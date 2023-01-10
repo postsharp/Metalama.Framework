@@ -17,7 +17,7 @@ internal class TargetClass
       this.Event_Source -= value;
     }
   }
-  private EventHandler? Event_Source;
+  private event EventHandler? Event_Source;
   public static event EventHandler? StaticEvent
   {
     add
@@ -33,7 +33,7 @@ internal class TargetClass
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.StaticEvent_Source -= value;
     }
   }
-  private static EventHandler? StaticEvent_Source;
+  private static event EventHandler? StaticEvent_Source;
   public void Foo()
   {
     if (this.Event_Source != null)
@@ -71,7 +71,7 @@ internal class TargetClass
       this.IntroducedEvent_Source -= value;
     }
   }
-  private global::System.EventHandler? IntroducedEvent_Source;
+  private event global::System.EventHandler? IntroducedEvent_Source;
   public static event global::System.EventHandler? IntroducedStaticEvent
   {
     add
@@ -87,5 +87,5 @@ internal class TargetClass
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source -= value;
     }
   }
-  private static global::System.EventHandler? IntroducedStaticEvent_Source;
+  private static event global::System.EventHandler? IntroducedStaticEvent_Source;
 }

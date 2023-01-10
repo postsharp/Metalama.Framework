@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Linking
         public const string HelperTypeName = "__LinkerInjectionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
         public const string PropertyMemberName = "__Property";
+        public const string EventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__"; 
         public const string EmptyCodeTypeName = "__Empty";
         public const string SourceCodeTypeName = "__Source";
         public const string OverridenByTypeName = "__OverriddenBy";
@@ -58,6 +59,15 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName( HelperTypeName ),
                     IdentifierName( PropertyMemberName ) );
+        }
+
+        public ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression()
+        {
+            return
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName( HelperTypeName ),
+                    IdentifierName( EventFieldInitializationExpressionMemberName ) );
         }
 
         public ExpressionSyntax GetOperatorMemberExpression(
@@ -174,6 +184,7 @@ internal class {HelperTypeName}
 {{
     public static void {FinalizeMemberName}() {{}}
     public static ref T {PropertyMemberName}<T>(T value) => ref Dummy<T>.Field;
+    public static void {EventFieldInitializationExpressionMemberName}<T>(T value) where T : delegate {{}}
     {string.Join( "\n    ", binaryOperators )}
     {string.Join( "\n    ", unaryOperators )}
     {string.Join( "\n    ", conversionOperators )}

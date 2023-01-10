@@ -1,7 +1,7 @@
 [Override]
 internal class TargetClass
 {
-  private EventHandler? _event;
+  private event EventHandler? _event;
   public event EventHandler? Event
   {
     add
@@ -15,7 +15,7 @@ internal class TargetClass
       this._event -= value;
     }
   }
-  private static EventHandler? _staticEvent;
+  private static event EventHandler? _staticEvent;
   public static event EventHandler? StaticEvent
   {
     add

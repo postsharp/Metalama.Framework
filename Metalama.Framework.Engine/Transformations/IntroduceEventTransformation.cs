@@ -148,10 +148,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                                                              && initializerExpression != null
                         => SyntaxFactoryEx.FormattedBlock(
                             ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
-                                    initializerExpression ) ) ),
+                                context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression( initializerExpression ) ) ),
                     _ => SyntaxFactoryEx.FormattedBlock()
                 };
 

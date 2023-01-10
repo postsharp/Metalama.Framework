@@ -68,7 +68,10 @@ internal sealed class AttributeClassificationService : IProjectService
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
              fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) )
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.IteratorStateMachineAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute", StringComparison.Ordinal ) )
         {
             return true;
         }

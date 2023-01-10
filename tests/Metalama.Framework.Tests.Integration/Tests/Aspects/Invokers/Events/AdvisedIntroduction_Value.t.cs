@@ -15,5 +15,5 @@ internal class TargetClass
       this.Event_Source -= value;
     }
   }
-  private global::System.EventHandler? Event_Source;
+  private event global::System.EventHandler? Event_Source;
 }
