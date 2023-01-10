@@ -182,10 +182,15 @@ internal abstract partial class BaseTestRunner
             }
 
             var emptyProject = this.CreateProject( testInput.Options );
-            var parseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
-            var project = emptyProject.WithParseOptions( parseOptions );
+            var mainParseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+            var mainProject = emptyProject.WithParseOptions( mainParseOptions );
 
-            async Task<Document?> AddDocumentAsync( string fileName, string sourceCode, bool acceptFileWithoutMember = false )
+            async Task<(Project Project, Document? Document)> AddDocumentAsync( 
+                Project project, 
+                CSharpParseOptions parseOptions, 
+                string fileName, 
+                string sourceCode, 
+                bool acceptFileWithoutMember = false )
             {
                 // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
@@ -198,19 +203,18 @@ internal abstract partial class BaseTestRunner
 
                 if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
                 {
-                    return null;
+                    return (project, null);
                 }
 
                 var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, state );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
-                project = document.Project;
 
-                return document;
+                return (document.Project, document);
             }
 
             // Add the main document.
             var sourceFileName = testInput.TestName + ".cs";
-            var mainDocument = await AddDocumentAsync( sourceFileName, testInput.SourceCode );
+            (mainProject, var mainDocument) = await AddDocumentAsync( mainProject, mainParseOptions, sourceFileName, testInput.SourceCode );
 
             if ( mainDocument == null )
             {
@@ -223,10 +227,10 @@ internal abstract partial class BaseTestRunner
             testResult.AddInputDocument( mainDocument, testInput.FullPath );
 
             var initialCompilation = CSharpCompilation.Create(
-                project.Name,
+                mainProject.Name,
                 new[] { syntaxTree },
-                project.MetadataReferences,
-                (CSharpCompilationOptions?) project.CompilationOptions );
+                mainProject.MetadataReferences,
+                (CSharpCompilationOptions?) mainProject.CompilationOptions );
 
             string? dependencyLicenseKey = null;
 
@@ -245,7 +249,7 @@ internal abstract partial class BaseTestRunner
                 {
                     var includedFileName = Path.GetFileName( includedFullPath );
 
-                    var includedDocument = await AddDocumentAsync( includedFileName, includedText );
+                    (mainProject, var includedDocument) = await AddDocumentAsync( mainProject, mainParseOptions, includedFileName, includedText );
 
                     if ( includedDocument == null )
                     {
@@ -263,8 +267,23 @@ internal abstract partial class BaseTestRunner
                     var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
                         preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
 
-                    var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                    var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, testContext, dependencyLicenseKey );
+                    var dependencyProject =
+                        emptyProject
+                            .WithParseOptions( dependencyParseOptions );
+
+                    var dependency = 
+                        await this.CompileDependencyAsync( 
+                            includedText, 
+                            dependencyProject, 
+                            testResult, 
+                            testContext, 
+                            async ( compilation ) => 
+                            {
+                                compilation = await AddPlatformDocuments( dependencyParseOptions, dependencyProject, compilation );
+                                
+                                return await AddAdditionalDocuments( dependencyProject, compilation, dependencyParseOptions );
+                            },
+                            dependencyLicenseKey );
 
                     if ( dependency == null )
                     {
@@ -275,31 +294,12 @@ internal abstract partial class BaseTestRunner
                 }
             }
 
-            // Add system documents.
-#if NETFRAMEWORK
-            var platformDocument = await AddDocumentAsync(
-                "___Platform.cs",
-                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
-
-            initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
-#endif
-
-            if ( this._references.GlobalUsingsFile != null )
-            {
-                var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
-
-                if ( File.Exists( path ) )
-                {
-                    var code = File.ReadAllText( path );
-                    var globalUsingsDocument = await AddDocumentAsync( "___GlobalUsings.cs", code, true );
-
-                    initialCompilation = initialCompilation.AddSyntaxTrees( (await globalUsingsDocument!.GetSyntaxTreeAsync())! );
-                }
-            }
+            initialCompilation = await AddPlatformDocuments( mainParseOptions, mainProject, initialCompilation );
+            initialCompilation = await AddAdditionalDocuments( mainProject, initialCompilation, mainParseOptions );
 
             ValidateCustomAttributes( initialCompilation );
 
-            testResult.InputProject = project;
+            testResult.InputProject = mainProject;
             testResult.InputCompilation = initialCompilation;
             testResult.TestContext = testContext.WithReferences( initialCompilation.References );
 
@@ -313,6 +313,45 @@ internal abstract partial class BaseTestRunner
                     testResult.InputCompilationDiagnostics.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
                 }
+            }
+
+            async Task<CSharpCompilation> AddAdditionalDocuments( Project project, CSharpCompilation compilation, CSharpParseOptions parseOptions )
+            {
+                if ( this._references.GlobalUsingsFile != null )
+                {
+                    var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
+
+                    if ( File.Exists( path ) )
+                    {
+                        var code = File.ReadAllText( path );
+                        (_, var globalUsingsDocument) = await AddDocumentAsync( project, parseOptions, "___GlobalUsings.cs", code, true );
+
+                        compilation = compilation.AddSyntaxTrees( (await globalUsingsDocument!.GetSyntaxTreeAsync())! );
+                    }
+                }
+
+                return compilation;
+            }
+
+#pragma warning disable CS1998
+            
+            // ReSharper disable UnusedParameter.Local
+            
+            async Task<CSharpCompilation> AddPlatformDocuments( CSharpParseOptions parseOptions, Project project, CSharpCompilation compilation )
+#pragma warning restore CS1998
+            {
+                // ReSharper restore UnusedParameter.Local
+                // Add system documents.
+#if NETFRAMEWORK
+                (_, var platformDocument) = await AddDocumentAsync(
+                    project,
+                    parseOptions,
+                    "___Platform.cs",
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+
+                compilation = compilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
+#endif
+                return compilation;
             }
         }
         finally
@@ -329,6 +368,7 @@ internal abstract partial class BaseTestRunner
         Project emptyProject,
         TestResult testResult,
         TestContext testContext,
+        Func<CSharpCompilation, Task<CSharpCompilation>> postProcessCompilation,
         string? licenseKey = null )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
@@ -353,6 +393,8 @@ internal abstract partial class BaseTestRunner
             testContext.Domain );
 
         var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
+
+        compilation = await postProcessCompilation( (CSharpCompilation) compilation );
 
         var pipelineResult = await pipeline.ExecuteAsync(
             testResult.InputCompilationDiagnostics,

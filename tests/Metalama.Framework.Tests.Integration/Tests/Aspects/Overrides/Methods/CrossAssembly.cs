@@ -37,12 +37,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAss
             Console.WriteLine("Original");
             yield return 42;
         }
-
-        public async IAsyncEnumerable<int> ExistingMethod_AsyncIterator()
-        {
-            Console.WriteLine("Original");
-            await Task.Yield();
-            yield return 42;
-        }
     }
 }
