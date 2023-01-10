@@ -90,7 +90,7 @@ public class PreviewPipelineBasedService
         var designTimeConfiguration = getConfigurationResult.Value;
 
         // Get the DesignTimeProjectVersion because it implements ITransitiveProjectManifest.
-        var transitiveAspectManifest = await pipeline.GetDesignTimeProjectVersionAsync( sourceCompilation, cancellationToken );
+        var transitiveAspectManifest = await pipeline.GetDesignTimeProjectVersionAsync( sourceCompilation, true, cancellationToken );
 
         if ( !transitiveAspectManifest.IsSuccessful )
         {
