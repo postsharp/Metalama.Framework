@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 this.CreateIndexerAccess(
                     TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
                     TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 propertyAccess,
                 TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
-            return new BuiltUserExpression( expression, this.Indexer.Type );
+            return new SyntaxUserExpression( expression, this.Indexer.Type );
         }
 
         public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )

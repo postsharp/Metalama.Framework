@@ -19,14 +19,14 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal static class ProceedHelper
     {
-        public static BuiltUserExpression CreateProceedDynamicExpression(
+        public static SyntaxUserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             BoundTemplateMethod template,
             IMethod overriddenMethod )
             => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
 
-        public static BuiltUserExpression CreateProceedDynamicExpression(
+        public static SyntaxUserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             TemplateKind selectedTemplateKind,
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Transformations
                             expression = GenerateAwaitBufferAsync();
                         }
 
-                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
+                        return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
                     }
 
                 case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Transformations
                                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
                         return
-                            new BuiltUserExpression(
+                            new SyntaxUserExpression(
                                 expression.WithAdditionalAnnotations( Simplifier.Annotation ),
                                 taskResultType );
                     }
@@ -100,13 +100,13 @@ namespace Metalama.Framework.Engine.Transformations
                     {
                         var expression = GenerateAwaitBufferAsync();
 
-                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
+                        return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
                     }
             }
 
             // This is a default method, or a non-default template.
             // Generate: `BASE(ARGS)`
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 invocationExpression,
                 overriddenMethod.ReturnType );
 
