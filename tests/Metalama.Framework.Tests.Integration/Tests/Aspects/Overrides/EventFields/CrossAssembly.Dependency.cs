@@ -3,6 +3,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.CrossAssembly;
 using System;
 
+#pragma warning disable CS0067
+
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.CrossAssembly
