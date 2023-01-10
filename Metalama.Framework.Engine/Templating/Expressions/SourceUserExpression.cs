@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -35,7 +34,9 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
     {
         switch ( expression )
         {
+#pragma warning disable RS1034
             case PostfixUnaryExpressionSyntax postFix when postFix.OperatorToken.Kind() == SyntaxKind.ExclamationToken:
+#pragma warning restore RS1034
                 return this.GetTypeConstant( postFix.Operand );
 
             case LiteralExpressionSyntax literal:

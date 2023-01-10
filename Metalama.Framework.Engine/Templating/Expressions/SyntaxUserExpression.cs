@@ -11,8 +11,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal class SyntaxUserExpression : UserExpression
     {
-        private readonly ExpressionSyntax _expression;
-
         public SyntaxUserExpression(
             ExpressionSyntax expression,
             IType type,
@@ -21,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             _ = isReferenceable;
 
-            this._expression = expression;
+            this.Expression = expression;
             this.Type = type;
             this.IsAssignable = isAssignable;
         }
@@ -32,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public override bool IsAssignable { get; }
 
-        public ExpressionSyntax Expression => this._expression;
+        public ExpressionSyntax Expression { get; }
 
         protected override string ToStringCore() => this.Expression.ToString();
     }
