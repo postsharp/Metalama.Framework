@@ -3,7 +3,7 @@
 namespace Metalama.Framework.Fabrics
 {
     /// <summary>
-    /// An interface that, when implemented by a type in an assembly (under any name or namespace), allows that type to analyze and
+    /// A class that, when inherited by a type in an assembly (under any name or namespace), allows that type to analyze and
     /// add aspects to any project that references this assembly. However, the <see cref="ProjectFabric.AmendProject"/> method
     /// is not executed in the current project (you will need another class that does not implement <see cref="TransitiveProjectFabric"/>
     /// to amend the current project). 

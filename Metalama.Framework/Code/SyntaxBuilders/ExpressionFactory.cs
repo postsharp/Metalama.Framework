@@ -128,11 +128,11 @@ public static class ExpressionFactory
     /// This mechanism allows to generate expressions that depend on a compile-time control flow.
     /// </summary>
     /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
-    /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
+    /// <param name="definedExpression">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
-    public static void Capture( dynamic? expression, out IExpression definedException )
-        => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
+    public static void Capture( dynamic? expression, out IExpression definedExpression )
+        => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( expression );
 
     /// <summary>
     /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.

@@ -6,8 +6,8 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Framework.Fabrics
 {
     /// <summary>
-    /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type implementing this interface.
-    /// You must not implement this interface directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
+    /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type inheriting this class.
+    /// You must not inherit this class directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
     /// or <see cref="TypeFabric"/>. 
     /// </summary>
     /// <seealso href="@applying-aspects"/>
