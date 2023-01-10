@@ -41,7 +41,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly AnalysisProcessEventHub _eventHub;
-    private IProjectOptionsFactory _projectOptionsFactory;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
 
     public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
@@ -243,8 +243,14 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
         => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
+    internal Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+        Compilation compilation,
+        TestableCancellationToken cancellationToken = default )
+        => this.ExecuteAsync( compilation, false, cancellationToken );
+
     internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
+        bool autoResumePipeline,
         TestableCancellationToken cancellationToken = default )
     {
         var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
@@ -254,7 +260,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return default;
         }
 
-        return await pipeline.ExecuteAsync( compilation, cancellationToken );
+        return await pipeline.ExecuteAsync( compilation, autoResumePipeline, cancellationToken );
     }
 
     public virtual void Dispose()

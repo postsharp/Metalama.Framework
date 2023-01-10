@@ -105,9 +105,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     // While waiting for disposal, we need to prevent any other thread from taking a reference to the list of assemblies
                     // loaded in the AppDomain, because such reference would prevent the assembly from being unloaded.
                     lock ( AppDomainUtility.Sync )
-                    lock ( this._loadedAssemblies )
                     {
-                        aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToList();
+                        lock ( this._loadedAssemblies )
+                        {
+                            aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToList();
+                        }
                     }
 
                     if ( aliveAssemblies.Count == 0 )
