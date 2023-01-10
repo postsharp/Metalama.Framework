@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Transformations
             SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpression = new BuiltUserExpression(
+            var proceedExpression = new SyntaxUserExpression(
                 accessor.MethodKind switch
                 {
                     MethodKind.EventAdd => this.CreateAddExpression( generationContext ),

@@ -38,5 +38,12 @@ namespace Metalama.Framework.Code
         /// when an instance of the declaring type is initialized.
         /// </summary>
         bool IsRequired { get; }
+
+        /// <summary>
+        /// Gets the initializer expression (i.e. the expression at the right hand of the equal sign), if any.
+        /// When the field or property is defined in source code, this property returns an <see cref="ISourceExpression"/>, which
+        /// exposes a <see cref="TypedConstant"/> when possible.
+        /// </summary>
+        IExpression? InitializerExpression { get; }
     }
 }

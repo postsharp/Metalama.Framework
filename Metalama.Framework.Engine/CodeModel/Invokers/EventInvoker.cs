@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 eventAccess,
                 TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new BuiltUserExpression( expression, this._event.Type );
+            return new SyntaxUserExpression( expression, this._event.Type );
         }
 
         public object Remove( object? instance, object? value )
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 eventAccess,
                 TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new BuiltUserExpression( expression, this._event.Type );
+            return new SyntaxUserExpression( expression, this._event.Type );
         }
 
         public object Raise( object? instance, params object?[] args )
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 eventAccess,
                 InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 expression,
                 this._event.Signature.ReturnType );
         }

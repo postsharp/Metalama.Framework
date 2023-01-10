@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public ref object? Value => ref RefHelper.Wrap( this.ToExpression() );
 
-        private BuiltUserExpression ToExpression()
+        private SyntaxUserExpression ToExpression()
             => new(
                 SyntaxFactory.IdentifierName( this.Underlying.Name ),
                 this.Underlying.Type,

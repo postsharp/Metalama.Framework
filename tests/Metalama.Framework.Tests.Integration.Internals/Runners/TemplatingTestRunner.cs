@@ -316,7 +316,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext();
 
             var proceedExpression =
-                new BuiltUserExpression(
+                new SyntaxUserExpression(
                     GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType );
 

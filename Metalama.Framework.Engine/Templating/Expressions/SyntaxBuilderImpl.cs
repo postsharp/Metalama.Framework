@@ -58,7 +58,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new BuiltUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
+        return new SyntaxUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
     }
 
     public IStatement ParseStatement( string code )
@@ -127,7 +127,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
         type = this._compilation.Factory.GetSpecialType( specialType );
 
-        return new BuiltUserExpression( expression, type );
+        return new SyntaxUserExpression( expression, type );
     }
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )
@@ -157,9 +157,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
 
     public object TypedConstant( in TypedConstant typedConstant )
-        => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
+        => new SyntaxUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
 
-    public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type );
+    public IExpression ThisExpression( INamedType type ) => new SyntaxUserExpression( SyntaxFactory.ThisExpression(), type );
 
     public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
     {

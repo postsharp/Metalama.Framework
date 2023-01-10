@@ -87,9 +87,9 @@ namespace Metalama.Framework.Engine.Transformations
             return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
-        private BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context )
+        private SyntaxUserExpression CreateProceedExpression( in MemberInjectionContext context )
         {
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }

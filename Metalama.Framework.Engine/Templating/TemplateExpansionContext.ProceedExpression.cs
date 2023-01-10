@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override IType Type => this._parent._proceedExpression!.Type;
 
-            public override string ToString() => $"meta.{this._methodName}()";
+            protected override string ToStringCore() => $"meta.{this._methodName}()";
         }
     }
 }
