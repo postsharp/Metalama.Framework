@@ -59,7 +59,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                     context.AnalyzerConfigOptionsProvider.Select(
                             ( x, _ ) =>
                             {
-                                var msBuildProjectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( x );
+                                var msBuildProjectOptions = MSBuildProjectOptionsFactory.Default.GetProjectOptions( x );
                                 this._logger.Trace?.Log( $"Roslyn asks the generated source for '{msBuildProjectOptions.AssemblyName}'." );
 
                                 return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: msBuildProjectOptions);

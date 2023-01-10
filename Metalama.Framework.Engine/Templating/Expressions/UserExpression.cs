@@ -12,12 +12,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal abstract class UserExpression : IUserExpression
     {
+        private string? _toString;
+
         protected abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
 
         /// <summary>
         /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
-        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        private TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl( this.ToSyntax( syntaxGenerationContext ), this.Type, syntaxGenerationContext );
 
         public abstract IType Type { get; }
@@ -30,5 +32,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => this.ToTypedExpressionSyntax( (SyntaxGenerationContext) syntaxGenerationContext );
+
+        public sealed override string ToString() => this._toString ??= this.ToStringCore();
+
+        protected virtual string ToStringCore()
+            => this.ToSyntax( SyntaxGenerationContext.Create( this.Type.GetCompilationModel().CompilationContext, false, false ) )
+                .ToString();
     }
 }

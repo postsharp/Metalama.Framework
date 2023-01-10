@@ -31,7 +31,7 @@ internal sealed class AdvisedMethod : AdvisedMember<IMethodImpl>, IAdvisedMethod
         {
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 generationContext.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
                 this.ReturnType );
         }

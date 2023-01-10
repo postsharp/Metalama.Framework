@@ -46,7 +46,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsRequired => this.FieldBuilder.IsRequired;
 
+        public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
+
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
+
+        public TypedConstant? ConstantValue => this.FieldBuilder.ConstantValue;
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

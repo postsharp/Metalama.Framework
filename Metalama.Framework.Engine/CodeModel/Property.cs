@@ -4,9 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -60,5 +63,22 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
+
+        [Memo]
+        public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
+
+        private IExpression? GetInitializerExpressionCore()
+        {
+            var initializer = ((VariableDeclaratorSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
+
+            if ( initializer == null )
+            {
+                return null;
+            }
+            else
+            {
+                return new SourceUserExpression( initializer.Value, this.Type );
+            }
+        }
     }
 }

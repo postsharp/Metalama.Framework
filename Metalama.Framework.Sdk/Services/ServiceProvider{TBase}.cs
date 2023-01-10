@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Services
         public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false )
             => this.WithService( new ServiceNode( service.GetType(), service ), allowOverride );
 
-        public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>, T> func )
+        public ServiceProvider<TBase> WithServiceConditional<T>( Func<ServiceProvider<TBase>, T> func )
             where T : class, TBase
             => this.GetService<T>() == null ? this.WithService( func( this ) ) : this;
 

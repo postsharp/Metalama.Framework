@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         private CollectibleExecutionContext() { }
 
-        public static void RegisterDisposeAction( Action action )
+        internal static void RegisterDisposeAction( Action action )
         {
             _current.Value?._disposeActions.Enqueue( action );
         }

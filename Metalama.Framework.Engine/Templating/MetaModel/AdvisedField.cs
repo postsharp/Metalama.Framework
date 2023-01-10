@@ -12,5 +12,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public AdvisedField( IField underlying ) : base( (IFieldImpl) underlying ) { }
 
         public FieldInfo ToFieldInfo() => this.Underlying.ToFieldInfo();
+
+        public TypedConstant? ConstantValue => this.Underlying.ConstantValue;
     }
 }

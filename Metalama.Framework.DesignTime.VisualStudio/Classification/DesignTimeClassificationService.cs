@@ -45,7 +45,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
             return EmptyDesignTimeClassifiedTextCollection.Instance;
         }
 
-        var projectOptions = this._msBuildProjectOptionsFactory.GetInstance( analyzerConfigOptionsProvider );
+        var projectOptions = this._msBuildProjectOptionsFactory.GetProjectOptions( analyzerConfigOptionsProvider );
 
         var classificationService = this._projectClassificationServices.GetOrAdd( projectOptions, this.CreateClassificationService );
 

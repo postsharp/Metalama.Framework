@@ -12,7 +12,9 @@ public partial class MetalamaInternalsAnalyzer
 {
     private sealed class PublicApiVisitor : CSharpSyntaxWalker
     {
+#pragma warning disable IDE0044 // Add readonly modifier
         private SemanticModelAnalysisContext _context;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public PublicApiVisitor( SemanticModelAnalysisContext context )
         {

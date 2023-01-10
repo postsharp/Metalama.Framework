@@ -68,7 +68,18 @@ internal abstract partial class BaseTestRunner
 
     public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
-        using ( CollectibleExecutionContext.Open() )
+        CollectibleExecutionContext? collectibleExecutionContext;
+
+        if ( testInput.Options.CheckMemoryLeaks == true )
+        {
+            collectibleExecutionContext = CollectibleExecutionContext.Open();
+        }
+        else
+        {
+            collectibleExecutionContext = null;
+        }
+
+        using ( collectibleExecutionContext )
         {
             try
             {
@@ -340,7 +351,7 @@ internal abstract partial class BaseTestRunner
             async Task<CSharpCompilation> AddPlatformDocuments( CSharpParseOptions parseOptions, Project project, CSharpCompilation compilation )
 #pragma warning restore CS1998
             {
-                // ReSharper restore UnusedParameter.Local
+                // ReSharper enable UnusedParameter.Local
                 // Add system documents.
 #if NETFRAMEWORK
                 (_, var platformDocument) = await AddDocumentAsync(

@@ -263,40 +263,45 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     return;
                 }
 
-                // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
-                // is removed.
-                if ( this.MustReportPausedPipelineAsErrors )
-                {
-                    foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
-                    {
-                        if ( file.Value == null )
-                        {
-                            this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
-
-                            RetryHelper.Retry(
-                                () =>
-                                {
-                                    if ( File.Exists( file.Key ) )
-                                    {
-                                        File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                                    }
-                                },
-                                logger: this.Logger );
-                        }
-                    }
-                }
-
-                // Reset the pipeline.
-                await this.SetStateAsync( this._currentState.Reset() );
-
-                // Notify that the pipeline must be executed again.
-                this._eventHub.OnProjectDirty( this.ProjectKey );
+                await this.ResumeCoreAsync();
             }
             finally
             {
                 await this.ProcessJobQueueAsync();
             }
         }
+    }
+
+    private async ValueTask ResumeCoreAsync()
+    {
+        // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
+        // is removed.
+        if ( this.MustReportPausedPipelineAsErrors )
+        {
+            foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
+            {
+                if ( file.Value == null )
+                {
+                    this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+
+                    RetryHelper.Retry(
+                        () =>
+                        {
+                            if ( File.Exists( file.Key ) )
+                            {
+                                File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
+                            }
+                        },
+                        logger: this.Logger );
+                }
+            }
+        }
+
+        // Reset the pipeline.
+        await this.SetStateAsync( this._currentState.Reset() );
+
+        // Notify that the pipeline must be executed again.
+        this._eventHub.OnProjectDirty( this.ProjectKey );
     }
 
     internal async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
@@ -407,8 +412,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
+    internal ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
+        Compilation compilation,
+        TestableCancellationToken cancellationToken )
+        => this.GetDesignTimeProjectVersionAsync( compilation, false, cancellationToken );
+
     internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
         Compilation compilation,
+        bool autoResumePipeline,
         TestableCancellationToken cancellationToken )
     {
         var pipelineStatus = this.Status;
@@ -427,7 +438,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 if ( metalamaVersion == EngineAssemblyMetadataReader.Instance.AssemblyVersion )
                 {
                     // This is a Metalama reference of the current version. We need to compile the dependency.
-                    var referenceResult = await this._pipelineFactory.ExecuteAsync( reference.Compilation, cancellationToken );
+                    var referenceResult = await this._pipelineFactory.ExecuteAsync( reference.Compilation, autoResumePipeline, cancellationToken );
 
                     if ( !referenceResult.IsSuccessful )
                     {
@@ -527,10 +538,24 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return new DesignTimeProjectVersion( compilationVersion, compilationReferences, pipelineStatus );
     }
 
-    public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    public ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
         TestableCancellationToken cancellationToken = default )
+        => this.ExecuteAsync( compilation, false, cancellationToken );
+
+    public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+        Compilation compilation,
+        bool autoResumePipeline,
+        TestableCancellationToken cancellationToken = default )
     {
+        async Task AutoResumeAsync()
+        {
+            if ( this.Status == DesignTimeAspectPipelineStatus.Paused && autoResumePipeline )
+            {
+                await this.ResumeCoreAsync();
+            }
+        }
+
         if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
         {
             if ( !compilationResult.IsSuccessful )
@@ -552,13 +577,15 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         return compilationResult;
                     }
 
-                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
+                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, autoResumePipeline, cancellationToken );
 
                     if ( !projectVersion.IsSuccessful )
                     {
                         // A dependency could not be compiled.
                         return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
                     }
+
+                    await AutoResumeAsync();
 
                     // If a dependency project was paused, we must pause too.
                     if ( this.Status != DesignTimeAspectPipelineStatus.Paused
@@ -575,6 +602,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         var compilationVersion = await this.InvalidateCacheAsync(
                             compilation,
                             cancellationToken );
+
+                        await AutoResumeAsync();
 
                         compilationToAnalyze = compilationVersion.CompilationToAnalyze;
 

@@ -84,7 +84,7 @@ namespace Metalama.Framework.DesignTime
                 return;
             }
 
-            var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project );
+            var projectOptions = MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.Document.Project );
 
             if ( !projectOptions.IsFrameworkEnabled )
             {

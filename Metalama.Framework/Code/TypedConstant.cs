@@ -115,7 +115,7 @@ namespace Metalama.Framework.Code
             this._type = type;
         }
 
-        internal static bool CheckAcceptableType( IType expectedType, object? value, bool throwOnError )
+        internal static bool CheckAcceptableType( IType expectedType, object? value, bool throwOnError, IDeclarationFactory declarationFactory )
         {
             if ( value == null )
             {
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Code
             }
 
             if ( expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [{ } wrappedType] }
-                 && CheckAcceptableType( wrappedType, value, false ) )
+                 && CheckAcceptableType( wrappedType, value, false, declarationFactory ) )
             {
                 return true;
             }
@@ -178,7 +178,7 @@ namespace Metalama.Framework.Code
             {
                 if ( value is Array array )
                 {
-                    if ( !arrayType.ElementType.Equals( TypeFactory.GetType( array.GetType().GetElementType()! ) ) )
+                    if ( !arrayType.ElementType.Equals( declarationFactory.GetTypeByReflectionType( array.GetType().GetElementType()! ) ) )
                     {
                         if ( throwOnError )
                         {
@@ -209,7 +209,7 @@ namespace Metalama.Framework.Code
                 {
                     foreach ( var arrayItem in immutableArray )
                     {
-                        if ( !CheckAcceptableType( arrayType.ElementType, arrayItem._value, throwOnError ) )
+                        if ( !CheckAcceptableType( arrayType.ElementType, arrayItem._value, throwOnError, declarationFactory ) )
                         {
                             return false;
                         }
@@ -218,9 +218,9 @@ namespace Metalama.Framework.Code
             }
             else if ( expectedType.TypeKind == TypeKind.Enum )
             {
-                if ( !expectedType.Equals( TypeFactory.GetType( value.GetType() ) ) )
+                if ( !expectedType.Equals( declarationFactory.GetTypeByReflectionType( value.GetType() ) ) )
                 {
-                    if ( !CheckAcceptableType( ((INamedType) expectedType).UnderlyingType, value, throwOnError ) )
+                    if ( !CheckAcceptableType( ((INamedType) expectedType).UnderlyingType, value, throwOnError, declarationFactory ) )
                     {
                         return false;
                     }
@@ -279,7 +279,7 @@ namespace Metalama.Framework.Code
         {
             var fixedValue = FixValue( value );
 
-            CheckAcceptableType( type, fixedValue, true );
+            CheckAcceptableType( type, fixedValue, true, ((ICompilationInternal) type.Compilation).Factory );
 
             return new TypedConstant( fixedValue, type );
         }

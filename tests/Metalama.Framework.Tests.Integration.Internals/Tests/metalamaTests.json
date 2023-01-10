@@ -1,4 +1,5 @@
 {
   "ReportErrorMessage": true,
-  "FormatOutput": false
+  "FormatOutput": false,
+  "CheckMemoryLeaks": true
 }

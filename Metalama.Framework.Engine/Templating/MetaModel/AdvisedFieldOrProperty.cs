@@ -25,6 +25,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool IsRequired => this.Underlying.IsRequired;
 
+        public IExpression? InitializerExpression => this.Underlying.InitializerExpression;
+
         private IExpression ToExpression()
         {
             if ( this.Invokers.Base == null )

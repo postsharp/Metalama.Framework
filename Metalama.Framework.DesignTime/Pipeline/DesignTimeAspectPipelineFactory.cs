@@ -41,6 +41,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
 
     public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
@@ -50,6 +51,8 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     {
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         serviceProvider = serviceProvider.WithService( this );
+
+        this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
 
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
@@ -98,7 +101,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
         else
         {
-            var options = new MSBuildProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions );
+            var options = this._projectOptionsFactory.GetProjectOptions( project );
 
             return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences, cancellationToken );
         }
@@ -240,8 +243,14 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
         => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
+    internal Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+        Compilation compilation,
+        TestableCancellationToken cancellationToken = default )
+        => this.ExecuteAsync( compilation, false, cancellationToken );
+
     internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
+        bool autoResumePipeline,
         TestableCancellationToken cancellationToken = default )
     {
         var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
@@ -251,7 +260,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return default;
         }
 
-        return await pipeline.ExecuteAsync( compilation, cancellationToken );
+        return await pipeline.ExecuteAsync( compilation, autoResumePipeline, cancellationToken );
     }
 
     public virtual void Dispose()

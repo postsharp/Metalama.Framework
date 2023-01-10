@@ -7,6 +7,7 @@ using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,7 +51,10 @@ namespace Metalama.Framework.Engine.CompileTime
             using var pdbStream = File.Exists( pdbPath ) ? RetryHelper.Retry( () => File.OpenRead( pdbPath ) ) : null;
             var assembly = this._assemblyLoadContext.LoadFromStream( peStream, pdbStream );
 
-            this._loadedAssemblies.Add( new WeakReference( assembly ) );
+            lock ( this._loadedAssemblies )
+            {
+                this._loadedAssemblies.Add( new WeakReference( assembly ) );
+            }
 
             return assembly;
         }
@@ -88,55 +92,65 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
 #if NET5_0_OR_GREATER
-        private void WaitForDisposalCore()
+        private async Task WaitForDisposalCoreAsync()
         {
-            var waits = 0;
-
-            while ( true )
+            try
             {
-                List<WeakReference> aliveAssemblies;
+                var stopwatch = Stopwatch.StartNew();
 
-                // While waiting for disposal, we need to prevent any other thread from taking a reference to the list of assemblies
-                // loaded in the AppDomain, because such reference would prevent the assembly from being unloaded.
-                lock ( AppDomainUtility.Sync )
+                while ( true )
                 {
-                    aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToList();
+                    List<WeakReference> aliveAssemblies;
+
+                    // While waiting for disposal, we need to prevent any other thread from taking a reference to the list of assemblies
+                    // loaded in the AppDomain, because such reference would prevent the assembly from being unloaded.
+                    lock ( AppDomainUtility.Sync )
+                    {
+                        lock ( this._loadedAssemblies )
+                        {
+                            aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToList();
+                        }
+                    }
+
+                    if ( aliveAssemblies.Count == 0 )
+                    {
+                        this._unloadedTask.SetResult( true );
+
+                        this.Unloaded?.Invoke();
+
+                        return;
+                    }
+
+                    await Task.Delay( 100 );
+
+                    GC.Collect();
+                    GC.WaitForFullGCComplete();
+
+                    if ( stopwatch.Elapsed.Seconds > 30 )
+                    {
+                        var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
+
+                        /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
+                         * 
+                         * Here are a few pointers:
+                         *  - You need to use WinDbg and sos.dll
+                         *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
+                         *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+                         */
+
+                        var exception = new InvalidOperationException(
+                            "The domain could not be unloaded. There are probably dangling references. " +
+                            "The following assemblies are still loaded: " + assemblies + "." );
+
+                        this._unloadedTask.SetException( exception );
+
+                        return;
+                    }
                 }
-
-                if ( aliveAssemblies.Count == 0 )
-                {
-                    this._unloadedTask.SetResult( true );
-
-                    this.Unloaded?.Invoke();
-
-                    return;
-                }
-
-                waits++;
-                Thread.Sleep( 10 );
-                GC.Collect();
-                GC.WaitForFullGCComplete();
-
-                if ( waits > 10 )
-                {
-                    var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
-
-                    /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
-                     * 
-                     * Here are a few pointers:
-                     *  - You need to use WinDbg and sos.dll
-                     *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
-                     *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
-                     */
-
-                    var exception = new InvalidOperationException(
-                        "The domain could not be unloaded. There are probably dangling references. " +
-                        "The following assemblies are still loaded: " + assemblies + "." );
-
-                    this._unloadedTask.SetException( exception );
-
-                    return;
-                }
+            }
+            catch ( Exception e )
+            {
+                this._unloadedTask.SetException( e );
             }
         }
 
@@ -150,9 +164,8 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( Interlocked.CompareExchange( ref this._disposeStatus, 1, 0 ) == 0 )
             {
                 this._assemblyLoadContext.Unload();
-                Task.Run( this.WaitForDisposalCore );
+                Task.Run( this.WaitForDisposalCoreAsync );
             }
-
 #endif
 
             // We cannot wait for complete disposal synchronously because the TestResult object, lower in the stack, typically contains
