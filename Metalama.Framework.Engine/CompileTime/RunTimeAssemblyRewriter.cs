@@ -364,8 +364,8 @@ namespace Metalama.Compiler
         var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected
-            && !isIteratorMethod
-            && !isAsyncMethod )
+             && !isIteratorMethod
+             && !isAsyncMethod )
         {
             // No change is needed.
             return transformedNode;

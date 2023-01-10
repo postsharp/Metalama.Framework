@@ -304,7 +304,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 {
                     case IMethod interfaceMethod:
                         var existingMethod = targetType.Methods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
-                        var templateMethod = memberSpec.Template.Cast<IMethod>().AssertNotNull();
+                        var templateMethod = memberSpec.Template?.Cast<IMethod>();
+                        var redirectionTargetMethod = (IMethod?) memberSpec.TargetMember;
 
                         if ( existingMethod != null && !memberSpec.IsExplicit )
                         {
@@ -333,26 +334,35 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             isExplicit = memberSpec.IsExplicit;
                         }
 
-                        memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, templateMethod, isExplicit );
+                        var isIteratorMethod = templateMethod?.IsIteratorMethod ?? redirectionTargetMethod.AssertNotNull().IsIteratorMethod() == true;
+
+                        memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit );
                         interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
-                        addTransformation(
-                            templateMethod != null
-                                ? new OverrideMethodTransformation(
+                        if ( templateMethod != null )
+                        {
+                            addTransformation(
+                                new OverrideMethodTransformation(
                                     this,
                                     (IMethod) memberBuilder,
                                     templateMethod.ForIntroduction(),
-                                    mergedTags )
-                                : new RedirectMethodTransformation(
+                                    mergedTags ) );
+                        }
+                        else
+                        {
+                            addTransformation(
+                                new RedirectMethodTransformation(
                                     this,
                                     (IMethod) memberBuilder,
-                                    mergedTags ) );
+                                    (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
+                        }
 
                         break;
 
                     case IProperty interfaceProperty:
                         var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
-                        var templateProperty = memberSpec.Template.Cast<IProperty>().AssertNotNull();
+                        var templateProperty = memberSpec.Template?.Cast<IProperty>();
+                        var redirectionTargetProperty = (IProperty?) memberSpec.TargetMember;
 
                         if ( existingProperty != null && !memberSpec.IsExplicit )
                         {
@@ -380,39 +390,50 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             isExplicit = memberSpec.IsExplicit;
                         }
 
-                        var buildAutoProperty = templateProperty.Declaration?.IsAutoPropertyOrField == true;
+                        var isAutoProperty = templateProperty?.Declaration.IsAutoPropertyOrField == true;
+
+                        var getAccessibility =
+                            templateProperty?.Declaration.GetMethod?.Accessibility ?? Accessibility.Public;
+
+                        var setAccessibility =
+                            templateProperty?.Declaration.SetMethod?.Accessibility ?? Accessibility.Public;
+
+                        var hasGetter =
+                            interfaceProperty.GetMethod != null || (!isExplicit && templateProperty?.Declaration.GetMethod != null);
+
+                        var hasSetter =
+                            interfaceProperty.GetMethod != null || (!isExplicit && templateProperty?.Declaration.GetMethod != null);
+
+                        var hasImplicitSetter = templateProperty?.Declaration.SetMethod?.IsImplicitlyDeclared ?? false;
 
                         var propertyBuilder = this.GetImplPropertyBuilder(
                             targetType,
                             interfaceProperty,
-                            templateProperty,
-                            buildAutoProperty,
+                            getAccessibility,
+                            setAccessibility,
+                            hasGetter,
+                            hasSetter,
+                            isAutoProperty,
                             isExplicit,
-                            templateProperty.Declaration?.SetMethod?.IsImplicitlyDeclared ?? false,
+                            hasImplicitSetter,
                             mergedTags );
 
                         memberBuilder = propertyBuilder;
-
                         interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
                         if ( templateProperty != null )
                         {
-                            if ( templateProperty.Declaration.IsAutoPropertyOrField != true )
+                            if ( isAutoProperty != true )
                             {
                                 var accessorTemplates = templateProperty.GetAccessorTemplates();
 
                                 addTransformation(
-                                    templateProperty.Declaration != null
-                                        ? new OverridePropertyTransformation(
-                                            this,
-                                            propertyBuilder,
-                                            propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
-                                            propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
-                                            mergedTags )
-                                        : new RedirectPropertyTransformation(
-                                            this,
-                                            propertyBuilder,
-                                            mergedTags ) );
+                                    new OverridePropertyTransformation(
+                                        this,
+                                        propertyBuilder,
+                                        propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
+                                        propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
+                                        mergedTags ) );
                             }
                             else
                             {
@@ -420,6 +441,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                                 OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
                             }
+                        }
+                        else
+                        {
+                            addTransformation(
+                                new RedirectPropertyTransformation(
+                                    this,
+                                    propertyBuilder,
+                                    redirectionTargetProperty.AssertNotNull() ) );
                         }
 
                         break;
@@ -429,7 +458,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                     case IEvent interfaceEvent:
                         var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
-                        var templateEvent = memberSpec.Template.Cast<IEvent>().AssertNotNull();
+                        var templateEvent = memberSpec.Template?.Cast<IEvent>();
+                        var redirectionTargetEvent = (IEvent?) memberSpec.TargetMember;
 
                         if ( existingEvent != null && !memberSpec.IsExplicit )
                         {
@@ -457,7 +487,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             isExplicit = memberSpec.IsExplicit;
                         }
 
-                        var isEventField = templateEvent.Declaration.IsEventField();
+                        var isEventField = templateEvent?.Declaration.IsEventField() ?? false;
 
                         var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
                         memberBuilder = eventBuilder;
@@ -468,19 +498,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             if ( !isEventField )
                             {
                                 addTransformation(
-                                    templateEvent != null
-                                        ? new OverrideEventTransformation(
-                                            this,
-                                            eventBuilder,
-                                            templateEvent,
-                                            default,
-                                            default,
-                                            mergedTags,
-                                            null )
-                                        : new RedirectEventTransformation(
-                                            this,
-                                            eventBuilder,
-                                            mergedTags ) );
+                                    new OverrideEventTransformation(
+                                        this,
+                                        eventBuilder,
+                                        templateEvent,
+                                        default,
+                                        default,
+                                        mergedTags,
+                                        null ) );
                             }
                             else
                             {
@@ -488,6 +513,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                                 OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
                             }
+                        }
+                        else
+                        {
+                            addTransformation(
+                                new RedirectEventTransformation(
+                                    this,
+                                    eventBuilder,
+                                    redirectionTargetEvent.AssertNotNull() ) );
                         }
 
                         break;
@@ -516,7 +549,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
     private MemberBuilder GetImplMethodBuilder(
         INamedType declaringType,
         IMethod interfaceMethod,
-        TemplateMember<IMethod> templateMethod,
+        bool isIteratorMethod,
         bool isExplicit )
     {
         var name = GetInterfaceMemberName( interfaceMethod, isExplicit );
@@ -526,7 +559,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
         };
 
-        methodBuilder.SetIsIteratorMethod( templateMethod.IsIteratorMethod );
+        methodBuilder.SetIsIteratorMethod( isIteratorMethod );
 
         foreach ( var interfaceParameter in interfaceMethod.Parameters )
         {
@@ -566,19 +599,16 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
     private PropertyBuilder GetImplPropertyBuilder(
         INamedType declaringType,
         IProperty interfaceProperty,
-        TemplateMember<IProperty> templateProperty,
+        Accessibility getAccessibility,
+        Accessibility setAccessibility,
+        bool hasGetter,
+        bool hasSetter,
         bool isAutoProperty,
         bool isExplicit,
         bool hasImplicitSetter,
         IObjectReader tags )
     {
         var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
-
-        var hasGetter =
-            interfaceProperty.GetMethod != null || (!isExplicit && templateProperty.Declaration.GetMethod != null);
-
-        var hasSetter =
-            interfaceProperty.GetMethod != null || (!isExplicit && templateProperty.Declaration.GetMethod != null);
 
         var propertyBuilder = new PropertyBuilder(
             this,
@@ -608,7 +638,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 }
                 else
                 {
-                    propertyBuilder.GetMethod.Accessibility = templateProperty.Declaration.GetMethod.AssertNotNull().Accessibility;
+                    propertyBuilder.GetMethod.Accessibility = getAccessibility;
                 }
             }
 
@@ -620,7 +650,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 }
                 else
                 {
-                    propertyBuilder.SetMethod.Accessibility = templateProperty.Declaration.SetMethod.AssertNotNull().Accessibility;
+                    propertyBuilder.SetMethod.Accessibility = setAccessibility;
                 }
             }
         }

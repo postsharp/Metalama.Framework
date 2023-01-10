@@ -20,10 +20,15 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class RedirectEventTransformation : OverrideMemberTransformation
     {
+        private readonly IEvent _targetEvent;
+
         private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags ) { }
+        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
+            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+        {
+            this._targetEvent = targetEvent;
+        }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
@@ -81,9 +86,9 @@ namespace Metalama.Framework.Engine.Transformations
             ExpressionSyntax CreateAccessTargetExpression()
             {
                 return
-                    this.OverriddenDeclaration.IsStatic
-                        ? IdentifierName( this.OverriddenDeclaration.Name )
-                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
+                    this._targetEvent.IsStatic
+                        ? IdentifierName( this._targetEvent.Name )
+                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
                             .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }

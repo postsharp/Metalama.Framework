@@ -20,10 +20,15 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
     {
+        private readonly IMethod _targetMethod;
+
         private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags ) { }
+        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
+            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+        {
+            this._targetMethod = targetMethod;
+        }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
@@ -74,11 +79,11 @@ namespace Metalama.Framework.Engine.Transformations
             {
                 var expression =
                     this.OverriddenDeclaration.IsStatic
-                        ? (ExpressionSyntax) IdentifierName( this.OverriddenDeclaration.Name )
+                        ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name )
                         : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
-                            IdentifierName( this.OverriddenDeclaration.Name ) );
+                            IdentifierName( this._targetMethod.Name ) );
 
                 return expression
                     .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );

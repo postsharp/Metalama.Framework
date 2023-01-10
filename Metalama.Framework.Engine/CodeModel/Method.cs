@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,7 +20,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed partial class Method : MethodBase, IMethodImpl
+internal sealed class Method : MethodBase, IMethodImpl
 {
     public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
     {

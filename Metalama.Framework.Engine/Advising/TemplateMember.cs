@@ -5,12 +5,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed partial class TemplateMember<T>
+internal sealed class TemplateMember<T>
     where T : class, IMemberOrNamedType
 {
     public T Declaration { get; }
@@ -161,7 +160,7 @@ internal sealed partial class TemplateMember<T>
     public TemplateMember<TOther> Cast<TOther>()
         where TOther : class, IMemberOrNamedType
         => TemplateMemberFactory.Create(
-            (TOther)(IMemberOrNamedType) this.Declaration,
+            (TOther) (IMemberOrNamedType) this.Declaration,
             this.TemplateClassMember,
             this.AdviceAttribute.AssertNotNull(),
             this.SelectedKind,
