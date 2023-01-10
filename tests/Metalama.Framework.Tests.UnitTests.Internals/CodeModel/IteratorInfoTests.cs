@@ -53,47 +53,47 @@ class C
     }
 
 #if NET5_0_OR_GREATER
-        [Fact]
-        public void AsyncEnumerableYield()
-        {
-            using var testContext = this.CreateTestContext();
+    [Fact]
+    public void AsyncEnumerableYield()
+    {
+        using var testContext = this.CreateTestContext();
 
-            var code = @"
+        var code = @"
 using System.Collections.Generic;
 class C
 {
-    async IAsyncEnumerable<int> Enumerable1() { yield return 1; }
+async IAsyncEnumerable<int> Enumerable1() { yield return 1; }
 }
 ";
 
-            var compilation = testContext.CreateCompilationModel( code );
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+        var compilation = testContext.CreateCompilationModel( code );
+        var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.True( iteratorInfo.IsIteratorMethod );
-            Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-        }
+        Assert.True( iteratorInfo.IsIteratorMethod );
+        Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
+    }
 
-        [Fact]
-        public void AsyncEnumeratorYield()
-        {
-            using var testContext = this.CreateTestContext();
+    [Fact]
+    public void AsyncEnumeratorYield()
+    {
+        using var testContext = this.CreateTestContext();
 
-            var code = @"
+        var code = @"
 using System.Collections.Generic;
 class C
 {
-    async IAsyncEnumerator<int> Enumerable1() { yield return 1; }
+async IAsyncEnumerator<int> Enumerable1() { yield return 1; }
 }
 ";
 
-            var compilation = testContext.CreateCompilationModel( code );
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+        var compilation = testContext.CreateCompilationModel( code );
+        var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.True( iteratorInfo.IsIteratorMethod );
-            Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-        }
+        Assert.True( iteratorInfo.IsIteratorMethod );
+        Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
+    }
 #endif
 
     [Fact]
@@ -193,47 +193,47 @@ class C
     }
 
 #if NET5_0_OR_GREATER
-        [Fact]
-        public void AsyncEnumerableNonYield()
-        {
-            using var testContext = this.CreateTestContext();
+    [Fact]
+    public void AsyncEnumerableNonYield()
+    {
+        using var testContext = this.CreateTestContext();
 
-            var code = @"
+        var code = @"
 using System.Collections.Generic;
 class C
 {
-     IAsyncEnumerable<int> Enumerable1() => null;
+ IAsyncEnumerable<int> Enumerable1() => null;
 }
 ";
 
-            var compilation = testContext.CreateCompilationModel( code );
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+        var compilation = testContext.CreateCompilationModel( code );
+        var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.False( iteratorInfo.IsIteratorMethod );
-            Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-        }
+        Assert.False( iteratorInfo.IsIteratorMethod );
+        Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
+    }
 
-        [Fact]
-        public void AsyncEnumeratorNonYield()
-        {
-            using var testContext = this.CreateTestContext();
+    [Fact]
+    public void AsyncEnumeratorNonYield()
+    {
+        using var testContext = this.CreateTestContext();
 
-            var code = @"
+        var code = @"
 using System.Collections.Generic;
 class C
 {
-     IAsyncEnumerator<int> Enumerable1() => null;
+ IAsyncEnumerator<int> Enumerable1() => null;
 }
 ";
 
-            var compilation = testContext.CreateCompilationModel( code );
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+        var compilation = testContext.CreateCompilationModel( code );
+        var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.False( iteratorInfo.IsIteratorMethod );
-            Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-        }
+        Assert.False( iteratorInfo.IsIteratorMethod );
+        Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
+    }
 #endif
 
     [Fact]
