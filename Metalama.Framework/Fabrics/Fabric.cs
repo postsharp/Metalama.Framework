@@ -7,10 +7,13 @@ namespace Metalama.Framework.Fabrics
 {
     /// <summary>
     /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type inheriting this class.
-    /// You must not inherit this class directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
-    /// or <see cref="TypeFabric"/>. 
+    /// You cannot inherit this class directly, inherit from <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
+    /// or <see cref="TypeFabric"/> instead.
     /// </summary>
     /// <seealso href="@applying-aspects"/>
     [CompileTime]
-    public abstract class Fabric : ILamaSerializable { }
+    public abstract class Fabric : ILamaSerializable
+    {
+        private protected Fabric() { }
+    }
 }
