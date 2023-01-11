@@ -32,6 +32,8 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     {
         public static void Method( object o ) { }
 
+        public virtual void VirtualMethod() { }
+
         public static int StaticField;
         public int InstanceField;
     }
@@ -44,6 +46,13 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         // Typeof in field initializer.
         private Type _field2 = typeof(ValidatedClass);
+
+        // Override.
+        public override void VirtualMethod()
+        {
+            // Base method call.
+            base.VirtualMethod();
+        }
 
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {

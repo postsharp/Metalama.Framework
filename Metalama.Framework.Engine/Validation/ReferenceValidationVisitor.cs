@@ -191,6 +191,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            this.ValidateSymbol( node, symbol.OverriddenMethod, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+
             this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
 
             foreach ( var parameter in node.ParameterList.Parameters )
@@ -209,6 +213,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            this.ValidateSymbol( node, symbol.OverriddenProperty, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+
             base.VisitPropertyDeclaration( node );
         }
     }
@@ -217,6 +225,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            this.ValidateSymbol( node, symbol.OverriddenEvent, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+
             base.VisitEventDeclaration( node );
         }
     }
@@ -326,6 +338,18 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
 
         return this.ValidateSymbol( node, symbol, referenceKind );
+    }
+
+    private void ValidateSymbol<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )
+        where T : ISymbol
+    {
+        if ( !symbols.IsDefaultOrEmpty )
+        {
+            foreach ( var symbol in symbols )
+            {
+                this.ValidateSymbol( node, symbol, referenceKinds );
+            }
+        }
     }
 
     private bool ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )

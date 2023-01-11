@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly AspectRepository _aspectRepository;
+        public AspectRepository AspectRepository { get; }
 
         private readonly DerivedTypeIndex _derivedTypes;
 
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public DeclarationFactory Factory { get; }
 
-        IAspectRepository ICompilationInternal.AspectRepository => this._aspectRepository;
+        IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
         public IProject Project { get; }
 
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Project = project;
             this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
-            this._aspectRepository = aspectRepository ?? new IncrementalAspectRepository();
+            this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( aspectInstances != null )
             {
-                this._aspectRepository = this._aspectRepository.WithAspectInstances( aspectInstances );
+                this.AspectRepository = this.AspectRepository.WithAspectInstances( aspectInstances );
             }
         }
 
@@ -193,9 +193,14 @@ namespace Metalama.Framework.Engine.CodeModel
             this._depthsCache = prototype._depthsCache;
             this._redirectionCache = prototype._redirectionCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
-            this._aspectRepository = prototype._aspectRepository;
+            this.AspectRepository = prototype.AspectRepository;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
+        }
+
+        private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository ) : this( prototype, false )
+        {
+            this.AspectRepository = aspectRepository;
         }
 
         internal CompilationModel WithTransformationsAndAspectInstances(
@@ -209,6 +214,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return new CompilationModel( this, introducedDeclarations, aspectInstances );
         }
+
+        internal CompilationModel WithAspectRepository( AspectRepository aspectRepository )
+            => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository );
 
         [Memo]
         public INamedTypeCollection Types

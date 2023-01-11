@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             this.AddSerializer( typeof(Dictionary<,>), typeof(DictionarySerializer<,>) );
             this.AddSerializer( typeof(ImmutableDictionary<,>), typeof(ImmutableDictionarySerializer<,>) );
             this.AddSerializer( typeof(ImmutableArray<>), typeof(ImmutableArraySerializer<>) );
+            this.AddSerializer( typeof(ImmutableHashSet<>), typeof(ImmutableHashSetSerializer<>) );
 
             // Our own types.
             this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
