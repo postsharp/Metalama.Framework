@@ -273,6 +273,12 @@ namespace Metalama.Testing.AspectTesting
         /// a static reference to compile-time assemblies. To enable this option in a test, add this comment to your test file: <c>// @CheckMemoryLeaks</c>.
         /// </summary>
         public bool? CheckMemoryLeaks { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the line number should be included in reports of warnings or errors in the consolidated test output.
+        /// The default value is <c>false</c>.   To enable this option in a test, add this comment to your test file: <c>// @IncludeLineNumberInDiagnosticReport</c>.
+        /// </summary>
+        public bool? IncludeLineNumberInDiagnosticReport { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -346,6 +352,8 @@ namespace Metalama.Testing.AspectTesting
             this.MainMethod ??= baseOptions.MainMethod;
 
             this.CheckMemoryLeaks ??= baseOptions.CheckMemoryLeaks;
+
+            this.IncludeLineNumberInDiagnosticReport ??= baseOptions.IncludeLineNumberInDiagnosticReport;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -596,6 +604,11 @@ namespace Metalama.Testing.AspectTesting
                     
                     case "CheckMemoryLeaks":
                         this.CheckMemoryLeaks = true;
+                        
+                        break;
+                    
+                    case "IncludeLineNumberInDiagnosticReport":
+                        this.IncludeLineNumberInDiagnosticReport = true;
                         
                         break;
 

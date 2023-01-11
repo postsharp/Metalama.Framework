@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesDiagnostic( definition.Id ) )
             {
                 throw new InvalidOperationException(
-                    $"The aspect cannot report the diagnostic {definition.Id} because the DiagnosticDefinition is not declared as a static field or property of the aspect class." );
+                    $"The aspect cannot report the diagnostic {definition.Id} because the DiagnosticDefinition is not declared as a static field or property of a compile-time class." );
             }
         }
 

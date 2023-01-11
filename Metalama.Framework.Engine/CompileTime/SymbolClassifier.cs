@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Compiler;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -52,7 +53,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     (typeof(Environment), TemplatingScope.RunTimeOnly, false),
                     (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly, false),
                     (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false)
+                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false),
+                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly, false)
                 }.ToImmutableDictionary(
                     t => t.ReflectionType.Name.AssertNotNull(),
                     t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )

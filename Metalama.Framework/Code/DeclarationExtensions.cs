@@ -40,7 +40,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static IEnumerable<IDeclaration> ContainingAncestors( this IDeclaration declaration )
         {
-            for ( var cursor = declaration.ContainingDeclaration; cursor != null; declaration = declaration.ContainingDeclaration )
+            for ( var cursor = declaration.ContainingDeclaration; cursor != null; cursor = cursor.ContainingDeclaration )
             {
                 yield return cursor;
             }
@@ -49,9 +49,9 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets all containing ancestors including the current declaration, i.e. <c>declaration</c>, <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,
         /// <c>declaration.ContainingDeclaration.ContainingDeclaration.ContainingDeclaration</c>... 
-        public static IEnumerable<IDeclaration> ContainedAncestorsAndSelf( this IDeclaration declaration )
+        public static IEnumerable<IDeclaration> ContainingAncestorsAndSelf( this IDeclaration declaration )
         {
-            for ( var cursor = declaration.ContainingDeclaration; cursor != null; declaration = declaration.ContainingDeclaration )
+            for ( var cursor = declaration; cursor != null; cursor = cursor.ContainingDeclaration )
             {
                 yield return cursor;
             }

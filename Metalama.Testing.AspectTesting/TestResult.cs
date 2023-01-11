@@ -371,7 +371,14 @@ internal sealed class TestResult : IDisposable
 
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
     {
-        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`\n";
+        if ( this.TestInput.Options.IncludeLineNumberInDiagnosticReport == true )
+        {
+            yield return $"// {d.Severity} {d.Id} at line {d.Location.GetLineSpan().StartLinePosition.Line + 1}`: `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`\n";
+        }
+        else
+        {
+            yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`\n";
+        }
 
         foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
         {

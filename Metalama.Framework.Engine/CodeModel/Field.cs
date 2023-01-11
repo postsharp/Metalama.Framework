@@ -85,15 +85,21 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IExpression? GetInitializerExpressionCore()
         {
-            var initializer = ((VariableDeclaratorSyntax?) this._symbol.GetPrimaryDeclaration())?.Initializer;
+            var expression = this._symbol.GetPrimaryDeclaration() switch
+            {
+                VariableDeclaratorSyntax variable => variable.Initializer?.Value,
+                EnumMemberDeclarationSyntax enumMember => enumMember.EqualsValue?.Value,
+                _ => null
+            };
+                
 
-            if ( initializer == null )
+            if ( expression == null )
             {
                 return null;
             }
             else
             {
-                return new SourceUserExpression( initializer.Value, this.Type );
+                return new SourceUserExpression( expression, this.Type );
             }
         }
 

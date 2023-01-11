@@ -20,6 +20,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ImmutableArray<SuppressionDefinition> SuppressionDefinitions { get; }
 
+        public static DiagnosticManifest Empty { get; } = new DiagnosticManifest( ImmutableArray<IDiagnosticDefinition>.Empty, ImmutableArray<SuppressionDefinition>.Empty );
+
         public DiagnosticManifest( ImmutableArray<IDiagnosticDefinition> diagnosticDescriptions, ImmutableArray<SuppressionDefinition> suppressionDescriptions )
         {
             this.DiagnosticDefinitions = diagnosticDescriptions;
