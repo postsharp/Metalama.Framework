@@ -202,18 +202,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( setter == null )
                     {
-                        // In some situations the above approaches do not work even if the setter exists.
-                        // I could not reproduce this in a unit tests but this happens in Metalama.Extensions.
-                        setter = property.DeclaringType!.GetMethod(
-                            "set_" + property.Name,
-                            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                            null,
-                            new[] { property.PropertyType },
-                            null );
-                    }
-
-                    if ( setter == null )
-                    {
                         diagnosticAdder.Report(
                             AttributeDeserializerDiagnostics.PropertyHasNoSetter.CreateRoslynDiagnostic(
                                 attribute.GetDiagnosticLocation(),

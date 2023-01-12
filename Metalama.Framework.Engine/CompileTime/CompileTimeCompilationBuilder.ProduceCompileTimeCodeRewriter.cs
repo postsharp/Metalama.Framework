@@ -845,7 +845,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     AccessorDeclaration(
                                                             SyntaxKind.SetAccessorDeclaration,
                                                             List<AttributeListSyntax>(),
-                                                            TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                                            default,
                                                             null,
                                                             null )
                                                         .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
