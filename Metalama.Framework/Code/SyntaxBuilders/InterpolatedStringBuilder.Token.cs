@@ -7,10 +7,14 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         internal sealed class Token
         {
             public object? Expression { get; }
+            public int? Alignment { get; }
+            public string? Format { get; }
 
-            public Token( object? expression )
+            public Token( object? expression, int? alignment, string? format )
             {
                 this.Expression = expression;
+                this.Alignment = alignment;
+                this.Format = format;
             }
         }
     }

@@ -38,7 +38,8 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// Adds an expression to the interpolated string.
         /// </summary>
         /// <param name="expression"></param>
-        public void AddExpression( dynamic? expression ) => this._items.Add( new Token( expression ) );
+        public void AddExpression( dynamic? expression, int? alignment = null, string? format = null ) =>
+            this._items.Add( new Token( (object?)expression, alignment, format ) );
 
         /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> from the current <see cref="ExpressionBuilder"/>.
