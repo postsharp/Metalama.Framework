@@ -5,7 +5,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.AccessAspectRepository;
 
-#pragma warning disable CS0169
+#pragma warning disable CS0169, CS8618
 
 public class TheAspect : TypeAspect
 {

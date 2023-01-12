@@ -373,7 +373,9 @@ internal sealed class TestResult : IDisposable
     {
         var message = $"// {d.Severity} {d.Id} ";
 
-        if ( this.TestInput.Options.IncludeLineNumberInDiagnosticReport == true )
+        var testInputOptions = this.TestInput!.Options;
+
+        if ( testInputOptions.IncludeLineNumberInDiagnosticReport == true )
         {
             message +=
                 $"at line {d.Location.GetLineSpan().StartLinePosition.Line + 1}";
@@ -383,7 +385,7 @@ internal sealed class TestResult : IDisposable
             message += $"on `{this.GetTextUnderDiagnostic( d )}`";
         }
 
-        if ( this.TestInput.Options.RemoveDiagnosticMessage != true )
+        if ( testInputOptions.RemoveDiagnosticMessage != true )
         {
             message += $": `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`";
         }

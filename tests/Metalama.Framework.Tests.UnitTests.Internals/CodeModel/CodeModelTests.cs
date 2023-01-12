@@ -1406,12 +1406,12 @@ class C {}
             Assert.Equal( 0, ((ISourceExpression?) type.Fields["None"].InitializerExpression)?.AsTypedConstant?.Value );
             Assert.Null( type.Fields["One"].InitializerExpression );
             Assert.Equal( 2, ((ISourceExpression?) type.Fields["Two"].InitializerExpression)?.AsTypedConstant?.Value );
-            var threeExpression = (ISourceExpression?) type.Fields["Three"].InitializerExpression.AssertNotNull();
+            var threeExpression = (ISourceExpression) type.Fields["Three"].InitializerExpression.AssertNotNull();
             Assert.Equal( "2 + 1", threeExpression.AsString );
-            var secondExpression = (ISourceExpression?) type.Fields["Second"].InitializerExpression.AssertNotNull();
-            Assert.Equal( 2, secondExpression.AsTypedConstant.Value.Value );
-            var thirdExpression = (ISourceExpression?) type.Fields["Third"].InitializerExpression.AssertNotNull();
-            Assert.Equal( 3, thirdExpression.AsTypedConstant.Value.Value );
+            var secondExpression = (ISourceExpression) type.Fields["Second"].InitializerExpression.AssertNotNull();
+            Assert.Equal( 2, secondExpression.AsTypedConstant!.Value.Value );
+            var thirdExpression = (ISourceExpression) type.Fields["Third"].InitializerExpression.AssertNotNull();
+            Assert.Equal( 3, thirdExpression.AsTypedConstant!.Value.Value );
         }
 
         [Theory]

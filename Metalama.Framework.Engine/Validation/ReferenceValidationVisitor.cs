@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
-using System.Text;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -31,11 +30,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private readonly CancellationToken _cancellationToken;
     private readonly UserCodeExecutionContext _userCodeExecutionContext;
     private readonly DisposeAction _disposeExecutionContext;
+    private readonly ISymbolClassifier _symbolClassifier;
     private SemanticModel? _semanticModel;
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
-    private ISymbolClassifier _symbolClassifier;
 
     public ReferenceValidationVisitor(
         ProjectServiceProvider serviceProvider,
@@ -153,7 +152,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
     {
-        var symbol = this._semanticModel.GetDeclaredSymbol( node );
+        var symbol = this._semanticModel?.GetDeclaredSymbol( node );
 
         if ( symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ) != TemplatingScope.RunTimeOnly )
         {
@@ -234,8 +233,8 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         using ( this.EnterContext( node ) )
         {
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol.OverriddenMethod, ReferenceKinds.OverrideMember );
-            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+            this.ValidateSymbol( node, symbol?.OverriddenMethod, ReferenceKinds.OverrideMember );
+            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
             this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
 
@@ -256,8 +255,8 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         using ( this.EnterContext( node ) )
         {
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol.OverriddenProperty, ReferenceKinds.OverrideMember );
-            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+            this.ValidateSymbol( node, symbol?.OverriddenProperty, ReferenceKinds.OverrideMember );
+            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
             base.VisitPropertyDeclaration( node );
         }
@@ -268,8 +267,8 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         using ( this.EnterContext( node ) )
         {
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol.OverriddenEvent, ReferenceKinds.OverrideMember );
-            this.ValidateSymbol( node, symbol.ExplicitInterfaceImplementations, ReferenceKinds.InterfaceMemberImplementation );
+            this.ValidateSymbol( node, symbol?.OverriddenEvent, ReferenceKinds.OverrideMember );
+            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
             base.VisitEventDeclaration( node );
         }
@@ -385,7 +384,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         return this.ValidateSymbol( node, symbol, referenceKind );
     }
 
-    private void ValidateSymbol<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )
+    private void ValidateSymbols<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )
         where T : ISymbol
     {
         if ( !symbols.IsDefaultOrEmpty )

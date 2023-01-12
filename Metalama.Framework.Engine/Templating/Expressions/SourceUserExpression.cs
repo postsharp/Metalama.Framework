@@ -64,12 +64,9 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
                 {
                     return null;
                 }
-                
 
             default:
                 return null;
         }
-
-      
     }
 }

@@ -91,7 +91,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 EnumMemberDeclarationSyntax enumMember => enumMember.EqualsValue?.Value,
                 _ => null
             };
-                
 
             if ( expression == null )
             {

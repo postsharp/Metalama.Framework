@@ -116,8 +116,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var hashSet = ImmutableHashSet.Create( "un", "deux", "trois" ).WithComparer( StringComparer.InvariantCultureIgnoreCase );
             var deserialized = this.TestValue( hashSet );
 
+#pragma warning disable xUnit2017
             Assert.True( deserialized.Contains( "UN" ) );
             Assert.False( deserialized.Contains( "quatre" ) );
+#pragma warning restore xUnit2017            
         }
 
         [Fact]
@@ -126,8 +128,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var hashSet = ImmutableHashSet.Create( "un", "deux", "trois" ).WithComparer( new CustomEqualityComparer() );
             var deserialized = this.TestValue( hashSet );
 
+#pragma warning disable xUnit2017
             Assert.True( deserialized.Contains( "u" ) );
             Assert.False( deserialized.Contains( "q" ) );
+#pragma warning restore xUnit2017            
         }
 
         private T TestValue<T>( T value )

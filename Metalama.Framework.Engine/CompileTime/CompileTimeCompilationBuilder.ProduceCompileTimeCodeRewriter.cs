@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 var filteredAttributes = new List<AttributeSyntax>( node.Attributes.Count );
-                
+
                 foreach ( var attribute in node.Attributes )
                 {
                     var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( attribute.Name ).Symbol;
@@ -165,7 +165,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             private SyntaxList<AttributeListSyntax> VisitAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
-             => List( attributeLists.SelectAsEnumerable( l => (AttributeListSyntax?) this.VisitAttributeList( l ) ) .WhereNotNull() );
+                => List( attributeLists.SelectAsEnumerable( l => (AttributeListSyntax?) this.VisitAttributeList( l ) ).WhereNotNull() );
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
@@ -562,8 +562,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 return transformedNode;
             }
-
-        
 
             private bool CheckTemplateName( ISymbol symbol )
             {

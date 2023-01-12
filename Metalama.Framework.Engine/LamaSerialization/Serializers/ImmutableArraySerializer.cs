@@ -23,6 +23,4 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
             return ImmutableArray.Create( values );
         }
     }
-    
- 
 }

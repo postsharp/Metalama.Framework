@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Serialization;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -25,10 +27,10 @@ internal sealed class ImmutableHashSetSerializer<T> : ReferenceTypeSerializer
 
         // Assertion on nullability was added after the code import from PostSharp.
         var keys = constructorArguments.GetValue<T[]>( _keysName ).AssertNotNull();
-        
+
         for ( var idx = 0; idx < keys.Length; idx++ )
         {
-            builder.Add(keys[idx]);
+            builder.Add( keys[idx] );
         }
 
         return builder.ToImmutable();
@@ -39,7 +41,7 @@ internal sealed class ImmutableHashSetSerializer<T> : ReferenceTypeSerializer
     {
         var hashSet = (ImmutableHashSet<T>) obj;
         var keys = hashSet.ToArray();
-        
+
         var comparerCode = ComparerExtensions.GetComparerCode( hashSet.KeyComparer );
 
         // byte.MaxValue is a flag for custom comparer

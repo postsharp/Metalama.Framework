@@ -561,7 +561,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
             return !ctor.IsStatic && ctor is { IsImplicitlyDeclared: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct };

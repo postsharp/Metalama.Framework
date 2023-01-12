@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var methodInfo = validateMethod.Method;
 
-            if ( ! methodInfo.DeclaringType.IsAssignableFrom( this._parent.Type ) )
+            if ( methodInfo.DeclaringType?.IsAssignableFrom( this._parent.Type ) != true )
             {
                 throw new ArgumentOutOfRangeException( nameof(validateMethod), $"The delegate must point to a method of type '{this._parent.Type};." );
             }
