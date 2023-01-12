@@ -28,6 +28,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.AdvancedInterpolated
             stringBuilder.AddExpression("f", format: "s");
             stringBuilder.AddExpression("f", format: null);
 
+            stringBuilder.AddText("{");
+            stringBuilder.AddExpression(0);
+            stringBuilder.AddText("}");
+
+            stringBuilder.AddExpression(new Random().Next() == 0 ? 0 : 1);
+
+            stringBuilder.AddText("\"\\\r\n\t");
+
             return stringBuilder.ToValue();
         }
     }
