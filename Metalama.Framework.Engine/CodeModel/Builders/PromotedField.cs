@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 var fieldBuilder = builtField.FieldBuilder;
 
                 return fieldBuilder.GetInitializerExpressionOrMethod(
-                    advice,
+                    fieldBuilder.ParentAdvice,
                     context,
                     this.Type,
                     fieldBuilder.InitializerExpression,

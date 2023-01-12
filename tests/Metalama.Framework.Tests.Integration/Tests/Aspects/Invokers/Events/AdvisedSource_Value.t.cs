@@ -30,5 +30,5 @@ internal class TargetClass
       this.EventField_Source -= value;
     }
   }
-  private EventHandler? EventField_Source;
+  private event EventHandler? EventField_Source;
 }

@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
+        private static EventFieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
             var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
 
@@ -153,13 +153,14 @@ namespace Metalama.Framework.Engine.Linking
         private MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
         {
             return
-                FieldDeclaration(
+                EventFieldDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
                                 Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
                                 Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                        Token( TriviaList( ElasticSpace ), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                         VariableDeclaration(
                             eventType.WithTrailingTrivia( Space ),
                             SingletonSeparatedList( VariableDeclarator( Identifier( name ) ) ) ),

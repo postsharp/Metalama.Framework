@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) )
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
-        private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+        private static EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
             EqualsValueClauseSyntax? initializerExpression;
 
@@ -202,7 +202,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Body.AssertNotNull()
                             .Statements.Single();
 
-                    var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
+                    var expression = ((InvocationExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).ArgumentList.Arguments[0].Expression;
 
                     initializerExpression = EqualsValueClause( expression );
 
@@ -217,8 +217,9 @@ namespace Metalama.Framework.Engine.Linking
             return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
         }
 
-        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
-            => FieldDeclaration(
+        // Event backing field is intentionally an event field to handle thread-safety.
+        private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
+            => EventFieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
                         ? TokenList(

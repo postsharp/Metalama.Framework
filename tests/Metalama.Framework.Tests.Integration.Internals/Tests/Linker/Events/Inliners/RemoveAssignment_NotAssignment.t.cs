@@ -12,5 +12,5 @@ public class Target
       Console.WriteLine("After");
     }
   }
-  private EventHandler? Foo_Source;
+  private event EventHandler? Foo_Source;
 }
