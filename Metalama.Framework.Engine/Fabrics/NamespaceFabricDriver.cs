@@ -57,7 +57,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
                 diagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<INamespaceAmender>( ((NamespaceFabric) this.Fabric).AmendNamespace ) ) );
+                UserCodeMemberInfo.FromDelegate( new Action<INamespaceAmender>( ((NamespaceFabric) this.Fabric).AmendNamespace ) ),
+                compilationModel: compilation );
 
             if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((NamespaceFabric) this.Fabric).AmendNamespace( amender ), executionContext ) )
             {

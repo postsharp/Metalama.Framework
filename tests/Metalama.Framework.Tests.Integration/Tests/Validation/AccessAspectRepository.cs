@@ -5,6 +5,8 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.AccessAspectRepository;
 
+#pragma warning disable CS0169
+
 public class TheAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )

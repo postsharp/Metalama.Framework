@@ -56,32 +56,30 @@ public static class NamedTypeExtensions
         {
             yield return m;
         }
-        
+
         foreach ( var m in type.Properties )
         {
             yield return m;
         }
-        
+
         foreach ( var m in type.Fields )
         {
             yield return m;
         }
-        
+
         foreach ( var m in type.Events )
         {
             yield return m;
         }
-        
-        
+
         foreach ( var m in type.Indexers )
         {
             yield return m;
         }
-        
+
         foreach ( var m in type.Constructors )
         {
             yield return m;
         }
-        
     }
 }

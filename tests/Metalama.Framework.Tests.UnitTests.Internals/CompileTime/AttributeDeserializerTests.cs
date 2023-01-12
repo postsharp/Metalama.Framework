@@ -24,7 +24,12 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             services.AddGlobalService( new HackedSystemTypeResolverFactory() );
         }
 
-        private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "", string className = "TestAttribute" )
+        private object? GetDeserializedProperty(
+            string property,
+            string value,
+            string? dependentCode = null,
+            string? additionalCode = "",
+            string className = "TestAttribute" )
         {
             using var testContext = this.CreateTestContext();
 
@@ -63,7 +68,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.InitOnlyProperty), "5" ) );
         }
-        
+
         [Fact]
         public void TestInitOnlyPropertyOfDerivedClass()
         {
@@ -495,14 +500,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public TestEnum[]? EnumArrayProperty { get; set; }
 
             public int Field;
-            
+
             public int InitOnlyProperty { get; init; }
         }
 
-        public class DerivedAttribute : TestAttribute
-        {
-            
-        }
+        public class DerivedAttribute : TestAttribute { }
 
         public class TestParamsAttribute : Attribute
         {

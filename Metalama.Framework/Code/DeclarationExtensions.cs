@@ -12,7 +12,6 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class DeclarationExtensions
     {
-        
         /// <summary>
         /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
         /// relationship for all declarations except for named type, where the parent namespace is considered.
@@ -45,10 +44,11 @@ namespace Metalama.Framework.Code
                 yield return cursor;
             }
         }
-        
+
         /// <summary>
         /// Gets all containing ancestors including the current declaration, i.e. <c>declaration</c>, <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,
         /// <c>declaration.ContainingDeclaration.ContainingDeclaration.ContainingDeclaration</c>... 
+        /// </summary>
         public static IEnumerable<IDeclaration> ContainingAncestorsAndSelf( this IDeclaration declaration )
         {
             for ( var cursor = declaration; cursor != null; cursor = cursor.ContainingDeclaration )
@@ -56,8 +56,7 @@ namespace Metalama.Framework.Code
                 yield return cursor;
             }
         }
-        
-  
+
         /// <summary>
         /// Gets an object that gives access to the aspects on the current declaration.
         /// </summary>

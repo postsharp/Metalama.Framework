@@ -1383,9 +1383,9 @@ class C {}
 
             Assert.Equal( value, source.AsTypedConstant!.Value.Value );
         }
-        
+
         [Fact]
-        public void InitializerExpression_EnumMembers( )
+        public void InitializerExpression_EnumMembers()
         {
             var code = """
         public enum C
@@ -1402,7 +1402,7 @@ class C {}
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.Single();
-            
+
             Assert.Equal( 0, ((ISourceExpression?) type.Fields["None"].InitializerExpression)?.AsTypedConstant?.Value );
             Assert.Null( type.Fields["One"].InitializerExpression );
             Assert.Equal( 2, ((ISourceExpression?) type.Fields["Two"].InitializerExpression)?.AsTypedConstant?.Value );
@@ -1412,9 +1412,8 @@ class C {}
             Assert.Equal( 2, secondExpression.AsTypedConstant.Value.Value );
             var thirdExpression = (ISourceExpression?) type.Fields["Third"].InitializerExpression.AssertNotNull();
             Assert.Equal( 3, thirdExpression.AsTypedConstant.Value.Value );
-
         }
-        
+
         [Theory]
         [InlineData( "int F {get;} = 5", 5 )]
         [InlineData( "string F {get;} = \"s\"", "s" )]
@@ -1438,7 +1437,7 @@ class C {}
 
             Assert.Equal( value, source.AsTypedConstant!.Value.Value );
         }
-        
+
         [Fact]
         public void InitializerExpression_NotTypedConstant()
         {

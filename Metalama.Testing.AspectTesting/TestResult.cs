@@ -372,7 +372,7 @@ internal sealed class TestResult : IDisposable
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
     {
         var message = $"// {d.Severity} {d.Id} ";
-        
+
         if ( this.TestInput.Options.IncludeLineNumberInDiagnosticReport == true )
         {
             message +=

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -14,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
+using System.Text;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -33,6 +35,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
+    private ISymbolClassifier _symbolClassifier;
 
     public ReferenceValidationVisitor(
         ProjectServiceProvider serviceProvider,
@@ -49,9 +52,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, default, compilationModel: compilation );
         this._cancellationToken = cancellationToken;
         this._disposeExecutionContext = UserCodeExecutionContext.WithContext( this._userCodeExecutionContext );
+        this._symbolClassifier = compilation.CompilationContext.SymbolClassifier;
     }
 
-    public void Visit( SyntaxTree syntaxTree )
+    internal void Visit( SyntaxTree syntaxTree )
     {
         this._semanticModel = this._semanticModelProvider.GetSemanticModel( syntaxTree );
         this.Visit( syntaxTree.GetRoot() );
@@ -147,8 +151,26 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this.VisitTypeReference( node.Type, ReferenceKinds.Other );
     }
 
+    private bool CanSkipTypeDeclaration( SyntaxNode node )
+    {
+        var symbol = this._semanticModel.GetDeclaredSymbol( node );
+
+        if ( symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ) != TemplatingScope.RunTimeOnly )
+        {
+            // We only validate run-time code.
+            return true;
+        }
+
+        return false;
+    }
+
     public override void VisitClassDeclaration( ClassDeclarationSyntax node )
     {
+        if ( this.CanSkipTypeDeclaration( node ) )
+        {
+            return;
+        }
+
         using ( this.EnterContext( node ) )
         {
             base.VisitClassDeclaration( node );
@@ -157,6 +179,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
     {
+        if ( this.CanSkipTypeDeclaration( node ) )
+        {
+            return;
+        }
+
         using ( this.EnterContext( node ) )
         {
             base.VisitRecordDeclaration( node );
@@ -165,6 +192,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitStructDeclaration( StructDeclarationSyntax node )
     {
+        if ( this.CanSkipTypeDeclaration( node ) )
+        {
+            return;
+        }
+
         using ( this.EnterContext( node ) )
         {
             base.VisitStructDeclaration( node );
@@ -173,6 +205,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node )
     {
+        if ( this.CanSkipTypeDeclaration( node ) )
+        {
+            return;
+        }
+
         using ( this.EnterContext( node ) )
         {
             base.VisitDelegateDeclaration( node );
@@ -181,6 +218,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitEnumDeclaration( EnumDeclarationSyntax node )
     {
+        if ( this.CanSkipTypeDeclaration( node ) )
+        {
+            return;
+        }
+
         using ( this.EnterContext( node ) )
         {
             base.VisitEnumDeclaration( node );
@@ -290,7 +332,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             // TODO: validate the base constructor.
             // TODO: validate the call to the base constructor of the implicit constructor.
-            
+
             base.VisitConstructorDeclaration( node );
         }
     }

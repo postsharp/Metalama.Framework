@@ -285,8 +285,7 @@ namespace Metalama.Testing.AspectTesting
         /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveOutputCode</c>.
         /// </summary>
         public bool? RemoveOutputCode { get; set; }
-        
-        
+
         /// <summary>
         /// Gets or sets a value indicating that the test output should not include the diagnostic message, but only the diagnostic ID.
         /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveDiagnosticMessage</c>. 
@@ -633,10 +632,10 @@ namespace Metalama.Testing.AspectTesting
                         this.RemoveOutputCode = true;
 
                         break;
-                    
+
                     case "RemoveDiagnosticMessage":
                         this.RemoveDiagnosticMessage = true;
-                        
+
                         break;
 
                     default:

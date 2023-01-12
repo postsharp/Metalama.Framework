@@ -33,6 +33,7 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
+        <None Include="Tests\Validation\CompileTimeCodeNotValidated.t.cs" />
     </ItemGroup>
 
     <ItemGroup>

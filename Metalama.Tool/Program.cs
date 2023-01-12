@@ -12,16 +12,19 @@ namespace Metalama.DotNetTools
     {
         private static async Task<int> Main( string[] args )
         {
-
             var app = new CommandApp();
             var options = new BackstageCommandOptions( new ApplicationInfo() );
             options.AddConfigurationFileAdapter<UserDiagnosticsConfiguration>();
             options.AddConfigurationFileAdapter<DesignTimeConfiguration>();
-            BackstageCommandFactory.ConfigureCommandApp( app, options, config => config.AddCommand<VersionCommand>("version").WithData(options ).WithDescription("Displays the version of the 'metalama' global tool."));
-            
+
+            BackstageCommandFactory.ConfigureCommandApp(
+                app,
+                options,
+                config => config.AddCommand<VersionCommand>( "version" )
+                    .WithData( options )
+                    .WithDescription( "Displays the version of the 'metalama' global tool." ) );
 
             return await app.RunAsync( args );
         }
-           
     }
 }

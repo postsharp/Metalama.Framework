@@ -18,33 +18,32 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         public void ImmutableArray_Ints()
         {
             this.TestValue(
-                ImmutableArray.Create( 
+                ImmutableArray.Create(
                     2,
                     10,
                     30,
                     int.MinValue,
                     int.MaxValue,
                     -2,
-                    0
-                 ) );
+                    0 ) );
         }
 
         [Fact]
         public void ImmutableArray_Strings()
         {
             this.TestValue(
-                ImmutableArray.Create( 
+                ImmutableArray.Create(
                     string.Empty,
                     null,
                     "text",
                     string.Empty,
-                    "2") );
+                    "2" ) );
         }
 
         [Fact]
         public void ImmutableArray_Classes()
         {
-            this.TestValue(  ImmutableArray.Create<SimpleType>(  new() { Name = "X" }, new() { Name = "Y" } ) );
+            this.TestValue( ImmutableArray.Create<SimpleType>( new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } ) );
         }
 
         [Fact]
@@ -75,11 +74,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 }.ToImmutableDictionary() );
         }
 
-
         [Fact]
         public void ImmutableDictionary_WithStringEqualityComparer()
         {
-            var dictionary = new Dictionary<string, string>( ) { ["first"] = "a", ["second"] = "b" }.ToImmutableDictionary( StringComparer.OrdinalIgnoreCase );
+            var dictionary = new Dictionary<string, string>() { ["first"] = "a", ["second"] = "b" }.ToImmutableDictionary( StringComparer.OrdinalIgnoreCase );
 
             var deserialized = this.SerializeDeserialize( dictionary );
 
@@ -94,7 +92,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void ImmutableDictionary_WithCustomEqualityComparer()
         {
-            var dictionary = new Dictionary<string, string>( ) { ["first"] = "a", ["second"] = "b" }.ToImmutableDictionary(new CustomEqualityComparer() );
+            var dictionary = new Dictionary<string, string>() { ["first"] = "a", ["second"] = "b" }.ToImmutableDictionary( new CustomEqualityComparer() );
 
             var deserialized = this.SerializeDeserialize( dictionary );
 
@@ -106,13 +104,11 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.Equal( dictionary["sdfg"], deserialized["second"] );
         }
 
-        
         [Fact]
         public void ImmutableHash_StringsWithStrings()
         {
             this.TestValue( ImmutableHashSet.Create( "un", "deux", "trois" ) );
         }
-
 
         [Fact]
         public void ImmutableHash_WithStringEqualityComparer()
@@ -134,8 +130,6 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.False( deserialized.Contains( "q" ) );
         }
 
-      
-
         private T TestValue<T>( T value )
             where T : ICollection
         {
@@ -149,10 +143,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             while ( enumerator1.MoveNext() )
             {
                 Assert.True( enumerator2.MoveNext() );
-                
+
                 Assert.Equal( enumerator1.Current, enumerator2.Current );
             }
-            
+
             Assert.False( enumerator2.MoveNext() );
 
             return deserialized;
