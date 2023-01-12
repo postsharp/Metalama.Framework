@@ -598,6 +598,7 @@ public class ReferencedClass
                     out _ ) );
         }
 
+#if NET6_0_OR_GREATER
         [Fact]
         public void CleanCacheAndDeserialize()
         {
@@ -671,6 +672,7 @@ class ReferencingClass
                         out _ ) );
             }
         }
+#endif
 
         [Fact]
         public void EmptyProjectWithReference()
