@@ -288,6 +288,9 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            // TODO: validate the base constructor.
+            // TODO: validate the call to the base constructor of the implicit constructor.
+            
             base.VisitConstructorDeclaration( node );
         }
     }

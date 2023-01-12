@@ -18,9 +18,18 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         protected override string GetText( IFormatProvider? formatProvider )
-            => this._arguments.Length == 0
-                ? this._message
-                : string.Format( MetalamaStringFormatter.Instance, this._message, this._arguments );
+        {
+            try
+            {
+                return this._arguments.Length == 0
+                    ? this._message
+                    : string.Format( MetalamaStringFormatter.Instance, this._message, this._arguments );
+            }
+            catch ( FormatException e )
+            {
+                return $"(Formatting exception when formatting the message \"{this._message}\": {e.Message})";
+            }
+        }
 
         protected override int GetHash()
         {

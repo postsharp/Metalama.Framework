@@ -376,7 +376,7 @@ internal sealed class TestResult : IDisposable
         if ( this.TestInput.Options.IncludeLineNumberInDiagnosticReport == true )
         {
             message +=
-                $"at line {d.Location.GetLineSpan().StartLinePosition.Line + 1}`";
+                $"at line {d.Location.GetLineSpan().StartLinePosition.Line + 1}";
         }
         else
         {
