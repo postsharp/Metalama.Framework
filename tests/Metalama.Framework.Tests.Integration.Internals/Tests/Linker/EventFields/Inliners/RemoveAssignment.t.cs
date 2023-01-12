@@ -1,6 +1,6 @@
 class Target
 {
-  private EventHandler? _foo;
+  private event EventHandler? _foo;
   event EventHandler? Foo
   {
     add

@@ -218,16 +218,30 @@ namespace Metalama.Framework.Engine.Linking
                         var referencedSymbol = inliningSpecification.TargetSemantic.Symbol;
                         var root = this._syntaxHandler.GetCanonicalRootNode( referencedSymbol );
 
-                        if ( root is not StatementSyntax )
+                        switch ( root )
                         {
-                            AddSubstitution(
-                                inliningSpecification.ContextIdentifier,
-                                CreateOriginalBodySubstitution( 
-                                    root,
-                                    inliningSpecification.AspectReference.ContainingBody,
-                                    referencedSymbol,
-                                    inliningSpecification.UseSimpleInlining,
-                                    inliningSpecification.ReturnVariableIdentifier ) );
+                            case not StatementSyntax:
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    CreateOriginalBodySubstitution( 
+                                        root,
+                                        inliningSpecification.AspectReference.ContainingBody,
+                                        referencedSymbol,
+                                        inliningSpecification.UseSimpleInlining,
+                                        inliningSpecification.ReturnVariableIdentifier ) );
+
+                                break;
+
+                            case BlockSyntax { Parent: AccessorDeclarationSyntax { Parent.Parent: EventDeclarationSyntax eventDeclaration } }
+                                when eventDeclaration.GetLinkerDeclarationFlags().HasAnyFlagFast( AspectLinkerDeclarationFlags.HasHiddenInitializerExpression ):
+                                // The event field has hidden initializer expression annotation.
+                                // This means that the expression is hidden in the body of the accessor and the whole accessor body needs to be replaced.
+
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    new EventFieldSubstitution( root, referencedSymbol ) );
+                                
+                                break;
                         }
                     }
 

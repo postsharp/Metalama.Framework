@@ -11,7 +11,7 @@ class Target
       this.Foo_Override2 -= value;
     }
   }
-  private EventHandler? Foo_Source;
+  private event EventHandler? Foo_Source;
   event EventHandler? Foo_Override2
   {
     add

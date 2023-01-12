@@ -115,6 +115,14 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
+        public override ExpressionSyntax GetEventFieldInitializerExpression( ExpressionSyntax initializerExpression )
+        {
+            return
+                InvocationExpression(
+                    this._injectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression(),
+                    ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
+        }
+
         private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer overriddenIndexer, OurSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;

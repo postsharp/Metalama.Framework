@@ -1,7 +1,7 @@
 [Test]
 internal class TargetClass
 {
-  private EventHandler? _b;
+  private event EventHandler? _b;
   public event EventHandler? B
   {
     add

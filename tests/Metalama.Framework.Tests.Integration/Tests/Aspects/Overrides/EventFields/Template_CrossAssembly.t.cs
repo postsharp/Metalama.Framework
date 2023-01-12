@@ -1,7 +1,7 @@
 [TestAspect]
 internal class TargetClass
 {
-  private EventHandler? _event;
+  private event EventHandler? _event;
   public event EventHandler? Event
   {
     add

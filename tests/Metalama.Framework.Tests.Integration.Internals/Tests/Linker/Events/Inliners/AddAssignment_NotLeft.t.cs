@@ -13,5 +13,5 @@ public class Target
     {
     }
   }
-  private EventHandler? Foo_Source;
+  private event EventHandler? Foo_Source;
 }
