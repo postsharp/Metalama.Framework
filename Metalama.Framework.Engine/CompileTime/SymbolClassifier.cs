@@ -54,7 +54,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly, false),
                     (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly, false),
                     (typeof(Marshal), TemplatingScope.RunTimeOnly, false),
-                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly, false)
+                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly, false),
+                    (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false),
+                    (typeof(Range), TemplatingScope.RunTimeOrCompileTime, false)
                 }.ToImmutableDictionary(
                     t => t.ReflectionType.Name.AssertNotNull(),
                     t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
