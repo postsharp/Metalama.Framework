@@ -24,7 +24,6 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Advising;
 
-[Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
 internal sealed class AdviceFactory : IAdviceFactory
 {
     private readonly string? _layerName;

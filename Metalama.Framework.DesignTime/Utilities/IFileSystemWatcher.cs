@@ -4,7 +4,6 @@ using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Utilities
 {
-    [Obfuscation( Exclude = true )]
     internal interface IFileSystemWatcher : IDisposable
     {
         bool EnableRaisingEvents { get; set; }

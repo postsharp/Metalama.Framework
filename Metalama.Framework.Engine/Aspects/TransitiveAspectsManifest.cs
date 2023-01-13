@@ -16,7 +16,6 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    [Obfuscation( Exclude = true /* Serialization */ )]
     public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     {
         public static TransitiveAspectsManifest Empty { get; } =

@@ -128,7 +128,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The base implementation of <see cref="ISdkRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [Obfuscation( Exclude = true /* Serialized */ )]
     internal readonly struct Ref<T> : IRefImpl<T>, IEquatable<Ref<T>>
         where T : class, ICompilationElement
     {

@@ -20,7 +20,6 @@ namespace Metalama.Framework.Engine.CodeModel
             Invariant.Assert( symbol.Kind != SymbolKind.ErrorType );
         }
 
-        [Obfuscation( Exclude = true /* The obfuscator believes it implements ISdkDeclaration.Symbol, but it does not. */ )]
         public abstract ISymbol Symbol { get; }
 
         [Memo]

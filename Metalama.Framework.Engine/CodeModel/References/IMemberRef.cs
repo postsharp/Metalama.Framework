@@ -18,7 +18,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Gets the member name without resolving to the target.
         /// </summary>
-        [Obfuscation( Exclude = true )] // Working around an obfuscator bug. 
         string Name { get; }
     }
 }

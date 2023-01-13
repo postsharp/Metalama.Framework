@@ -107,7 +107,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )

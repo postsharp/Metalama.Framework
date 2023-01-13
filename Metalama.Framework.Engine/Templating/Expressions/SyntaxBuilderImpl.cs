@@ -44,7 +44,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
     }
 
-    [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
     public IExpression Capture( object? expression ) => new CapturedUserExpression( this.Compilation, expression );

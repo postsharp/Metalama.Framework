@@ -15,7 +15,6 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
-    [Obfuscation( Exclude = true /* JSON */ )]
     [JsonObject]
     internal sealed class CompileTimeProjectManifest
     {

@@ -14,7 +14,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         protected AdvisedFieldOrPropertyOrIndexer( T underlying ) : base( underlying ) { }
 
-        [Obfuscation( Exclude = true )]
         public bool IsAssignable => this.Underlying.Writeability >= Writeability.ConstructorOnly;
 
         public IType Type => this.Underlying.Type;

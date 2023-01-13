@@ -431,13 +431,13 @@ namespace Metalama.Testing.AspectTesting
                             {
                                 case AspectTesting.TestScenario.PreviewLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
 
                                     break;
 
                                 case AspectTesting.TestScenario.ApplyLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
 
                                     break;
                             }
