@@ -12,7 +12,7 @@ namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
-    /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
+    /// aspects and validators, or report diagnostics. This is the weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
     [CompileTime]
     public interface IAspectBuilder
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Aspects
 
     /// <summary>
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
-    /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
+    /// aspects and validators, or report diagnostics. This is a strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
     public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder, IAspectReceiverSelector<TAspectTarget>
         where TAspectTarget : class, IDeclaration

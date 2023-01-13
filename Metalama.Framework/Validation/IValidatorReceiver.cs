@@ -14,7 +14,7 @@ public interface IValidatorReceiver<out TDeclaration>
     where TDeclaration : class, IDeclaration
 {
     /// <summary>
-    /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
+    /// Registers a method that will be invoked to validate any declaration
     /// in the current set. This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
     /// </summary>
     /// <param name="validateMethod"></param>

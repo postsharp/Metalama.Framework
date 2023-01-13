@@ -6,11 +6,14 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Framework.Fabrics
 {
     /// <summary>
-    /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type implementing this interface.
-    /// You must not implement this interface directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
-    /// or <see cref="TypeFabric"/>. 
+    /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type inheriting this class.
+    /// You cannot inherit this class directly, inherit from <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
+    /// or <see cref="TypeFabric"/> instead.
     /// </summary>
     /// <seealso href="@applying-aspects"/>
     [CompileTime]
-    public abstract class Fabric : ILamaSerializable { }
+    public abstract class Fabric : ILamaSerializable
+    {
+        private protected Fabric() { }
+    }
 }

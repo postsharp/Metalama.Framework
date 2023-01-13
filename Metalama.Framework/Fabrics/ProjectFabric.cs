@@ -3,7 +3,7 @@
 namespace Metalama.Framework.Fabrics
 {
     /// <summary>
-    /// An interface that, when implemented by a type in a project (under any name or namespace), allows that type to analyze and
+    /// A class that, when inherited by a type in a project (under any name or namespace), allows that type to analyze and
     /// add aspects to that project.
     /// </summary>
     /// <remarks>

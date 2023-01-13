@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Custom attribute that, when applied an an aspect class, means that this aspect class is implemented by a low-level built with Metalama SDK.
+/// Custom attribute that, when applied an an aspect class, means that this aspect class is implemented by a low-level weaver built with Metalama SDK.
 /// When the <see cref="RequireAspectWeaverAttribute"/> is added to a type, the <see cref="IAspect{T}.BuildAspect"/> method is not invoked.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
