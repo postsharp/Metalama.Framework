@@ -50,6 +50,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
             var initialCompilation = pipelineStepsResult.Compilations[0];
             var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
+
+            // TODO: pass aspect repository to initialCompilation.
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.

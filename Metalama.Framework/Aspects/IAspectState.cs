@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Serialization;
+
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
@@ -7,4 +9,4 @@ namespace Metalama.Framework.Aspects;
 /// <see cref="IAspectBuilder"/> interface.
 /// </summary>
 [CompileTime]
-public interface IAspectState { }
+public interface IAspectState : ILamaSerializable { }

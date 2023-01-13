@@ -47,7 +47,8 @@ internal sealed class TypeFabricDriver : FabricDriver
         var executionContext = new UserCodeExecutionContext(
             aspectBuilder.ServiceProvider,
             aspectBuilder.DiagnosticAdder,
-            UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
+            UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ),
+            compilationModel: compilation );
 
         return this.FabricManager.UserCodeInvoker.TryInvoke(
             () =>

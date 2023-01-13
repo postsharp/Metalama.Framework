@@ -34,10 +34,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
+        public bool IsEmpty
+            => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.Validators.IsEmpty && this._inheritableAspects.IsEmpty;
+
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
-
+        
         /// <summary>
         /// Gets a maps if the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
@@ -56,24 +59,36 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionary<string, SyntaxTreePipelineResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
-            DesignTimeValidatorCollection validators )
+            DesignTimeValidatorCollection validators,
+            AspectPipelineConfiguration? configuration )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
             this.Validators = validators;
+            this.Configuration = configuration;
 
             Logger.DesignTime.Trace?.Log(
                 $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
+
+            if ( !this.IsEmpty && configuration == null )
+            {
+                throw new AssertionFailedException();
+            }
         }
 
         internal CompilationPipelineResult() { }
 
         /// <summary>
+        /// Gets the pipeline configuration, or potentially <c>null</c>  if the current <see cref="CompilationPipelineResult"/> is empty.
+        /// </summary>
+        public AspectPipelineConfiguration? Configuration { get; }
+
+        /// <summary>
         /// Updates cache with a <see cref="DesignTimePipelineExecutionResult"/> that includes results for several syntax trees.
         /// </summary>
-        internal CompilationPipelineResult Update( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResults )
+        internal CompilationPipelineResult Update( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResults, AspectPipelineConfiguration configuration )
         {
             Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} )" );
 
@@ -181,7 +196,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
-                validators );
+                validators ,
+                configuration );
         }
 
         /// <summary>

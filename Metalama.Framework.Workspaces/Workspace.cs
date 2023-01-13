@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +40,16 @@ namespace Metalama.Framework.Workspaces
         {
             if ( MSBuildLocator.CanRegister )
             {
-                MSBuildLocator.RegisterDefaults();
+                try
+                {
+                    MSBuildLocator.RegisterDefaults();
+                }
+                catch ( InvalidOperationException e )
+                {
+                    throw new DotNetSdkLoadException(
+                        $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?",
+                        e );
+                }
             }
 
             WorkspaceServices.Initialize();

@@ -106,7 +106,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
                 diagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( projectFabric.AmendProject ) ) );
+                UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( projectFabric.AmendProject ) ),
+                compilationModel: compilation );
 
             if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => projectFabric.AmendProject( amender ), executionContext ) )
             {

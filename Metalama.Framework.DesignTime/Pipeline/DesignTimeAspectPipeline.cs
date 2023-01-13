@@ -710,7 +710,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 this._currentState.PipelineResult,
                                 validationResult,
                                 this._currentState.Status,
-                                this._currentState.Configuration!.Value.Value );
+                                this._currentState.PipelineResult.Configuration.AssertNotNull() );
                         }
                         else
                         {

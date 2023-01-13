@@ -88,11 +88,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
-#pragma warning disable CA1822
-
         // TODO: If we support introducing const fields, implement ConstantValue.
         public TypedConstant? ConstantValue => null;
-#pragma warning restore CA1822
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 

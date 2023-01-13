@@ -484,11 +484,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( ProjectServiceProvider serviceProvider )
         {
-            var declaringTypes = this.AspectTypes.Concat( this.FabricTypes )
-                .Concat( this.TransitiveFabricTypes )
-                .Select( this.GetTypeOrNull )
-                .WhereNotNull()
-                .ToArray();
+            if ( this.IsEmpty )
+            {
+                return DiagnosticManifest.Empty;
+            }
+
+            var declaringTypes = this.Assembly.GetTypes();
 
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
             var diagnostics = service.GetDiagnosticDefinitions( declaringTypes ).ToImmutableArray();

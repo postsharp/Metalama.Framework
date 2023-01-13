@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Compiler;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -52,7 +53,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     (typeof(Environment), TemplatingScope.RunTimeOnly, false),
                     (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly, false),
                     (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false)
+                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false),
+                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly, false)
                 }.ToImmutableDictionary(
                     t => t.ReflectionType.Name.AssertNotNull(),
                     t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
@@ -559,15 +561,17 @@ namespace Metalama.Framework.Engine.CompileTime
                             // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
                             var combinedScope = GetScopeFromAttributes( namedType );
+                            TemplatingScope? declaringTypeScope = null;
 
                             // Check the scope of the containing type.
                             if ( combinedScope == null )
                             {
+                             
                                 if ( namedType.ContainingType != null )
                                 {
                                     // We do not check conflicts here. Errors must be reported by TemplateCodeValidator.
 
-                                    var declaringTypeScope = this.GetTemplatingScopeCore(
+                                    declaringTypeScope = this.GetTemplatingScopeCore(
                                         namedType.ContainingType,
                                         options,
                                         symbolsBeingProcessedIncludingCurrent,
@@ -622,9 +626,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                 }
                             }
 
-                            // If a type is not classified after all these inference rules were evaluated, we consider
-                            // it is a run-time type.
-                            return combinedScope ?? TemplatingScope.RunTimeOnly;
+                            // If a type is not classified after all these inference rules were evaluated,
+                            // and if it is not a nested type,  we consider it is a run-time type.
+                            return combinedScope ?? declaringTypeScope ?? TemplatingScope.RunTimeOnly;
                         }
 
                     case INamespaceSymbol:
@@ -716,7 +720,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
 
-                            TemplatingScope? ApplyDefault( TemplatingScope? s )
+                            static TemplatingScope? ApplyDefault( TemplatingScope? s )
                             {
                                 if ( s != null )
                                 {

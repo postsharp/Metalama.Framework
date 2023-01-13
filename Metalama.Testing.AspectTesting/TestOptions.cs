@@ -266,13 +266,31 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @MainMethod(name)</c>. 
         /// </summary>
         public string? MainMethod { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether memory leaks should be detected. This features is supported from .NET 6. Leaks are detected
         /// by trying to unload the <c>AssemblyLoadContext</c>. If it fails to unload in due time, it means that Metalama or the user code has
         /// a static reference to compile-time assemblies. To enable this option in a test, add this comment to your test file: <c>// @CheckMemoryLeaks</c>.
         /// </summary>
         public bool? CheckMemoryLeaks { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the line number should be included in reports of warnings or errors in the consolidated test output.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @IncludeLineNumberInDiagnosticReport</c>.
+        /// </summary>
+        public bool? IncludeLineNumberInDiagnosticReport { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating that the test output should not include the transformed code, but only the diagnostics.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveOutputCode</c>.
+        /// </summary>
+        public bool? RemoveOutputCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating that the test output should not include the diagnostic message, but only the diagnostic ID.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveDiagnosticMessage</c>. 
+        /// </summary>
+        public bool? RemoveDiagnosticMessage { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -346,6 +364,12 @@ namespace Metalama.Testing.AspectTesting
             this.MainMethod ??= baseOptions.MainMethod;
 
             this.CheckMemoryLeaks ??= baseOptions.CheckMemoryLeaks;
+
+            this.IncludeLineNumberInDiagnosticReport ??= baseOptions.IncludeLineNumberInDiagnosticReport;
+
+            this.RemoveOutputCode ??= baseOptions.RemoveOutputCode;
+
+            this.RemoveDiagnosticMessage ??= baseOptions.RemoveDiagnosticMessage;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -593,10 +617,25 @@ namespace Metalama.Testing.AspectTesting
                         this.MainMethod = optionArg;
 
                         break;
-                    
+
                     case "CheckMemoryLeaks":
                         this.CheckMemoryLeaks = true;
-                        
+
+                        break;
+
+                    case "IncludeLineNumberInDiagnosticReport":
+                        this.IncludeLineNumberInDiagnosticReport = true;
+
+                        break;
+
+                    case "RemoveOutputCode":
+                        this.RemoveOutputCode = true;
+
+                        break;
+
+                    case "RemoveDiagnosticMessage":
+                        this.RemoveDiagnosticMessage = true;
+
                         break;
 
                     default:

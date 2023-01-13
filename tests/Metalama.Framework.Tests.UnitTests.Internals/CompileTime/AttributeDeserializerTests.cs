@@ -24,11 +24,16 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             services.AddGlobalService( new HackedSystemTypeResolverFactory() );
         }
 
-        private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
+        private object? GetDeserializedProperty(
+            string property,
+            string value,
+            string? dependentCode = null,
+            string? additionalCode = "",
+            string className = "TestAttribute" )
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
+            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.{className}( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
                        + " class GenericRunTimeType<T> {}"
                        + " struct GenericStruct {} "
@@ -56,6 +61,18 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.Int32Property), "5" ) );
             Assert.Equal( "Zuzana", this.GetDeserializedProperty( nameof(TestAttribute.StringProperty), "\"Zuzana\"" ) );
             Assert.Equal( new[] { 5 }, this.GetDeserializedProperty( nameof(TestAttribute.Int32ArrayProperty), "new[]{5}" ) );
+        }
+
+        [Fact]
+        public void TestInitOnlyProperty()
+        {
+            Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.InitOnlyProperty), "5" ) );
+        }
+
+        [Fact]
+        public void TestInitOnlyPropertyOfDerivedClass()
+        {
+            Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.InitOnlyProperty), "5", nameof(DerivedAttribute) ) );
         }
 
         [Fact]
@@ -483,7 +500,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public TestEnum[]? EnumArrayProperty { get; set; }
 
             public int Field;
+
+            public int InitOnlyProperty { get; init; }
         }
+
+        public class DerivedAttribute : TestAttribute { }
 
         public class TestParamsAttribute : Attribute
         {

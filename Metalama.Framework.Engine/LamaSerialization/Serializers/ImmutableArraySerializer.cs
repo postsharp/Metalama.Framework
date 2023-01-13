@@ -6,9 +6,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
-    // This needs to be public because the type is instantiated from an activator in client assemblies.
-
-    /// <exclude/>
     internal sealed class ImmutableArraySerializer<T> : ValueTypeSerializer<ImmutableArray<T>>
     {
         private const string _keyName = "_";

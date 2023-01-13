@@ -571,7 +571,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
             // in case of cancellation. From our point of view, this is a safe place to commit.
-            state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion );
+            state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
             // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
             ExecuteValidators( ref state, compilation, configuration, cancellationToken );
@@ -655,9 +655,10 @@ internal sealed partial class DesignTimeAspectPipeline
             PartialCompilation compilation,
             DesignTimePipelineExecutionResult pipelineResult,
             DependencyGraph dependencies,
-            DesignTimeProjectVersion projectVersion )
+            DesignTimeProjectVersion projectVersion,
+            AspectPipelineConfiguration configuration )
         {
-            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
+            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult, configuration );
 
             return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }

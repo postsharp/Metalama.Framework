@@ -198,8 +198,22 @@ namespace Metalama.Framework.Engine.CompileTime
                         return false;
                     }
 
+                    var setter = property.SetMethod ?? property.GetSetMethod( true );
+
+                    if ( setter == null )
+                    {
+                        diagnosticAdder.Report(
+                            AttributeDeserializerDiagnostics.PropertyHasNoSetter.CreateRoslynDiagnostic(
+                                attribute.GetDiagnosticLocation(),
+                                arg.Key ) );
+                        
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
                     if ( !this._userCodeInvoker.TryInvoke(
-                            () => property.SetValue( localAttributeInstance, translatedValue ),
+                            () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
                             executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
                     {
                         attributeInstance = null;

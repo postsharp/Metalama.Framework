@@ -125,7 +125,47 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
 
-            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
+            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
+            {
+                if ( node.Parent is CompilationUnitSyntax )
+                {
+                    return null;
+                }
+
+                var filteredAttributes = new List<AttributeSyntax>( node.Attributes.Count );
+
+                foreach ( var attribute in node.Attributes )
+                {
+                    var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( attribute.Name ).Symbol;
+
+                    if ( symbol != null )
+                    {
+                        if ( this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.RunTimeOnly )
+                        {
+                            continue;
+                        }
+                    }
+
+                    var item = (AttributeSyntax?) this.Visit( attribute );
+
+                    if ( item != null )
+                    {
+                        filteredAttributes.Add( item );
+                    }
+                }
+
+                if ( filteredAttributes.Count == 0 )
+                {
+                    return null;
+                }
+                else
+                {
+                    return node.WithAttributes( SeparatedList( filteredAttributes ) );
+                }
+            }
+
+            private SyntaxList<AttributeListSyntax> VisitAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
+                => List( attributeLists.SelectAsEnumerable( l => (AttributeListSyntax?) this.VisitAttributeList( l ) ).WhereNotNull() );
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
@@ -505,7 +545,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 var transformedNode = node.WithMembers( List( members ) )
-                    .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                    .WithAttributeLists( this.VisitAttributeLists( node.AttributeLists ) );
 
                 // If the type is a fabric, add the OriginalPath attribute.
                 if ( this._runTimeCompilation.HasImplicitConversion( symbol, this._fabricType ) )
@@ -802,7 +843,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     AccessorDeclaration(
                                                             SyntaxKind.SetAccessorDeclaration,
                                                             List<AttributeListSyntax>(),
-                                                            TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                                            default,
                                                             null,
                                                             null )
                                                         .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
@@ -868,7 +909,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                      var member = node.WithDeclaration(
                                              node.Declaration.WithVariables( SingletonSeparatedList( v ) )
                                                  .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
-                                         .WithAttributeLists( default );
+                                         .WithAttributeLists( this.VisitAttributeLists( node.AttributeLists ) );
 
                                      if ( removeReadOnly )
                                      {
@@ -893,7 +934,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                  v => node.WithDeclaration(
                                          node.Declaration.WithVariables( SingletonSeparatedList( v ) )
                                              .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
-                                     .WithAttributeLists( default ) ) )
+                                     .WithAttributeLists( this.VisitAttributeLists( node.AttributeLists ) ) ) )
                     {
                         yield return result;
                     }
@@ -1137,14 +1178,12 @@ namespace Metalama.Framework.Engine.CompileTime
                         .Concat( node.Usings.SelectAsEnumerable( x => this.Visit( x ).AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
-                    var attributes = node.AttributeLists.SelectAsEnumerable( x => (AttributeListSyntax?) this.Visit( x ) )
-                        .WhereNotNull()
-                        .AssertNoneNull();
+                    var attributes = this.VisitAttributeLists( node.AttributeLists );
 
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
                         .WithUsings( List( usings ) )
-                        .WithAttributeLists( List( attributes ) );
+                        .WithAttributeLists( attributes );
                 }
                 else
                 {

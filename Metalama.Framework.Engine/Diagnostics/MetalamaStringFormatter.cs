@@ -102,6 +102,9 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case IFormattable formattable:
                         return formattable.ToString( format, this );
+                    
+                    case Type type:
+                        return type.Name;
 
                     case string?[] strings:
                         return string.Join( ", ", strings.SelectAsEnumerable( s => s == null ? null : "'" + s + "'" ) );

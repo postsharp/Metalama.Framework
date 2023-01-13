@@ -144,13 +144,13 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace)>
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace, string AttributeName)>
             CompileTimeCodeNeedsNamespaceImport
                 = new(
                     "LAMA0119",
                     "The declaration contains compile-time code but it does not import the proper namespaces.",
                     "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import the '{1}' namespaces. "
-                    + "This may cause an inconsistent design-time experience. Import this namespace explicitly.",
+                    + "This may cause an inconsistent design-time experience. Add the [{2}] attribute to '{0}' and import this namespace explicitly.",
                     _category,
                     Error );
 

@@ -57,5 +57,14 @@ namespace Metalama.Framework.Engine.CompileTime
                     "Cannot instantiate a custom attribute: cannot find a public field or property named '{1}' in type '{0}'.",
                     Error,
                     "Cannot instantiate a custom attribute: cannot find a field or property." );
+        
+        internal static readonly DiagnosticDefinition<string>
+            PropertyHasNoSetter
+                = new(
+                    "LAMA0405",
+                    _category,
+                    "Cannot instantiate a custom attribute: the property '{0}' has no setter.",
+                    Error,
+                    "Cannot instantiate a custom attribute: a property has no setter." );
     }
 }
