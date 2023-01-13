@@ -424,6 +424,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             {
                 // Avoid transforming "T?" into e.g. "string??" or "int??".
 
+                // Note that this implementation means that templates behave differently than regular C#.
+                // In C# with unconstrained T substituted with a value type turns T? into e.g. int.
+                // In templates, T? turns into e.g. int?.
+
                 // T.Type.IsNullable == true
                 var isNullableType = BinaryExpression(
                     SyntaxKind.EqualsExpression,
