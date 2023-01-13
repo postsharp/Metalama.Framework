@@ -413,15 +413,39 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
     {
-        if ( node.ElementType is IdentifierNameSyntax identifier && string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
+        if ( node.ElementType is IdentifierNameSyntax identifier )
         {
-            // Avoid transforming "dynamic?" into "var?".
-            return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            if ( string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
+            {
+                // Avoid transforming "dynamic?" into "var?".
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            }
+            else if ( this._templateCompileTimeTypeParameterNames.Contains( identifier.Identifier.Text ) )
+            {
+                // Avoid transforming "T?" into e.g. "string??" or "int??".
+
+                // Note that this implementation means that templates behave differently than regular C#.
+                // In C# with unconstrained T substituted with a value type turns T? into e.g. int.
+                // In templates, T? turns into e.g. int?.
+
+                // T.Type.IsNullable == true
+                var isNullableType = BinaryExpression(
+                    SyntaxKind.EqualsExpression,
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName( identifier.Identifier ),
+                            IdentifierName( nameof( TemplateTypeArgument.Type ) ) ),
+                        IdentifierName( nameof( IType.IsNullable ) ) ),
+                    SyntaxFactoryEx.LiteralExpression( true ) );
+
+                return ConditionalExpression( 
+                    isNullableType, this.Transform( node.ElementType ), base.TransformNullableType( node ) );
+            }
         }
-        else
-        {
-            return base.TransformNullableType( node );
-        }
+
+        return base.TransformNullableType( node );
     }
 
     private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
