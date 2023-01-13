@@ -2,7 +2,6 @@
 
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
-using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {

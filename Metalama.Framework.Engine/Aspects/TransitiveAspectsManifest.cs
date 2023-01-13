@@ -12,7 +12,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
 {

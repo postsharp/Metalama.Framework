@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References

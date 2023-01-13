@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Reflection;
 using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {

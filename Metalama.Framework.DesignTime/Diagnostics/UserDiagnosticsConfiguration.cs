@@ -3,7 +3,6 @@
 using Metalama.Backstage.Configuration;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {

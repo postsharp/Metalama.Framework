@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Templating.Mapping;
 using Microsoft.CodeAnalysis.Text;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {

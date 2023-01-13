@@ -45,11 +45,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
-
-    <ItemGroup>
-      <EditorConfigFiles Include="Tests\Templating\.editorconfig" />
-    </ItemGroup>
-
+    
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
 
 </Project>
