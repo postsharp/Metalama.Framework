@@ -200,7 +200,7 @@ namespace Metalama.Framework.Engine.Templating
                 = new(
                     "LAMA0224",
                     "Cannot declare local variable with the dynamic type if the variable is not initialized.",
-                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized. Use 'var'.",
+                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized.",
                     _category,
                     Error );
 
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0227",
                 "'dynamic' is forbidden as a generic parameter type or array element type in a template.",
-                "The type '{0}' is forbidden in a template: 'dynamic' cannot be used as a generic argument type or an array element type.",
+                "The type '{0}' is forbidden in a template: 'dynamic' cannot be used as a generic argument type, an array element type, a tuple element type or a ref type.",
                 _category,
                 Error );
 
@@ -387,6 +387,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0249",
                 "Template code cannot contain unsafe code",
                 "'{0}' cannot contain unsafe code because it is a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<None> ForbiddenDynamicUseInTemplate
+            = new(
+                "LAMA0250",
+                "Template code cannot use dynamic like this",
+                "This use of 'dynamic' is not allowed in a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<string> DynamicVariableSetToNonDynamic
+            = new(
+                "LAMA0251",
+                "Dynamic variables cannot be set to non-dynamic values.",
+                "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
                 _category,
                 Error );
     }
