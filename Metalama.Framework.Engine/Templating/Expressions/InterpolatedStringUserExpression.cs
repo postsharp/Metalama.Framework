@@ -63,13 +63,21 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                         var tokenSyntax = TypedExpressionSyntaxImpl.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
-                        if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
+                        if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) &&
+                            token.Alignment is null && token.Format is null )
                         {
                             textAccumulator.Append( literal.Token.Text.Substring( 1, literal.Token.Text.Length - 2 ) );
                         }
                         else
                         {
-                            var interpolation = InterpolationSyntaxHelper.Fix( SyntaxFactory.Interpolation( tokenSyntax ) );
+                            var alignmentClause = token.Alignment is null ? null : SyntaxFactory.InterpolationAlignmentClause(
+                                SyntaxFactory.Token( SyntaxKind.CommaToken ), SyntaxFactoryEx.LiteralExpression( token.Alignment.Value ) );
+                            var formatClause = token.Format is null ? null : SyntaxFactory.InterpolationFormatClause(
+                                SyntaxFactory.Token( SyntaxKind.ColonToken ),
+                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, token.Format, token.Format, default ) );
+
+                            var interpolation = InterpolationSyntaxHelper.Fix(
+                                SyntaxFactory.Interpolation( tokenSyntax, alignmentClause, formatClause ) );
                             contents.Add( interpolation );
                         }
 
