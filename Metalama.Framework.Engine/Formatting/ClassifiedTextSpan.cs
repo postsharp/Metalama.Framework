@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
@@ -30,6 +31,18 @@ namespace Metalama.Framework.Engine.Formatting
             this.Span = span;
             this.Classification = classification;
             this.Tags = tags ?? ImmutableDictionary<string, string>.Empty;
+        }
+
+        public override string ToString()
+        {
+            var s = this.Span.ToString().ReplaceOrdinal( "2147483647" /* int.Max */, "inf" ) + "=>" + this.Classification;
+
+            foreach ( var tag in this.Tags )
+            {
+                s += $"{{{tag.Key}={tag.Value}}}";
+            }
+
+            return s;
         }
     }
 }

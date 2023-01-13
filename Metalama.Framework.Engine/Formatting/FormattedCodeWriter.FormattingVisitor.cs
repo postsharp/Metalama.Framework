@@ -30,12 +30,18 @@ namespace Metalama.Framework.Engine.Formatting
 
                 if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                 {
-                    this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
                     setVisitTrivia = true;
                 }
-                else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
+
+                // Give preference to source code.
+                // TODO: Ideally, both annotations should not be present as it indicated inefficiency.
+                if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
                 {
                     this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.SourceCode );
+                }
+                else if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                {
+                    this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
                 }
 
                 if ( setVisitTrivia )

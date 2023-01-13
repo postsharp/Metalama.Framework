@@ -24,5 +24,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.UserCodeBetweenG
         {
             Console.WriteLine("InstanceMethod");
         }
+
+        [Log]
+        public void ExpressionMethod() => Console.WriteLine("InstanceMethod");
     }
 }
