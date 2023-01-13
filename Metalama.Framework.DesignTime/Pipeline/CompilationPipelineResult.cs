@@ -34,10 +34,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
+        public bool IsEmpty
+            => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.Validators.IsEmpty && this._inheritableAspects.IsEmpty;
+
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
-
+        
         /// <summary>
         /// Gets a maps if the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
