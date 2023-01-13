@@ -13,7 +13,6 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,7 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -295,7 +293,7 @@ internal abstract partial class BaseTestRunner
             mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
             mainProject = await AddAdditionalDocuments( mainProject,  mainParseOptions );
 
-            var initialCompilation = await mainProject.GetCompilationAsync();
+            var initialCompilation = (await mainProject.GetCompilationAsync())!;
 
             ValidateCustomAttributes( initialCompilation );
 
@@ -348,8 +346,10 @@ internal abstract partial class BaseTestRunner
                     "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
 
                 return newProject;
-#endif
+#else
                 return project;
+#endif
+
             }
         }
         finally
@@ -387,9 +387,7 @@ internal abstract partial class BaseTestRunner
 
         var pipeline = new CompileTimeAspectPipeline( serviceProvider, testContext.Domain );
         
-        
         var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
-
 
         var pipelineResult = await pipeline.ExecuteAsync(
             testResult.InputCompilationDiagnostics,
