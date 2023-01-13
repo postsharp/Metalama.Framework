@@ -49,9 +49,7 @@
             }
         </style>
     </head>
-    <body><pre><code class="nohighlight"><span class="cr-NeutralTrivia cs-comment">// Error CS0234 on `Aspects`: `The type or namespace name 'Aspects' does not exist in the namespace 'Metalama.Framework.Tests.Integration.Tests' (are you missing an assembly reference?)`
-</span><span class="cs-keyword">using</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
-<span class="cs-keyword">using</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-identifier diag-Error" title="Error CS0234: The type or namespace name 'Aspects' does not exist in the namespace 'Metalama.Framework.Tests.Integration.Tests' (are you missing an assembly reference?)">Aspects</span><span class="cs-operator">.</span><span class="cs-identifier">Samples</span><span class="cs-operator">.</span><span class="cs-identifier">CompileTimeIf</span><span class="cs-punctuation">;</span>
+    <body><pre><code class="nohighlight"><span class="cs-keyword">using</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
 <span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-punctuation">;</span>
 <span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-operator">.</span><span class="cs-namespace-name">Collections</span><span class="cs-operator">.</span><span class="cs-namespace-name">Generic</span><span class="cs-punctuation">;</span>
 <span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-operator">.</span><span class="cs-namespace-name">Linq</span><span class="cs-punctuation">;</span>
@@ -77,8 +75,16 @@
         <span class="cs-keyword">public</span> <span class="cs-keyword">void</span> <span class="cs-method-name">Method</span><span class="cs-punctuation">()</span>
         <span class="cs-punctuation">{</span>
             <span class="cr-GeneratedCode cs-class-name cs-static-symbol">Console</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name cs-static-symbol">WriteLine</span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-string">"Invoking Foo.Method()"</span><span class="cr-GeneratedCode cs-punctuation">);</span>
-            <span class="cr-GeneratedCode cs-class-name cs-static-symbol">Console</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name cs-static-symbol">WriteLine</span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-string">"InstanceMethod"</span><span class="cr-GeneratedCode cs-punctuation">);</span>
-            <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode cs-punctuation">;</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-SourceCode cs-class-name cs-static-symbol">Console</span><span class="cr-SourceCode cs-operator">.</span><span class="cr-SourceCode cs-method-name cs-static-symbol">WriteLine</span><span class="cr-SourceCode cs-punctuation">(</span><span class="cr-SourceCode cs-string">"InstanceMethod"</span><span class="cr-SourceCode cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode cs-punctuation">;</span>
+        <span class="cs-punctuation">}</span>
+
+        <span class="cs-punctuation">[</span><span class="cs-class-name">Log</span><span class="cs-punctuation">]</span>
+        <span class="cs-keyword">public</span> <span class="cs-keyword">void</span> <span class="cs-method-name">ExpressionMethod</span><span class="cs-punctuation">()</span>
+        <span class="cs-punctuation">{</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-GeneratedCode cs-class-name cs-static-symbol">Console</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name cs-static-symbol">WriteLine</span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-string">"Invoking Foo.ExpressionMethod()"</span><span class="cr-GeneratedCode cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-SourceCode cs-class-name cs-static-symbol">Console</span><span class="cr-SourceCode cs-operator">.</span><span class="cr-SourceCode cs-method-name cs-static-symbol">WriteLine</span><span class="cr-SourceCode cs-punctuation">(</span><span class="cr-SourceCode cs-string">"InstanceMethod"</span><span class="cr-SourceCode cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode cs-punctuation">;</span>
         <span class="cs-punctuation">}</span>
     <span class="cs-punctuation">}</span>
 <span class="cs-punctuation">}</span></code></pre>
