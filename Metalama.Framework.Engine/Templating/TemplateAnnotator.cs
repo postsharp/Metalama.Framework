@@ -876,7 +876,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         ScopeContext? context;
 
-        if ( scope == TemplatingScope.CompileTimeOnly )
+        if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.CompileTimeOnlyReturningBoth )
         {
             context = this._currentScopeContext.CompileTimeOnly( $"element of the compile-time collection '{node.Expression}'" );
         }
