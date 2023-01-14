@@ -379,7 +379,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
             if ( this._rewriter != null )
             {
-                // TryMetalama defines a binary rewriter to inject Unbreakable.
+                // Metalama.Try defines a binary rewriter to inject Unbreakable.
 
                 MemoryStream memoryStream = new();
                 emitResult = compileTimeCompilation.Emit( memoryStream, options: emitOptions, cancellationToken: cancellationToken );
@@ -400,11 +400,19 @@ internal sealed partial class CompileTimeCompilationBuilder
                     outputPaths.Pe,
                     _ =>
                     {
-                        using ( var peStream = File.Create( outputPaths.Pe ) )
+                        // We don't write the PE stream directly to the final file because this operation is not atomic.
+                        // Instead, we write to a temporary file, and then we move this file to the final destination, because
+                        // moving a file is an atomic operation.
+
+                        var tempPeFileName = Path.ChangeExtension( outputPaths.Pe, "tmp" );
+
+                        using ( var peStream = File.Create( tempPeFileName ) )
                         using ( var pdbStream = File.Create( outputPaths.Pdb ) )
                         {
                             emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                         }
+
+                        File.Move( tempPeFileName, outputPaths.Pe );
                     },
                     this._serviceProvider.Underlying,
                     logger: this._logger );
@@ -528,7 +536,20 @@ internal sealed partial class CompileTimeCompilationBuilder
                 if ( Directory.Exists( outputDirectory ) )
                 {
                     var files = Directory.GetFiles( outputDirectory );
-                    RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider.Underlying );
+                    var deletedDirectory = Path.Combine( Path.GetDirectoryName( outputDirectory )!, Path.GetFileName( outputDirectory ) + ".del" );
+
+                    RetryHelper.RetryWithLockDetection(
+                        files,
+                        () =>
+                        {
+                            if ( Directory.Exists( outputDirectory ) )
+                            {
+                                // To delete the directory atomically, rename it.
+                                Directory.Move( outputDirectory, deletedDirectory );
+                                Directory.Delete( deletedDirectory, true );
+                            }
+                        },
+                        this._serviceProvider.Underlying );
                 }
 
                 // Then delete the directory itself. At this point, we should no longer have locks. 
