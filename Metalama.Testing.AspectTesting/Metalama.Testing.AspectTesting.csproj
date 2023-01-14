@@ -30,9 +30,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>

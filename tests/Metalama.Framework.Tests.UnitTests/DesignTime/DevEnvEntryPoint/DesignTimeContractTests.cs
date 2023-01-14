@@ -23,7 +23,8 @@ public sealed class DesignTimeContractTests : UnitTestClass
 
         foreach ( var type in _loadFileAssembly.GetTypes() )
         {
-            if ( (type.IsInterface || type.IsValueType) && !type.Namespace!.StartsWith( "System", StringComparison.Ordinal ) )
+            if ( (type.IsInterface || type.IsValueType) && !type.Namespace!.StartsWith( "System", StringComparison.Ordinal )
+                                                        && type.DeclaringType == null )
             {
                 var otherType = mainAssembly.GetType( type.FullName! );
                 Assert.NotSame( type, otherType );

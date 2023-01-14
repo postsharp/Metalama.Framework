@@ -12,11 +12,9 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    [Obfuscation( Exclude = true /* Serialization */ )]
     public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     {
         public static TransitiveAspectsManifest Empty { get; } =

@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -14,7 +13,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         protected AdvisedFieldOrPropertyOrIndexer( T underlying ) : base( underlying ) { }
 
-        [Obfuscation( Exclude = true )]
         public bool IsAssignable => this.Underlying.Writeability >= Writeability.ConstructorOnly;
 
         public IType Type => this.Underlying.Type;

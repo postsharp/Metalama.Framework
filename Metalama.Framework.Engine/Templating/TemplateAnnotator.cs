@@ -1537,7 +1537,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     }
 
     // This method is called from the classification service. Constructors are never templates, so it can be skipped.
-    public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) => node;
+    public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) => node;
 
     public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         => this.VisitMemberDeclaration(

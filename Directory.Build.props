@@ -3,7 +3,6 @@
     <PropertyGroup>
         <RepoDirectory>$(MSBuildThisFileDirectory)</RepoDirectory>
         <RepoKind>AzureRepos</RepoKind>
-        <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
         <!-- CS8032: An instance of analyzer X cannot be created. -->

@@ -23,6 +23,8 @@
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="FakeItEasy" Version="6.2.1" />
+        <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
 
         <!-- These packages ared used in tests -->
         <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
@@ -32,7 +34,6 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
-        <None Include="Tests\**\__*.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -43,8 +44,9 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
-
+    
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
 
 </Project>

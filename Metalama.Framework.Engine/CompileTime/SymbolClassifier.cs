@@ -566,7 +566,6 @@ namespace Metalama.Framework.Engine.CompileTime
                             // Check the scope of the containing type.
                             if ( combinedScope == null )
                             {
-                             
                                 if ( namedType.ContainingType != null )
                                 {
                                     // We do not check conflicts here. Errors must be reported by TemplateCodeValidator.

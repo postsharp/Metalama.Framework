@@ -23,14 +23,14 @@ internal sealed class ImmutableHashSetSerializer<T> : ReferenceTypeSerializer
         var comparer = constructorArguments.GetValue<IEqualityComparer<T>>( _comparerName ) ??
                        ComparerExtensions.GetComparerFromCode( comparerCode ) as IEqualityComparer<T>;
 
-        var builder = ImmutableHashSet.CreateBuilder<T>( comparer );
+        var builder = ImmutableHashSet.CreateBuilder( comparer );
 
         // Assertion on nullability was added after the code import from PostSharp.
         var keys = constructorArguments.GetValue<T[]>( _keysName ).AssertNotNull();
 
-        for ( var idx = 0; idx < keys.Length; idx++ )
+        foreach ( var t in keys )
         {
-            builder.Add( keys[idx] );
+            builder.Add( t );
         }
 
         return builder.ToImmutable();

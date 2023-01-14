@@ -196,11 +196,11 @@ internal abstract partial class BaseTestRunner
             var mainParseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
             var mainProject = emptyProject.WithParseOptions( mainParseOptions );
 
-            async Task<(Project Project, Document? Document)> AddDocumentAsync( 
-                Project project, 
-                CSharpParseOptions parseOptions, 
-                string fileName, 
-                string sourceCode, 
+            async Task<(Project Project, Document? Document)> AddDocumentAsync(
+                Project project,
+                CSharpParseOptions parseOptions,
+                string fileName,
+                string sourceCode,
                 bool acceptFileWithoutMember = false )
             {
                 // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
@@ -234,7 +234,7 @@ internal abstract partial class BaseTestRunner
             }
 
             testResult.AddInputDocument( mainDocument, testInput.FullPath );
-    
+
             string? dependencyLicenseKey = null;
 
             if ( testInput.Options.DependencyLicenseFile != null )
@@ -260,8 +260,6 @@ internal abstract partial class BaseTestRunner
                     }
 
                     testResult.AddInputDocument( includedDocument, includedFullPath );
-
-                    var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
                 }
                 else
                 {
@@ -272,13 +270,13 @@ internal abstract partial class BaseTestRunner
                     var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
                     dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
                     dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
-                    
-                    (var dependency, dependencyProject) = 
-                        await this.CompileDependencyAsync( 
-                            includedText, 
-                            dependencyProject, 
-                            testResult, 
-                            testContext, 
+
+                    var (dependency, _) =
+                        await this.CompileDependencyAsync(
+                            includedText,
+                            dependencyProject,
+                            testResult,
+                            testContext,
                             dependencyLicenseKey );
 
                     if ( dependency == null )
@@ -291,7 +289,7 @@ internal abstract partial class BaseTestRunner
             }
 
             mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
-            mainProject = await AddAdditionalDocuments( mainProject,  mainParseOptions );
+            mainProject = await AddAdditionalDocuments( mainProject, mainParseOptions );
 
             var initialCompilation = (await mainProject.GetCompilationAsync())!;
 
@@ -322,7 +320,7 @@ internal abstract partial class BaseTestRunner
                     if ( File.Exists( path ) )
                     {
                         var code = File.ReadAllText( path );
-                        (project, _ ) = await AddDocumentAsync( project, parseOptions, "___GlobalUsings.cs", code, true );
+                        (project, _) = await AddDocumentAsync( project, parseOptions, "___GlobalUsings.cs", code, true );
                     }
                 }
 
@@ -330,9 +328,9 @@ internal abstract partial class BaseTestRunner
             }
 
 #pragma warning disable CS1998
-            
+
             // ReSharper disable UnusedParameter.Local
-            
+
             async Task<Project> AddPlatformDocuments( Project project, CSharpParseOptions parseOptions )
 #pragma warning restore CS1998
             {
@@ -349,7 +347,6 @@ internal abstract partial class BaseTestRunner
 #else
                 return project;
 #endif
-
             }
         }
         finally
@@ -361,7 +358,7 @@ internal abstract partial class BaseTestRunner
     /// <summary>
     /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
     /// </summary>
-    private async Task<(MetadataReference? Reference,Project Project)> CompileDependencyAsync(
+    private async Task<(MetadataReference? Reference, Project Project)> CompileDependencyAsync(
         string code,
         Project emptyProject,
         TestResult testResult,
@@ -386,7 +383,7 @@ internal abstract partial class BaseTestRunner
         // Transform with Metalama.
 
         var pipeline = new CompileTimeAspectPipeline( serviceProvider, testContext.Domain );
-        
+
         var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
         var pipelineResult = await pipeline.ExecuteAsync(

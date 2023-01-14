@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void ImmutableArray_Classes()
         {
-            this.TestValue( ImmutableArray.Create<SimpleType>( new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } ) );
+            this.TestValue( ImmutableArray.Create( new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } ) );
         }
 
         [Fact]

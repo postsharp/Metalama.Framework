@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Reflection;
 using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -20,7 +19,6 @@ namespace Metalama.Framework.Engine.CodeModel
             Invariant.Assert( symbol.Kind != SymbolKind.ErrorType );
         }
 
-        [Obfuscation( Exclude = true /* The obfuscator believes it implements ISdkDeclaration.Symbol, but it does not. */ )]
         public abstract ISymbol Symbol { get; }
 
         [Memo]

@@ -273,7 +273,6 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         return true;
     }
 
-    [Obfuscation( Exclude = true /* Reflection */ )]
     private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> rules )
         where T : class, IDeclaration
     {
