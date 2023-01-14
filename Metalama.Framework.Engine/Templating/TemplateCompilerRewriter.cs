@@ -50,7 +50,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
-    
+
     private TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
@@ -436,12 +436,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             IdentifierName( identifier.Identifier ),
-                            IdentifierName( nameof( TemplateTypeArgument.Type ) ) ),
-                        IdentifierName( nameof( IType.IsNullable ) ) ),
+                            IdentifierName( nameof(TemplateTypeArgument.Type) ) ),
+                        IdentifierName( nameof(IType.IsNullable) ) ),
                     SyntaxFactoryEx.LiteralExpression( true ) );
 
-                return ConditionalExpression( 
-                    isNullableType, this.Transform( node.ElementType ), base.TransformNullableType( node ) );
+                return ConditionalExpression( isNullableType, this.Transform( node.ElementType ), base.TransformNullableType( node ) );
             }
         }
 

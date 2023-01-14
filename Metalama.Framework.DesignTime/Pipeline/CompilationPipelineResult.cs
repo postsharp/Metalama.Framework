@@ -196,7 +196,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
-                validators ,
+                validators,
                 configuration );
         }
 

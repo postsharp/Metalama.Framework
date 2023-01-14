@@ -452,6 +452,7 @@ namespace Metalama.Framework.Engine.Templating
                                                               declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
                 {
                     var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
+
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
