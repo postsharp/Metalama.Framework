@@ -403,15 +403,15 @@ internal sealed partial class CompileTimeCompilationBuilder
                         // We don't write the PE stream directly to the final file because this operation is not atomic.
                         // Instead, we write to a temporary file, and then we move this file to the final destination, because
                         // moving a file is an atomic operation.
-                        
+
                         var tempPeFileName = Path.ChangeExtension( outputPaths.Pe, "tmp" );
-                        
+
                         using ( var peStream = File.Create( tempPeFileName ) )
                         using ( var pdbStream = File.Create( outputPaths.Pdb ) )
                         {
                             emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                         }
-                        
+
                         File.Move( tempPeFileName, outputPaths.Pe );
                     },
                     this._serviceProvider.Underlying,
