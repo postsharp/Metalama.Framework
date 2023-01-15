@@ -102,7 +102,8 @@ internal sealed class TestResult : IDisposable
 
     public TestContext? TestContext { get; set; }
 
-    internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
+    internal async Task AddInputDocumentAsync( Document document, string? path )
+        => this._syntaxTrees.Add( await TestSyntaxTree.CreateAsync( path, document, this ) );
 
     private static string CleanMessage( string text )
     {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
@@ -59,7 +60,7 @@ class TheClass {}
         // Execute the pipeline to get diagnostics.
         var project = testContext.WorkspaceProvider.GetProject( "project" );
         var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
-        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())! );
+        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
         Assert.True( result.IsSuccessful );
         var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;
         Assert.Single( diagnostics, d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id );

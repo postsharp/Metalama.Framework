@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-public class SingleThreadedTaskScheduler : ITaskScheduler
+public class SingleThreadedTaskRunner : IConcurrentTaskRunner
 {
     public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull
@@ -26,6 +26,17 @@ public class SingleThreadedTaskScheduler : ITaskScheduler
         catch ( Exception e )
         {
             return Task.FromException( e );
+        }
+    }
+
+    public async Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
+        where T : notnull
+    {
+        var orderedItems = this.GetOrderedItems( items );
+
+        foreach ( var item in orderedItems )
+        {
+            await action( item );
         }
     }
 

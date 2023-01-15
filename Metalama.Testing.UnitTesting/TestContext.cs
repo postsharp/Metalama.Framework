@@ -29,7 +29,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private readonly bool _isRoot;
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
-    private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
+    private readonly StrongBox<CompileTimeDomain?> _domain;
 
     private volatile CancellationTokenSource? _timeout;
     private CancellationTokenRegistration? _timeoutAction;
@@ -71,7 +71,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
-        this._domain = new StrongBox<UnloadableCompileTimeDomain?>();
+        this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
         this.ProjectOptions = new TestProjectOptions( contextOptions );
@@ -214,22 +214,24 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     internal CompilationModel CreateCompilationModel( Compilation compilation ) => (CompilationModel) this.CreateCompilation( compilation );
 
-    private UnloadableCompileTimeDomain CreateDomain()
+    private CompileTimeDomain CreateDomain()
     {
-        var domain = new UnloadableCompileTimeDomain();
+#if NET5_0_OR_GREATER
+        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
 
         // Prevents the ProjectOptions from being disposed while the domain is in used, because the domain typically
         // locks files in the directory created by ProjectOptions.
         this.ProjectOptions.AddFileLocker();
 
-#if NET5_0_OR_GREATER
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
-#endif
 
         return domain;
+#else
+        return new CompileTimeDomain();
+#endif
     }
 
-    internal UnloadableCompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
+    internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 
     string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
     {

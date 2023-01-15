@@ -25,7 +25,7 @@ public sealed class DesignTimeCodeFixRunner : CodeFixRunner
             PartialCompilation compilation,
             TestableCancellationToken cancellationToken )
     {
-        var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, cancellationToken );
+        var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, AsyncExecutionContext.Get(), cancellationToken );
 
         if ( getConfigurationResult.IsSuccessful )
         {

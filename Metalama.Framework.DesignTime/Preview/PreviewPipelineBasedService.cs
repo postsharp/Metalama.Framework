@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -75,11 +76,11 @@ public class PreviewPipelineBasedService
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
         // Resume all pipelines.
-        await this.PipelineFactory.ResumePipelinesAsync( cancellationToken );
+        var executionContext = AsyncExecutionContext.Get();
+        await this.PipelineFactory.ResumePipelinesAsync( executionContext, cancellationToken );
 
         // Get the pipeline configuration from the design-time pipeline.
-        await pipeline.InvalidateCacheAsync( compilation, cancellationToken );
-        var getConfigurationResult = await pipeline.GetConfigurationAsync( partialCompilation, true, cancellationToken );
+        var getConfigurationResult = await pipeline.GetConfigurationAsync( partialCompilation, true, executionContext, cancellationToken );
 
         if ( !getConfigurationResult.IsSuccessful )
         {
@@ -90,7 +91,7 @@ public class PreviewPipelineBasedService
         var designTimeConfiguration = getConfigurationResult.Value;
 
         // Get the DesignTimeProjectVersion because it implements ITransitiveProjectManifest.
-        var transitiveAspectManifest = await pipeline.GetDesignTimeProjectVersionAsync( sourceCompilation, true, cancellationToken );
+        var transitiveAspectManifest = await pipeline.GetDesignTimeProjectVersionAsync( sourceCompilation, true, executionContext, cancellationToken );
 
         if ( !transitiveAspectManifest.IsSuccessful )
         {

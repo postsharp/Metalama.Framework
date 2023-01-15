@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-public interface ITaskScheduler : IProjectService // Must be project-scoped because the option to enable/disable concurrency is in the project options.
+public interface IConcurrentTaskRunner : IProjectService // Must be project-scoped because the option to enable/disable concurrency is in the project options.
 {
     Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+        where T : notnull;
+
+    Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull;
 }

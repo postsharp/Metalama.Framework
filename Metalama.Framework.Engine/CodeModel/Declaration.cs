@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class Declaration : SymbolBasedDeclaration
     {
-        protected Declaration( CompilationModel compilation, ISymbol symbol ) : base( symbol )
+        protected Declaration( CompilationModel compilation )
         {
             this.Compilation = compilation;
         }

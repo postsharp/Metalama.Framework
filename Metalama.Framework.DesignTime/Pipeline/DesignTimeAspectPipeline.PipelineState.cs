@@ -663,6 +663,9 @@ internal sealed partial class DesignTimeAspectPipeline
             return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }
 
-        public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );
+        public PipelineState Pause()
+        {
+            return new PipelineState( this, DesignTimeAspectPipelineStatus.Paused );
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
 
-        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
+        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
             this._typeSymbol = typeSymbol;
         }

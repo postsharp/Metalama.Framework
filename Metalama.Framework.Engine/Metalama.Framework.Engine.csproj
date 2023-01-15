@@ -64,6 +64,7 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" />
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
         <ProjectReference Include="..\Metalama.Framework.CompileTimeContracts\Metalama.Framework.CompileTimeContracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />

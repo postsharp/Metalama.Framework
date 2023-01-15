@@ -37,7 +37,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
 
-    internal NamedTypeImpl( NamedType facade, INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
+    internal NamedTypeImpl( NamedType facade, INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
     {
         this._facade = facade;
         this.TypeSymbol = typeSymbol;

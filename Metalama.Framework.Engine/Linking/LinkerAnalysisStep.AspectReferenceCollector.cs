@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class AspectReferenceCollector
         {
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
             private readonly LinkerInjectionRegistry _injectionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModelProvider _semanticModelProvider;
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
                 this._injectionRegistry = injectionRegistry;
                 this._referenceResolver = referenceResolver;
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             }
 
             public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 // Add implicit references going from final semantic to the last override.
                 var overriddenMembers = this._injectionRegistry.GetOverriddenMembers().ToReadOnlyList();
-                await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
 
                 void ProcessOverriddenMember( ISymbol overriddenMember )
                 {
@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 // Analyze introduced method bodies.
                 var injectedMembers = this._injectionRegistry.GetInjectedMembers();
-                await this._taskScheduler.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
 
                 void ProcessInjectedMember( LinkerInjectedMember injectedMember )
                 {
@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMembers2, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMembers2, cancellationToken );
 
                 void ProcessOverriddenMembers2( ISymbol symbol )
                 {

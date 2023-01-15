@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class InliningAlgorithm
         {
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._aspectReferencesByContainingSemantic = aspectReferencesByContainingSemantic;
                 this._reachableSemantics = reachableSemantics;
                 this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking
                     VisitSemantic( semantic, inliningContext );
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
 
                 return inliningSpecifications.ToList();
 

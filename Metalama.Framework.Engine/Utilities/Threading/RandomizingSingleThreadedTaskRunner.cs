@@ -7,11 +7,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-public sealed class RandomizingSingleThreadedTaskScheduler : SingleThreadedTaskScheduler
+public sealed class RandomizingSingleThreadedTaskRunner : SingleThreadedTaskRunner
 {
     private readonly int _seed;
 
-    public RandomizingSingleThreadedTaskScheduler( IServiceProvider serviceProvider )
+    public RandomizingSingleThreadedTaskRunner( IServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( "TaskScheduler" );
         var seedGenerator = new Random();
@@ -21,7 +21,7 @@ public sealed class RandomizingSingleThreadedTaskScheduler : SingleThreadedTaskS
     }
 
     // ReSharper disable once UnusedMember.Global
-    public RandomizingSingleThreadedTaskScheduler( int seed )
+    public RandomizingSingleThreadedTaskRunner( int seed )
     {
         this._seed = seed;
     }

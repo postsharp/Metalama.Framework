@@ -14,11 +14,6 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public abstract class SymbolBasedDeclaration : BaseDeclaration
     {
-        protected SymbolBasedDeclaration( ISymbol symbol )
-        {
-            Invariant.Assert( symbol.Kind != SymbolKind.ErrorType );
-        }
-
         public abstract ISymbol Symbol { get; }
 
         [Memo]

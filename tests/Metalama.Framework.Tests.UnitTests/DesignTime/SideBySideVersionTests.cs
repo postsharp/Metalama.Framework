@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.VersionNeutral;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +78,7 @@ public class TheClass : TheInterface
 
         var dependentCompilation = await workspaceProvider.GetCompilationAsync( dependentProjectKey );
 
-        var result = await currentVersionPipelineFactory.ExecuteAsync( dependentCompilation! );
+        var result = await currentVersionPipelineFactory.ExecuteAsync( dependentCompilation!, AsyncExecutionContext.Get() );
 
         Assert.Single( result.Value.TransformationResult.SyntaxTreeResults.Single().Value.AspectInstances );
     }

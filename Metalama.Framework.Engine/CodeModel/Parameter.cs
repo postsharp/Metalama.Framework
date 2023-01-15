@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
-        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this.ParameterSymbol = symbol;
         }

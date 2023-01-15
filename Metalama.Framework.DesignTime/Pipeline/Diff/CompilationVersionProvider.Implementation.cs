@@ -15,11 +15,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 internal sealed partial class ProjectVersionProvider
 {
-    private sealed partial class Implementation : IDisposable
+    private sealed partial class Implementation
     {
         private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
         private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
-        private readonly SemaphoreSlim _semaphore = new( 1 );
         private readonly DiffStrategy _metalamaDiffStrategy;
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
         private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
@@ -89,12 +88,11 @@ internal sealed partial class ProjectVersionProvider
         public async ValueTask<ProjectVersion> GetCompilationVersionCoreAsync(
             Compilation? oldCompilation,
             Compilation newCompilation,
-            bool semaphoreOwned,
             TestableCancellationToken cancellationToken = default )
         {
             // When we are asked a CompilationVersion, we do it through getting a CompilationChanges, because this path is incremental
             // and offers optimal performances.
-            var changes = await this.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
+            var changes = await this.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, cancellationToken );
 
             return changes.NewProjectVersion;
         }
@@ -102,7 +100,6 @@ internal sealed partial class ProjectVersionProvider
         private async ValueTask<ReferenceChanges> GetReferencesAsync(
             Compilation? oldCompilation,
             Compilation newCompilation,
-            bool semaphoreOwned,
             TestableCancellationToken cancellationToken )
         {
             // If references are the same by reference, there is no need to compare anything. Most hits to the method should take this shortcut.
@@ -116,7 +113,7 @@ internal sealed partial class ProjectVersionProvider
                     ImmutableDictionary<string, ReferenceChangeKind>.Empty );
             }
 
-            var projectReferences = await this.GetProjectReferencesAsync( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
+            var projectReferences = await this.GetProjectReferencesAsync( oldCompilation, newCompilation, cancellationToken );
             var portableExecutableReferences = GetPortableExecutableReferences( oldCompilation, newCompilation );
 
             return new ReferenceChanges(
@@ -130,7 +127,6 @@ internal sealed partial class ProjectVersionProvider
             GetProjectReferencesAsync(
                 Compilation? oldCompilation,
                 Compilation newCompilation,
-                bool semaphoreOwned,
                 TestableCancellationToken cancellationToken )
         {
             // Verify changes in referenced projects.
@@ -156,7 +152,6 @@ internal sealed partial class ProjectVersionProvider
                     var compilationChanges = await this.GetCompilationChangesAsyncCoreAsync(
                         oldReferenceCompilation,
                         reference.Compilation,
-                        semaphoreOwned,
                         cancellationToken );
 
                     projectVersion = compilationChanges.NewProjectVersion;
@@ -179,7 +174,7 @@ internal sealed partial class ProjectVersionProvider
                 {
                     // If there is no old compilation, the reference is new.
                     changes = new ReferencedProjectChange( null, reference.Compilation, ReferenceChangeKind.Added );
-                    projectVersion = await this.GetCompilationVersionCoreAsync( null, reference.Compilation, semaphoreOwned, cancellationToken );
+                    projectVersion = await this.GetCompilationVersionCoreAsync( null, reference.Compilation, cancellationToken );
                 }
 
                 if ( changes.ChangeKind != ReferenceChangeKind.None )
@@ -253,7 +248,6 @@ internal sealed partial class ProjectVersionProvider
         public async ValueTask<CompilationChanges> GetCompilationChangesAsyncCoreAsync(
             Compilation? oldCompilation,
             Compilation newCompilation,
-            bool semaphoreOwned,
             TestableCancellationToken cancellationToken = default )
         {
             DiffStrategy? diffStrategy = null;
@@ -276,42 +270,26 @@ internal sealed partial class ProjectVersionProvider
 
                 GetDiffStrategy().Observer?.OnNewCompilation();
 
-                if ( !semaphoreOwned )
+                if ( !this._cache.TryGetValue( newCompilation, out newList ) )
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await this._semaphore.WaitAsync( cancellationToken );
+                    var referencedCompilationChanges = await this.GetReferencesAsync( oldCompilation, newCompilation, cancellationToken );
+
+                    var compilationVersion = ProjectVersion.Create(
+                        newCompilation,
+                        newCompilation.GetProjectKey(),
+                        GetDiffStrategy(),
+                        referencedCompilationChanges.NewProjectReferences,
+                        referencedCompilationChanges.NewPortableExecutableReferences,
+                        cancellationToken );
+
+                    newList = new ChangeLinkedList( compilationVersion );
+                    this._cache.Add( newCompilation, newList );
+
+                    this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
+                        new WeakReference<Compilation>( newCompilation );
                 }
 
-                try
-                {
-                    if ( !this._cache.TryGetValue( newCompilation, out newList ) )
-                    {
-                        var referencedCompilationChanges = await this.GetReferencesAsync( oldCompilation, newCompilation, true, cancellationToken );
-
-                        var compilationVersion = ProjectVersion.Create(
-                            newCompilation,
-                            newCompilation.GetProjectKey(),
-                            GetDiffStrategy(),
-                            referencedCompilationChanges.NewProjectReferences,
-                            referencedCompilationChanges.NewPortableExecutableReferences,
-                            cancellationToken );
-
-                        newList = new ChangeLinkedList( compilationVersion );
-                        this._cache.Add( newCompilation, newList );
-
-                        this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
-                            new WeakReference<Compilation>( newCompilation );
-                    }
-
-                    return newList.NonIncrementalChanges;
-                }
-                finally
-                {
-                    if ( !semaphoreOwned )
-                    {
-                        this._semaphore.Release();
-                    }
-                }
+                return newList.NonIncrementalChanges;
             }
             else
             {
@@ -337,7 +315,6 @@ internal sealed partial class ProjectVersionProvider
                     var references = await this.GetReferencesAsync(
                         closestIncrementalChanges.NewProjectVersion.Compilation,
                         newCompilation,
-                        semaphoreOwned,
                         cancellationToken );
 
                     var changesFromClosestCompilation = CompilationChanges.Incremental(
@@ -349,7 +326,6 @@ internal sealed partial class ProjectVersionProvider
                     incrementalChanges = await this.MergeCompilationChangesAsync(
                         closestIncrementalChanges,
                         changesFromClosestCompilation,
-                        semaphoreOwned,
                         cancellationToken );
 
                     if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
@@ -373,102 +349,85 @@ internal sealed partial class ProjectVersionProvider
                 {
                     // We could not get the changes from the cache, so we need to run the diff algorithm.
 
-                    if ( !semaphoreOwned )
+                    ProjectVersion oldProjectVersion;
+
+                    if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
                     {
-                        await this._semaphore.WaitAsync( cancellationToken );
+                        oldProjectVersion = changeLinkedListFromOldCompilation.ProjectVersion;
                     }
-
-                    try
+                    else
                     {
-                        ProjectVersion oldProjectVersion;
+                        // We have never processed the old compilation, so we have to compute it from the scratch.
 
-                        if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                        // Get the last compilation we know for the project. It can help building the old CompilationVersion incrementally.
+                        Compilation? lastCompilationOfProject = null;
+
+                        if ( this._lastCompilationPerProject.TryGetValue(
+                                oldCompilation.GetProjectKey(),
+                                out var lastCompilationOfProjectRef ) )
                         {
-                            oldProjectVersion = changeLinkedListFromOldCompilation.ProjectVersion;
+                            _ = lastCompilationOfProjectRef.TryGetTarget( out lastCompilationOfProject );
+                        }
+
+                        var oldReferences = await this.GetReferencesAsync( lastCompilationOfProject, oldCompilation, cancellationToken );
+
+                        if ( lastCompilationOfProject != null )
+                        {
+                            // Build oldCompilationVersion incrementally.
+                            oldProjectVersion = await this.GetCompilationVersionCoreAsync(
+                                lastCompilationOfProject,
+                                oldCompilation,
+                                cancellationToken );
+
+                            if ( !this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation ) )
+                            {
+                                throw new AssertionFailedException( $"Compilation '{oldCompilation.Assembly.Identity}' not found in cache." );
+                            }
                         }
                         else
                         {
-                            // We have never processed the old compilation, so we have to compute it from the scratch.
+                            // Build oldCompilationVersion from scratch.
+                            oldProjectVersion = ProjectVersion.Create(
+                                oldCompilation,
+                                oldCompilation.GetProjectKey(),
+                                GetDiffStrategy(),
+                                oldReferences.NewProjectReferences,
+                                oldReferences.NewPortableExecutableReferences,
+                                cancellationToken );
 
-                            // Get the last compilation we know for the project. It can help building the old CompilationVersion incrementally.
-                            Compilation? lastCompilationOfProject = null;
-
-                            if ( this._lastCompilationPerProject.TryGetValue(
-                                    oldCompilation.GetProjectKey(),
-                                    out var lastCompilationOfProjectRef ) )
-                            {
-                                _ = lastCompilationOfProjectRef.TryGetTarget( out lastCompilationOfProject );
-                            }
-
-                            var oldReferences = await this.GetReferencesAsync( lastCompilationOfProject, oldCompilation, true, cancellationToken );
-
-                            if ( lastCompilationOfProject != null )
-                            {
-                                // Build oldCompilationVersion incrementally.
-                                oldProjectVersion = await this.GetCompilationVersionCoreAsync(
-                                    lastCompilationOfProject,
-                                    oldCompilation,
-                                    true,
-                                    cancellationToken );
-
-                                if ( !this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation ) )
-                                {
-                                    throw new AssertionFailedException( $"Compilation '{oldCompilation.Assembly.Identity}' not found in cache." );
-                                }
-                            }
-                            else
-                            {
-                                // Build oldCompilationVersion from scratch.
-                                oldProjectVersion = ProjectVersion.Create(
-                                    oldCompilation,
-                                    oldCompilation.GetProjectKey(),
-                                    GetDiffStrategy(),
-                                    oldReferences.NewProjectReferences,
-                                    oldReferences.NewPortableExecutableReferences,
-                                    cancellationToken );
-
-                                changeLinkedListFromOldCompilation = new ChangeLinkedList( oldProjectVersion );
-                                this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
-                            }
+                            changeLinkedListFromOldCompilation = new ChangeLinkedList( oldProjectVersion );
+                            this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
                         }
-
-                        var referenceChanges = await this.GetReferencesAsync(
-                            oldCompilation,
-                            newCompilation,
-                            true,
-                            cancellationToken );
-
-                        // Compute the increment.
-                        incrementalChanges = CompilationChanges.Incremental(
-                            oldProjectVersion,
-                            newCompilation,
-                            referenceChanges,
-                            cancellationToken );
-
-                        if ( !this._cache.TryGetValue( newCompilation, out _ ) )
-                        {
-                            this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
-
-                            this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
-                                new WeakReference<Compilation>( newCompilation );
-                        }
-                        else
-                        {
-                            // The new compilation was already computed, but we could not reuse it because no diff from the old
-                            // compilation was available.
-                        }
-
-                        changeLinkedListFromOldCompilation.Insert( incrementalChanges );
-
-                        return incrementalChanges;
                     }
-                    finally
+
+                    var referenceChanges = await this.GetReferencesAsync(
+                        oldCompilation,
+                        newCompilation,
+                        cancellationToken );
+
+                    // Compute the increment.
+                    incrementalChanges = CompilationChanges.Incremental(
+                        oldProjectVersion,
+                        newCompilation,
+                        referenceChanges,
+                        cancellationToken );
+
+                    if ( !this._cache.TryGetValue( newCompilation, out _ ) )
                     {
-                        if ( !semaphoreOwned )
-                        {
-                            this._semaphore.Release();
-                        }
+                        this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+
+                        this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
+                            new WeakReference<Compilation>( newCompilation );
                     }
+                    else
+                    {
+                        // The new compilation was already computed, but we could not reuse it because no diff from the old
+                        // compilation was available.
+                    }
+
+                    changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+
+                    return incrementalChanges;
                 }
             }
         }
@@ -476,7 +435,6 @@ internal sealed partial class ProjectVersionProvider
         private async ValueTask<CompilationChanges> MergeCompilationChangesAsync(
             CompilationChanges first,
             CompilationChanges second,
-            bool semaphoreOwned,
             TestableCancellationToken cancellationToken )
         {
             if ( !first.HasChange || !second.IsIncremental )
@@ -547,7 +505,6 @@ internal sealed partial class ProjectVersionProvider
                         var merged = await this.MergeReferencedProjectChangesAsync(
                             oldReferencedCompilationChange,
                             referencedCompilationChange.Value,
-                            semaphoreOwned,
                             cancellationToken );
 
                         mergedReferencedCompilationBuilder[referencedCompilationChange.Key] = merged;
@@ -589,7 +546,6 @@ internal sealed partial class ProjectVersionProvider
         private async ValueTask<ReferencedProjectChange> MergeReferencedProjectChangesAsync(
             ReferencedProjectChange first,
             ReferencedProjectChange second,
-            bool semaphoreOwned,
             TestableCancellationToken cancellationToken = default )
         {
             switch (first.ChangeKind, second.ChangeKind)
@@ -605,7 +561,6 @@ internal sealed partial class ProjectVersionProvider
                         var changes = await this.GetCompilationChangesAsyncCoreAsync(
                             first.OldCompilation.AssertNotNull(),
                             second.NewCompilation.AssertNotNull(),
-                            semaphoreOwned,
                             cancellationToken );
 
                         return new ReferencedProjectChange(
@@ -620,7 +575,7 @@ internal sealed partial class ProjectVersionProvider
 
                 case (ReferenceChangeKind.Modified, ReferenceChangeKind.Modified):
                     {
-                        var changes = await this.MergeCompilationChangesAsync( first.Changes!, second.Changes!, semaphoreOwned, cancellationToken );
+                        var changes = await this.MergeCompilationChangesAsync( first.Changes!, second.Changes!, cancellationToken );
 
                         return changes.HasChange
                             ? new ReferencedProjectChange(
@@ -669,11 +624,6 @@ internal sealed partial class ProjectVersionProvider
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ({first}, {second})" );
             }
-        }
-
-        public void Dispose()
-        {
-            this._semaphore.Dispose();
         }
     }
 }

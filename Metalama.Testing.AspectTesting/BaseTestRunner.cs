@@ -233,7 +233,7 @@ internal abstract partial class BaseTestRunner
                 return;
             }
 
-            testResult.AddInputDocument( mainDocument, testInput.FullPath );
+            await testResult.AddInputDocumentAsync( mainDocument, testInput.FullPath );
 
             string? dependencyLicenseKey = null;
 
@@ -259,7 +259,7 @@ internal abstract partial class BaseTestRunner
                         continue;
                     }
 
-                    testResult.AddInputDocument( includedDocument, includedFullPath );
+                    await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
                 }
                 else
                 {
@@ -663,7 +663,7 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
             // Multi file tests are not supported for html output.
-            var output = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
+            var output = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
             var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
             var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );

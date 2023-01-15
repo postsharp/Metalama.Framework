@@ -3,7 +3,6 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -95,10 +94,7 @@ namespace Metalama.Framework.Engine.Formatting
             return compilation.Update( syntaxTreeReplacements );
         }
 
-        public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )
-            => TaskHelper.RunAndWait( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken );
-
-        private static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        public static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
             var formattedCompilation = compilation;
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );

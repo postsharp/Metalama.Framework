@@ -36,12 +36,12 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
         private readonly ProjectServiceProvider _serviceProvider;
-        private readonly ITaskScheduler _taskScheduler;
+        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         public LinkerLinkingStep( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();
 
-            void ProcessTransformation( SyntaxTreeTransformation modifiedSyntaxTree )
+            async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
             {
                 if ( modifiedSyntaxTree.Kind == SyntaxTreeTransformationKind.Add )
                 {
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
                     var syntaxTree = modifiedSyntaxTree.NewTree.AssertNotNull();
 
                     // Run the linking rewriter for this tree.
-                    var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() )!;
+                    var linkedRoot = linkingRewriter.Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
                     var cleanRoot = cleanupRewriter.Visit( linkedRoot )!;
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
@@ -79,7 +79,10 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await this._taskScheduler.RunInParallelAsync( input.IntermediateCompilation.ModifiedSyntaxTrees.Values, ProcessTransformation, cancellationToken );
+            await this._concurrentTaskRunner.RunInParallelAsync(
+                input.IntermediateCompilation.ModifiedSyntaxTrees.Values,
+                ProcessTransformationAsync,
+                cancellationToken );
 
             var linkedCompilation =
                 input.IntermediateCompilation
