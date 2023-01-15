@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Aspects
 {
     /// <summary>

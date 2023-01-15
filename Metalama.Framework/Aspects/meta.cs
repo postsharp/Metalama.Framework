@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
+#pragma warning disable VSTHRD200
+
 // ReSharper disable UnusedParameter.Global
 // ReSharper disable once InconsistentNaming
 namespace Metalama.Framework.Aspects

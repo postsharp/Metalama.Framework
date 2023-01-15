@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> called for each <see cref="SyntaxTree"/> in the compilation.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+        public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriter,
                 this.ServiceProvider,
@@ -104,15 +104,15 @@ namespace Metalama.Framework.Engine.AspectWeavers
 
             ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
-            await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTree, cancellationToken );
+            await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
-            void ProcessSyntaxTree( IGrouping<SyntaxTree, SyntaxReference> group )
+            async Task ProcessSyntaxTreeAsync( IGrouping<SyntaxTree, SyntaxReference> group )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var oldTree = @group.Key;
                 var outerRewriter = new Rewriter( group.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
-                var oldRoot = oldTree.GetRoot();
+                var oldRoot = await oldTree.GetRootAsync( cancellationToken );
                 var newRoot = outerRewriter.Visit( oldRoot )!;
 
                 if ( oldRoot != newRoot )
