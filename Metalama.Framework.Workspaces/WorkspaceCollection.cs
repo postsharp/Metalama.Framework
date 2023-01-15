@@ -21,7 +21,7 @@ namespace Metalama.Framework.Workspaces
     public sealed class WorkspaceCollection
     {
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();
-        
+
         static WorkspaceCollection()
         {
             WorkspaceServices.Initialize();
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Workspaces
             out bool isMetalamaOutput )
         {
             // We are only considering workspaces that have already been loaded.
-            
+
 #pragma warning disable VSTHRD002
             var found = this._workspaces.Values
                 .Select(

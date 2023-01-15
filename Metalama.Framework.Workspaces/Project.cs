@@ -32,7 +32,7 @@ namespace Metalama.Framework.Workspaces
         internal ICompilation Compilation { get; }
 
         public string TargetFramework => this._projectOptions.TargetFramework;
-        
+
         internal Project(
             CompileTimeDomain domain,
             ProjectServiceProvider serviceProvider,
