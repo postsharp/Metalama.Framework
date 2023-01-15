@@ -166,7 +166,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private async Task OnOtherPipelineStatusChangedAsync( AsyncExecutionContext executionContext, DesignTimePipelineStatusChangedEventArgs args )
     {
-        if ( this._currentState.Dependencies.DependenciesByMasterProject.ContainsKey( args.Pipeline.ProjectKey ) )
+        if ( this._currentState.ProjectVersion?.ReferencedProjectVersions.ContainsKey( args.Pipeline.ProjectKey ) == true )
         {
             if ( args.IsPausing && this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
@@ -992,7 +992,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    private async Task ProcessJobQueueWhenLockAvailableAsync()
+    internal async Task ProcessJobQueueWhenLockAvailableAsync()
     {
         var executionContext = AsyncExecutionContext.Get();
 

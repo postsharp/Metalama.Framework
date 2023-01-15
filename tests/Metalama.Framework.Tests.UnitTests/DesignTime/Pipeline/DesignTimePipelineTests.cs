@@ -476,6 +476,8 @@ Target.cs:
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results3 ) );
 
+        await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
+        await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, targetProjectPipeline.Status );
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, aspectProjectPipeline.Status );
         Assert.True( factory.EventHub.IsEditingCompileTimeCode );
@@ -489,6 +491,8 @@ Target.cs:
 
         // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
         await aspectProjectPipeline.ResumeAsync( AsyncExecutionContext.Get() );
+        await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
+        await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, targetProjectPipeline.Status );
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, aspectProjectPipeline.Status );
         Assert.False( factory.EventHub.IsEditingCompileTimeCode );
@@ -498,6 +502,8 @@ Target.cs:
         var dumpedResults6 = DumpResults( results6! );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
+        await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
+        await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );
         Assert.Equal( 2, targetProjectPipeline.PipelineInitializationCount );
         Assert.False( targetProjectPipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );

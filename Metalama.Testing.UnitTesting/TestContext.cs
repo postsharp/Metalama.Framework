@@ -216,13 +216,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     private CompileTimeDomain CreateDomain()
     {
-#if NET5_0_OR_GREATER
-        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
-
         // Prevents the ProjectOptions from being disposed while the domain is in used, because the domain typically
         // locks files in the directory created by ProjectOptions.
         this.ProjectOptions.AddFileLocker();
 
+#if NET5_0_OR_GREATER
+        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
 
         return domain;

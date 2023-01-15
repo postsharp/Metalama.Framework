@@ -76,7 +76,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 x => x.Key,
                 x => new ReferencedProjectChange( null, x.Value.Compilation, ReferenceChangeKind.Added ) );
 
-            var portableExecutableReferences = projectVersion.ReferencesPortableExecutables
+            var portableExecutableReferences = projectVersion.ReferencedPortableExecutables
                 .ToImmutableDictionary( x => x, _ => ReferenceChangeKind.Added );
 
             return new CompilationChanges(

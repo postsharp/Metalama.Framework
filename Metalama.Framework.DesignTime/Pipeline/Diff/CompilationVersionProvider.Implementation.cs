@@ -109,7 +109,7 @@ internal sealed partial class ProjectVersionProvider
                 return new ReferenceChanges(
                     list.ProjectVersion.ReferencedProjectVersions,
                     ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
-                    list.ProjectVersion.ReferencesPortableExecutables,
+                    list.ProjectVersion.ReferencedPortableExecutables,
                     ImmutableDictionary<string, ReferenceChangeKind>.Empty );
             }
 
