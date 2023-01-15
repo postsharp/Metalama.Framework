@@ -40,7 +40,7 @@
     
     <!-- Validate async code -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="true" />
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all" />
     </ItemGroup>
     
 
