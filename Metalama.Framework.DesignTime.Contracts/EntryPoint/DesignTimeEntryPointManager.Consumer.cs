@@ -61,9 +61,10 @@ public sealed partial class DesignTimeEntryPointManager
                 }
             }
 
-            result[0] = task.Result;
+            result[0] = await task;
         }
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public ICompilerServiceProvider[] GetRegisteredProviders() => this._parent._providers.ToArray();
 
         public IDisposable ObserveOnContractVersionMismatchDetected( ServiceProviderEventHandler observer )
