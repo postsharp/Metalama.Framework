@@ -7,13 +7,27 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal sealed class ConcurrentTaskScheduler : ITaskScheduler, IDisposable
+internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 {
     // TODO: this could be optimized by using lightweight objects and a ConcurrentQueue instead of a set of tasks.
 
     private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
     public async Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+        where T : notnull
+    {
+        var tasks = new List<Task>();
+
+        foreach ( var item in items )
+        {
+            var task = Task.Factory.StartNew( () => action( item ), cancellationToken, TaskCreationOptions.None, this._scheduler );
+            tasks.Add( task );
+        }
+
+        await Task.WhenAll( tasks );
+    }
+
+    public async Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull
     {
         var tasks = new List<Task>();

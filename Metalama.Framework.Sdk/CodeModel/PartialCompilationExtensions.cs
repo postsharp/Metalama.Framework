@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
             IServiceProvider<IProjectService> serviceProvider,
             CancellationToken cancellationToken = default )
         {
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
             await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );

@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => base.ContainingDeclaration
             };
 
-        protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this.MethodSymbol = symbol;
         }

@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                                                    && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 

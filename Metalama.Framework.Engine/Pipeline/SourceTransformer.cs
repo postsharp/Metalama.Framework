@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -46,9 +47,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
+                var taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
+
                 // ReSharper disable once AccessToDisposedClosure
                 var pipelineResult =
-                    TaskHelper.RunAndWait(
+                    taskRunner.RunSynchronously(
                         () => pipeline.ExecuteAsync(
                             new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                             context.Compilation,

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public NamedTypeImpl Implementation { get; }
 
-        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
+        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
             this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }

@@ -57,6 +57,7 @@ public static class ServiceProviderFactory
         }
 
         serviceProvider = serviceProvider
+            .WithServiceConditional<ITaskRunner>( _ => new TaskRunner() )
             .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
             .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
             .WithServiceConditional<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
@@ -104,23 +105,23 @@ public static class ServiceProviderFactory
             projectServiceProvider = additionalServices.ProjectServices.Build( projectServiceProvider );
         }
 
-        if ( projectServiceProvider.GetService<ITaskScheduler>() == null )
+        if ( projectServiceProvider.GetService<IConcurrentTaskRunner>() == null )
         {
             // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
             // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
             // We randomize the ordering of execution to improve the test relevance.
-            ITaskScheduler taskScheduler;
+            IConcurrentTaskRunner concurrentTaskRunner;
 
             if ( projectOptions.IsTest )
             {
-                taskScheduler = new RandomizingSingleThreadedTaskScheduler( serviceProvider );
+                concurrentTaskRunner = new RandomizingSingleThreadedTaskRunner( serviceProvider );
             }
             else
             {
-                taskScheduler = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler();
+                concurrentTaskRunner = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskRunner() : new SingleThreadedTaskRunner();
             }
 
-            projectServiceProvider = projectServiceProvider.WithService( taskScheduler );
+            projectServiceProvider = projectServiceProvider.WithService( concurrentTaskRunner );
         }
 
         projectServiceProvider = projectServiceProvider

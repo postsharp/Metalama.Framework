@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
@@ -44,7 +45,7 @@ class TheClass {}
         // Initialize the pipeline. It needs to execute before we ask for refactorings because the refactoring service uses the last results.
         var project = testContext.WorkspaceProvider.GetProject( "project" );
         var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
-        await pipeline.ExecuteAsync( (await project.GetCompilationAsync())! );
+        await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
 
         // Query refactorings.
         var document = testContext.WorkspaceProvider.GetDocument( "project", "code.cs" );

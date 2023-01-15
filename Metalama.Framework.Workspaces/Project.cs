@@ -77,7 +77,7 @@ namespace Metalama.Framework.Workspaces
                 var compiler = new IntrospectionCompiler( this._serviceProvider, this._domain, this._options );
                 this.IsMetalamaOutputEvaluated = true;
 
-                var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation ) );
+                var result = this._serviceProvider.Global.GetRequiredService<ITaskRunner>().RunSynchronously( () => compiler.CompileAsync( this.Compilation ) );
 
                 return result;
             }

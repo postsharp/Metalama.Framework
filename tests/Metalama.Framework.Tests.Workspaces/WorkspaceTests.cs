@@ -9,12 +9,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.Workspaces
 {
     public sealed class WorkspaceTests : UnitTestClass
     {
         [Fact]
         public async Task LoadProjectSingleTarget()
+
         {
             using var testContext = this.CreateTestContext();
 

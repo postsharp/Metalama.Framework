@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly INamespaceSymbol _symbol;
 
-        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this._symbol;
 
-        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }

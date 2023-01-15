@@ -53,6 +53,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
     private readonly ExecutionScenario _executionScenario;
+    private readonly ITaskRunner _taskRunner;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -90,6 +91,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
         this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
+        this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -246,7 +248,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
         {
-            var formattedCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+            var compilation = compileTimeCompilation;
+            var formattedCompilation = this._taskRunner.RunSynchronously( () => OutputCodeFormatter.FormatAllAsync( compilation, cancellationToken ) );
 
             if ( !(formattedCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error ) &&
                    !compileTimeCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error )) )

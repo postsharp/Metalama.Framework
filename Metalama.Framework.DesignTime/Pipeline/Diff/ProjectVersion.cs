@@ -20,7 +20,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<ProjectKey, IProjectVersion> ReferencedProjectVersions { get; }
 
-        public ImmutableHashSet<string> ReferencesPortableExecutables { get; }
+        public ImmutableHashSet<string> ReferencedPortableExecutables { get; }
 
         public Compilation Compilation { get; }
 
@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.Strategy = strategy;
             this.SyntaxTrees = syntaxTrees;
             this.ReferencedProjectVersions = referencedCompilations;
-            this.ReferencesPortableExecutables = referencesPortableExecutables;
+            this.ReferencedPortableExecutables = referencesPortableExecutables;
             this.Compilation = compilation;
             this.ProjectKey = projectKey;
             this.CompilationToAnalyze = compilationToAnalyze;
@@ -59,7 +59,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 this.CompilationToAnalyze,
                 this.SyntaxTrees,
                 this.ReferencedProjectVersions,
-                this.ReferencesPortableExecutables );
+                this.ReferencedPortableExecutables );
 
         public static ProjectVersion Create(
             Compilation compilation,

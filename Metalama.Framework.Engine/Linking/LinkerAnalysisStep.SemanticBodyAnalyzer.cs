@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                var taskScheduler = this._serviceProvider.GetRequiredService<ITaskScheduler>();
+                var taskScheduler = this._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 await taskScheduler.RunInParallelAsync( this._reachableSemantics, AnalyzeSemantic, cancellationToken );
 
                 return results;

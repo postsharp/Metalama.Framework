@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 
@@ -62,6 +63,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
         var getConfigurationResult = await pipeline.GetConfigurationAsync(
             partialCompilation,
             true,
+            AsyncExecutionContext.Get(),
             cancellationToken.ToTestable() );
 
         if ( !getConfigurationResult.IsSuccessful )

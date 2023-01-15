@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System;
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var pipeline = pipelineFactory.CreatePipeline( compilation.RoslynCompilation );
 
             // Force the pipeline to execute so the tests can do queries over it.
-            TaskHelper.RunAndWait( () => pipeline.ExecuteAsync( compilation.RoslynCompilation ) );
+            pipeline.Execute( compilation.RoslynCompilation );
 
             var targetSymbol = declarations[target].GetSymbol().AssertNotNull();
 

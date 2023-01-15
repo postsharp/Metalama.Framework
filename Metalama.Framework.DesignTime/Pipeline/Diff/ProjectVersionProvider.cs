@@ -16,27 +16,44 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
 {
     private readonly Implementation _implementation;
 
+    private readonly SemaphoreSlim _semaphore = new( 1 );
+
     public ProjectVersionProvider( GlobalServiceProvider serviceProvider, bool isTest = false )
     {
         this._implementation = new Implementation( serviceProvider, isTest );
     }
 
-    public ValueTask<ProjectVersion> GetCompilationVersionAsync(
+    public async ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         TestableCancellationToken cancellationToken = default )
-        => this._implementation.GetCompilationVersionCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
+    {
+        using ( await this.WithLockAsync( cancellationToken ) )
+        {
+            return await this._implementation.GetCompilationVersionCoreAsync( oldCompilation, newCompilation, cancellationToken );
+        }
+    }
 
-    public ValueTask<ProjectVersion> GetCompilationVersionAsync(
+    public async ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation newCompilation,
         TestableCancellationToken cancellationToken = default )
-        => this._implementation.GetCompilationVersionCoreAsync( null, newCompilation, false, cancellationToken );
+    {
+        using ( await this.WithLockAsync( cancellationToken ) )
+        {
+            return await this._implementation.GetCompilationVersionCoreAsync( null, newCompilation, cancellationToken );
+        }
+    }
 
-    public ValueTask<CompilationChanges> GetCompilationChangesAsync(
+    public async ValueTask<CompilationChanges> GetCompilationChangesAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         TestableCancellationToken cancellationToken = default )
-        => this._implementation.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
+    {
+        using ( await this.WithLockAsync( cancellationToken ) )
+        {
+            return await this._implementation.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, cancellationToken );
+        }
+    }
 
     public async ValueTask<DependencyGraph> ProcessCompilationChangesAsync(
         CompilationChanges changes,
@@ -45,104 +62,131 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
         bool invalidateOnlyDependencies = false,
         TestableCancellationToken cancellationToken = default )
     {
-        HashSet<Compilation> processedCompilations = new();
-        var dependencyGraphBuilder = dependencyGraph.ToBuilder();
-
-        await ProcessCompilationRecursiveAsync( changes );
-
-        if ( !invalidateOnlyDependencies )
+        using ( await this.WithLockAsync( cancellationToken ) )
         {
-            foreach ( var syntaxTreeChange in changes.SyntaxTreeChanges )
-            {
-                invalidateAction( syntaxTreeChange.Key );
-            }
-        }
+            HashSet<Compilation> processedCompilations = new();
+            var dependencyGraphBuilder = dependencyGraph.ToBuilder();
 
-        return dependencyGraphBuilder.ToImmutable();
+            await ProcessCompilationRecursiveAsync( changes );
 
-        async ValueTask ProcessCompilationRecursiveAsync( CompilationChanges currentCompilationChanges )
-        {
-            // Prevent duplicate processing.
-            if ( !processedCompilations.Add( currentCompilationChanges.NewProjectVersion.Compilation ) )
+            if ( !invalidateOnlyDependencies )
             {
-                // This set of changes has already been processed.
-                return;
-            }
-
-            if ( dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
-            {
-                // Process syntax trees.
-                foreach ( var syntaxTreeChangeEntry in currentCompilationChanges.SyntaxTreeChanges )
+                foreach ( var syntaxTreeChange in changes.SyntaxTreeChanges )
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    invalidateAction( syntaxTreeChange.Key );
+                }
+            }
 
-                    var syntaxTreeChange = syntaxTreeChangeEntry.Value;
+            return dependencyGraphBuilder.ToImmutable();
 
-                    if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Removed )
+            async ValueTask ProcessCompilationRecursiveAsync( CompilationChanges currentCompilationChanges )
+            {
+                // Prevent duplicate processing.
+                if ( !processedCompilations.Add( currentCompilationChanges.NewProjectVersion.Compilation ) )
+                {
+                    // This set of changes has already been processed.
+                    return;
+                }
+
+                if ( dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
+                {
+                    // Process syntax trees.
+                    foreach ( var syntaxTreeChangeEntry in currentCompilationChanges.SyntaxTreeChanges )
                     {
-                        if ( dependenciesOfCompilation.DependenciesByMasterFilePath.TryGetValue( syntaxTreeChange.FilePath, out var dependenciesOfSyntaxTree ) )
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        var syntaxTreeChange = syntaxTreeChangeEntry.Value;
+
+                        if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Removed )
                         {
-                            foreach ( var dependentSyntaxTree in dependenciesOfSyntaxTree.DependentFilePaths )
+                            if ( dependenciesOfCompilation.DependenciesByMasterFilePath.TryGetValue(
+                                    syntaxTreeChange.FilePath,
+                                    out var dependenciesOfSyntaxTree ) )
                             {
-                                invalidateAction( dependentSyntaxTree );
+                                foreach ( var dependentSyntaxTree in dependenciesOfSyntaxTree.DependentFilePaths )
+                                {
+                                    invalidateAction( dependentSyntaxTree );
+                                }
+                            }
+
+                            if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Removed )
+                            {
+                                dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
                             }
                         }
 
-                        if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Removed )
+                        // Process partial types.
+                        foreach ( var partialTypeChange in syntaxTreeChange.PartialTypeChanges )
                         {
-                            dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
-                        }
-                    }
-
-                    // Process partial types.
-                    foreach ( var partialTypeChange in syntaxTreeChange.PartialTypeChanges )
-                    {
-                        if ( dependenciesOfCompilation.DependenciesByMasterPartialType.TryGetValue(
-                                partialTypeChange.Type,
-                                out var dependenciesOfPartialType ) )
-                        {
-                            foreach ( var dependentSyntaxTree in dependenciesOfPartialType.DependentFilePaths )
+                            if ( dependenciesOfCompilation.DependenciesByMasterPartialType.TryGetValue(
+                                    partialTypeChange.Type,
+                                    out var dependenciesOfPartialType ) )
                             {
-                                invalidateAction( dependentSyntaxTree );
+                                foreach ( var dependentSyntaxTree in dependenciesOfPartialType.DependentFilePaths )
+                                {
+                                    invalidateAction( dependentSyntaxTree );
+                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                // There is no dependency on this compilation, but there may be on recursively referenced compilations.
-            }
-
-            // Process references.
-            foreach ( var reference in currentCompilationChanges.ReferencedCompilationChanges )
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                switch ( reference.Value.ChangeKind )
+                else
                 {
-                    case ReferenceChangeKind.Modified
-                        when !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ):
-                        {
-                            var referenceChanges = reference.Value.Changes
-                                                   ?? await this.GetCompilationChangesAsync(
-                                                       reference.Value.OldCompilation.AssertNotNull(),
-                                                       reference.Value.NewCompilation.AssertNotNull(),
-                                                       cancellationToken );
+                    // There is no dependency on this compilation, but there may be on recursively referenced compilations.
+                }
 
-                            await ProcessCompilationRecursiveAsync( referenceChanges );
+                // Process references.
+                foreach ( var reference in currentCompilationChanges.ReferencedCompilationChanges )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    switch ( reference.Value.ChangeKind )
+                    {
+                        case ReferenceChangeKind.Modified
+                            when !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ):
+                            {
+                                var referenceChanges = reference.Value.Changes
+                                                       ?? await this.GetCompilationChangesAsync(
+                                                           reference.Value.OldCompilation.AssertNotNull(),
+                                                           reference.Value.NewCompilation.AssertNotNull(),
+                                                           cancellationToken );
+
+                                await ProcessCompilationRecursiveAsync( referenceChanges );
+
+                                break;
+                            }
+
+                        case ReferenceChangeKind.Removed:
+                            dependencyGraphBuilder.RemoveProject( reference.Key );
 
                             break;
-                        }
-
-                    case ReferenceChangeKind.Removed:
-                        dependencyGraphBuilder.RemoveProject( reference.Key );
-
-                        break;
+                    }
                 }
             }
         }
     }
 
-    public void Dispose() => this._implementation.Dispose();
+    public void Dispose() => this._semaphore.Dispose();
+
+    private async ValueTask<DisposeCookie> WithLockAsync( CancellationToken cancellationToken )
+    {
+        await this._semaphore.WaitAsync( cancellationToken );
+
+        return new DisposeCookie( this );
+    }
+
+    private readonly struct DisposeCookie : IDisposable
+    {
+        private readonly ProjectVersionProvider? _parent;
+
+        public DisposeCookie( ProjectVersionProvider? parent )
+        {
+            this._parent = parent;
+        }
+
+        public void Dispose()
+        {
+            this._parent?._semaphore.Release();
+        }
+    }
 }

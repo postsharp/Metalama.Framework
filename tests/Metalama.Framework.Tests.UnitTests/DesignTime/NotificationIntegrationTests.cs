@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -39,13 +40,13 @@ public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
         var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
-        await pipeline.ExecuteAsync( compilation1 );
+        await pipeline.ExecuteAsync( compilation1, AsyncExecutionContext.Get() );
         var notification1 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.False( notification1.IsPartialCompilation );
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( "class C{}", name: "project" );
-        await pipeline.ExecuteAsync( compilation2 );
+        await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get() );
         var notification2 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.True( notification2.IsPartialCompilation );

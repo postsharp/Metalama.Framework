@@ -17,14 +17,14 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class SymbolReferenceFinder
         {
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
             private readonly SemanticModelProvider _semanticModelProvider;
 
             public SymbolReferenceFinder(
                 ProjectServiceProvider serviceProvider,
                 Compilation intermediateCompilation )
             {
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
             }
 
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
 
                 return symbolReferences.ToReadOnlyList();
             }

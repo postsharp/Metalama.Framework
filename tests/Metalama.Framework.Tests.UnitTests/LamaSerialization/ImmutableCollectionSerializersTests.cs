@@ -119,7 +119,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 #pragma warning disable xUnit2017
             Assert.True( deserialized.Contains( "UN" ) );
             Assert.False( deserialized.Contains( "quatre" ) );
-#pragma warning restore xUnit2017            
+#pragma warning restore xUnit2017
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 #pragma warning disable xUnit2017
             Assert.True( deserialized.Contains( "u" ) );
             Assert.False( deserialized.Contains( "q" ) );
-#pragma warning restore xUnit2017            
+#pragma warning restore xUnit2017
         }
 
         private T TestValue<T>( T value )

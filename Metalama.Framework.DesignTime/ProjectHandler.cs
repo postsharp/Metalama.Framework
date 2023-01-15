@@ -16,6 +16,8 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public abstract class ProjectHandler : IDisposable
 {
+    private readonly ITaskRunner _taskRunner;
+
     protected GlobalServiceProvider ServiceProvider { get; }
 
     protected IProjectOptions ProjectOptions { get; }
@@ -31,6 +33,7 @@ public abstract class ProjectHandler : IDisposable
         this.ProjectKey = projectKey;
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this.PendingTasks = new TaskBag( this.Logger );
+        this._taskRunner = this.ServiceProvider.GetRequiredService<ITaskRunner>();
     }
 
     public abstract SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken );
@@ -39,7 +42,7 @@ public abstract class ProjectHandler : IDisposable
     {
         if ( disposing )
         {
-            TaskHelper.RunAndWait( () => this.PendingTasks.WaitAllAsync() );
+            this._taskRunner.RunSynchronously( () => this.PendingTasks.WaitAllAsync() );
         }
     }
 

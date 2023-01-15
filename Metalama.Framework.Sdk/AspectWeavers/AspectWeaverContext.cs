@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         {
             cancellationToken = this.GetCancellationToken( cancellationToken );
 
-            var taskScheduler = this.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = this.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
             var nodesBySyntaxTree = this.AspectInstances.Values
                 .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
