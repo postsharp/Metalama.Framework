@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Elfie.Model;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,38 +29,69 @@ namespace Metalama.Framework.Engine.Linking
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
             }
 
-            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
-                IEnumerable<ISymbol> symbols,
+            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync<T>(
+                IEnumerable<(T ReferencedSymbol, INamedTypeSymbol ReferencingType)> symbolReferenceSources,
                 CancellationToken cancellationToken )
+                where T : ISymbol
             {
                 // TODO: Caching.
-                // The search is currently limited to constructors and init-only setters.
-                var containingTypes = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-                var symbolsToFind = symbols.ToHashSet();
+                var referencingTypes = new Dictionary<INamedTypeSymbol, HashSet<ISymbol>>( SymbolEqualityComparer.Default );
 
-                // Currently limit the search to declaring types (this would need to change for general call site transformations).
-                foreach ( var symbol in symbolsToFind )
+                // Currently limit the search to specified referencing types (for general call site transformations we would need to specify reference in any type).
+                foreach ( var symbolReferenceSource in symbolReferenceSources)
                 {
-                    containingTypes.Add( symbol.ContainingType );
+                    if (!referencingTypes.TryGetValue(symbolReferenceSource.ReferencingType, out var referencedSymbol))
+                    {
+                        referencingTypes[symbolReferenceSource.ReferencingType] = referencedSymbol = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+                    }
+
+                    referencedSymbol.Add( symbolReferenceSource.ReferencedSymbol );
                 }
 
-                var methodsToAnalyze = new List<IMethodSymbol>();
+                var methodsToAnalyze = new List<(IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind)>();
                 var symbolReferences = new ConcurrentBag<IntermediateSymbolSemanticReference>();
 
-                foreach ( var type in containingTypes )
+                foreach ( var referencingType in referencingTypes )
                 {
                     // Only take methods.
-                    foreach ( var member in type.GetMembers() )
+                    foreach ( var member in referencingType.Key.GetMembers() )
                     {
                         switch ( member )
                         {
                             case IMethodSymbol method:
-                                methodsToAnalyze.Add( method );
+                                methodsToAnalyze.Add( (method, referencingType.Value) );
 
                                 break;
                         }
                     }
                 }
+
+                void Analyze( (IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind) input )
+                {
+                    foreach ( var declaration in input.Method.DeclaringSyntaxReferences.Select( x => x.GetSyntax() ) )
+                    {
+                        var walker =
+                            new BodyWalker(
+                                this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
+                                input.Method,
+                                input.SymbolsToFind,
+                                symbolReferences );
+
+                        walker.Visit( declaration );
+                    }
+                }
+
+                await this._taskScheduler.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+
+                return symbolReferences.ToReadOnlyList();
+            }
+
+            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
+                IEnumerable<IMethodSymbol> methodsToAnalyze,
+                CancellationToken cancellationToken )
+            {
+                // TODO: Caching.
+                var symbolReferences = new ConcurrentBag<IntermediateSymbolSemanticReference>();
 
                 void Analyze( IMethodSymbol method )
                 {
@@ -69,7 +101,7 @@ namespace Metalama.Framework.Engine.Linking
                             new BodyWalker(
                                 this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
                                 method,
-                                symbolsToFind,
+                                null,
                                 symbolReferences );
 
                         walker.Visit( declaration );
@@ -85,13 +117,13 @@ namespace Metalama.Framework.Engine.Linking
             {
                 private readonly SemanticModel _semanticModel;
                 private readonly IMethodSymbol _contextSymbol;
-                private readonly HashSet<ISymbol> _symbolsToFind;
+                private readonly HashSet<ISymbol>? _symbolsToFind;
                 private readonly ConcurrentBag<IntermediateSymbolSemanticReference> _symbolReferences;
 
                 public BodyWalker(
                     SemanticModel semanticModel,
                     IMethodSymbol contextSymbol,
-                    HashSet<ISymbol> symbolsToFind,
+                    HashSet<ISymbol>? symbolsToFind,
                     ConcurrentBag<IntermediateSymbolSemanticReference> symbolReferences )
                 {
                     this._semanticModel = semanticModel;
@@ -110,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( symbolInfo.Symbol != null
                              && SymbolEqualityComparer.Default.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType )
-                             && this._symbolsToFind.Contains( symbolInfo.Symbol ) )
+                             && (this._symbolsToFind == null || this._symbolsToFind.Contains( symbolInfo.Symbol ) ) )
                         {
                             this._symbolReferences.Add(
                                 new IntermediateSymbolSemanticReference(

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -52,6 +53,11 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return false;
+        }
+
+        public static bool IsCallerMemberNameParameter(this IParameterSymbol parameter)
+        {
+            return parameter.GetAttributes().Any(a => a.AttributeConstructor.AssertNotNull().ContainingType.GetFullName() == "System.Runtime.CompilerServices.CallerMemberNameAttribute");
         }
     }
 }

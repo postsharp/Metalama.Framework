@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
-            var rewrittenBody = this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBody = (BlockSyntax)this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
 
             // Add the SourceCode annotation, if it is source code.
             if ( !(semantic.Symbol.GetPrimarySyntaxReference() is { } primarySyntax
@@ -282,7 +282,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
+        private SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
 #pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new SubstitutingRewriter( context );
@@ -323,9 +323,7 @@ namespace Metalama.Framework.Engine.Linking
                                 return rewrittenBlock;
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
-                                return
-                                    Block( ExpressionStatement( rewrittenArrowClause.Expression ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                return rewrittenArrowClause;
 
                             default:
                                 throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
@@ -347,13 +345,7 @@ namespace Metalama.Framework.Engine.Linking
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
-                                return
-                                    SyntaxFactoryEx.FormattedBlock(
-                                            ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                                rewrittenArrowClause.Expression,
-                                                Token( SyntaxKind.SemicolonToken ) ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                return rewrittenArrowClause;
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;

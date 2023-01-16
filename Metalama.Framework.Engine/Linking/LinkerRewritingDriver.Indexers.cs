@@ -49,11 +49,12 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     members.Add(
                         this.GetOriginalImplIndexer(
+                            indexerDeclaration,
                             symbol,
                             indexerDeclaration.Type,
                             indexerDeclaration.ParameterList,
-                            indexerDeclaration.AccessorList,
-                            indexerDeclaration.ExpressionBody ) );
+                            indexerDeclaration.ExpressionBody,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -237,12 +238,29 @@ namespace Metalama.Framework.Engine.Linking
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private MemberDeclarationSyntax GetOriginalImplIndexer(
+            IndexerDeclarationSyntax indexer,
             IPropertySymbol symbol,
             TypeSyntax type,
             BracketedParameterListSyntax parameterList,
-            AccessorListSyntax? existingAccessorList,
-            ArrowExpressionClauseSyntax? existingExpressionBody )
+            ArrowExpressionClauseSyntax? existingExpressionBody,
+            SyntaxGenerationContext generationContext )
         {
+            var existingAccessorList = indexer.AccessorList.AssertNotNull();
+            var transformedAccessorList =
+                existingAccessorList
+                    .WithAccessors(
+                        List(
+                            existingAccessorList.Accessors.SelectAsArray( a =>
+                                TransformAccessor(
+                                    a,
+                                    a.Kind() switch
+                                    {
+                                        SyntaxKind.GetAccessorDeclaration => symbol.GetMethod.AssertNotNull(),
+                                        SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => symbol.SetMethod.AssertNotNull(),
+                                        _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" ),
+                                    } ) ) ) )
+                    .WithSourceCodeAnnotation();
+
             return this.GetSpecialImplIndexer(
                 type,
                 parameterList,
@@ -250,6 +268,38 @@ namespace Metalama.Framework.Engine.Linking
                 existingExpressionBody,
                 symbol,
                 GetOriginalImplParameterType() );
+
+            AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
+            {
+                var semantic = accessorSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                var context = new InliningContextIdentifier( semantic );
+
+                var substitutedBody =
+                accessorDeclaration.Body != null
+                ? (BlockSyntax) this.RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                : null;
+
+                var substitutedExpressionBody =
+                    accessorDeclaration.ExpressionBody != null
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody( accessorDeclaration.ExpressionBody, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+                return
+                    accessorDeclaration
+                    .WithBody( substitutedBody )
+                    .WithExpressionBody( substitutedExpressionBody );
+            }
+
+            ArrowExpressionClauseSyntax TransformExpressionBody( ArrowExpressionClauseSyntax expressionBody, IMethodSymbol accessorSymbol )
+            {
+                var semantic = accessorSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                var context = new InliningContextIdentifier( semantic );
+
+                var substitutedExpressionBody =
+                    (ArrowExpressionClauseSyntax) this.RewriteBody( expressionBody, accessorSymbol, new SubstitutionContext( this, generationContext, context ) );
+
+                return substitutedExpressionBody;
+            }
         }
 
         private MemberDeclarationSyntax GetEmptyImplIndexer(

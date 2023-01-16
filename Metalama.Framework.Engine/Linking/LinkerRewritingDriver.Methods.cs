@@ -138,13 +138,28 @@ namespace Metalama.Framework.Engine.Linking
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
-            => this.GetSpecialImplMethod(
+        {
+            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+            var context = new InliningContextIdentifier( semantic );
+
+            var substitutedBody = 
+                method.Body != null
+                ? (BlockSyntax) this.RewriteBody( method.Body, symbol, new SubstitutionContext( this , generationContext, context) )
+                : null;
+
+            var substitutedExpressionBody =
+                method.ExpressionBody != null
+                ? (ArrowExpressionClauseSyntax) this.RewriteBody( method.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
+                : null;
+
+            return this.GetSpecialImplMethod(
                 method,
-                method.Body.WithSourceCodeAnnotation(),
-                method.ExpressionBody.WithSourceCodeAnnotation(),
+                substitutedBody.WithSourceCodeAnnotation(),
+                substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
+        }
 
         private MemberDeclarationSyntax GetEmptyImplMethod(
             MethodDeclarationSyntax method,

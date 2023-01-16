@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,10 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
                 _eventFieldRaiseReferencesByContainingSemantic;
 
+            private readonly IReadOnlyDictionary<
+                IntermediateSymbolSemantic<IMethodSymbol>, 
+                IReadOnlyList<CallerAttributeReference>> _callerMemberReferencesByContainingSemantic;
+
             private readonly ITaskScheduler _taskScheduler;
 
             public SubstitutionGenerator(
@@ -52,7 +57,8 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
                 IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences,
                 IReadOnlyList<ForcefullyInitializedType> forcefullyInitializedTypes,
-                IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences )
+                IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences,
+                IReadOnlyList<CallerAttributeReference> callerMemberReferences )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._syntaxHandler = syntaxHandler;
@@ -71,25 +77,28 @@ namespace Metalama.Framework.Engine.Linking
                         .Distinct()
                         .ToList();
 
-                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences );
-                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences );
+                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences, x => x.ContainingSemantic );
+                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences, x => x.ContainingSemantic );
+                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody( callerMemberReferences, x => x.ContainingSemantic );
 
-                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
-                    IndexReferenceByContainingBody( IReadOnlyList<IntermediateSymbolSemanticReference> references )
+                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<T>>
+                    IndexReferenceByContainingBody<T>( IReadOnlyList<T> references, Func<T, IntermediateSymbolSemantic<IMethodSymbol>> getContainingSemanticFunc )
                 {
-                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
+                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<T>>();
 
-                    foreach ( var redirectedSymbolReference in references )
+                    foreach ( var data in references )
                     {
-                        if ( !dict.TryGetValue( redirectedSymbolReference.ContainingSemantic, out var list ) )
+                        var containingSemantic = getContainingSemanticFunc( data );
+
+                        if ( !dict.TryGetValue( containingSemantic, out var list ) )
                         {
-                            dict[redirectedSymbolReference.ContainingSemantic] = list = new List<IntermediateSymbolSemanticReference>();
+                            dict[containingSemantic] = list = new List<T>();
                         }
 
-                        list.Add( redirectedSymbolReference );
+                        list.Add( data );
                     }
 
-                    return dict.ToDictionary( x => x.Key, x => (IReadOnlyList<IntermediateSymbolSemanticReference>) x.Value );
+                    return dict.ToDictionary( x => x.Key, x => (IReadOnlyList<T>) x.Value );
                 }
             }
 
@@ -155,6 +164,21 @@ namespace Metalama.Framework.Engine.Linking
                                     reference.ReferencingNode,
                                     (IEventSymbol) reference.TargetSemantic.Symbol,
                                     this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                        }
+                    }
+
+                    // Add substitutions for caller member references.
+                    if (this._callerMemberReferencesByContainingSemantic.TryGetValue( nonInlinedSemanticBody, out var callerMemberReferences ) )
+                    {
+                        foreach ( var reference in callerMemberReferences )
+                        {
+                            AddSubstitution(
+                                context,
+                                new CallerMemberSubstitution( 
+                                    reference.InvocationExpression, 
+                                    reference.ReferencingOverrideTarget,
+                                    reference.TargetMethod,
+                                    reference.ParametersToFix ) );
                         }
                     }
                 }
@@ -293,6 +317,21 @@ namespace Metalama.Framework.Engine.Linking
                                     reference.ReferencingNode,
                                     (IEventSymbol) reference.TargetSemantic.Symbol,
                                     this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                        }
+                    }
+
+                    // Add substitutions for caller member references.
+                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var callerAttributeReferences ) )
+                    {
+                        foreach ( var reference in callerAttributeReferences )
+                        {
+                            AddSubstitution(
+                                inliningSpecification.ContextIdentifier,
+                                new CallerMemberSubstitution( 
+                                    reference.InvocationExpression,
+                                    reference.ReferencingOverrideTarget,
+                                    reference.TargetMethod,
+                                    reference.ParametersToFix ) );
                         }
                     }
                 }
