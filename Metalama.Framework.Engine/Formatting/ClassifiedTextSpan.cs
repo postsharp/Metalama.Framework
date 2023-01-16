@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Formatting
 {
@@ -37,9 +38,9 @@ namespace Metalama.Framework.Engine.Formatting
         {
             var s = this.Span.ToString().ReplaceOrdinal( "2147483647" /* int.Max */, "inf" ) + "=>" + this.Classification;
 
-            foreach ( var tag in this.Tags )
+            if ( this.Tags.Any() )
             {
-                s += $"{{{tag.Key}={tag.Value}}}";
+                s += " " + string.Join( ", ", this.Tags.SelectAsEnumerable( tag => $"{tag.Key}={tag.Value}" ) );
             }
 
             return s;
