@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_GREATER) - Index and Range are not included in .Net Framework
+#endif
+
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,12 +15,19 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
     {
         public override dynamic OverrideMethod()
         {
-            var baseType = meta.Target.Method.DeclaringType.BaseType!;
-            var secondToLastBaseTypeTypeArgument = (INamedType)baseType.TypeArguments[^1];
-            var numberOfbaseTypeTypeArgumentsExceptTheLastOne = baseType.TypeArguments.ToArray().AsSpan()[..^1].Length;
+            var collection = meta.Target.Method.DeclaringType.BaseType!.TypeArguments.Select(ta => ta.ToDisplayString()).ToArray();
+            var compileTimeCollection = collection.AsSpan();
+            var runTimeCollection = meta.RunTime(collection).AsSpan();
 
-            Console.WriteLine($"Second to last base type type argument: {secondToLastBaseTypeTypeArgument}");
-            Console.WriteLine($"Number of base type type arguments except the last one: {numberOfbaseTypeTypeArgumentsExceptTheLastOne}");
+            var compileTimeCollectionWithCompileTimeIndex = compileTimeCollection[^1];
+            Console.WriteLine(compileTimeCollectionWithCompileTimeIndex);
+            var compileTimeCollectionWithCompileTimeRange = compileTimeCollection[..^1].Length;
+            Console.WriteLine(compileTimeCollectionWithCompileTimeRange);
+
+            var runTimeCollectionWithRunTimeIndex = runTimeCollection[meta.RunTime(^1)];
+            Console.WriteLine(runTimeCollectionWithRunTimeIndex);
+            var runTimeCollectionWithRunTimeRange = runTimeCollection[meta.RunTime(..^1)].Length;
+            Console.WriteLine(runTimeCollectionWithRunTimeRange);
 
             return meta.Proceed();
         }

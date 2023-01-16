@@ -22,8 +22,13 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
         [UseIndexAndRange]
         private int Method(int a, int b, int c, int d)
         {
-            global::System.Console.WriteLine("Second to last base type type argument: int");
-            global::System.Console.WriteLine("Number of base type type arguments except the last one: 1");
+            var runTimeCollection = global::System.MemoryExtensions.AsSpan(new global::System.String[] { "int", "int" });
+            global::System.Console.WriteLine("int");
+            global::System.Console.WriteLine(1);
+            var runTimeCollectionWithRunTimeIndex = runTimeCollection[^1];
+            global::System.Console.WriteLine(runTimeCollectionWithRunTimeIndex);
+            var runTimeCollectionWithRunTimeRange = runTimeCollection[..^1].Length;
+            global::System.Console.WriteLine(runTimeCollectionWithRunTimeRange);
             return a;
         }
     }
