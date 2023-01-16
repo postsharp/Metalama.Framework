@@ -9,6 +9,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
 {
     public class UseIndexAndRangeAttribute : OverrideMethodAspect
