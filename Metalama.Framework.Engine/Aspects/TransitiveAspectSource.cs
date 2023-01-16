@@ -11,12 +11,10 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -143,7 +141,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
             return this._referenceValidators.Select(
                 v => new ReferenceValidatorInstance(
                     v.ValidatedDeclaration.GetTarget( compilation ),
-                    GetReferenceValidatorDriver( v.Object.GetType(), v.MethodName ),
+                    v.GetReferenceValidatorDriver(),
                     ValidatorImplementation.Create( v.Object, v.State ),
                     v.ReferenceKinds ) );
         }
@@ -151,18 +149,5 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
         {
             return Enumerable.Empty<ValidatorInstance>();
         }
-    }
-
-    private static ReferenceValidatorDriver GetReferenceValidatorDriver( Type type, string methodName )
-    {
-        var method = type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
-
-        if ( method == null )
-        {
-            throw new ArgumentOutOfRangeException( nameof(methodName), $"Cannot find a method named '{methodName}' in '{type}'." );
-        }
-
-        return ValidatorDriverFactory.GetInstance( type )
-            .GetReferenceValidatorDriver( method );
     }
 }

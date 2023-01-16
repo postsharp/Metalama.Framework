@@ -360,7 +360,7 @@ public static partial class EligibilityExtensions
     public static void MustBeRunTimeOnly( this IEligibilityBuilder<INamedType> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => member.ExecutionScope == ExecutionScope.RunTime,
-            member => $"the execution scope of {member} must run-time but is {member.Object.ExecutionScope}" );
+            member => $"the execution scope of {member} must be run-time but is {member.Object.ExecutionScope}" );
 
     /// <summary>
     /// Requires the target member or type to be static.

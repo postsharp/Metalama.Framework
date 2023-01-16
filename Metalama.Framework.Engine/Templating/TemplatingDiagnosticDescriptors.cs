@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Templating
                     + "next build and you may get errors related to the absence of generated source. "
                     + "To resume analysis, finish the work on all compile-time logic, then build the project (even if the run-time code still has issues).",
                     _category,
-                    Error );
+                    Warning );
 
         internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace, string AttributeName)>
             CompileTimeCodeNeedsNamespaceImport

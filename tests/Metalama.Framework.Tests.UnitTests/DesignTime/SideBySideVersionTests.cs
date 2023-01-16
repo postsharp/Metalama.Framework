@@ -43,7 +43,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
 using System;
 using Metalama.Framework.Aspects;
 
-[Inherited]
+[Inheritable]
 public class TheAspect : TypeAspect
 {
  [Introduce( WhenExists = OverrideStrategy.New )]

@@ -1,0 +1,24 @@
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.ConditionallyInheritable;
+
+public class TheAspect : TypeAspect, IConditionallyInheritableAspect
+{
+    public bool IsInheritable { get; set; }
+
+    [Introduce]
+    private void IntroducedMethod() { }
+}
+
+[TheAspect( IsInheritable = true )]
+internal class BaseClass1 { }
+
+// <target>
+internal class DerivedClass1 : BaseClass1 { }
+
+[TheAspect( IsInheritable = false )]
+internal class BaseClass2 { }
+
+// <target>
+internal class DerivedClass2 : BaseClass2 { }

@@ -178,7 +178,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public sealed class Child : Base, ILamaSerializationCallback
+        public sealed class Child : Base, ICompileTimeSerializationCallback
         {
             public static int NSerialized { get; set; }
 

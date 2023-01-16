@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var declaredSymbol = (INamedTypeSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) );
+                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
                 if ( !declaredSymbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, serializableInterface ) ) )
                 {

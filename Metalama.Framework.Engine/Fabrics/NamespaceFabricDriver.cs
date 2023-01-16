@@ -52,7 +52,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var amender = new Amender(
                 project,
                 this.FabricManager,
-                new FabricInstance( this, compilation.Factory.GetNamespace( namespaceSymbol ) ) );
+                new FabricInstance( this, compilation.Factory.GetNamespace( namespaceSymbol ) ),
+                namespaceSymbol.GetFullName() );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
@@ -79,11 +80,17 @@ namespace Metalama.Framework.Engine.Fabrics
             public Amender(
                 IProject project,
                 FabricManager fabricManager,
-                FabricInstance fabricInstance ) : base(
+                FabricInstance fabricInstance,
+                string ns ) : base(
                 project,
                 fabricManager,
                 fabricInstance,
-                fabricInstance.TargetDeclaration.As<INamespace>() ) { }
+                fabricInstance.TargetDeclaration.As<INamespace>() )
+            {
+                this.Namespace = ns;
+            }
+
+            public string Namespace { get; }
         }
     }
 }

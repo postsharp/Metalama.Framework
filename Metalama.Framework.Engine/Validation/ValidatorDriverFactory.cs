@@ -11,40 +11,45 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
 {
-    private readonly Type _type;
-    private readonly ConcurrentDictionary<MethodInfo, ReferenceValidatorDriver> _drivers = new();
+    private static readonly ConcurrentDictionary<Type, ClassBasedReferenceValidatorDriver> _classBasedDrivers = new();
+
+    private readonly Type _aspectOrFabricType;
+    private readonly ConcurrentDictionary<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();
     private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
 
-    public static ValidatorDriverFactory GetInstance( Type type )
+    public static ValidatorDriverFactory GetInstance( Type aspectOrFabricType )
     {
         // The factory method is static, and does not depend on IServiceProvider nor is provided by IServiceProvider, because we want
         // to share driver instances across compilations and projects given the high cost of instantiating them.
 
-        return _instances.GetOrAdd( type, t => new ValidatorDriverFactory( t ) );
+        return _instances.GetOrAdd( aspectOrFabricType, t => new ValidatorDriverFactory( t ) );
     }
 
-    private ValidatorDriverFactory( Type type )
+    private ValidatorDriverFactory( Type aspectOrFabricType )
     {
-        this._type = type;
+        this._aspectOrFabricType = aspectOrFabricType;
     }
 
-    public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
-        => this._drivers.GetOrAdd( validateMethod, this.GetReferenceValidatorDriverImpl );
+    public MethodBasedReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
+        => this._methodBasedDrivers.GetOrAdd( validateMethod, this.GetMethodBasedReferenceValidatorDriverCore );
+
+    public ClassBasedReferenceValidatorDriver GetReferenceValidatorDriver( Type type )
+        => _classBasedDrivers.GetOrAdd( type, t => new ClassBasedReferenceValidatorDriver( t ) );
 
     public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate ) => new( validate );
 
-    private ReferenceValidatorDriver GetReferenceValidatorDriverImpl( MethodInfo method )
+    private MethodBasedReferenceValidatorDriver GetMethodBasedReferenceValidatorDriverCore( MethodInfo method )
     {
         var instanceParameter = Expression.Parameter( typeof(object), "instance" );
         var contextParameter = Expression.Parameter( typeof(ReferenceValidationContext).MakeByRefType(), "context" );
 
         var invocation = method.IsStatic
             ? Expression.Call( method, contextParameter )
-            : Expression.Call( Expression.Convert( instanceParameter, this._type ), method, contextParameter );
+            : Expression.Call( Expression.Convert( instanceParameter, this._aspectOrFabricType ), method, contextParameter );
 
         var lambda = Expression.Lambda<InvokeValidatorDelegate<ReferenceValidationContext>>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 
-        return new ReferenceValidatorDriver( method, compiled );
+        return new MethodBasedReferenceValidatorDriver( method, compiled );
     }
 }

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAs
         }
     }
 
-    [Inherited]
+    [Inheritable]
     public class ChildAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()

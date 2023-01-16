@@ -46,6 +46,10 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Validation\ClassBasedValidator_Func.t.cs" />
+    </ItemGroup>
     
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
 

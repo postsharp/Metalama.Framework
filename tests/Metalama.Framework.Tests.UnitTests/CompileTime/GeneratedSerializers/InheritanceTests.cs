@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int BaseField;
 }
@@ -76,7 +76,7 @@ public class B : A
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public abstract class A : ILamaSerializable
+public abstract class A : ICompileTimeSerializable
 {
     public int PropertyA { get; }
 
@@ -132,7 +132,7 @@ public class B : A
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Property { get; }
 
@@ -185,7 +185,7 @@ public class B : A
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public abstract class A<T> : ILamaSerializable
+public abstract class A<T> : ICompileTimeSerializable
 {
     public int PropertyA { get; }
 
@@ -261,7 +261,7 @@ public class C : A<int>
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A<T> : ILamaSerializable
+public class A<T> : ICompileTimeSerializable
 {
     public T FieldA;
     public T PropertyA { get; set; }

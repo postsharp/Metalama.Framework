@@ -17,7 +17,7 @@ public interface IValidatorReceiverSelector<out TTarget>
 {
     /// <summary>
     /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding validators to them
-    /// using e.g. <see cref="IValidatorReceiver{TDeclaration}.Validate"/> or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/> .
+    /// using e.g. <see cref="IValidatorReceiver{TDeclaration}.Validate"/> or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/> .
     /// </summary>
     IValidatorReceiver<TMember> With<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
         where TMember : class, IDeclaration;

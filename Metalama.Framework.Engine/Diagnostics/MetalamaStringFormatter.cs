@@ -77,6 +77,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                             case DeclarationKind.NamedType:
                                 return "type";
 
+                            case DeclarationKind.Compilation:
+                                return "project";
+
                             default:
                                 return declarationKind.ToString().ToLowerInvariant();
                         }
@@ -102,7 +105,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case IFormattable formattable:
                         return formattable.ToString( format, this );
-                    
+
                     case Type type:
                         return type.Name;
 

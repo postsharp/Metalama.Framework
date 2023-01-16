@@ -161,8 +161,11 @@ namespace Metalama.Framework.Engine.Aspects
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._aspectBuilderState.Configuration.BoundAspectClasses;
 
-        public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
+        public MethodBasedReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( validateMethod );
+
+        public ClassBasedReferenceValidatorDriver GetReferenceValidatorDriver( Type type )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( type );
 
         public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetDeclarationValidatorDriver( validate );

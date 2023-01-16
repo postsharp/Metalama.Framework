@@ -41,7 +41,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
         void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
-            where TAspect : Attribute, IAspect<TDeclaration>;
+            where TAspect : class, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
@@ -53,14 +53,14 @@ namespace Metalama.Framework.Aspects
         void AddAspectIfEligible<TAspect>(
             Func<TDeclaration, TAspect> createAspect,
             EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
-            where TAspect : Attribute, IAspect<TDeclaration>;
+            where TAspect : class, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect. This overload creates a new instance of the
         /// aspect class for each target declaration.
         /// </summary>
         void AddAspect<TAspect>()
-            where TAspect : Attribute, IAspect<TDeclaration>, new();
+            where TAspect : class, IAspect<TDeclaration>, new();
 
         /// <summary>
         /// Adds an aspect to the current set of declarations using the default constructor of the aspect type. This method
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Aspects
         /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
         /// </param>
         void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
-            where TAspect : Attribute, IAspect<TDeclaration>, new();
+            where TAspect : class, IAspect<TDeclaration>, new();
 
         /// <summary>
         /// Requires an instance of a specified aspect type to be present on a specified declaration. If the aspect
@@ -83,6 +83,6 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         void RequireAspect<TAspect>()
-            where TAspect : IAspect<TDeclaration>, new();
+            where TAspect : class, IAspect<TDeclaration>, new();
     }
 }

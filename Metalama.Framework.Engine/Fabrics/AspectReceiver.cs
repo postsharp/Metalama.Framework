@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
@@ -95,11 +94,10 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
-                    this._parent,
+                    this._parent.GetReferenceValidatorDriver( validateMethod.Method ),
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    validateMethod.Method,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
@@ -108,6 +106,51 @@ namespace Metalama.Framework.Engine.Fabrics
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
                             referenceKinds ) ) ) );
+        }
+
+        public void ValidateReferences( ReferenceValidator validator )
+        {
+            this.RegisterValidatorSource(
+                new ProgrammaticValidatorSource(
+                    this._parent.GetReferenceValidatorDriver( validator.GetType() ),
+                    ValidatorKind.Reference,
+                    CompilationModelVersion.Current,
+                    this._parent.AspectPredecessor,
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        compilation,
+                        diagnostics,
+                        item => new ReferenceValidatorInstance(
+                            item,
+                            source.Driver,
+                            ValidatorImplementation.Create( validator ),
+                            validator.ValidatedReferenceKinds ) ) ) );
+        }
+
+        public void ValidateReferences<TValidator>( Func<T, TValidator> getValidator )
+            where TValidator : ReferenceValidator
+        {
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
+            this.RegisterValidatorSource(
+                new ProgrammaticValidatorSource(
+                    this._parent.GetReferenceValidatorDriver( typeof(TValidator) ),
+                    ValidatorKind.Reference,
+                    CompilationModelVersion.Current,
+                    this._parent.AspectPredecessor,
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        compilation,
+                        diagnostics,
+                        item =>
+                        {
+                            var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
+
+                            return new ReferenceValidatorInstance(
+                                item,
+                                source.Driver,
+                                ValidatorImplementation.Create( validator ),
+                                validator.ValidatedReferenceKinds );
+                        } ) ) );
         }
 
         public void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod )
@@ -175,7 +218,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
-            where TAspect : Attribute, IAspect<T>
+            where TAspect : class, IAspect<T>
             => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
 
         public void AddAspect( Type aspectType, Func<T, IAspect> createAspect ) => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
@@ -213,15 +256,15 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
-            where TAspect : Attribute, IAspect<T>
+            where TAspect : class, IAspect<T>
             => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
         public void AddAspect<TAspect>()
-            where TAspect : Attribute, IAspect<T>, new()
+            where TAspect : class, IAspect<T>, new()
             => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
 
         public void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility )
-            where TAspect : Attribute, IAspect<T>, new()
+            where TAspect : class, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
@@ -347,7 +390,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void RequireAspect<TAspect>()
-            where TAspect : IAspect<T>, new()
+            where TAspect : class, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 

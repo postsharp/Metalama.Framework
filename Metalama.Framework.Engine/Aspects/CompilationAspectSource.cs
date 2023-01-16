@@ -83,7 +83,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
                         if ( eligibility == EligibleScenarios.None )
                         {
-                            var requestedEligibility = aspectClass.IsInherited ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
 
                             var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
                                 requestedEligibility,

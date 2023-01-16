@@ -6,12 +6,12 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
+internal sealed class MethodBasedReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
 {
     private readonly InvokeValidatorDelegate<ReferenceValidationContext> _validateMethod;
     private readonly MethodInfo _validateMethodInfo;
 
-    public ReferenceValidatorDriver(
+    public MethodBasedReferenceValidatorDriver(
         MethodInfo validateMethodInfoInfo,
         InvokeValidatorDelegate<ReferenceValidationContext> validateMethod )
     {
@@ -34,9 +34,9 @@ internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValida
     {
         private readonly ValidatorImplementation _implementation;
         private readonly ReferenceValidationContext _context;
-        private readonly ReferenceValidatorDriver _driver;
+        private readonly MethodBasedReferenceValidatorDriver _driver;
 
-        public InvokePayload( ValidatorImplementation implementation, in ReferenceValidationContext context, ReferenceValidatorDriver driver )
+        public InvokePayload( ValidatorImplementation implementation, in ReferenceValidationContext context, MethodBasedReferenceValidatorDriver driver )
         {
             this._implementation = implementation;
             this._context = context;

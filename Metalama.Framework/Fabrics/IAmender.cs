@@ -13,7 +13,7 @@ namespace Metalama.Framework.Fabrics
     /// </summary>
     [InternalImplement]
     [CompileTime]
-    public interface IAmender<T> : IAspectReceiverSelector<T>
+    public interface IAmender<out T> : IAspectReceiverSelector<T>
         where T : class, IDeclaration
     {
         /// <summary>

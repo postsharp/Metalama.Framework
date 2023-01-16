@@ -82,7 +82,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
     public bool IsAbstract { get; }
 
-    public bool IsInherited { get; }
+    public bool? IsInheritable { get; } = false;
 
     public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.Type );
 
@@ -125,7 +125,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         if ( baseClass != null )
         {
             this.Description = baseClass.Description;
-            this.IsInherited = baseClass.IsInherited;
+            this.IsInheritable = baseClass.IsInheritable;
             this.WeaverType = baseClass.WeaverType;
 
             layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
@@ -142,6 +142,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             layers.Add( null );
         }
 
+        if ( typeof(IConditionallyInheritableAspect).IsAssignableFrom( aspectType ) )
+        {
+            this.IsInheritable = null;
+        }
+
         foreach ( var attribute in typeSymbol.GetAttributes() )
         {
             switch ( attribute.AttributeClass?.Name )
@@ -149,8 +154,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                 case null:
                     continue;
 
-                case nameof(InheritedAttribute):
-                    this.IsInherited = true;
+                case nameof(InheritableAttribute):
+                    this.IsInheritable = true;
 
                     break;
 
@@ -196,8 +201,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
         this.Layers = layers.SelectAsImmutableArray( l => new AspectLayer( this, l ) );
 
-        var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
-        licenseVerifier?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
+        if ( this.IsInheritable != false )
+        {
+            var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
+            licenseVerifier?.VerifyCanBeInherited( this, diagnosticAdder );
+        }
 
         if ( this.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() )
         {
@@ -425,7 +433,16 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         return aspectInterface.IsAssignableFrom( this.Type );
     }
 
-    public EligibleScenarios GetEligibility( IDeclaration obj )
+    /// <summary>
+    /// Gets the eligibility of a an aspect instance of the current aspect class. If the aspect type implements <see cref="IConditionallyInheritableAspect"/>,
+    /// this method assumes that the aspect instance is inheritable. 
+    /// </summary>
+    public EligibleScenarios GetEligibility( IDeclaration obj ) => this.GetEligibility( obj, this.IsInheritable != true );
+
+    /// <summary>
+    /// Gets the eligibility of a an aspect instance of the current aspect class without when knowing whether the aspect instance is inheritable.
+    /// </summary>
+    public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {
         if ( this._eligibilityRules.IsDefaultOrEmpty )
         {
@@ -447,7 +464,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             var eligibility = EligibleScenarios.All;
 
             // If the aspect cannot be inherited, remove the inheritance eligibility.
-            if ( !this.IsInherited )
+            if ( isInheritable != true )
             {
                 eligibility &= ~EligibleScenarios.Inheritance;
             }
@@ -497,11 +514,18 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
     public override string ToString() => this.FullName;
 
-    ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
+    MethodBasedReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
     {
         this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.Type );
 
         return this._validatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
+    }
+
+    ClassBasedReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( Type type )
+    {
+        this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.Type );
+
+        return this._validatorDriverFactory.GetReferenceValidatorDriver( type );
     }
 
     DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )

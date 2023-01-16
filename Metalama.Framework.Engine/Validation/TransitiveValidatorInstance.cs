@@ -5,16 +5,17 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
 using System;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class TransitiveValidatorInstance : ILamaSerializable
+public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = instance.ReferenceKinds;
-        this.MethodName = ((ReferenceValidatorDriver) instance.Driver).MethodName;
+        this.MethodName = instance.Driver.MethodName;
         this.Object = instance.Implementation.Implementation;
         this.State = instance.Implementation.State;
     }
@@ -24,7 +25,7 @@ public sealed class TransitiveValidatorInstance : ILamaSerializable
         ReferenceKinds referenceKinds,
         object obj,
         IAspectState? state,
-        string methodName )
+        string? methodName )
     {
         this.ValidatedDeclaration = validatedDeclaration;
         this.ReferenceKinds = referenceKinds;
@@ -50,7 +51,29 @@ public sealed class TransitiveValidatorInstance : ILamaSerializable
 
     public IAspectState? State { get; private set; }
 
-    public string MethodName { get; private set; }
+    public string? MethodName { get; private set; }
+
+    internal ValidatorDriver GetReferenceValidatorDriver()
+    {
+        var type = this.Object.GetType();
+
+        if ( this.MethodName != null )
+        {
+            var method = type.GetMethod( this.MethodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
+
+            if ( method == null )
+            {
+                throw new InvalidOperationException( $"Cannot find a method named '{this.MethodName}' in '{type}'." );
+            }
+
+            return ValidatorDriverFactory.GetInstance( type )
+                .GetReferenceValidatorDriver( method );
+        }
+        else
+        {
+            return ValidatorDriverFactory.GetInstance( type ).GetReferenceValidatorDriver( type );
+        }
+    }
 
     // ReSharper disable once UnusedType.Local
     private sealed class Serializer : ReferenceTypeSerializer

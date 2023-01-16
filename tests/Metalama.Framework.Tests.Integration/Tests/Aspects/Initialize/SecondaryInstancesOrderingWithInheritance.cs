@@ -12,7 +12,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.SecondaryIns
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.SecondaryInstancesOrderingWithInheritance;
 
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly | AttributeTargets.Method, AllowMultiple = false )]
-[Inherited]
+[Inheritable]
 public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INamedType>
 {
     private string _tag;

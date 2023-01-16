@@ -17,7 +17,7 @@ public class ParentAspect : TypeAspect
     }
 }
 
-[Inherited]
+[Inheritable]
 public class ChildAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()

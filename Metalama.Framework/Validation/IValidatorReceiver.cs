@@ -10,8 +10,7 @@ namespace Metalama.Framework.Validation;
 
 [InternalImplement]
 [CompileTime]
-public interface IValidatorReceiver<out TDeclaration>
-    where TDeclaration : class, IDeclaration
+public interface IValidatorReceiver
 {
     /// <summary>
     /// Registers a method that will be invoked to validate any declaration
@@ -28,6 +27,17 @@ public interface IValidatorReceiver<out TDeclaration>
     /// <param name="validateMethod"></param>
     /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
     void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds );
+
+    void ValidateReferences( ReferenceValidator validator );
+}
+
+[InternalImplement]
+[CompileTime]
+public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
+    where TDeclaration : class, IDeclaration
+{
+    void ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+        where TValidator : ReferenceValidator;
 
     void ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic );
 
