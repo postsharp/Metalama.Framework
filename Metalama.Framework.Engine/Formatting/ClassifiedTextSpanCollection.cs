@@ -233,6 +233,14 @@ namespace Metalama.Framework.Engine.Formatting
 
         public int Count => this._spans.Count;
 
+        private static bool IsColored( TextSpanClassification classification ) =>
+            classification is not (
+                TextSpanClassification.Default or
+                TextSpanClassification.RunTime or
+                TextSpanClassification.Excluded or
+                TextSpanClassification.SourceCode or
+                TextSpanClassification.NeutralTrivia);
+
         /// <summary>
         /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
         /// </summary>
@@ -259,8 +267,8 @@ namespace Metalama.Framework.Engine.Formatting
                     return;
                 }
 
-                if ( enumerator.Current.Value.Classification is not (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
-                     && nextEnumerator.Current.Value.Classification is TextSpanClassification.Default or TextSpanClassification.NeutralTrivia )
+                if ( IsColored( enumerator.Current.Value.Classification )
+                     && !IsColored( nextEnumerator.Current.Value.Classification ) )
                 {
                     var span = enumerator.Current.Value.Span;
                     var rawSpanLength = span.Length;
