@@ -46,8 +46,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
 
+        [Memo]
+        public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );
+
         public override SyntaxTree? PrimarySyntaxTree => null;
 
         public override IDeclarationOrigin Origin => DeclarationOrigin.External;
+
+        public override IAssembly DeclaringAssembly => this;
     }
 }

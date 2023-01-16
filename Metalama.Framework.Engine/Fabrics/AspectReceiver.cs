@@ -370,7 +370,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
+                if ( (!targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal)
+                     && containingDeclaration.DeclarationKind != DeclarationKind.Compilation )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateRoslynDiagnostic(
