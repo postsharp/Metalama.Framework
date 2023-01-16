@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 project,
                 this.FabricManager,
                 new FabricInstance( this, compilation.Factory.GetNamespace( namespaceSymbol ) ),
-                namespaceSymbol.GetFullName() );
+                namespaceSymbol.GetFullName() ?? "" );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,

@@ -449,7 +449,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             this.ValidateSymbol( node, symbol.ContainingType, referenceKinds );
         }
-        else if ( symbol is { ContainingNamespace: not null } && symbol is { Kind: not SymbolKind.Namespace } )
+        else if ( symbol is { ContainingNamespace: not null } and { Kind: not SymbolKind.Namespace } )
         {
             // We validate namespaces, but not recursively because it is more cost-efficient when the user registers validators for all child namespaces.
             this.ValidateSymbol( node, symbol.ContainingNamespace, referenceKinds );
