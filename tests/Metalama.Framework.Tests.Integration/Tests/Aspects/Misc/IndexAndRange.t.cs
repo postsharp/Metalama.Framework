@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
 {
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
