@@ -95,7 +95,7 @@ public sealed class CacheTests : UnitTestClass
         var cache = new FileBasedCache<string>( TimeSpan.MaxValue );
 
         using var testContext = this.CreateTestContext();
-        var directory = testContext.ProjectOptions.BaseDirectory;
+        var directory = testContext.BaseDirectory;
         var fileName = Path.Combine( directory, "test.txt" );
 
         // Add to cache.

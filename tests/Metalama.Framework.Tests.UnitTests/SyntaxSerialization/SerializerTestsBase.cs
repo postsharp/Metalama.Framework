@@ -31,7 +31,7 @@ class Expression
 
             var assemblyPath = MetalamaCompilerUtility.CompileAssembly(
                 testContext.ServiceProvider,
-                testContext.ProjectOptions.BaseDirectory,
+                testContext.BaseDirectory,
                 context,
                 expressionContainer );
 
