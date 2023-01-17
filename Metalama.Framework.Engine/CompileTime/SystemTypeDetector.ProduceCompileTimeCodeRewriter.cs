@@ -11,6 +11,7 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( namedType.GetReflectionName() )
             {
                 case "System.Index":
+                case "System.Range":
                     return true;
             }
 
