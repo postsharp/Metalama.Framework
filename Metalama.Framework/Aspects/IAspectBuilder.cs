@@ -107,7 +107,7 @@ namespace Metalama.Framework.Aspects
         new TAspectTarget Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to add child advice and to validate code and code references.
+        /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
     }

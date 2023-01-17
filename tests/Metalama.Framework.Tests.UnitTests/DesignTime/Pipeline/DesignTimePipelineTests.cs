@@ -248,7 +248,7 @@ class MyAspect : MethodAspect
 
    public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
-aspectBuilder.Diagnostics.Report(         _description.WithArguments( this.Version ) );
+aspectBuilder.Diagnostics.Report( _description.WithArguments( this.Version ) );
    }
 }
 ";
@@ -292,12 +292,14 @@ Target.cs:
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
+        Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2! );
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
+        Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
         // Third execution, this time with modified target but same aspect code.
         var compilation3 = TestCompilationFactory.CreateCSharpCompilation(

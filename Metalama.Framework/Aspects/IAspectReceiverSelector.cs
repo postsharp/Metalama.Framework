@@ -13,14 +13,14 @@ namespace Metalama.Framework.Aspects;
 public interface IAspectReceiverSelector<out TTarget> : IValidatorReceiverSelector<TTarget>
     where TTarget : class, IDeclaration
 {
-    
+
     /// <summary>
     /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
     /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
     /// <see cref="IValidatorReceiver.Validate"/>
     /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
     /// </summary>
-    [Obsolete(ObsoleteMessages.WithMethod  )]
+    [Obsolete( ObsoleteMessages.WithMethod )]
     new IAspectReceiver<TMember> With<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
         where TMember : class, IDeclaration;
 
