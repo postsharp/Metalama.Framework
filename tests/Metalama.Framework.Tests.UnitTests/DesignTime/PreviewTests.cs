@@ -106,7 +106,7 @@ class MyAspect : TypeAspect
         {
             ["aspect.cs"] = @"
 using Metalama.Framework.Aspects;
-[Inherited]
+[Inheritable]
 class MyAspect : TypeAspect
 {
    [Introduce]
@@ -241,7 +241,7 @@ class C {}"
         {
             ["aspect.cs"] = @"
 using Metalama.Framework.Aspects;
-[Inherited]
+[Inheritable]
 class MyAspect : TypeAspect
 {
    [Introduce]
@@ -263,7 +263,7 @@ class MyAspect : TypeAspect
         {
             ["aspect.cs"] = @"
 using Metalama.Framework.Aspects;
-[Inherited]
+[Inheritable]
 class MyAspect : TypeAspect
 {
    [Introduce]

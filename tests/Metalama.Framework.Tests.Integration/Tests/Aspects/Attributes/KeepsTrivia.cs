@@ -18,9 +18,9 @@ public class MyAspect : TypeAspect
 
 public class MyFabric : ProjectFabric
 {
-    public override void AmendProject(IProjectAmender amender)
+    public override void AmendProject( IProjectAmender amender )
     {
-        amender.With(c => c.Types.OfName("C")).AddAspect<MyAspect>();
+        amender.Outbound.SelectMany( c => c.Types.OfName( "C" ) ).AddAspect<MyAspect>();
     }
 }
 

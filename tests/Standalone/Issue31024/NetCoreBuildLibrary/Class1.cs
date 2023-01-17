@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace ClassLibrary1
 {
-    [Inherited]
+    [Inheritable]
     public class MyInheritedAspect : TypeAspect
     {
         private IReadOnlyList<int>? _list;

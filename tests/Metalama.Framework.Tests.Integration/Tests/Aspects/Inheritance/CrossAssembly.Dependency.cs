@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssembly
 {
-    [Inherited]
+    [Inheritable]
     public class Aspect : TypeAspect
     {
         [Introduce]

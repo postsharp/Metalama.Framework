@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public struct A : ILamaSerializable
+public struct A : ICompileTimeSerializable
 {
     public readonly int Field;
     public int Property { get; }
@@ -64,7 +64,7 @@ public struct A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public readonly struct A : ILamaSerializable
+public readonly struct A : ICompileTimeSerializable
 {
     public readonly int Field;
     public int Property { get; }

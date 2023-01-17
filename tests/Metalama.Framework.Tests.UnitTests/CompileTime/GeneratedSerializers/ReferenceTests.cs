@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public object? Property { get; }
 
@@ -61,7 +61,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Property { get; }
 
@@ -106,7 +106,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public S Property { get; }
 
@@ -116,7 +116,7 @@ public class A : ILamaSerializable
     }
 }
 
-public struct S : ILamaSerializable
+public struct S : ICompileTimeSerializable
 {
     public int X;
     public int Y;
@@ -159,7 +159,7 @@ public struct S : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public S Property { get; }
 
@@ -169,7 +169,7 @@ public class A : ILamaSerializable
     }
 }
 
-public struct S : ILamaSerializable
+public struct S : ICompileTimeSerializable
 {
     public int X;
     public object? Y;
@@ -213,7 +213,7 @@ public struct S : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public S Property { get; }
 
@@ -223,19 +223,19 @@ public class A : ILamaSerializable
     }
 }
 
-public struct S : ILamaSerializable
+public struct S : ICompileTimeSerializable
 {
     public T A;
     public U B {get;set;}
 }
 
-public struct T : ILamaSerializable
+public struct T : ICompileTimeSerializable
 {
     public int X;
     public object? Y;
 }
 
-public struct U : ILamaSerializable
+public struct U : ICompileTimeSerializable
 {
     public int X;
     public object? Y;
@@ -284,7 +284,7 @@ public struct U : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public S Property { get; }
 
@@ -294,11 +294,11 @@ public class A : ILamaSerializable
     }
 }
 
-public struct S : ILamaSerializable
+public struct S : ICompileTimeSerializable
 {
     public int X;
 
-    [LamaNonSerialized]
+    [NonCompileTimeSerialized]
     public object? Y;
 }
 ";

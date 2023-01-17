@@ -58,6 +58,8 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public bool IsSkipped => this._primaryInstance.IsSkipped;
 
+    public bool IsInheritable => this._primaryInstance.IsInheritable;
+
     [Memo]
     public ImmutableArray<IAspectInstance> SecondaryInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
 

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Testing.UnitTesting
 {
-    internal class TestProjectOptionsFactory : IProjectOptionsFactory
+    internal sealed class TestProjectOptionsFactory : IProjectOptionsFactory
     {
         private readonly IProjectOptions _projectOptions;
 

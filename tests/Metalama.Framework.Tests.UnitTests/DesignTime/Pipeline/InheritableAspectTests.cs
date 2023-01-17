@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             var code1 = @"
 using Metalama.Framework.Aspects;
 
-[Inherited]
+[Inheritable]
 public class Aspect : TypeAspect {}
 
 [Aspect]
@@ -50,7 +50,7 @@ public interface I {}
             var aspectCode = @"
 using Metalama.Framework.Aspects;
 
-[Inherited]
+[Inheritable]
 public class Aspect : TypeAspect { }
 ";
 
@@ -111,7 +111,7 @@ public class Aspect : TypeAspect { }
             var code1 = @"
 using Metalama.Framework.Aspects;
 
-[Inherited]
+[Inheritable]
 public class Aspect : TypeAspect
 {
     [Introduce]

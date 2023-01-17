@@ -295,7 +295,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Gets aspects that can be inherited.
         var inheritableAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.AspectClass.IsInherited )
+            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.IsInheritable )
             .ToList();
 
         // Gets aspects that have been inherited by the source. 

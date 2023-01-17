@@ -5,7 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Type;
 
-[Inherited]
+[Inheritable]
 public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )

@@ -47,16 +47,16 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 this.InitializeObject( instanceId );
             }
 
-            ILamaSerializationCallback? callback;
+            ICompileTimeSerializationCallback? callback;
 
-            if ( (callback = rootObject as ILamaSerializationCallback) != null )
+            if ( (callback = rootObject as ICompileTimeSerializationCallback) != null )
             {
                 callback.OnDeserialized();
             }
 
             foreach ( var obj in this._referenceTypeInstances.Values )
             {
-                if ( (callback = obj.Value.AssertNotNull().Value as ILamaSerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
+                if ( (callback = obj.Value.AssertNotNull().Value as ICompileTimeSerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
                 {
                     callback.OnDeserialized();
                 }

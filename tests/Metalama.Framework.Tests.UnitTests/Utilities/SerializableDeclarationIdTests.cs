@@ -42,6 +42,8 @@ class C<T>
             Roundloop( declaration );
         }
 
+        Roundloop( compilation );
+
         void Roundloop( IDeclaration declaration )
         {
             if ( declaration is PseudoParameter && declaration.ContainingDeclaration is IMethod { MethodKind: MethodKind.EventRaise } )

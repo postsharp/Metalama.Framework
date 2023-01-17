@@ -54,6 +54,6 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.ReadOnlyField = 42;
+    ReadOnlyField = 42;
   }
 }

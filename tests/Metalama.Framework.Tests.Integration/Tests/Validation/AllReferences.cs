@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -19,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder
-                .With( ns => ns )
+                .Outbound
                 .ValidateReferences( Validate, ReferenceKinds.All );
         }
 

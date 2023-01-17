@@ -9,7 +9,7 @@ using Metalama.Framework.Diagnostics;
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// The context object passed to the single parameter of validators added using <see cref="IValidatorReceiver{TDeclaration}.Validate"/>.
+    /// The context object passed to the single parameter of validators added using <see cref="IValidatorReceiver.Validate"/>.
     /// </summary>
     /// <seealso href="@validation"/>
     [CompileTime]

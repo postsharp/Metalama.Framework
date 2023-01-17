@@ -21,7 +21,7 @@ internal abstract class BaseIntrospectionAspectClass : IIntrospectionAspectClass
 
     public bool IsAbstract => this._aspectClass.IsAbstract;
 
-    public bool IsInherited => this._aspectClass.IsInherited;
+    public bool? IsInheritable => this._aspectClass.IsInheritable;
 
     public bool IsAttribute => this._aspectClass.IsAttribute;
 

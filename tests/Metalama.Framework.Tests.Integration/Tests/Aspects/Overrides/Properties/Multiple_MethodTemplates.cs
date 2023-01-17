@@ -67,8 +67,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new FirstOverrideAttribute() );
-            builder.With( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new SecondOverrideAttribute() );
+            builder.Outbound.SelectMany( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new FirstOverrideAttribute() );
+            builder.Outbound.SelectMany( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new SecondOverrideAttribute() );
         }
 
         [Introduce]

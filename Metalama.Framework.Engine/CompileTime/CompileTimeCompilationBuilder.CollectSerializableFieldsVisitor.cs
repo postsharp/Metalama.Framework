@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._symbolClassifier = symbolClassifier;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
-                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
+                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) );
                 this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
             }
 

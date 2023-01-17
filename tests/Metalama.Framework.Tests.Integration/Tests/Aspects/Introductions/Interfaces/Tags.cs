@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new { TestTag = "TestValue_For_Interface1" } );
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" });
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" } );
         }
 
         [InterfaceMember]
@@ -49,12 +49,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
 
             remove
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
@@ -63,21 +63,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
                 return 42;
             }
 
             set
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
         [InterfaceMember]
         public int InterfaceMethod2()
         {
-            Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+            Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
             return meta.Proceed();
         }
@@ -87,12 +87,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
 
             remove
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
@@ -101,14 +101,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
                 return 42;
             }
 
             set
             {
-                Console.WriteLine($"This is introduced interface member with Tag {meta.Tags["TestTag"]}.");
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
     }

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Serialization
     /// It defines methods <see cref="OnDeserialized"/> and <see cref="OnSerializing"/> called during serialization.
     /// </summary>
     [CompileTime]
-    public interface ILamaSerializationCallback
+    public interface ICompileTimeSerializationCallback
     {
         /// <summary>
         /// Method called after the object has been deserialized.

@@ -13,10 +13,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Issue3018
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(builder.Target.Fields.OfName("E").Single(), nameof(PropertyTemplate));
-            builder.Advice.Override(builder.Target.Fields.OfName("G").Single(), nameof(PropertyTemplate));
-            builder.Advice.Override(builder.Target.Fields.OfName("H").Single(), nameof(PropertyTemplate));
-            builder.Advice.Override(builder.Target.Fields.OfName("I").Single(), nameof(PropertyTemplate));
+            builder.Advice.Override( builder.Target.Fields.OfName( "E" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "G" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "H" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "I" ).Single(), nameof(PropertyTemplate) );
         }
 
         [Template]
@@ -47,24 +47,24 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Issue3018
         public // Comment after keyword.
             // Comment before variable declarator.
             int A, B, C // Comment after variable declarator
-            ; // Comment after first list.
+            ;           // Comment after first list.
 
         // Comment before first list (one overridden).
         /// <summary>
         /// Doc comment for D, E, F.
         /// </summary>
         public // Comment after keyword.
-               // Comment before variable declarator.
+            // Comment before variable declarator.
             int D, E, F // Comment after variable declarator
-            ; // Comment after first list.
+            ;           // Comment after first list.
 
         // Comment before first list (all overridden).
         /// <summary>
         /// Doc comment for G, H, I.
         /// </summary>
         public // Comment after keyword.
-               // Comment before variable declarator.
+            // Comment before variable declarator.
             int G, H, I // Comment after variable declarator
-            ; // Comment after first list.
+            ;           // Comment after first list.
     }
 }

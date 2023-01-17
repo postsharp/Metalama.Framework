@@ -44,7 +44,7 @@ namespace Doc.InheritedTypeLevel
         public void Method4() { }
     }
 
-    [Inherited]
+    [Inheritable]
     internal class InheritedAspectAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )

@@ -10,13 +10,13 @@ internal class MyAspect : FieldAspect
 {
     public override void BuildAspect( IAspectBuilder<IField> builder )
     {
-        builder.Advice.AddContract( builder.Target, nameof(Filter),  tags: new { tag = "tag"} );
+        builder.Advice.AddContract( builder.Target, nameof(Filter), tags: new { tag = "tag" } );
     }
 
     [Template]
     public void Filter( dynamic? value )
     {
-        Console.WriteLine( (string?) meta.Tags["tag"] );
+        Console.WriteLine( (string?)meta.Tags["tag"] );
     }
 }
 

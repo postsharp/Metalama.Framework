@@ -12,16 +12,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.GenericNul
 
     internal class MyAspect : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(Template), args: new { T = builder.Target.Type });
+            builder.Advice.IntroduceMethod( builder.Target.DeclaringType, nameof(Template), args: new { T = builder.Target.Type } );
         }
 
         [Template]
-        public void Template<[CompileTime]T>()
+        public void Template<[CompileTime] T>()
         {
             IServiceProvider serviceProvider = null!;
-            var x = (T) serviceProvider.GetService(typeof(T));
+            var x = (T)serviceProvider.GetService( typeof(T) );
         }
     }
 
@@ -29,8 +29,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.GenericNul
     internal class C
     {
         [MyAspect]
-        string? _f;
+        private string? _f;
     }
-
-
 }

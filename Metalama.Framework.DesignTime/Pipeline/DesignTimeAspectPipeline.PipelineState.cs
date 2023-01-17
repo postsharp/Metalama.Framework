@@ -595,7 +595,8 @@ internal sealed partial class DesignTimeAspectPipeline
             var validationRunner = new DesignTimeValidatorRunner(
                 configuration.ServiceProvider,
                 state.PipelineResult,
-                configuration.ProjectModel );
+                configuration.ProjectModel,
+                compilation );
 
             IEnumerable<SyntaxTree> syntaxTreesToValidate;
 

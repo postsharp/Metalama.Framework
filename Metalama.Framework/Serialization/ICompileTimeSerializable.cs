@@ -16,7 +16,7 @@ namespace Metalama.Framework.Serialization
     /// </summary>
     /// <remarks>
     /// <para>When a type is marked as lama-serializable, all fields and automatic properties should be of a serializable type, except those
-    /// annotated with the <see cref="LamaNonSerializedAttribute"/> custom attribute. </para>
+    /// annotated with the <see cref="NonCompileTimeSerializedAttribute"/> custom attribute. </para>
     /// <para>The following system types are serializable: intrinsic types, arrays of serializable types, <see cref="DateTime"/>, <see cref="TimeSpan"/>, <see cref="CultureInfo"/>, <see cref="Guid"/>, <see cref="Dictionary{TKey,TValue}"/>,
     /// <see cref="List{T}"/>, <see cref="ImmutableArray{T}"/>, <see cref="ImmutableDictionary{TKey,TValue}"/>.
     /// </para>
@@ -25,5 +25,5 @@ namespace Metalama.Framework.Serialization
     /// <para>To serialize an <see cref="IDeclaration"/>, use the <see cref="IDeclaration.ToRef"/> method and store the <see cref="IRef{T}"/>.</para>
     /// </remarks>
     [CompileTime]
-    public interface ILamaSerializable { }
+    public interface ICompileTimeSerializable { }
 }

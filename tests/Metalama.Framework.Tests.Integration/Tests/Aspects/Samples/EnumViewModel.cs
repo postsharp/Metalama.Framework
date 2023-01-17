@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
                 return;
             }
 
-            var enumType = (INamedType) valueField.Type;
+            var enumType = (INamedType)valueField.Type;
 
             foreach (var member in enumType.Fields)
             {
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
         }
 
         [Template]
-        public bool IsMemberTemplate => meta.This._value == ( (IField) meta.Tags["member"]! ).Invokers.Final.GetValue( null );
+        public bool IsMemberTemplate => meta.This._value == ( (IField)meta.Tags["member"]! ).Invokers.Final.GetValue( null );
     }
 
     internal enum Visibility

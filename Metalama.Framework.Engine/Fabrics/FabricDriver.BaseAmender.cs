@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
@@ -25,7 +26,9 @@ internal abstract partial class FabricDriver
     {
         // The Target property is protected (and not exposed to the API) because
         private readonly FabricInstance _fabricInstance;
-        private readonly Ref<T> _targetDeclaration;
+
+        protected Ref<T> TargetDeclaration { get; }
+
         private readonly FabricManager _fabricManager;
         private AspectReceiverSelector<T>? _declarationSelector;
 
@@ -36,14 +39,14 @@ internal abstract partial class FabricDriver
             in Ref<T> targetDeclaration )
         {
             this._fabricInstance = fabricInstance;
-            this._targetDeclaration = targetDeclaration;
+            this.TargetDeclaration = targetDeclaration;
             this._fabricManager = fabricManager;
             this.Project = project;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
         private AspectReceiverSelector<T> GetAspectTargetSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this._targetDeclaration, this, CompilationModelVersion.Initial );
+            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.TargetDeclaration, this, CompilationModelVersion.Initial );
 
         public IProject Project { get; }
 
@@ -73,10 +76,16 @@ internal abstract partial class FabricDriver
 
         Type IAspectReceiverParent.Type => this._fabricInstance.Fabric.GetType();
 
-        ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
+        MethodBasedReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
             => this._fabricInstance.ValidatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
+
+        ClassBasedReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( Type type )
+            => this._fabricInstance.ValidatorDriverFactory.GetReferenceValidatorDriver( type );
 
         DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
             => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
+
+        [Memo]
+        public IAspectReceiver<T> Outbound => this.GetAspectTargetSelector().With( t => t );
     }
 }

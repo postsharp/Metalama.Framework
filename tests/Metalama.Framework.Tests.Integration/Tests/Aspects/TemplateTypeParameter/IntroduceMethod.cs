@@ -17,15 +17,12 @@ public class Aspect : TypeAspect
     }
 
     [Template]
-    private T? Method<[CompileTime] T>( T p, T[] p2, List<T> p3) where T : class 
+    private T? Method<[CompileTime] T>( T p, T[] p2, List<T> p3 ) where T : class
     {
-        return default(T);
+        return default;
     }
 }
 
 // <target>
 [Aspect]
-public class Target
-{
-  
-}
+public class Target { }

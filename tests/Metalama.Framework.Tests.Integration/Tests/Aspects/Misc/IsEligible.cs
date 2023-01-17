@@ -26,7 +26,7 @@ public class TopLevelAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods.Where( m => m.IsAspectEligible<MyAspect>() ) ).AddAspect<MyAspect>();
+        builder.Outbound.SelectMany( t => t.Methods.Where( m => m.IsAspectEligible<MyAspect>() ) ).AddAspect<MyAspect>();
     }
 }
 

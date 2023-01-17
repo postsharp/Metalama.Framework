@@ -11,7 +11,7 @@ namespace Metalama.Framework.Serialization
     /// </summary>
     /// <remarks>
     /// <para>This custom attribute is useful to add serializers to types of third-party assemblies.
-    /// For types whose source code you can modify, it is preferable to use <see cref="ILamaSerializable"/>.
+    /// For types whose source code you can modify, it is preferable to use <see cref="ICompileTimeSerializable"/>.
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true )]

@@ -8,58 +8,70 @@ using static System.Collections.Specialized.BitVector32;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
 {
-    [Inherited]
+    [Inheritable]
     public sealed class BusinessObjectModelImplementationAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            if (builder == null) throw new ArgumentNullException(nameof(builder));
-            base.BuildAspect(builder);
-
-            if (builder.Target.Is(typeof(BusinessObjectModel<>))) return;
-
-            builder.Advice.IntroduceMethod(builder.Target, nameof(CreateColumns), whenExists: OverrideStrategy.Override);
-
-            foreach (var property in GetDataClassProperties(builder.Target))
+            if (builder == null)
             {
-                builder.Advice.IntroduceProperty(builder.Target, name: property.Name, getTemplate: nameof(GetColumn),
-                    setTemplate: null, args: new { columnName = property.Name });
+                throw new ArgumentNullException( nameof(builder) );
+            }
+
+            base.BuildAspect( builder );
+
+            if (builder.Target.Is( typeof(BusinessObjectModel<>) ))
+            {
+                return;
+            }
+
+            builder.Advice.IntroduceMethod( builder.Target, nameof(CreateColumns), whenExists: OverrideStrategy.Override );
+
+            foreach (var property in GetDataClassProperties( builder.Target ))
+            {
+                builder.Advice.IntroduceProperty(
+                    builder.Target,
+                    name: property.Name,
+                    getTemplate: nameof(GetColumn),
+                    setTemplate: null,
+                    args: new { columnName = property.Name } );
             }
         }
 
-        [Template(Accessibility = Accessibility.Public)]
-        private BusinessObjectModelColumn GetColumn([CompileTime] string columnName)
+        [Template( Accessibility = Accessibility.Public )]
+        private BusinessObjectModelColumn GetColumn( [CompileTime] string columnName )
         {
             return meta.This.Columns[columnName];
         }
 
-        [Template(Accessibility = Accessibility.Protected)]
+        [Template( Accessibility = Accessibility.Protected )]
         private IList<BusinessObjectModelColumn> CreateColumns()
         {
             var columns = meta.Proceed()!;
 
-            foreach (IProperty property in GetDataClassProperties(meta.Target.Type))
+            foreach (var property in GetDataClassProperties( meta.Target.Type ))
             {
-                columns.Add(property.Attributes.Any(a => a.Type.Is(typeof(KeyAttribute)))
-                    ? new BusinessObjectModelColumn(property.Name) { VisibleInDetailView = false }
-                    : new BusinessObjectModelColumn(property.Name));
+                columns.Add(
+                    property.Attributes.Any( a => a.Type.Is( typeof(KeyAttribute) ) )
+                        ? new BusinessObjectModelColumn( property.Name ) { VisibleInDetailView = false }
+                        : new BusinessObjectModelColumn( property.Name ) );
             }
 
             return columns;
         }
 
-        private IList<IProperty> GetDataClassProperties(INamedType type)
+        private IList<IProperty> GetDataClassProperties( INamedType type )
         {
             var result = new List<IProperty>();
 
             IGeneric baseType = type.BaseType!;
             var xpoType = (INamedType)baseType.TypeArguments[0];
 
-            foreach (IProperty property in xpoType.Properties)
+            foreach (var property in xpoType.Properties)
             {
                 if (property.Accessibility == Accessibility.Public)
                 {
-                    result.Add(property);
+                    result.Add( property );
                 }
             }
 
@@ -67,13 +79,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
         }
     }
 
-    public interface ITypesInfo
-    {
-    }
+    public interface ITypesInfo { }
 
     public interface IBusinessObjectModel
     {
-        void CustomizeTypesInfo(ITypesInfo typesInfo);
+        void CustomizeTypesInfo( ITypesInfo typesInfo );
     }
 
     [BusinessObjectModelImplementation]
@@ -81,30 +91,24 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
     {
         public IDictionary<string, BusinessObjectModelColumn> Columns => throw new NotImplementedException();
 
-        public void CustomizeTypesInfo(ITypesInfo typesInfo)
-        {
-        }
+        public void CustomizeTypesInfo( ITypesInfo typesInfo ) { }
     }
 
     public sealed class BusinessObjectModelColumn
-    {        
+    {
         public bool VisibleInDetailView { get; init; }
 
-        public BusinessObjectModelColumn(string name)
-        {
-        }
+        public BusinessObjectModelColumn( string name ) { }
     }
 
     public sealed class KeyAttribute : Attribute
     {
-        public KeyAttribute(bool b)
-        {
-        }
+        public KeyAttribute( bool b ) { }
     }
 
     public sealed class UsersLoginInfo
     {
-        [Key(true)]
+        [Key( true )]
         public int Id { get; init; }
 
         public string? ProviderUserKey { get; set; }
@@ -113,8 +117,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
     // <target>
     public sealed partial class UsersLoginInfoModel : BusinessObjectModel<UsersLoginInfo>
     {
-        public UsersLoginInfoModel()
-        {
-        }
+        public UsersLoginInfoModel() { }
     }
 }

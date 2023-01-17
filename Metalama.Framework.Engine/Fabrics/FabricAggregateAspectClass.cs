@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public bool IsAbstract => false;
 
-        public bool IsInherited => false;
+        public bool? IsInheritable => false;
 
         public bool IsAttribute => false;
 
@@ -55,9 +55,13 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public ImmutableArray<AspectLayer> Layers { get; } = ImmutableArray.Create( new AspectLayer( "<Fabric>", null ) );
 
-        public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+        EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
 
-        public FormattableString GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+        EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+
+        FormattableString IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
+            EligibleScenarios requestedEligibility,
+            IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This method should not be called because it is always eligible." );
     }
 }

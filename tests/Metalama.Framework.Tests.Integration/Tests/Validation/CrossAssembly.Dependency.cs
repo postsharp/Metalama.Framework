@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder
-                .With( ns => ns )
+                .Outbound
                 .ValidateReferences( Validate, ReferenceKinds.All );
         }
 

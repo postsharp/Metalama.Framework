@@ -7,7 +7,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.TestApp.Aspects
 {
-    [Inherited]
+    [Inheritable]
     class InheritedAspect : TypeAspect
     {
         [Introduce]

@@ -39,7 +39,7 @@ namespace Metalama.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to create an advice, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows to create advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
         IAdviceFactory Advice { get; }
 
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Aspects
         /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.AspectState"/> property of
         /// the <see cref="IAspectInstance"/> interface. While a single instance of an aspect class can be used for
         /// several target declarations, the <see cref="AspectState"/> is specific to the target declaration. If the aspect
-        /// is inherited, the <see cref="AspectState"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
+        /// is inherited, the <see cref="AspectState"/> must be lama-serializable (<see cref="ICompileTimeSerializable"/> or
         /// default serializable classes).
         /// </summary>
         IAspectState? AspectState { get; set; }
@@ -105,5 +105,10 @@ namespace Metalama.Framework.Aspects
         /// Gets the declaration to which the aspect was added.
         /// </summary>
         new TAspectTarget Target { get; }
+
+        /// <summary>
+        /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
+        /// </summary>
+        IAspectReceiver<TAspectTarget> Outbound { get; }
     }
 }

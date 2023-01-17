@@ -5,59 +5,63 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAssembly
 {
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public T IntroducedMethod_Generic<T>(T x)
+        public T IntroducedMethod_Generic<T>( T x )
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return x;
         }
 
         [Introduce]
-        public int IntroducedMethod_Expression(int x) => x;
+        public int IntroducedMethod_Expression( int x ) => x;
 
         [Introduce]
         public async Task<int> IntroducedMethod_TaskAsync()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             return 42;
         }
 
         [Introduce]
         public async void IntroducedMethod_VoidAsync()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
         }
 
         [Introduce]
         public IEnumerable<int> IntroducedMethod_Iterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             yield return 42;
         }
     }
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var method in builder.Target.Methods)
+            foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Template));
+                builder.Advice.Override( method, nameof(Template) );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }

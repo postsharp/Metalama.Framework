@@ -197,7 +197,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             private const string _ignoredKey = "_n";
             private const string _importantKey = "_i";
 
-            [LamaNonSerialized]
+            [NonCompileTimeSerialized]
             public string? NoMatter;
 #pragma warning restore SA1401  // Fields should be private
 #pragma warning restore IDE0051 // Remove unused private members

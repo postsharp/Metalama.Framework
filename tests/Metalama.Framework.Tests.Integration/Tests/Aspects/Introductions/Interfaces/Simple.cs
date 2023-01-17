@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests a simple case with implicit interface member.
      */
 
-    public interface IInterface 
+    public interface IInterface
     {
         void Foo();
     }
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [InterfaceMember]
         public void Foo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 

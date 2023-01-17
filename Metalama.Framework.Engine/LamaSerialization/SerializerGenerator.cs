@@ -180,7 +180,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
 
         if ( targetType.BaseType.AllInterfaces.Contains(
-                this._runTimeReflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) ),
+                this._runTimeReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
                 SymbolEqualityComparer.Default ) )
         {
             // The base type should have a serializer.
@@ -684,7 +684,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 .Any(
                     a => SymbolEqualityComparer.Default.Equals(
                         a.AttributeClass,
-                        this._runTimeReflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) ) ) ) )
+                        this._runTimeReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) ) ) ) )
             {
                 continue;
             }

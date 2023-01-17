@@ -18,39 +18,41 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int Method()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return 42;
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int Property
         {
             get
             {
-                Console.WriteLine("This is introduced interface property.");
+                Console.WriteLine( "This is introduced interface property." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface property.");
+                Console.WriteLine( "This is introduced interface property." );
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler Event
         {
             add
             {
-                Console.WriteLine("This is introduced interface event.");
+                Console.WriteLine( "This is introduced interface event." );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced interface event.");
+                Console.WriteLine( "This is introduced interface event." );
             }
         }
     }
@@ -70,7 +72,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public int Method()
         {
-            Console.WriteLine("This is original method.");
+            Console.WriteLine( "This is original method." );
+
             return 0;
         }
 
@@ -78,13 +81,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("This is original property.");
+                Console.WriteLine( "This is original property." );
+
                 return 0;
             }
 
             set
             {
-                Console.WriteLine("This is original property.");
+                Console.WriteLine( "This is original property." );
             }
         }
 
@@ -92,12 +96,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }

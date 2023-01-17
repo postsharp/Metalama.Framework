@@ -75,6 +75,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
+        [Memo]
+        public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
+
         IDeclaration IAspectBuilder.Target => this.Target;
 
         private AspectReceiverSelector<T> GetAspectReceiverSelector()
@@ -91,7 +94,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
-        public IAdviceFactory Advice => this.AdviceFactory;
+        public IAdviceFactory Advise => this.AdviceFactory;
+
+        IAdviceFactory IAspectBuilder.Advice => this.Advise;
 
         public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
 
@@ -161,8 +166,11 @@ namespace Metalama.Framework.Engine.Aspects
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._aspectBuilderState.Configuration.BoundAspectClasses;
 
-        public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
+        public MethodBasedReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( validateMethod );
+
+        public ClassBasedReferenceValidatorDriver GetReferenceValidatorDriver( Type type )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( type );
 
         public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetDeclarationValidatorDriver( validate );

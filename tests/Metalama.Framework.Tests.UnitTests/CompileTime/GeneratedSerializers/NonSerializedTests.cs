@@ -15,9 +15,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
-    [LamaNonSerialized]
+    [NonCompileTimeSerialized]
     public int Field;
     public int Property { get; set; }
 }
@@ -57,10 +57,10 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Field;
-    [LamaNonSerialized]
+    [NonCompileTimeSerialized]
     public int Property { get; set; }
 }
 ";
@@ -99,10 +99,10 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Field;
-    [field:LamaNonSerialized]
+    [field:NonCompileTimeSerialized]
     public int Property { get; set; }
 }
 ";
@@ -141,7 +141,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Field;
     
@@ -181,7 +181,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Field;
     
@@ -221,13 +221,13 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public B Field;
     public int ManualProperty { get => this.Field.Field; set => this.Field.Field = value; }
 }
 
-public class B : ILamaSerializable
+public class B : ICompileTimeSerializable
 {
     public int Field;
 }

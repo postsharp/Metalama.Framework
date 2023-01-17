@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public int Field;
     public int Property { get; set; }
@@ -58,7 +58,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public readonly int Field;
     public int Property { get; }
@@ -103,7 +103,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public readonly B Field;
     public B Property { get; }
@@ -162,7 +162,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public B Property { get; init; }
 
@@ -221,7 +221,7 @@ public class B
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : ILamaSerializable
+public class A : ICompileTimeSerializable
 {
     public A()
     {
@@ -258,7 +258,7 @@ public class A : ILamaSerializable
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A<T> : ILamaSerializable
+public class A<T> : ICompileTimeSerializable
 {
     public T Property { get; }
 
@@ -310,7 +310,7 @@ public class A<T>
     }
 }
 
-public class B : ILamaSerializable
+public class B : ICompileTimeSerializable
 {
     public A<object> Field;
     public A<int> Property { get; set; }
@@ -370,7 +370,7 @@ public class A<T>
     }
 }
 
-public class B<T> : ILamaSerializable
+public class B<T> : ICompileTimeSerializable
 {
     public A<T> Property { get; set; }
 
@@ -416,7 +416,7 @@ using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A
 {
-    public class B : ILamaSerializable
+    public class B : ICompileTimeSerializable
     {
         public int Field;
         public int Property { get; set; }
@@ -460,7 +460,7 @@ using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A<T>
 {
-    public class B<U> : ILamaSerializable
+    public class B<U> : ICompileTimeSerializable
     {
         public T Field;
         public U Property { get; set; }
