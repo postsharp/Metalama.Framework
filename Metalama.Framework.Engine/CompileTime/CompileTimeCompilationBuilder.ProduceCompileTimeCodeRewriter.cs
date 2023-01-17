@@ -348,7 +348,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 // Eliminate system types.
-                if ( SystemTypeDetector.IsSystemType( symbol ) )
+                if ( this._parent.PredefinedTypes.Contains( symbol.GetFullMetadataName() ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

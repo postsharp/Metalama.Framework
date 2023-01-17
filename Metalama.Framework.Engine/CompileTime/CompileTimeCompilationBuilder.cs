@@ -56,6 +56,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ITaskRunner _taskRunner;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
+    private readonly Lazy<ImmutableArray<string>> _predefinedTypesArray;
 
     private static ImmutableDictionary<string, string> GetPredefinedSyntaxTrees()
     {
@@ -75,6 +76,13 @@ internal sealed partial class CompileTimeCompilationBuilder
                 } );
     }
 
+    public ImmutableArray<string> GetPredefinedTypes()
+    {
+        var emptyCompilation = this.CreateEmptyCompileTimeCompilation( string.Empty, Array.Empty<CompileTimeProject>() );
+
+        return emptyCompilation.Assembly.GetTypes().Select( t => t.GetFullMetadataName() ).ToImmutableArray();
+    }
+
     private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
     private readonly CompilationContextFactory _compilationContextFactory;
     private readonly ITempFileManager _tempFileManager;
@@ -92,7 +100,11 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
         this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
         this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
+
+        this._predefinedTypesArray = new( this.GetPredefinedTypes );
     }
+
+    public ImmutableArray<string> PredefinedTypes => this._predefinedTypesArray.Value;
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
     {

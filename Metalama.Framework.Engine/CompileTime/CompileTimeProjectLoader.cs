@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -42,6 +43,8 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
     private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
 
     public AttributeDeserializer AttributeDeserializer { get; }
+
+    public ImmutableArray<string> PredefinedTypes => this._builder.PredefinedTypes;
 
     private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider ) : this(
         domain,

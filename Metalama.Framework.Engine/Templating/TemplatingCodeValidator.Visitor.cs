@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -33,6 +34,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
             private readonly bool _hasCompileTimeCodeFast;
+            private readonly ImmutableArray<string> _predefinedTypes;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -60,6 +62,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
+                this._predefinedTypes = serviceProvider.GetRequiredService<CompileTimeProjectLoader>().PredefinedTypes;
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -447,9 +450,10 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 // Report error when we have compile-time code but no namespace import for fast detection.
-                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
-                                                          && !SystemTypeDetector.IsSystemType(
-                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
+                if ( scope != TemplatingScope.RunTimeOnly &&
+                     !this._hasCompileTimeCodeFast &&
+                     !this._predefinedTypes.Contains(
+                        ( declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ).GetFullMetadataName() ) )
                 {
                     var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
 
