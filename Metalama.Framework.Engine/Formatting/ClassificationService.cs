@@ -24,6 +24,11 @@ namespace Metalama.Framework.Engine.Formatting
 
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {
+            return this.GetClassifiedTextSpans( model, polish: true, cancellationToken );
+        }
+
+        internal ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, bool polish, CancellationToken cancellationToken )
+        {
             var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticBag();
 
@@ -35,7 +40,11 @@ namespace Metalama.Framework.Engine.Formatting
             var text = model.SyntaxTree.GetText();
             var classifier = new TextSpanClassifier( text, cancellationToken );
             classifier.Visit( annotatedSyntaxRoot );
-            classifier.ClassifiedTextSpans.Polish();
+
+            if ( polish )
+            {
+                classifier.ClassifiedTextSpans.Polish();
+            }
 
             return classifier.ClassifiedTextSpans;
         }
