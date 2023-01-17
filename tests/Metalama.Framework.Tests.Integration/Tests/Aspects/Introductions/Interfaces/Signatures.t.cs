@@ -15,12 +15,12 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
       }
       else
       {
-        return (T? )default(T? );
+        return default;
       }
     }
     else
     {
-      return (T? )default(T? );
+      return default;
     }
   }
   public T? GenericMethod_Multiple<T, U>(T? x, U? y)
@@ -39,12 +39,12 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
     }
     else
     {
-      return (T? )default(T? );
+      return default;
     }
   }
   public void GenericMethod_Out<T>(out T? x)
   {
-    x = default(T? );
+    x = default;
   }
   public T? GenericMethod_Ref<T>(ref T? x)
   {

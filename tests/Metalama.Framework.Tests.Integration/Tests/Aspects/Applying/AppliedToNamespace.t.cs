@@ -1,6 +1,6 @@
 internal class C
 {
-    public void IntroducedMethod()
-    {
-    }
+  public void IntroducedMethod()
+  {
+  }
 }
