@@ -12,7 +12,7 @@ public class MyAdviceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
 {
     public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advise.IntroduceField( (INamedType)builder.Target, templateMemberId );
+        builder.Advice.IntroduceField( (INamedType)builder.Target, templateMemberId );
     }
 
     TemplateAttributeProperties? ITemplateAttribute.Properties => null;

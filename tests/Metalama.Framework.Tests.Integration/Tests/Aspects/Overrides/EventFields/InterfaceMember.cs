@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advise.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
+                builder.Advice.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.ImplementInterface( builder.Target, typeof(IntroducedInterface) );
+            builder.Advice.ImplementInterface( builder.Target, typeof(IntroducedInterface) );
         }
 
         [InterfaceMember( IsExplicit = false )]

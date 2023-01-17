@@ -8,12 +8,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var newEvent = builder.Advise.IntroduceEvent(
+            var newEvent = builder.Advice.IntroduceEvent(
                     builder.Target,
                     nameof(PropertyChanged) )
                 .Declaration;
 
-            builder.Advise.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
                 tags: new { @event = newEvent } );

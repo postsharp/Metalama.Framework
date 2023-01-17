@@ -17,12 +17,12 @@ public class MyAspect : MethodAspect
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         // Zero parameter.
-        builder.Advise.IntroduceAttribute(
+        builder.Advice.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create( typeof(MyAttribute) ) );
 
         // One parameter.
-        builder.Advise.IntroduceAttribute(
+        builder.Advice.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
@@ -30,7 +30,7 @@ public class MyAspect : MethodAspect
             whenExists: OverrideStrategy.New );
 
         // Many parameters.
-        builder.Advise.IntroduceAttribute(
+        builder.Advice.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
@@ -38,7 +38,7 @@ public class MyAspect : MethodAspect
             whenExists: OverrideStrategy.New );
 
         // Passing an array.
-        builder.Advise.IntroduceAttribute(
+        builder.Advice.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),

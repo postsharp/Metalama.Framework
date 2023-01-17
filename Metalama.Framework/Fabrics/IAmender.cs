@@ -27,6 +27,6 @@ namespace Metalama.Framework.Fabrics
         /// <summary>
         /// Gets an object that allows to add child advice and to validate code and code references.
         /// </summary>
-        IAspectReceiver<T> Amend { get; }
+        IAspectReceiver<T> Outbound { get; }
     }
 }

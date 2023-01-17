@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectState
                     break;
 
                 case "Second":
-                    builder.Advise.Override( builder.Target, nameof(OverrideMethod), args: new { value = ( (State)builder.AspectState! ).Value } );
+                    builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { value = ( (State)builder.AspectState! ).Value } );
 
                     break;
             }

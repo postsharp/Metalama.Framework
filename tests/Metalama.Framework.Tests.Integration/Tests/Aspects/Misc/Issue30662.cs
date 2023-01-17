@@ -9,7 +9,7 @@ internal class RegisterInstanceAttribute : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advise.IntroduceParameter(
+        builder.Advice.IntroduceParameter(
             builder.Target,
             "instanceRegistry",
             typeof(IInstanceRegistry),
@@ -20,7 +20,7 @@ internal class RegisterInstanceAttribute : ConstructorAspect
                     TypeFactory.GetType( typeof(IInstanceRegistry) ),
                     TypedConstant.Default( typeof(IInstanceRegistry) ) ) );
 
-        builder.Advise.AddInitializer( builder.Target, StatementFactory.Parse( "instanceRegistry.Register( this );" ) );
+        builder.Advice.AddInitializer( builder.Target, StatementFactory.Parse( "instanceRegistry.Register( this );" ) );
     }
 }
 

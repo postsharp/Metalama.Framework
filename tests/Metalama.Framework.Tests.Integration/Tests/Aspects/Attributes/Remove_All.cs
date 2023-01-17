@@ -11,7 +11,7 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
 
     public void BuildAspect( IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advise.RemoveAttributes( builder.Target, GetType() );
+        builder.Advice.RemoveAttributes( builder.Target, GetType() );
     }
 }
 

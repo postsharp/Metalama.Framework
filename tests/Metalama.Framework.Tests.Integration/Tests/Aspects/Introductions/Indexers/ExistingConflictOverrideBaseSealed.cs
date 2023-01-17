@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceIndexer(
+            builder.Advice.IntroduceIndexer(
                 builder.Target,
                 new[] { ( typeof(int), "x" ) },
                 nameof(ExistingIndexer),

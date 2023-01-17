@@ -12,7 +12,7 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advise.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(SerializableAttribute) ) );
+        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(SerializableAttribute) ) );
     }
 }
 
@@ -20,7 +20,7 @@ public class MyFabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Amend.SelectMany( c => c.Types.OfName( "C" ) ).AddAspect<MyAspect>();
+        amender.Outbound.SelectMany( c => c.Types.OfName( "C" ) ).AddAspect<MyAspect>();
     }
 }
 

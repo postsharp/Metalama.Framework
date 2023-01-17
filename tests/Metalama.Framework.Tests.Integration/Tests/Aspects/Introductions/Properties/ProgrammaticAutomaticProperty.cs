@@ -8,13 +8,13 @@ public class MyAspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Default
-        builder.Advise.IntroduceAutomaticProperty( builder.Target, "P1", typeof(int) );
+        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P1", typeof(int) );
 
         // Change property visibility.
-        builder.Advise.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildProperty: p => { p.Accessibility = Accessibility.Protected; } );
+        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildProperty: p => { p.Accessibility = Accessibility.Protected; } );
 
         // Change accessor visibility.
-        builder.Advise.IntroduceAutomaticProperty(
+        builder.Advice.IntroduceAutomaticProperty(
             builder.Target,
             "P3",
             typeof(int),

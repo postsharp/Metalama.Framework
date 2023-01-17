@@ -56,11 +56,11 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advise.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
+        builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
 
         foreach (var property in builder.Target.Properties.Where( p => !p.IsAbstract && p.Writeability == Writeability.All ))
         {
-            builder.Advise.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
         }
     }
 
@@ -94,7 +94,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
 
         // Introduce a property in the main type to store the Optional object.
         var optionalValuesProperty =
-            builder.Advise.IntroduceProperty(
+            builder.Advice.IntroduceProperty(
                 builder.Target,
                 nameof(OptionalValues),
                 buildProperty: p =>
@@ -109,7 +109,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
         foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
         {
             // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
-            var builtProperty = builder.Advise.IntroduceProperty(
+            var builtProperty = builder.Advice.IntroduceProperty(
                     nestedType,
                     nameof(OptionalPropertyTemplate),
                     buildProperty: p =>
@@ -120,7 +120,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
                 .Declaration;
 
             // Override the property in the target type so that it is forwarded to the nested type.
-            builder.Advise.Override(
+            builder.Advice.Override(
                 property,
                 nameof(OverridePropertyTemplate),
                 tags: new { optionalProperty = builtProperty } );

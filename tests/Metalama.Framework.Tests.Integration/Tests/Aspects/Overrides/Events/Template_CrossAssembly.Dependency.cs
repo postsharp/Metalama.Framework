@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.Te
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advise.OverrideAccessors(@event, nameof(Override), nameof(Override), null);
+                builder.Advice.OverrideAccessors(@event, nameof(Override), nameof(Override), null);
             }
         }
 

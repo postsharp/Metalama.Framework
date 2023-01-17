@@ -16,7 +16,7 @@ internal class NotNullAttribute : MethodAspect
                           && !p.Type.IsNullable.GetValueOrDefault()
                           && p.Type.IsReferenceType.GetValueOrDefault() ) )
         {
-            builder.Advise.AddContract( parameter, nameof(this.Validate), args: new { parameterName = parameter.Name } );
+            builder.Advice.AddContract( parameter, nameof(this.Validate), args: new { parameterName = parameter.Name } );
         }
     }
 

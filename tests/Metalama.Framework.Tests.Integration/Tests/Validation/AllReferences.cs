@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder
-                .Amend
+                .Outbound
                 .ValidateReferences( Validate, ReferenceKinds.All );
         }
 

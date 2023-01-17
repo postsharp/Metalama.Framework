@@ -14,7 +14,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
         {
             foreach (var method in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advise.Override( method, nameof(Template), tags: new { name = method.Name } );
+                builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
             }
         }
 

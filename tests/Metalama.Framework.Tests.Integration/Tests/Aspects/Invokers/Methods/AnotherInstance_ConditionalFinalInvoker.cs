@@ -15,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advise.IntroduceMethod(
+            aspectBuilder.Advice.IntroduceMethod(
                 aspectBuilder.Target,
                 nameof(OverrideMethod),
                 whenExists: OverrideStrategy.Override,
@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
                     m.ReturnType = TypeFactory.GetType( SpecialType.Void );
                 } );
 
-            aspectBuilder.Advise.IntroduceMethod(
+            aspectBuilder.Advice.IntroduceMethod(
                 aspectBuilder.Target,
                 nameof(OverrideMethod),
                 whenExists: OverrideStrategy.Override,

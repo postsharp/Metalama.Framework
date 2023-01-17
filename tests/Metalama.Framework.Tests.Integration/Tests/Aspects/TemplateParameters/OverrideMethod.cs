@@ -10,7 +10,7 @@ public class Aspect : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advise.Override( builder.Target, nameof(Method), args: new { a = 5, t = builder.Target.ReturnType } );
+        builder.Advice.Override( builder.Target, nameof(Method), args: new { a = 5, t = builder.Target.ReturnType } );
     }
 
     [Template]

@@ -23,7 +23,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithPa
                     _ => throw new Exception()
                 };
 
-                builder.Advise.Override( o, templateName );
+                builder.Advice.Override( o, templateName );
             }
         }
 

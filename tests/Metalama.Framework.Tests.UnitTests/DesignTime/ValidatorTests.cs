@@ -29,7 +29,7 @@ public class Aspect : TypeAspect
 {
    public override void BuildAspect( IAspectBuilder<INamedType> builder )
    {
-        builder.Amend.ValidateReferences( this.Validate, ReferenceKinds.All );
+        builder.Outbound.ValidateReferences( this.Validate, ReferenceKinds.All );
    }
 
     private void Validate( in ReferenceValidationContext context ) {}
@@ -64,7 +64,7 @@ public class Aspect1 : TypeAspect
 {
    public override void BuildAspect( IAspectBuilder<INamedType> builder )
    {
-        builder.Amend.ValidateReferences( this.Validate, ReferenceKinds.All );
+        builder.Outbound.ValidateReferences( this.Validate, ReferenceKinds.All );
    }
 
     private void Validate( in ReferenceValidationContext context ) {}
@@ -74,7 +74,7 @@ public class Aspect2 : TypeAspect
 {
    public override void BuildAspect( IAspectBuilder<INamedType> builder )
    {
-        builder.Amend.ValidateReferences( this.Validate, ReferenceKinds.All );
+        builder.Outbound.ValidateReferences( this.Validate, ReferenceKinds.All );
    }
 
     private void Validate( in ReferenceValidationContext context ) {}

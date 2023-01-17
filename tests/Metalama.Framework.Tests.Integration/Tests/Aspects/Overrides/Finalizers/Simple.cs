@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Simpl
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.Override( builder.Target.Finalizer!, nameof(Template) );
+            builder.Advice.Override( builder.Target.Finalizer!, nameof(Template) );
         }
 
         [Template]

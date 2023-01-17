@@ -14,12 +14,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), null );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
             }
 
             foreach (var indexer in builder.Target.Properties)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), null );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
             }
         }
 
@@ -38,7 +38,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advise.OverrideAccessors( property, nameof(GetProperty), nameof(SetProperty) );
+                builder.Advice.OverrideAccessors( property, nameof(GetProperty), nameof(SetProperty) );
             }
         }
 

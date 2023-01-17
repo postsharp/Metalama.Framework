@@ -15,7 +15,7 @@ public class TheAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Amend.ValidateReferences( ValidateReference, ReferenceKinds.All );
+        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
     }
 
     private void ValidateReference( in ReferenceValidationContext context )

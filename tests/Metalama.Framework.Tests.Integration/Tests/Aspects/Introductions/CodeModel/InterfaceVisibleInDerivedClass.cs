@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             if (!aspectBuilder.Target.AllImplementedInterfaces.Contains( typeof(IInterface) ))
             {
-                aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+                aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
             }
         }
     }

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Layers
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advise.Override( builder.Target, nameof(OverrideMethod), args: new { layerName = builder.Layer } );
+            builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { layerName = builder.Layer } );
         }
 
         [Template]

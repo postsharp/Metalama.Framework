@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var methodBuilder = builder.Advise.IntroduceMethod(
+            var methodBuilder = builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Method) );
         }

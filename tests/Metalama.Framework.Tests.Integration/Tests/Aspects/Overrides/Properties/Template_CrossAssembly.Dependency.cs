@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advise.Override(property, nameof(Override));
+                builder.Advice.Override(property, nameof(Override));
             }
         }
 

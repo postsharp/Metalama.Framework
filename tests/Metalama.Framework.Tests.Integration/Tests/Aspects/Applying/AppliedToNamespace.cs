@@ -12,7 +12,7 @@ public class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Amend.AddAspect<MyNamespaceAspect>();
+        amender.Outbound.AddAspect<MyNamespaceAspect>();
     }
 }
 
@@ -20,7 +20,7 @@ public class MyNamespaceAspect : IAspect<INamespace>
 {
     public void BuildAspect( IAspectBuilder<INamespace> builder )
     {
-        builder.Amend.SelectMany( ns => ns.Types ).AddAspectIfEligible<MyTypeAspect>();
+        builder.Outbound.SelectMany( ns => ns.Types ).AddAspectIfEligible<MyTypeAspect>();
     }
 
     public void BuildEligibility( IEligibilityBuilder<INamespace> builder ) { }

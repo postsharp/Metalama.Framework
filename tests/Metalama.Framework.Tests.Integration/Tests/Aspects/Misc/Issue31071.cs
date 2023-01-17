@@ -30,7 +30,7 @@ public sealed class XpoDefaultValueAutoImplementationAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advise.IntroduceMethod(
+        builder.Advice.IntroduceMethod(
             builder.Target,
             nameof(AfterConstruction),
             whenExists: OverrideStrategy.Override );

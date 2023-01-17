@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override,
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                     m.ReturnType = builder.Target;
                 } );
 
-            builder.Advise.ImplementInterface(
+            builder.Advice.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore );

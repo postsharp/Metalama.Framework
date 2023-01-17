@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Diagnostics.Report( ManualAssert.WithArguments( "Manually assert that 3 errors are reported on this class." ) );
-            builder.Advise.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyStaticExplicitlyVirtual), buildMethod: b => b.IsVirtual = true );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyStaticExplicitlyVirtual), buildMethod: b => b.IsVirtual = true );
         }
 
         [Template]
@@ -30,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyStaticImplicitlyVirtual), scope: IntroductionScope.Static );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyStaticImplicitlyVirtual), scope: IntroductionScope.Static );
         }
 
         [Template]
@@ -44,7 +44,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Method_ExplicitlyStaticExplicitlyVirtual),
                 scope: IntroductionScope.Static,

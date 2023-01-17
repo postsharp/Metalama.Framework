@@ -31,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Paramete
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Amend.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
         }
 
         [Introduce]

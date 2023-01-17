@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advise.Override( property, nameof(Template) );
+                builder.Advice.Override( property, nameof(Template) );
             }
         }
 

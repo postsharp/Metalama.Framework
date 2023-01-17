@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
     {
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Advise.Override(builder.Target, nameof(Override));
+            builder.Advice.Override(builder.Target, nameof(Override));
         }
 
         [Template]
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
     {
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Advise.Override(builder.Target, nameof(Override));
+            builder.Advice.Override(builder.Target, nameof(Override));
         }
 
         [Template]

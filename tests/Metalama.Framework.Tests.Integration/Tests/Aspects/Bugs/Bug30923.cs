@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30923
 
             foreach (var property in builder.Target.Properties.Where( p => p.Type.Is( typeof(int) ) ))
             {
-                builder.Advise.Override( property, nameof(TheAnswer) );
+                builder.Advice.Override( property, nameof(TheAnswer) );
             }
         }
 

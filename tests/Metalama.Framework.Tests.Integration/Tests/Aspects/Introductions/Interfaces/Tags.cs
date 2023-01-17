@@ -32,8 +32,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new { TestTag = "TestValue_For_Interface1" } );
-            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" } );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new { TestTag = "TestValue_For_Interface1" } );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" } );
         }
 
         [InterfaceMember]

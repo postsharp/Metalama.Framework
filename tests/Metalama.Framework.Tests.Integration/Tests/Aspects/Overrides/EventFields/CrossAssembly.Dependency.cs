@@ -27,7 +27,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Cros
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advise.OverrideAccessors( @event, nameof(Template), nameof(Template) );
+                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template) );
             }
         }
 

@@ -8,10 +8,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceEvent( builder.Target, nameof(EventField), buildEvent: e => e.Accessibility = Accessibility.Public );
-            builder.Advise.IntroduceEvent( builder.Target, nameof(Event), buildEvent: e => e.Accessibility = Accessibility.Public );
+            builder.Advice.IntroduceEvent( builder.Target, nameof(EventField), buildEvent: e => e.Accessibility = Accessibility.Public );
+            builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildEvent: e => e.Accessibility = Accessibility.Public );
 
-            builder.Advise.IntroduceEvent(
+            builder.Advice.IntroduceEvent(
                 builder.Target,
                 "EventFromAccessors",
                 nameof(AddEventTemplate),

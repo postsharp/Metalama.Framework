@@ -14,14 +14,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         {
             foreach (var constructor in builder.Target.Constructors)
             {
-                var parameter = builder.Advise.IntroduceParameter(
+                var parameter = builder.Advice.IntroduceParameter(
                         constructor,
                         "dependency",
                         typeof(int),
                         TypedConstant.Create( 0 ) )
                     .Declaration;
 
-                builder.Advise.AddContract( parameter, nameof(Validate) );
+                builder.Advice.AddContract( parameter, nameof(Validate) );
             }
         }
 

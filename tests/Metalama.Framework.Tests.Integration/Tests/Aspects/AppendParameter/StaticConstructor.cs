@@ -9,7 +9,7 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advise.IntroduceParameter( builder.Target.StaticConstructor!, "p", typeof(int), TypedConstant.Create( 15 ) );
+        builder.Advice.IntroduceParameter( builder.Target.StaticConstructor!, "p", typeof(int), TypedConstant.Create( 15 ) );
     }
 }
 

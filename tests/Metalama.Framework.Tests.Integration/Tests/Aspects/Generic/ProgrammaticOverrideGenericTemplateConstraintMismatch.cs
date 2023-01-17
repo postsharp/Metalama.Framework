@@ -8,7 +8,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOv
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advise.Override( builder.Target, nameof(OverrideMethod) );
+            builder.Advice.Override( builder.Target, nameof(OverrideMethod) );
         }
 
         [Template]

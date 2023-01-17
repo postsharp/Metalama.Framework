@@ -19,12 +19,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
+            builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
 
             foreach (var property in builder.Target.Properties
                          .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
             {
-                builder.Advise.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
+                builder.Advice.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
             }
         }
 

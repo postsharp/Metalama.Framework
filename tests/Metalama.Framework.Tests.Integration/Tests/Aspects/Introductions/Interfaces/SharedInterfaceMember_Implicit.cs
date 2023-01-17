@@ -12,8 +12,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Share
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface1) );
-            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface2) );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface1) );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2) );
         }
 
         [InterfaceMember( IsExplicit = false )]

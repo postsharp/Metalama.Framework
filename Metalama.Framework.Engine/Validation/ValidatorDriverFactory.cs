@@ -8,14 +8,14 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
+internal sealed class ValidatorDriverFactory : IValidatorDriverFactory, IDisposable
 {
     private static readonly WeakCache<Type, ClassBasedReferenceValidatorDriver> _classBasedDrivers = new();
+    private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
 
     private readonly Type _aspectOrFabricType;
     private readonly WeakCache<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();
-    private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
-
+    
     public static ValidatorDriverFactory GetInstance( Type aspectOrFabricType )
     {
         // The factory method is static, and does not depend on IServiceProvider nor is provided by IServiceProvider, because we want
@@ -51,4 +51,6 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
 
         return new MethodBasedReferenceValidatorDriver( method, compiled );
     }
+
+    public void Dispose() => this._methodBasedDrivers.Dispose();
 }

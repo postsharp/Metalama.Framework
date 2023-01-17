@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
 
             foreach (var member in enumType.Fields)
             {
-                var propertyBuilder = builder.Advise.IntroduceProperty(
+                var propertyBuilder = builder.Advice.IntroduceProperty(
                     builder.Target,
                     nameof(IsMemberTemplate),
                     buildProperty: p => p.Name = "Is" + member.Name,

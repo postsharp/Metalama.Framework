@@ -8,7 +8,7 @@ internal class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advise.WithTemplateProvider( new MyTemplateProvider() ).IntroduceMethod( builder.Target, nameof(MyTemplateProvider.NewMethod) );
+        builder.Advice.WithTemplateProvider( new MyTemplateProvider() ).IntroduceMethod( builder.Target, nameof(MyTemplateProvider.NewMethod) );
     }
 }
 

@@ -28,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAsse
         {
             foreach(var field in builder.Target.Fields)
             {
-                builder.Advise.Override(field, nameof(Template));
+                builder.Advice.Override(field, nameof(Template));
             }
         }
 

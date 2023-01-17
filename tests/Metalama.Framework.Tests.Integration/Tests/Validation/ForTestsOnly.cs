@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
 
         public void BuildAspect( IAspectBuilder<IDeclaration> builder )
         {
-            builder.Amend.ValidateReferences( ValidateReference, ReferenceKinds.All );
+            builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
         }
 
         private void ValidateReference( in ReferenceValidationContext context )

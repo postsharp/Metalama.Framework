@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAs
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceIndexer( builder.Target, typeof(int), nameof(Template), nameof(Template) );
+            builder.Advice.IntroduceIndexer( builder.Target, typeof(int), nameof(Template), nameof(Template) );
         }
 
         [Template]
@@ -31,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAs
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(Template), nameof(Template) );
+                builder.Advice.OverrideAccessors( indexer, nameof(Template), nameof(Template) );
             }
         }
 

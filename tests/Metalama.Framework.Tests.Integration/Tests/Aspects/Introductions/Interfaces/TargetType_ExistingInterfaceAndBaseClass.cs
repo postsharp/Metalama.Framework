@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
     {
         public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.Advise.ImplementInterface(aspectBuilder.Target, typeof(IIntroducedInterface));
+            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IIntroducedInterface));
         }
 
         [InterfaceMember]

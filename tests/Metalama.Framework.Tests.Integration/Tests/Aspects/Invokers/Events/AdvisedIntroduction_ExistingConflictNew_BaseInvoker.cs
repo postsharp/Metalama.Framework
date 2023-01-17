@@ -137,7 +137,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             foreach ( var e in builder.Target.Events )
             {
-                builder.Advise.OverrideAccessors(e, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advice.OverrideAccessors(e, nameof(OverrideAdd), nameof(OverrideRemove));
             }
         }
 

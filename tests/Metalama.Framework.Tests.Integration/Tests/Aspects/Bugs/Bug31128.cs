@@ -25,11 +25,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
                 return;
             }
 
-            builder.Advise.IntroduceMethod( builder.Target, nameof(CreateColumns), whenExists: OverrideStrategy.Override );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(CreateColumns), whenExists: OverrideStrategy.Override );
 
             foreach (var property in GetDataClassProperties( builder.Target ))
             {
-                builder.Advise.IntroduceProperty(
+                builder.Advice.IntroduceProperty(
                     builder.Target,
                     name: property.Name,
                     getTemplate: nameof(GetColumn),

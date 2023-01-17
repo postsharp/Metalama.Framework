@@ -16,7 +16,7 @@ public class GenerateMethodsAttribute : TypeAspect
 
         foreach (var field in builder.Target.Fields)
         {
-            builder.Advise.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(this.Use),
                 args: new { field = field, T = field.Type },

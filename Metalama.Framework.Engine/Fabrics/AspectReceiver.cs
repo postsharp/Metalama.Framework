@@ -91,10 +91,9 @@ namespace Metalama.Framework.Engine.Fabrics
                     nameof(validateMethod),
                     $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
             }
-            
+
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
-
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
@@ -368,7 +367,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 targets = this._selector( compilation, diagnosticAdder ).ToList();
             }
 
-            foreach ( var targetDeclaration in targets  )
+            foreach ( var targetDeclaration in targets )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 

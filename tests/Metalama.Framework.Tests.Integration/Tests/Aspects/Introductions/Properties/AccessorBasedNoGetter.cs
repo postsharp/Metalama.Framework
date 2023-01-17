@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceProperty( builder.Target, "TheProperty", null, nameof(Setter) );
+            builder.Advice.IntroduceProperty( builder.Target, "TheProperty", null, nameof(Setter) );
         }
     }
 

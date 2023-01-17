@@ -16,7 +16,7 @@ public class MyAspect : MethodAspect
 {
     public override void BuildAspect(IAspectBuilder<IMethod> builder)
     {
-        builder.Advise.IntroduceAttribute(
+        builder.Advice.IntroduceAttribute(
             builder.Target, 
             AttributeConstruction.Create(
                 typeof(MyAttribute),

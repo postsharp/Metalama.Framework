@@ -7,7 +7,7 @@ internal class NormalizeAttribute : FieldOrPropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advise.Override( builder.Target, nameof(this.OverrideProperty) );
+        builder.Advice.Override( builder.Target, nameof(this.OverrideProperty) );
     }
 
     [Template]

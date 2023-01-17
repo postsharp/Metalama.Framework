@@ -14,7 +14,7 @@ public class MyAspect : Aspect, IAspect<IMethod>, IAspect<INamedType>
 
     public void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Amend.Select( t => t.DeclaringType ).AddAspect<MyAspect>( _ => this );
+        builder.Outbound.Select( t => t.DeclaringType ).AddAspect<MyAspect>( _ => this );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }

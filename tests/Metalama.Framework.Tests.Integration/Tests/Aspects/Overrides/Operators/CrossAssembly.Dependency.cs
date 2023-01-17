@@ -13,14 +13,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceUnaryOperator(
+            builder.Advice.IntroduceUnaryOperator(
                 builder.Target,
                 nameof(UnaryOperatorTemplate),
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.UnaryNegation );
 
-            builder.Advise.IntroduceBinaryOperator(
+            builder.Advice.IntroduceBinaryOperator(
                 builder.Target,
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
@@ -28,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.Addition );
 
-            builder.Advise.IntroduceConversionOperator(
+            builder.Advice.IntroduceConversionOperator(
                 builder.Target,
                 nameof(ConversionOperatorTemplate),
                 builder.Target,
@@ -66,7 +66,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advise.Override( method, nameof(Template) );
+                builder.Advice.Override( method, nameof(Template) );
             }
         }
 

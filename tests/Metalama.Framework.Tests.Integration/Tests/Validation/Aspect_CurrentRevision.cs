@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.Aspect_CurrentRevision
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Amend.SelectMany( t => t.Methods ).Validate( Validate );
+            builder.Outbound.SelectMany( t => t.Methods ).Validate( Validate );
         }
 
         private static void Validate( in DeclarationValidationContext context )

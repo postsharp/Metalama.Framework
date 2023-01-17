@@ -13,7 +13,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Advising
 {
     /// <summary>
-    /// Exposes all factory methods to create advice. Exposed on the <see cref="IAspectBuilder.Advise"/> property
+    /// Exposes all factory methods to create advice. Exposed on the <see cref="IAspectBuilder.Advice"/> property
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectBuilder"/>.
     /// </summary>
     /// <seealso href="@advising-code"/>

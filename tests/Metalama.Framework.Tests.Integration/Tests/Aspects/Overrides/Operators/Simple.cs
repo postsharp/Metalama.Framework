@@ -15,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
         {
             foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advise.Override( o, nameof(Template) );
+                builder.Advice.Override( o, nameof(Template) );
             }
         }
 

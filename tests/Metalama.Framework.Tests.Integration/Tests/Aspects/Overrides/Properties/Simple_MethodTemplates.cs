@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advise.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]

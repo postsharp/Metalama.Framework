@@ -28,9 +28,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advise.ImplementInterface(builder.Target, (INamedType)TypeFactory.GetType(typeof(IntroducedInterface)));
+            builder.Advice.ImplementInterface(builder.Target, (INamedType)TypeFactory.GetType(typeof(IntroducedInterface)));
 
-            builder.Amend.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
         }
 
         [InterfaceMember(IsExplicit = false)]

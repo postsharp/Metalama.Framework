@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Diagnostics.Report( ManualAssert.WithArguments( "Manually assert that 2 error is reported on this class." ) );
-            builder.Advise.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyInstance) );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyInstance) );
         }
 
         [Template]
@@ -30,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyInstance), scope: IntroductionScope.Instance );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyInstance), scope: IntroductionScope.Instance );
         }
 
         [Template]

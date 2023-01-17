@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Finalizers.E
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var introductionResult = builder.Advise.IntroduceFinalizer( builder.Target, nameof(IntroduceTemplate), whenExists: OverrideStrategy.Ignore );
+            var introductionResult = builder.Advice.IntroduceFinalizer( builder.Target, nameof(IntroduceTemplate), whenExists: OverrideStrategy.Ignore );
         }
 
         [Template]

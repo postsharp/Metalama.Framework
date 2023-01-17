@@ -20,15 +20,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advise.ImplementInterface(
+            aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(aspectBuilder.Target.TypeParameters[0]));
 
-            aspectBuilder.Advise.ImplementInterface(
+            aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(TypeFactory.MakeArrayType(aspectBuilder.Target.TypeParameters[0])));
 
-            aspectBuilder.Advise.ImplementInterface(
+            aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 ((INamedType)TypeFactory.GetType(typeof(IInterface<>)))
                 .WithTypeArguments(

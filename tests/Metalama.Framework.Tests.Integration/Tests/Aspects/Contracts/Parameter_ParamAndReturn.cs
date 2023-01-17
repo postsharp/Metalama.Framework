@@ -10,11 +10,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
     {
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Advise.AddContract(builder.Target.ReturnParameter, nameof(Filter));
+            builder.Advice.AddContract(builder.Target.ReturnParameter, nameof(Filter));
 
             foreach (var parameter in builder.Target.Parameters)
             {
-                builder.Advise.AddContract(parameter, nameof(Filter));
+                builder.Advice.AddContract(parameter, nameof(Filter));
             }
         }
 

@@ -86,6 +86,6 @@ internal abstract partial class FabricDriver
             => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
 
         [Memo]
-        public IAspectReceiver<T> Amend => this.GetAspectTargetSelector().With( t => t );
+        public IAspectReceiver<T> Outbound => this.GetAspectTargetSelector().With( t => t );
     }
 }

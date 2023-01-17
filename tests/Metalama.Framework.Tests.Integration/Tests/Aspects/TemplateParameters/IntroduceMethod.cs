@@ -10,7 +10,7 @@ public class Aspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advise.IntroduceMethod( builder.Target, nameof(Method), args: new { a = 5 } );
+        builder.Advice.IntroduceMethod( builder.Target, nameof(Method), args: new { a = 5 } );
     }
 
     [Template]

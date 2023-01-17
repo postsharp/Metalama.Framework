@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceUnaryOperator(
+            builder.Advice.IntroduceUnaryOperator(
                 builder.Target,
                 nameof(UnaryOperatorTemplate),
                 builder.Target,
@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
                 OperatorKind.UnaryNegation,
                 whenExists: OverrideStrategy.Ignore );
 
-            builder.Advise.IntroduceBinaryOperator(
+            builder.Advice.IntroduceBinaryOperator(
                 builder.Target,
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
                 OperatorKind.Addition,
                 whenExists: OverrideStrategy.Ignore );
 
-            builder.Advise.IntroduceConversionOperator(
+            builder.Advice.IntroduceConversionOperator(
                 builder.Target,
                 nameof(ConversionOperatorTemplate),
                 TypeFactory.GetType( typeof(int) ),

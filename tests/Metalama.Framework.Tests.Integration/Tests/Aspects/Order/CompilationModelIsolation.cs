@@ -15,7 +15,7 @@ internal class Aspect1 : TypeAspect
     {
         foreach (var m in builder.Target.Methods)
         {
-            builder.Advise.Override( m, nameof(Override) );
+            builder.Advice.Override( m, nameof(Override) );
         }
     }
 
@@ -44,7 +44,7 @@ internal class Aspect2 : TypeAspect
     {
         foreach (var m in builder.Target.Methods)
         {
-            builder.Advise.Override( m, nameof(Override) );
+            builder.Advice.Override( m, nameof(Override) );
         }
     }
 

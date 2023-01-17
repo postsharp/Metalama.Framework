@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Simple
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer) );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer) );
             }
         }
 

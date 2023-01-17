@@ -186,7 +186,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
                     {
                         foreach ( var m in builder.Target.Methods )
                         {
-                            builder.Advise.IntroduceField( builder.Target, ""__"" + m.Name, typeof(int) );
+                            builder.Advice.IntroduceField( builder.Target, ""__"" + m.Name, typeof(int) );
                         }
                     }
 

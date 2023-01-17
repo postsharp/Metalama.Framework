@@ -8,14 +8,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedGet) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedGet) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedSet) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedSet) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedInit) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedInit) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter) );
-            builder.Advise.IntroduceProperty( builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedGet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedGet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedSet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedSet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedInit) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedInit) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter) );
         }
 
         [Template]

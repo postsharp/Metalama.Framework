@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advise.Override(field, nameof(Template));
+                builder.Advice.Override(field, nameof(Template));
             }
         }
 

@@ -7,9 +7,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceField( builder.Target, "IntroducedField", typeof(int) );
+            builder.Advice.IntroduceField( builder.Target, "IntroducedField", typeof(int) );
 
-            builder.Advise.IntroduceField(
+            builder.Advice.IntroduceField(
                 builder.Target,
                 "IntroducedField_Static",
                 typeof(int),

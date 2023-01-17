@@ -12,7 +12,7 @@ public class Aspect1 : MethodAspect
 
         var version = typeof(IAspectBuilder).Assembly.GetName().Name;
 
-        builder.Advise.Override( builder.Target, nameof(OverrideMethod), args: new { versionFromBuildAspect = version } );
+        builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { versionFromBuildAspect = version } );
     }
 
     [Template]

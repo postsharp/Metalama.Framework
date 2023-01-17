@@ -53,7 +53,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAss
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advise.Override( method, nameof(Template) );
+                builder.Advice.Override( method, nameof(Template) );
             }
         }
 

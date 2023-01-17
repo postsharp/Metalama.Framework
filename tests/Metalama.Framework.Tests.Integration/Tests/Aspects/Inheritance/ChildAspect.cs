@@ -13,7 +13,7 @@ public class ParentAspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Amend.SelectMany( t => t.Methods ).AddAspect( _ => new ChildAspect() );
+        builder.Outbound.SelectMany( t => t.Methods ).AddAspect( _ => new ChildAspect() );
     }
 }
 

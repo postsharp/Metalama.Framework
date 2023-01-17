@@ -10,11 +10,11 @@ public class MyAspect : TypeAspect
     {
         var templateProvider = new TemplateProvider();
 
-        builder.Advise.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProvider.IntroducedProperty) );
+        builder.Advice.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProvider.IntroducedProperty) );
 
         foreach (var property in builder.Target.Properties)
         {
-            builder.Advise.WithTemplateProvider( templateProvider ).Override( property, nameof(TemplateProvider.OverrideTemplate) );
+            builder.Advice.WithTemplateProvider( templateProvider ).Override( property, nameof(TemplateProvider.OverrideTemplate) );
         }
     }
 }

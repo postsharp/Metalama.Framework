@@ -18,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Introd
         {
             foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advise.Override( o, nameof(Template) );
+                builder.Advice.Override( o, nameof(Template) );
             }
         }
 
@@ -35,9 +35,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Introd
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceUnaryOperator( builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation );
+            builder.Advice.IntroduceUnaryOperator( builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation );
 
-            builder.Advise.IntroduceBinaryOperator(
+            builder.Advice.IntroduceBinaryOperator(
                 builder.Target,
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
@@ -45,7 +45,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Introd
                 builder.Target,
                 OperatorKind.Addition );
 
-            builder.Advise.IntroduceConversionOperator(
+            builder.Advice.IntroduceConversionOperator(
                 builder.Target,
                 nameof(ConversionOperatorTemplate),
                 TypeFactory.GetType( typeof(int) ),

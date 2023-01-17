@@ -11,10 +11,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
             }
         }
 

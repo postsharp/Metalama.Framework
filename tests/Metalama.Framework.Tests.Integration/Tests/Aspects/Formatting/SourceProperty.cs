@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourcePr
         {
             foreach (var property in builder.Target.Properties.Where( p => !p.IsAbstract && p.Writeability == Writeability.All ))
             {
-                builder.Advise.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+                builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
             }
         }
 

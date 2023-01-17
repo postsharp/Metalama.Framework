@@ -64,7 +64,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
         {
             foreach(var property in builder.Target.Properties)
             {
-                builder.Advise.OverrideAccessors(property, nameof(Template), nameof(Template));
+                builder.Advice.OverrideAccessors(property, nameof(Template), nameof(Template));
             }
         }
 

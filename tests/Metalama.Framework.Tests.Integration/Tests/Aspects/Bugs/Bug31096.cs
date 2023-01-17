@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31096
     {
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Advise.Override(builder.Target, nameof(OverrideMethod));
+            builder.Advice.Override(builder.Target, nameof(OverrideMethod));
         }
 
         [Template]

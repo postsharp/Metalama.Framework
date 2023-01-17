@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                                   && !p.Type.IsNullable.GetValueOrDefault()
                                   && p.Type.IsReferenceType.GetValueOrDefault() ))
                 {
-                    builder.Advise.AddContract(
+                    builder.Advice.AddContract(
                         parameter,
                         nameof(ValidateParameter),
                         args: new { parameterName = parameter.Name } );
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                 if (method.ReturnType.IsReferenceType.GetValueOrDefault()
                     && !method.ReturnType.IsNullable.GetValueOrDefault())
                 {
-                    builder.Advise.AddContract(
+                    builder.Advice.AddContract(
                         method.ReturnParameter,
                         nameof(ValidateMethodResult),
                         args: new { methodName = method.Name } );
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                                   && !p.Type.IsNullable.GetValueOrDefault()
                                   && p.Type.IsReferenceType.GetValueOrDefault() ))
                 {
-                    builder.Advise.AddContract(
+                    builder.Advice.AddContract(
                         parameter,
                         nameof(ValidateParameter),
                         args: new { parameterName = parameter.Name } );
@@ -68,13 +68,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                              && p.Type.IsReferenceType.GetValueOrDefault() ) )
                     )
             {
-                builder.Advise.AddContract(
+                builder.Advice.AddContract(
                     property,
                     nameof(ValidatePropertyGetter),
                     ContractDirection.Output,
                     args: new { propertyName = property.Name } );
 
-                builder.Advise.AddContract(
+                builder.Advice.AddContract(
                     property,
                     nameof(ValidatePropertySetter),
                     ContractDirection.Input,

@@ -20,7 +20,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.OverrideAccessors(
+            builder.Advice.OverrideAccessors(
                 builder.Target.Events.OfName( nameof(TestIntroductionAttribute.Event) ).Single(),
                 nameof(AddTemplate),
                 nameof(RemoveTemplate),

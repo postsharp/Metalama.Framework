@@ -8,9 +8,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advise.IntroduceUnaryOperator(builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation, whenExists: OverrideStrategy.Override);
-            builder.Advise.IntroduceBinaryOperator(builder.Target, nameof(BinaryOperatorTemplate), builder.Target, builder.Target, builder.Target, OperatorKind.Addition, whenExists: OverrideStrategy.Override);
-            builder.Advise.IntroduceConversionOperator(builder.Target, nameof(ConversionOperatorTemplate), TypeFactory.GetType(typeof(int)), builder.Target, whenExists: OverrideStrategy.Override);
+            builder.Advice.IntroduceUnaryOperator(builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation, whenExists: OverrideStrategy.Override);
+            builder.Advice.IntroduceBinaryOperator(builder.Target, nameof(BinaryOperatorTemplate), builder.Target, builder.Target, builder.Target, OperatorKind.Addition, whenExists: OverrideStrategy.Override);
+            builder.Advice.IntroduceConversionOperator(builder.Target, nameof(ConversionOperatorTemplate), TypeFactory.GetType(typeof(int)), builder.Target, whenExists: OverrideStrategy.Override);
         }
 
         [Template]

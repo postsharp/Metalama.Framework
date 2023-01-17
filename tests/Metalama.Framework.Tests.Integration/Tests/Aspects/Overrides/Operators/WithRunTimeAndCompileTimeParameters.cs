@@ -22,7 +22,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithRu
                     _ => throw new Exception()
                 };
                 
-                builder.Advise.Override(o, templateName, args: new { operatorKind = o.OperatorKind});
+                builder.Advice.Override(o, templateName, args: new { operatorKind = o.OperatorKind});
             }
         }
 

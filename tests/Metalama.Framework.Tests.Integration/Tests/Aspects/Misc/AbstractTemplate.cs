@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.AbstractTemplate
     {
         public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advise.Override( builder.Target, nameof(OverrideMethod) );
+            builder.Advice.Override( builder.Target, nameof(OverrideMethod) );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )

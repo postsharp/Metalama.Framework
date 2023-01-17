@@ -19,7 +19,7 @@ public sealed class NotNullCheckAttribute : TypeAspect
                               && !p.Type.IsNullable.GetValueOrDefault()
                               && p.Type.IsReferenceType.GetValueOrDefault() ))
             {
-                builder.Advise.AddContract(
+                builder.Advice.AddContract(
                     parameter,
                     nameof(ValidateParameter),
                     args: new { parameterName = parameter.Name } );
@@ -28,7 +28,7 @@ public sealed class NotNullCheckAttribute : TypeAspect
             if (method.ReturnType.IsReferenceType.GetValueOrDefault()
                 && !method.ReturnType.IsNullable.GetValueOrDefault())
             {
-                builder.Advise.AddContract(
+                builder.Advice.AddContract(
                     method.ReturnParameter,
                     nameof(ValidateMethodResult),
                     args: new { methodName = method.Name } );

@@ -9,9 +9,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleD
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.Override( builder.Target.Fields.OfName( "A" ).Single(), nameof(PropertyTemplate) );
-            builder.Advise.Override( builder.Target.Fields.OfName( "B" ).Single(), nameof(PropertyTemplate) );
-            builder.Advise.Override( builder.Target.Fields.OfName( "C" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "A" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "B" ).Single(), nameof(PropertyTemplate) );
+            builder.Advice.Override( builder.Target.Fields.OfName( "C" ).Single(), nameof(PropertyTemplate) );
         }
 
         [Template]

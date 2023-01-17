@@ -9,7 +9,7 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advise.AddInitializer( builder.Target, nameof(Initialize) );
+        builder.Advice.AddInitializer( builder.Target, nameof(Initialize) );
     }
 
     [Introduce]

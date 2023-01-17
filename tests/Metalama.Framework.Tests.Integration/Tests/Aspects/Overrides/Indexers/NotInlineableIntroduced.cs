@@ -12,14 +12,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advise.IntroduceIndexer(
+            builder.Advice.IntroduceIndexer(
                 builder.Target,
                 new[] { ( typeof(int), "x" ) },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p => { p.Accessibility = Accessibility.Public; } );
 
-            builder.Advise.IntroduceIndexer(
+            builder.Advice.IntroduceIndexer(
                 builder.Target,
                 new[] { ( typeof(string), "x" ) },
                 nameof(GetIndexerTemplate),
@@ -49,10 +49,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
-                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
             }
         }
 
