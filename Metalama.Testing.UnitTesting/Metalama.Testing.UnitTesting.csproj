@@ -23,6 +23,5 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Workspaces" />
-        <InternalsVisibleTo Include="Metalama.LinqPad.Tests" />
     </ItemGroup>
 </Project>

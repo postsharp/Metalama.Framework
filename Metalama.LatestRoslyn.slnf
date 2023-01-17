@@ -16,15 +16,13 @@
       "Metalama.Framework.Sdk\\Metalama.Framework.Sdk.csproj",
       "Metalama.Framework.Workspaces\\Metalama.Framework.Workspaces.csproj",
       "Metalama.Framework\\Metalama.Framework.csproj",
-      "Metalama.LinqPad\\Metalama.LinqPad.csproj",
       "Metalama.SystemTypes\\Metalama.SystemTypes.csproj",
       "Metalama.Testing.AspectTesting\\Metalama.Testing.AspectTesting.csproj",
       "Metalama.Testing.UnitTesting\\Metalama.Testing.UnitTesting.csproj",
       "Tests\\Metalama.AspectWorkbench\\Metalama.AspectWorkbench.csproj",
       "Tests\\Metalama.Framework.Tests.Integration\\Metalama.Framework.Tests.Integration.csproj",
       "Tests\\Metalama.Framework.Tests.UnitTests\\Metalama.Framework.Tests.UnitTests.csproj",
-      "Tests\\Metalama.Framework.Tests.Workspaces\\Metalama.Framework.Tests.Workspaces.csproj",
-      "Tests\\Metalama.LinqPad.Tests\\Metalama.LinqPad.Tests.csproj"
+      "Tests\\Metalama.Framework.Tests.Workspaces\\Metalama.Framework.Tests.Workspaces.csproj"
     ]
   }
 }
