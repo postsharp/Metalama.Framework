@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RemoveOutputCode
+#endif
+
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;

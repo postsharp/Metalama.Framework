@@ -14,7 +14,7 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
     private static readonly ConcurrentDictionary<Type, ClassBasedReferenceValidatorDriver> _classBasedDrivers = new();
 
     private readonly Type _aspectOrFabricType;
-    private readonly ConcurrentDictionary<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();
+    private readonly WeakCache<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();
     private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
 
     public static ValidatorDriverFactory GetInstance( Type aspectOrFabricType )

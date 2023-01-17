@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RemoveOutputCode
+#endif
+
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
@@ -11,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Validation.ExternalAssembly
 public class Fabric : ProjectFabric
 {
     private static readonly DiagnosticDefinition<string> _warning =
-        new( "MY001", Severity.Warning, "Warning on '{0}'." );
+        new( "MY001", Severity.Warning, "Referencing the forbidden assembly." );
 
     public override void AmendProject( IProjectAmender amender )
     {

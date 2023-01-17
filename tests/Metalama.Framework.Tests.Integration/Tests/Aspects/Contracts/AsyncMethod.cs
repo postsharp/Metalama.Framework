@@ -3,8 +3,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMeth
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Framework.Aspects;
-using Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 public sealed class NotNullCheckAttribute : TypeAspect
 {
