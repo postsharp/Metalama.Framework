@@ -1801,6 +1801,49 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
     }
 
+    public override SyntaxNode VisitConditionalExpression( ConditionalExpressionSyntax node )
+    {
+        var annotatedCondition = this.Visit( node.Condition );
+        var conditionScope = this.GetNodeScope( annotatedCondition );
+
+        ExpressionSyntax annotatedWhenTrue;
+        ExpressionSyntax annotatedWhenFalse;
+        ScopeContext? scopeContext;
+
+        if ( conditionScope.GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            scopeContext = null;
+        }
+        else
+        {
+            scopeContext = this._currentScopeContext.RunTimePreferred( node.Condition.ToString() );
+        }
+
+        using ( this.WithScopeContext( scopeContext ) )
+        {
+            annotatedWhenTrue = this.Visit( node.WhenTrue );
+            annotatedWhenFalse = this.Visit( node.WhenFalse );
+        }
+
+        var combinedScope = TemplatingScope.RunTimeOnly;
+
+        // Mark the whole expression as compile-time only if all three sub-expressions are compile-time
+        if ( scopeContext == null &&
+             this.GetNodeScope( annotatedWhenTrue ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly &&
+             this.GetNodeScope( annotatedWhenFalse ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            combinedScope = TemplatingScope.CompileTimeOnly;
+        }
+
+        return node.Update(
+                annotatedCondition,
+                node.QuestionToken,
+                annotatedWhenTrue,
+                node.ColonToken,
+                annotatedWhenFalse )
+            .AddScopeAnnotation( combinedScope );
+    }
+
     public override SyntaxNode VisitForStatement( ForStatementSyntax node )
     {
         // This is a quick-and-dirty implementation that all for statements runtime.
