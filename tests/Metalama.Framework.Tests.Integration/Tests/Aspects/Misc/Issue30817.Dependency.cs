@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30817
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.IntroduceField(
+            builder.Advise.IntroduceField(
                 builder.Target,
                 nameof(DependencyPropertyTemplate),
                 buildField: f =>

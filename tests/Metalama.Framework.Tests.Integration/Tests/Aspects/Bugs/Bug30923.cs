@@ -8,17 +8,18 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30923
 {
     public sealed class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            base.BuildAspect(builder);
+            base.BuildAspect( builder );
 
-            foreach (var property in builder.Target.Properties.Where(p => p.Type.Is(typeof(int))))
+            foreach (var property in builder.Target.Properties.Where( p => p.Type.Is( typeof(int) ) ))
             {
-                builder.Advice.Override(property, nameof(TheAnswer));
+                builder.Advise.Override( property, nameof(TheAnswer) );
             }
         }
 
-        [Template] public int TheAnswer => 42;
+        [Template]
+        public int TheAnswer => 42;
     }
 
     // <target>
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30923
             Test = 0;
         }
 
-        public TestStruct(int test)
+        public TestStruct( int test )
         {
             Test = test;
         }

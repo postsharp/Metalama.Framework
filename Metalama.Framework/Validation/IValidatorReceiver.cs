@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Validation;
 
@@ -54,4 +55,23 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// Gets an interface that allows to validate the initial compilation, after before any aspect has been applied.
     /// </summary>
     IValidatorReceiver<IDeclaration> BeforeAnyAspect();
+
+    /// <summary>
+    /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
+    /// <see cref="IValidatorReceiver.Validate"/>
+    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+    /// </summary>
+    IValidatorReceiver<TMember> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+        where TMember : class, IDeclaration;
+
+    /// <summary>
+    /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
+    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+    /// </summary>
+    IValidatorReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
+        where TMember : class, IDeclaration;
+
+    IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
 }

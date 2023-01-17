@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.IntroduceIndexer(
+            builder.Advise.IntroduceIndexer(
                 builder.Target,
                 Array.Empty<(IType, string)>(),
                 nameof(GetIndexerTemplate),

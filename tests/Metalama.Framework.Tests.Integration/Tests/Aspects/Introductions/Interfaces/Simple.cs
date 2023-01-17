@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests a simple case with implicit interface member.
      */
 
-    public interface IInterface 
+    public interface IInterface
     {
         void Foo();
     }
@@ -19,13 +19,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember]
         public void Foo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 

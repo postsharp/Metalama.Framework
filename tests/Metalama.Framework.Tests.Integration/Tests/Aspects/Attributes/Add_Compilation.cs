@@ -14,6 +14,6 @@ public class MyAspect : CompilationAspect
 {
     public override void BuildAspect( IAspectBuilder<ICompilation> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.Advise.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
     }
 }

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30840
         {
             foreach (var fieldOrProperty in builder.Target.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ))
             {
-                builder.Advice.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.Advise.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
             }
         }
 

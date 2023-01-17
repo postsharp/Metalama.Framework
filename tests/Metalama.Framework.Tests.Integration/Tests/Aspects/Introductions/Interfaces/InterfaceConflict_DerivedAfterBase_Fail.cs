@@ -22,10 +22,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IBaseInterface));
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IDerivedInterface), OverrideStrategy.Fail);
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface) );
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface), OverrideStrategy.Fail );
         }
 
         [InterfaceMember]

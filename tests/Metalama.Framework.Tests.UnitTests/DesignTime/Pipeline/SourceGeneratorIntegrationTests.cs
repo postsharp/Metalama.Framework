@@ -40,7 +40,7 @@ class MyAspect : TypeAspect
    {
         foreach ( var field in aspectBuilder.Target.BaseType.Fields )
         {
-            aspectBuilder.Advice.IntroduceField( aspectBuilder.Target,  field.Name + ""Plus"", field.Type );
+            aspectBuilder.Advise.IntroduceField( aspectBuilder.Target,  field.Name + ""Plus"", field.Type );
         }
    }
 }

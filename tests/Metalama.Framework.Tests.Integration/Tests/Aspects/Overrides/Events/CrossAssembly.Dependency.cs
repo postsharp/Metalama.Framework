@@ -29,7 +29,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAsse
         {
             foreach(var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(Template), nameof(Template));
+                builder.Advise.OverrideAccessors(@event, nameof(Template), nameof(Template));
             }
         }
 

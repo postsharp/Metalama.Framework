@@ -51,7 +51,7 @@ namespace Doc.InheritedTypeLevel
         {
             foreach ( var method in builder.Target.Methods )
             {
-                builder.Advice.Override( method, nameof(this.MethodTemplate) );
+                builder.Advise.Override( method, nameof(this.MethodTemplate) );
             }
         }
 

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod(
+            var typedMethod = builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 buildMethod: m =>
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
                     m.ReturnType = builder.Target;
                 } );
 
-            builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
+            builder.Advise.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }
 
         [Template]

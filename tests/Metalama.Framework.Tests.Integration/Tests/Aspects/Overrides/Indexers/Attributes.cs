@@ -13,11 +13,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Inde
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override(property, nameof(Template));
+                builder.Advise.Override( property, nameof(Template) );
             }
         }
 
@@ -26,50 +26,44 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Inde
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
     }
 
-    [AttributeUsage(AttributeTargets.Property)]
-    public class PropertyOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Property )]
+    public class PropertyOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MethodOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Method )]
+    public class MethodOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.ReturnValue)]
-    public class ReturnValueOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.ReturnValue )]
+    public class ReturnValueOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class ParamOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Parameter )]
+    public class ParamOnlyAttribute : Attribute { }
 
     // <target>
     [Override]
     internal class TargetClass
     {
-        [PropertyOnly]        
-        public int this[[ParamOnly] int x]
+        [PropertyOnly]
+        public int this[ [ParamOnly] int x ]
         {
             [return: ReturnValueOnly]
             [method: MethodOnly]
             get
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
+
                 return 42;
             }
 
@@ -78,7 +72,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Inde
             [param: ParamOnly]
             set
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
             }
         }
     }

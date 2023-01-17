@@ -13,13 +13,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advise.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]
         public dynamic? GetTemplate()
         {
             Console.WriteLine( "This is the overridden getter." );
+
             return meta.Proceed();
         }
 
@@ -41,12 +42,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
 

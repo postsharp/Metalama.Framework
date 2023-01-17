@@ -13,7 +13,7 @@ public class MyAspect : FieldAspect
 {
     public override void BuildAspect( IAspectBuilder<IField> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.Advise.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
     }
 }
 

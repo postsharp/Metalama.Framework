@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Part
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
+                builder.Advise.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
             }
         }
 

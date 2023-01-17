@@ -9,15 +9,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Simpl
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(builder.Target.Finalizer!, nameof(Template));
+            builder.Advise.Override( builder.Target.Finalizer!, nameof(Template) );
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is the override.");
+            Console.WriteLine( "This is the override." );
+
             return meta.Proceed();
         }
     }
@@ -28,7 +29,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Simpl
     {
         ~TargetClass()
         {
-            Console.WriteLine($"This is the original finalizer.");
+            Console.WriteLine( $"This is the original finalizer." );
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+            builder.Advise.Override( builder.Target, nameof(OverrideProperty) );
         }
 
         [Template]

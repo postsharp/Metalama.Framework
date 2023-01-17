@@ -24,12 +24,12 @@ public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INa
 
     public void BuildAspect( IAspectBuilder<ICompilation> builder )
     {
-        builder.With( c => c.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( _ => this );
+        builder.Amend.SelectMany( c => c.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( _ => this );
     }
 
     public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods ).AddAspect( _ => this );
+        builder.Amend.SelectMany( t => t.Methods ).AddAspect( _ => this );
     }
 
     public void BuildEligibility( IEligibilityBuilder<ICompilation> builder ) { }

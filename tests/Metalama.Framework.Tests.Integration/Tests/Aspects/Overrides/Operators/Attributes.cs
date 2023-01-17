@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
         {
             foreach (var method in builder.Target.Methods )
             {
-                builder.Advice.Override(method, nameof(Override));
+                builder.Advise.Override(method, nameof(Override));
             }
         }
 

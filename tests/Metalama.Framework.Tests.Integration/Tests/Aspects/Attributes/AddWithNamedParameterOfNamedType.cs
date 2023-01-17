@@ -6,20 +6,20 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddWithNamedParameterOfNamedType;
 
-public class MyAttribute : Attribute 
+public class MyAttribute : Attribute
 {
     public Type? Property { get; set; }
 }
 
 public class MyAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.IntroduceAttribute(
+        builder.Advise.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
-                namedArguments: new KeyValuePair<string, object?>[] { new("Property", TypeFactory.GetType(typeof(C))) }));
+                namedArguments: new KeyValuePair<string, object?>[] { new( "Property", TypeFactory.GetType( typeof(C) ) ) } ) );
     }
 }
 

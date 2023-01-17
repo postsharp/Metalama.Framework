@@ -8,7 +8,7 @@ public class Override : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override( builder.Target, nameof(Template), args: new { T = builder.Target.ReturnType } );
+        builder.Advise.Override( builder.Target, nameof(Template), args: new { T = builder.Target.ReturnType } );
     }
 
     [Template]
@@ -20,7 +20,6 @@ public class Override : MethodAspect
         }
 
         return LocalFunction();
-
     }
 }
 

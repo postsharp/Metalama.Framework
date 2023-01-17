@@ -9,8 +9,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template1), InitializerKind.BeforeInstanceConstructor );
-            builder.Advice.AddInitializer( builder.Target, nameof(Template2), InitializerKind.BeforeInstanceConstructor );
+            builder.Advise.AddInitializer( builder.Target, nameof(Template1), InitializerKind.BeforeInstanceConstructor );
+            builder.Advise.AddInitializer( builder.Target, nameof(Template2), InitializerKind.BeforeInstanceConstructor );
         }
 
         [Template]

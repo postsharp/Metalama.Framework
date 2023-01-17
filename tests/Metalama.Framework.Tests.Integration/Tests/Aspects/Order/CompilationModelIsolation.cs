@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
 
-
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
@@ -14,9 +13,9 @@ internal class Aspect1 : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        foreach ( var m in builder.Target.Methods )
+        foreach (var m in builder.Target.Methods)
         {
-            builder.Advice.Override( m, nameof(this.Override) );
+            builder.Advise.Override( m, nameof(Override) );
         }
     }
 
@@ -33,7 +32,7 @@ internal class Aspect1 : TypeAspect
 
         Console.WriteLine(
             $"Executing Aspect1 on {meta.Target.Method.Name}. Methods present before applying Aspect1: "
-            + string.Join( ", ", ((IEnumerable<IMethod>) meta.Target.Type.Methods).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
+            + string.Join( ", ", ( (IEnumerable<IMethod>)meta.Target.Type.Methods ).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }
@@ -43,9 +42,9 @@ internal class Aspect2 : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        foreach ( var m in builder.Target.Methods )
+        foreach (var m in builder.Target.Methods)
         {
-            builder.Advice.Override( m, nameof(this.Override) );
+            builder.Advise.Override( m, nameof(Override) );
         }
     }
 
@@ -62,7 +61,7 @@ internal class Aspect2 : TypeAspect
 
         Console.WriteLine(
             $"Executing Aspect2 on {meta.Target.Method.Name}. Methods present before applying Aspect2: "
-            + string.Join( ", ", ((IEnumerable<IMethod>)meta.Target.Type.Methods).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
+            + string.Join( ", ", ( (IEnumerable<IMethod>)meta.Target.Type.Methods ).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }

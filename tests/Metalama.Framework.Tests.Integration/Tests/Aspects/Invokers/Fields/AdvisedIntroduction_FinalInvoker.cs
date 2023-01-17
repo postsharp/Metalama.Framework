@@ -20,7 +20,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.Override(
+            builder.Advise.Override(
                 builder.Target.Fields.OfName(nameof(IntroductionAttribute.Field)).Single(),
                 nameof(PropertyTemplate));
         }

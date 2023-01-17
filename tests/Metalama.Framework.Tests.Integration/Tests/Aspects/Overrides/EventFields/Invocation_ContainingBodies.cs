@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             foreach(var @event in builder.Target.Events.Where( e => e.Name is "Event" or "StaticEvent" ) )
             {
-                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advise.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
             }
         }
 

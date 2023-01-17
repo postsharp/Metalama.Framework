@@ -24,7 +24,7 @@ internal class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advice.ImplementInterface(builder.Target, typeof(Interface));
+        builder.Advise.ImplementInterface(builder.Target, typeof(Interface));
     }
 
     [InterfaceMember(IsExplicit = true)]
@@ -43,7 +43,7 @@ internal class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.With(x => x.Events).AddAspect<OverrideEventAttribute>();
+        builder.Amend.SelectMany(x => x.Events).AddAspect<OverrideEventAttribute>();
     }
 }
 

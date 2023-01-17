@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Aspects
 {
@@ -84,5 +85,24 @@ namespace Metalama.Framework.Aspects
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         void RequireAspect<TAspect>()
             where TAspect : class, IAspect<TDeclaration>, new();
+
+        /// <summary>
+        /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
+        /// <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+        /// </summary>
+        new IAspectReceiver<TMember> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+        /// </summary>
+        new IAspectReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
+            where TMember : class, IDeclaration;
+
+        new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
     }
 }

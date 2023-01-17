@@ -11,7 +11,7 @@ internal class Aspect : TypeAspect
     {
         foreach (var m in builder.Target.Methods)
         {
-            builder.Advice.Override( m, nameof(Template) );
+            builder.Advise.Override( m, nameof(Template) );
         }
     }
 

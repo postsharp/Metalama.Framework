@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.PartialAspectC
         {
             foreach (var m in builder.Target.Methods)
             {
-                builder.Advice.Override( m, nameof(MethodTemplate) );
+                builder.Advise.Override( m, nameof(MethodTemplate) );
             }
         }
     }

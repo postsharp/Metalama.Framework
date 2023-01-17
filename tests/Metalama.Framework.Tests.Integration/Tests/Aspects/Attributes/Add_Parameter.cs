@@ -12,7 +12,7 @@ public class MyAspect : ParameterAspect
 {
     public override void BuildAspect( IAspectBuilder<IParameter> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.Advise.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
     }
 }
 

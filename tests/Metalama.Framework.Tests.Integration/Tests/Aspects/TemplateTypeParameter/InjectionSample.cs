@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(OverrideGet), args: new { T = builder.Target.Type } );
+            builder.Advise.OverrideAccessors( builder.Target, nameof(OverrideGet), args: new { T = builder.Target.Type } );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Ignore )]

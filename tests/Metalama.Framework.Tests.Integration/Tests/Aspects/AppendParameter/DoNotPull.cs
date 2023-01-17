@@ -7,9 +7,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.DoN
 
 public class MyAspect : ConstructorAspect
 {
-    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+    public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.IntroduceParameter(builder.Target, "p", typeof(int), TypedConstant.Create(15) );
+        builder.Advise.IntroduceParameter( builder.Target, "p", typeof(int), TypedConstant.Create( 15 ) );
     }
 }
 
@@ -19,11 +19,8 @@ public class C
     [MyAspect]
     public C() { }
 
-    public C(string s) : this() { }
+    public C( string s ) : this() { }
 }
 
 // <target>
-public class D : C
-{
-
-}
+public class D : C { }

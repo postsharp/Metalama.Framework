@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(MethodTemplate));
+                builder.Advise.Override(method, nameof(MethodTemplate));
             }
         }
 

@@ -11,7 +11,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
         public override void AmendProject( IProjectAmender amender )
         {
             amender
-                .With( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
+                .Amend
+                .SelectMany( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();
         }
     }
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
     {
         private int Method1( int a ) => a;
 
-        [ExcludeAspect(typeof(Aspect))]
+        [ExcludeAspect( typeof(Aspect) )]
         private string Method2( string s ) => s;
     }
 }

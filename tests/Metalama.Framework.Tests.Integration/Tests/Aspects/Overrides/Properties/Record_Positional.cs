@@ -10,7 +10,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 {
     internal class MyAspect : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty { get => meta.Proceed(); set => meta.Proceed(); }
+        public override dynamic? OverrideProperty
+        {
+            get => meta.Proceed();
+            set => meta.Proceed();
+        }
     }
 
     // <target>
@@ -18,10 +22,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 
     internal class Fabric : ProjectFabric
     {
-        public override void AmendProject(IProjectAmender amender)
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.With(p => p.Types.OfName("MyRecord").SelectMany(t => t.Properties.Where( p => !p.IsImplicitlyDeclared) )).AddAspect<MyAspect>();
+            amender.Amend.SelectMany( p => p.Types.OfName( "MyRecord" ).SelectMany( t => t.Properties.Where( p => !p.IsImplicitlyDeclared ) ) )
+                .AddAspect<MyAspect>();
         }
     }
-
 }

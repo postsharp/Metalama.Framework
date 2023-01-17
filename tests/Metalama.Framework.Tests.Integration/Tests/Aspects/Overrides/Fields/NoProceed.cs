@@ -11,9 +11,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class OverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Advise.Override( builder.Target, nameof(Template) );
         }
 
         [Template]
@@ -21,13 +21,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
+
                 return default;
             }
 
             set
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
             }
         }
     }
@@ -49,7 +50,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
         public TargetClass()
         {
-            this.ReadOnlyField = 42;
+            ReadOnlyField = 42;
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
     {
         public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.Advice.Override(builder.Target, nameof(OverrideProperty));
+            builder.Advise.Override(builder.Target, nameof(OverrideProperty));
         }
 
         [Template]
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.ImplementInterface(builder.Target, typeof(IIntroducedInterface));
+            builder.Advise.ImplementInterface(builder.Target, typeof(IIntroducedInterface));
         }
 
         [InterfaceMember(IsExplicit = true)]
@@ -128,22 +128,22 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
 
         public override void AmendProject(IProjectAmender amender)
         {
-            amender.With(p =>
+            amender.Amend.SelectMany(p =>
                 p.Types
                 .Where(t => t is { Name: nameof(BackorderMode) })
                 .SelectMany(t => t.Methods.Where( m => !m.IsImplicitlyDeclared ))
                     .Cast<IMethod>())
                 .AddAspect<LoggingAspect>();
 
-            amender.With(p =>
+            amender.Amend.SelectMany(p =>
                 p.Types
                 .Where(t => t is { Name: nameof(BackorderMode) })
                 .SelectMany(t => t.Fields.Where(m => !m.IsImplicitlyDeclared) )
                     .Cast<IFieldOrProperty>())
                 .AddAspect<FieldOrPropertyLoggingAspect>();
 
-            amender.With(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<IntroductionAttribute>();
-            amender.With(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<InterfaceIntroductionAttribute>();
+            amender.Amend.SelectMany(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<IntroductionAttribute>();
+            amender.Amend.SelectMany(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<InterfaceIntroductionAttribute>();
         }
     }
 

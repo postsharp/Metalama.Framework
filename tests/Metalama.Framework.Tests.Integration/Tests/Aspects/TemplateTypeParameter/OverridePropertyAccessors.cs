@@ -10,7 +10,7 @@ public class Aspect : FieldOrPropertyAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.OverrideAccessors( builder.Target, getTemplate: nameof(GetTemplate), setTemplate: nameof(SetTemplate), args: new { T = builder.Target.Type } );
+        builder.Advise.OverrideAccessors( builder.Target, getTemplate: nameof(GetTemplate), setTemplate: nameof(SetTemplate), args: new { T = builder.Target.Type } );
     }
 
     [Template]

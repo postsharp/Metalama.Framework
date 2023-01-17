@@ -20,7 +20,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(
+            builder.Advise.Override(
                 builder.Target.Properties.OfName( nameof(IntroductionAttribute.Property) ).Single(),
                 nameof(PropertyTemplate) );
         }
@@ -30,13 +30,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
         {
             get
             {
-                Console.WriteLine("Override");
+                Console.WriteLine( "Override" );
+
                 return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
-                Console.WriteLine("Override");
+                Console.WriteLine( "Override" );
                 meta.Target.FieldOrProperty.Value = value;
             }
         }

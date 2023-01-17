@@ -16,14 +16,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(GetProperty), nameof(SetProperty) );
+            builder.Advise.OverrideAccessors( builder.Target, nameof(GetProperty), nameof(SetProperty) );
         }
 
         [Template]
-        public dynamic GetProperty() => ExpressionFactory.Parse("default");
+        public dynamic GetProperty() => ExpressionFactory.Parse( "default" );
 
         [Template]
-        public void SetProperty() => Console.WriteLine("Overridden");
+        public void SetProperty() => Console.WriteLine( "Overridden" );
     }
 
     // <target>
@@ -34,12 +34,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             set
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
@@ -47,12 +48,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int ExpressionBodiedAccessors
         {
             get => 42;
-            set => Console.WriteLine("Original");
+            set => Console.WriteLine( "Original" );
         }
 
         [Test]
         public int ExpressionBodiedProperty => 42;
-
 
         [Test]
         public int AutoProperty { get; set; }

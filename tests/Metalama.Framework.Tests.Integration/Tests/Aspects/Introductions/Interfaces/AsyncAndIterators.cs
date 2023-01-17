@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests that async methods, iterators and async iterators are correctly introduced.
      */
 
-    public interface IInterface 
+    public interface IInterface
     {
         Task<int> AsyncMethod();
 
@@ -26,29 +26,32 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember]
         public async Task<int> AsyncMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             return 42;
         }
 
         [InterfaceMember]
         public IEnumerable<int> Iterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             yield return 42;
         }
 
         [InterfaceMember]
         public async IAsyncEnumerable<int> AsyncIterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             yield return 42;
         }
     }

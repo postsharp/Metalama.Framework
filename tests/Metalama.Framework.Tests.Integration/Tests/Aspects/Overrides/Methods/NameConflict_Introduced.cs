@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         {
             foreach(var method in builder.Target.Methods.Where(m => !m.IsImplicitlyDeclared))
             {
-                builder.Advice.Override(method, nameof(OverrideMethod));
+                builder.Advise.Override(method, nameof(OverrideMethod));
             }
         }
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         {
             foreach (var method in builder.Target.Methods.Where(m => !m.IsImplicitlyDeclared))
             {
-                builder.Advice.Override(method, nameof(OverrideMethod));
+                builder.Advise.Override(method, nameof(OverrideMethod));
             }
         }
 

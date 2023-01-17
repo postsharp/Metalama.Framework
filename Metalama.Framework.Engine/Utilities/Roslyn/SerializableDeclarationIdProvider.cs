@@ -13,9 +13,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SerializableDeclarationIdProvider
 {
-    private static readonly char[] _separators = new[] { ';', '=' };
     private const string _assemblyPrefix = "Assembly:";
 
+    private static readonly char[] _separators = new[] { ';', '=' };
+    
     public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( DeclarationRefTargetKind.Default );
 
     internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, DeclarationRefTargetKind targetKind )

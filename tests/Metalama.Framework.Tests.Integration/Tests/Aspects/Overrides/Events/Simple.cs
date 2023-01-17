@@ -13,25 +13,25 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advise.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
         [Template]
-        public void OverrideAdd(dynamic value)
+        public void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine( "This is the add template." );
             meta.Proceed();
         }
 
         [Template]
-        public void OverrideRemove(dynamic value)
+        public void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine( "This is the remove template." );
             meta.Proceed();
         }
     }
@@ -43,14 +43,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             add
             {
-                Console.WriteLine("This is the introduced add.");
-                meta.This.handlers.Add(value);
+                Console.WriteLine( "This is the introduced add." );
+                meta.This.handlers.Add( value );
             }
 
             remove
             {
-                Console.WriteLine("This is the introduced remove.");
-                meta.This.handlers.Remove(value);
+                Console.WriteLine( "This is the introduced remove." );
+                meta.This.handlers.Remove( value );
             }
         }
 
@@ -59,14 +59,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             add
             {
-                Console.WriteLine("This is the introduced add.");
-                meta.ThisType.staticHandlers.Add(value);
+                Console.WriteLine( "This is the introduced add." );
+                meta.ThisType.staticHandlers.Add( value );
             }
 
             remove
             {
-                Console.WriteLine("This is the introduced remove.");
-                meta.ThisType.staticHandlers.Remove(value);
+                Console.WriteLine( "This is the introduced remove." );
+                meta.ThisType.staticHandlers.Remove( value );
             }
         }
     }
@@ -76,37 +76,37 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     [Introduction]
     internal class TargetClass
     {
-        private HashSet<EventHandler> handlers = new HashSet<EventHandler>();
+        private HashSet<EventHandler> handlers = new();
 
         public event EventHandler Event
         {
             add
             {
-                Console.WriteLine("This is the original add.");
-                this.handlers.Add(value);
+                Console.WriteLine( "This is the original add." );
+                handlers.Add( value );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
-                this.handlers.Remove(value);
+                Console.WriteLine( "This is the original remove." );
+                handlers.Remove( value );
             }
         }
 
-        private static HashSet<EventHandler> staticHandlers = new HashSet<EventHandler>();
+        private static HashSet<EventHandler> staticHandlers = new();
 
         public static event EventHandler StaticEvent
         {
             add
             {
-                Console.WriteLine("This is the original add.");
-                staticHandlers.Add(value);
+                Console.WriteLine( "This is the original add." );
+                staticHandlers.Add( value );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
-                staticHandlers.Remove(value);
+                Console.WriteLine( "This is the original remove." );
+                staticHandlers.Remove( value );
             }
         }
     }

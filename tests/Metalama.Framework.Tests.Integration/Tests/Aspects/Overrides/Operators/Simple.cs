@@ -11,18 +11,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advice.Override(o, nameof(Template));
+                builder.Advise.Override( o, nameof(Template) );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is the override.");
+            Console.WriteLine( "This is the override." );
+
             return meta.Proceed();
         }
     }
@@ -31,23 +32,23 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
     [Override]
     internal class TargetClass
     {
-        public static TargetClass operator +(TargetClass a, TargetClass b)
+        public static TargetClass operator +( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
 
-        public static TargetClass operator -(TargetClass a)
+        public static TargetClass operator -( TargetClass a )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
 
         public static explicit operator TargetClass( int x )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }

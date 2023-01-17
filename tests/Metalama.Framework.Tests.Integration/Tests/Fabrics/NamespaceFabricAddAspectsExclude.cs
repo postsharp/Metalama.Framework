@@ -10,8 +10,8 @@ internal class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender
-            .With(
+        amender.Amend
+            .SelectMany(
                 c => c.DescendantsAndSelf()
                     .SelectMany( t => t.Types )
                     .SelectMany( t => t.Methods )

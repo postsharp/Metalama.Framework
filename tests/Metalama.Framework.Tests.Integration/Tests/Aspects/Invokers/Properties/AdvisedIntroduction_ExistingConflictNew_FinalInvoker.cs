@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override(property, nameof(PropertyTemplate));
+                builder.Advise.Override(property, nameof(PropertyTemplate));
             }
 
         }

@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Fina
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-                builder.Advice.IntroduceMethod(builder.Target, nameof(Template),
+                builder.Advise.IntroduceMethod(builder.Target, nameof(Template),
                 buildMethod: methodBuilder =>
                 {
                     methodBuilder.Name = "Finalize";

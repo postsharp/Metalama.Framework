@@ -5,22 +5,20 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddWithParameter;
 
-public class MyAttribute : Attribute 
+public class MyAttribute : Attribute
 {
-    public MyAttribute(int param)
-    {
-    }
+    public MyAttribute( int param ) { }
 }
 
 public class MyAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.IntroduceAttribute(
-            builder.Target, 
+        builder.Advise.IntroduceAttribute(
+            builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
-                constructorArguments: new object?[] { 42 }));
+                constructorArguments: new object?[] { 42 } ) );
     }
 }
 

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.AsyncIterators.Introduce
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod( builder.Target, nameof(ProgrammaticallyMethodAsync) );
+            builder.Advise.IntroduceMethod( builder.Target, nameof(ProgrammaticallyMethodAsync) );
         }
 
         [Introduce]

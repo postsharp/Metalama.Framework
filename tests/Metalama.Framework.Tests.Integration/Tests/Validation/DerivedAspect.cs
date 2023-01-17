@@ -20,19 +20,17 @@ internal class BaseAspect : TypeAspect
 
 internal class DerivedAspect : BaseAspect
 {
- 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         builder
-            .With( ns => ns )
+            .Amend
             .ValidateReferences( Validate, ReferenceKinds.All );
     }
-
 }
 
 // <target>
 [DerivedAspect]
-class C { }
+internal class C { }
 
 // <target>
-class D : C { }
+internal class D : C { }

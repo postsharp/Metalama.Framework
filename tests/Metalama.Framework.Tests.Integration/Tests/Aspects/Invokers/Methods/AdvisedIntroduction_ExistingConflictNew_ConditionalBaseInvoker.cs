@@ -8,51 +8,51 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalBaseInvoker;
 using System;
 
-[assembly: AspectOrder(typeof(IntroductionAttribute), typeof(OverrideAttribute))]
+[assembly: AspectOrder( typeof(IntroductionAttribute), typeof(OverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalBaseInvoker
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public void BaseClass_Method()
         {
-            meta.InsertComment("Introduced.");
-            meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This);
+            meta.InsertComment( "Introduced." );
+            meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This );
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public void TargetClass_Method()
         {
-            meta.InsertComment("Introduced.");
-            meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This);
+            meta.InsertComment( "Introduced." );
+            meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This );
         }
-
-
     }
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(MethodTemplate));
+                builder.Advise.Override( method, nameof(MethodTemplate) );
             }
         }
 
         [Template]
         public dynamic? MethodTemplate()
         {
-            Console.WriteLine("Override");
-            if (meta.Target.Method.ReturnType.Is( SpecialType.Void) )
+            Console.WriteLine( "Override" );
+
+            if (meta.Target.Method.ReturnType.Is( SpecialType.Void ))
             {
-                meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This );
+                meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This );
+
                 return default;
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This );
+                return meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This );
             }
         }
     }
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     {
         public virtual void BaseClass_Method()
         {
-            System.Console.WriteLine("BaseClass_Method()");
+            Console.WriteLine( "BaseClass_Method()" );
         }
     }
 
@@ -72,8 +72,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     {
         public void TargetClass_Method()
         {
-            System.Console.WriteLine("TargetClass_Method()");
+            Console.WriteLine( "TargetClass_Method()" );
         }
-
     }
 }

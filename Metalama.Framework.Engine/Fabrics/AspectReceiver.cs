@@ -192,6 +192,35 @@ namespace Metalama.Framework.Engine.Fabrics
         public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
             => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
 
+        public IAspectReceiver<TMember> SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector )
+            where TMember : class, IDeclaration
+            => new AspectReceiver<TMember>(
+                this._containingDeclaration,
+                this._parent,
+                this._compilationModelVersion,
+                ( c, d ) => this._selector( c, d ).SelectMany( selector ) );
+
+        public IAspectReceiver<TMember> Select<TMember>( Func<T, TMember> selector )
+            where TMember : class, IDeclaration
+            => new AspectReceiver<TMember>(
+                this._containingDeclaration,
+                this._parent,
+                this._compilationModelVersion,
+                ( c, d ) => this._selector( c, d ).Select( selector ) );
+
+        public IAspectReceiver<T> Where( Func<T, bool> predicate )
+            => new AspectReceiver<T>(
+                this._containingDeclaration,
+                this._parent,
+                this._compilationModelVersion,
+                ( c, d ) => this._selector( c, d ).Where( predicate ) );
+
+        IValidatorReceiver<T> IValidatorReceiver<T>.Where( Func<T, bool> predicate ) => this.Where( predicate );
+
+        IValidatorReceiver<TMember> IValidatorReceiver<T>.SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.SelectMany( selector );
+
+        IValidatorReceiver<TMember> IValidatorReceiver<T>.Select<TMember>( Func<T, TMember> selector ) => this.Select( selector );
+
         private sealed class FinalValidatorHelper<TOutput>
         {
             private readonly Func<T, TOutput> _func;

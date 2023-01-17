@@ -13,16 +13,16 @@ public class MyAspect : EventAspect
 {
     public override void BuildAspect( IAspectBuilder<IEvent> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.Advise.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
 
         if (builder.Target.AddMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.AddMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.Advise.IntroduceAttribute( builder.Target.AddMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
 
         if (builder.Target.RemoveMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.RemoveMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.Advise.IntroduceAttribute( builder.Target.RemoveMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
     }
 }

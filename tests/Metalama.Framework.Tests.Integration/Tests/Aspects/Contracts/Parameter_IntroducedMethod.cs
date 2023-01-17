@@ -16,21 +16,21 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.AddContract( method.ReturnParameter, nameof(Filter) );
+                builder.Advise.AddContract( method.ReturnParameter, nameof(Filter) );
 
                 foreach (var parameter in method.Parameters)
                 {
-                    builder.Advice.AddContract( parameter, nameof(Filter) );
+                    builder.Advise.AddContract( parameter, nameof(Filter) );
                 }
             }
 
-            var introducedMethod = builder.Advice.IntroduceMethod( builder.Target, nameof(IntroducedMethod) ).Declaration;
+            var introducedMethod = builder.Advise.IntroduceMethod( builder.Target, nameof(IntroducedMethod) ).Declaration;
 
-            builder.Advice.AddContract( introducedMethod.ReturnParameter, nameof(Filter) );
+            builder.Advise.AddContract( introducedMethod.ReturnParameter, nameof(Filter) );
 
             foreach (var parameter in introducedMethod.Parameters)
             {
-                builder.Advice.AddContract( parameter, nameof(Filter) );
+                builder.Advise.AddContract( parameter, nameof(Filter) );
             }
         }
 

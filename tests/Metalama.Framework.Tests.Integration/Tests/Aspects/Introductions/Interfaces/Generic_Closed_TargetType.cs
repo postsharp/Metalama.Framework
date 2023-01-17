@@ -1,6 +1,4 @@
-﻿// @Skipped(#32359)
-
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -13,24 +11,22 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests introducing closed generic interface with a type argument set to the target type currently results in an error.
      */
 
-    public interface IInterface<T> 
+    public interface IInterface<T>
     {
-        void Foo(T t); 
+        void Foo( T t );
     }
 
     public class IntroductionAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(
+            aspectBuilder.Advise.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(aspectBuilder.Target));
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target ) );
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass 
-    { 
-    }
+    public class TargetClass { }
 }

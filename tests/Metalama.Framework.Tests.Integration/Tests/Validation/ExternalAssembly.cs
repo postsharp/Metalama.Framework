@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.ExternalAssembly;
 
+#pragma warning disable CS0169
+
 public class Fabric : ProjectFabric
 {
     private static readonly DiagnosticDefinition<string> _warning =
@@ -13,7 +15,7 @@ public class Fabric : ProjectFabric
 
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.With( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name ) )
+        amender.Amend.SelectMany( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name! ) )
             .ValidateReferences( Validate, ReferenceKinds.All );
     }
 

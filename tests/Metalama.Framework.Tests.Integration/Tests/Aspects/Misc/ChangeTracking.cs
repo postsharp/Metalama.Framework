@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 
             foreach (var property in builder.Target.Properties)
             {
-                var isSpecifiedProperty = builder.Advice.IntroduceProperty(
+                var isSpecifiedProperty = builder.Advise.IntroduceProperty(
                         builder.Target,
                         nameof(IsSpecifiedTemplate),
                         buildProperty: p =>
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                         } )
                     .Declaration;
 
-                builder.Advice.Override(
+                builder.Advise.Override(
                     property,
                     nameof(OverrideProperty),
                     tags: new { isSpecifiedProperty = isSpecifiedProperty } );
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 
             set
             {
-                var isSpecifiedProperty = (IProperty) meta.Tags["isSpecifiedProperty"]!;
+                var isSpecifiedProperty = (IProperty)meta.Tags["isSpecifiedProperty"]!;
                 isSpecifiedProperty.Invokers.Final.SetValue( meta.This, true );
                 meta.Proceed();
             }

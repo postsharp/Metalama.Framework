@@ -1,5 +1,3 @@
-// @RemoveOutputCode
-
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
@@ -19,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder
-                .With( ns => ns )
+                .Amend
                 .ValidateReferences( Validate, ReferenceKinds.All );
         }
 

@@ -75,6 +75,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
+
+        [Memo]
+        public IAspectReceiver<T> Amend => this.GetAspectReceiverSelector().With( t => t );
+
         IDeclaration IAspectBuilder.Target => this.Target;
 
         private AspectReceiverSelector<T> GetAspectReceiverSelector()
@@ -91,7 +95,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
-        public IAdviceFactory Advice => this.AdviceFactory;
+        public IAdviceFactory Advise => this.AdviceFactory;
+        
+        IAdviceFactory IAspectBuilder.Advice => this.Advise;
 
         public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
 

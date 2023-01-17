@@ -72,7 +72,7 @@ public class IntroductionAspectAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Foo));
+        builder.Advise.IntroduceMethod(builder.Target, nameof(Foo));
     }
 
     [Template]

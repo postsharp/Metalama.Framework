@@ -16,7 +16,7 @@ namespace Metalama.Framework.Aspects
         /// <inheritdoc />
         public override void BuildAspect( IAspectBuilder<IEvent> builder )
         {
-            builder.Advice.OverrideAccessors(
+            builder.Advise.OverrideAccessors(
                 builder.Target,
                 nameof(this.OverrideAdd),
                 nameof(this.OverrideRemove) );

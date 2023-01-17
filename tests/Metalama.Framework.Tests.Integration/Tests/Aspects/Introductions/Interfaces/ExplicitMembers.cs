@@ -27,13 +27,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = true )]
         public int InterfaceMethod()
         {
             Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
 

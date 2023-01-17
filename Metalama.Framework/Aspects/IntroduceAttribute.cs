@@ -174,22 +174,22 @@ namespace Metalama.Framework.Aspects
             switch ( templateMember.DeclarationKind )
             {
                 case DeclarationKind.Method:
-                    builder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advise.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Property:
-                    builder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advise.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Event:
-                    builder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advise.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Field:
-                    builder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advise.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 

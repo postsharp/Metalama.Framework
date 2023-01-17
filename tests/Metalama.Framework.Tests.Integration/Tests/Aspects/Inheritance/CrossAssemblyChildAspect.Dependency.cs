@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAs
         {
             base.BuildAspect( builder );
 
-            builder.With( t => t.Methods ).AddAspect( _ => new ChildAspect() );
+            builder.Amend.SelectMany( t => t.Methods ).AddAspect( _ => new ChildAspect() );
         }
     }
 

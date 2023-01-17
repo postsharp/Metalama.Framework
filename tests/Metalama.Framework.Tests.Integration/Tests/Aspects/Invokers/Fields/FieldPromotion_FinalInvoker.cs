@@ -4,15 +4,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_FinalInvoker;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(PromoteAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(PromoteAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_FinalInvoker
 {
     public class PromoteAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(builder.Target.Fields.OfName("Field").Single(), nameof(PropertyTemplate));
+            builder.Advise.Override( builder.Target.Fields.OfName( "Field" ).Single(), nameof(PropertyTemplate) );
         }
 
         [Template]
@@ -20,13 +20,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
         {
             get
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
 
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
                 meta.Proceed();
             }
         }
@@ -34,9 +34,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(builder.Target.FieldsAndProperties.OfName( nameof(TargetClass.Field) ).Single(), nameof(PropertyTemplate));
+            builder.Advise.Override( builder.Target.FieldsAndProperties.OfName( nameof(TargetClass.Field) ).Single(), nameof(PropertyTemplate) );
         }
 
         [Template]
@@ -44,14 +44,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
         {
             get
             {
-                Console.WriteLine("Override.");
-                return meta.Target.FieldOrProperty.Invokers.Final!.GetValue(meta.This);
+                Console.WriteLine( "Override." );
+
+                return meta.Target.FieldOrProperty.Invokers.Final!.GetValue( meta.This );
             }
 
             set
             {
-                Console.WriteLine("Override.");
-                meta.Target.FieldOrProperty.Invokers.Final!.SetValue(meta.This, value);
+                Console.WriteLine( "Override." );
+                meta.Target.FieldOrProperty.Invokers.Final!.SetValue( meta.This, value );
             }
         }
     }

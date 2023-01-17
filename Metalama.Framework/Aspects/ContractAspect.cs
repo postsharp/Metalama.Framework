@@ -56,7 +56,7 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddContract( builder.Target, nameof(this.Validate), this.Direction );
+            builder.Advise.AddContract( builder.Target, nameof(this.Validate), this.Direction );
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
@@ -78,11 +78,11 @@ namespace Metalama.Framework.Aspects
             if ( parameter.DeclaringMember is IConstructor { DeclaringType.TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct } constructor &&
                  (property = constructor.DeclaringType.Properties.OfName( builder.Target.Name ).SingleOrDefault()) != null )
             {
-                builder.Advice.AddContract( property, nameof(this.Validate), this.Direction );
+                builder.Advise.AddContract( property, nameof(this.Validate), this.Direction );
             }
             else
             {
-                builder.Advice.AddContract( parameter, nameof(this.Validate), this.Direction );
+                builder.Advise.AddContract( parameter, nameof(this.Validate), this.Direction );
             }
         }
 

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             }
 
             // Introduce a property in the main type to store the Optional object.
-            var optionalValuesProperty = builder.Advice.IntroduceProperty(
+            var optionalValuesProperty = builder.Advise.IntroduceProperty(
                     builder.Target,
                     nameof(OptionalValues),
                     buildProperty: p =>
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
             {
                 // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
-                var optionalProperty = builder.Advice.IntroduceProperty(
+                var optionalProperty = builder.Advise.IntroduceProperty(
                         nestedType,
                         nameof(OptionalPropertyTemplate),
                         buildProperty: p =>
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                     .Declaration;
 
                 // Override the property in the target type so that it is forwarded to the nested type.
-                builder.Advice.Override(
+                builder.Advise.Override(
                     property,
                     nameof(OverridePropertyTemplate),
                     tags: new { optionalProperty = optionalProperty } );

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
         {
             foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField == true && !p.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override( property, nameof(OverrideProperty) );
+                builder.Advise.Override( property, nameof(OverrideProperty) );
             }
         }
 

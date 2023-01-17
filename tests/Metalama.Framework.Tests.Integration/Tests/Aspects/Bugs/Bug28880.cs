@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880
 
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+            builder.Advise.Override( builder.Target, nameof(OverrideProperty) );
         }
     }
 

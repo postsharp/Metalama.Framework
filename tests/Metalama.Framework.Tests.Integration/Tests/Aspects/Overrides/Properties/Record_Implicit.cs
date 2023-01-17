@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     {
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.With( p => p.Types.Where( t => t.ExecutionScope == ExecutionScope.RunTime ).SelectMany( t => t.Properties ) ).AddAspect<MyAspect>();
+            amender.Amend.SelectMany( p => p.Types.Where( t => t.ExecutionScope == ExecutionScope.RunTime ).SelectMany( t => t.Properties ) ).AddAspect<MyAspect>();
         }
     }
 }

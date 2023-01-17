@@ -7,18 +7,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Express
 {
     public class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors(indexer, nameof(GetIndexer), null);
+                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), null );
             }
         }
 
         [Template]
         public dynamic? GetIndexer()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }
@@ -27,6 +28,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Express
     [Test]
     internal class TargetClass
     {
-        public int this[int x] => x;
+        public int this[ int x ] => x;
     }
 }

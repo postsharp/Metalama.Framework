@@ -10,7 +10,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
-                .With<INamedType>( c => new[] { (INamedType)TypeFactory.GetType( typeof(C2) ) } )
+                .Amend
+                .SelectMany<INamedType>( c => new[] { (INamedType)TypeFactory.GetType( typeof(C2) ) } )
                 .AddAspect<Aspect>();
         }
     }

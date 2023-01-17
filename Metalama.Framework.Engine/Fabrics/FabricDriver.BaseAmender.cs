@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
@@ -83,5 +84,8 @@ internal abstract partial class FabricDriver
 
         DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
             => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
+
+        [Memo]
+        public IAspectReceiver<T> Amend => this.GetAspectTargetSelector().With( t => t );
     }
 }

@@ -1,5 +1,3 @@
-// @RemoveOutputCode
-
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Code;
@@ -18,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CompileTimeCodeNotVali
 
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.With( compilation => compilation.Types ).ValidateReferences( Validate, ReferenceKinds.All );
+            amender.Amend.SelectMany( compilation => compilation.Types ).ValidateReferences( Validate, ReferenceKinds.All );
 
             // This reference is legal.
             _ = typeof(SomeClass);

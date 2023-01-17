@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(
+            aspectBuilder.Advise.ImplementInterface(
                 aspectBuilder.Target,
                 (INamedType)TypeFactory.GetType( typeof(IInterface) ) );
         }

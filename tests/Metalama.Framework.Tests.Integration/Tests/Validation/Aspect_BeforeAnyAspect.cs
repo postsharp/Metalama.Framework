@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.Aspect_BeforeAnyAspect
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( t => t.Methods ).BeforeAnyAspect().Validate( Validate );
+            builder.Amend.SelectMany( t => t.Methods ).BeforeAnyAspect().Validate( Validate );
         }
 
         private static void Validate( in DeclarationValidationContext context )

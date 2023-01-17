@@ -13,11 +13,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
         [Template]
         public int Getter() => 5;
 
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty(builder.Target, "TheProperty", nameof(Getter), null);
+            builder.Advise.IntroduceProperty( builder.Target, "TheProperty", nameof(Getter), null );
         }
-
     }
 
     // <target>

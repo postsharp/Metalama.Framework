@@ -6,18 +6,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer(
+            builder.Advise.IntroduceIndexer(
                 builder.Target,
-                new[] { (typeof(int), "x") },
+                new[] { ( typeof(int), "x" ) },
                 nameof(ExistingIndexer),
                 nameof(ExistingIndexer),
                 whenExists: OverrideStrategy.Override,
-                buildIndexer: i =>
-                {
-                    i.Type = TypeFactory.GetType(typeof(int));
-                });
+                buildIndexer: i => { i.Type = TypeFactory.GetType( typeof(int) ); } );
         }
 
         [Template]
@@ -29,31 +26,27 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
 
     internal class BaseClass
     {
-        public virtual int this[int x]
+        public virtual int this[ int x ]
         {
             get
             {
                 return 13;
             }
 
-            set
-            {
-            }
+            set { }
         }
     }
 
     internal class DerivedClass : BaseClass
     {
-        public sealed override int this[int x]
+        public sealed override int this[ int x ]
         {
             get
             {
                 return 13;
             }
 
-            set
-            {
-            }
+            set { }
         }
     }
 

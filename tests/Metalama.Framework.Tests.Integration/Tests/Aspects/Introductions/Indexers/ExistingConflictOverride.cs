@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.IntroduceIndexer(
+            builder.Advise.IntroduceIndexer(
                 builder.Target, 
                 new[] { (typeof(int), "x") },
                 nameof(ExistingBaseIndexer),
@@ -19,7 +19,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
                     i.Type = TypeFactory.GetType(typeof(int));
                 });
 
-            builder.Advice.IntroduceIndexer(
+            builder.Advise.IntroduceIndexer(
                 builder.Target,
                 new[] { (typeof(int), "x"), (typeof(int), "y") },
                 nameof(ExistingIndexer), 
@@ -30,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
                     i.Type = TypeFactory.GetType(typeof(int));
                 });
 
-            builder.Advice.IntroduceIndexer(
+            builder.Advise.IntroduceIndexer(
                 builder.Target,
                 new[] { (typeof(int), "x"), (typeof(int), "y"), (typeof(int), "z") },
                 nameof(NotExistingIndexer), 

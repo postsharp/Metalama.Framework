@@ -13,19 +13,16 @@ public class Aspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod( builder.Target, nameof(Method), args: new { T = builder.Target } );
+        builder.Advise.IntroduceMethod( builder.Target, nameof(Method), args: new { T = builder.Target } );
     }
 
     [Template]
-    private T? Method<[CompileTime] T>( T p, T[] p2, List<T> p3) where T : class 
+    private T? Method<[CompileTime] T>( T p, T[] p2, List<T> p3 ) where T : class
     {
-        return default(T);
+        return default;
     }
 }
 
 // <target>
 [Aspect]
-public class Target
-{
-  
-}
+public class Target { }

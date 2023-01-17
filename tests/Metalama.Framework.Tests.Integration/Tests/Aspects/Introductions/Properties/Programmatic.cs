@@ -8,10 +8,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoProperty), buildProperty: p => p.Accessibility = Accessibility.Public );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(Property), buildProperty: p => p.Accessibility = Accessibility.Public );
+            builder.Advise.IntroduceProperty( builder.Target, nameof(AutoProperty), buildProperty: p => p.Accessibility = Accessibility.Public );
+            builder.Advise.IntroduceProperty( builder.Target, nameof(Property), buildProperty: p => p.Accessibility = Accessibility.Public );
 
-            builder.Advice.IntroduceProperty(
+            builder.Advise.IntroduceProperty(
                 builder.Target,
                 "PropertyFromAccessors",
                 nameof(GetPropertyTemplate),

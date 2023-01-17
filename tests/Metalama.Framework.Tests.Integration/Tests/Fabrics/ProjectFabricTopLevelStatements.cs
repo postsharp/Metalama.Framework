@@ -32,7 +32,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
     {
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.With( p => p.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( m => new OverrideAttribute() );
+            amender.Amend.SelectMany( p => p.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( m => new OverrideAttribute() );
         }
     }
 }

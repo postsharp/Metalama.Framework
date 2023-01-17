@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Layers.Introduction
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(OverrideMethod), args: new { layerName = builder.Layer ?? "First" } );
+                builder.Advise.Override( method, nameof(OverrideMethod), args: new { layerName = builder.Layer ?? "First" } );
             }
         }
 

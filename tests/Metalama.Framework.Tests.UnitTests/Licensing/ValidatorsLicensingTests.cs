@@ -25,7 +25,7 @@ class ValidateAspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods ).AfterAllAspects().Validate( Validate );
+        builder.Outbound.With( t => t.Methods ).AfterAllAspects().Validate( Validate );
     }
 
     private static void Validate( in DeclarationValidationContext context )

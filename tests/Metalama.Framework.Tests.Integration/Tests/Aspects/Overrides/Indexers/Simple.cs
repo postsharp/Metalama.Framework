@@ -7,25 +7,26 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Simple
 {
     public class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors(indexer, nameof(GetIndexer), nameof(SetIndexer));
+                builder.Advise.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer) );
             }
         }
 
         [Template]
         public dynamic? GetIndexer()
         {
-            Console.WriteLine($"Override [{meta.Target.Indexer.Parameters[0].Value}]");
+            Console.WriteLine( $"Override [{meta.Target.Indexer.Parameters[0].Value}]" );
+
             return meta.Proceed();
         }
 
         [Template]
         public void SetIndexer()
         {
-            Console.WriteLine($"Override [{meta.Target.Indexer.Parameters[0].Value}]");
+            Console.WriteLine( $"Override [{meta.Target.Indexer.Parameters[0].Value}]" );
             meta.Proceed();
         }
     }
@@ -34,17 +35,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Simple
     [Test]
     internal class TargetClass
     {
-        public int this[int x]
-        {   
+        public int this[ int x ]
+        {
             get
             {
-                Console.WriteLine("Original");
-                return x; 
+                Console.WriteLine( "Original" );
+
+                return x;
             }
 
             set
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
     }

@@ -9,7 +9,7 @@ public class RequiredAttribute : ParameterAspect
 {
     public override void BuildAspect( IAspectBuilder<IParameter> builder )
     {
-        builder.Advice.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
+        builder.Advise.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
     }
 
     [Template]

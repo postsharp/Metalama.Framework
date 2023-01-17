@@ -19,12 +19,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Int
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.AddContract( field, nameof(Filter), ContractDirection.Both );
+                builder.Advise.AddContract( field, nameof(Filter), ContractDirection.Both );
             }
 
-            var introducedField = builder.Advice.IntroduceField( builder.Target, nameof(IntroducedField) ).Declaration;
+            var introducedField = builder.Advise.IntroduceField( builder.Target, nameof(IntroducedField) ).Declaration;
 
-            builder.Advice.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
+            builder.Advise.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
         }
 
         [Template]

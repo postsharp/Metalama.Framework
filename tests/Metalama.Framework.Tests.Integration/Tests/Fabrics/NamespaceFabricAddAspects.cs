@@ -11,7 +11,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
-                .With(
+                .Amend
+                .SelectMany(
                     c => c.DescendantsAndSelf()
                         .SelectMany( t => t.Types )
                         .SelectMany( t => t.Methods )

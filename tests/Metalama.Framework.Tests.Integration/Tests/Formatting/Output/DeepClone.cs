@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod(
+            var typedMethod = builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override,
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
                     m.ReturnType = builder.Target;
                 } );
 
-            builder.Advice.ImplementInterface(
+            builder.Advise.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore );

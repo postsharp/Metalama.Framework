@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             if (builder.Target.SetMethod != null)
             {
-                builder.Advice.OverrideAccessors( builder.Target, null, setTemplate: nameof(SetProperty) );
+                builder.Advise.OverrideAccessors( builder.Target, null, setTemplate: nameof(SetProperty) );
             }
         }
 

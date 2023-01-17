@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(OverrideTemplate) );
+                builder.Advise.Override( method, nameof(OverrideTemplate) );
             }
         }
 
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(OverrideTemplate) );
+                builder.Advise.Override( method, nameof(OverrideTemplate) );
             }
         }
 
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(OverrideTemplate) );
+                builder.Advise.Override( method, nameof(OverrideTemplate) );
             }
         }
 

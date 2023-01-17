@@ -15,71 +15,69 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         void VoidMethod();
 
-        int Method(int x, string y);
+        int Method( int x, string y );
 
-        int Method_Ref(ref int x);
+        int Method_Ref( ref int x );
 
         //ref int Method_RefReturn(ref int x);
 
-        T? GenericMethod<T>(T? x);
+        T? GenericMethod<T>( T? x );
 
-        T? GenericMethod_Multiple<T, U>(T? x, U? y);
+        T? GenericMethod_Multiple<T, U>( T? x, U? y );
 
-        T? GenericMethod_MultipleReverse<T, U>(U? x, T? y);
+        T? GenericMethod_MultipleReverse<T, U>( U? x, T? y );
 
-        T? GenericMethod_NestedParam<T>(List<T> x);
+        T? GenericMethod_NestedParam<T>( List<T> x );
 
-        T? GenericMethod_DoubleNestedParam<T>(List<List<T>> x);
+        T? GenericMethod_DoubleNestedParam<T>( List<List<T>> x );
 
-        T? GenericMethod_Ref<T>(ref T? x);
+        T? GenericMethod_Ref<T>( ref T? x );
 
-        void GenericMethod_Out<T>(out T? x);
+        void GenericMethod_Out<T>( out T? x );
     }
 
     public class IntroductionAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advise.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember]
-        void VoidMethod()
-        {
-        }
+        private void VoidMethod() { }
 
         [InterfaceMember]
-        int Method(int x, string y)
+        private int Method( int x, string y )
         {
             return x;
         }
 
         [InterfaceMember]
-        int Method_Ref(ref int x)
+        private int Method_Ref( ref int x )
         {
             return x;
         }
 
         [InterfaceMember]
-        T? GenericMethod<T>(T? x)
+        private T? GenericMethod<T>( T? x )
         {
             return x;
         }
 
         [InterfaceMember]
-        T? GenericMethod_Multiple<T, U>(T? x, U? y)
+        private T? GenericMethod_Multiple<T, U>( T? x, U? y )
         {
             return x;
         }
 
         [InterfaceMember]
-        T? GenericMethod_MultipleReverse<T, U>(U? x, T? y)
+        private T? GenericMethod_MultipleReverse<T, U>( U? x, T? y )
         {
             return y;
         }
 
         [InterfaceMember]
-        T? GenericMethod_NestedParam<T>(List<T> x)
+        private T? GenericMethod_NestedParam<T>( List<T> x )
         {
             if (x.Count > 0)
             {
@@ -87,12 +85,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
             else
             {
-                return default(T?);
+                return default;
             }
         }
 
         [InterfaceMember]
-        T? GenericMethod_DoubleNestedParam<T>(List<List<T>> x)
+        private T? GenericMethod_DoubleNestedParam<T>( List<List<T>> x )
         {
             if (x.Count > 0)
             {
@@ -102,25 +100,25 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 }
                 else
                 {
-                    return default(T?);
+                    return default;
                 }
             }
             else
             {
-                return default(T?);
+                return default;
             }
         }
 
         [InterfaceMember]
-        T? GenericMethod_Ref<T>(ref T? x)
+        private T? GenericMethod_Ref<T>( ref T? x )
         {
             return x;
         }
 
         [InterfaceMember]
-        void GenericMethod_Out<T>(out T? x)
+        private void GenericMethod_Out<T>( out T? x )
         {
-            x = default(T?);
+            x = default;
         }
     }
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using System;
 using System.Threading;
 
 namespace Metalama.Framework.Aspects
@@ -39,8 +40,11 @@ namespace Metalama.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to create an advice, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows to create advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
+        IAdviceFactory Advise { get; }
+        
+        [Obsolete("The property has been renamed 'Advise'.")]
         IAdviceFactory Advice { get; }
 
         /// <summary>
@@ -105,5 +109,10 @@ namespace Metalama.Framework.Aspects
         /// Gets the declaration to which the aspect was added.
         /// </summary>
         new TAspectTarget Target { get; }
+
+        /// <summary>
+        /// Gets an object that allows to add child advice and to validate code and code references.
+        /// </summary>
+        IAspectReceiver<TAspectTarget> Amend { get; }
     }
 }

@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
+            builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
                 buildMethod: introduced =>
@@ -18,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
                     introduced.AddParameter( "y", typeof(int) );
                 } );
 
-            builder.Advice.IntroduceMethod(
+            builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
                 buildMethod: introduced =>
@@ -27,7 +27,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
                     introduced.ReturnType = TypeFactory.GetType( typeof(int) );
                 } );
 
-            builder.Advice.IntroduceMethod(
+            builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
                 buildMethod: introduced =>
@@ -36,7 +36,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
                     introduced.Accessibility = Accessibility.Private;
                 } );
 
-            builder.Advice.IntroduceMethod(
+            builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
                 buildMethod: introduced =>
@@ -45,7 +45,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
                     introduced.IsStatic = true;
                 } );
 
-            builder.Advice.IntroduceMethod(
+            builder.Advise.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
                 buildMethod: introduced =>

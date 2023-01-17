@@ -18,8 +18,8 @@ public class MyAttribute : Attribute
 
     public MyRunTimeEnum Property
     {
-        get => (MyRunTimeEnum) _property;
-        set => _property = (int) value;
+        get => (MyRunTimeEnum)_property;
+        set => _property = (int)value;
     }
 }
 
@@ -29,7 +29,7 @@ public class MyAspect : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.IntroduceAttribute(
+        builder.Advise.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
@@ -40,6 +40,6 @@ public class MyAspect : MethodAspect
 // <target>
 internal class C
 {
-    [MyAspect( Property = (int) MyRunTimeEnum.B )]
+    [MyAspect( Property = (int)MyRunTimeEnum.B )]
     private void M() { }
 }

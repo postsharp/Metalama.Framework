@@ -7,9 +7,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.Sta
 
 public class MyAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceParameter(builder.Target.StaticConstructor!, "p", typeof(int), TypedConstant.Create(15));
+        builder.Advise.IntroduceParameter( builder.Target.StaticConstructor!, "p", typeof(int), TypedConstant.Create( 15 ) );
     }
 }
 
@@ -17,7 +17,5 @@ public class MyAspect : TypeAspect
 [MyAspect]
 public class C
 {
-    static C()
-    {
-    }
+    static C() { }
 }

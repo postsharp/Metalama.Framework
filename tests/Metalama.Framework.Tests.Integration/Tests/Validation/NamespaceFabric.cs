@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
 
         public override void AmendNamespace( INamespaceAmender amender )
         {
-            amender.With( ns => ns ).ValidateReferences( Validate, ReferenceKinds.All );
+            amender.Amend.ValidateReferences( Validate, ReferenceKinds.All );
         }
 
         private static void Validate( in ReferenceValidationContext context )
@@ -25,7 +25,6 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
         }
     }
 
-    
     // <target>
     internal class ValidatedClass
     {

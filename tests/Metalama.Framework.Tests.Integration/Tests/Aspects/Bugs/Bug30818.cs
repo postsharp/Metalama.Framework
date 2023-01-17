@@ -14,13 +14,13 @@ internal class ValidationAspect : FieldOrPropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.AddContract(
+        builder.Advise.AddContract(
             builder.Target,
             nameof(ValidatePropertyGetter),
             ContractDirection.Output,
             args: new { propertyName = builder.Target.Name } );
 
-        builder.Advice.AddContract(
+        builder.Advise.AddContract(
             builder.Target,
             nameof(ValidatePropertySetter),
             ContractDirection.Input,
@@ -52,7 +52,7 @@ public sealed class OnPropertyChangedAspect : TypeAspect
     {
         foreach (var property in builder.Target.FieldsAndProperties.Where( f => !f.IsImplicitlyDeclared ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.Advise.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
         }
     }
 
