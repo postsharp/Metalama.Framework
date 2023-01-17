@@ -437,7 +437,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     /// Gets the eligibility of a an aspect instance of the current aspect class. If the aspect type implements <see cref="IConditionallyInheritableAspect"/>,
     /// this method assumes that the aspect instance is inheritable. 
     /// </summary>
-    public EligibleScenarios GetEligibility( IDeclaration obj ) => this.GetEligibility( obj, this.IsInheritable != true );
+    public EligibleScenarios GetEligibility( IDeclaration obj ) => this.GetEligibility( obj, this.IsInheritable != false );
 
     /// <summary>
     /// Gets the eligibility of a an aspect instance of the current aspect class without when knowing whether the aspect instance is inheritable.

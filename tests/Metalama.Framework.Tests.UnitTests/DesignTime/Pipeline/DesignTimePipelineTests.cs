@@ -345,7 +345,7 @@ Target.cs:
 
         Assert.Contains(
             diagnostics4,
-            d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+            d => d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
         // Fifth execution, the same scenario as before.
         var compilation5 = TestCompilationFactory.CreateCSharpCompilation(
@@ -372,7 +372,7 @@ Target.cs:
 
         Assert.Contains(
             diagnostics5,
-            d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+            d => d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
         // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
         await pipeline.ResumeAsync( AsyncExecutionContext.Get() );
@@ -393,7 +393,7 @@ Target.cs:
 
         Assert.DoesNotContain(
             diagnostics6,
-            d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+            d => d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
     }
 
     [Fact]

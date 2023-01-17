@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,7 +10,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
 {
-    private static readonly ConcurrentDictionary<Type, ClassBasedReferenceValidatorDriver> _classBasedDrivers = new();
+    private static readonly WeakCache<Type, ClassBasedReferenceValidatorDriver> _classBasedDrivers = new();
 
     private readonly Type _aspectOrFabricType;
     private readonly WeakCache<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();

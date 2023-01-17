@@ -91,6 +91,10 @@ namespace Metalama.Framework.Engine.Fabrics
                     nameof(validateMethod),
                     $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
             }
+            
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
@@ -99,6 +103,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnostics,
                         item => new ReferenceValidatorInstance(
@@ -110,6 +116,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public void ValidateReferences( ReferenceValidator validator )
         {
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent.GetReferenceValidatorDriver( validator.GetType() ),
@@ -117,6 +126,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnostics,
                         item => new ReferenceValidatorInstance(
@@ -139,6 +150,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnostics,
                         item =>
@@ -155,6 +168,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,
@@ -163,6 +179,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._parent.AspectPredecessor,
                     validateMethod,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnostics,
                         item => new DeclarationValidatorInstance(
@@ -262,6 +280,8 @@ namespace Metalama.Framework.Engine.Fabrics
                 new ProgrammaticAspectSource(
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnosticAdder,
                         aspectClass,
@@ -304,6 +324,8 @@ namespace Metalama.Framework.Engine.Fabrics
                 new ProgrammaticAspectSource(
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                        userCodeInvoker,
+                        executionContext,
                         compilation,
                         diagnosticAdder,
                         aspectClass,
@@ -327,13 +349,26 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         private IEnumerable<TResult> SelectAndValidateAspectTargets<TResult>(
+            UserCodeInvoker? invoker,
+            UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
             EligibleScenarios filteredEligibility,
             Func<T, TResult?> createResult )
         {
-            foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
+            List<T> targets;
+
+            if ( invoker != null && executionContext != null )
+            {
+                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
+            }
+            else
+            {
+                targets = this._selector( compilation, diagnosticAdder ).ToList();
+            }
+
+            foreach ( var targetDeclaration in targets  )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
@@ -387,13 +422,26 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
+            UserCodeInvoker? invoker,
+            UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
             IDiagnosticSink diagnosticSink,
             Func<T, ValidatorInstance?> createResult )
         {
             var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
 
-            foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
+            List<T> targets;
+
+            if ( invoker != null && executionContext != null )
+            {
+                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
+            }
+            else
+            {
+                targets = this._selector( compilation, diagnosticAdder ).ToList();
+            }
+
+            foreach ( var targetDeclaration in targets )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
@@ -428,6 +476,8 @@ namespace Metalama.Framework.Engine.Fabrics
                 new ProgrammaticAspectSource(
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                        null,
+                        null,
                         compilation,
                         diagnosticAdder,
                         aspectClass,
