@@ -21,8 +21,8 @@ namespace Metalama.Framework.Tests.Workspaces
         {
             using var testContext = this.CreateTestContext();
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,
@@ -52,8 +52,8 @@ namespace Metalama.Framework.Tests.Workspaces
         {
             using var testContext = this.CreateTestContext();
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,
@@ -110,8 +110,8 @@ namespace Metalama.Framework.Tests.Workspaces
             var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
                 .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,

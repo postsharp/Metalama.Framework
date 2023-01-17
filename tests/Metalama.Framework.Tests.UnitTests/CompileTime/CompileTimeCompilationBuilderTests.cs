@@ -693,7 +693,7 @@ public class ReferencedClass
 
             // Emit the referenced assembly.
             var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
-            var referencedPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext.BaseDirectory, "referenced.dll" );
 
             DiagnosticBag diagnosticBag = new();
 

@@ -37,6 +37,11 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     internal TestProjectOptions ProjectOptions { get; }
 
     /// <summary>
+    /// Gets the directory that was specifically created for the current test and where all specific files should be stored.
+    /// </summary>
+    public string BaseDirectory => this.ProjectOptions.BaseDirectory;
+
+    /// <summary>
     /// Gets the <see cref="ProjectServiceProvider"/> for the current context.
     /// </summary>
     public ProjectServiceProvider ServiceProvider { get; }
