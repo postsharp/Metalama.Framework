@@ -10,7 +10,7 @@ namespace Metalama.Framework.TestApp.Aspects
     [Inheritable]
     class InheritedAspect : TypeAspect
     {
-        [Inheritable]
+        [Introduce]
         public void IntroducedMethod() { }
     }
 }
