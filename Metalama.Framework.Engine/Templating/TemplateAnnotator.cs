@@ -2108,7 +2108,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             transformedArms = node.Arms.SelectAsArray( a => this.Visit( a ) );
 
-            this.RequireScope( transformedArms, governingExpressionScope, "a compile-time switch expression" );
+            var reason = governingExpressionScope == TemplatingScope.RunTimeOnly
+                ? "a run-time switch expression"
+                : "a compile-time switch expression";
+
+            this.RequireScope( transformedArms, governingExpressionScope, reason );
         }
 
         return node.Update(
