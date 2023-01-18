@@ -405,5 +405,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartialTemplateMethodsForbidden
+            = new(
+                "LAMA0252",
+                "Template methods cannot be partial",
+                "'{0}' cannot be partial because it is a template.",
+                _category,
+                Error );
     }
 }
