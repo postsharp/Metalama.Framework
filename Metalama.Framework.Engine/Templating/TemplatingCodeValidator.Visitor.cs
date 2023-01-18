@@ -264,6 +264,21 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
+
+                // Check that an aspect is not a nested type
+                if ( node.Parent is BaseTypeDeclarationSyntax )
+                {
+                    var declaredTypeSymbol = (INamedTypeSymbol) context.DeclaredSymbol!;
+                    var iAspectSymbol = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof( IAspect ) );
+
+                    if ( declaredTypeSymbol.Is( iAspectSymbol ) )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.AspectNestedTypeForbidden.CreateRoslynDiagnostic(
+                                node.Identifier.GetLocation(),
+                                declaredTypeSymbol ) );
+                    }
+                }
             }
 
             private void VerifyModifiers( SyntaxTokenList modifiers )

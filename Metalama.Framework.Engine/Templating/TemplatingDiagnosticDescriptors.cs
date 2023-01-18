@@ -405,5 +405,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> AspectNestedTypeForbidden
+            = new(
+                "LAMA0253",
+                "Aspects cannot be nested types.",
+                "Aspect type '{0}' is a nested type, which is not supported.",
+                _category,
+                Error );
     }
 }
