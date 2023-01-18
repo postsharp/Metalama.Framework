@@ -84,6 +84,32 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
             switch ( currentNode )
             {
+                case MemberAccessExpressionSyntax 
+                { 
+                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                    Name.Identifier.Text : LinkerInjectionHelperProvider.FinalizeMemberName                            
+                }:
+                    // Finalizer invocation.
+
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( targetMemberName ) );
+
+                case MemberAccessExpressionSyntax
+                {
+                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                    Name.Identifier.Text: var operatorName
+                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != Code.OperatorKind.None:
+                    // Operator invocation.
+
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                            IdentifierName( targetMemberName ) );
+
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     // The reference expression is member access.
 

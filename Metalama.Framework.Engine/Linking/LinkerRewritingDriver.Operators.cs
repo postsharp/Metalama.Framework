@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( this.GetOriginalImplOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplOperator( operatorDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -98,13 +98,32 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberDeclarationSyntax GetOriginalImplOperator(
             OperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol )
-            => this.GetSpecialImplOperator(
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
+        {
+            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+            var context = new InliningContextIdentifier( semantic );
+
+            var substitutedBody =
+                @operator.Body != null
+                    ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            var substitutedExpressionBody =
+                @operator.ExpressionBody != null
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                        @operator.ExpressionBody,
+                        symbol,
+                        new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            return this.GetSpecialImplOperator(
                 @operator,
-                @operator.Body.WithSourceCodeAnnotation(),
-                @operator.ExpressionBody.WithSourceCodeAnnotation(),
+                substitutedBody.WithSourceCodeAnnotation(),
+                substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
+        }
 
         private MemberDeclarationSyntax GetEmptyImplOperator(
             OperatorDeclarationSyntax @operator,

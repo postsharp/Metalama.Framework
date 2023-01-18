@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( this.GetOriginalImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplDestructor( destructorDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -98,13 +98,29 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberDeclarationSyntax GetOriginalImplDestructor(
             DestructorDeclarationSyntax destructor,
-            IMethodSymbol symbol )
-            => this.GetSpecialImplDestructor(
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
+        {
+            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+            var context = new InliningContextIdentifier( semantic );
+
+            var substitutedBody =
+                destructor.Body != null
+                    ? (BlockSyntax) this.RewriteBody( destructor.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            var substitutedExpressionBody =
+                destructor.ExpressionBody != null
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody( destructor.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            return this.GetSpecialImplDestructor(
                 destructor,
-                destructor.Body.WithSourceCodeAnnotation(),
-                destructor.ExpressionBody.WithSourceCodeAnnotation(),
+                substitutedBody.WithSourceCodeAnnotation(),
+                substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
+        }
 
         private MemberDeclarationSyntax GetEmptyImplDestructor(
             DestructorDeclarationSyntax destructor,

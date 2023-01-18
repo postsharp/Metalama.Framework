@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol ) );
+                        members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
                     }
                 }
 
@@ -238,13 +238,55 @@ namespace Metalama.Framework.Engine.Linking
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetOriginalImplEvent( 
+            EventDeclarationSyntax @event, 
+            IEventSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
+            var existingAccessorList = @event.AccessorList.AssertNotNull();
+            
+            var transformedAccessorList =
+                existingAccessorList
+                    .WithAccessors(
+                        List(
+                            existingAccessorList.Accessors.SelectAsArray( 
+                                a =>
+                                    TransformAccessor(
+                                        a,
+                                        a.Kind() switch
+                                        {
+                                            SyntaxKind.AddAccessorDeclaration => symbol.AddMethod.AssertNotNull(),
+                                            SyntaxKind.RemoveAccessorDeclaration => symbol.RemoveMethod.AssertNotNull(),
+                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" ),
+                                        } ) ) ) )
+                    .WithSourceCodeAnnotation();
+
             return this.GetSpecialImplEvent(
                 @event.Type,
-                @event.AccessorList.AssertNotNull().WithSourceCodeAnnotation(),
+                transformedAccessorList.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
+
+            AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
+            {
+                var semantic = accessorSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                var context = new InliningContextIdentifier( semantic );
+
+                var substitutedBody =
+                    accessorDeclaration.Body != null
+                        ? (BlockSyntax) this.RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        : null;
+
+                var substitutedExpressionBody =
+                    accessorDeclaration.ExpressionBody != null
+                        ? (ArrowExpressionClauseSyntax) this.RewriteBody( accessorDeclaration.ExpressionBody, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        : null;
+
+                return
+                    accessorDeclaration
+                        .WithBody( substitutedBody )
+                        .WithExpressionBody( substitutedExpressionBody );
+            }
         }
 
         private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -148,6 +149,13 @@ namespace Metalama.Framework.Engine.Linking
                 redirectedGetOnlyAutoProperties,
                 cancellationToken );
 
+            var callerAttributeReferences =
+                await GetCallerAttributeReferencesAsync(
+                    input.IntermediateCompilation,
+                    input.InjectionRegistry,
+                    symbolReferenceFinder,
+                    cancellationToken );
+
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,
                 syntaxHandler,
@@ -159,7 +167,8 @@ namespace Metalama.Framework.Engine.Linking
                 redirectedSymbols,
                 redirectedGetOnlyAutoPropertyReferences,
                 forcefullyInitializedTypes,
-                eventFieldRaiseReferences );
+                eventFieldRaiseReferences,
+                callerAttributeReferences );
 
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
@@ -417,7 +426,7 @@ namespace Metalama.Framework.Engine.Linking
             var list = new List<IntermediateSymbolSemanticReference>();
 
             var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync(
-                redirectedGetOnlyAutoProperties.SelectAsEnumerable( x => x.Property ),
+                redirectedGetOnlyAutoProperties.SelectAsEnumerable( x => (x.Property, x.Property.ContainingType) ),
                 cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
@@ -432,7 +441,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         /// <summary>
-        /// Filters event raise references from a list of all references to an event field.
+        /// Finds all references to overridden event fields.
         /// </summary>
         private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetEventFieldRaiseReferencesAsync(
             SymbolReferenceFinder symbolReferenceFinder,
@@ -440,7 +449,11 @@ namespace Metalama.Framework.Engine.Linking
             CancellationToken cancellationToken )
         {
             var list = new List<IntermediateSymbolSemanticReference>();
-            var allEventFieldReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( overriddenEventFields, cancellationToken );
+
+            var allEventFieldReferences =
+                await symbolReferenceFinder.FindSymbolReferencesAsync(
+                    overriddenEventFields.SelectAsEnumerable( x => (x, x.ContainingType) ),
+                    cancellationToken );
 
             foreach ( var reference in allEventFieldReferences )
             {
@@ -471,6 +484,124 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Finds all references to overridden methods that have caller attributes and need to be fixed.
+        /// </summary>
+        private static async Task<IReadOnlyList<CallerAttributeReference>> GetCallerAttributeReferencesAsync( 
+            PartialCompilation intermediateCompilation,
+            LinkerInjectionRegistry injectionRegistry,
+            SymbolReferenceFinder symbolReferenceFinder, 
+            CancellationToken cancellationToken )
+        {
+            var referenceList = new List<CallerAttributeReference>();
+
+            // Presume that overrides always contain the full invocation without omitted parameters.
+            // TODO: Optimize. Too many allocations.
+            // TODO: We don't have to search methods that are inlined directly into the final semantic (all overrides and source are inlined).
+            var methodsToAnalyze =
+                injectionRegistry
+                .GetOverriddenMembers()
+                .Select( x => x.ContainingType )
+                .Distinct<INamedTypeSymbol>( SymbolEqualityComparer.Default )
+                .SelectMany( 
+                    x =>
+                        x.GetMembers()
+                        .Select( 
+                            member =>
+                                member switch
+                                {
+                                    IMethodSymbol method => method,
+                                    IPropertySymbol => null,
+                                    IEventSymbol => null,
+                                    IFieldSymbol => null,
+                                    INamedTypeSymbol => null,
+                                    _ => throw new AssertionFailedException( $"Symbol not supported: {member.Kind}." ),
+                                } )
+                        .OfType<IMethodSymbol>() )
+                .Where( m => !injectionRegistry.IsOverride( m ) );
+            
+            var allContainedReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( methodsToAnalyze, cancellationToken );
+            var semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
+
+            foreach ( var reference in allContainedReferences )
+            {
+                if ( reference.TargetSemantic.Symbol is not IMethodSymbol methodSymbol
+                     || reference.TargetSemantic.Kind != IntermediateSymbolSemanticKind.Default
+                     || injectionRegistry.IsOverride( reference.TargetSemantic.Symbol ) )
+                {
+                    // References to non-methods or non-source semantics are skipped.
+                    continue;
+                }
+                
+                // TODO: This should be cached.
+                if ( !methodSymbol.Parameters.Any( p => p.IsCallerMemberNameParameter() ) )
+                {
+                    // References to methods without caller attributes are skipped.
+                    continue;
+                }
+
+                switch ( reference.ReferencingNode )
+                {
+                    case { Parent: InvocationExpressionSyntax invocationExpression }:
+                        ProcessReference( reference, invocationExpression );
+
+                        break;
+                }
+            }
+
+            return referenceList;
+
+            void ProcessReference( IntermediateSymbolSemanticReference reference, InvocationExpressionSyntax invocationExpression )
+            {
+                var semanticModel = semanticModelProvider.GetSemanticModel( reference.ReferencingNode.SyntaxTree );
+                var method = (IMethodSymbol?) semanticModel.GetSymbolInfo( invocationExpression ).Symbol;
+
+                if ( method != null )
+                {
+                    var referencedParameterOrdinals = new HashSet<int>();
+
+                    var index = 0;
+
+                    foreach ( var argument in invocationExpression.ArgumentList.Arguments )
+                    {
+                        if ( argument.NameColon == null )
+                        {
+                            referencedParameterOrdinals.Add( index );
+                        }
+                        else
+                        {
+                            var referencedParameter = (IParameterSymbol) semanticModel.GetSymbolInfo( argument.NameColon.Name ).Symbol.AssertNotNull();
+
+                            referencedParameterOrdinals.Add( referencedParameter.Ordinal );
+                        }
+
+                        index++;
+                    }
+
+                    var parametersToFix = new List<int>();
+
+                    foreach ( var parameter in method.Parameters )
+                    {
+                        if ( parameter.IsCallerMemberNameParameter() && !referencedParameterOrdinals.Contains( parameter.Ordinal ) )
+                        {
+                            parametersToFix.Add( parameter.Ordinal );
+                        }
+                    }
+
+                    if ( parametersToFix.Count > 0 )
+                    {
+                        referenceList.Add(
+                            new CallerAttributeReference(
+                                reference.ContainingSemantic,
+                                reference.ContainingSemantic.Symbol,
+                                (IMethodSymbol) reference.TargetSemantic.Symbol,
+                                invocationExpression,
+                                parametersToFix ) );
+                    }
+                }
+            }
         }
     }
 }
