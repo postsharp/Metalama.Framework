@@ -36,14 +36,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Overrides\Events\CallerAttributes.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Finalizers\CallerAttributes.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Methods\Attributes - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Operators\CallerAttributes.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Properties\CallerAttributes.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -51,29 +43,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\Overrides\Events\CallerAttributes.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>CallerAttributes.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Finalizers\CallerAttributes.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>CallerAttributes.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Methods\CallerAttributes.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>CallerAttributes.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Operators\CallerAttributes.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>CallerAttributes.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Properties\CallerAttributes.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>CallerAttributes.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

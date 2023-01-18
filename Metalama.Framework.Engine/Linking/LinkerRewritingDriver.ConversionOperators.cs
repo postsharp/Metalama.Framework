@@ -99,20 +99,20 @@ namespace Metalama.Framework.Engine.Linking
         private MemberDeclarationSyntax GetOriginalImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext)
+            SyntaxGenerationContext generationContext )
         {
             var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
             var context = new InliningContextIdentifier( semantic );
 
             var substitutedBody =
                 @operator.Body != null
-                ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
-                : null;
+                    ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             var substitutedExpressionBody =
                 @operator.ExpressionBody != null
-                ? (ArrowExpressionClauseSyntax) this.RewriteBody( @operator.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
-                : null;
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody( @operator.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             return this.GetSpecialImplConversionOperator(
                 @operator,

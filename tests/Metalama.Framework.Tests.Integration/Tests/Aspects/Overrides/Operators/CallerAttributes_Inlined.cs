@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Operators.CallerAttributes
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Operators.CallerAttributes_Inlined
 {
     /*
-     * Tests that overriding operator does correctly transforms caller attribute method invocations when the source is not inlined.
+     * Tests that overriding operator does not transform caller attribute method invocations when the source is inlined.
      */
 
     public class OverrideAttribute : MethodAspect
@@ -22,8 +22,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
         [Template]
         public dynamic? Override()
         {
-            // Block inlining.
-            _ = meta.Proceed();
             Console.WriteLine("This is the overridden method.");
             return meta.Proceed();
         }

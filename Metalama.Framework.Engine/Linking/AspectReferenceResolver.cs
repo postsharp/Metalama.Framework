@@ -565,12 +565,11 @@ namespace Metalama.Framework.Engine.Linking
                     case { Name: LinkerInjectionHelperProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
                         rootNode = expression;
+                        targetSymbolSource = expression;
 
                         targetSymbol = containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
-
-                        targetSymbolSource = expression;
 
                         return;
 
@@ -595,10 +594,11 @@ namespace Metalama.Framework.Engine.Linking
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
                         // Referencing an operator.
+                        rootNode = expression;
+                        targetSymbolSource = expression;
+
                         if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
-                            rootNode = expression;
-
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -607,15 +607,9 @@ namespace Metalama.Framework.Engine.Linking
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
-
-                            targetSymbolSource = expression;
-
-                            return;
                         }
                         else
                         {
-                            rootNode = expression;
-
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -623,11 +617,9 @@ namespace Metalama.Framework.Engine.Linking
                                         m.Parameters.Length == 1
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
-
-                            targetSymbolSource = expression;
-
-                            return;
                         }
+
+                        return;
 
                     default:
                         throw new AssertionFailedException( $"Unexpected helper method: '{helperMethod}'." );

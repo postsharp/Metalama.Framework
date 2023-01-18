@@ -142,15 +142,18 @@ namespace Metalama.Framework.Engine.Linking
             var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
             var context = new InliningContextIdentifier( semantic );
 
-            var substitutedBody = 
+            var substitutedBody =
                 method.Body != null
-                ? (BlockSyntax) this.RewriteBody( method.Body, symbol, new SubstitutionContext( this , generationContext, context) )
-                : null;
+                    ? (BlockSyntax) this.RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             var substitutedExpressionBody =
                 method.ExpressionBody != null
-                ? (ArrowExpressionClauseSyntax) this.RewriteBody( method.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
-                : null;
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                        method.ExpressionBody,
+                        symbol,
+                        new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             return this.GetSpecialImplMethod(
                 method,

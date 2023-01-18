@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
     /// <summary>
-    /// Substitutes non-inlined aspect reference.
+    /// Substitutes non-inlined aspect reference that adds a helper parameter.
     /// </summary>
     internal sealed class AspectReferenceParameterSubstitution : SyntaxNodeSubstitution
     {
@@ -28,6 +28,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
+            // TODO: This not used, instead of predefined helper types, the linker should generate private helper
+            //       types for each aspect layer into each target type.
+
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
 

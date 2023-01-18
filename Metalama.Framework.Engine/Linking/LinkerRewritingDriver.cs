@@ -64,19 +64,20 @@ namespace Metalama.Framework.Engine.Linking
         {
             var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
-            var rewrittenBody = (BlockSyntax)this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBody = this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
             // Add the SourceCode annotation, if it is source code.
             if ( !(semantic.Symbol.GetPrimarySyntaxReference() is { } primarySyntax
                    && primarySyntax.GetSyntax().HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
             {
-                rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
+                rewrittenBlock = rewrittenBlock.WithSourceCodeAnnotation();
             }
 
             if ( triviaSource == null )
             {
                 // Strip the trivia from the block.
-                return rewrittenBody
+                return rewrittenBlock
                     .WithOpenBraceToken(
                         Token( SyntaxKind.OpenBraceToken )
                             .WithLeadingTrivia( ElasticMarker )
@@ -109,21 +110,21 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( shouldRemoveExistingTrivia )
                 {
-                    rewrittenBody =
-                        rewrittenBody
-                            .WithOpenBraceToken( rewrittenBody.OpenBraceToken.WithoutTrivia() )
-                            .WithCloseBraceToken( rewrittenBody.CloseBraceToken.WithoutTrivia() )
+                    rewrittenBlock =
+                        rewrittenBlock
+                            .WithOpenBraceToken( rewrittenBlock.OpenBraceToken.WithoutTrivia() )
+                            .WithCloseBraceToken( rewrittenBlock.CloseBraceToken.WithoutTrivia() )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {
-                    rewrittenBody =
-                        rewrittenBody
+                    rewrittenBlock =
+                        rewrittenBlock
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
 
                 // Keep all trivia from the source block and add trivias from the root block.
-                return Block( rewrittenBody )
+                return Block( rewrittenBlock )
                     .WithOpenBraceToken(
                         Token( SyntaxKind.OpenBraceToken )
                             .WithLeadingTrivia( openBraceLeadingTrivia.Add( ElasticMarker ) )
@@ -133,6 +134,65 @@ namespace Metalama.Framework.Engine.Linking
                             .WithLeadingTrivia( closeBraceLeadingTrivia.Add( ElasticMarker ) )
                             .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
+
+            static BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
+            {
+                // TODO: Convert to block.
+                if ( symbol.ReturnsVoid )
+                {
+                    switch ( node )
+                    {
+                        case null:
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                        // return
+                        //     SyntaxFactoryEx.FormattedBlock()
+                        //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case BlockSyntax rewrittenBlock:
+                            return rewrittenBlock;
+
+                        case ArrowExpressionClauseSyntax rewrittenArrowClause:
+                            return
+                                Block( ExpressionStatement( rewrittenArrowClause.Expression ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        default:
+                            throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                    }
+                }
+                else
+                {
+                    switch ( node )
+                    {
+                        case null:
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                        // return
+                        //     Block(
+                        //             ReturnStatement(
+                        //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                        //                 Token( SyntaxKind.SemicolonToken ) ) )
+                        //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case ArrowExpressionClauseSyntax rewrittenArrowClause:
+                            return
+                                SyntaxFactoryEx.FormattedBlock(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                            rewrittenArrowClause.Expression,
+                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case BlockSyntax rewrittenBlock:
+                            return rewrittenBlock;
+
+                        default:
+                            throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                    }
+                }
             }
         }
 

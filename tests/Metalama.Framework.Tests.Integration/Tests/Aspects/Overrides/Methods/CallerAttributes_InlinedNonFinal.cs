@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Finalizers.CallerAttributes
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.CallerAttributes_InlinedNonFinal
 {
     /*
-     * Tests that overriding finalizer does correctly transform caller attribute method invocations when the source is not inlined.
+     * Tests that overriding method correctly transforms caller attribute method invocations when the source is inlined into non-final semantic.
      */
 
     public class OverrideAttribute : MethodAspect
@@ -17,10 +17,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             builder.Advice.Override(builder.Target, nameof(Override));
+            builder.Advice.Override(builder.Target, nameof(Override2));
         }
 
         [Template]
         public dynamic? Override()
+        {
+            Console.WriteLine("This is the overridden method.");
+            return meta.Proceed();
+        }
+
+        [Template]
+        public dynamic? Override2()
         {
             // Block inlining.
             _ = meta.Proceed();
@@ -33,7 +41,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
     internal class TargetClass
     {
         [Override]
-        ~TargetClass()
+        public void OverriddenMethod()
         {
             this.MethodWithCallerMemberName(42);
             this.MethodWithCallerMemberName(42, y: 27);

@@ -106,13 +106,16 @@ namespace Metalama.Framework.Engine.Linking
 
             var substitutedBody =
                 @operator.Body != null
-                ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
-                : null;
+                    ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             var substitutedExpressionBody =
                 @operator.ExpressionBody != null
-                ? (ArrowExpressionClauseSyntax) this.RewriteBody( @operator.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
-                : null;
+                    ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                        @operator.ExpressionBody,
+                        symbol,
+                        new SubstitutionContext( this, generationContext, context ) )
+                    : null;
 
             return this.GetSpecialImplOperator(
                 @operator,

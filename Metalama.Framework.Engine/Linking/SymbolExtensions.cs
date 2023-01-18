@@ -55,9 +55,10 @@ namespace Metalama.Framework.Engine.Linking
             return false;
         }
 
-        public static bool IsCallerMemberNameParameter(this IParameterSymbol parameter)
+        public static bool IsCallerMemberNameParameter( this IParameterSymbol parameter )
         {
-            return parameter.GetAttributes().Any(a => a.AttributeConstructor.AssertNotNull().ContainingType.GetFullName() == "System.Runtime.CompilerServices.CallerMemberNameAttribute");
+            return parameter.GetAttributes()
+                .Any( a => a.AttributeConstructor.AssertNotNull().ContainingType.GetFullName() == "System.Runtime.CompilerServices.CallerMemberNameAttribute" );
         }
     }
 }

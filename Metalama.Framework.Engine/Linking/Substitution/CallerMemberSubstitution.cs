@@ -35,9 +35,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case InvocationExpressionSyntax invocationExpression:
                     var additionalArguments = new List<ArgumentSyntax>();
 
-                    foreach (var parameterToFix in this._parametersToFix)
+                    foreach ( var parameterToFix in this._parametersToFix )
                     {
                         var parameter = this._targetMethod.Parameters[parameterToFix];
+
                         additionalArguments.Add(
                             Argument(
                                 NameColon( parameter.Name ),
@@ -47,9 +48,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                     return
                         invocationExpression
-                        .WithArgumentList(
-                            invocationExpression.ArgumentList.WithArguments(
-                                invocationExpression.ArgumentList.Arguments.AddRange( additionalArguments ) ) );
+                            .WithArgumentList(
+                                invocationExpression.ArgumentList.WithArguments(
+                                    invocationExpression.ArgumentList.Arguments.AddRange( additionalArguments ) ) );
 
                 default:
                     throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );

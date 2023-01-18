@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.CallerAttributes
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.CallerAttributes_InlinedNonFinal
 {
     /*
-     * Tests that overriding event does correctly transform caller attribute method invocations when the source is not inlined.
+     * Tests that overriding event correctly transforms caller attribute method invocations when the source is inlined into non-final semantic.
      */
 
     public class OverrideAttribute : EventAspect
@@ -17,10 +17,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         public override void BuildAspect(IAspectBuilder<IEvent> builder)
         {
             builder.Advice.OverrideAccessors(builder.Target, nameof(Override), nameof(Override));
+            builder.Advice.OverrideAccessors(builder.Target, nameof(Override2), nameof(Override2));
         }
 
         [Template]
         public dynamic? Override()
+        {
+            Console.WriteLine("This is the overridden method.");
+            return meta.Proceed();
+        }
+
+        [Template]
+        public dynamic? Override2()
         {
             // Block inlining.
             _ = meta.Proceed();

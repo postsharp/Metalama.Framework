@@ -6,15 +6,15 @@ using System.Runtime.CompilerServices;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.CallerAttributes
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.CallerAttributes_Inlined
 {
     /*
-     * Tests that overriding event does correctly transform caller attribute method invocations when the source is not inlined.
+     * Tests that overriding property does not transform caller attribute method invocations when the source is inlined.
      */
 
-    public class OverrideAttribute : EventAspect
+    public class OverrideAttribute : PropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IEvent> builder)
+        public override void BuildAspect(IAspectBuilder<IProperty> builder)
         {
             builder.Advice.OverrideAccessors(builder.Target, nameof(Override), nameof(Override));
         }
@@ -22,8 +22,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         [Template]
         public dynamic? Override()
         {
-            // Block inlining.
-            _ = meta.Proceed();
             Console.WriteLine("This is the overridden method.");
             return meta.Proceed();
         }
@@ -33,18 +31,19 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     internal class TargetClass
     {
         [Override]
-        public event EventHandler OverriddenEvent
+        public int OverriddenProperty
         {
-            add
+            get
             {
                 this.MethodWithCallerMemberName(42);
                 this.MethodWithCallerMemberName(42, y: 27);
                 this.MethodWithCallerMemberName(42, name1: "foo", y: 27);
                 this.MethodWithCallerMemberName(42, "foo", 27);
                 this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+                return 42;
             }
 
-            remove
+            set
             {
                 this.MethodWithCallerMemberName(42);
                 this.MethodWithCallerMemberName(42, y: 27);

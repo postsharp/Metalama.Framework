@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.CallerAttributes
 {
     /*
-     * Tests that overriding method correctly handles caller attributes.
+     * Tests that overriding method does correctly transform caller attribute method invocations when the source is not inlined.
      */
 
     public class OverrideAttribute : MethodAspect

@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Linking
                 redirectedGetOnlyAutoProperties,
                 cancellationToken );
 
-            var callerMemberReferences =
+            var callerAttributeReferences =
                 await GetCallerAttributeReferences(
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.Linking
                 redirectedGetOnlyAutoPropertyReferences,
                 forcefullyInitializedTypes,
                 eventFieldRaiseReferences,
-                callerMemberReferences );
+                callerAttributeReferences );
 
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
@@ -449,7 +449,11 @@ namespace Metalama.Framework.Engine.Linking
             CancellationToken cancellationToken )
         {
             var list = new List<IntermediateSymbolSemanticReference>();
-            var allEventFieldReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( overriddenEventFields.SelectAsEnumerable( x=>(x, x.ContainingType)), cancellationToken );
+
+            var allEventFieldReferences =
+                await symbolReferenceFinder.FindSymbolReferencesAsync(
+                    overriddenEventFields.SelectAsEnumerable( x => (x, x.ContainingType) ),
+                    cancellationToken );
 
             foreach ( var reference in allEventFieldReferences )
             {
@@ -493,7 +497,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var referenceList = new List<CallerAttributeReference>();
 
-            // Presume that overrides always contain the full invocation without ommitted parameters.
+            // Presume that overrides always contain the full invocation without omitted parameters.
             // TODO: Optimize. Too many allocations.
             // TODO: We don't have to search methods that are inlined directly into the final semantic (all overrides and source are inlined).
             var methodsToAnalyze =
@@ -501,25 +505,27 @@ namespace Metalama.Framework.Engine.Linking
                 .GetOverriddenMembers()
                 .Select( x => x.ContainingType )
                 .Distinct<INamedTypeSymbol>( SymbolEqualityComparer.Default )
-                .SelectMany( x =>
-                    x.GetMembers()
-                    .Select( member =>
-                        member switch
-                        {
-                            IMethodSymbol method => method,
-                            IPropertySymbol => null,
-                            IEventSymbol => null,
-                            IFieldSymbol => null,
-                            INamedTypeSymbol => null,
-                            _ => throw new AssertionFailedException( $"Symbol not supported: {member.Kind}." ),
-                        } )
-                    .OfType<IMethodSymbol>() )
+                .SelectMany( 
+                    x =>
+                        x.GetMembers()
+                        .Select( 
+                            member =>
+                                member switch
+                                {
+                                    IMethodSymbol method => method,
+                                    IPropertySymbol => null,
+                                    IEventSymbol => null,
+                                    IFieldSymbol => null,
+                                    INamedTypeSymbol => null,
+                                    _ => throw new AssertionFailedException( $"Symbol not supported: {member.Kind}." ),
+                                } )
+                        .OfType<IMethodSymbol>() )
                 .Where( m => !injectionRegistry.IsOverride( m ) );
             
             var allContainedReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( methodsToAnalyze, cancellationToken );
             var semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
 
-            foreach (var reference in allContainedReferences)
+            foreach ( var reference in allContainedReferences )
             {
                 if ( reference.TargetSemantic.Symbol is not IMethodSymbol methodSymbol
                      || reference.TargetSemantic.Kind != IntermediateSymbolSemanticKind.Default
@@ -530,7 +536,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 
                 // TODO: This should be cached.
-                if (!methodSymbol.Parameters.Any(p => p.IsCallerMemberNameParameter() ) )
+                if ( !methodSymbol.Parameters.Any( p => p.IsCallerMemberNameParameter() ) )
                 {
                     // References to methods without caller attributes are skipped.
                     continue;
@@ -538,7 +544,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( reference.ReferencingNode )
                 {
-                    case { Parent: InvocationExpressionSyntax { } invocationExpression }:
+                    case { Parent: InvocationExpressionSyntax invocationExpression }:
                         ProcessReference( reference, invocationExpression );
 
                         break;

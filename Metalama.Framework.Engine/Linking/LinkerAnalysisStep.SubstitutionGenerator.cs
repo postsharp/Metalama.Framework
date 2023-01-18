@@ -129,6 +129,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 case IPropertySymbol { Parameters.Length: > 0 }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -168,14 +169,14 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Add substitutions for caller member references.
-                    if (this._callerMemberReferencesByContainingSemantic.TryGetValue( nonInlinedSemanticBody, out var callerMemberReferences ) )
+                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( nonInlinedSemanticBody, out var callerMemberReferences ) )
                     {
                         foreach ( var reference in callerMemberReferences )
                         {
                             AddSubstitution(
                                 context,
-                                new CallerMemberSubstitution( 
-                                    reference.InvocationExpression, 
+                                new CallerMemberSubstitution(
+                                    reference.InvocationExpression,
                                     reference.ReferencingOverrideTarget,
                                     reference.TargetMethod,
                                     reference.ParametersToFix ) );
@@ -321,8 +322,11 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Add substitutions for caller member references.
-                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var callerAttributeReferences ) )
+                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var callerAttributeReferences )
+                         && inliningSpecification.ContextIdentifier.DestinationSemantic.Kind != IntermediateSymbolSemanticKind.Final )
                     {
+                        // We only want to substitute when we are inlining into non-final semantic.
+
                         foreach ( var reference in callerAttributeReferences )
                         {
                             AddSubstitution(
