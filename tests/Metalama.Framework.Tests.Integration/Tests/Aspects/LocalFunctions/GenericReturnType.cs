@@ -20,7 +20,6 @@ public class Override : MethodAspect
         }
 
         return LocalFunction();
-
     }
 }
 

@@ -78,7 +78,7 @@ namespace Metalama.Testing.AspectTesting
             }
 
             var serviceProviderForThisTest = testContext.ServiceProvider
-                .WithService( new Observer( testResult ) )
+                .WithService( new Observer( testContext.ServiceProvider, testResult ) )
                 .AddLicenseConsumptionManagerForTest( testInput );
 
             var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, testContext.Domain );

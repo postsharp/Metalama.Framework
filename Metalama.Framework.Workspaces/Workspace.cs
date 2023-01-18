@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
@@ -35,6 +36,7 @@ namespace Metalama.Framework.Workspaces
         internal string Key { get; }
 
         private ProjectSet _projects;
+        private readonly ITaskRunner _taskRunner;
 
         static Workspace()
         {
@@ -56,6 +58,7 @@ namespace Metalama.Framework.Workspaces
         }
 
         private Workspace(
+            GlobalServiceProvider serviceProvider,
             ImmutableArray<string> loadedPaths,
             ImmutableDictionary<string, string>? properties,
             string key,
@@ -71,6 +74,7 @@ namespace Metalama.Framework.Workspaces
             this._collection = collection;
             this._domain = domain;
             this._introspectionOptions = introspectionOptions;
+            this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         }
 
         /// <summary>
@@ -111,7 +115,7 @@ namespace Metalama.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSet(
+            this._projects = await LoadProjectSetAsync(
                 this.LoadedPaths,
                 this.Properties,
                 this._collection,
@@ -125,12 +129,13 @@ namespace Metalama.Framework.Workspaces
 
         public Workspace Reload( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this.ReloadAsync( restore, cancellationToken ).Wait( cancellationToken );
+            this._taskRunner.RunSynchronously( () => this.ReloadAsync( restore, cancellationToken ) );
 
             return this;
         }
 
         internal static async Task<Workspace> LoadAsync(
+            GlobalServiceProvider serviceProvider,
             string key,
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
@@ -141,9 +146,17 @@ namespace Metalama.Framework.Workspaces
             var domain = new CompileTimeDomain();
 
             var introspectionOptions = new IntrospectionOptionsBox();
-            var projectSet = await LoadProjectSet( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
+            var projectSet = await LoadProjectSetAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
 
-            return new Workspace( projects, properties, key, projectSet, collection, domain, introspectionOptions );
+            return new Workspace(
+                serviceProvider,
+                projects,
+                properties,
+                key,
+                projectSet,
+                collection,
+                domain,
+                introspectionOptions );
         }
 
         private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
@@ -152,7 +165,7 @@ namespace Metalama.Framework.Workspaces
             dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
         }
 
-        private static async Task<ProjectSet> LoadProjectSet(
+        private static async Task<ProjectSet> LoadProjectSetAsync(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,

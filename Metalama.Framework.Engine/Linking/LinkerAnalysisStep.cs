@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 .Cast<IEventSymbol>()
                 .ToArray();
 
-            var eventFieldRaiseReferences = await GetEventFieldRaiseReferences( symbolReferenceFinder, overriddenEventFields, cancellationToken );
+            var eventFieldRaiseReferences = await GetEventFieldRaiseReferencesAsync( symbolReferenceFinder, overriddenEventFields, cancellationToken );
 
             var aspectReferenceCollector = new AspectReferenceCollector(
                 this._serviceProvider,
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var inliningSpecifications = await inliningAlgorithm.RunAsync( cancellationToken );
 
-            var redirectedGetOnlyAutoPropertyReferences = await GetRedirectedGetOnlyAutoPropertyReferences(
+            var redirectedGetOnlyAutoPropertyReferences = await GetRedirectedGetOnlyAutoPropertyReferencesAsync(
                 symbolReferenceFinder,
                 redirectedGetOnlyAutoProperties,
                 cancellationToken );
@@ -418,7 +418,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Filters redirected get-only auto property references from a list of all references to an event.
         /// </summary>
-        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetRedirectedGetOnlyAutoPropertyReferences(
+        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetRedirectedGetOnlyAutoPropertyReferencesAsync(
             SymbolReferenceFinder symbolReferenceFinder,
             IReadOnlyList<(IPropertySymbol Property, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties,
             CancellationToken cancellationToken )
@@ -443,7 +443,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Finds all references to overridden event fields.
         /// </summary>
-        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetEventFieldRaiseReferences(
+        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetEventFieldRaiseReferencesAsync(
             SymbolReferenceFinder symbolReferenceFinder,
             IReadOnlyList<IEventSymbol> overriddenEventFields,
             CancellationToken cancellationToken )

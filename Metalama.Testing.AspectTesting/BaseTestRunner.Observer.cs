@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -18,14 +19,16 @@ namespace Metalama.Testing.AspectTesting
         private protected sealed class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {
             private readonly TestResult _testResult;
+            private readonly ITaskRunner _taskRunner;
 
-            public Observer( TestResult testResult )
+            public Observer( GlobalServiceProvider serviceProvider, TestResult testResult )
             {
                 this._testResult = testResult;
+                this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
             }
 
             public void OnCompileTimeCompilation( Compilation compilation )
-                => TaskHelper.RunAndWait( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
+                => this._taskRunner.RunSynchronously( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
 
             public void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics )
                 => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );

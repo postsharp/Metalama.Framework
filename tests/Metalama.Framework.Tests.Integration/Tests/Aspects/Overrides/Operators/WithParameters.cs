@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithPa
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
@@ -22,29 +22,32 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithPa
                     OperatorCategory.Conversion => nameof(ConversionOperatorTemplate),
                     _ => throw new Exception()
                 };
-                
-                builder.Advice.Override(o, templateName);
+
+                builder.Advice.Override( o, templateName );
             }
         }
 
         [Template]
-        public dynamic? BinaryOperatorTemplate( dynamic? x, dynamic? y)
+        public dynamic? BinaryOperatorTemplate( dynamic? x, dynamic? y )
         {
-            Console.WriteLine($"Overriding binary operator {meta.Target.Method.OperatorKind}({x}, {y})");
+            Console.WriteLine( $"Overriding binary operator {meta.Target.Method.OperatorKind}({x}, {y})" );
+
             return meta.Proceed();
         }
 
         [Template]
-        public dynamic? UnaryOperatorTemplate(dynamic? x)
+        public dynamic? UnaryOperatorTemplate( dynamic? x )
         {
-            Console.WriteLine($"Overriding unary operator {meta.Target.Method.OperatorKind}({x})");
+            Console.WriteLine( $"Overriding unary operator {meta.Target.Method.OperatorKind}({x})" );
+
             return meta.Proceed();
         }
 
         [Template]
-        public dynamic? ConversionOperatorTemplate(dynamic? x)
+        public dynamic? ConversionOperatorTemplate( dynamic? x )
         {
-            Console.WriteLine($"Overriding conversion operator {meta.Target.Method.OperatorKind}({x})");
+            Console.WriteLine( $"Overriding conversion operator {meta.Target.Method.OperatorKind}({x})" );
+
             return meta.Proceed();
         }
     }
@@ -53,23 +56,23 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithPa
     [Override]
     internal class TargetClass
     {
-        public static TargetClass operator +(TargetClass a, TargetClass b)
+        public static TargetClass operator +( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
 
-        public static TargetClass operator -(TargetClass a)
+        public static TargetClass operator -( TargetClass a )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
 
         public static explicit operator TargetClass( int x )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }

@@ -20,6 +20,8 @@ public sealed partial class InheritableAspectInstance : IAspectInstance
 
     bool IAspectInstance.IsSkipped => false;
 
+    public bool IsInheritable => true;
+
     public ImmutableArray<IAspectInstance> SecondaryInstances { get; private set; }
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;

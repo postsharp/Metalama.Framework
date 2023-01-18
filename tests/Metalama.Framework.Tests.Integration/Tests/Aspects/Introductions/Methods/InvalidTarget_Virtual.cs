@@ -11,12 +11,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ImplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        public static DiagnosticDefinition<string> ManualAssert = new("MANUAL_ASSERT", Severity.Warning, "{0}");
+        public static DiagnosticDefinition<string> ManualAssert = new( "MANUAL_ASSERT", Severity.Warning, "{0}" );
 
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Diagnostics.Report(ManualAssert.WithArguments("Manually assert that 3 errors are reported on this class."));
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ImplicitlyVirtual));
+            builder.Diagnostics.Report( ManualAssert.WithArguments( "Manually assert that 3 errors are reported on this class." ) );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyVirtual) );
         }
 
         [Template]
@@ -25,11 +25,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
             return meta.Proceed();
         }
     }
+
     public class ExplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ExplicitlyVirtual), buildMethod: b => b.IsVirtual = true);
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyVirtual), buildMethod: b => b.IsVirtual = true );
         }
 
         [Template]
@@ -42,21 +43,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     // <target>
     [ImplicitlyVirtualIntroduction]
     [ExplicitlyVirtualIntroduction]
-    internal struct TargetStruct
-    {
-    }
+    internal struct TargetStruct { }
 
     // <target>
     [ImplicitlyVirtualIntroduction]
     [ExplicitlyVirtualIntroduction]
-    internal sealed class SealedTargetClass
-    {
-    }
+    internal sealed class SealedTargetClass { }
 
     // <target>
     [ImplicitlyVirtualIntroduction]
     [ExplicitlyVirtualIntroduction]
-    internal static class StaticTargetClass
-    {
-    }
+    internal static class StaticTargetClass { }
 }

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,14 +16,8 @@ namespace Metalama.Framework.Engine.Formatting
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    internal sealed partial class TextSpanClassifier : SafeSyntaxWalker
+    internal sealed partial class TextSpanClassifier : ClassifierBase
     {
-#if !DEBUG
-#pragma warning disable IDE0052 // Remove unread private members
-
-        // ReSharper disable once NotAccessedField.Local
-#endif
-        private readonly SourceText _sourceText;
         private readonly CancellationToken _cancellationToken;
 #if !DEBUG
 #pragma warning restore IDE0052 // Remove unread private members
@@ -41,16 +34,12 @@ namespace Metalama.Framework.Engine.Formatting
         /// <param name="sourceText"></param>
         /// <param name="cancellationToken"></param>
         public TextSpanClassifier( SourceText sourceText, CancellationToken cancellationToken )
-            : base( SyntaxWalkerDepth.Trivia )
+            : base( new ClassifiedTextSpanCollection( sourceText ), sourceText )
         {
-            this._sourceText = sourceText;
             this._cancellationToken = cancellationToken;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
-            this.ClassifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
         }
-
-        public ClassifiedTextSpanCollection ClassifiedTextSpans { get; }
 
         private static bool ShouldMarkTrivia( TextSpanClassification classification )
             => classification switch
@@ -233,41 +222,6 @@ namespace Metalama.Framework.Engine.Formatting
             base.VisitToken( token );
         }
 
-        private bool _isAfterEndOfLine;
-
-        private void VisitTriviaList( SyntaxTriviaList triviaList )
-        {
-            foreach ( var trivia in triviaList )
-            {
-                switch ( trivia.Kind() )
-                {
-                    case SyntaxKind.EndOfLineTrivia:
-                        this._isAfterEndOfLine = true;
-
-                        break;
-
-                    case SyntaxKind.WhitespaceTrivia when this._isAfterEndOfLine:
-                    case SyntaxKind.MultiLineCommentTrivia:
-                    case SyntaxKind.SingleLineCommentTrivia:
-                        this.Mark( trivia.Span, TextSpanClassification.NeutralTrivia );
-
-                        break;
-                }
-            }
-        }
-
-        public override void VisitTrailingTrivia( SyntaxToken token )
-        {
-            this._isAfterEndOfLine = false;
-
-            this.VisitTriviaList( token.TrailingTrivia );
-        }
-
-        public override void VisitLeadingTrivia( SyntaxToken token )
-        {
-            this.VisitTriviaList( token.LeadingTrivia );
-        }
-
         public override void DefaultVisit( SyntaxNode node )
         {
             if ( this._isInTemplate )
@@ -362,22 +316,6 @@ namespace Metalama.Framework.Engine.Formatting
                     this.ClassifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, triviaEnd ), classification );
                 }
             }
-        }
-
-        private void Mark( TextSpan span, TextSpanClassification classification )
-        {
-            if ( span.IsEmpty )
-            {
-                return;
-            }
-
-#if DEBUG
-
-            // ReSharper disable once UnusedVariable
-            var text = this._sourceText.GetSubText( span ).ToString();
-#endif
-
-            this.ClassifiedTextSpans.Add( span, classification );
         }
 
         /*

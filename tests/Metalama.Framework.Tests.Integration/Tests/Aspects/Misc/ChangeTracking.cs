@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 
             set
             {
-                var isSpecifiedProperty = (IProperty) meta.Tags["isSpecifiedProperty"]!;
+                var isSpecifiedProperty = (IProperty)meta.Tags["isSpecifiedProperty"]!;
                 isSpecifiedProperty.Invokers.Final.SetValue( meta.This, true );
                 meta.Proceed();
             }

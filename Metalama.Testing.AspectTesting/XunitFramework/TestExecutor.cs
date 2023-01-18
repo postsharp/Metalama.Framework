@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -22,6 +23,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         private readonly TestFactory _factory;
         private static readonly object _launchingDebuggerLock = new();
         private readonly GlobalServiceProvider _serviceProvider;
+        private readonly ITaskRunner _taskRunner;
 
         public TestExecutor( AssemblyName assemblyName )
         {
@@ -31,6 +33,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             var projectProperties = discoverer.GetTestProjectProperties();
             this._factory = new TestFactory( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ), assemblyInfo );
             this._serviceProvider = ServiceProviderFactory.GetServiceProvider();
+            this._taskRunner = this._serviceProvider.GetRequiredService<ITaskRunner>();
         }
 
         void IDisposable.Dispose() { }
@@ -164,27 +167,35 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                                     testMetrics.TestSkipped ) );
                         };
 
-                        var task = Task.Run(
-                            () => this.RunTestAsync(
-                                executionMessageSink,
-                                projectReferences,
-                                directoryOptionsReader,
-                                testCase,
-                                test,
-                                testMetrics,
-                                logger ) );
-
                         if ( executionOptions.DisableParallelizationOrDefault() )
                         {
-                            task.Wait();
+                            this._taskRunner.RunSynchronously(
+                                () => this.RunTestAsync(
+                                    executionMessageSink,
+                                    projectReferences,
+                                    directoryOptionsReader,
+                                    testCase,
+                                    test,
+                                    testMetrics,
+                                    logger ) );
                         }
                         else
                         {
+                            var task = Task.Run(
+                                () => this.RunTestAsync(
+                                    executionMessageSink,
+                                    projectReferences,
+                                    directoryOptionsReader,
+                                    testCase,
+                                    test,
+                                    testMetrics,
+                                    logger ) );
+
                             // Throttle execution thanks to the semaphore.
                             semaphore.Wait();
 
                             // When the task is over, release the semaphore.
-                            _ = task.ContinueWith( _ => semaphore.Release() );
+                            _ = task.ContinueWith( _ => semaphore.Release(), TaskScheduler.Current );
 
                             tasks.TryAdd( task, task );
                         }
@@ -193,7 +204,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             }
 
             // Wait for all tasks to complete and catch exceptions.
+#pragma warning disable VSTHRD002
             Task.WhenAll( tasks.Keys ).Wait();
+#pragma warning restore VSTHRD002
         }
 
         private async Task RunTestAsync(

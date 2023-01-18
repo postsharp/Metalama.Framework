@@ -1,8 +1,9 @@
 [Introduction]
 [Override]
 internal class TargetClass
-{ // TODO: It is expected that the field attributes is not properly moved to the backing field as Roslyn currently does not expose the backing field.
+{
   private event EventHandler? _eventField;
+  // TODO: It is expected that the field attributes is not properly moved to the backing field as Roslyn currently does not expose the backing field.
   [EventOnly]
   public event EventHandler? EventField
   {

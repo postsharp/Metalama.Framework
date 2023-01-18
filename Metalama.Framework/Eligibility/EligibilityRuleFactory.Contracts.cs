@@ -27,6 +27,7 @@ public static partial class EligibilityRuleFactory
                         p.MustBeWritable();
                         p.MustBeExplicitlyDeclared();
                         p.DeclaringType().AddRule( declaringTypeRule );
+                        p.ExceptForInheritance().MustNotBeAbstract();
                     } );
 
             var propertyOrIndexerEligibilityOutput =
@@ -40,6 +41,7 @@ public static partial class EligibilityRuleFactory
                                     p.MustBeReadable();
                                     p.MustBeExplicitlyDeclared();
                                     p.DeclaringType().AddRule( declaringTypeRule );
+                                    p.ExceptForInheritance().MustNotBeAbstract();
                                 } ) );
 
             var propertyOrIndexerEligibilityBoth =
@@ -49,6 +51,7 @@ public static partial class EligibilityRuleFactory
                         builder.MustBeReadable();
                         builder.MustBeWritable();
                         builder.DeclaringType().AddRule( declaringTypeRule );
+                        builder.ExceptForInheritance().MustNotBeAbstract();
                     } );
 
             var propertyOrIndexerEligibilityDefault =
@@ -58,6 +61,7 @@ public static partial class EligibilityRuleFactory
                         builder.MustBeExplicitlyDeclared();
                         builder.Convert().When<IField>().MustBeWritable();
                         builder.DeclaringType().AddRule( declaringTypeRule );
+                        builder.ExceptForInheritance().MustNotBeAbstract();
                     } );
 
             // Eligibility rules for parameters.

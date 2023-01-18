@@ -59,9 +59,9 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private static void CallOnSerialization( object obj )
         {
-            ILamaSerializationCallback? callback;
+            ICompileTimeSerializationCallback? callback;
 
-            if ( (callback = obj as ILamaSerializationCallback) != null )
+            if ( (callback = obj as ICompileTimeSerializationCallback) != null )
             {
                 callback.OnSerializing();
             }

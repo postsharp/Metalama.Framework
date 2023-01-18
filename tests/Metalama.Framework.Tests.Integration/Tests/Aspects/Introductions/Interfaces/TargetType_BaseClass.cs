@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [InterfaceMember]
         public void IntroducedMethod()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 
@@ -36,11 +36,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [IntroduceAspect]
-    public class TargetClass : BaseClass 
+    public class TargetClass : BaseClass
     {
         public override void ExistingMethod()
         {
-            Console.WriteLine("Original interface member");
+            Console.WriteLine( "Original interface member" );
         }
     }
 }

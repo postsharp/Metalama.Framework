@@ -68,15 +68,14 @@ namespace Metalama.Framework.Engine.Linking
             var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
             // Add the SourceCode annotation, if it is source code.
-            if ( !(semantic.Symbol.GetPrimarySyntaxReference() is { } primarySyntax
-                   && primarySyntax.GetSyntax().HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
+            if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget(semantic.Symbol) )
             {
                 rewrittenBlock = rewrittenBlock.WithSourceCodeAnnotation();
             }
 
             if ( triviaSource == null )
             {
-                // Strip the trivia from the block.
+                // Strip the trivia from the block and add a flattenable annotation.
                 return rewrittenBlock
                     .WithOpenBraceToken(
                         Token( SyntaxKind.OpenBraceToken )

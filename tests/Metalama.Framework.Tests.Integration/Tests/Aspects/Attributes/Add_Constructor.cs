@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Cons
 
 public class MyAttribute : Attribute { }
 
-[Inherited]
+[Inheritable]
 public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )

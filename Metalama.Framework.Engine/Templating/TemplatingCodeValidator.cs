@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var semanticModelProvider = compilationContext.SemanticModelProvider;
 
             var hasError = false;

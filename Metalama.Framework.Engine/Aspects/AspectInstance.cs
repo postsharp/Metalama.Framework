@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public bool IsSkipped { get; private set; }
 
+        public bool IsInheritable => this.AspectClass.IsInheritable ?? ((IConditionallyInheritableAspect) this.Aspect).IsInheritable;
+
         public ImmutableArray<IAspectInstance> SecondaryInstances => ImmutableArray<IAspectInstance>.Empty;
 
         public void Skip() { this.IsSkipped = true; }
@@ -115,7 +117,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public EligibleScenarios ComputeEligibility( IDeclaration declaration )
         {
-            var eligibility = this.AspectClass.GetEligibility( declaration );
+            var eligibility = this.AspectClass.GetEligibility( declaration, this.IsInheritable );
 
             if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
             {

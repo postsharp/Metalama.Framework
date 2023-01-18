@@ -53,6 +53,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
     private readonly ExecutionScenario _executionScenario;
+    private readonly ITaskRunner _taskRunner;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -90,6 +91,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
         this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
+        this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -246,7 +248,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
         {
-            var formattedCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+            var compilation = compileTimeCompilation;
+            var formattedCompilation = this._taskRunner.RunSynchronously( () => OutputCodeFormatter.FormatAllAsync( compilation, cancellationToken ) );
 
             if ( !(formattedCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error ) &&
                    !compileTimeCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error )) )
@@ -379,7 +382,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
             if ( this._rewriter != null )
             {
-                // TryMetalama defines a binary rewriter to inject Unbreakable.
+                // Metalama.Try defines a binary rewriter to inject Unbreakable.
 
                 MemoryStream memoryStream = new();
                 emitResult = compileTimeCompilation.Emit( memoryStream, options: emitOptions, cancellationToken: cancellationToken );
@@ -400,11 +403,19 @@ internal sealed partial class CompileTimeCompilationBuilder
                     outputPaths.Pe,
                     _ =>
                     {
-                        using ( var peStream = File.Create( outputPaths.Pe ) )
+                        // We don't write the PE stream directly to the final file because this operation is not atomic.
+                        // Instead, we write to a temporary file, and then we move this file to the final destination, because
+                        // moving a file is an atomic operation.
+
+                        var tempPeFileName = Path.ChangeExtension( outputPaths.Pe, "tmp" );
+
+                        using ( var peStream = File.Create( tempPeFileName ) )
                         using ( var pdbStream = File.Create( outputPaths.Pdb ) )
                         {
                             emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                         }
+
+                        File.Move( tempPeFileName, outputPaths.Pe );
                     },
                     this._serviceProvider.Underlying,
                     logger: this._logger );
@@ -528,7 +539,20 @@ internal sealed partial class CompileTimeCompilationBuilder
                 if ( Directory.Exists( outputDirectory ) )
                 {
                     var files = Directory.GetFiles( outputDirectory );
-                    RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider.Underlying );
+                    var deletedDirectory = Path.Combine( Path.GetDirectoryName( outputDirectory )!, Path.GetFileName( outputDirectory ) + ".del" );
+
+                    RetryHelper.RetryWithLockDetection(
+                        files,
+                        () =>
+                        {
+                            if ( Directory.Exists( outputDirectory ) )
+                            {
+                                // To delete the directory atomically, rename it.
+                                Directory.Move( outputDirectory, deletedDirectory );
+                                Directory.Delete( deletedDirectory, true );
+                            }
+                        },
+                        this._serviceProvider.Underlying );
                 }
 
                 // Then delete the directory itself. At this point, we should no longer have locks. 

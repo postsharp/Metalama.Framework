@@ -12,7 +12,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.SecondaryIns
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.SecondaryInstancesOrderingWithInheritance;
 
 [AttributeUsage( AttributeTargets.Class | AttributeTargets.Assembly | AttributeTargets.Method, AllowMultiple = false )]
-[Inherited]
+[Inheritable]
 public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INamedType>
 {
     private string _tag;
@@ -24,12 +24,12 @@ public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INa
 
     public void BuildAspect( IAspectBuilder<ICompilation> builder )
     {
-        builder.With( c => c.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( _ => this );
+        builder.Outbound.SelectMany( c => c.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( _ => this );
     }
 
     public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods ).AddAspect( _ => this );
+        builder.Outbound.SelectMany( t => t.Methods ).AddAspect( _ => this );
     }
 
     public void BuildEligibility( IEligibilityBuilder<ICompilation> builder ) { }

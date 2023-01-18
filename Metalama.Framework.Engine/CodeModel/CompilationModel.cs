@@ -68,8 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository ) : base(
-            partialCompilation.Compilation.Assembly )
+        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
@@ -166,7 +165,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable ) : base( prototype.Symbol )
+        private CompilationModel( CompilationModel prototype, bool mutable )
         {
             this.IsMutable = mutable;
             this.Project = prototype.Project;
@@ -452,5 +451,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+
+        [Memo]
+        public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
     }
 }

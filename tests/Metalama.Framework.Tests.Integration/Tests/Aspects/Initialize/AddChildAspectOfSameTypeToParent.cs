@@ -5,35 +5,25 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.AddChildAspectOfSameTypeToParent;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage( AttributeTargets.Method )]
 public class MyAspect : Aspect, IAspect<IMethod>, IAspect<INamedType>
 {
+    public void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
-    public void BuildAspect( IAspectBuilder<INamedType> builder )
+    public void BuildEligibility( IEligibilityBuilder<INamedType> builder ) { }
+
+    public void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        
+        builder.Outbound.Select( t => t.DeclaringType ).AddAspect<MyAspect>( _ => this );
     }
 
-    public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-    {
-        
-    }
-
-    public void BuildAspect(IAspectBuilder<IMethod> builder)
-    {
-        builder.With(t => t.DeclaringType).AddAspect<MyAspect>(_ => this);
-    }
-
-    public void BuildEligibility(IEligibilityBuilder<IMethod> builder)
-    {
-        
-    }
+    public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
 }
 
 // <target>
 
-class C
+internal class C
 {
     [MyAspect]
-    void M() { }
+    private void M() { }
 }

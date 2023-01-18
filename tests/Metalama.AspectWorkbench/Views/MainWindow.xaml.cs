@@ -11,6 +11,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
+#pragma warning disable VSTHRD100
+
 namespace Metalama.AspectWorkbench.Views
 {
     internal sealed partial class MainWindow

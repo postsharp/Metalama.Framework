@@ -10,7 +10,7 @@ internal class TargetClass : BaseClass
   }
   private void VoidMethod_Source()
   {
-    System.Console.WriteLine("TargetClass_VoidMethod()");
+    Console.WriteLine("TargetClass_VoidMethod()");
   }
   public int ExistingMethod()
   {
@@ -19,7 +19,7 @@ internal class TargetClass : BaseClass
   }
   private int ExistingMethod_Source()
   {
-    System.Console.WriteLine("TargetClass_ExistingMethod()");
+    Console.WriteLine("TargetClass_ExistingMethod()");
     return 42;
   }
   public int ExistingMethod_Parameterized(int x)
@@ -29,7 +29,7 @@ internal class TargetClass : BaseClass
   }
   private int ExistingMethod_Parameterized_Source(int x)
   {
-    System.Console.WriteLine("TargetClass_ExistingMethod_Parameterized");
+    Console.WriteLine("TargetClass_ExistingMethod_Parameterized");
     return x + 42;
   }
   public override global::System.Int32 BaseClass_ExistingMethod()

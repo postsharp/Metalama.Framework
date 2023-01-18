@@ -11,12 +11,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ImplicitInstanceIntroductionAttribute : TypeAspect
     {
-        public static DiagnosticDefinition<string> ManualAssert = new("MANUAL_ASSERT", Severity.Warning, "{0}");
+        public static DiagnosticDefinition<string> ManualAssert = new( "MANUAL_ASSERT", Severity.Warning, "{0}" );
 
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Diagnostics.Report(ManualAssert.WithArguments("Manually assert that 2 error is reported on this class."));
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ImplicitlyInstance));
+            builder.Diagnostics.Report( ManualAssert.WithArguments( "Manually assert that 2 error is reported on this class." ) );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyInstance) );
         }
 
         [Template]
@@ -25,11 +25,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
             return meta.Proceed();
         }
     }
+
     public class ExplicitInstanceIntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ExplicitlyInstance), scope: IntroductionScope.Instance);
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyInstance), scope: IntroductionScope.Instance );
         }
 
         [Template]
@@ -42,7 +43,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     // <target>
     [ImplicitInstanceIntroduction]
     [ExplicitInstanceIntroduction]
-    internal static class StaticTargetClass
-    {
-    }
+    internal static class StaticTargetClass { }
 }

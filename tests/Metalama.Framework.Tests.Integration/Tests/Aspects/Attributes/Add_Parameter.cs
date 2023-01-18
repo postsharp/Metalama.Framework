@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Para
 
 public class MyAttribute : Attribute { }
 
-[Inherited]
+[Inheritable]
 public class MyAspect : ParameterAspect
 {
     public override void BuildAspect( IAspectBuilder<IParameter> builder )

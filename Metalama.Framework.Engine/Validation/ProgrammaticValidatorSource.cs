@@ -7,7 +7,6 @@ using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -22,11 +21,10 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
     private readonly CompilationModelVersion _compilationModelVersion;
 
     public ProgrammaticValidatorSource(
-        IValidatorDriverFactory driverFactory,
+        ValidatorDriver driver,
         ValidatorKind validatorKind,
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
-        MethodInfo method,
         Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
     {
         if ( validatorKind != ValidatorKind.Reference )
@@ -34,7 +32,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
             throw new ArgumentOutOfRangeException( nameof(validatorKind) );
         }
 
-        this.Driver = driverFactory.GetReferenceValidatorDriver( method );
+        this.Driver = driver;
         this._kind = validatorKind;
         this._compilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;

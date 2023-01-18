@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class SymbolReferenceFinder
         {
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>> _cache;
 
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                 ProjectServiceProvider serviceProvider,
                 Compilation intermediateCompilation )
             {
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._cache = new ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>>();
             }

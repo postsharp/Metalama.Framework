@@ -10,7 +10,11 @@ public class Aspect : FieldOrPropertyAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.OverrideAccessors( builder.Target, getTemplate: nameof(GetTemplate), setTemplate: nameof(SetTemplate), args: new { a = 5, t = builder.Target.Type } );
+        builder.Advice.OverrideAccessors(
+            builder.Target,
+            getTemplate: nameof(GetTemplate),
+            setTemplate: nameof(SetTemplate),
+            args: new { a = 5, t = builder.Target.Type } );
     }
 
     [Template]
@@ -18,14 +22,15 @@ public class Aspect : FieldOrPropertyAspect
     {
         Console.WriteLine( a );
         Console.WriteLine( t.ToDisplayString() );
+
         return meta.Proceed();
     }
 
     [Template]
-    private void SetTemplate([CompileTime] int a, dynamic value, INamedType t)
+    private void SetTemplate( [CompileTime] int a, dynamic value, INamedType t )
     {
-        Console.WriteLine(a);
-        Console.WriteLine(t.ToDisplayString());
+        Console.WriteLine( a );
+        Console.WriteLine( t.ToDisplayString() );
         meta.Proceed();
     }
 }

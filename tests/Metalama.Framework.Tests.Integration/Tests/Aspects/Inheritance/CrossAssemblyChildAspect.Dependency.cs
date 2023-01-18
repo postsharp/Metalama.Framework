@@ -13,11 +13,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAs
         {
             base.BuildAspect( builder );
 
-            builder.With( t => t.Methods ).AddAspect( _ => new ChildAspect() );
+            builder.Outbound.SelectMany( t => t.Methods ).AddAspect( _ => new ChildAspect() );
         }
     }
 
-    [Inherited]
+    [Inheritable]
     public class ChildAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()

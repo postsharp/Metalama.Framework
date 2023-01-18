@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Contracts.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -33,7 +34,7 @@ internal sealed class TransitiveCompilationService : ITransitiveCompilationServi
         }
 
         // Execute the pipeline.
-        var pipelineResult = await pipeline.ExecuteAsync( compilation, cancellationToken.ToTestable() );
+        var pipelineResult = await pipeline.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken.ToTestable() );
 
         if ( !pipelineResult.IsSuccessful )
         {

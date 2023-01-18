@@ -11,5 +11,6 @@ public interface IAspectPipelineConfigurationProvider : IGlobalService
 {
     ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
         PartialCompilation compilation,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken );
 }

@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -24,7 +23,6 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Advising;
 
-[Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
 internal sealed class AdviceFactory : IAdviceFactory
 {
     private readonly string? _layerName;

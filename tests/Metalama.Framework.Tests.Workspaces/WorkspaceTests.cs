@@ -9,17 +9,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.Workspaces
 {
     public sealed class WorkspaceTests : UnitTestClass
     {
         [Fact]
         public async Task LoadProjectSingleTarget()
+
         {
             using var testContext = this.CreateTestContext();
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,
@@ -49,8 +52,8 @@ namespace Metalama.Framework.Tests.Workspaces
         {
             using var testContext = this.CreateTestContext();
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,
@@ -107,8 +110,8 @@ namespace Metalama.Framework.Tests.Workspaces
             var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
                 .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+            var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
 
             await File.WriteAllTextAsync(
                 projectPath,

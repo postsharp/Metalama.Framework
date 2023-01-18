@@ -6,14 +6,17 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SerializableDeclarationIdProvider
 {
-    private static readonly char[] _separators = new[] { ';', '=' };
+    private const string _assemblyPrefix = "Assembly:";
 
+    private static readonly char[] _separators = new[] { ';', '=' };
+    
     public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( DeclarationRefTargetKind.Default );
 
     internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, DeclarationRefTargetKind targetKind )
@@ -62,6 +65,13 @@ public static class SerializableDeclarationIdProvider
                     return true;
                 }
 
+            case IAssemblySymbol assemblySymbol:
+                {
+                    id = new SerializableDeclarationId( $"{_assemblyPrefix}{assemblySymbol.Identity}" );
+
+                    return true;
+                }
+
             default:
                 var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
 
@@ -103,6 +113,22 @@ public static class SerializableDeclarationIdProvider
                 (IPropertySymbol property, "Parameter") => property.Parameters[ordinal],
                 _ => null
             };
+        }
+        else if ( id.Id.StartsWith( _assemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+        {
+            if ( !AssemblyIdentity.TryParseDisplayName( id.Id.Substring( _assemblyPrefix.Length ), out var assemblyIdentity ) )
+            {
+                throw new AssertionFailedException( $"Cannot parse the id '{id.Id}'." );
+            }
+
+            if ( compilation.Assembly.Identity.Equals( assemblyIdentity ) )
+            {
+                return compilation.Assembly;
+            }
+            else
+            {
+                return compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( a => a.Identity.Equals( assemblyIdentity ) );
+            }
         }
         else
         {
@@ -148,6 +174,15 @@ public static class SerializableDeclarationIdProvider
                     .RaiseMethod?.ReturnParameter,
                 _ => null
             };
+        }
+        else if ( id.Id.StartsWith( _assemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+        {
+            if ( !AssemblyIdentity.TryParseDisplayName( id.Id.Substring( _assemblyPrefix.Length ), out var assemblyIdentity ) )
+            {
+                throw new AssertionFailedException( $"Cannot parse the id '{id.Id}'." );
+            }
+
+            return compilation.Factory.GetAssembly( assemblyIdentity );
         }
         else
         {

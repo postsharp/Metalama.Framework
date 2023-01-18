@@ -1,0 +1,1 @@
+// Warning MY001 on `Regex`: `Referencing the forbidden assembly.`

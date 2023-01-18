@@ -3,14 +3,12 @@
 using Metalama.Backstage.Configuration;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.
     /// </summary>
-    [Obfuscation( Exclude = true /* JSON */ )]
     [ConfigurationFile( "userDiagnostics.json" )]
     [Description( "Stores the IDs of diagnostics and suppressions defined by user aspects." )]
     public sealed record UserDiagnosticsConfiguration : ConfigurationFile

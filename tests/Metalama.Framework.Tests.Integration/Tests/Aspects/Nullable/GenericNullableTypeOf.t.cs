@@ -1,7 +1,7 @@
 internal class C
 {
   [MyAspect]
-  string? _f;
+  private string? _f;
   public void Template()
   {
     global::System.IServiceProvider serviceProvider = null !;

@@ -55,7 +55,8 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         /// <param name="paths">A list of project or solution paths.</param>
         /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
-        public Workspace Load( params string[] paths ) => TaskHelper.RunAndWait( () => this.LoadAsync( paths.ToImmutableArray() ) );
+        public Workspace Load( params string[] paths )
+            => this.ServiceProvider.GetRequiredService<ITaskRunner>().RunSynchronously( () => this.LoadAsync( paths.ToImmutableArray() ) );
 
         /// <summary>
         /// Asynchronously loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Workspaces
 
             async Task<Workspace> LoadCore( string k )
             {
-                var workspace = await Workspace.LoadAsync( key, paths, properties, this, restore, cancellationToken );
+                var workspace = await Workspace.LoadAsync( this.ServiceProvider, key, paths, properties, this, restore, cancellationToken );
                 workspace.Disposed += this.OnWorkspaceDisposed;
 
                 return workspace;
@@ -115,6 +116,9 @@ namespace Metalama.Framework.Workspaces
             [NotNullWhen( true )] out Project? project,
             out bool isMetalamaOutput )
         {
+            // We are only considering workspaces that have already been loaded.
+
+#pragma warning disable VSTHRD002
             var found = this._workspaces.Values
                 .Select(
                     w => w.IsCompleted
@@ -124,6 +128,7 @@ namespace Metalama.Framework.Workspaces
                            Workspace: w.Result)
                         : (null, null) )
                 .FirstOrDefault( p => p.Project != null );
+#pragma warning restore VSTHRD002
 
             if ( found.Project != null )
             {

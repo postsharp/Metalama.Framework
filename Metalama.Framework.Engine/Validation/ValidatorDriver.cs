@@ -8,5 +8,5 @@ public abstract class ValidatorDriver
 {
     internal abstract UserCodeMemberInfo UserCodeMemberInfo { get; }
 
-    public abstract string MethodName { get; }
+    public abstract string? MethodName { get; }
 }

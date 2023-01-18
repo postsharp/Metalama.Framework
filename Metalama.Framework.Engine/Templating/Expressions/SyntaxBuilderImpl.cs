@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
-using System.Reflection;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -44,7 +43,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
     }
 
-    [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
     public IExpression Capture( object? expression ) => new CapturedUserExpression( this.Compilation, expression );

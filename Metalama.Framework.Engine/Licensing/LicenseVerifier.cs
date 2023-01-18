@@ -214,15 +214,9 @@ public sealed class LicenseVerifier : IProjectService
                 (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
     }
 
-    internal void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
+    internal void VerifyCanBeInherited( AspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
-        if ( prototype == null )
-        {
-            // This happens only with abstract classes.
-            return;
-        }
-
-        if ( aspectClass.IsInherited && !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
             diagnostics.Report( LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic( null, aspectClass.ShortName ) );
         }

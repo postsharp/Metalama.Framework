@@ -595,7 +595,8 @@ internal sealed partial class DesignTimeAspectPipeline
             var validationRunner = new DesignTimeValidatorRunner(
                 configuration.ServiceProvider,
                 state.PipelineResult,
-                configuration.ProjectModel );
+                configuration.ProjectModel,
+                compilation );
 
             IEnumerable<SyntaxTree> syntaxTreesToValidate;
 
@@ -663,6 +664,9 @@ internal sealed partial class DesignTimeAspectPipeline
             return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }
 
-        public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );
+        public PipelineState Pause()
+        {
+            return new PipelineState( this, DesignTimeAspectPipelineStatus.Paused );
+        }
     }
 }

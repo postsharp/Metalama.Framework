@@ -16,7 +16,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355;
 
-[Inherited]
+[Inheritable]
 internal class NotifyPropertyChangedAttribute : TypeAspect
 {
     #region Events

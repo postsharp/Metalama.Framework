@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -107,7 +106,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )

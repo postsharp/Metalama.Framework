@@ -17,11 +17,13 @@ public interface IValidatorReceiverSelector<out TTarget>
 {
     /// <summary>
     /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding validators to them
-    /// using e.g. <see cref="IValidatorReceiver{TDeclaration}.Validate"/> or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/> .
+    /// using e.g. <see cref="IValidatorReceiver.Validate"/> or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences{TValidator}"/> .
     /// </summary>
+    [Obsolete( ObsoleteMessages.WithMethod )]
     IValidatorReceiver<TMember> With<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
         where TMember : class, IDeclaration;
 
+    [Obsolete( ObsoleteMessages.WithMethod )]
     IValidatorReceiver<TMember> With<TMember>( Func<TTarget, TMember> selector )
         where TMember : class, IDeclaration;
 }

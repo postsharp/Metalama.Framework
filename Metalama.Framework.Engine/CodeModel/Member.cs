@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -10,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class Member : MemberOrNamedType, IMember
     {
-        protected Member( CompilationModel compilation, ISymbol symbol ) : base( compilation, symbol ) { }
+        protected Member( CompilationModel compilation ) : base( compilation ) { }
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
 

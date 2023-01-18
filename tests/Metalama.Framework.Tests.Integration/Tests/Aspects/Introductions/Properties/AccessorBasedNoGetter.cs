@@ -11,16 +11,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
     internal class MyAspect : TypeAspect
     {
         [Template]
-        public void Setter(int value) 
+        public void Setter( int value )
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
         }
 
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty(builder.Target, "TheProperty", null, nameof(Setter));
+            builder.Advice.IntroduceProperty( builder.Target, "TheProperty", null, nameof(Setter) );
         }
-
     }
 
     // <target>

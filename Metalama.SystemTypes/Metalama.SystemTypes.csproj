@@ -28,9 +28,7 @@
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting"/>
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration"/>
-        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration.Internals"/>
+        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration"/>    
     </ItemGroup>
     
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>

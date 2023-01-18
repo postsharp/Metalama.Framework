@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 IntermediateSymbolSemantic<IMethodSymbol>, 
                 IReadOnlyList<CallerAttributeReference>> _callerMemberReferencesByContainingSemantic;
 
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
             public SubstitutionGenerator(
                 ProjectServiceProvider serviceProvider,
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences,
                 IReadOnlyList<CallerAttributeReference> callerMemberReferences )
             {
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._syntaxHandler = syntaxHandler;
                 this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
                 this._nonInlinedSemantics = nonInlinedSemantics;
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync(
+                await this._concurrentTaskRunner.RunInParallelAsync(
                     this._nonInlinedSemantics.Union( this._additionalTransformedSemantics ),
                     ProcessNonInlinedSemantic,
                     cancellationToken );
@@ -248,7 +248,7 @@ namespace Metalama.Framework.Engine.Linking
                             case not StatementSyntax:
                                 AddSubstitution(
                                     inliningSpecification.ContextIdentifier,
-                                    CreateOriginalBodySubstitution( 
+                                    CreateOriginalBodySubstitution(
                                         root,
                                         inliningSpecification.AspectReference.ContainingBody,
                                         referencedSymbol,
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.Linking
                                 AddSubstitution(
                                     inliningSpecification.ContextIdentifier,
                                     new EventFieldSubstitution( root, referencedSymbol ) );
-                                
+
                                 break;
                         }
                     }
@@ -340,7 +340,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
 
                 void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType )
                 {
@@ -363,7 +363,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
 
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
@@ -380,7 +380,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol referencingSymbol, IMethodSymbol targetSymbol, bool usingSimpleInlining, string? returnVariableIdentifier )
+            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution(
+                SyntaxNode root,
+                IMethodSymbol referencingSymbol,
+                IMethodSymbol targetSymbol,
+                bool usingSimpleInlining,
+                string? returnVariableIdentifier )
             {
                 switch (root, targetSymbol)
                 {
@@ -388,7 +393,12 @@ namespace Metalama.Framework.Engine.Linking
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
 
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, usingSimpleInlining, returnVariableIdentifier );
+                        return new ExpressionBodySubstitution(
+                            arrowExpressionClause,
+                            referencingSymbol,
+                            targetSymbol,
+                            usingSimpleInlining,
+                            returnVariableIdentifier );
 
                     case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );

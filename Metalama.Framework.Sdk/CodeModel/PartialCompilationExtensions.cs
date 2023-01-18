@@ -86,16 +86,16 @@ namespace Metalama.Framework.Engine.CodeModel
             IServiceProvider<IProjectService> serviceProvider,
             CancellationToken cancellationToken = default )
         {
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
-            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
+            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
-            void RewriteSyntaxTree( SyntaxTree tree )
+            async Task RewriteSyntaxTreeAsync( SyntaxTree tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var oldRoot = tree.GetRoot();
+                var oldRoot = await tree.GetRootAsync( cancellationToken );
                 var newRoot = rewriter.Visit( oldRoot );
 
                 if ( newRoot != oldRoot )

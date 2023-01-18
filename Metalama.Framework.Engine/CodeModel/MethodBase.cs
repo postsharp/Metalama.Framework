@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => base.ContainingDeclaration
             };
 
-        protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this.MethodSymbol = symbol;
         }
@@ -41,7 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
-        [Obfuscation( Exclude = true )]
         public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
             {
