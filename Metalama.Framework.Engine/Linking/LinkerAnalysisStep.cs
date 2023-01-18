@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Linking
                 cancellationToken );
 
             var callerAttributeReferences =
-                await GetCallerAttributeReferences(
+                await GetCallerAttributeReferencesAsync(
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
                     symbolReferenceFinder,
@@ -489,7 +489,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Finds all references to overridden methods that have caller attributes and need to be fixed.
         /// </summary>
-        private static async Task<IReadOnlyList<CallerAttributeReference>> GetCallerAttributeReferences( 
+        private static async Task<IReadOnlyList<CallerAttributeReference>> GetCallerAttributeReferencesAsync( 
             PartialCompilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
             SymbolReferenceFinder symbolReferenceFinder, 

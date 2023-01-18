@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
 
                 return symbolReferences.ToReadOnlyList();
             }
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
 
                 return symbolReferences.ToReadOnlyList();
             }
