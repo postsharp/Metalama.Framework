@@ -2354,7 +2354,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 }
                 else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                 {
-                    var context = this._currentScopeContext.RunTimeOnly( "a generic argument of run-time declaration" );
+                    var context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
 
                     using ( this.WithScopeContext( context ) )
                     {
