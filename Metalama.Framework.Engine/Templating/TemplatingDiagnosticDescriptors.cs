@@ -413,5 +413,13 @@ namespace Metalama.Framework.Engine.Templating
                 "'{0}' cannot be partial because it is a template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> AspectNestedTypeForbidden
+            = new(
+                "LAMA0253",
+                "Aspects cannot be nested types.",
+                "Aspect type '{0}' is a nested type, which is not supported.",
+                _category,
+                Error );
     }
 }
