@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IEnumerable<string> InheritableAspectTypes => this.InheritableAspects.Keys;
 
-        public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this.InheritableAspects[aspectType];
+        public IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType ) => this.InheritableAspects[aspectType];
 
         // ReSharper disable once UnusedType.Local
         private class Serializer : ReferenceTypeSerializer

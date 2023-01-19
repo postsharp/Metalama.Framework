@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract bool CanBeInherited { get; }
 
-        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
 
         internal abstract Ref<IDeclaration> ToRef();
 

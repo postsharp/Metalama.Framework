@@ -313,7 +313,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-                const string arguments = "build -t:WriteReferenceAssemblies";
+                const string arguments = "build -t:WriteReferenceAssemblies -bl";
 
                 this._dotNetTool.Execute( arguments, this._cacheDirectory );
 

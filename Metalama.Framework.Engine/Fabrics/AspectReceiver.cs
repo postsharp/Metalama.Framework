@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
                         item => new ReferenceValidatorInstance(
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
                         item => new ReferenceValidatorInstance(
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._parent.AspectPredecessor,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
                         item =>
@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     validateMethod,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
                         item => new DeclarationValidatorInstance(
@@ -280,7 +280,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                         compilation,
                         diagnosticAdder,
                         aspectClass,
@@ -289,7 +289,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => createAspect( t ),
-                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
+                                    executionContext,
                                     out var aspect ) )
                             {
                                 return null;
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         userCodeInvoker,
-                        executionContext,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                         compilation,
                         diagnosticAdder,
                         aspectClass,
@@ -333,7 +333,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
-                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
+                                    executionContext,
                                     out var aspect ) )
                             {
                                 return null;
@@ -360,6 +360,13 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( invoker != null && executionContext != null )
             {
+#if DEBUG
+                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
+                {
+                    throw new AssertionFailedException( "Execution context mismatch." );
+                }
+#endif
+
                 targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
             }
             else
@@ -433,6 +440,12 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( invoker != null && executionContext != null )
             {
+#if DEBUG
+                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
+                {
+                    throw new AssertionFailedException( "Execution context mismatch." );
+                }
+#endif
                 targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
             }
             else

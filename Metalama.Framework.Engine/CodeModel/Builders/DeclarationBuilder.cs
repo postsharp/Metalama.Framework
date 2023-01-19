@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree();
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 

@@ -199,7 +199,7 @@ internal sealed class TestResult : IDisposable
     {
         if ( this._frozen )
         {
-            throw new InvalidOperationException( "The test result can no longer be modified." );
+            return;
         }
 
         this._frozen = true;

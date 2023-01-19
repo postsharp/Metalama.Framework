@@ -34,17 +34,15 @@ namespace Metalama.Framework.Code
         /// Gets the set of types, in the current compilation, that are derived from a given base type (given as an <see cref="INamedType"/>).
         /// </summary>
         /// <param name="baseType">The base type.</param>
-        /// <param name="deep">When <c>true</c>, all derived types and their descendants are recursively returned. When <c>false</c>,
-        /// only the first level of types in the current compilation is returned.</param>
-        IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep = true );
+        /// <param name="options">Options that determine whether the search should be deep or shallow.</param>
+        IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, DerivedTypesOptions options = default );
 
         /// <summary>
         /// Gets the set of types, in the current compilation, that are derived from a given base type (given as a <see cref="Type"/>).
         /// </summary>
         /// <param name="baseType">The base type.</param>
-        /// <param name="deep">When <c>true</c>, all derived types and their descendants are recursively returned. When <c>false</c>,
-        /// only the first level of types in the current compilation is returned.</param>
-        IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
+        /// <param name="options">Options that determine whether the search should be deep or shallow.</param>
+        IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default );
 
         /// <summary>
         /// Gets the version of the current compilation in the Metalama pipeline. This number is only informational.
