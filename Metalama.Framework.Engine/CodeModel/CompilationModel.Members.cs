@@ -437,7 +437,7 @@ public sealed partial class CompilationModel
 
         interfaces.Add( introduceInterface );
 
-        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType, true ) ) )
+        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType ) ) )
         {
             var allInterfaces = this.GetAllInterfaceImplementationCollection( type.GetSymbol().AssertNotNull(), true );
 

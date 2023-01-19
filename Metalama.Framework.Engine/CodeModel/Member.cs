@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsOverride => this.Symbol.IsOverride;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         {
             if ( !this.CanBeInherited )
             {
@@ -29,13 +29,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return this.GetDerivedDeclarationsCore( deep );
+                return this.GetDerivedDeclarationsCore( options );
             }
         }
 
-        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore( bool deep )
+        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore( DerivedTypesOptions options )
         {
-            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, deep ) )
+            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, options ) )
             {
                 foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( this ) )
                 {

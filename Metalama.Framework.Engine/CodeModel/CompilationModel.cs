@@ -251,15 +251,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
-        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
+        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
+            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
         }
 
-        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
-            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
+        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
+            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), options );
 
         public int Revision { get; }
 
@@ -345,7 +345,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( namedType.DeclaringAssembly.IsExternal )
             {
-                throw new InvalidOperationException( $"Cannot compute the depth of '{namedType.FullName}' because it is an external type." );
+                return 0;
             }
 
             var reference = namedType.ToTypedRef<IDeclaration>();
@@ -401,7 +401,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 

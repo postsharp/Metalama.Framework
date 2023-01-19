@@ -45,11 +45,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         {
             this.OnUsingDeclaration();
 
-            return this.Implementation.GetDerivedDeclarations( deep );
+            return this.Implementation.GetDerivedDeclarations( options );
         }
 
         public override DeclarationKind DeclarationKind
