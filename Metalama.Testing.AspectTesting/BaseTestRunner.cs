@@ -174,14 +174,13 @@ internal abstract partial class BaseTestRunner
 
         testResult.TestInput = testInput;
         var testDirectory = Path.GetDirectoryName( testInput.FullPath )!;
-        
+
         string? dependencyLicenseKey = null;
 
         if ( testInput.Options.DependencyLicenseFile != null )
         {
             dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
         }
-
 
         try
         {
@@ -245,13 +244,14 @@ internal abstract partial class BaseTestRunner
 
             await testResult.AddInputDocumentAsync( mainDocument, testInput.FullPath );
 
-            (mainProject, _) = await AddDependencyProjectAsync( mainProject, testInput.FullPath );
-
-         
+            if ( !string.IsNullOrEmpty( testInput.FullPath ) )
+            {
+                (mainProject, _) = await AddDependencyProjectAsync( mainProject, testInput.FullPath );
+            }
 
             // Add additional input documents.
-         
-            foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs" ) ) )
+
+            foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
                 var includedFullPath = Path.GetFullPath( Path.Combine( testDirectory, includedFile ) );
                 var includedText = File.ReadAllText( includedFullPath );
@@ -334,7 +334,7 @@ internal abstract partial class BaseTestRunner
             }
 #pragma warning restore CS1998
 
-            async Task<(Project Project,ImmutableArray<MetadataReference> References)> AddDependencyProjectAsync( Project baseProject, string basePath = "" )
+            async Task<(Project Project, ImmutableArray<MetadataReference> References)> AddDependencyProjectAsync( Project baseProject, string basePath = "" )
             {
                 var dependencyName = Path.GetFileNameWithoutExtension( basePath ) + ".Dependency.cs";
                 var dependencyPath = Path.GetFullPath( Path.Combine( testDirectory, dependencyName ) );
@@ -355,7 +355,7 @@ internal abstract partial class BaseTestRunner
                 dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
 
                 // Add dependencies recursively.
-                ( dependencyProject, var recursiveReferences ) = await AddDependencyProjectAsync( dependencyProject, dependencyName );
+                (dependencyProject, var recursiveReferences) = await AddDependencyProjectAsync( dependencyProject, dependencyName );
 
                 // Compile the dependency.
                 var (dependencyReference, _) =
@@ -373,7 +373,7 @@ internal abstract partial class BaseTestRunner
 
                 var allReferences = recursiveReferences.Add( dependencyReference );
 
-                return (baseProject.AddMetadataReferences( allReferences ), allReferences );
+                return (baseProject.AddMetadataReferences( allReferences ), allReferences);
             }
         }
         finally
