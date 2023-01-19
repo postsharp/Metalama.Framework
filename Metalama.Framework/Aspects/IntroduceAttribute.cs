@@ -71,17 +71,6 @@ namespace Metalama.Framework.Aspects
 
             builder.MustBeExplicitlyDeclared();
 
-            builder.AddRule(
-                new EligibilityRule<IDeclaration>(
-                    EligibleScenarios.Inheritance,
-                    x =>
-                    {
-                        var t = x.GetClosestNamedType();
-
-                        return t != null && t.TypeKind != TypeKind.Interface;
-                    },
-                    _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
-
             var isEffectivelyInstance =
                 (this.Scope, adviceMember.IsStatic) switch
                 {
@@ -161,7 +150,7 @@ namespace Metalama.Framework.Aspects
 
             switch ( targetType )
             {
-                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct) }:
+                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface) }:
                     builder.Diagnostics.Report(
                         FrameworkDiagnosticDescriptors.CannotApplyAdviceOnTypeOrItsMembers.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, targetType.TypeKind) ) );

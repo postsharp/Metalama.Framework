@@ -212,7 +212,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
         {
-            if ( this._compilation == compilation && diagnostics == this.Diagnostics )
+            if ( ReferenceEquals( this._compilation, compilation ) && diagnostics == this.Diagnostics )
             {
                 return this;
             }

@@ -175,10 +175,13 @@ internal abstract partial class BaseTestRunner
         testResult.TestInput = testInput;
         var testDirectory = Path.GetDirectoryName( testInput.FullPath )!;
 
+        // ReSharper disable once RedundantAssignment
         string? dependencyLicenseKey = null;
 
         if ( testInput.Options.DependencyLicenseFile != null )
         {
+            // ReSharper disable once MethodHasAsyncOverload
+            // ReSharper disable once RedundantAssignment
             dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
         }
 

@@ -361,7 +361,7 @@ namespace Metalama.Framework.Engine.Fabrics
             if ( invoker != null && executionContext != null )
             {
 #if DEBUG
-                if ( executionContext.Compilation != compilation )
+                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
                 {
                     throw new AssertionFailedException( "Execution context mismatch." );
                 }
@@ -441,7 +441,7 @@ namespace Metalama.Framework.Engine.Fabrics
             if ( invoker != null && executionContext != null )
             {
 #if DEBUG
-                if ( executionContext.Compilation != compilation )
+                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
                 {
                     throw new AssertionFailedException( "Execution context mismatch." );
                 }

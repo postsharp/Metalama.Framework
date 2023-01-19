@@ -40,7 +40,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
-        
+
         /// <summary>
         /// Gets a maps if the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
@@ -88,7 +88,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Updates cache with a <see cref="DesignTimePipelineExecutionResult"/> that includes results for several syntax trees.
         /// </summary>
-        internal CompilationPipelineResult Update( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResults, AspectPipelineConfiguration configuration )
+        internal CompilationPipelineResult Update(
+            PartialCompilation compilation,
+            DesignTimePipelineExecutionResult pipelineResults,
+            AspectPipelineConfiguration configuration )
         {
             Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} )" );
 
@@ -392,7 +395,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public IEnumerable<string> InheritableAspectTypes => this._inheritableAspects.Keys;
 
-        public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this._inheritableAspects[aspectType];
+        public IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType ) => this._inheritableAspects[aspectType];
 
         // The design-time implementation of validators does not use this property but GetValidatorsForSymbol.
         // (and cross-project design-time validators are not implemented)

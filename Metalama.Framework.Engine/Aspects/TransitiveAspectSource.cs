@@ -79,7 +79,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                         throw new AssertionFailedException( $"Cannot find an aspect '{aspectClassName}'." );
                     }
 
-                    var targets = manifest.GetInheritedAspects( aspectClassName )
+                    var targets = manifest.GetInheritableAspects( aspectClassName )
                         .WhereNotNull();
 
                     inheritedAspectsBuilder.AddRange( aspectClass, targets );

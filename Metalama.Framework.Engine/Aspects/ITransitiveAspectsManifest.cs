@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         IEnumerable<string> InheritableAspectTypes { get; }
 
-        IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType );
+        IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType );
 
         ImmutableArray<TransitiveValidatorInstance> Validators { get; }
     }
