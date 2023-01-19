@@ -26,12 +26,7 @@ namespace Metalama.Framework.Engine.Formatting
                     return;
                 }
 
-                var setVisitTrivia = false;
-
-                if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
-                {
-                    setVisitTrivia = true;
-                }
+                var setVisitTrivia = node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind );
 
                 // Give preference to source code.
                 // TODO: Ideally, both annotations should not be present as it indicated inefficiency.
@@ -48,6 +43,7 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     var previousVisitTrivia = this._visitTrivia;
                     this._visitTrivia = true;
+
                     try
                     {
                         base.VisitCore( node );

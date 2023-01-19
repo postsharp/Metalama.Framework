@@ -211,7 +211,13 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.MetaApi );
 
         internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
-            => new(
+        {
+            if ( ReferenceEquals( this._compilation, compilation ) && diagnostics == this.Diagnostics )
+            {
+                return this;
+            }
+
+            return new UserCodeExecutionContext(
                 this.ServiceProvider,
                 diagnostics,
                 this.InvokedMember,
@@ -221,6 +227,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this._throwOnUnsupportedDependencies,
                 new SyntaxBuilderImpl( compilation ),
                 this.MetaApi );
+        }
 
         internal void AddDependency( IDeclaration declaration )
         {

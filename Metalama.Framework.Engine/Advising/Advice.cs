@@ -37,6 +37,12 @@ namespace Metalama.Framework.Engine.Advising
             ICompilation sourceCompilation,
             string? layerName )
         {
+#if DEBUG
+            if ( targetDeclaration.DeclaringAssembly.IsExternal )
+            {
+                throw new AssertionFailedException( $"Cannot override '{targetDeclaration}' because it is external." );
+            }
+#endif
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();

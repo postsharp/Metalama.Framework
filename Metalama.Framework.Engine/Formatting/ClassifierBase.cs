@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
 #endif
         private readonly SourceText? _sourceText;
 
-        public ClassifierBase( ClassifiedTextSpanCollection classifiedTextSpans, SourceText? sourceText = null )
+        protected ClassifierBase( ClassifiedTextSpanCollection classifiedTextSpans, SourceText? sourceText = null )
             : base( SyntaxWalkerDepth.Trivia )
         {
             this.ClassifiedTextSpans = classifiedTextSpans;

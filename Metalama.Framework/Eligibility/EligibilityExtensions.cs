@@ -395,6 +395,14 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be abstract" );
 
     /// <summary>
+    /// Forbids the target type from being an interface.
+    /// </summary>
+    public static void MustNotBeInterface( this IEligibilityBuilder<INamedType> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member.TypeKind != TypeKind.Interface,
+            member => $"{member} must not an interface" );
+
+    /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
     /// </summary>
     public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )

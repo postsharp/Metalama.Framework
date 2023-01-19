@@ -30,11 +30,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         SyntaxTree? PrimarySyntaxTree { get; }
 
-        IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
-    }
-
-    internal interface IMemberImpl : IDeclarationImpl, IMember
-    {
-        IMember? OverriddenMember { get; }
+        IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
     }
 }
