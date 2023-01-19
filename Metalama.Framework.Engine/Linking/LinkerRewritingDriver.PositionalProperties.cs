@@ -60,7 +60,6 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add(
                         this.GetOriginalImplProperty(
                             symbol,
-                            true,
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
                             recordParameter.Type.AssertNotNull(),
                             recordParameter.Default,
@@ -75,10 +74,8 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add(
                         this.GetEmptyImplProperty(
                             symbol,
-                            true,
                             List<AttributeListSyntax>(),
-                            recordParameter.Type.AssertNotNull(),
-                            null ) );
+                            recordParameter.Type.AssertNotNull() ) );
                 }
 
                 return members;

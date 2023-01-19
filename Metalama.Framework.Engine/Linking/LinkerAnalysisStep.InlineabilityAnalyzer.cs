@@ -148,33 +148,51 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineableProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic )
                 {
-                    var getAspectReferences =
-                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertyGetAccessor ) );
-
-                    var setAspectReferences =
-                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertySetAccessor ) );
-
-                    if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                                                       || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
+                    if ( semantic.Symbol.IsAutoProperty() == true && semantic.Kind == IntermediateSymbolSemanticKind.Default )
                     {
+                        // Override target that is auto property is never inlineable.
                         return false;
                     }
+                    else
+                    {
+                        var getAspectReferences =
+                            this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertyGetAccessor ) );
 
-                    return true;
+                        var setAspectReferences =
+                            this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertySetAccessor ) );
+
+                        if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
+                                                           || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
                 }
 
                 bool IsInlineableEvent( IntermediateSymbolSemantic<IEventSymbol> semantic )
                 {
-                    var addAspectReferences =
-                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventAddAccessor ) );
-
-                    var removeAspectReferences =
-                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
-
-                    if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
-                                                       || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
+                    if ( semantic.Symbol.IsEventField() == true && semantic.Kind == IntermediateSymbolSemanticKind.Default )
                     {
+                        // Override target that is event field is never inlineable.
                         return false;
+                    }
+                    else
+                    {
+                        var addAspectReferences =
+                            this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventAddAccessor ) );
+
+                        var removeAspectReferences =
+                            this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
+
+                        if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
+                                                       || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
+                        {
+                            return false;
+                        }
                     }
 
                     return true;

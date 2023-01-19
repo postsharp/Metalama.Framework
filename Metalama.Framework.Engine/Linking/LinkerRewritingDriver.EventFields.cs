@@ -25,8 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
@@ -38,12 +37,6 @@ namespace Metalama.Framework.Engine.Linking
                 else
                 {
                     members.Add( GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
-                }
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    members.Add( this.GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -130,11 +123,6 @@ namespace Metalama.Framework.Engine.Linking
                     symbol );
         }
 
-        private MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
-        {
-            return this.GetSpecialImplEventField( eventType, symbol, GetOriginalImplMemberName( symbol ) );
-        }
-
         private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {
             var accessorList =
@@ -148,27 +136,6 @@ namespace Metalama.Framework.Engine.Linking
                     .NormalizeWhitespace();
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
-        }
-
-        private MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
-        {
-            return
-                EventFieldDeclaration(
-                        this.FilterAttributesOnSpecialImpl( symbol ),
-                        symbol.IsStatic
-                            ? TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                        Token( TriviaList( ElasticSpace ), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                        VariableDeclaration(
-                            eventType.WithTrailingTrivia( Space ),
-                            SingletonSeparatedList( VariableDeclarator( Identifier( name ) ) ) ),
-                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
         private static EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
