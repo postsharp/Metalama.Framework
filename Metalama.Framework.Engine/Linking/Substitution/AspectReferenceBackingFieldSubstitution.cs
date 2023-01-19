@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,10 +40,20 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             switch ( currentNode )
             {
-                case MemberAccessExpressionSyntax { Name: { } name } memberAccess:
-                    return
-                        memberAccess.
-                        WithName( IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._aspectReference.ResolvedSemantic.Symbol ) ) );
+                case MemberAccessExpressionSyntax { Name: { } name } memberAccessExpression:
+                    var backingFieldName = LinkerRewritingDriver.GetBackingFieldName( this._aspectReference.ResolvedSemantic.Symbol );
+
+                    if ( this._aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
+                    {
+                        return memberAccessExpression
+                            .WithExpression( ThisExpression() )
+                            .WithName( IdentifierName( backingFieldName ) );
+                    }
+                    else
+                    {
+                        return memberAccessExpression.
+                            WithName( IdentifierName( backingFieldName ) );
+                    }
 
                 default:
                     throw new AssertionFailedException( $"Unexpected syntax kind: {currentNode.Kind()}" );

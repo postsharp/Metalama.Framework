@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineableEvent( IntermediateSymbolSemantic<IEventSymbol> semantic )
                 {
-                    if ( semantic.Symbol.IsEventField() == true && semantic.Kind == IntermediateSymbolSemanticKind.Default )
+                    if ( semantic.Symbol.IsEventFieldIntroduction() == true )
                     {
                         // Override target that is event field is never inlineable.
                         return false;

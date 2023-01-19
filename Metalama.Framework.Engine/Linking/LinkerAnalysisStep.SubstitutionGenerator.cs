@@ -129,8 +129,9 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( nonInlinedReference.ResolvedSemantic )
                             {
                                 case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventField() == true:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction() == true:
                                     // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field.
+                                    // Take care to include interface event fields that are containing initializer expressions.
                                     AddSubstitution( context, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -171,8 +172,7 @@ namespace Metalama.Framework.Engine.Linking
                                 context,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
                     }
 
@@ -286,8 +286,8 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( nonInlinedReference.ResolvedSemantic )
                             {
                                 case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventField() == true:
-                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field.
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction() == true:
+                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -332,8 +332,7 @@ namespace Metalama.Framework.Engine.Linking
                                 inliningSpecification.ContextIdentifier,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
                     }
 
