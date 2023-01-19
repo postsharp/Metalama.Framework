@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineableEvent( IntermediateSymbolSemantic<IEventSymbol> semantic )
                 {
-                    if ( semantic.Symbol.IsEventFieldIntroduction() == true )
+                    if ( semantic.Symbol.IsEventFieldIntroduction() )
                     {
                         // Override target that is event field is never inlineable.
                         return false;
@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Linking
                             this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
 
                         if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
-                                                       || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
+                                                           || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
                         {
                             return false;
                         }
