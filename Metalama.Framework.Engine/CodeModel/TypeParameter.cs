@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
 

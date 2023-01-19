@@ -233,8 +233,8 @@ namespace Metalama.Framework.Engine.Formatting
 
         public int Count => this._spans.Count;
 
-        private static bool IsColored( TextSpanClassification classification ) =>
-            classification is not (
+        private static bool IsColored( TextSpanClassification classification )
+            => classification is not (
                 TextSpanClassification.Default or
                 TextSpanClassification.RunTime or
                 TextSpanClassification.Excluded or

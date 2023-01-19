@@ -2090,7 +2090,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 transformedWhen,
                 node.EqualsGreaterThanToken,
                 transformedExpression )
-            .AddScopeAnnotation( combinedScope );
+            .AddScopeAnnotation( combinedScope )
+            .AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
     }
 
     public override SyntaxNode VisitSwitchExpression( SwitchExpressionSyntax node )

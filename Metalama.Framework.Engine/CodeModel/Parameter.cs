@@ -58,8 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
-            => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
+            => this.DeclaringMember.GetDerivedDeclarations( options ).Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
         public TypedConstant? DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue

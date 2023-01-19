@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => this.AttributeData.ApplicationSyntaxReference?.SyntaxTree;
 
-        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
+        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
 
         Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 

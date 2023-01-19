@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
             var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
             // Add the SourceCode annotation, if it is source code.
-            if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget(semantic.Symbol) )
+            if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 rewrittenBlock = rewrittenBlock.WithSourceCodeAnnotation();
             }

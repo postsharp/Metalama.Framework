@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
@@ -78,7 +79,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                         throw new AssertionFailedException( $"Cannot find an aspect '{aspectClassName}'." );
                     }
 
-                    var targets = manifest.GetInheritedAspects( aspectClassName )
+                    var targets = manifest.GetInheritableAspects( aspectClassName )
                         .WhereNotNull();
 
                     inheritedAspectsBuilder.AddRange( aspectClass, targets );
@@ -116,7 +117,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
             // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
-            foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
+            foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( DerivedTypesOptions.DirectOnly ) )
             {
                 aspectInstances.Add(
                     new AspectInstance(

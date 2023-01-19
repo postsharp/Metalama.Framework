@@ -112,7 +112,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
             var derivedConstructors = compilation
-                .GetDerivedTypes( baseConstructor.DeclaringType, false )
+                .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
                 .Where( c => c.InitializerKind != ConstructorInitializerKind.This );
 
