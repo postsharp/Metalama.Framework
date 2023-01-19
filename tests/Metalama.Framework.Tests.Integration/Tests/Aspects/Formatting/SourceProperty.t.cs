@@ -4,21 +4,21 @@ public class Target
   public int _field;
   public int GetAutoProperty { get; }
   public int InitAutoProperty { get; init; }
+  private int _autoProperty;
   public int AutoProperty
   {
     get
     {
-      return this.AutoProperty_Source;
+      return this._autoProperty;
     }
     set
     {
-      if (value != this.AutoProperty_Source)
+      if (value != this._autoProperty)
       {
-        this.AutoProperty_Source = value;
+        this._autoProperty = value;
       }
     }
   }
-  private int AutoProperty_Source { get; set; }
   public int Property
   {
     get

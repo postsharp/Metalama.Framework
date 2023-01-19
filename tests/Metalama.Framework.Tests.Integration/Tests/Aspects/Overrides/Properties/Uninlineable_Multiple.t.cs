@@ -109,6 +109,7 @@ internal class TargetClass
       return this.ExpressionBodiedProperty_Source;
     }
   }
+  private int _autoProperty;
   [FirstOverride]
   [SecondOverride]
   public int AutoProperty
@@ -126,22 +127,22 @@ internal class TargetClass
       this.AutoProperty_SecondOverride = value;
     }
   }
-  private int AutoProperty_Source { get; set; }
   private global::System.Int32 AutoProperty_SecondOverride
   {
     get
     {
       global::System.Console.WriteLine("Second override.");
-      _ = this.AutoProperty_Source;
-      return this.AutoProperty_Source;
+      _ = this._autoProperty;
+      return this._autoProperty;
     }
     set
     {
       global::System.Console.WriteLine("Second override.");
-      this.AutoProperty_Source = value;
-      this.AutoProperty_Source = value;
+      this._autoProperty = value;
+      this._autoProperty = value;
     }
   }
+  private readonly int _autoGetOnlyProperty;
   [FirstOverride]
   [SecondOverride]
   public int AutoGetOnlyProperty
@@ -159,20 +160,19 @@ internal class TargetClass
       this.AutoGetOnlyProperty_SecondOverride = value;
     }
   }
-  private int AutoGetOnlyProperty_Source { get; init; }
   private global::System.Int32 AutoGetOnlyProperty_SecondOverride
   {
     get
     {
       global::System.Console.WriteLine("Second override.");
-      _ = this.AutoGetOnlyProperty_Source;
-      return this.AutoGetOnlyProperty_Source;
+      _ = this._autoGetOnlyProperty;
+      return this._autoGetOnlyProperty;
     }
     init
     {
       global::System.Console.WriteLine("Second override.");
-      this.AutoGetOnlyProperty_Source = value;
-      this.AutoGetOnlyProperty_Source = value;
+      this._autoGetOnlyProperty = value;
+      this._autoGetOnlyProperty = value;
     }
   }
   public TargetClass()

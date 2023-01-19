@@ -67,38 +67,38 @@ internal class TargetClass
     }
   }
   private int ExpressionBodiedProperty_Source => 42;
+  private int _autoProperty;
   [Override]
   public int AutoProperty
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.AutoProperty_Source;
-      return this.AutoProperty_Source;
+      _ = this._autoProperty;
+      return this._autoProperty;
     }
     set
     {
       global::System.Console.WriteLine("Override.");
-      this.AutoProperty_Source = value;
-      this.AutoProperty_Source = value;
+      this._autoProperty = value;
+      this._autoProperty = value;
     }
   }
-  private int AutoProperty_Source { get; set; }
+  private readonly int _autoGetOnlyProperty;
   [Override]
   public int AutoGetOnlyProperty
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.AutoGetOnlyProperty_Source;
-      return this.AutoGetOnlyProperty_Source;
+      _ = this._autoGetOnlyProperty;
+      return this._autoGetOnlyProperty;
     }
     private init
     {
       global::System.Console.WriteLine("Override.");
-      this.AutoGetOnlyProperty_Source = value;
-      this.AutoGetOnlyProperty_Source = value;
+      this._autoGetOnlyProperty = value;
+      this._autoGetOnlyProperty = value;
     }
   }
-  private int AutoGetOnlyProperty_Source { get; init; }
 }

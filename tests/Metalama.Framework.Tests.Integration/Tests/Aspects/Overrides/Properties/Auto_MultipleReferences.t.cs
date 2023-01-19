@@ -7,12 +7,17 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
+      if (this._property < 0)
+      {
+        this._property = 0;
+      }
       return this._property;
     }
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this._property = value;
+      var current = this._property;
+      this._property = current + 1;
     }
   }
   private static int _staticProperty;
@@ -22,35 +27,17 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty;
+      if (global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_MultipleReferences.TargetClass._staticProperty < 0)
+      {
+        global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_MultipleReferences.TargetClass._staticProperty = 0;
+      }
+      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_MultipleReferences.TargetClass._staticProperty;
     }
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty = value;
-    }
-  }
-  private readonly int _propertyInitOnly;
-  [Override]
-  public int PropertyInitOnly
-  {
-    get
-    {
-      global::System.Console.WriteLine("This is the overridden getter.");
-      return this._propertyInitOnly;
-    }
-    init
-    {
-      global::System.Console.WriteLine("This is the overridden setter.");
-      this._propertyInitOnly = value;
-    }
-  }
-  public int __Init
-  {
-    init
-    {
-      // Init-only setter should be accessible from other init-only setters.
-      PropertyInitOnly = 42;
+      var current = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_MultipleReferences.TargetClass._staticProperty;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_MultipleReferences.TargetClass._staticProperty = current + 1;
     }
   }
 }

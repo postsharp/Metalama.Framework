@@ -70,10 +70,12 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.Integra
     add
     {
       global::System.Console.WriteLine("This is the add template.");
+      this._explicitIntroducedEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
+      this._explicitIntroducedEvent -= value;
     }
   }
   private event global::System.EventHandler? _initializerExplicitIntroducedEvent = (global::System.EventHandler? )global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroductionAttribute.Bar;

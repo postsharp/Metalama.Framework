@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.DiagnosticSink,
                 nonInlinedSemantics );
 
-            var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, inlinedSemantics );
+            var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, reachableSemantics );
             var forcefullyInitializedTypes = GetForcefullyInitializedTypes( forcefullyInitializedSymbols );
 
             var bodyAnalyzer = new BodyAnalyzer(
@@ -349,11 +349,11 @@ namespace Metalama.Framework.Engine.Linking
 
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
             LinkerInjectionRegistry injectionRegistry,
-            IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
+            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
         {
             var forcefullyInitializedSymbols = new List<ISymbol>();
 
-            foreach ( var semantic in inlinedSemantics )
+            foreach ( var semantic in reachableSemantics )
             {
                 // Currently limited to readonly structs to avoid errors.
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )

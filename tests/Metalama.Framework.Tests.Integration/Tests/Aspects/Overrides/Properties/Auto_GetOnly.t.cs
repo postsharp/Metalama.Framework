@@ -60,6 +60,7 @@ internal class TargetClass : BaseClass
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializerProperty = value;
     }
   }
+  private readonly int _abstractBaseProperty;
   [Override]
   public override int AbstractBaseProperty
   {
@@ -68,20 +69,20 @@ internal class TargetClass : BaseClass
       return this.AbstractBaseProperty_Override;
     }
   }
-  private int AbstractBaseProperty_Source { get; init; }
   private global::System.Int32 AbstractBaseProperty_Override
   {
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return this.AbstractBaseProperty_Source;
+      return this._abstractBaseProperty;
     }
     init
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.AbstractBaseProperty_Source = value;
+      this._abstractBaseProperty = value;
     }
   }
+  private readonly int _abstractBaseInitializerProperty = 42;
   [Override]
   public override int AbstractBaseInitializerProperty
   {
@@ -90,20 +91,20 @@ internal class TargetClass : BaseClass
       return this.AbstractBaseInitializerProperty_Override;
     }
   }
-  private int AbstractBaseInitializerProperty_Source { get; init; } = 42;
   private global::System.Int32 AbstractBaseInitializerProperty_Override
   {
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return this.AbstractBaseInitializerProperty_Source;
+      return this._abstractBaseInitializerProperty;
     }
     init
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.AbstractBaseInitializerProperty_Source = value;
+      this._abstractBaseInitializerProperty = value;
     }
   }
+  private readonly int _virtualBaseProperty;
   [Override]
   public override int VirtualBaseProperty
   {
@@ -112,20 +113,20 @@ internal class TargetClass : BaseClass
       return this.VirtualBaseProperty_Override;
     }
   }
-  private int VirtualBaseProperty_Source { get; init; }
   private global::System.Int32 VirtualBaseProperty_Override
   {
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return this.VirtualBaseProperty_Source;
+      return this._virtualBaseProperty;
     }
     init
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.VirtualBaseProperty_Source = value;
+      this._virtualBaseProperty = value;
     }
   }
+  private readonly int _virtualBaseInitializerProperty = 42;
   [Override]
   public override int VirtualBaseInitializerProperty
   {
@@ -134,18 +135,17 @@ internal class TargetClass : BaseClass
       return this.VirtualBaseInitializerProperty_Override;
     }
   }
-  private int VirtualBaseInitializerProperty_Source { get; init; } = 42;
   private global::System.Int32 VirtualBaseInitializerProperty_Override
   {
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return this.VirtualBaseInitializerProperty_Source;
+      return this._virtualBaseInitializerProperty;
     }
     init
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.VirtualBaseInitializerProperty_Source = value;
+      this._virtualBaseInitializerProperty = value;
     }
   }
   public TargetClass()

@@ -24,7 +24,7 @@ class Target
       {
         goto __aspect_return_1;
       }
-      this._foo -= value;
+      this._foo += value;
       Console.WriteLine("After1");
       __aspect_return_1:
         Console.WriteLine("After2");

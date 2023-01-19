@@ -1,73 +1,73 @@
 internal class TargetClass
 {
+  private global::System.Int32 _field;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
   public global::System.Int32 Field
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.Field_Source;
-      return this.Field_Source;
+      _ = this._field;
+      return this._field;
     }
     set
     {
       global::System.Console.WriteLine("Override.");
-      this.Field_Source = value;
-      this.Field_Source = value;
+      this._field = value;
+      this._field = value;
     }
   }
-  private global::System.Int32 Field_Source { get; set; }
+  private global::System.Int32 _staticField;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
   public global::System.Int32 StaticField
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.StaticField_Source;
-      return this.StaticField_Source;
+      _ = this._staticField;
+      return this._staticField;
     }
     set
     {
       global::System.Console.WriteLine("Override.");
-      this.StaticField_Source = value;
-      this.StaticField_Source = value;
+      this._staticField = value;
+      this._staticField = value;
     }
   }
-  private global::System.Int32 StaticField_Source { get; set; }
+  private global::System.Int32 _initializerField = 42;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
   public global::System.Int32 InitializerField
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.InitializerField_Source;
-      return this.InitializerField_Source;
+      _ = this._initializerField;
+      return this._initializerField;
     }
     set
     {
       global::System.Console.WriteLine("Override.");
-      this.InitializerField_Source = value;
-      this.InitializerField_Source = value;
+      this._initializerField = value;
+      this._initializerField = value;
     }
   }
-  private global::System.Int32 InitializerField_Source { get; set; } = 42;
+  private readonly global::System.Int32 _readOnlyField;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
   public global::System.Int32 ReadOnlyField
   {
     get
     {
       global::System.Console.WriteLine("Override.");
-      _ = this.ReadOnlyField_Source;
-      return this.ReadOnlyField_Source;
+      _ = this._readOnlyField;
+      return this._readOnlyField;
     }
     private init
     {
       global::System.Console.WriteLine("Override.");
-      this.ReadOnlyField_Source = value;
-      this.ReadOnlyField_Source = value;
+      this._readOnlyField = value;
+      this._readOnlyField = value;
     }
   }
-  private global::System.Int32 ReadOnlyField_Source { get; init; }
   public TargetClass()
   {
     this.ReadOnlyField = 42;

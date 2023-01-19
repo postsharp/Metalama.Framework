@@ -44,9 +44,9 @@ class Target
       // Should invoke empty code.
       _ = this.Bar_Empty;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke the final declaration.
       _ = this.Bar;
       return 42;
@@ -56,9 +56,9 @@ class Target
       // Should invoke empty code.
       this.Bar_Empty = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
     }
@@ -148,7 +148,7 @@ class Target
       // Should invoke empty code.
       _ = this.Bar_Empty;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke the final declaration.
@@ -160,7 +160,7 @@ class Target
       // Should invoke empty code.
       this.Bar_Empty = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke the final declaration.
@@ -219,6 +219,7 @@ class Target
       this.Bar = value;
     }
   }
+  private int _bar;
   public int Bar
   {
     get
@@ -230,7 +231,6 @@ class Target
       this.Bar_Override8 = value;
     }
   }
-  private int Bar_Source { get; set; }
   private int Bar_Empty
   {
     get => default(int);
