@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -172,6 +173,15 @@ internal abstract partial class BaseTestRunner
         }
 
         testResult.TestInput = testInput;
+        var testDirectory = Path.GetDirectoryName( testInput.FullPath )!;
+        
+        string? dependencyLicenseKey = null;
+
+        if ( testInput.Options.DependencyLicenseFile != null )
+        {
+            dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+        }
+
 
         try
         {
@@ -235,61 +245,36 @@ internal abstract partial class BaseTestRunner
 
             await testResult.AddInputDocumentAsync( mainDocument, testInput.FullPath );
 
-            string? dependencyLicenseKey = null;
+            (mainProject, _) = await AddDependencyProjectAsync( mainProject, testInput.FullPath );
 
-            if ( testInput.Options.DependencyLicenseFile != null )
-            {
-                dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
-            }
+         
 
-            // Add additional test documents.
-            foreach ( var includedFile in testInput.Options.IncludedFiles )
+            // Add additional input documents.
+         
+            foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs" ) ) )
             {
-                var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
+                var includedFullPath = Path.GetFullPath( Path.Combine( testDirectory, includedFile ) );
                 var includedText = File.ReadAllText( includedFullPath );
 
-                if ( !includedFile.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) )
+                var includedFileName = Path.GetFileName( includedFullPath );
+
+                (mainProject, var includedDocument) = await AddDocumentAsync( mainProject, mainParseOptions, includedFileName, includedText );
+
+                if ( includedDocument == null )
                 {
-                    var includedFileName = Path.GetFileName( includedFullPath );
-
-                    (mainProject, var includedDocument) = await AddDocumentAsync( mainProject, mainParseOptions, includedFileName, includedText );
-
-                    if ( includedDocument == null )
-                    {
-                        continue;
-                    }
-
-                    await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
+                    continue;
                 }
-                else
-                {
-                    // Dependencies must be compiled separately using Metalama.
-                    var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
-                        preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
 
-                    var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                    dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
-                    dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
+                (mainProject, _) = await AddDependencyProjectAsync( mainProject, includedFileName );
 
-                    var (dependency, _) =
-                        await this.CompileDependencyAsync(
-                            includedText,
-                            dependencyProject,
-                            testResult,
-                            testContext,
-                            dependencyLicenseKey );
-
-                    if ( dependency == null )
-                    {
-                        return;
-                    }
-
-                    mainProject = mainProject.AddMetadataReference( dependency );
-                }
+                await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
             }
 
+            // Add system files.
             mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
             mainProject = await AddAdditionalDocuments( mainProject, mainParseOptions );
+
+            // We are done creating the project.
 
             var initialCompilation = (await mainProject.GetCompilationAsync())!;
 
@@ -329,10 +314,9 @@ internal abstract partial class BaseTestRunner
 
 #pragma warning disable CS1998
 
-            // ReSharper disable UnusedParameter.Local
-
+            // ReSharper disable once UnusedParameter.Local
+            // ReSharper disable once LocalFunctionCanBeMadeStatic
             async Task<Project> AddPlatformDocuments( Project project, CSharpParseOptions parseOptions )
-#pragma warning restore CS1998
             {
                 // ReSharper enable UnusedParameter.Local
                 // Add system documents.
@@ -347,6 +331,49 @@ internal abstract partial class BaseTestRunner
 #else
                 return project;
 #endif
+            }
+#pragma warning restore CS1998
+
+            async Task<(Project Project,ImmutableArray<MetadataReference> References)> AddDependencyProjectAsync( Project baseProject, string basePath = "" )
+            {
+                var dependencyName = Path.GetFileNameWithoutExtension( basePath ) + ".Dependency.cs";
+                var dependencyPath = Path.GetFullPath( Path.Combine( testDirectory, dependencyName ) );
+
+                if ( !File.Exists( dependencyPath ) )
+                {
+                    return (baseProject, ImmutableArray<MetadataReference>.Empty);
+                }
+
+                // Add documents to the dependency project.
+                var includedText = File.ReadAllText( dependencyPath );
+
+                var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
+                    preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+
+                var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
+                dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+                dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
+
+                // Add dependencies recursively.
+                ( dependencyProject, var recursiveReferences ) = await AddDependencyProjectAsync( dependencyProject, dependencyName );
+
+                // Compile the dependency.
+                var (dependencyReference, _) =
+                    await this.CompileDependencyAsync(
+                        includedText,
+                        dependencyProject,
+                        testResult,
+                        testContext,
+                        dependencyLicenseKey );
+
+                if ( dependencyReference == null )
+                {
+                    return (baseProject, ImmutableArray<MetadataReference>.Empty);
+                }
+
+                var allReferences = recursiveReferences.Add( dependencyReference );
+
+                return (baseProject.AddMetadataReferences( allReferences ), allReferences );
             }
         }
         finally
