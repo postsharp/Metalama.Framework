@@ -1816,7 +1816,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
         else
         {
-            scopeContext = this._currentScopeContext.RunTimePreferred( node.Condition.ToString() );
+            scopeContext = this._currentScopeContext.RunTimePreferred( $"run-time conditional expression with the condition '{node.Condition}'" );
         }
 
         using ( this.WithScopeContext( scopeContext ) )
