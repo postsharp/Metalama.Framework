@@ -295,15 +295,6 @@ namespace Metalama.Framework.Engine.Linking
             ArrowExpressionClauseSyntax? existingExpressionBody,
             SyntaxGenerationContext generationContext )
         {
-            var setAccessorKind =
-                symbol switch
-                {
-                    { SetMethod.IsInitOnly: false } => SyntaxKind.SetAccessorDeclaration,
-                    { SetMethod.IsInitOnly: true } => SyntaxKind.InitAccessorDeclaration,
-                    { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
-                    _ => (SyntaxKind?) null
-                };
-
             var accessorList =
                 existingAccessorList
                     ?.WithAccessors(
@@ -392,26 +383,26 @@ namespace Metalama.Framework.Engine.Linking
 
             var accessorList =
                 AccessorList(
-                    List(
-                        new[]
-                            {
-                                symbol.GetMethod != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Token( SyntaxKind.GetKeyword ),
-                                        null,
-                                        ArrowExpressionClause( DefaultExpression( type ) ),
-                                        Token( SyntaxKind.SemicolonToken ) )
-                                    : null,
-                                setAccessorKind != null
-                                    ? AccessorDeclaration(
-                                        setAccessorKind.Value,
-                                        SyntaxFactoryEx.FormattedBlock() )
-                                    : null
-                            }.Where( a => a != null )
-                            .AssertNoneNull() ) )
+                        List(
+                            new[]
+                                {
+                                    symbol.GetMethod != null
+                                        ? AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            Token( SyntaxKind.GetKeyword ),
+                                            null,
+                                            ArrowExpressionClause( DefaultExpression( type ) ),
+                                            Token( SyntaxKind.SemicolonToken ) )
+                                        : null,
+                                    setAccessorKind != null
+                                        ? AccessorDeclaration(
+                                            setAccessorKind.Value,
+                                            SyntaxFactoryEx.FormattedBlock() )
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) )
                     .NormalizeWhitespace();
 
             return this.GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );

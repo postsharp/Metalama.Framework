@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
             {
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             switch ( currentNode )
             {
-                case MemberAccessExpressionSyntax { Name: { } name } memberAccessExpression:
+                case MemberAccessExpressionSyntax { Name: { } } memberAccessExpression:
                     var backingFieldName = LinkerRewritingDriver.GetBackingFieldName( this._aspectReference.ResolvedSemantic.Symbol );
 
                     if ( this._aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
@@ -51,8 +51,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        return memberAccessExpression.
-                            WithName( IdentifierName( backingFieldName ) );
+                        return memberAccessExpression.WithName( IdentifierName( backingFieldName ) );
                     }
 
                 default:

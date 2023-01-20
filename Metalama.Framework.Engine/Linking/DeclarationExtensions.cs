@@ -10,13 +10,13 @@ namespace Metalama.Framework.Engine.Linking
     {
         public static bool IsEventFieldIntroduction( this IEventSymbol @event )
         {
-            if (@event.IsEventField() == true)
+            if ( @event.IsEventField() == true )
             {
                 return true;
             }
-            
-            if (@event.GetPrimaryDeclaration() is { } primaryDeclaration 
-                && primaryDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
+
+            if ( @event.GetPrimaryDeclaration() is { } primaryDeclaration
+                 && primaryDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
             {
                 return true;
             }

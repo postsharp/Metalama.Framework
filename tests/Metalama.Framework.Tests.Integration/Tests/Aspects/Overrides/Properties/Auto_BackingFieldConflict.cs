@@ -1,4 +1,6 @@
-﻿// @Skipped(#32572)
+﻿#if TEST_OPTIONS
+// @Skipped(#32572)
+#endif
 
 using Metalama.Framework.Aspects;
 using Metalama.Testing.AspectTesting;
