@@ -25,11 +25,13 @@ class OuterClass
 [CompileTime]
 interface OuterInterface
 {
-    public class MyAspect : Aspect { }
+    [CompileTime]
+    public class MyType { }
 }
 
-[CompileTime]
+[RunTimeOrCompileTime]
 struct OuterStruct
 {
-    public class MyIAspect : IAspect { }
+    [RunTimeOrCompileTime]
+    public class MyType { }
 }

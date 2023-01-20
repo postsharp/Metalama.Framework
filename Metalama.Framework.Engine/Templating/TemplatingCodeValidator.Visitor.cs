@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,6 +34,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
             private readonly bool _hasCompileTimeCodeFast;
+            private readonly ITypeSymbol _typeFabricSymbol;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -60,6 +62,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
+                this._typeFabricSymbol = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -207,6 +210,24 @@ namespace Metalama.Framework.Engine.Templating
                 base.VisitInterfaceDeclaration( node );
             }
 
+            public override void VisitEnumDeclaration( EnumDeclarationSyntax node )
+            {
+                using var context = this.WithDeclaration( node );
+
+                this.VerifyTypeDeclaration( node, context );
+
+                base.VisitEnumDeclaration( node );
+            }
+
+            public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            {
+                using var context = this.WithDeclaration( node );
+
+                this.VerifyAllTypeDeclarations( node, node.Identifier, context );
+
+                base.VisitDelegateDeclaration( node );
+            }
+
             private void VerifyTypeDeclaration( BaseTypeDeclarationSyntax node, in Context context )
             {
                 // Report an error on aspect classes when the pipeline is paused.
@@ -265,18 +286,23 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
 
-                // Check that an aspect is not a nested type
+                this.VerifyAllTypeDeclarations( node, node.Identifier, context );
+            }
+
+            private void VerifyAllTypeDeclarations( MemberDeclarationSyntax node, SyntaxToken nodeIdentifier, in Context context )
+            {
+                // Check that compile-time type is not a nested type
                 if ( node.Parent is BaseTypeDeclarationSyntax )
                 {
                     var declaredTypeSymbol = (INamedTypeSymbol) context.DeclaredSymbol!;
-                    var iAspectSymbol = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof( IAspect ) );
 
-                    if ( declaredTypeSymbol.Is( iAspectSymbol ) )
+                    if ( this._currentScope is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime &&
+                        !declaredTypeSymbol.Is( this._typeFabricSymbol ) )
                     {
                         this.Report(
-                            TemplatingDiagnosticDescriptors.AspectNestedTypeForbidden.CreateRoslynDiagnostic(
-                                node.Identifier.GetLocation(),
-                                declaredTypeSymbol ) );
+                            TemplatingDiagnosticDescriptors.CompileTimeTypesCannotBeNestedTypes.CreateRoslynDiagnostic(
+                                nodeIdentifier.GetLocation(),
+                                (declaredTypeSymbol, typeof( TypeFabric )) ) );
                     }
                 }
             }

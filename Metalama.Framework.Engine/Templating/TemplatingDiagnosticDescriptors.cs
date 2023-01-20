@@ -253,11 +253,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> RunTimeTypesCannotHaveCompileTimeTypesExceptClasses
+        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> CompileTimeTypesCannotBeNestedTypes
             = new(
                 "LAMA0231",
-                "Run-time types cannot have other compile-time types than classes.",
-                "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
+                "Compile-time types cannot be nested types.",
+                "The compile-time type '{0}' cannot be a nested type. The only compile-time type that can be nested in another type is a class inheriting '{1}'.",
                 _category,
                 Error );
 
@@ -411,14 +411,6 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0252",
                 "Template methods cannot be partial",
                 "'{0}' cannot be partial because it is a template.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<INamedTypeSymbol> AspectNestedTypeForbidden
-            = new(
-                "LAMA0253",
-                "Aspects cannot be nested types.",
-                "Aspect type '{0}' is a nested type, which is not supported.",
                 _category,
                 Error );
     }
