@@ -1227,8 +1227,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var transformedType = this.Visit( node.Type );
         var scope = this.GetNodeScope( transformedType );
 
+        var typeSymbol = this._syntaxTreeAnnotationMap.GetExpressionType( node.Type )!;
+
         var context = scope == TemplatingScope.CompileTimeOnly
-            ? this._currentScopeContext.CompileTimeOnly( $"local variable of compile-time '{node.Type}'" )
+            ? this._currentScopeContext.CompileTimeOnly( $"local variable of compile-time type '{typeSymbol}'" )
             : null;
 
         VariableDesignationSyntax transformedDesignation;
@@ -1458,7 +1460,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
         {
-            using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{node.Type}'" ) ) )
+            var typeSymbol = this._syntaxTreeAnnotationMap.GetExpressionType( node.Type )!;
+
+            using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{typeSymbol}'" ) ) )
             {
                 // ReSharper disable once RedundantSuppressNullableWarningExpression
                 var transformedVariables = node.Variables.SelectAsEnumerable( v => this.Visit( v )! );
