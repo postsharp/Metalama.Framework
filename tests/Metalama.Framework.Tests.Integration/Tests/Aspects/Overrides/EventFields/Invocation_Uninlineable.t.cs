@@ -2,90 +2,90 @@
 [Introduction]
 internal class TargetClass
 {
+  private event EventHandler? _event;
   public event EventHandler? Event
   {
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      this.Event_Source += value;
-      this.Event_Source += value;
+      this._event += value;
+      this._event += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      this.Event_Source -= value;
-      this.Event_Source -= value;
+      this._event -= value;
+      this._event -= value;
     }
   }
-  private event EventHandler? Event_Source;
+  private static event EventHandler? _staticEvent;
   public static event EventHandler? StaticEvent
   {
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.StaticEvent_Source += value;
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.StaticEvent_Source += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._staticEvent += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._staticEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.StaticEvent_Source -= value;
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.StaticEvent_Source -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._staticEvent -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._staticEvent -= value;
     }
   }
-  private static event EventHandler? StaticEvent_Source;
   public void Foo()
   {
-    if (this.Event_Source != null)
+    if (this._event != null)
     {
-      this.Event_Source(this, new EventArgs());
+      this._event(this, new EventArgs());
     }
-    if (StaticEvent_Source != null)
+    if (_staticEvent != null)
     {
-      StaticEvent_Source(this, new EventArgs());
+      _staticEvent(this, new EventArgs());
     }
   }
   public void Bar()
   {
-    if (this.IntroducedEvent_Source != null)
+    if (this._introducedEvent != null)
     {
-      this.IntroducedEvent_Source(this, new global::System.EventArgs());
+      this._introducedEvent(this, new global::System.EventArgs());
     }
-    if (global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source != null)
+    if (global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent != null)
     {
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source(this, new global::System.EventArgs());
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent(this, new global::System.EventArgs());
     }
   }
+  private event global::System.EventHandler? _introducedEvent;
   public event global::System.EventHandler? IntroducedEvent
   {
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      this.IntroducedEvent_Source += value;
-      this.IntroducedEvent_Source += value;
+      this._introducedEvent += value;
+      this._introducedEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      this.IntroducedEvent_Source -= value;
-      this.IntroducedEvent_Source -= value;
+      this._introducedEvent -= value;
+      this._introducedEvent -= value;
     }
   }
-  private event global::System.EventHandler? IntroducedEvent_Source;
+  private static event global::System.EventHandler? _introducedStaticEvent;
   public static event global::System.EventHandler? IntroducedStaticEvent
   {
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source += value;
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source -= value;
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass.IntroducedStaticEvent_Source -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Uninlineable.TargetClass._introducedStaticEvent -= value;
     }
   }
-  private static event global::System.EventHandler? IntroducedStaticEvent_Source;
 }

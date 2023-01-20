@@ -16,11 +16,11 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke the final declaration.
       _ = this.Bar;
       return 42;
@@ -28,11 +28,11 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
     }
@@ -42,7 +42,7 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 2.
       _ = this.Bar_Override2;
       // Should invoke override 2.
@@ -54,7 +54,7 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 2.
       this.Bar_Override2 = value;
       // Should invoke override 2.
@@ -68,7 +68,7 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke override 4.
@@ -80,7 +80,7 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke override 4.
@@ -94,7 +94,7 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke the final declaration.
       _ = this.Bar;
       // Should invoke the final declaration.
@@ -106,7 +106,7 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
       // Should invoke the final declaration.
@@ -115,6 +115,7 @@ class Target
       this.Bar = value;
     }
   }
+  private int _bar;
   public int Bar
   {
     get
@@ -126,15 +127,14 @@ class Target
       this.Bar_Override6 = value;
     }
   }
-  private int Bar_Source { get; set; }
   public int Bar_Override2
   {
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 2.
       _ = this.Bar_Override2;
       // Should invoke the final declaration.
@@ -144,9 +144,9 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 2.
       this.Bar_Override2 = value;
       // Should invoke the final declaration.
@@ -158,7 +158,7 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 2.
       _ = this.Bar_Override2;
       // Should invoke override 4.
@@ -170,7 +170,7 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 2.
       this.Bar_Override2 = value;
       // Should invoke override 4.
@@ -184,7 +184,7 @@ class Target
     get
     {
       // Should invoke source code.
-      _ = this.Bar_Source;
+      _ = this._bar;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke the final declaration.
@@ -196,7 +196,7 @@ class Target
     set
     {
       // Should invoke source code.
-      this.Bar_Source = value;
+      this._bar = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke the final declaration.

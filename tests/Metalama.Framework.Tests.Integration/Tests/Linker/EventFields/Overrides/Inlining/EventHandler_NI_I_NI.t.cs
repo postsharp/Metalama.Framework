@@ -1,5 +1,6 @@
 class Target
 {
+  private event EventHandler? _foo;
   event EventHandler? Foo
   {
     add
@@ -11,14 +12,13 @@ class Target
       this.Foo_Override2 -= value;
     }
   }
-  private event EventHandler? Foo_Source;
   event EventHandler? Foo_Override2
   {
     add
     {
       Console.WriteLine("Before2");
       Console.WriteLine("Before1");
-      this.Foo_Source += value;
+      this._foo += value;
       Console.WriteLine("After1");
       Console.WriteLine("After2");
     }
@@ -26,7 +26,7 @@ class Target
     {
       Console.WriteLine("Before2");
       Console.WriteLine("Before1");
-      this.Foo_Source -= value;
+      this._foo -= value;
       Console.WriteLine("After1");
       Console.WriteLine("After2");
     }
