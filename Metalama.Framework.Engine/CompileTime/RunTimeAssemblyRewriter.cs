@@ -188,7 +188,7 @@ namespace Metalama.Compiler
     {
         var anyChange = false;
         var variables = new List<VariableDeclaratorSyntax>();
-        ISymbol? firstTemplateSymbol = null;
+        ISymbol? lastTemplateSymbol = null;
         var transformedNode = node;
 
         foreach ( var variable in node.Declaration.Variables )
@@ -199,7 +199,7 @@ namespace Metalama.Compiler
 
             if ( this.IsTemplate( symbol ) )
             {
-                firstTemplateSymbol = null;
+                lastTemplateSymbol = symbol;
 
                 if ( variable.Initializer != null )
                 {
@@ -216,9 +216,9 @@ namespace Metalama.Compiler
             transformedNode = replaceVariables( node, variables );
         }
 
-        if ( firstTemplateSymbol != null )
+        if ( lastTemplateSymbol != null )
         {
-            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, firstTemplateSymbol );
+            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, lastTemplateSymbol );
         }
 
         return transformedNode;
@@ -347,7 +347,7 @@ namespace Metalama.Compiler
 
         var newModifiers = transformedNode.Modifiers.Where( n => !n.IsAccessModifierKeyword() ).ToList();
 
-        newModifiers.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) );
+        newModifiers.Insert( 0, Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) );
 
         return (T) transformedNode.WithModifiers( TokenList( newModifiers ) )
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )

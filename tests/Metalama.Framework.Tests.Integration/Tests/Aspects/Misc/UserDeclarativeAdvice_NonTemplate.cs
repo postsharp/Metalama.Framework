@@ -21,7 +21,7 @@ public class MyAspect : TypeAspect
     private RunTimeOnlyClass f = null!;
 }
 
-internal class RunTimeOnlyClass { }
+public class RunTimeOnlyClass { }
 
 // <target>
 [MyAspect]
