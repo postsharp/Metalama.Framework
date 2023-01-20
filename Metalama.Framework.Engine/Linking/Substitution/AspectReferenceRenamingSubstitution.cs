@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public AspectReferenceRenamingSubstitution( ResolvedAspectReference aspectReference )
         {
             // Auto properties and event field default semantics should not get here.
-            Invariant.AssertNot( 
+            Invariant.AssertNot(
                 aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
                 && property.IsAutoProperty() == true );
 
