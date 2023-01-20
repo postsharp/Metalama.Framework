@@ -6,6 +6,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Testing.AspectTesting;
 using System;
 
+#pragma warning disable CS0169
+
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_BackingFieldConflict
 {
     /*

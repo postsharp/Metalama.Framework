@@ -37,10 +37,10 @@ public class Target
   public static int AutoProperty_Static_NoOverride { get; set; }
   public void Introduced()
   {
-    _ = this._autoProperty;
-    this._autoProperty = 42;
-    _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target._autoProperty_Static;
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target._autoProperty_Static = 42;
+    _ = this.AutoProperty;
+    this.AutoProperty = 42;
+    _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static;
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static = 42;
     _ = this.AutoProperty_NoOverride;
     this.AutoProperty_NoOverride = 42;
     _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static_NoOverride;
@@ -59,10 +59,10 @@ public class Target
   }
   public void IntroducedBefore()
   {
-    _ = this._autoProperty;
-    this._autoProperty = 42;
-    _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target._autoProperty_Static;
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target._autoProperty_Static = 42;
+    _ = this.AutoProperty;
+    this.AutoProperty = 42;
+    _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static;
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static = 42;
     _ = this.AutoProperty_NoOverride;
     this.AutoProperty_NoOverride = 42;
     _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.AutoProperty_FinalInvoker.Target.AutoProperty_Static_NoOverride;

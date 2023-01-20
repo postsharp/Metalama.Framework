@@ -27,14 +27,14 @@ public class Override : TypeAspect
     [Introduce]
     public void Introduced()
     {
-        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base.SetValue(null, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
     }
 }
 
@@ -43,14 +43,14 @@ public class Before : TypeAspect
     [Introduce]
     public void IntroducedBefore()
     {
-        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base.SetValue(null, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
     }
 }
 
@@ -59,14 +59,14 @@ public class After : TypeAspect
     [Introduce]
     public void IntroducedAfter()
     {
-        _ = meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base.SetValue(null, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.GetValue(meta.This);
-        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base.SetValue(meta.This, 42);
-        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.GetValue(null);
-        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base.SetValue(null, 42);
+        _ = meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
     }
 }
 
