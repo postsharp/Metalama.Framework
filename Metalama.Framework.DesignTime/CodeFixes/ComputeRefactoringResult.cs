@@ -8,7 +8,8 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 [JsonObject]
 public sealed class ComputeRefactoringResult
 {
-    internal ImmutableArray<CodeActionBaseModel> CodeActions { get; }
+    [JsonProperty]
+    public ImmutableArray<CodeActionBaseModel> CodeActions { get; }
 
     [JsonConstructor]
     public ComputeRefactoringResult( ImmutableArray<CodeActionBaseModel> codeActions )

@@ -14,6 +14,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.
     /// It should never be persisted into a file. 
     /// </summary>
+    [JsonObject]
     public readonly struct SymbolId : IEquatable<SymbolId>
     {
         private static readonly WeakCache<Compilation, ConcurrentDictionary<SymbolId, ISymbol?>> _cache = new();
@@ -26,7 +27,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private readonly object _symbolKey;
 
-        internal string Id => this._symbolKey.ToString() ?? "";
+        [JsonProperty]
+        public string Id => this._symbolKey.ToString() ?? "";
 
         static SymbolId()
         {
