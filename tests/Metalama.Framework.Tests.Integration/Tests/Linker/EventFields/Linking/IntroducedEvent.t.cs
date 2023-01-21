@@ -11,6 +11,7 @@ class Target
       this.Foo_Override7 -= value;
     }
   }
+  private event EventHandler? _bar;
   public event EventHandler? Bar
   {
     add
@@ -22,7 +23,6 @@ class Target
       this.Bar_Override6 -= value;
     }
   }
-  private event EventHandler? Bar_Source;
   private event EventHandler? Bar_Empty
   {
     add
@@ -139,7 +139,7 @@ class Target
       // Should invoke empty code.
       this.Bar_Empty += value;
       // Should invoke source code.
-      this.Bar_Source += value;
+      this._bar += value;
       // Should invoke override 2.
       this.Bar_Override2 += value;
       // Should invoke the final declaration.
@@ -150,7 +150,7 @@ class Target
       // Should invoke empty code.
       this.Bar_Empty -= value;
       // Should invoke introduced event field.
-      this.Bar_Source -= value;
+      this._bar -= value;
       // Should invoke override 2.
       this.Bar_Override2 -= value;
       // Should invoke the final declaration.

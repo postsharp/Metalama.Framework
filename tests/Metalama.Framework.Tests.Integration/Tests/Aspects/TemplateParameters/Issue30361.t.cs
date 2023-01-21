@@ -1,16 +1,16 @@
 internal class Foo
 {
+  private string? _property;
   [Normalize]
   public string? Property
   {
     get
     {
-      return this.Property_Source;
+      return this._property;
     }
     set
     {
-      this.Property_Source = value?.Trim().ToLowerInvariant();
+      this._property = value?.Trim().ToLowerInvariant();
     }
   }
-  private string? Property_Source { get; set; }
 }

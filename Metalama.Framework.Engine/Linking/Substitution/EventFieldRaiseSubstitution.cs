@@ -14,13 +14,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private readonly SyntaxNode _rootNode;
         private readonly IEventSymbol _targetEvent;
-        private readonly bool _inlinedTarget;
 
-        public EventFieldRaiseSubstitution( SyntaxNode rootNode, IEventSymbol targetEvent, bool inlinedTarget )
+        public EventFieldRaiseSubstitution( SyntaxNode rootNode, IEventSymbol targetEvent )
         {
             this._rootNode = rootNode;
             this._targetEvent = targetEvent;
-            this._inlinedTarget = inlinedTarget;
         }
 
         public override SyntaxNode TargetNode => this._rootNode;
@@ -28,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             var targetName =
-                this._inlinedTarget
+                this._targetEvent.IsEventFieldIntroduction()
                     ? LinkerRewritingDriver.GetBackingFieldName( this._targetEvent )
                     : LinkerRewritingDriver.GetOriginalImplMemberName( this._targetEvent );
 

@@ -184,12 +184,17 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( targetIntroductionInjectedMember == null )
                 {
-                    // There is no introduction, i.e. this is a user source symbol.
+                    // There is no introduction, i.e. this is a user source symbol. If there are no overrides, use the final semantic.
+                    var targetSemantic =
+                        overrideIndices.Count > 0
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,

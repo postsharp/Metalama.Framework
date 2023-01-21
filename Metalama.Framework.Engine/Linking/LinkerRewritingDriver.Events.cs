@@ -42,17 +42,11 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
+                     && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-                    {
-                        members.Add( this.GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
-                    }
-                    else
-                    {
-                        members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
-                    }
+                    members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )

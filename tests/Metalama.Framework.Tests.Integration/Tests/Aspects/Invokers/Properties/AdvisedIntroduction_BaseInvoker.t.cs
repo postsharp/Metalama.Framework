@@ -2,18 +2,18 @@
 [Override]
 internal class TargetClass
 {
+  private global::System.Int32 _property;
   public global::System.Int32 Property
   {
     get
     {
       global::System.Console.WriteLine("Override");
-      return this.Property_Source;
+      return this._property;
     }
     set
     {
       global::System.Console.WriteLine("Override");
-      this.Property_Source = value;
+      this._property = value;
     }
   }
-  private global::System.Int32 Property_Source { get; set; }
 }

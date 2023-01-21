@@ -1688,6 +1688,42 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
+    public override SyntaxNode VisitConditionalExpression( ConditionalExpressionSyntax node )
+    {
+        // condition has to be preserved if one of the expressions is throw
+        var runTimeCondition =
+            this.GetTransformationKind( node.Condition ) == TransformationKind.Transform ||
+            node.WhenTrue is ThrowExpressionSyntax || node.WhenFalse is ThrowExpressionSyntax;
+
+        if ( runTimeCondition )
+        {
+            // Run-time conditional expression. Just serialize to syntax.
+            return this.TransformConditionalExpression( node );
+        }
+        else
+        {
+            ExpressionSyntax transformedWhenTrue;
+            ExpressionSyntax transformedWhenFalse;
+
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time sub-expressions, serialize them to syntax.
+                transformedWhenTrue = this.Transform( node.WhenTrue );
+                transformedWhenFalse = this.Transform( node.WhenFalse );
+            }
+            else
+            {
+                transformedWhenTrue = (ExpressionSyntax) this.Visit( node.WhenTrue )!;
+                transformedWhenFalse = (ExpressionSyntax) this.Visit( node.WhenFalse )!;
+            }
+
+            // The condition may contain constructs like typeof or nameof that need to be transformed.
+            var condition = this.TransformCompileTimeCode( node.Condition );
+
+            return ConditionalExpression( condition, transformedWhenTrue, transformedWhenFalse );
+        }
+    }
+
     public override SyntaxNode VisitWhileStatement( WhileStatementSyntax node )
     {
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform )

@@ -1,2 +1,5 @@
-// TestTemplateCompiler.TryCompile failed.
-// Error LAMA0241 on `r != null ? 1 : throw new Exception()`: `Execution scope mismatch in the expression `r != null ? 1 : throw new Exception()`: the sub-expression `r != null` is compile-time, but the other sub-expression `throw new Exception()` is run-time.`
+void Method(int a)
+{
+    var s = false ? 1 : throw new global::System.Exception();
+    return;
+}

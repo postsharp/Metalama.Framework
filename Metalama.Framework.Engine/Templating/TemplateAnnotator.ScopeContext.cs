@@ -69,16 +69,6 @@ namespace Metalama.Framework.Engine.Templating
                     this.IsDynamicTypingForbidden,
                     this.ForbidDynamicTypingReason );
 
-            public ScopeContext RunTimeOnly( string reason )
-                => new(
-                    this.CurrentBreakOrContinueScope,
-                    this.IsRuntimeConditionalBlock,
-                    this.IsRuntimeConditionalBlockReason,
-                    TemplatingScope.RunTimeOnly,
-                    reason,
-                    this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason );
-
             public ScopeContext RunTimeOrCompileTime( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,

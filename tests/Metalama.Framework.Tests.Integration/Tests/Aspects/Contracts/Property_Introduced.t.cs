@@ -6,8 +6,7 @@ internal class Target
   {
     get
     {
-      global::System.String? returnValue;
-      returnValue = this._existingProperty;
+      var returnValue = this._existingProperty;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -28,8 +27,7 @@ internal class Target
   {
     get
     {
-      global::System.String? returnValue;
-      returnValue = this._introducedProperty;
+      var returnValue = this._introducedProperty;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();

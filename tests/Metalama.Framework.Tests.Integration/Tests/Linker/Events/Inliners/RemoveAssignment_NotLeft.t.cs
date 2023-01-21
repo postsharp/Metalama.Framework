@@ -1,5 +1,6 @@
 public class Target
 {
+  private event EventHandler? _foo;
   event EventHandler? Foo
   {
     add
@@ -9,9 +10,8 @@ public class Target
     {
       Console.WriteLine("Before");
       EventHandler? x = null;
-      x -= this.Foo_Source;
+      x -= this._foo;
       Console.WriteLine("After");
     }
   }
-  private event EventHandler? Foo_Source;
 }
