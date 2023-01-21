@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 IEventSymbol => DeclarationKind.Event,
                 ITypeSymbol => DeclarationKind.None,
                 IModuleSymbol => DeclarationKind.Compilation,
-                _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
+                _ => throw new ArgumentException( $"Unexpected symbol: {symbol.GetType().Name}.", nameof(symbol) )
             };
 
         /// <summary>

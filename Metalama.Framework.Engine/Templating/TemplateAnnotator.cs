@@ -2162,7 +2162,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             using ( this.WithScopeContext( labelContext ) )
             {
-                transformedLabels = section.Labels.SelectAsArray( l => this.Visit( l ) );
+                transformedLabels = section.Labels.SelectAsArray( this.Visit );
 
                 if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                 {

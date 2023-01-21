@@ -105,7 +105,7 @@ public sealed class LicenseVerifier : IProjectService
         }
     }
 
-    internal void VerifyCanValidator( AspectPredecessor predecessor )
+    internal void VerifyCanAddValidator( AspectPredecessor predecessor )
     {
         if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
