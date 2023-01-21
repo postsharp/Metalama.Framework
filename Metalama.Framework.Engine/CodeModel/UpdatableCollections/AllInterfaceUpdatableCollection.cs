@@ -13,7 +13,8 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
 {
     private readonly INamedTypeSymbol _declaringType;
 
-    public ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; private set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
+    // TODO: This property is written but never read.
+    private ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
 
     public AllInterfaceUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation )
     {

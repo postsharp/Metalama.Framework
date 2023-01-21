@@ -14,12 +14,9 @@ namespace Metalama.Framework.Engine.Advising
     internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
         private readonly IObjectReader _parameters;
-
-        public TemplateMember<IEvent>? EventTemplate { get; }
-
-        public TemplateMember<IMethod>? AddTemplate { get; }
-
-        public TemplateMember<IMethod>? RemoveTemplate { get; }
+        private readonly TemplateMember<IEvent>? _eventTemplate;
+        private readonly TemplateMember<IMethod>? _addTemplate;
+        private readonly TemplateMember<IMethod>? _removeTemplate;
 
         public OverrideEventAdvice(
             IAspectInstanceInternal aspect,
@@ -40,9 +37,9 @@ namespace Metalama.Framework.Engine.Advising
             Invariant.Assert( eventTemplate != null || addTemplate != null || removeTemplate != null );
             Invariant.Assert( !(eventTemplate != null && (addTemplate != null || removeTemplate != null)) );
 
-            this.EventTemplate = eventTemplate;
-            this.AddTemplate = addTemplate;
-            this.RemoveTemplate = removeTemplate;
+            this._eventTemplate = eventTemplate;
+            this._addTemplate = addTemplate;
+            this._removeTemplate = removeTemplate;
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideEvent;
@@ -57,9 +54,9 @@ namespace Metalama.Framework.Engine.Advising
                 new OverrideEventTransformation(
                     this,
                     this.TargetDeclaration.GetTarget( compilation ),
-                    this.EventTemplate,
-                    this.AddTemplate,
-                    this.RemoveTemplate,
+                    this._eventTemplate,
+                    this._addTemplate,
+                    this._removeTemplate,
                     this.Tags,
                     this._parameters ) );
 

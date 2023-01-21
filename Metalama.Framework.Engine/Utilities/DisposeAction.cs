@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Utilities
     {
         private readonly Action? _action;
 
-        public DisposeAction( Action action )
+        internal DisposeAction( Action action )
         {
             this._action = action;
         }

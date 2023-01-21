@@ -68,19 +68,19 @@ public sealed class CompilationContext
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
-    public CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
+    internal CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
         return SyntaxGenerationContext.Create( this, node );
     }
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxTree tree, int nodeSpanStart )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxTree tree, int nodeSpanStart )
     {
         return SyntaxGenerationContext.Create( this, tree, nodeSpanStart );
     }
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial = false )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial = false )
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }

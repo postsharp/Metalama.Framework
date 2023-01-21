@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// the responsibility can be put on the user. This exception type is typically not observed out of Metalama code,
     ///  and should be handled properly.
     /// </summary>
-    public sealed class DiagnosticException : Exception
+    internal sealed class DiagnosticException : Exception
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 

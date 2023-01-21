@@ -129,7 +129,7 @@ public sealed class LicenseVerifier : IProjectService
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
         };
 
-    public static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
         var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
 

@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Services;
 
+// ReSharper disable UnusedMember.Global
+
 namespace Metalama.Framework.DesignTime.Utilities
 {
     internal interface IFileSystemWatcherFactory : IProjectService

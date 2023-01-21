@@ -2,7 +2,7 @@
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
-    public enum DetailPaneContent
+    internal enum DetailPaneContent
     {
         ProgramOutput,
         CompiledTemplate,

@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Aspects
         internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) :
             this( aspect, declaration.ToTypedRef(), declaration.Depth, aspectClass, predecessor ) { }
 
-        internal AspectInstance(
+        private AspectInstance(
             IAspect aspect,
             in Ref<IDeclaration> declaration,
             int declarationDepth,

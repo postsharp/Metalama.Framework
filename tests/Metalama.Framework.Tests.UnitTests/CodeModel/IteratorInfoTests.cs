@@ -15,7 +15,7 @@ public sealed class IteratorInfoTests : UnitTestClass
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -36,7 +36,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -58,7 +58,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -79,7 +79,7 @@ async IAsyncEnumerable<int> Enumerable1() { yield return 1; }
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -101,7 +101,7 @@ async IAsyncEnumerator<int> Enumerable1() { yield return 1; }
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections;
 class C
 {
@@ -126,7 +126,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections;
 class C
 {
@@ -151,7 +151,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -176,7 +176,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -198,7 +198,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -219,7 +219,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -241,7 +241,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections;
 class C
 {
@@ -266,7 +266,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections;
 class C
 {

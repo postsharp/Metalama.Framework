@@ -94,9 +94,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
-        public IAdviceFactory Advise => this.AdviceFactory;
-
-        IAdviceFactory IAspectBuilder.Advice => this.Advise;
+        IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
         public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
 

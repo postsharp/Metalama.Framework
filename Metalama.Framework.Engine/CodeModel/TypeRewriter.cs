@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     internal abstract class TypeRewriter
     {
-        public static TypeRewriter Null { get; } = new NullRewriter();
+        protected static TypeRewriter Null { get; } = new NullRewriter();
 
         internal virtual ITypeInternal Visit( ArrayType arrayType ) => arrayType.WithElementType( this.Visit( arrayType.ElementType ) );
 

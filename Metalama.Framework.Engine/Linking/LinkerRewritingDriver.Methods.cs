@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
             MethodDeclarationSyntax methodDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -144,12 +144,12 @@ namespace Metalama.Framework.Engine.Linking
 
             var substitutedBody =
                 method.Body != null
-                    ? (BlockSyntax) this.RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    ? (BlockSyntax) RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
                     : null;
 
             var substitutedExpressionBody =
                 method.ExpressionBody != null
-                    ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                    ? (ArrowExpressionClauseSyntax) RewriteBody(
                         method.ExpressionBody,
                         symbol,
                         new SubstitutionContext( this, generationContext, context ) )

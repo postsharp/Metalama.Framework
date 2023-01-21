@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransformation
     {
-        public BoundTemplateMethod? GetTemplate { get; }
+        private BoundTemplateMethod? GetTemplate { get; }
 
-        public BoundTemplateMethod? SetTemplate { get; }
+        private BoundTemplateMethod? SetTemplate { get; }
 
         public OverrideIndexerTransformation(
             Advice advice,

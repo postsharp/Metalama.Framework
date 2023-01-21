@@ -23,7 +23,7 @@ internal static partial class SyntaxFactoryEx
             SyntaxKind.DefaultLiteralExpression,
             SyntaxFactory.Token( SyntaxKind.DefaultKeyword ) );
 
-    public static SyntaxToken LiteralImpl<T>( T value, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+    private static SyntaxToken LiteralImpl<T>( T value, ObjectDisplayOptions options = ObjectDisplayOptions.None )
         => LiteralFormatter<T>.Instance.Format( value, options );
 
     public static ExpressionSyntax LiteralExpression( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )

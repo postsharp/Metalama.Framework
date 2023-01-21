@@ -19,8 +19,6 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
 
     public IMember TargetMember { get; }
 
-    public IMemberOrNamedType ContextDeclaration => this.TargetMember;
-
     public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;

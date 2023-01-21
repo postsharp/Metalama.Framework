@@ -29,7 +29,7 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
         TransformerOptions? transformerOptions = null )
         => this.GetProjectOptions( options.GlobalOptions, plugIns, transformerOptions );
 
-    public MSBuildProjectOptions GetProjectOptions(
+    private MSBuildProjectOptions GetProjectOptions(
         AnalyzerConfigOptions options,
         ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )

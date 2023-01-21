@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
         private static readonly object _initializeSync = new();
         private static ILoggerFactory? _loggerFactory;
 
-        public static ILoggerFactory LoggerFactory => _loggerFactory ?? NullLogger.Instance;
+        internal static ILoggerFactory LoggerFactory => _loggerFactory ?? NullLogger.Instance;
 
         /// <summary>
         /// Initializes all loggers from the support services.
@@ -50,6 +50,6 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
 
         public static ILogger DesignTimeEntryPointManager { get; private set; } = NullLogger.Instance;
 
-        public static ILogger Domain { get; private set; } = NullLogger.Instance;
+        internal static ILogger Domain { get; private set; } = NullLogger.Instance;
     }
 }

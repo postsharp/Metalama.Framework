@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassifiedTextSpan"/> struct.
         /// </summary>
-        public ClassifiedTextSpan( TextSpan span, TextSpanClassification classification, ImmutableDictionary<string, string>? tags )
+        internal ClassifiedTextSpan( TextSpan span, TextSpanClassification classification, ImmutableDictionary<string, string>? tags )
         {
             this.Span = span;
             this.Classification = classification;

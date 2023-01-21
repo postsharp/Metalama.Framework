@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIndexerTransformation
     {
-        public new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
+        private new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
 
         protected OverrideIndexerBaseTransformation(
             Advice advice,

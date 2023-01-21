@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    internal partial class EndOfLineHelper
+    internal static partial class EndOfLineHelper
     {
         private sealed class TriviaRewriter : SafeSyntaxRewriter, IDisposable
         {

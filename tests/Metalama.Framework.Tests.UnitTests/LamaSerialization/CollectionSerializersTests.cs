@@ -8,6 +8,13 @@ using Xunit;
 
 // ReSharper disable StringLiteralTypo
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global 
+// ReSharper disable MemberCanBeProtected.Global
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable UnusedType.Global
+// Resharper disable MemberCanBePrivate.Global
+// Resharper disable ClassNeverInstantiated.Global
+// Resharper disable UnusedMember.Global
+// Resharper disable UnusedMember.Local
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {

@@ -13,7 +13,7 @@ public static class AppDomainUtility
     /// Gets an object that can be locked when user assembly is being awaited for being unloaded. It makes sure that all arbitrary references
     /// to the <see cref="Assembly"/> are shared only within the lifetime of this lock.
     /// </summary>
-    public static object Sync { get; } = new();
+    internal static object Sync { get; } = new();
 
     /// <summary>
     /// Gets a list of all loaded assemblies fulfilling a given predicate while holding a lock on <see cref="Sync"/>.
@@ -33,7 +33,7 @@ public static class AppDomainUtility
     /// Determines whether the current <see cref="AppDomain"/> contains an <see cref="Assembly"/> fulfilling a given predicate,
     /// while holding a lock on <see cref="Sync"/>.
     /// </summary>
-    public static bool HasAnyLoadedAssembly( Predicate<Assembly> predicate )
+    internal static bool HasAnyLoadedAssembly( Predicate<Assembly> predicate )
     {
         lock ( Sync )
         {

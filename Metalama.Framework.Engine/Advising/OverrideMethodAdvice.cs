@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
     {
-        public BoundTemplateMethod BoundTemplate { get; }
+        private readonly BoundTemplateMethod _boundTemplate;
 
         public OverrideMethodAdvice(
             IAspectInstanceInternal aspect,
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Advising
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this.BoundTemplate = boundTemplate;
+            this._boundTemplate = boundTemplate;
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideMethod;
@@ -41,19 +41,19 @@ namespace Metalama.Framework.Engine.Advising
             {
                 case MethodKind.Finalizer:
                     addTransformation(
-                        new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+                        new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
                     break;
 
                 case MethodKind.Operator:
                     addTransformation(
-                        new OverrideOperatorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+                        new OverrideOperatorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
                     break;
 
                 default:
                     addTransformation(
-                        new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+                        new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
                     break;
             }

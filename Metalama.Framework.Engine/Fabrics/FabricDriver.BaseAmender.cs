@@ -27,7 +27,7 @@ internal abstract partial class FabricDriver
         // The Target property is protected (and not exposed to the API) because
         private readonly FabricInstance _fabricInstance;
 
-        protected Ref<T> TargetDeclaration { get; }
+        private Ref<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
         private AspectReceiverSelector<T>? _declarationSelector;

@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Xunit;
 
+// ReSharper disable UnusedType.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable MemberCanBeInternal
+
 // ReSharper disable StringLiteralTypo
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global 
 

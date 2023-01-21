@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
@@ -44,6 +45,7 @@ namespace Metalama.Framework.Aspects
         /// <remarks>
         /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
         /// </remarks>
+        [PublicAPI]
         protected ContractDirection Direction { get; }
 
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )

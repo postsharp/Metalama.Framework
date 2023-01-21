@@ -14,13 +14,13 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
-public class PreviewPipelineBasedService
+public abstract class PreviewPipelineBasedService
 {
     private protected DesignTimeAspectPipelineFactory PipelineFactory { get; }
 
     private protected WorkspaceProvider WorkspaceProvider { get; }
 
-    public PreviewPipelineBasedService( GlobalServiceProvider serviceProvider )
+    protected PreviewPipelineBasedService( GlobalServiceProvider serviceProvider )
     {
         this.PipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this.WorkspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();

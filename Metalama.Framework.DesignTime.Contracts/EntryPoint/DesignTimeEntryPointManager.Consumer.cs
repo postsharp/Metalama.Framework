@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable InconsistentlySynchronizedField
+
 namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 
 public sealed partial class DesignTimeEntryPointManager

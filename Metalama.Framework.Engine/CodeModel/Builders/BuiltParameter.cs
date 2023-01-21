@@ -9,33 +9,33 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     {
+        private readonly IParameterBuilder _parameterBuilder;
+
         public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
-            this.ParameterBuilder = builder;
+            this._parameterBuilder = builder;
         }
 
-        public IParameterBuilder ParameterBuilder { get; }
+        public override DeclarationBuilder Builder => (DeclarationBuilder) this._parameterBuilder;
 
-        public override DeclarationBuilder Builder => (DeclarationBuilder) this.ParameterBuilder;
-
-        public RefKind RefKind => this.ParameterBuilder.RefKind;
+        public RefKind RefKind => this._parameterBuilder.RefKind;
 
         [Memo]
-        public IType Type => this.Compilation.Factory.GetIType( this.ParameterBuilder.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._parameterBuilder.Type );
 
-        public string Name => this.ParameterBuilder.Name;
+        public string Name => this._parameterBuilder.Name;
 
-        public int Index => this.ParameterBuilder.Index;
+        public int Index => this._parameterBuilder.Index;
 
-        public TypedConstant? DefaultValue => this.ParameterBuilder.DefaultValue;
+        public TypedConstant? DefaultValue => this._parameterBuilder.DefaultValue;
 
-        public bool IsParams => this.ParameterBuilder.IsParams;
+        public bool IsParams => this._parameterBuilder.IsParams;
 
         [Memo]
-        public IHasParameters DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
+        public IHasParameters DeclaringMember => this.Compilation.Factory.GetDeclaration( this._parameterBuilder.DeclaringMember );
 
-        public ParameterInfo ToParameterInfo() => this.ParameterBuilder.ToParameterInfo();
+        public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 
-        public bool IsReturnParameter => this.ParameterBuilder.IsReturnParameter;
+        public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
     }
 }

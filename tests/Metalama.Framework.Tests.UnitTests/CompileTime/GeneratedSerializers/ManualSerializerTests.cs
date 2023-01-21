@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void CustomBaseSerializer()
         {
             // Verifies that custom serializer defined in the base type is correctly consumed by the generated serializer in the derived type.
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;

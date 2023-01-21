@@ -38,9 +38,14 @@
         <MetalamaLicense>1-ZEQQQQQQ5TQEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEJX22BA3Y5MW5DV9YNZYXT2ZKHLK8KSFWEZQZ94MN5XRJKJL89XDF4ETFCGR5BN5KKZQQDTFJJPA</MetalamaLicense>
     </PropertyGroup>
     
-    <!-- Validate async code -->
+    
     <ItemGroup>
+        <!-- Validate async code -->
         <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all" />
+
+        <!-- Resharper annotations -->
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
+     
     </ItemGroup>
     
 

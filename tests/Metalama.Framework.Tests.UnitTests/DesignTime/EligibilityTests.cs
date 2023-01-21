@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [InlineData( "Event", "DeclarationAspect" )]
         public void IsEligibleFromType( string target, string aspects )
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Code;
 using Metalama.Framework.Aspects;
@@ -105,7 +105,7 @@ namespace Ns { class C {} }
         [Fact]
         public void NotEligibleWhenSameAspectPresent()
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Code;
 using Metalama.Framework.Aspects;
@@ -124,7 +124,7 @@ class ClassWithAspect {}
         [Fact]
         public void NotEligibleWhenInaccessible()
         {
-            var code = @"
+            const string code = @"
 interface Interface {}
 ";
 
@@ -137,7 +137,7 @@ interface Interface {}
         [InlineData( "ClassWithoutAspect", "MyTypeAspect" )]
         public void MustHaveAspectOfType( string target, string aspects )
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Code;
 using Metalama.Framework.Aspects;
@@ -161,7 +161,7 @@ class ClassWithoutAspect {}
         [InlineData( "ClassWithoutAspect", "ForbiddingMyTypeAspect,MyTypeAspect" )]
         public void MustNotHaveAspectOfType( string target, string aspects )
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Code;
 using Metalama.Framework.Aspects;
@@ -197,7 +197,7 @@ class ClassWithoutAspect {}
         {
             var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
   void Method( int intParameter, string stringParameter ) {}
@@ -217,7 +217,7 @@ class C
         {
             var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
   void Method( int intParameter, string stringParameter ) {}
@@ -236,7 +236,7 @@ class C
         {
             var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
   void Method( int intParameter, string stringParameter ) {}

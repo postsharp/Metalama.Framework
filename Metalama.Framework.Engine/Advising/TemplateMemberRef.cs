@@ -14,21 +14,21 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal readonly struct TemplateMemberRef
     {
-        public TemplateClassMember TemplateMember { get; }
+        private readonly TemplateClassMember _templateMember;
 
-        public TemplateKind SelectedKind { get; }
+        private readonly TemplateKind _selectedKind;
 
-        public TemplateKind InterpretedKind { get; }
+        private readonly TemplateKind _interpretedKind;
 
-        public bool IsNull => this.SelectedKind == TemplateKind.None;
+        private bool IsNull => this._selectedKind == TemplateKind.None;
 
         public TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind ) : this( template, selectedKind, selectedKind ) { }
 
         private TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
-            this.TemplateMember = template;
-            this.SelectedKind = selectedKind;
-            this.InterpretedKind = interpretedKind;
+            this._templateMember = template;
+            this._selectedKind = selectedKind;
+            this._interpretedKind = interpretedKind;
         }
 
         public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, ProjectServiceProvider serviceProvider )
@@ -41,8 +41,8 @@ namespace Metalama.Framework.Engine.Advising
 
             var classifier = compilation.CompilationContext.SymbolClassifier;
 
-            var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.TemplateClass.FullName );
-            var symbol = type.GetMembers( this.TemplateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );
+            var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
+            var symbol = type.GetMembers( this._templateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );
 
             var declaration = compilation.Factory.GetDeclaration( symbol );
 
@@ -55,16 +55,16 @@ namespace Metalama.Framework.Engine.Advising
             // Create the attribute instance.
             IAdviceAttribute? attribute;
 
-            if ( this.TemplateMember.TemplateInfo.Attribute != null )
+            if ( this._templateMember.TemplateInfo.Attribute != null )
             {
                 // If we have a system attribute, return it.
 
-                attribute = this.TemplateMember.TemplateInfo.Attribute;
+                attribute = this._templateMember.TemplateInfo.Attribute;
             }
             else
             {
                 if ( !serviceProvider.GetRequiredService<TemplateAttributeFactory>()
-                        .TryGetTemplateAttribute( this.TemplateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out attribute ) )
+                        .TryGetTemplateAttribute( this._templateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out attribute ) )
                 {
                     throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
                 }
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( attribute is ITemplateAttribute templateAttribute )
             {
-                return TemplateMemberFactory.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
+                return TemplateMemberFactory.Create( typedSymbol, this._templateMember, templateAttribute, this._selectedKind, this._interpretedKind );
             }
             else
             {
@@ -80,8 +80,8 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );
+        public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this._templateMember, this._selectedKind, interpretedKind );
 
-        public override string ToString() => this.IsNull ? "null" : $"{this.TemplateMember.Name}:{this.SelectedKind}";
+        public override string ToString() => this.IsNull ? "null" : $"{this._templateMember.Name}:{this._selectedKind}";
     }
 }

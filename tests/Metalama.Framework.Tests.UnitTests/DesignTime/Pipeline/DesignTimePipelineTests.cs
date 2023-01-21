@@ -180,7 +180,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         var dumpedResults = DumpResults( results! );
         this.TestOutput.WriteLine( dumpedResults );
 
-        var expectedResult = @"
+        const string expectedResult = @"
 F1.cs:
 0 diagnostic(s):
 0 suppression(s):
@@ -203,7 +203,7 @@ F1.cs:
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using Metalama.Framework.Aspects;
 public class Aspect : OverrideMethodAspect 
 { 
@@ -235,7 +235,7 @@ public class Aspect : OverrideMethodAspect
     {
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
-        var aspectCode = @"
+        const string aspectCode = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -253,7 +253,7 @@ aspectBuilder.Diagnostics.Report( _description.WithArguments( this.Version ) );
 }
 ";
 
-        var targetCode = @"
+        const string targetCode = @"
 class C
 {
    [MyAspect(Version=$version$)]
@@ -261,7 +261,7 @@ class C
 }
 ";
 
-        var expectedResult = @"
+        const string expectedResult = @"
 Aspect.cs:
 0 diagnostic(s):
 0 suppression(s):
@@ -404,7 +404,7 @@ Target.cs:
         var aspectAssemblyName = "aspect_" + RandomIdGenerator.GenerateId();
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
 
-        var aspectCode = @"
+        const string aspectCode = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -422,7 +422,7 @@ public class MyAspect : MethodAspect
 }
 ";
 
-        var targetCode = @"
+        const string targetCode = @"
 class C
 {
    [MyAspect(Version=$version$)]
@@ -430,7 +430,7 @@ class C
 }
 ";
 
-        var expectedResult = @"
+        const string expectedResult = @"
 Target.cs:
 1 diagnostic(s):
    Warning MY001 on `M`: `AspectVersion=$AspectVersion$,TargetVersion=$TargetVersion$`
@@ -516,7 +516,7 @@ Target.cs:
     {
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
-        var aspectCode = @"
+        const string aspectCode = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -529,7 +529,7 @@ class MyAspect : TypeAspect
 }
 ";
 
-        var expectedResult = @"
+        const string expectedResult = @"
 Aspect.cs:
 0 diagnostic(s):
 0 suppression(s):
@@ -704,7 +704,7 @@ class C : BaseClass
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
-        var code1 = @"
+        const string code1 = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -720,7 +720,7 @@ class MyAspect : TypeAspect
         var result1 = await factory.ExecuteAsync( compilation1, AsyncExecutionContext.Get() );
         Assert.False( result1.IsSuccessful );
 
-        var code2 = @"
+        const string code2 = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

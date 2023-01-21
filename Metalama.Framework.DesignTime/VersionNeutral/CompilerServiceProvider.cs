@@ -12,7 +12,7 @@ public class CompilerServiceProvider : ICompilerServiceProvider
     private readonly ConcurrentDictionary<string, ICompilerService?> _services = new( StringComparer.Ordinal );
     private GlobalServiceProvider? _serviceProvider;
 
-    public CompilerServiceProvider( ContractVersion[]? contractVersions = null, Version? version = null )
+    protected internal CompilerServiceProvider( ContractVersion[]? contractVersions = null, Version? version = null )
     {
         this.ContractVersions = contractVersions ?? CurrentContractVersions.All;
         this.Version = version ?? this.GetType().Assembly.GetName().Version!;
@@ -22,7 +22,7 @@ public class CompilerServiceProvider : ICompilerServiceProvider
 
     public ContractVersion[] ContractVersions { get; }
 
-    public GlobalServiceProvider ServiceProvider => this._serviceProvider ?? throw new InvalidOperationException();
+    protected GlobalServiceProvider ServiceProvider => this._serviceProvider ?? throw new InvalidOperationException();
 
     internal void Initialize( GlobalServiceProvider serviceProvider )
     {

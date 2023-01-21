@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Workspaces;
 
-public sealed class DotNetSdkLoadException : Exception
+internal sealed class DotNetSdkLoadException : Exception
 {
     public DotNetSdkLoadException( string message, Exception inner ) : base( message, inner ) { }
 }

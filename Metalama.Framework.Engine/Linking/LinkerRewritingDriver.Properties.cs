@@ -359,7 +359,7 @@ namespace Metalama.Framework.Engine.Linking
                                             {
                                                 SyntaxKind.GetAccessorDeclaration => symbol.GetMethod.AssertNotNull(),
                                                 SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => symbol.SetMethod.AssertNotNull(),
-                                                _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" ),
+                                                _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
                                             } ) ) ) )
                         .WithSourceCodeAnnotation();
 
@@ -386,7 +386,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var substitutedBody =
                     accessorDeclaration.Body != null
-                        ? (BlockSyntax) this.RewriteBody(
+                        ? (BlockSyntax) RewriteBody(
                             accessorDeclaration.Body,
                             accessorSymbol,
                             new SubstitutionContext( this, generationContext, context ) )
@@ -394,7 +394,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var substitutedExpressionBody =
                     accessorDeclaration.ExpressionBody != null
-                        ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                        ? (ArrowExpressionClauseSyntax) RewriteBody(
                             accessorDeclaration.ExpressionBody,
                             accessorSymbol,
                             new SubstitutionContext( this, generationContext, context ) )
@@ -412,7 +412,7 @@ namespace Metalama.Framework.Engine.Linking
                 var context = new InliningContextIdentifier( semantic );
 
                 var substitutedExpressionBody =
-                    (ArrowExpressionClauseSyntax) this.RewriteBody(
+                    (ArrowExpressionClauseSyntax) RewriteBody(
                         expressionBody,
                         accessorSymbol,
                         new SubstitutionContext( this, generationContext, context ) );

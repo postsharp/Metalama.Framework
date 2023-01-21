@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// <summary>
 /// A cache based on <see cref="ConditionalWeakTable{TKey,TValue}"/>, which holds a weak reference to the key.
 /// </summary>
-public sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
+internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
     where TKey : class
 {
     private readonly ConditionalWeakTable<TKey, StrongBox<TValue>> _cache = new();

@@ -45,7 +45,7 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
     [Fact]
     public async Task CSharpErrorIsNotReported()
     {
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 
 class TheAspect : TypeAspect
@@ -64,7 +64,7 @@ class TheAspect : TypeAspect
     [Fact]
     public async Task CompileTimeMetalamaDiagnosticsAreReported()
     {
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 
 class TheAspect : OverrideMethodAspect 

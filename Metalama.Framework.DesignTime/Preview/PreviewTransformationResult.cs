@@ -16,7 +16,7 @@ public sealed class PreviewTransformationResult : IPreviewTransformationResult
 
     public string[]? ErrorMessages { get; set; }
 
-    public PreviewTransformationResult( bool isSuccessful, SyntaxTree? transformedSyntaxTree, string[]? errorMessages )
+    private PreviewTransformationResult( bool isSuccessful, SyntaxTree? transformedSyntaxTree, string[]? errorMessages )
     {
         this.IsSuccessful = isSuccessful;
 

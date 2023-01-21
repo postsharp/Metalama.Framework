@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using K4os.Hash.xxHash;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -7,6 +8,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities
 {
+    [PublicAPI]
     public static class HashUtilities
     {
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16", CultureInfo.InvariantCulture );

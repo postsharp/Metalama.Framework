@@ -24,7 +24,7 @@ internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     private CompilationModel Compilation { get; }
 
-    public IntrospectionFactory Factory { get; }
+    private IntrospectionFactory Factory { get; }
 
     public IntrospectionAspectInstance( IAspectInstance aspectInstance, CompilationModel compilation, IntrospectionFactory factory )
     {

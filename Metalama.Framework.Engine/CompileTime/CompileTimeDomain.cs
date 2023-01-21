@@ -13,6 +13,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
+// Resharper disable ClassWithVirtualMembersNeverInherited.Global
+
 namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
@@ -70,13 +72,13 @@ namespace Metalama.Framework.Engine.CompileTime
             return null;
         }
 
-        // ReSharper disable once VirtualMemberNeverOverridden.Global
+        // ReSharper disable once VirtualMemberNeverOverridden.Global, 
 
         /// <summary>
         /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
         /// but it can be overwritten for .NET Core.
         /// </summary>
-        public virtual Assembly LoadAssembly( string path )
+        internal virtual Assembly LoadAssembly( string path )
         {
             try
             {

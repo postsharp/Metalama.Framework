@@ -23,13 +23,13 @@ namespace Metalama.Framework.Engine.Linking
         public const string HelperTypeName = "__LinkerInjectionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
         public const string PropertyMemberName = "__Property";
-        public const string EventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__"; 
-        public const string EmptyCodeTypeName = "__Empty";
-        public const string SourceCodeTypeName = "__Source";
-        public const string OverridenByTypeName = "__OverriddenBy";
-        public const string OrdinalTypeName = "__Ordinal";
-        public const string CompositeOrdinalTypeName = "__CompositeOrdinal";
-        public const string SyntaxTreeName = "__LinkerInjectionHelpers__.cs";
+        private const string _eventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__";
+        private const string _emptyCodeTypeName = "__Empty";
+        private const string _sourceCodeTypeName = "__Source";
+        private const string _overridenByTypeName = "__OverriddenBy";
+        private const string _ordinalTypeName = "__Ordinal";
+        private const string _compositeOrdinalTypeName = "__CompositeOrdinal";
+        private const string _syntaxTreeName = "__LinkerInjectionHelpers__.cs";
 
         private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
             this._useNullability = useNullability;
         }
 
-        public ExpressionSyntax GetFinalizeMemberExpression()
+        public static ExpressionSyntax GetFinalizeMemberExpression()
         {
             return
                 MemberAccessExpression(
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( FinalizeMemberName ) );
         }
 
-        public ExpressionSyntax GetPropertyMemberExpression()
+        public static ExpressionSyntax GetPropertyMemberExpression()
         {
             return
                 MemberAccessExpression(
@@ -61,16 +61,16 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( PropertyMemberName ) );
         }
 
-        public ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression()
+        public static ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression()
         {
             return
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName( HelperTypeName ),
-                    IdentifierName( EventFieldInitializationExpressionMemberName ) );
+                    IdentifierName( _eventFieldInitializationExpressionMemberName ) );
         }
 
-        public ExpressionSyntax GetOperatorMemberExpression(
+        public static ExpressionSyntax GetOperatorMemberExpression(
             OurSyntaxGenerator syntaxGenerator,
             OperatorKind operatorKind,
             IType returnType,
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Linking
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( OverridenByTypeName ),
+                                Identifier( _overridenByTypeName ),
                                 TypeArgumentList( SingletonSeparatedList( aspectTypeSyntax ) ) ) );
 
                 case < 10:
@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( OverridenByTypeName ),
+                                Identifier( _overridenByTypeName ),
                                 TypeArgumentList(
                                     SeparatedList(
                                         new[]
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Linking
                                             aspectTypeSyntax,
                                             QualifiedName(
                                                 IdentifierName( HelperTypeName ),
-                                                IdentifierName( OrdinalTypeName + ordinal ) )
+                                                IdentifierName( _ordinalTypeName + ordinal ) )
                                         } ) ) ) );
 
                 case < 100:
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Linking
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( OverridenByTypeName ),
+                                Identifier( _overridenByTypeName ),
                                 TypeArgumentList(
                                     SeparatedList(
                                         new[]
@@ -132,17 +132,17 @@ namespace Metalama.Framework.Engine.Linking
                                             QualifiedName(
                                                 IdentifierName( HelperTypeName ),
                                                 GenericName(
-                                                    Identifier( CompositeOrdinalTypeName ),
+                                                    Identifier( _compositeOrdinalTypeName ),
                                                     TypeArgumentList(
                                                         SeparatedList<TypeSyntax>(
                                                             new[]
                                                             {
                                                                 QualifiedName(
                                                                     IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( OrdinalTypeName + (ordinal / 10) ) ),
+                                                                    IdentifierName( _ordinalTypeName + (ordinal / 10) ) ),
                                                                 QualifiedName(
                                                                     IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( OrdinalTypeName + (ordinal % 10) ) )
+                                                                    IdentifierName( _ordinalTypeName + (ordinal % 10) ) )
                                                             } ) ) ) )
                                         } ) ) ) );
 
@@ -184,27 +184,27 @@ internal class {HelperTypeName}
 {{
     public static void {FinalizeMemberName}() {{}}
     public static ref T {PropertyMemberName}<T>(T value) => ref Dummy<T>.Field;
-    public static void {EventFieldInitializationExpressionMemberName}<T>(T value) where T : delegate {{}}
+    public static void {_eventFieldInitializationExpressionMemberName}<T>(T value) where T : delegate {{}}
     {string.Join( "\n    ", binaryOperators )}
     {string.Join( "\n    ", unaryOperators )}
     {string.Join( "\n    ", conversionOperators )}
 
-    public readonly struct {EmptyCodeTypeName} {{}}
-    public readonly struct {SourceCodeTypeName} {{}}
-    public readonly struct {OverridenByTypeName}<TAspect> {{}}
-    public readonly struct {OverridenByTypeName}<TAspect, TOrdinal> {{}}
+    public readonly struct {_emptyCodeTypeName} {{}}
+    public readonly struct {_sourceCodeTypeName} {{}}
+    public readonly struct {_overridenByTypeName}<TAspect> {{}}
+    public readonly struct {_overridenByTypeName}<TAspect, TOrdinal> {{}}
 
-    public readonly struct {OrdinalTypeName}0 {{}}
-    public readonly struct {OrdinalTypeName}1 {{}}
-    public readonly struct {OrdinalTypeName}2 {{}}
-    public readonly struct {OrdinalTypeName}3 {{}}
-    public readonly struct {OrdinalTypeName}4 {{}}
-    public readonly struct {OrdinalTypeName}5 {{}}
-    public readonly struct {OrdinalTypeName}6 {{}}
-    public readonly struct {OrdinalTypeName}7 {{}}
-    public readonly struct {OrdinalTypeName}8 {{}}
-    public readonly struct {OrdinalTypeName}9 {{}}
-    public readonly struct {CompositeOrdinalTypeName}<T1, T2> {{}}
+    public readonly struct {_ordinalTypeName}0 {{}}
+    public readonly struct {_ordinalTypeName}1 {{}}
+    public readonly struct {_ordinalTypeName}2 {{}}
+    public readonly struct {_ordinalTypeName}3 {{}}
+    public readonly struct {_ordinalTypeName}4 {{}}
+    public readonly struct {_ordinalTypeName}5 {{}}
+    public readonly struct {_ordinalTypeName}6 {{}}
+    public readonly struct {_ordinalTypeName}7 {{}}
+    public readonly struct {_ordinalTypeName}8 {{}}
+    public readonly struct {_ordinalTypeName}9 {{}}
+    public readonly struct {_compositeOrdinalTypeName}<T1, T2> {{}}
 
     public class Dummy<T>
     {{
@@ -215,7 +215,7 @@ internal class {HelperTypeName}
 
             return CSharpSyntaxTree.ParseText(
                 code,
-                path: SyntaxTreeName,
+                path: _syntaxTreeName,
                 encoding: Encoding.UTF8,
                 options: options.ToParseOptions() );
         }

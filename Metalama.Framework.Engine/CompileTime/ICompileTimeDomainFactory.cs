@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// Gets an instance of <see cref="CompileTimeDomain"/>.
     /// </summary>
-    public interface ICompileTimeDomainFactory : IGlobalService
+    internal interface ICompileTimeDomainFactory : IGlobalService
     {
         /// <summary>
         /// Gets an instance of <see cref="CompileTimeDomain"/>. 

@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IIndexerInvoker> Invokers
+        private IInvokerFactory<IIndexerInvoker> Invokers
             => new InvokerFactory<IIndexerInvoker>(
                 ( order, _ ) => new IndexerInvoker( this, order ),
                 this.HasBaseInvoker );
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
-        public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IIndexer>();
+        public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations { get; } = Array.Empty<IIndexer>();
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
@@ -155,8 +155,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
         public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
-
-        public void SetExplicitInterfaceImplementation( Indexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = new[] { interfaceIndexer };
 
         public override void Freeze()
         {

@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Contracts.CodeLens;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public sealed class CodeLensDetailsHeader : ICodeLensDetailsHeader
+internal sealed class CodeLensDetailsHeader : ICodeLensDetailsHeader
 {
     public CodeLensDetailsHeader( string displayName, string uniqueName, bool isVisible = true, double width = 0 )
     {

@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Transformations
             };
         }
 
-        public IObjectReader Tags { get; }
+        private IObjectReader Tags { get; }
 
         public override IDeclaration TargetDeclaration => this.TargetMember;
 

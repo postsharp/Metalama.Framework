@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteOperator(
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteOperator(
             OperatorDeclarationSyntax operatorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -106,12 +106,12 @@ namespace Metalama.Framework.Engine.Linking
 
             var substitutedBody =
                 @operator.Body != null
-                    ? (BlockSyntax) this.RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    ? (BlockSyntax) RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
                     : null;
 
             var substitutedExpressionBody =
                 @operator.ExpressionBody != null
-                    ? (ArrowExpressionClauseSyntax) this.RewriteBody(
+                    ? (ArrowExpressionClauseSyntax) RewriteBody(
                         @operator.ExpressionBody,
                         symbol,
                         new SubstitutionContext( this, generationContext, context ) )

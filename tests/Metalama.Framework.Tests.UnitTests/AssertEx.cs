@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public static class AssertEx
+    internal static class AssertEx
     {
         public static void DynamicEquals( object expression, string expected )
         {

@@ -9,11 +9,11 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
 {
+    private readonly ImmutableDictionary<ProjectKey, DesignTimeProjectReference> _references;
+
     public DesignTimeAspectPipelineStatus PipelineStatus { get; }
 
     public IProjectVersion ProjectVersion { get; }
-
-    public ImmutableDictionary<ProjectKey, DesignTimeProjectReference> References { get; }
 
     public DesignTimeProjectVersion(
         IProjectVersion projectVersion,
@@ -22,12 +22,12 @@ internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvid
     {
         this.ProjectVersion = projectVersion;
         this.PipelineStatus = pipelineStatus;
-        this.References = references.ToImmutableDictionary( x => x.ProjectKey, x => x );
+        this._references = references.ToImmutableDictionary( x => x.ProjectKey, x => x );
     }
 
     public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation )
     {
-        if ( this.References.TryGetValue( compilation.GetProjectKey(), out var reference ) )
+        if ( this._references.TryGetValue( compilation.GetProjectKey(), out var reference ) )
         {
             return reference.TransitiveAspectsManifest;
         }

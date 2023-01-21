@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class TypeSerializationHelper
+    internal static class TypeSerializationHelper
     {
         public static ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, SyntaxSerializationContext serializationContext )
         {

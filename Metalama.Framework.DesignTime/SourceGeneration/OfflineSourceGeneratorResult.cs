@@ -13,7 +13,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration;
 /// An implementation of <see cref="SourceGeneratorResult"/> that is backed by a set of
 /// files on the filesystem, generated at compile-time when the design-time pipeline is disabled.
 /// </summary>
-public sealed class OfflineSourceGeneratorResult : SourceGeneratorResult
+internal sealed class OfflineSourceGeneratorResult : SourceGeneratorResult
 {
     public ImmutableArray<AdditionalCompilationOutputFile> OfflineFiles { get; }
 
@@ -39,7 +39,7 @@ public sealed class OfflineSourceGeneratorResult : SourceGeneratorResult
         return hash;
     }
 
-    public override void ProduceContent( SourceProductionContext context )
+    internal override void ProduceContent( SourceProductionContext context )
     {
         foreach ( var file in this.OfflineFiles )
         {

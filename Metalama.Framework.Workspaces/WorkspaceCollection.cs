@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -18,6 +19,7 @@ namespace Metalama.Framework.Workspaces
     /// Represents a set of workspaces. Two attempts to load a workspace with the same parameters, in the same <see cref="WorkspaceCollection"/>,
     /// will return the exact same instance, unless the <see cref="Reset"/> method is called.
     /// </summary>
+    [PublicAPI]
     public sealed class WorkspaceCollection
     {
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();

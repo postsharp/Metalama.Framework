@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -140,6 +141,7 @@ namespace Metalama.Framework.Engine.Templating
 
         protected ExpressionSyntax Transform( SyntaxKind kind ) => this.MetaSyntaxFactory.Kind( kind );
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform<T>( SeparatedSyntaxList<T> list )
             where T : SyntaxNode
         {
@@ -156,6 +158,7 @@ namespace Metalama.Framework.Engine.Templating
             return this.MetaSyntaxFactory.SeparatedList<T>( list.SelectAsEnumerable( this.Transform ) );
         }
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform( BracketedArgumentListSyntax? list )
         {
             if ( list == null )
@@ -166,12 +169,15 @@ namespace Metalama.Framework.Engine.Templating
             return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
         }
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform( ArgumentListSyntax? list )
             => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform( ParameterListSyntax? list )
             => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform( SyntaxTokenList list )
         {
             if ( list.Count == 0 )
@@ -268,6 +274,7 @@ namespace Metalama.Framework.Engine.Templating
 #pragma warning disable CA1822 // Mark members as static
 
         // Not static for uniformity with other methods.
+        [UsedImplicitly]
         protected ExpressionSyntax Transform( bool value )
         {
             return value

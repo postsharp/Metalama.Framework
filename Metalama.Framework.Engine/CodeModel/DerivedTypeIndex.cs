@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private bool IsContainedInCurrentCompilation( INamedTypeSymbol type )
             => SymbolEqualityComparer.Default.Equals( this._compilation.Assembly, type.ContainingAssembly );
 
-        public IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
+        internal IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
         {
             return options switch
             {
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
             => this._relationships[baseType]
-                .SelectManyRecursive( t => this._relationships[t], throwOnDuplicate: false )
+                .SelectManyRecursiveInternal( t => this._relationships[t], throwOnDuplicate: false )
                 .Where( this.IsContainedInCurrentCompilation );
 
         private IEnumerable<INamedTypeSymbol> GetDirectlyDerivedTypesCore( INamedTypeSymbol baseType )

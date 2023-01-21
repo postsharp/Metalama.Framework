@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Formatting
                     List<string> classes = new();
                     List<string> titles = new();
 
-                    var isLeadingTrivia = false; // string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
+                    const bool isLeadingTrivia = false; // string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
 
                     if ( !isLeadingTrivia )
                     {

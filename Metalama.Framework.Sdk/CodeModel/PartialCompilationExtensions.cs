@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Extension methods for the <see cref="IPartialCompilation"/> interface.
     /// </summary>
-    public static class PartialCompilationExtensions
+    internal static class PartialCompilationExtensions
     {
         /// <summary>
         /// Updates the syntax trees of a given <see cref="IPartialCompilation"/> by providing a function that maps

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void ReferenceType()
         {
             // Verifies that a reference-type property is deserialized in DeserializeFields method even if it was readonly.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -57,7 +57,7 @@ public class A : ICompileTimeSerializable
         public void PrimitiveValueType()
         {
             // Verifies that a primitive value-type property is deserialized in constructor.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -102,7 +102,7 @@ public class A : ICompileTimeSerializable
         public void ValueTypeWithoutReference()
         {
             // Verifies that a value-type property is deserialized in constructor.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -155,7 +155,7 @@ public struct S : ICompileTimeSerializable
         public void ValueTypeContainingReference()
         {
             // Verifies that a value-type property containing a reference is deserialized in DeserializeFields method even if it was readonly.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -209,7 +209,7 @@ public struct S : ICompileTimeSerializable
         public void ValueTypeIndirectlyContainingReference()
         {
             // Verifies that a value-type property indirectly containing a reference is deserialized in DeserializeFields method even if it was readonly.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -280,7 +280,7 @@ public struct U : ICompileTimeSerializable
         public void ValueTypeContainingNonSerializedReference()
         {
             // Verifies that a value-type property containing a non-serialized reference is deserialized in constructor even if it was readonly.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]

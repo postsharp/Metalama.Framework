@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public event Action? Unloaded;
 
-        public override Assembly LoadAssembly( string path )
+        internal override Assembly LoadAssembly( string path )
         {
             // When using LoadFromAssemblyPath, the file is locked and the lock is not disposed when the AssemblyLoadContext is unloaded.
             // Therefore, we're loading from bytes.

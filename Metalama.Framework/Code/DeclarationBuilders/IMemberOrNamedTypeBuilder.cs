@@ -26,5 +26,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Gets or sets a value indicating whether the member is <c>sealed</c>.
         /// </summary>
         new bool IsSealed { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the member is <c>abstract</c>.
+        /// </summary>
+        new bool IsAbstract { get; set; }
     }
 }

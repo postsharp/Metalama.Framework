@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Metalama.Framework.Engine;
 
-internal class ModuleInitializer
+internal static class ModuleInitializer
 {
     static ModuleInitializer()
     {

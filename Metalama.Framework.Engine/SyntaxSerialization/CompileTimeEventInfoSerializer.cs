@@ -38,6 +38,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
+        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
     }
 }

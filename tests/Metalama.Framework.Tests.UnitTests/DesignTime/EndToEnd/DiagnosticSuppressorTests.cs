@@ -40,7 +40,7 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
     [Fact]
     public async Task SuppressVariableLevelWarning()
     {
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
     [Fact]
     public async Task SuppressFieldLevelWarning()
     {
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;

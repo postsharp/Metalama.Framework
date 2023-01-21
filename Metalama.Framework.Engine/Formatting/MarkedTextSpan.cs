@@ -7,9 +7,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public readonly struct MarkedTextSpan
+    internal readonly struct MarkedTextSpan
     {
-        public TextSpan Span { get; }
+        internal TextSpan Span { get; }
 
         public TextSpanClassification Classification { get; }
 

@@ -23,9 +23,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameterBuilder IReadOnlyList<IParameterBuilder>.this[ int index ] => this[index];
 
-        // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
-        public IList<BaseParameterBuilder> AsBuilderList => this;
-
         public IParameterBuilder this[ string name ] => this.Single<IParameterBuilder>( p => p.Name == name );
 
         int IReadOnlyCollection<IParameter>.Count => this.Count;

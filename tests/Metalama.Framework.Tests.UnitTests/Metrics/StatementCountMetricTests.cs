@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.Metrics
             var services = new AdditionalServiceCollection( new ForStatementNumberMetricProvider() );
             using var testContext = this.CreateTestContext( services );
 
-            var code = @"
+            const string code = @"
 class C
 {
   void M1()  { int k = 0; for ( int i = 0; i < 5; i++ ) {  k++; if ( k == 5 ) { k = 0; } for ( int j = 0; j < i; j++ ) { k++; }  } }

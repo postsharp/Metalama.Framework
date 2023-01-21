@@ -18,7 +18,7 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
 {
     public IMemberOrNamedType TargetMember { get; }
 
-    public Accessibility Accessibility { get; }
+    private Accessibility Accessibility { get; }
 
     public ChangeVisibilityCodeAction( IMemberOrNamedType targetMember, Accessibility accessibility )
     {

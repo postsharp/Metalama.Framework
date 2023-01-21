@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// <summary>
     /// Exposes the <see cref="SyntaxAnnotation"/>s used by Metalama.
     /// </summary>
-    public static class FormattingAnnotations
+    internal static class FormattingAnnotations
     {
         /// <summary>
         /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,

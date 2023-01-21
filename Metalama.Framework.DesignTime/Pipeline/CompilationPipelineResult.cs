@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
-        public bool IsEmpty
+        private bool IsEmpty
             => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.Validators.IsEmpty && this._inheritableAspects.IsEmpty;
 
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;

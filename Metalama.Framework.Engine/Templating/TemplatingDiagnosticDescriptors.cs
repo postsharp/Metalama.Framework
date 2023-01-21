@@ -18,15 +18,6 @@ namespace Metalama.Framework.Engine.Templating
 
         private const string _category = "Metalama.Template";
 
-        internal static readonly DiagnosticDefinition<(string Expression, string ParentExpression)>
-            CannotReferenceRuntimeExpressionFromBuildTimeExpression
-                = new(
-                    "LAMA0100",
-                    "Cannot reference a run-time expression from a compile-time expression",
-                    "Cannot reference the run-time expression {0} because the parent expression {1} is compile-time",
-                    _category,
-                    Error );
-
         public static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
             = new(
                 "LAMA0101",
@@ -58,14 +49,6 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0106",
                 "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
                 "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<(string Expression, ITypeSymbol ExpressionType)> CannotConvertBuildTime
-            = new(
-                "LAMA0107",
-                "Cannot convert an expression into compile-time code because the expression is of an unsupported type",
-                "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 Error );
 
@@ -204,15 +187,6 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<string>
-            CallToExpressionMustHaveExplicitCast
-                = new(
-                    "LAMA0225",
-                    "Calls to meta.Expression must be explicitly cast to IExpression.",
-                    "The call to '{0}' must be explicitly cast to IExpression.",
-                    _category,
-                    Error );
-
         internal static readonly DiagnosticDefinition<(ISymbol Symbol, ISymbol RunTimeSymbol, ISymbol CompileTimeSymbol)> TemplatingScopeConflict
             = new(
                 "LAMA0226",
@@ -309,15 +283,6 @@ namespace Metalama.Framework.Engine.Templating
                     "LAMA0238",
                     "Only templates of [Template] kind can have a dynamic type or signature.",
                     "'{0}' cannot be of 'dynamic' type because the type '{1}' is {2} and '{0}' is not a template.",
-                    _category,
-                    Error );
-
-        internal static readonly DiagnosticDefinition<ISymbol>
-            InvalidScope
-                = new(
-                    "LAMA0239",
-                    "Arrays or generic types of 'dynamic' are forbidden.",
-                    "The type or signature of '{0}' is invalid: arrays or generic types of 'dynamic' are forbidden.",
                     _category,
                     Error );
 

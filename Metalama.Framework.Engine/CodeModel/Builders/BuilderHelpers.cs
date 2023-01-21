@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
-using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -52,6 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
+        /*
         public static void AddReturnValueTokens( this RefKind refKind, List<SyntaxToken> tokenList )
         {
             switch ( refKind )
@@ -106,5 +106,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     throw new AssertionFailedException( $"{refKind} is not supported." );
             }
         }
+        */
     }
 }

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestSerializationOfMethod()
         {
-            var code = "class Target { public static int Method() => 42; }";
+            const string code = "class Target { public static int Method() => 42; }";
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericMethod()
         {
-            var code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
+            const string code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestMethodWithOutParameter()
         {
-            var code = "class Target { public static int Method( out int x) { x = 100; return 42;  } }";
+            const string code = "class Target { public static int Method( out int x) { x = 100; return 42;  } }";
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(

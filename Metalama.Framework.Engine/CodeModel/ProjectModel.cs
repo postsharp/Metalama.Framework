@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
+        private readonly ProjectServiceProvider _serviceProvider;
         private bool _isFrozen;
 
         public ProjectModel( Compilation compilation, ProjectServiceProvider serviceProvider )
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PreprocessorSymbols =
                 anySyntaxTree != null ? anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
 
-            this.ServiceProvider = serviceProvider.Underlying;
+            this._serviceProvider = serviceProvider.Underlying;
 
             this._projectReferences =
                 new Lazy<ImmutableArray<IAssemblyIdentity>>(
@@ -67,9 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return data;
         }
 
-        public ProjectServiceProvider ServiceProvider { get; }
-
-        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this._serviceProvider.Underlying;
 
         internal void Freeze()
         {

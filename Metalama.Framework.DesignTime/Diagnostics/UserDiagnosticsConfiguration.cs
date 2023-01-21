@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Configuration;
+using Newtonsoft.Json;
 using System.Collections.Immutable;
 using System.ComponentModel;
 
@@ -11,6 +12,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// </summary>
     [ConfigurationFile( "userDiagnostics.json" )]
     [Description( "Stores the IDs of diagnostics and suppressions defined by user aspects." )]
+    [JsonObject]
     public sealed record UserDiagnosticsConfiguration : ConfigurationFile
     {
         public ImmutableDictionary<string, UserDiagnosticRegistration> Diagnostics { get; init; } =

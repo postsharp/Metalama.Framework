@@ -107,6 +107,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public MethodKind MethodKind { get; }
 
+    bool IMethodBuilder.IsReadOnly { get; set; }
+
     public OperatorKind OperatorKind => OperatorKind.None;
 
     IMethod IMethod.MethodDefinition => this;
@@ -190,7 +192,11 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
         set => throw new NotSupportedException( "Cannot directly change the IsSealed property of an accessor." );
     }
 
-    public bool IsAbstract => this.ContainingMember.IsAbstract;
+    public bool IsAbstract
+    {
+        get => this.ContainingMember.IsAbstract;
+        set => throw new InvalidOperationException();
+    }
 
     public bool IsReadOnly => false;
 

@@ -63,12 +63,5 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Get( originalSymbol );
             }
         }
-
-        public Type Get( SerializableTypeId typeId )
-        {
-            var symbol = this._serializableTypeIdProvider.ResolveId( typeId );
-
-            return this.Get( symbol );
-        }
     }
 }

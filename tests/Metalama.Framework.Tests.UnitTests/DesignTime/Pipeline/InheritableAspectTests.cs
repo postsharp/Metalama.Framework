@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             using var testContext = this.CreateTestContext();
 
             // Initial compilation.
-            var code1 = @"
+            const string code1 = @"
 using Metalama.Framework.Aspects;
 
 [Inheritable]
@@ -47,7 +47,7 @@ public interface I {}
         {
             using var testContext = this.CreateTestContext();
 
-            var aspectCode = @"
+            const string aspectCode = @"
 using Metalama.Framework.Aspects;
 
 [Inheritable]
@@ -55,7 +55,7 @@ public class Aspect : TypeAspect { }
 ";
 
             // Initial compilation.
-            var targetCode1 = "[Aspect] interface I {}";
+            const string targetCode1 = "[Aspect] interface I {}";
 
             var compilation1 = testContext.CreateCompilationModel( new Dictionary<string, string> { ["aspect.cs"] = aspectCode, ["target.cs"] = targetCode1 } );
 
@@ -108,7 +108,7 @@ public class Aspect : TypeAspect { }
         {
             using var testContext = this.CreateTestContext();
 
-            var code1 = @"
+            const string code1 = @"
 using Metalama.Framework.Aspects;
 
 [Inheritable]
@@ -122,7 +122,7 @@ public class Aspect : TypeAspect
 public interface I {}
 ";
 
-            var code2 = @"partial class C : I {}";
+            const string code2 = @"partial class C : I {}";
 
             using var testContext1 = this.CreateTestContext();
 

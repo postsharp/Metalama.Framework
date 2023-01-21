@@ -709,11 +709,7 @@ namespace Metalama.Framework.Engine.Collections
 
             public int Count => this._parent.Count;
 
-            public TValue this[ int index ]
-            {
-                get => this._parent.GetAt( index ).Value;
-                set => throw new NotSupportedException();
-            }
+            public TValue this[ int index ] => this._parent.GetAt( index ).Value;
         }
     }
 }

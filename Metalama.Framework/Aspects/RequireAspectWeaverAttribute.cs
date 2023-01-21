@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 
 namespace Metalama.Framework.Aspects;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Aspects;
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
 [CompileTime]
+[PublicAPI]
 public sealed class RequireAspectWeaverAttribute : Attribute
 {
     /// <summary>
