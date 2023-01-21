@@ -16,16 +16,9 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
-
-        public LinkerAspectReferenceSyntaxProvider( LinkerInjectionHelperProvider injectionHelperProvider )
-        {
-            this._injectionHelperProvider = injectionHelperProvider;
-        }
-
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer )
             => InvocationExpression(
-                this._injectionHelperProvider.GetFinalizeMemberExpression()
+                LinkerInjectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
@@ -47,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     return
                         InvocationExpression(
-                            this._injectionHelperProvider.GetPropertyMemberExpression()
+                            LinkerInjectionHelperProvider.GetPropertyMemberExpression()
                                 .WithAspectReferenceAnnotation(
                                     aspectLayer,
                                     AspectReferenceOrder.Base,
@@ -103,7 +96,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 InvocationExpression(
-                    this._injectionHelperProvider.GetOperatorMemberExpression(
+                    LinkerInjectionHelperProvider.GetOperatorMemberExpression(
                             syntaxGenerator,
                             overriddenOperator.OperatorKind,
                             overriddenOperator.ReturnType,
@@ -119,7 +112,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 InvocationExpression(
-                    this._injectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression(),
+                    LinkerInjectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression(),
                     ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
         }
 

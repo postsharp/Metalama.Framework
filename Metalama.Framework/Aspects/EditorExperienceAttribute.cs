@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Eligibility;
 using System;
 
@@ -7,6 +8,7 @@ namespace Metalama.Framework.Aspects;
 
 [AttributeUsage( AttributeTargets.Class )]
 [CompileTime]
+[PublicAPI]
 public sealed class EditorExperienceAttribute : Attribute
 {
     internal EditorExperienceOptions Options { get; private set; } = EditorExperienceOptions.Default;

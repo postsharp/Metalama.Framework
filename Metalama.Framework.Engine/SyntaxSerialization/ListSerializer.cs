@@ -38,6 +38,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public ListSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>) );
+        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>) );
     }
 }

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
         /// <summary>
         /// Gets the suggested <see cref="Metalama.Framework.CodeFixes.CodeFix"/>.
         /// </summary>
-        public CodeFix CodeFix { get; }
+        internal CodeFix CodeFix { get; }
 
         /// <summary>
         /// Gets some indication about the creator of the code fix.

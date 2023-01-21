@@ -17,9 +17,9 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     public static class CompileTimeCodeFastDetector
     {
-        public const string Namespace = "Metalama.Framework";
+        internal const string Namespace = "Metalama.Framework";
 
-        public static ImmutableHashSet<string> SubNamespaces { get; } = ImmutableHashSet.Create<string>(
+        private static readonly ImmutableHashSet<string> _subNamespaces = ImmutableHashSet.Create<string>(
             StringComparer.Ordinal,
             "Aspects",
             "Code",
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Any tree containing a using directive for Metalama.Framework needs to be included.
                     return node.Name switch
                     {
-                        QualifiedNameSyntax q3 when SubNamespaces.Contains( q3.Right.Identifier.Text ) &&
+                        QualifiedNameSyntax q3 when _subNamespaces.Contains( q3.Right.Identifier.Text ) &&
                                                     q3.Left is QualifiedNameSyntax
                                                     {
                                                         Right.Identifier.Text: "Framework", Left: IdentifierNameSyntax { Identifier.Text: "Metalama" }

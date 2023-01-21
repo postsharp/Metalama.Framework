@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -11,8 +12,10 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;
 
+    [UsedImplicitly]
     public RoslynApiVersion MaximalAcceptableApiVersion { get; }
 
+    [UsedImplicitly]
     public string MaximalAcceptableLanguageVersion { get; }
 
     public RoslynApiVersion MaximalUsedVersion { get; private set; } = RoslynApiVersion.Lowest;

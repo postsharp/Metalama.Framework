@@ -34,6 +34,6 @@ namespace Metalama.Testing.AspectTesting
 
         IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
 
-        public ProjectServiceProvider ServiceProvider { get; }
+        private ProjectServiceProvider ServiceProvider { get; }
     }
 }

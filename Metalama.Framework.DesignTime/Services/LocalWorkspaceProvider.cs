@@ -16,7 +16,14 @@ internal sealed class LocalWorkspaceProvider : WorkspaceProvider
     public LocalWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
     protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
-        => this._workspace.Task.WithCancellation( cancellationToken );
+    {
+        if ( !this._workspace.Task.IsCompleted )
+        {
+            this.Logger.Warning?.Log( $"The workspace is not yet available. Waiting." );
+        }
+        
+        return this._workspace.Task.WithCancellation( cancellationToken );
+    }
 
     public void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
 }

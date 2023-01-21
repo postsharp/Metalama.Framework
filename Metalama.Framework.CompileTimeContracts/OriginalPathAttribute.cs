@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 
 namespace Metalama.Framework.CompileTimeContracts
@@ -10,6 +11,7 @@ namespace Metalama.Framework.CompileTimeContracts
     /// of directory.
     /// </summary>
     [AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Delegate | AttributeTargets.Enum | AttributeTargets.Interface )]
+    [PublicAPI]
     public sealed class OriginalPathAttribute : Attribute
     {
         public string Path { get; }

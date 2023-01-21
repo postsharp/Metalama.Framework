@@ -1,11 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Testing.AspectTesting
 {
     /// <summary>
     /// Enumerates the scenarios that are simulated for the test, for instance compilation (the <see cref="Default"/> scenario),
     /// applying a code fix, or others.
     /// </summary>
+    [PublicAPI]
     public enum TestScenario
     {
         /// <summary>

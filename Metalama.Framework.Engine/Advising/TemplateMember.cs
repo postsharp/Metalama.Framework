@@ -30,11 +30,6 @@ internal sealed class TemplateMember<T>
     public Accessibility SetAccessorAccessibility { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the method is an <c>async</c> one. If the template is a property, the value applies to the getter.
-    /// </summary>
-    public bool IsAsyncMethod { get; }
-
-    /// <summary>
     /// Gets a value indicating whether the method is a <c>yield</c>-base iterator method. If the template is a property, the value applies to the getter.
     /// </summary>
     public bool IsIteratorMethod { get; }
@@ -85,7 +80,6 @@ internal sealed class TemplateMember<T>
         {
             this.Accessibility = compiledTemplateAttribute.Accessibility;
             this.IsIteratorMethod = compiledTemplateAttribute.IsIteratorMethod;
-            this.IsAsyncMethod = compiledTemplateAttribute.IsAsync;
         }
 
         if ( implementation is IProperty property )
@@ -95,7 +89,6 @@ internal sealed class TemplateMember<T>
                 var attributeOnGetter = GetCompiledTemplateAttribute( property.GetMethod );
                 this.GetAccessorAccessibility = attributeOnGetter.Accessibility;
                 this.IsIteratorMethod = attributeOnGetter.IsIteratorMethod;
-                this.IsAsyncMethod = attributeOnGetter.IsAsync;
             }
 
             if ( property.SetMethod != null )

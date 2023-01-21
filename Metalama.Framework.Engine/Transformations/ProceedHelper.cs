@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
@@ -19,13 +18,6 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal static class ProceedHelper
 {
-    public static SyntaxUserExpression CreateProceedDynamicExpression(
-        SyntaxGenerationContext generationContext,
-        ExpressionSyntax invocationExpression,
-        BoundTemplateMethod template,
-        IMethod overriddenMethod )
-        => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
-
     public static SyntaxUserExpression CreateProceedDynamicExpression(
         SyntaxGenerationContext generationContext,
         ExpressionSyntax invocationExpression,

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
         [Fact]
         public void GetLocation()
         {
-            var code = @"
+            const string code = @"
 using System;
 class C<T> : object
 {

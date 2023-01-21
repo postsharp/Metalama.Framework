@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating
 {
+    // TODO: Check why it exists but is not used.
+    // ReSharper disable once UnusedType.Global
+
     /// <summary>
     /// A forwarding <see cref="CSharpSyntaxRewriter"/> that only forwards
     /// 'interesting' declarations and ignores the other ones. This should be generalized
@@ -20,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
-        public T Inner { get; }
+        private T Inner { get; }
 
         public TemplateRewriterFilter( SyntaxTreeAnnotationMap syntaxTreeAnnotationMap, T inner )
         {

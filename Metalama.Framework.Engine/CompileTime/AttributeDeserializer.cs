@@ -32,11 +32,6 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         // Coverage: ignore
-        public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
-            where T : Attribute
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
-
-        // Coverage: ignore
         public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
         {
@@ -206,7 +201,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             AttributeDeserializerDiagnostics.PropertyHasNoSetter.CreateRoslynDiagnostic(
                                 attribute.GetDiagnosticLocation(),
                                 arg.Key ) );
-                        
+
                         attributeInstance = null;
 
                         return false;

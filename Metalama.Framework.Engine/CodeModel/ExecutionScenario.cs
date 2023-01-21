@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsTest { get; private set; }
 
-        public bool MustReportCSharpErrorsInCompileTimeCode { get; }
+        internal bool MustReportCSharpErrorsInCompileTimeCode { get; }
 
         public static ExecutionScenario DesignTime { get; } = new( nameof(DesignTime), true, false, true, false, false );
 
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CapturesCodeFixTitles = capturesCodeFixTitles;
         }
 
-        public ExecutionScenario WithTest()
+        internal ExecutionScenario WithTest()
         {
             var clone = (ExecutionScenario) this.MemberwiseClone();
             clone.IsTest = true;

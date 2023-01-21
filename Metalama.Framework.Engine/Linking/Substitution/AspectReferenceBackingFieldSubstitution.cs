@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes an aspect reference that points to the source semantic of auto property for an access to the generated backing field.
     /// </summary>
-    internal class AspectReferenceBackingFieldSubstitution : SyntaxNodeSubstitution
+    internal sealed class AspectReferenceBackingFieldSubstitution : SyntaxNodeSubstitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 

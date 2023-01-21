@@ -174,7 +174,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
                 // The code is an aspect that produces some introduction that depends on the target code,
                 // then we change the target code in each version. If we change the aspect in each version, we 
                 // will have to cope with pausing and resuming the pipeline.
-                var aspectCode = @"
+                const string aspectCode = @"
                 using Metalama.Framework.Aspects;
                 using Metalama.Framework.Code;
                 using Metalama.Framework.Diagnostics;

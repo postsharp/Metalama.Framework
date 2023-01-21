@@ -23,7 +23,7 @@ internal class TransformationContext
 
     public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
-    public TransformationContext(
+    protected TransformationContext(
         ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticSink,
         SyntaxGenerationContext syntaxGenerationContext,

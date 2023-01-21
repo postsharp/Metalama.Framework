@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// </summary>
     public sealed class MetalamaStringFormatter : CultureInfo, ICustomFormatter
     {
-        public static readonly MetalamaStringFormatter Instance = new();
+        internal static readonly MetalamaStringFormatter Instance = new();
 
         private MetalamaStringFormatter() : base( InvariantCulture.Name ) { }
 

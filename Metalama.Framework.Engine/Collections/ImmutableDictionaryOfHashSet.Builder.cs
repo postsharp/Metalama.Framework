@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Engine.Collections
 {
     public sealed partial class ImmutableDictionaryOfHashSet<TKey, TValue>
     {
+        [PublicAPI]
         public sealed class Builder
         {
             private readonly IEqualityComparer<TValue> _valueComparer;

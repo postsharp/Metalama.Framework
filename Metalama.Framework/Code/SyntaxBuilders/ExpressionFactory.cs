@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using System;
 using System.Text;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders;
 /// Provides several ways to create instances of the <see cref="IExpression"/> interface.
 /// </summary>
 [CompileTime]
+[PublicAPI]
 public static class ExpressionFactory
 {
     /// <summary>

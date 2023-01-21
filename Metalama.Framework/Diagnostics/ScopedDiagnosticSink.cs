@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Diagnostics;
 /// Encapsulates an <see cref="IDiagnosticSink"/> and the default target of diagnostics, suppressions, and code fixes.
 /// </summary>
 /// <seealso href="@diagnostics"/>
+[PublicAPI]
 public readonly struct ScopedDiagnosticSink : IDiagnosticSink
 {
     private readonly IDiagnosticSink _sink;

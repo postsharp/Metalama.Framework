@@ -10,9 +10,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// <summary>
     /// Provides extension methods that are useful when writing code using Metalama SDK.
     /// </summary>
-    public static class RoslynExtensions
+    internal static class RoslynExtensions
     {
-        public static TCompilation ReplaceTrees<TCompilation>(
+        private static TCompilation ReplaceTrees<TCompilation>(
             this TCompilation compilation,
             Func<SyntaxTree, SyntaxTree?> replacer,
             IEnumerable<SyntaxTree>? trees = null )

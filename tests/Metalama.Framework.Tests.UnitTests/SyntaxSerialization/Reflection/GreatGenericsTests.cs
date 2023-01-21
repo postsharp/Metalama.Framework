@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
         public GreatGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
-            var code = @"
+            const string code = @"
 class Origin<T1> { 
     private T1 privateField;
     public T1 Field;

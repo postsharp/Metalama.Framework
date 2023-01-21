@@ -54,15 +54,16 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ITaskRunner _taskRunner;
+    private readonly ProjectVersionProvider _projectVersionProvider;
 
     private bool _mustProcessQueue;
-
-    public ProjectKey ProjectKey { get; }
 
     // This field should not be changed directly, but only through the SetState method.
     private PipelineState _currentState;
 
     private int _pipelineExecutionCount;
+
+    public ProjectKey ProjectKey { get; }
 
     /// <summary>
     /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
@@ -71,8 +72,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
-
-    public ProjectVersionProvider ProjectVersionProvider { get; }
 
     public long SnapshotId => this._currentState.SnapshotId;
 
@@ -93,7 +92,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this.ProjectKey = projectKey;
         this._pipelineFactory = pipelineFactory;
         this._entryPointConsumer = (IDesignTimeEntryPointConsumer?) this.ServiceProvider.Global.Underlying.GetService( typeof(IDesignTimeEntryPointConsumer) );
-        this.ProjectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
+        this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
@@ -435,12 +434,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    internal ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
-        Compilation compilation,
-        AsyncExecutionContext executionContext,
-        TestableCancellationToken cancellationToken )
-        => this.GetDesignTimeProjectVersionAsync( compilation, false, executionContext, cancellationToken );
-
     internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
         Compilation compilation,
         bool autoResumePipeline,
@@ -449,7 +442,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         var pipelineStatus = this.Status;
 
-        var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
+        var compilationVersion = await this._projectVersionProvider.GetCompilationVersionAsync(
             this._currentState.ProjectVersion?.Compilation,
             compilation,
             cancellationToken );

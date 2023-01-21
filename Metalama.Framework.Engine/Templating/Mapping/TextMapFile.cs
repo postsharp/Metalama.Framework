@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         /// <summary>
         /// Serializes the current <see cref="TextMapFile"/> into a <see cref="BinaryWriter"/>.
         /// </summary>
-        public void Write( BinaryWriter writer )
+        private void Write( BinaryWriter writer )
         {
             writer.Write( _signature );
             writer.Write( this.SourcePath );

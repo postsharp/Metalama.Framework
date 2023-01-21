@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Services
     public sealed class CompilationContextFactory : IProjectService, IDisposable
     {
         // This should be used only for tests.
-        public static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );
+        internal static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );
 
         private readonly ProjectServiceProvider _serviceProvider;
 
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Services
 
         private readonly WeakCache<Compilation, CompilationContext> _instances = new();
 
-        public CompilationContextFactory( ProjectServiceProvider serviceProvider )
+        internal CompilationContextFactory( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider.Underlying.WithService( this );
         }
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Services
             => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this._serviceProvider, this ) );
 
         [Memo]
-        public CompilationContext Empty => new( EmptyCompilation, this._serviceProvider, this );
+        internal CompilationContext Empty => new( EmptyCompilation, this._serviceProvider, this );
 
         public void Dispose() => this._instances.Dispose();
     }

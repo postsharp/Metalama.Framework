@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    public interface ICompileTimeExceptionHandler : IGlobalService
+    internal interface ICompileTimeExceptionHandler : IGlobalService
     {
         void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled );
     }

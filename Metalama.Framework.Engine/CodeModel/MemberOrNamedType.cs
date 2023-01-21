@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamedType? DeclaringType
+        protected INamedType? DeclaringType
         {
             get
             {

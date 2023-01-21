@@ -10,7 +10,7 @@ public sealed class CodeLensSummary : ICodeLensSummary
 
     public static CodeLensSummary NoAspect { get; } = new( "no aspect" );
 
-    public CodeLensSummary( string description, string? tooltipText = null )
+    internal CodeLensSummary( string description, string? tooltipText = null )
     {
         this.Description = description;
         this.TooltipText = tooltipText;

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 [assembly: MyAttribute(1)]
 [module: MyAttribute(2)]
 

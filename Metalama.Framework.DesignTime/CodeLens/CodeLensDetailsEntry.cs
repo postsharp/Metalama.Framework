@@ -5,17 +5,17 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public sealed class CodeLensDetailsEntry : ICodeLensDetailsEntry
+internal sealed class CodeLensDetailsEntry : ICodeLensDetailsEntry
 {
-    public CodeLensDetailsEntry( ImmutableArray<CodeLensDetailsField> fields, string? tooltip = null )
+    private readonly ImmutableArray<CodeLensDetailsField> _fields;
+
+    internal CodeLensDetailsEntry( ImmutableArray<CodeLensDetailsField> fields, string? tooltip = null )
     {
-        this.Fields = fields;
+        this._fields = fields;
         this.Tooltip = tooltip;
     }
 
-    public ImmutableArray<CodeLensDetailsField> Fields { get; }
-
-    ICodeLensDetailsField[] ICodeLensDetailsEntry.Fields => this.Fields.ToArray<ICodeLensDetailsField>();
+    ICodeLensDetailsField[] ICodeLensDetailsEntry.Fields => this._fields.ToArray<ICodeLensDetailsField>();
 
     public string? Tooltip { get; }
 }

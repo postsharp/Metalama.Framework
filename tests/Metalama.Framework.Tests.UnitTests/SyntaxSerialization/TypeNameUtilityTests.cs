@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable BadListLineBreaks
+// ReSharper disable MemberCanBeInternal
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {

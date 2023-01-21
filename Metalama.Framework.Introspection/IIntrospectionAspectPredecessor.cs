@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Collections.Immutable;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Introspection;
 /// Base interface for objects that can cause aspects to be added to a compilation. Predecessors are exposed on
 /// the <see cref="IAspectPredecessor.Predecessors"/> property.
 /// </summary>
+[PublicAPI]
 public interface IIntrospectionAspectPredecessor
 {
     /// <summary>

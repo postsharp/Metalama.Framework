@@ -9,11 +9,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     public static class SyntaxExtensions
     {
-        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode node )
+        internal static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode node )
             => FindMemberDeclarationOrNull( node )
                ?? throw new AssertionFailedException( $"The {node.Kind()} at '{node.GetLocation()}' is not the descendant of a member declaration." );
 
-        public static MemberDeclarationSyntax? FindMemberDeclarationOrNull( this SyntaxNode node )
+        private static MemberDeclarationSyntax? FindMemberDeclarationOrNull( this SyntaxNode node )
         {
             var current = node;
 
@@ -52,16 +52,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return null;
         }
 
-        public static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
+        internal static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.ExpressionBody == null
                && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
                && propertyDeclaration.Modifiers.All( x => !x.IsKind( SyntaxKind.AbstractKeyword ) );
 
-        public static bool HasSetterAccessorDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
+        internal static bool HasSetterAccessorDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.AccessorList != null
                && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) );
 
-        public static bool IsAccessModifierKeyword( this SyntaxToken token )
+        internal static bool IsAccessModifierKeyword( this SyntaxToken token )
             => token.Kind() switch
             {
                 SyntaxKind.PrivateKeyword => true,
@@ -71,14 +71,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
-        public static ExpressionSyntax RemoveParenthesis( this ExpressionSyntax node )
+        internal static ExpressionSyntax RemoveParenthesis( this ExpressionSyntax node )
             => node switch
             {
                 ParenthesizedExpressionSyntax parenthesized => parenthesized.Expression.RemoveParenthesis(),
                 _ => node
             };
 
-        public static TypeDeclarationSyntax? GetDeclaringType( this SyntaxNode node )
+        internal static TypeDeclarationSyntax? GetDeclaringType( this SyntaxNode node )
             => node switch
             {
                 TypeDeclarationSyntax type => type,

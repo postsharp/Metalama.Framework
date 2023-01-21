@@ -16,6 +16,9 @@ namespace Metalama.Framework.Engine.Transformations
 
         internal abstract string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IMember initializedMember );
 
+        // TODO: Check why it is never used.
+        // Resharper disable UnusedMember.Global
+
         internal abstract string GetInitializationName(
             INamedType targetType,
             AspectLayerId aspectLayer,

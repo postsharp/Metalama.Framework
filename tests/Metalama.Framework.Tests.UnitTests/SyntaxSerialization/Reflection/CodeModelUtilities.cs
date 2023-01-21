@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public static class CodeModelUtilities
+    internal static class CodeModelUtilities
     {
         public static IMethod Method( this INamedType type, string name ) => type.Methods.Single( m => m.Name == name );
 

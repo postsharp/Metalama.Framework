@@ -30,7 +30,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     private OurSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
-    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
+    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
     {
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
@@ -110,7 +110,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped )
     {
         ExpressionSyntax expression;
-        IType type;
 
         if ( value == null )
         {
@@ -123,7 +122,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
             expression = GetLiteralImpl( value, specialType, stronglyTyped );
         }
 
-        type = this._compilation.Factory.GetSpecialType( specialType );
+        IType type = this._compilation.Factory.GetSpecialType( specialType );
 
         return new SyntaxUserExpression( expression, type );
     }

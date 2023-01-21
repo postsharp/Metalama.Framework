@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
@@ -8,8 +9,10 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Provides extension methods for handling of aspect reference annotations.
     /// </summary>
+    [UsedImplicitly] // Used by AspectWorkbench but JB tool does not see it.
     public static class AspectReferenceAnnotationExtensions
     {
+        [UsedImplicitly]
         public const string AnnotationKind = "MetalamaAspectReference";
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
-public static class TreeReader
+internal static class TreeReader
 {
     public static Tree ReadTree( string inputFile )
     {

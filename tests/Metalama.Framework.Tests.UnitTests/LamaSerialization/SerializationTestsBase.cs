@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Services;
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         protected T SerializeDeserialize<T>( T value )
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
 
             formatter.Serialize( value!, memoryStream );

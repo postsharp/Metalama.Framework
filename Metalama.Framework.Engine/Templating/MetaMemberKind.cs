@@ -43,8 +43,6 @@ namespace Metalama.Framework.Engine.Templating
 
         ProceedAsyncEnumerable,
 
-        ProceedAsyncEnumerator,
-
-        Expression
+        ProceedAsyncEnumerator
     }
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -20,6 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// The main compile-time entry point of Metalama. An implementation of Metalama.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public sealed class SourceTransformer : ISourceTransformer
     {
         public void Execute( TransformerContext context )

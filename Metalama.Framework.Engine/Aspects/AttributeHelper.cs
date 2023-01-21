@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Aspects;
 public static class AttributeHelper
 {
     [return: NotNullIfNotNull( "name" )]
-    public static string? GetShortName( string? name )
+    internal static string? GetShortName( string? name )
     {
         if ( name == null )
         {

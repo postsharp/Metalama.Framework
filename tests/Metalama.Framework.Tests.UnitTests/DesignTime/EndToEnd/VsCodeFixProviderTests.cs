@@ -31,7 +31,7 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
 
         await testContext.WhenInitialized.WithCancellation( testContext.CancellationToken );
 
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;

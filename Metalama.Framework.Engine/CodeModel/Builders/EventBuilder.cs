@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         IMethod? IEvent.RaiseMethod => this.RaiseMethod;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IEvent>();
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IEvent>();
 
         public IExpression? InitializerExpression { get; set; }
 

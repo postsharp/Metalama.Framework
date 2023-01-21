@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             // This basically tests that [Memo] works.
 
-            var code = "";
+            const string code = "";
             var compilation = testContext.CreateCompilationModel( code );
 
             var types1 = compilation.Types;
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     class D { }
@@ -95,7 +95,7 @@ class E<T> {}
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     void M()
@@ -126,7 +126,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 enum E
@@ -165,7 +165,7 @@ class TestAttribute : Attribute
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 [Test(typeof(ErrorType))]
@@ -184,7 +184,7 @@ class TestAttribute : Attribute
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 interface I<T>
@@ -236,7 +236,7 @@ interface I<T>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C<T1, T2>
 {
     static C<int, string> GetInstance() => null;
@@ -262,7 +262,7 @@ class C<T1, T2>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 [module: MyAttribute(""m"")]
@@ -292,7 +292,7 @@ class MyAttribute : Attribute
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 class C 
@@ -316,7 +316,7 @@ class MyAttribute : Attribute
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     void M(int[] i) {}
@@ -348,7 +348,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     int Auto { get; set; }
@@ -373,7 +373,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public sealed class C
 {
     public InvalidType Property {get;set;}
@@ -390,7 +390,7 @@ public sealed class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     int a = 0, b;
@@ -415,7 +415,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public sealed class C
 {
    InvalidType field;
@@ -432,7 +432,7 @@ public sealed class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     int field;
@@ -456,7 +456,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     event Handler Event
@@ -484,7 +484,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 class C : IDisposable
 {
@@ -521,7 +521,7 @@ class C : IDisposable
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"class C {}
+            const string code = @"class C {}
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
@@ -537,7 +537,7 @@ class C : IDisposable
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public sealed class C
 {
     public InvalidType M1() {}
@@ -558,7 +558,7 @@ public sealed class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 class C<T>
 {
@@ -587,7 +587,7 @@ class C<T>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"delegate void D();";
+            const string code = @"delegate void D();";
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "D" ).Single();
@@ -609,7 +609,7 @@ class C<T>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     int i;
@@ -632,7 +632,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 
 class C
@@ -691,7 +691,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System.Collections.Generic;
 
 class C<T>
@@ -720,7 +720,7 @@ class C<T>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System.Collections.Generic;
 
 class A
@@ -745,7 +745,7 @@ partial class B
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C<TC>
 {
     (TC, TM) M<TM>() => default;
@@ -778,7 +778,7 @@ class C<TC>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class Class<T>
 {
     T field;
@@ -809,7 +809,7 @@ class Class<T>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class Parent<TParent>
 {
     class NestedGeneric<TNested>
@@ -863,7 +863,7 @@ class Parent<TParent>
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public sealed class C
 {
     public string this[string key]
@@ -886,7 +886,7 @@ public sealed class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public sealed class C
 {
     public string this[InvalidType key]
@@ -908,6 +908,7 @@ public sealed class C
         {
             using var testContext = this.CreateTestContext();
 
+            // ReSharper disable once ConvertToConstant.Local
             var code = @"
 public record R( int A, int B )
 {
@@ -940,7 +941,7 @@ public record R( int A, int B )
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C 
 {
     void M() { void N() {} }
@@ -991,7 +992,7 @@ namespace Ns1
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [CompileTime]
@@ -1015,7 +1016,7 @@ class D
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"";
+            const string code = @"";
 
             var compilation = testContext.CreateCompilationModel( code );
 
@@ -1039,7 +1040,7 @@ class D
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 namespace Ns1
 {
     namespace Ns2
@@ -1129,7 +1130,7 @@ namespace System { class MySystemClass {} }
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 
 class NonGeneric { }
 
@@ -1179,7 +1180,7 @@ class Derived : Base<int>
         {
             using var testContext = this.CreateTestContext();
 
-            var masterCode = @"
+            const string masterCode = @"
 public class PublicClass
 { 
    private int _privateField;
@@ -1265,7 +1266,7 @@ public class PublicClass
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public class C<T>
 { 
    class D<A,B> {}
@@ -1294,7 +1295,7 @@ class F { class G {} }
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 public class C<T>
 { 
    class D<A,B> {}
@@ -1314,7 +1315,7 @@ class F { class G {} }
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 [System.Obsolete]
 class C {} 
 ";
@@ -1387,7 +1388,7 @@ class C {}
         [Fact]
         public void InitializerExpression_EnumMembers()
         {
-            var code = """
+            const string code = """
         public enum C
         {
             None = 0,
@@ -1441,7 +1442,7 @@ class C {}
         [Fact]
         public void InitializerExpression_NotTypedConstant()
         {
-            var code = $$"""
+            const string code = $$"""
         public class C
         {
            object _f = new object();
@@ -1483,7 +1484,7 @@ class C {}
         [Fact]
         public void FieldConstantValue()
         {
-            var code = $$"""
+            const string code = $$"""
         public class C
         {
             const int _f = 5;

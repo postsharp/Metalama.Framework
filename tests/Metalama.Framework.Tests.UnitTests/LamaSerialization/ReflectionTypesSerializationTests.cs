@@ -1,13 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedParameter.Global
+// Resharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {

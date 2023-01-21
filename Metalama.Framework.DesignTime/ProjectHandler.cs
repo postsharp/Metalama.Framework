@@ -22,7 +22,7 @@ public abstract class ProjectHandler : IDisposable
 
     protected IProjectOptions ProjectOptions { get; }
 
-    public ProjectKey ProjectKey { get; }
+    protected ProjectKey ProjectKey { get; }
 
     protected ILogger Logger { get; }
 

@@ -24,7 +24,7 @@ public static class ProjectKeyFactory
     private static readonly WeakCache<Microsoft.CodeAnalysis.Project, ProjectKey?> _projectCache = new();
     private static readonly WeakCache<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
 
-    public static ProjectKey Create( string assemblyName, ParseOptions? parseOptions )
+    internal static ProjectKey Create( string assemblyName, ParseOptions? parseOptions )
     {
         ulong preprocessorSymbolHashCode;
 
@@ -93,7 +93,7 @@ public static class ProjectKeyFactory
         return new StrongBox<ulong>( hashCode );
     }
 
-    public static ProjectKey FromCompilation( Compilation compilation ) => _compilationCache.GetOrAdd( compilation, FromCompilationCore );
+    internal static ProjectKey FromCompilation( Compilation compilation ) => _compilationCache.GetOrAdd( compilation, FromCompilationCore );
 
     private static ProjectKey FromCompilationCore( Compilation compilation )
     {

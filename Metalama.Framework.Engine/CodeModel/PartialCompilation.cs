@@ -49,8 +49,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract ImmutableHashSet<INamespaceSymbol> Namespaces { get; }
 
         [Memo]
-        public ImmutableHashSet<INamespaceSymbol> ParentNamespaces
-            => this.Namespaces.SelectRecursive( n => n.IsGlobalNamespace ? null : n.ContainingNamespace )
+        internal ImmutableHashSet<INamespaceSymbol> ParentNamespaces
+            => this.Namespaces.SelectRecursiveInternal( n => n.IsGlobalNamespace ? null : n.ContainingNamespace )
                 .ToImmutableHashSet();
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.CodeModel
         ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
         /// representing the modified object.
         /// </summary>
-        public abstract PartialCompilation Update(
+        internal abstract PartialCompilation Update(
             IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
@@ -341,7 +341,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return builder.ToImmutable();
         }
 
-        public ImmutableArray<SyntaxTreeTransformation> ToTransformations() => this.ModifiedSyntaxTrees.Values.ToImmutableArray();
+        internal ImmutableArray<SyntaxTreeTransformation> ToTransformations() => this.ModifiedSyntaxTrees.Values.ToImmutableArray();
 
         public override string ToString()
             => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
@@ -357,7 +357,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets the <see cref="SyntaxTree"/> that can be used to add new assembly- or module-level attributes.
         /// </summary>
         [Memo]
-        public SyntaxTree SyntaxTreeForCompilationLevelAttributes
+        internal SyntaxTree SyntaxTreeForCompilationLevelAttributes
             => this.Compilation.Assembly.GetAttributes()
                    .Select( a => a.ApplicationSyntaxReference )
                    .WhereNotNull()

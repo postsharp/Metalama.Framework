@@ -15,8 +15,6 @@ internal sealed class SymbolClassifierTracer
 
     public SymbolClassifierTracer( ISymbol symbol ) : this( symbol, 0 ) { }
 
-    public bool IsRoot => this.Depth == 0;
-
     public TemplatingScope? Result { get; private set; }
 
     public ISymbol? Symbol { get; }

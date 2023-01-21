@@ -10,9 +10,9 @@ namespace Metalama.Framework.Engine.Advising
     internal abstract class OverrideMemberAdvice<TMember> : Advice
         where TMember : class, IMember
     {
-        public new Ref<TMember> TargetDeclaration => base.TargetDeclaration.As<TMember>();
+        protected new Ref<TMember> TargetDeclaration => base.TargetDeclaration.As<TMember>();
 
-        public IObjectReader Tags { get; }
+        protected IObjectReader Tags { get; }
 
         protected OverrideMemberAdvice(
             IAspectInstanceInternal aspect,

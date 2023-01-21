@@ -52,6 +52,4 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
         => TransformationLinkerOrderComparer.Instance.Compare( this._transformation, ((IntrospectionTransformation?) other)?._transformation );
 
     public override string ToString() => this.Description.ToString( MetalamaStringFormatter.Instance );
-
-    public FormattableString ToFormattableString() => this.Description;
 }

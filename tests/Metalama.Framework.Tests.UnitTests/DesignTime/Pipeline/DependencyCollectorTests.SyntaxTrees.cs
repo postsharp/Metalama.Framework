@@ -83,7 +83,7 @@ public sealed partial class DependencyCollectorTests
             Environment.NewLine,
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
-        var expectedDependencies = @"'Class2.cs'->'Class3.cs'
+        const string expectedDependencies = @"'Class2.cs'->'Class3.cs'
 'Class2.cs'->'Class4.cs'
 'Class3.cs'->'Class4.cs'
 'Interface1.cs'->'Class4.cs'
@@ -131,7 +131,7 @@ public sealed partial class DependencyCollectorTests
             Environment.NewLine,
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
-        var expectedDependencies = @"'Class2.cs'->'Class3.cs'
+        const string expectedDependencies = @"'Class2.cs'->'Class3.cs'
 'Class2.cs'->'Class4.cs'
 'Class3.cs'->'Class4.cs'
 'Interface1.cs'->'Class4.cs'

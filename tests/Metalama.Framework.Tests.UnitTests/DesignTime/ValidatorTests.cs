@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             using var testContext = this.CreateTestContext();
 
             // Initial compilation.
-            var code1 = @"
+            const string code1 = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
 using Metalama.Framework.Code;
@@ -55,7 +55,7 @@ public class C {}
         {
             using var testContext = this.CreateTestContext();
 
-            var aspectCode = @"
+            const string aspectCode = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
 using Metalama.Framework.Code;
@@ -83,7 +83,7 @@ public class Aspect2 : TypeAspect
 ";
 
             // Initial compilation.
-            var targetCode1 = "[Aspect1] class C {}";
+            const string targetCode1 = "[Aspect1] class C {}";
 
             var compilation1 = testContext.CreateCompilationModel( new Dictionary<string, string> { ["aspect.cs"] = aspectCode, ["target.cs"] = targetCode1 } );
             var classC = compilation1.Types.OfName( "C" ).Single().GetSymbol().AssertNotNull();

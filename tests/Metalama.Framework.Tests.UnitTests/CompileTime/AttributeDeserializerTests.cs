@@ -14,6 +14,14 @@ using Attribute = System.Attribute;
 
 #pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
 
+// ReSharper disable MemberCanBeProtected.Global
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable UnusedType.Global
+// Resharper disable MemberCanBePrivate.Global
+// Resharper disable ClassNeverInstantiated.Global
+// Resharper disable UnusedMember.Global
+// Resharper disable UnusedMember.Local
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public sealed class AttributeDeserializerTests : UnitTestClass
@@ -80,7 +88,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
+            const string code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
             var compilation = testContext.CreateCompilationModel( code );
 
             var domain = testContext.Domain;
@@ -190,7 +198,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                     nameof(TestAttribute.TypeProperty),
                     "typeof(GenericStruct*)" ) );
 
-            var dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
+            const string dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
             var typeValue = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
             Assert.Equal( "MyExternClass", Assert.IsType<CompileTimeType>( typeValue ).FullName );
 
@@ -331,7 +339,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: UnknownType] [UnknownType] class C {}";
+            const string code = @"[assembly: UnknownType] [UnknownType] class C {}";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
@@ -343,7 +351,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
+            const string code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             var domain = testContext.Domain;
@@ -361,8 +369,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
-                       + "[Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
+            const string code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
+                                + "[Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
 
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
@@ -375,7 +383,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
+            const string code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
@@ -394,7 +402,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
+            const string code =
+                @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
+
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
@@ -413,7 +423,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: MyAttribute] class MyAttribute : System.Attribute {}";
+            const string code = @"[assembly: MyAttribute] class MyAttribute : System.Attribute {}";
 
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
@@ -432,7 +442,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"" )]";
+            const string code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"" )]";
 
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
@@ -444,7 +454,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"", ""y"" )]";
+            const string code =
+                @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"", ""y"" )]";
 
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
@@ -457,7 +468,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code =
+            const string code =
                 @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( Property = ""x"" )]";
 
             var compilation = testContext.CreateCompilationModel( code );

@@ -7,23 +7,22 @@ namespace Metalama.Framework.DesignTime.CodeLens;
 
 public sealed class CodeLensDetailsTable : ICodeLensDetailsTable
 {
+    private readonly ImmutableArray<CodeLensDetailsHeader> _headers;
+    private readonly ImmutableArray<CodeLensDetailsEntry> _entries;
+
     public static CodeLensDetailsTable Empty { get; } = new( ImmutableArray<CodeLensDetailsHeader>.Empty, ImmutableArray<CodeLensDetailsEntry>.Empty );
 
-    public CodeLensDetailsTable( ImmutableArray<CodeLensDetailsHeader> headers, ImmutableArray<CodeLensDetailsEntry> entries )
+    internal CodeLensDetailsTable( ImmutableArray<CodeLensDetailsHeader> headers, ImmutableArray<CodeLensDetailsEntry> entries )
     {
-        this.Headers = headers;
-        this.Entries = entries;
+        this._headers = headers;
+        this._entries = entries;
     }
 
-    public ImmutableArray<CodeLensDetailsHeader> Headers { get; }
+    ICodeLensDetailsHeader[] ICodeLensDetailsTable.Headers => this._headers.ToArray<ICodeLensDetailsHeader>();
 
-    public ImmutableArray<CodeLensDetailsEntry> Entries { get; }
+    ICodeLensDetailsEntry[] ICodeLensDetailsTable.Entries => this._entries.ToArray<ICodeLensDetailsEntry>();
 
-    ICodeLensDetailsHeader[] ICodeLensDetailsTable.Headers => this.Headers.ToArray<ICodeLensDetailsHeader>();
-
-    ICodeLensDetailsEntry[] ICodeLensDetailsTable.Entries => this.Entries.ToArray<ICodeLensDetailsEntry>();
-
-    public static CodeLensDetailsTable CreateError( params string[] messages )
+    internal static CodeLensDetailsTable CreateError( params string[] messages )
     {
         return new CodeLensDetailsTable(
             ImmutableArray.Create( new CodeLensDetailsHeader( "Error", "Error", true, 1 ) ),

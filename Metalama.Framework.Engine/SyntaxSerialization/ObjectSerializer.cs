@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     /// </summary>
     internal abstract class ObjectSerializer
     {
-        public SyntaxSerializationService Service { get; }
+        protected SyntaxSerializationService Service { get; }
 
         protected ObjectSerializer( SyntaxSerializationService service )
         {
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// </summary>
         public abstract Type? OutputType { get; }
 
-        public virtual ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray<Type>.Empty;
+        protected virtual ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray<Type>.Empty;
 
         public ImmutableArray<Type> AllSupportedTypes
         {

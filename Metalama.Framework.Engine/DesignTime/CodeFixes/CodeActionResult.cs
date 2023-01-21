@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
+[JsonObject]
 public sealed class CodeActionResult
 {
     public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }

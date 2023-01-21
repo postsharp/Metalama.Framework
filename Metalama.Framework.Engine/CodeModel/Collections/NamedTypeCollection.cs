@@ -8,10 +8,6 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public static NamedTypeCollection Empty { get; } = new();
-
-        private NamedTypeCollection() { }
-
         public NamedTypeCollection( NamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
             base( declaringType, sourceItems ) { }
 

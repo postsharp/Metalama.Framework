@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Diagnostics;
@@ -14,6 +15,7 @@ namespace Metalama.Testing.AspectTesting
     /// Implementation of a Xunit test framework for Metalama. Falls back to the default XUnit framework in Resharper or Rider.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public class AspectTestFramework : ITestFramework
     {
         static AspectTestFramework()

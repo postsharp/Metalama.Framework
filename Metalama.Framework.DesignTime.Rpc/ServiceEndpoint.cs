@@ -70,7 +70,7 @@ public abstract class ServiceEndpoint
         }
     }
 
-    protected JsonRpc CreateRpc( Stream stream )
+    protected static JsonRpc CreateRpc( Stream stream )
     {
         // MessagePackFormatter does not work in the devenv process, probably because devenv sets it up with some global effect.
 

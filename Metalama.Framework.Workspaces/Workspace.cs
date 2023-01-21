@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -27,6 +28,7 @@ namespace Metalama.Framework.Workspaces
     /// Represents a set of projects. Workspaces can be created using the <see cref="WorkspaceCollection"/> class.  When projects target several frameworks,
     /// they are represented by several instances of the <see cref="Project"/> class in the workspace.
     /// </summary>
+    [PublicAPI]
     public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
         private readonly WorkspaceCollection _collection;

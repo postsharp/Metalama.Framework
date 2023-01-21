@@ -4,5 +4,6 @@
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
+    // Must be public.
     public sealed class PredefinedNode : TreeType { }
 }

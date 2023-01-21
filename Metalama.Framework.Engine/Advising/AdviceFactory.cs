@@ -833,37 +833,40 @@ internal sealed class AdviceFactory : IAdviceFactory
                 throw new InvalidOperationException( "There is no accessor to override." );
             }
 
-            if ( targetFieldOrPropertyOrIndexer is IFieldOrProperty targetFieldOrProperty )
+            switch ( targetFieldOrPropertyOrIndexer )
             {
-                var advice = new OverrideFieldOrPropertyAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetFieldOrProperty,
-                    this._compilation,
-                    getTemplateRef,
-                    setTemplateRef,
-                    this._layerName,
-                    this.GetObjectReader( tags ) );
+                case IFieldOrProperty targetFieldOrProperty:
+                    {
+                        var advice = new OverrideFieldOrPropertyAdvice(
+                            this._state.AspectInstance,
+                            this._templateInstance,
+                            targetFieldOrProperty,
+                            this._compilation,
+                            getTemplateRef,
+                            setTemplateRef,
+                            this._layerName,
+                            this.GetObjectReader( tags ) );
 
-                return this.ExecuteAdvice<IProperty>( advice );
-            }
-            else if ( targetFieldOrPropertyOrIndexer is IIndexer targetIndexer )
-            {
-                var advice = new OverrideIndexerAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetIndexer,
-                    this._compilation,
-                    getTemplateRef,
-                    setTemplateRef,
-                    this._layerName,
-                    this.GetObjectReader( tags ) );
+                        return this.ExecuteAdvice<IProperty>( advice );
+                    }
 
-                return this.ExecuteAdvice<IProperty>( advice );
-            }
-            else
-            {
-                throw new AssertionFailedException( $"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here." );
+                case IIndexer targetIndexer:
+                    {
+                        var advice = new OverrideIndexerAdvice(
+                            this._state.AspectInstance,
+                            this._templateInstance,
+                            targetIndexer,
+                            this._compilation,
+                            getTemplateRef,
+                            setTemplateRef,
+                            this._layerName,
+                            this.GetObjectReader( tags ) );
+
+                        return this.ExecuteAdvice<IProperty>( advice );
+                    }
+
+                default:
+                    throw new AssertionFailedException( $"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here." );
             }
         }
     }

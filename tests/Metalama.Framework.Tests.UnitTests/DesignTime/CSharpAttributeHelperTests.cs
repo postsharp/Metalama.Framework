@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public async Task Can_AddAttributeToMethodAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     public void Method1() { }
@@ -85,7 +85,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeWithArgumentsAndPropertiesAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     public void Method1() { }
@@ -115,7 +115,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToClassAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
 }
@@ -139,7 +139,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToInterfaceAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public interface IInterface
 {
 }
@@ -163,7 +163,7 @@ public interface IInterface
         [Fact]
         public async Task Can_AddAttributeToDelegateAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public delegate void Delegate();
 ";
 
@@ -185,7 +185,7 @@ public delegate void Delegate();
         [Fact]
         public async Task Can_AddAttributeToEnumAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public enum Enum
 {
 }
@@ -209,7 +209,7 @@ public enum Enum
         [Fact]
         public async Task Can_AddAttributeToPropertyAccessorAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     public int P1 { get; set; }
@@ -233,7 +233,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToEventAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     public event EventHandler { add { } remove { } }
@@ -257,7 +257,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToFieldAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     private List<int> field;
@@ -282,7 +282,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToVariableDeclaratorAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     private List<int> field = new List<int>();
@@ -306,7 +306,7 @@ public class Class
         [Fact]
         public async Task Can_AddAttributeToParameterAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 public class Class
 {
     public void Method(int param1, string param2) { }
@@ -330,7 +330,7 @@ public class Class
         [Fact]
         public async Task When_AttributeAppliedToDeclarationWithComment_Then_AttributePreserveCommentAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -343,7 +343,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -371,7 +371,7 @@ namespace Test
         [Fact]
         public async Task When_AttributeAppliedToIndentedDeclaration_Then_AttributePreserveIndentationAndExactlyOneNewlineAfterAttributeAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -380,7 +380,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -402,7 +402,7 @@ namespace Test
         [Fact]
         public async Task When_AttributeAppliedToIndentedDeclarationWithAnAttribute_Then_AttributePreserveIndentationAndExactlyOneNewlineAfterAttributeAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -412,7 +412,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -436,7 +436,7 @@ namespace Test
         public async Task
             When_AttributeAppliedToIndentedDeclarationWithSeveralAttributes_Then_AttributePreserveIndentationAndExactlyOneNewlineAfterAttributeAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -448,7 +448,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1 { }
@@ -473,7 +473,7 @@ namespace Test
         [Fact]
         public async Task When_AttributeAppliedToParameter_Then_NoIndentationAndNoNewlineAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1
@@ -483,7 +483,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1
@@ -545,7 +545,7 @@ namespace Test
         [Fact]
         public async Task When_AttributeAppliedToParameterWithAttribute_Then_NoIndentationAndNoNewlineAsync()
         {
-            var syntax = @"
+            const string syntax = @"
 namespace Test
 {
     public class Class1
@@ -555,7 +555,7 @@ namespace Test
 }
 ";
 
-            var expectedSyntax = @"
+            const string expectedSyntax = @"
 namespace Test
 {
     public class Class1

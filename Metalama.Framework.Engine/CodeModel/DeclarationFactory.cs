@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( compilationElement is not IDeclaration declaration )
             {
-                throw new ArgumentException( nameof(symbol), $"{symbol.Kind} is not a declaration" );
+                throw new ArgumentException( $"{symbol.Kind} is not a declaration", nameof(symbol) );
             }
 
             return declaration;

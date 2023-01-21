@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void BaseSerializerInTheSameAssembly()
         {
             // Verifies that when serializable base and derived type are defined in the same assembly, both get a generated serializer that serializes and deserializes.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -72,7 +72,7 @@ public class B : A
         public void AbstractBase()
         {
             // Verifies that a serializable type derived from abstract base can be serialized and deserialized
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -128,7 +128,7 @@ public class B : A
         public void NewSlot()
         {
             // Verifies that a conflict in serializable field/property names does not break serialization.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -181,7 +181,7 @@ public class B : A
         public void GenericBase()
         {
             // Verifies that a type with generic base type gets a correct serializer generated.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -257,7 +257,7 @@ public class C : A<int>
         public void NestedGenericDerived()
         {
             // Verifies that when a type is a nested generic type with the parent generic type as a base, the generated serializer is correct.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine;
@@ -21,6 +22,7 @@ namespace Metalama.Testing.UnitTesting
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.
     /// </summary>
+    [PublicAPI]
     public static class TestCompilationFactory
     {
         private static readonly ConcurrentDictionary<Assembly, PortableExecutableReference> _metadataReferenceCache = new();

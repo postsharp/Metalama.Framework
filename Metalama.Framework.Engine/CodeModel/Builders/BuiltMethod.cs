@@ -16,55 +16,55 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 {
+    private readonly MethodBuilder _methodBuilder;
+
     public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
     {
-        this.MethodBuilder = builder;
+        this._methodBuilder = builder;
     }
 
-    public MethodBuilder MethodBuilder { get; }
+    protected override MemberBuilder MemberBuilder => this._methodBuilder;
 
-    public override MemberBuilder MemberBuilder => this.MethodBuilder;
-
-    public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.MethodBuilder;
+    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._methodBuilder;
 
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this.MethodBuilder.ToTypedRef<IHasParameters>() ) );
+            this.GetCompilationModel().GetParameterCollection( this._methodBuilder.ToTypedRef<IHasParameters>() ) );
 
-    public MethodKind MethodKind => this.MethodBuilder.MethodKind;
+    public MethodKind MethodKind => this._methodBuilder.MethodKind;
 
-    public OperatorKind OperatorKind => this.MethodBuilder.OperatorKind;
+    public OperatorKind OperatorKind => this._methodBuilder.OperatorKind;
 
-    public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
+    public bool IsReadOnly => this._methodBuilder.IsReadOnly;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this.MethodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
-    public MethodInfo ToMethodInfo() => this.MethodBuilder.ToMethodInfo();
+    public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
     IMemberWithAccessors? IMethod.DeclaringMember => null;
 
     System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this.MethodBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.Compilation.Factory.GetIType( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this.MethodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
 
     public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
-    public bool IsGeneric => this.MethodBuilder.IsGeneric;
+    public bool IsGeneric => this._methodBuilder.IsGeneric;
 
     public bool IsCanonicalGenericInstance => throw new NotImplementedException();
 
@@ -75,11 +75,11 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
         => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
     [Memo]
-    public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this._methodBuilder.OverriddenMethod );
 
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
 
-    public bool? IsIteratorMethod => this.MethodBuilder.IsIteratorMethod;
+    public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

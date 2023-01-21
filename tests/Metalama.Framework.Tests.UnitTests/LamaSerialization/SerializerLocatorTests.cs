@@ -1,10 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Tests.UnitTests.LamaSerialization;
 using System;
 using Xunit;
+
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedType.Global
 
 // attribute added for testing purposes
 [assembly: ImportSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
@@ -85,7 +89,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void GetSerializerType_HasManySerializers_Throws()
         {
-            Assert.Throws<LamaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
+            Assert.Throws<CompileTimeSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
         public sealed class SerializedClass
@@ -97,9 +101,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new SerializedClass();
                 }
 
-                public override void SerializeObject( SerializedClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments ) { }
+                internal override void SerializeObject(
+                    SerializedClass obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( SerializedClass obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( SerializedClass obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
@@ -112,12 +119,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new GenericSerializedClass<T>();
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     GenericSerializedClass<T> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( GenericSerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( GenericSerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
@@ -133,12 +140,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new TypeWithManySerializers();
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     TypeWithManySerializers obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
             }
 
             public sealed class SecondSerializer : ReferenceTypeSerializer<TypeWithManySerializers>
@@ -148,12 +155,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new TypeWithManySerializers();
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     TypeWithManySerializers obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
             }
         }
     }

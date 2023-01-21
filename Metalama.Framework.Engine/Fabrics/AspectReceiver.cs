@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
-            this._parent.LicenseVerifier?.VerifyCanValidator( this._parent.AspectPredecessor );
+            this._parent.LicenseVerifier?.VerifyCanAddValidator( this._parent.AspectPredecessor );
 
             this._parent.AddValidatorSource( validatorSource );
         }

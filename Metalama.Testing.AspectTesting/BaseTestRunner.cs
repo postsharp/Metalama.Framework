@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -22,13 +23,14 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 using Document = Microsoft.CodeAnalysis.Document;
+
+// ReSharper disable MethodHasAsyncOverload
 
 namespace Metalama.Testing.AspectTesting;
 
@@ -37,8 +39,6 @@ namespace Metalama.Testing.AspectTesting;
 /// </summary>
 internal abstract partial class BaseTestRunner
 {
-    private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );
-    private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n)+)", RegexOptions.Compiled | RegexOptions.Multiline );
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
@@ -63,9 +63,10 @@ internal abstract partial class BaseTestRunner
     /// <summary>
     /// Gets the project directory, or <c>null</c> if it is unknown.
     /// </summary>
+    [PublicAPI]
     public string? ProjectDirectory { get; }
 
-    public ITestOutputHelper? Logger { get; }
+    protected ITestOutputHelper? Logger { get; }
 
     public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
@@ -132,6 +133,7 @@ internal abstract partial class BaseTestRunner
         }
     }
 
+    [PublicAPI]
     public Task RunAsync( TestInput testInput, TestResult testResult, TestContext testContext )
         => this.RunAsync(
             testInput,
@@ -467,33 +469,6 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    protected static string NormalizeEndOfLines( string? s, bool replaceWithSpace = false )
-        => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, replaceWithSpace ? " " : Environment.NewLine ).Trim();
-
-    public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
-        => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
-
-    private static string NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
-    {
-        if ( preserveFormatting )
-        {
-            return NormalizeEndOfLines( syntaxNode.ToFullString() );
-        }
-        else
-        {
-            var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
-
-            s = NormalizeEndOfLines( s, forComparison );
-
-            if ( forComparison )
-            {
-                s = _spaceRegex.Replace( s, " " );
-            }
-
-            return s;
-        }
-    }
-
     protected virtual bool CompareTransformedCode => true;
 
     private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
@@ -520,8 +495,8 @@ internal abstract partial class BaseTestRunner
 
         var testOutputs = testResult.GetTestOutputsWithDiagnostics();
         var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-        var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, true );
-        var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, false );
+        var actualTransformedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, true );
+        var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, false );
 
         // If the expectation file does not exist, create it with some placeholder content.
         if ( !File.Exists( expectedTransformedPath ) )
@@ -535,7 +510,7 @@ internal abstract partial class BaseTestRunner
 
         // Read expectations from the file.
         var expectedSourceText = File.ReadAllText( expectedTransformedPath );
-        var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, preserveWhitespace, true );
+        var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, preserveWhitespace, true );
 
         // Update the file in obj/transformed if it is different.
         var actualTransformedPath = Path.Combine(
@@ -556,7 +531,8 @@ internal abstract partial class BaseTestRunner
         // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
         if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
         {
-            if ( NormalizeEndOfLines( expectedSourceText ) != NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+            if ( TestOutputNormalizer.NormalizeEndOfLines( expectedSourceText )
+                 != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
             {
                 // The test output is correct but it must be formatted.
                 File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
@@ -638,7 +614,8 @@ internal abstract partial class BaseTestRunner
     /// Creates a new project that is used to compile the test source.
     /// </summary>
     /// <returns>A new project instance.</returns>
-    internal Project CreateProject( TestOptions options )
+    [PublicAPI]
+    public Project CreateProject( TestOptions options )
     {
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
             null,
@@ -650,7 +627,7 @@ internal abstract partial class BaseTestRunner
             },
             nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
-        var projectName = "test";
+        const string projectName = "test";
 
         var workspace1 = new AdhocWorkspace();
         var solution = workspace1.CurrentSolution;

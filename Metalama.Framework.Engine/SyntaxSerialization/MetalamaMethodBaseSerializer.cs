@@ -168,6 +168,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         }
         */
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
+        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }
 }

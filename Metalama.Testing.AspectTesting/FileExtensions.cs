@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Testing.AspectTesting
 {
     /// <summary>
     /// List of file extensions used by the test framework.
     /// </summary>
+    [PublicAPI]
     public static class FileExtensions
     {
         /// <summary>

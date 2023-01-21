@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.LamaSerialization;
+using JetBrains.Annotations;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using System;
 using Xunit;
+
+// Resharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
@@ -379,6 +382,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 return name != null ? StringComparer.Ordinal.GetHashCode( name ) : 0;
             }
 
+            [UsedImplicitly]
             public class Serializer : ReferenceTypeSerializer
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )

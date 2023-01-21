@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,9 +11,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// <summary>
     /// Rewriter that removes all preprocessor directives including inactive code.
     /// </summary>
+    [PublicAPI]
     public sealed class RemovePreprocessorDirectivesRewriter : SafeSyntaxRewriter
     {
-        public static RemovePreprocessorDirectivesRewriter Instance { get; } = new();
+        internal static RemovePreprocessorDirectivesRewriter Instance { get; } = new();
 
         private readonly ImmutableHashSet<SyntaxKind> _preservedSyntaxKinds;
         private static readonly SyntaxTrivia _emptyTrivia = SyntaxFactory.Whitespace( "" );

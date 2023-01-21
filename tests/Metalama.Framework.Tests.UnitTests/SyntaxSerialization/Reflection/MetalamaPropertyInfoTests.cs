@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestProperty()
         {
-            var code = "class Target { public int Property {get;} }";
+            const string code = "class Target { public int Property {get;} }";
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericProperty()
         {
-            var code = "class Target<T> { public T Property {get;} }";
+            const string code = "class Target<T> { public T Property {get;} }";
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestNonAutomaticProperty()
         {
-            var code = "class Target { public string Property {get{return default;}set{}} }";
+            const string code = "class Target { public string Property {get{return default;}set{}} }";
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestIndexer()
         {
-            var code = "class Target { public string this[int target] {get{return default;}} }";
+            const string code = "class Target { public string this[int target] {get{return default;}} }";
             var serialized = this.SerializeIndexerWithTarget( code );
 
             this.AssertEqual(
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestIndexerOnString()
         {
-            var code = "class Target { public string this[int target] {get{return default;}} }";
+            const string code = "class Target { public string this[int target] {get{return default;}} }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             return actual;
         }
 
-        public static string StripLocationInfo( string serialized )
+        internal static string StripLocationInfo( string serialized )
         {
             const string prefix = "new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(";
 

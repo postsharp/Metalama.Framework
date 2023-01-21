@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransformation
     {
-        public BoundTemplateMethod BoundTemplate { get; }
+        private BoundTemplateMethod BoundTemplate { get; }
 
         public OverrideMethodTransformation( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
             : base( advice, targetMethod, tags )

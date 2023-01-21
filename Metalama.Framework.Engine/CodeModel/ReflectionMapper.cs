@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Maps System.Reflection objects to Roslyn symbols.
     /// </summary>
-    internal sealed class ReflectionMapper
+    internal sealed class ReflectionMapper : IReflectionMapper
     {
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();

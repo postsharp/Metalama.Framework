@@ -16,7 +16,7 @@ public static class SerializableDeclarationIdProvider
     private const string _assemblyPrefix = "Assembly:";
 
     private static readonly char[] _separators = new[] { ';', '=' };
-    
+
     public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( DeclarationRefTargetKind.Default );
 
     internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, DeclarationRefTargetKind targetKind )
@@ -32,7 +32,7 @@ public static class SerializableDeclarationIdProvider
     public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
         => TryGetSerializableId( symbol, DeclarationRefTargetKind.Default, out id );
 
-    internal static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
+    private static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
     {
         switch ( symbol )
         {
@@ -136,7 +136,7 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    public static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
+    internal static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 

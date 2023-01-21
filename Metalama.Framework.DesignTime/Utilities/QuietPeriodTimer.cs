@@ -2,6 +2,9 @@
 
 using Metalama.Backstage.Diagnostics;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace Metalama.Framework.DesignTime.Utilities;
 
 internal sealed class QuietPeriodTimer : IDisposable

@@ -100,11 +100,11 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             this.RegisterSerializer( new ExpressionSerializer( this ) );
         }
 
-        internal TypeSerializer TypeSerializer { get; }
+        private TypeSerializer TypeSerializer { get; }
 
         internal CompileTimeMethodInfoSerializer CompileTimeMethodInfoSerializer { get; }
 
-        internal CompileTimePropertyInfoSerializer CompileTimePropertyInfoSerializer { get; }
+        private CompileTimePropertyInfoSerializer CompileTimePropertyInfoSerializer { get; }
 
         /// <summary>
         /// Registers an additional serializer. See Remarks for generics.

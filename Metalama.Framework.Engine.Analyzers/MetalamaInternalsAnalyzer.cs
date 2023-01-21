@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
@@ -7,6 +8,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.Analyzers;
 
 [DiagnosticAnalyzer( LanguageNames.CSharp )]
+[UsedImplicitly]
 public partial class MetalamaInternalsAnalyzer : DiagnosticAnalyzer
 {
     // Range: 820-839
@@ -32,10 +34,10 @@ public partial class MetalamaInternalsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.None );
         context.EnableConcurrentExecution();
-        context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
+        context.RegisterSemanticModelAction( AnalyzeSemanticModel );
     }
 
-    private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
+    private static void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
     {
         var projectKind = ProjectClassifier.GetProjectKind( context.SemanticModel.Compilation.AssemblyName );
 

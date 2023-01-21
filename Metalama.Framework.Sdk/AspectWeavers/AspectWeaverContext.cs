@@ -6,9 +6,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         private readonly Action<Diagnostic> _addDiagnostic;
         private IPartialCompilation _compilation;
 
-        public IServiceProvider<IProjectService> ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the type of aspects that must be handled.
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             }
         }
 
-        public AspectWeaverHelper Helper { get; }
+        public ICompilationServices CompilationServices { get; }
 
         private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriter,
-                this.ServiceProvider,
+                this.ServiceProvider.Underlying,
                 this.GetCancellationToken( cancellationToken ) );
 
         /// <summary>
@@ -129,10 +129,10 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            AspectWeaverHelper helper,
-            IServiceProvider<IProjectService> serviceProvider,
+            ProjectServiceProvider serviceProvider,
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
+            ICompilationServices compilationServices,
             CancellationToken cancellationToken )
         {
             this.AspectClass = aspectClass;
@@ -142,7 +142,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this.Project = project;
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.CancellationToken = cancellationToken;
-            this.Helper = helper;
             this.ServiceProvider = serviceProvider;
         }
 

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
             };
         }
 
-        public Type Get( SymbolId symbolKey, string fullMetadataName )
+        private Type Get( SymbolId symbolKey, string fullMetadataName )
         {
             return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), fullMetadataName ) );
         }
@@ -62,13 +62,6 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 return this.Get( originalSymbol );
             }
-        }
-
-        public Type Get( SerializableTypeId typeId )
-        {
-            var symbol = this._serializableTypeIdProvider.ResolveId( typeId );
-
-            return this.Get( symbol );
         }
     }
 }

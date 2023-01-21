@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
-    public sealed class CustomComparer<T> : IEqualityComparer<T>
+    internal sealed class CustomComparer<T> : IEqualityComparer<T>
     {
         public bool Equals( T? x, T? y ) => true;
 

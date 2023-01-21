@@ -17,14 +17,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// Creates an <see cref="DiagnosticException"/> instance based on the current descriptor and given arguments.
         /// The diagnostic location will be resolved from the call stack.
         /// </summary>
-        public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
+        internal static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             where T : notnull
             => new DiagnosticException( definition.CreateRoslynDiagnostic( null, arguments ) );
-
-        // Coverage: ignore (trivial)
-        public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location location, T arguments )
-            where T : notnull
-            => new DiagnosticException( definition.CreateRoslynDiagnostic( location, arguments ) );
 
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.

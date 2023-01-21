@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestType()
         {
-            var code = "class Target { class Sub { }  }";
+            const string code = "class Target { class Sub { }  }";
             var serialized = this.SerializeType( code );
 
             this.AssertEqual(

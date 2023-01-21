@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -13,8 +12,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    // This class must be public because it is referenced from compiled templates.
-    public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>, ICompileTimeType
+    internal sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>, ICompileTimeType
     {
         // We store a reference-typed ISdkRef instead of the value-typed Ref because it is only being accessed
         // through ICompileTimeReflectionObject, so boxing cannot be avoided anyway. It is better in this case
@@ -35,10 +33,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
-
-        public static Type Get( string id, string fullMetadataName )
-            => UserCodeExecutionContext.Current.CompilationContext.CompileTimeTypeFactory.Get( new SymbolId( id ), fullMetadataName );
-
+        
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
 
@@ -46,7 +41,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
 
         // For test only.
-        internal static Type Create( ITypeSymbol typeSymbol, Compilation compilation )
+        private static Type Create( ITypeSymbol typeSymbol, Compilation compilation )
             => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace

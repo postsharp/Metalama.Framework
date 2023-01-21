@@ -86,7 +86,7 @@ namespace Metalama.Framework.Tests.UnitTests
         [Fact]
         public void OneSingleLayerAspect()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 class Aspect1 : TypeAspect { }
 ";
@@ -98,7 +98,7 @@ class Aspect1 : TypeAspect { }
         [Fact]
         public void OneDoubleLayerAspect()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [Layers(""Layer1"")]
 class Aspect1 : TypeAspect { }
@@ -111,7 +111,7 @@ class Aspect1 : TypeAspect { }
         [Fact]
         public void TwoUnorderedDoubleLayerAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [Layers(""Layer1"")]
 class Aspect1 : TypeAspect { }
@@ -127,7 +127,7 @@ class Aspect2 : TypeAspect { }
         [Fact]
         public void ThreeOrderedSingleLayerAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
@@ -155,7 +155,7 @@ class Aspect2 : TypeAspect
         [Fact]
         public void TwoOrderedDoubleLayerAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
@@ -174,7 +174,7 @@ class Aspect2 : TypeAspect { }
         [Fact]
         public void TwoPartiallyOrderedDoubleLayerAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
@@ -193,7 +193,7 @@ class Aspect2  : TypeAspect { }
         [Fact]
         public void TwoTotallyOrderedDoubleLayerAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2:Layer1"", ""Aspect1:Layer1"", ""Aspect2"", ""Aspect1"" ) ]
@@ -212,7 +212,7 @@ class Aspect2  : TypeAspect { }
         [Fact]
         public void InheritedAspects()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [Layers(""Layer1"")]
@@ -228,7 +228,7 @@ class Aspect2 : Aspect1 {}
         [Fact]
         public void InvalidAspectName()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Aspects;
 
@@ -245,7 +245,7 @@ class Aspect1 : TypeAspect { }
         [Fact]
         public void Cycle()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
@@ -266,7 +266,7 @@ class Aspect2 : TypeAspect { }
             // The difference of Cycle2 compared to Cycle1 is that Aspect3 has no predecessor (in Cycle test, all nodes have a predecessor),
             // therefore the sort algorithm goes to another branch.
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]

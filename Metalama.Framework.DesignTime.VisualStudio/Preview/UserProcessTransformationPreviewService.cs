@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime.Contracts.Preview;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             if ( syntaxTree == null )
             {
                 // This should never happen.
-                result[0] = new PreviewTransformationResult( false, null, new[] { "Cannot get the syntax tree." } );
+                result[0] = PreviewTransformationResult.Failure( "Cannot get the syntax tree." );
 
                 return;
             }
@@ -39,7 +40,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 
             if ( projectKey == null || !projectKey.IsMetalamaEnabled )
             {
-                result[0] = new PreviewTransformationResult( false, null, new[] { "Metalama is not enabled for this project." } );
+                result[0] = PreviewTransformationResult.Failure( "Metalama is not enabled for this project." );
 
                 return;
             }
@@ -50,7 +51,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 
             if ( !unformattedResult.IsSuccessful )
             {
-                result[0] = new PreviewTransformationResult( unformattedResult.IsSuccessful, null, unformattedResult.ErrorMessages );
+                result[0] = PreviewTransformationResult.Failure( unformattedResult.ErrorMessages ?? Array.Empty<string>() );
 
                 return;
             }
@@ -63,7 +64,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
             var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
 
-            result[0] = new PreviewTransformationResult( true, formattedSyntaxTree, unformattedResult.ErrorMessages );
+            result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
         }
     }
 }

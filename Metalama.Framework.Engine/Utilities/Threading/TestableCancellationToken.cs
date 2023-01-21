@@ -45,6 +45,8 @@ public readonly struct TestableCancellationToken
     }
 
 #if DEBUG
+
+    // Resharper disable UnusedMember.Global
     public TestableCancellationToken WithTimeout( TimeSpan delay )
     {
         var source = new TestableCancellationTokenSource( delay );

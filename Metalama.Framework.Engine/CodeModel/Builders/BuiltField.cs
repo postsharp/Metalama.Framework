@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldBuilder FieldBuilder { get; }
 
-        public override MemberBuilder MemberBuilder => this.FieldBuilder;
+        protected override MemberBuilder MemberBuilder => this.FieldBuilder;
 
-        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.FieldBuilder;
+        protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.FieldBuilder;
 
         public Writeability Writeability => this.FieldBuilder.Writeability;
 

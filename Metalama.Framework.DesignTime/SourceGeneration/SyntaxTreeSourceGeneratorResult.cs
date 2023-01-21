@@ -19,7 +19,7 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
 {
     public ImmutableDictionary<string, IntroducedSyntaxTree> AdditionalSources { get; }
 
-    public SyntaxTreeSourceGeneratorResult( ImmutableDictionary<string, IntroducedSyntaxTree> additionalSources )
+    internal SyntaxTreeSourceGeneratorResult( ImmutableDictionary<string, IntroducedSyntaxTree> additionalSources )
     {
         this.AdditionalSources = additionalSources;
     }
@@ -56,7 +56,7 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
         return hash;
     }
 
-    public override void ProduceContent( SourceProductionContext context )
+    internal override void ProduceContent( SourceProductionContext context )
     {
         foreach ( var source in this.AdditionalSources.Values )
         {

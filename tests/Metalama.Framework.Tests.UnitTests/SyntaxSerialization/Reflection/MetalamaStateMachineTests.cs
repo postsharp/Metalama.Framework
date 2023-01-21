@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestEnumerable()
         {
-            var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
+            const string code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
             using var testContext = this.CreateSerializationTestContext( code );
 
             var serialized = testContext.Serialize(
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void Test()
         {
-            var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
+            const string code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestField()
         {
-            var code = "class Target { public int Field; }";
+            const string code = "class Target { public int Field; }";
             var serialized = this.SerializeField( code );
 
             // TODO: This should emit a call to Intrinsics.
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestFieldGeneric()
         {
-            var code = "class Target<TKey> { public TKey[] Field; }";
+            const string code = "class Target<TKey> { public TKey[] Field; }";
             var serialized = this.SerializeField( code );
 
             // TODO: This should emit a call to Intrinsics.

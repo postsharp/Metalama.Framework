@@ -1,14 +1,20 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Code.Collections
 {
+    [PublicAPI]
     public static class EnumerableExtensions
     {
         public static IEnumerable<T> SelectRecursive<T>( T item, Func<T, T?> getNext )
+            where T : class, ICompilationElement
+            => SelectRecursiveInternal( item, getNext );
+
+        internal static IEnumerable<T> SelectRecursiveInternal<T>( T item, Func<T, T?> getNext )
             where T : class
         {
             for ( var i = item; i != null; i = getNext( i ) )
@@ -18,6 +24,10 @@ namespace Metalama.Framework.Code.Collections
         }
 
         public static IEnumerable<T> SelectRecursive<T>( this IEnumerable<T> items, Func<T, T?> getNext )
+            where T : class, ICompilationElement
+            => items.SelectRecursiveInternal( getNext );
+
+        internal static IEnumerable<T> SelectRecursiveInternal<T>( this IEnumerable<T> items, Func<T, T?> getNext )
             where T : class
         {
             foreach ( var item in items )
@@ -71,6 +81,13 @@ namespace Metalama.Framework.Code.Collections
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IReadOnlyCollection<T> SelectManyRecursive<T>(
+            this IEnumerable<T> collection,
+            Func<T, IEnumerable<T>?> getItems,
+            bool throwOnDuplicate = true )
+            where T : class, ICompilationElement
+            => SelectManyRecursiveInternal( collection, getItems, throwOnDuplicate );
+
+        internal static IReadOnlyCollection<T> SelectManyRecursiveInternal<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
             bool throwOnDuplicate = true )
