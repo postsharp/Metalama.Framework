@@ -43,12 +43,10 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Gets an annotation that means that a qualified type must be simplified. This is equivalent to <c>Simplifier.Annotation</c>.
         /// </summary>
-        internal static SyntaxAnnotation SimplifyAnnotation
+        internal static void Initialize( SyntaxAnnotation value )
         {
-            private get => _simplifier ?? throw new InvalidOperationException();
-
             // This property must be set by the engine assembly because we don't want a dependency on workspaces here.
-            set => _simplifier = value;
+            _simplifier = value;
         }
 
         public static T WithSimplifierAnnotation<T>( this T node ) where T : SyntaxNode => node.WithAdditionalAnnotations( _simplifier );

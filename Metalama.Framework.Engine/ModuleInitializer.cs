@@ -12,7 +12,7 @@ internal static class ModuleInitializer
     static ModuleInitializer()
     {
         TypeOfResolver.Resolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
-        FormattingAnnotations.SimplifyAnnotation = Simplifier.Annotation;
+        FormattingAnnotations.Initialize( Simplifier.Annotation );
     }
 
     public static void EnsureInitialized() { }
