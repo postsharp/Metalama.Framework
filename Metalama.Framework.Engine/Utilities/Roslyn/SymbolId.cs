@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private readonly object _symbolKey;
 
-        public string Id => this._symbolKey.ToString() ?? "";
+        internal string Id => this._symbolKey.ToString() ?? "";
 
         static SymbolId()
         {

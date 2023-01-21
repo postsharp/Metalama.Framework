@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
+        private string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
 
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
             => lineFeed
@@ -203,6 +203,7 @@ namespace Metalama.Framework.Engine.Templating
                                         SeparatedList( list.SelectAsEnumerable( this.Transform ) ) ) ) ) ) ) );
         }
 
+        [UsedImplicitly]
         protected ExpressionSyntax Transform<T>( SyntaxList<T> list )
             where T : SyntaxNode
         {

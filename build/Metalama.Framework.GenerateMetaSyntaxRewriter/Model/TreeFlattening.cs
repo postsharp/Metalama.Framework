@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public static class TreeFlattening
+    internal static class TreeFlattening
     {
         public static void FlattenChildren( Tree tree )
         {

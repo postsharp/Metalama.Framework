@@ -148,7 +148,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             return actual;
         }
 
-        public static string StripLocationInfo( string serialized )
+        internal static string StripLocationInfo( string serialized )
         {
             const string prefix = "new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(";
 

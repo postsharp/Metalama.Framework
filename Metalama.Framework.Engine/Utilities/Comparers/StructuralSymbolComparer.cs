@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
     /// <summary>
     /// Compares symbols, possibly from different compilations.
     /// </summary>
-    internal class StructuralSymbolComparer : IEqualityComparer<ISymbol>
+    internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>
     {
         public static readonly StructuralSymbolComparer Default =
             new(
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private readonly StructuralSymbolComparerOptions _options;
 
-        private protected StructuralSymbolComparer( StructuralSymbolComparerOptions options )
+        private StructuralSymbolComparer( StructuralSymbolComparerOptions options )
         {
             this._options = options;
         }

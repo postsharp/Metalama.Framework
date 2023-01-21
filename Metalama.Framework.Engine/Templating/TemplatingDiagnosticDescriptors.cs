@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private const string _category = "Metalama.Template";
 
-        public static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
+        internal static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
             = new(
                 "LAMA0101",
                 "The C# language feature is not supported.",
@@ -41,14 +41,6 @@ namespace Metalama.Framework.Engine.Templating
                 + "one for run-time variables, and one for compile-time variables",
                 "Local variables {0} cannot be declared in the same declaration. "
                 + "Split them into different declarations; one for run-time variables, and one for compile-time variables",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<string> UnsupportedContextForProceed
-            = new(
-                "LAMA0106",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
                 _category,
                 Error );
 

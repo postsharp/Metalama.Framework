@@ -140,14 +140,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Parent( constructorArguments.GetValue<string>( _nameKey ).AssertNotNull() );
                 }
 
-                public override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _childrenKey, obj.Children );
                     initializationArguments.SetValue( _spouseKey, obj.Spouse );
                     constructorArguments.SetValue( _nameKey, obj.Name );
                 }
 
-                public override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<Child[]>( _childrenKey );
                     obj.Spouse = initializationArguments.GetValue<Parent>( _spouseKey );
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Child();
                 }
 
-                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _nameKey, obj.Name );
                     initializationArguments.SetValue( _motherKey, obj.Mother );
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( _siblingKey, obj.Sibling );
                 }
 
-                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     obj.Name = initializationArguments.GetValue<string>( _nameKey );
                     obj.Mother = initializationArguments.GetValue<Parent>( _motherKey );
@@ -216,12 +216,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new IgnoringType();
                 }
 
-                public override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     throw new NotImplementedException();
                 }
 
-                public override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
                 {
                     throw new NotImplementedException();
                 }

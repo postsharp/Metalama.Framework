@@ -37,11 +37,6 @@ class C
 
     internal struct ForStatementNumberMetric : IMetric<IMethod>, IMetric<INamedType>
     {
-        public ForStatementNumberMetric( int count )
-        {
-            this.Count = count;
-        }
-
         public int Count { get; internal set; }
     }
 

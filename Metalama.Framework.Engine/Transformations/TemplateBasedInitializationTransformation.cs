@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Transformations
         private readonly IConstructor _targetConstructor;
         private readonly BoundTemplateMethod _boundTemplate;
 
-        public IMemberOrNamedType ContextDeclaration { get; }
+        private IMemberOrNamedType ContextDeclaration { get; }
 
         public IMember TargetMember => this._targetConstructor;
 

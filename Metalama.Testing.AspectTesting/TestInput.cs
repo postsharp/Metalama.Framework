@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Testing.AspectTesting.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -95,6 +96,7 @@ namespace Metalama.Testing.AspectTesting
         }
 
         [ExcludeFromCodeCoverage]
+        [UsedImplicitly]
         internal static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
         {
             var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );

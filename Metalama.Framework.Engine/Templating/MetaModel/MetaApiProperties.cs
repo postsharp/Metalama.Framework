@@ -29,11 +29,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public ProjectServiceProvider ServiceProvider { get; }
 
-        public ExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
-
         public MetaApiStaticity Staticity { get; }
 
-        public ICompilation SourceCompilation { get; }
+        private ICompilation SourceCompilation { get; }
 
         public MetaApiProperties(
             ICompilation sourceCompilation,

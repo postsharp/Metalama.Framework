@@ -10,6 +10,10 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
+    // ReSharper disable MemberCanBeInternal
+    // ReSharper disable MemberCanBeProtected.Global
+    // ReSharper disable UnusedType.Global
+
     public enum Fail
     {
         None,
@@ -156,7 +160,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Base();
                 }
 
-                public override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     if ( obj.Fail == Fail.Write )
                     {
@@ -166,7 +170,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "Fail", obj.Fail );
                 }
 
-                public override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
                 {
                     obj.Fail = initializationArguments.GetValue<Fail>( "Fail" );
 
@@ -189,12 +193,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Child();
                 }
 
-                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     new Base.Serializer().SerializeObject( obj, constructorArguments, initializationArguments );
                 }
 
-                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     new Base.Serializer().DeserializeFields( obj, initializationArguments );
                 }
@@ -221,12 +225,15 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new ReferenceToChildren();
                 }
 
-                public override void SerializeObject( ReferenceToChildren obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject(
+                    ReferenceToChildren obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "Children", obj.Children );
                 }
 
-                public override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<List<Child>>( "Children" ).AssertNotNull();
                 }

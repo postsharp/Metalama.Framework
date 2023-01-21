@@ -8,6 +8,8 @@ using Xunit;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedParameter.Global
+// Resharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {

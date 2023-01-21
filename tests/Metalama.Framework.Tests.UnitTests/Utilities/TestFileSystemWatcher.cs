@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities
 {
-    public sealed class TestFileSystemWatcher : IFileSystemWatcher
+    internal sealed class TestFileSystemWatcher : IFileSystemWatcher
     {
         public TestFileSystemWatcher( string path, string filter )
         {

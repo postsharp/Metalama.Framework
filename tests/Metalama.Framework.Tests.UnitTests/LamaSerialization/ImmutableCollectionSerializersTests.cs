@@ -214,12 +214,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new SimpleType();
                 }
 
-                public override void SerializeObject( SimpleType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( SimpleType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "_", obj.Name );
                 }
 
-                public override void DeserializeFields( SimpleType obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( SimpleType obj, IArgumentsReader initializationArguments )
                 {
                     obj.Name = initializationArguments.GetValue<string>( "_" );
                 }
@@ -283,7 +283,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new TypeWithDictionary<TKey, TValue>();
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     TypeWithDictionary<TKey, TValue> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "_", obj.Dictionary );
                 }
 
-                public override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Dictionary = initializationArguments.GetValue<Dictionary<TKey, TValue>>( "_" );
                 }
@@ -310,12 +310,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new LinkedListImpl();
                 }
 
-                public override void SerializeObject( LinkedListImpl obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( LinkedListImpl obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "_", obj.Head );
                 }
 
-                public override void DeserializeFields( LinkedListImpl obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( LinkedListImpl obj, IArgumentsReader initializationArguments )
                 {
                     obj.Head = initializationArguments.GetValue<Node<int>>( "_" );
                 }
@@ -341,13 +341,13 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Node<T>( constructorArguments.GetValue<T>( "v" )! );
                 }
 
-                public override void SerializeObject( Node<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Node<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "v", obj.Value );
                     initializationArguments.SetValue( "next", obj.Next );
                 }
 
-                public override void DeserializeFields( Node<T> obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Node<T> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Next = initializationArguments.GetValue<Node<T>>( "next" );
                 }

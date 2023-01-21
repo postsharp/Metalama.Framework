@@ -43,12 +43,12 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Gets an annotation that means that a qualified type must be simplified. This is equivalent to <c>Simplifier.Annotation</c>.
         /// </summary>
-        public static SyntaxAnnotation SimplifyAnnotation
+        internal static SyntaxAnnotation SimplifyAnnotation
         {
-            get => _simplifier ?? throw new InvalidOperationException();
+            private get => _simplifier ?? throw new InvalidOperationException();
 
             // This property must be set by the engine assembly because we don't want a dependency on workspaces here.
-            internal set => _simplifier = value;
+            set => _simplifier = value;
         }
 
         public static T WithSimplifierAnnotation<T>( this T node ) where T : SyntaxNode => node.WithAdditionalAnnotations( _simplifier );
@@ -100,17 +100,6 @@ namespace Metalama.Framework.Engine.Formatting
             => node?.WithAnnotationInsideBlock( annotation );
 
         /// <summary>
-        /// Annotates a syntax node with an annotation meaning that the syntax node and all its children are generated, except whose marked with <see cref="WithSourceCodeAnnotation{T}"/>.
-        /// The annotation is typically obtained from <see cref="AspectWeaverContext.GeneratedCodeAnnotation"/>, but it can also
-        /// be created from <see cref="MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation"/>.
-        /// </summary>
-        /// <param name="node">The input node.</param>
-        /// <param name="annotation">A <see cref="SyntaxAnnotation"/> of kind <see cref="MetalamaCompilerAnnotations.GeneratedCodeAnnotationKind"/>.</param>
-        /// <returns>The annotated node.</returns>
-        public static SyntaxTrivia WithGeneratedCodeAnnotation( this SyntaxTrivia node, SyntaxAnnotation annotation )
-            => node.WithAdditionalAnnotations( annotation );
-
-        /// <summary>
         /// Annotates a syntax node with an annotation meaning that the syntax node and all its children are user code.
         /// The annotation is typically obtained from <see cref="AspectWeaverContext.GeneratedCodeAnnotation"/>, but it can also
         /// be created from <see cref="MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation"/>.
@@ -121,15 +110,6 @@ namespace Metalama.Framework.Engine.Formatting
         public static T? WithSourceCodeAnnotation<T>( this T? node )
             where T : SyntaxNode
             => node?.WithAnnotationInsideBlock( SourceCodeAnnotation );
-
-        /// <summary>
-        /// Annotates a syntax node with an annotation meaning that the syntax node and all its children are user code.
-        /// The annotation is typically obtained from <see cref="AspectWeaverContext.GeneratedCodeAnnotation"/>, but it can also
-        /// be created from <see cref="MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation"/>.
-        /// </summary>
-        /// <param name="node">The input node.</param>
-        /// <returns>The annotated node.</returns>
-        public static SyntaxTrivia WithSourceCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( SourceCodeAnnotation );
 
         [return: NotNullIfNotNull( "node" )]
         internal static T WithSourceCodeAnnotationIfNotGenerated<T>( this T node )

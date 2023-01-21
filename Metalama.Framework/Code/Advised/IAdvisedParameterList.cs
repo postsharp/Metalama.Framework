@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using System;
 using System.Collections.Generic;
 
@@ -12,6 +13,8 @@ namespace Metalama.Framework.Code.Advised
     /// </summary>
     public interface IAdvisedParameterList : IReadOnlyList<IAdvisedParameter>
     {
+        IParameterList AsParameterList();
+
         IAdvisedParameter this[ string name ] { get; }
 
         IEnumerable<IAdvisedParameter> OfType( IType type );
@@ -19,5 +22,7 @@ namespace Metalama.Framework.Code.Advised
         IEnumerable<IAdvisedParameter> OfType( Type type );
 
         IAdvisedParameterValueList Values { get; }
+
+        new int Count { get; }
     }
 }

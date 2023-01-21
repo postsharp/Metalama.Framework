@@ -50,6 +50,8 @@ namespace Metalama.AspectWorkbench.ViewModels
 
         public FlowDocument? CompiledTemplateDocument { get; set; }
 
+        // TODO: Check why this is not used 
+        // Resharper disable UnusedAutoPropertyAccessor.Global
         public string? CompiledTemplatePath { get; set; }
 
         public FlowDocument? TransformedCodeDocument { get; set; }

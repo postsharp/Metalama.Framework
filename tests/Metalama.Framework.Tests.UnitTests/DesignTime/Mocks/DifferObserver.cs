@@ -12,13 +12,11 @@ internal sealed class DifferObserver : IDifferObserver
 
     public int ComputeNonIncrementalChangesEventCount { get; private set; }
 
-    public int MergeCompilationChangesEventCounts { get; private set; }
-
     void IDifferObserver.OnNewCompilation() => this.NewCompilationEventCount++;
 
     void IDifferObserver.OnComputeIncrementalChanges() => this.ComputeIncrementalChangesEventCount++;
 
     void IDifferObserver.OnComputeNonIncrementalChanges() => this.ComputeNonIncrementalChangesEventCount++;
 
-    public void OnMergeCompilationChanges() => this.MergeCompilationChangesEventCounts++;
+    public void OnMergeCompilationChanges() { }
 }

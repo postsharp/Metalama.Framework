@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationContext
+public sealed class CompilationContext : ICompilationServices
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
@@ -33,6 +33,8 @@ public sealed class CompilationContext
     internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
 
     public Compilation Compilation { get; }
+
+    IReflectionMapper ICompilationServices.ReflectionMapper => this.ReflectionMapper;
 
     [Memo]
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );

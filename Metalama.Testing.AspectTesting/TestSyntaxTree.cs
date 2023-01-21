@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
@@ -41,6 +42,7 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
+        [UsedImplicitly]
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
 
         /// <summary>
@@ -54,6 +56,7 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the full path of the code for the output compile-time syntax tree.
         /// </summary>
+        [UsedImplicitly]
         public string? OutputCompileTimePath { get; private set; }
 
         public string? HtmlInputRunTimePath { get; internal set; }

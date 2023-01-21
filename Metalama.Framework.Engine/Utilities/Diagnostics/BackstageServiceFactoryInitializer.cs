@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
     {
         private static BackstageInitializationOptions? _options;
 
+        [PublicAPI]
         public static bool IsInitialized => _options != null;
 
         public static void Initialize( BackstageInitializationOptions options )

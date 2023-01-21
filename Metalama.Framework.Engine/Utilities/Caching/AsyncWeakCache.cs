@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code.Collections;
 using System;
 using System.Collections.Concurrent;
@@ -40,6 +41,7 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
 
     public bool TryAdd( TKey key, TValue value ) => this.TryAdd( key, value, default );
 
+    [PublicAPI]
     public TValue GetOrAdd( TKey key, Func<TKey, CancellationToken, TValue> func, CancellationToken cancellationToken = default )
     {
         if ( this.TryGetValue( key, out var value ) )
@@ -133,6 +135,7 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
         }
     }
 
+    [PublicAPI]
     public bool TryAdd( TKey key, TValue value, CancellationToken cancellationToken )
     {
         if ( this.TryGetValue( key, out _ ) )

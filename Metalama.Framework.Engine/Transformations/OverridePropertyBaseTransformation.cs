@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrIndexerTransformation
 {
-    public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
+    private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
     protected OverridePropertyBaseTransformation(
         Advice advice,

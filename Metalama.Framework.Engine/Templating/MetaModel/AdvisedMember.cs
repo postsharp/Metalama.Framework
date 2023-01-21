@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public ExecutionScope ExecutionScope => this.Underlying.ExecutionScope;
 
-        public UserReceiver This
+        protected UserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,
                 new AspectReferenceSpecification( UserCodeExecutionContext.Current.AspectLayerId!.Value, AspectReferenceOrder.Base ) );

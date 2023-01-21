@@ -14,7 +14,6 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
         GenericArguments = 1 << 4,
         ParameterTypes = 1 << 5,
         ParameterModifiers = 1 << 6,
-        FieldPromotions = 1 << 7,
 
         MethodSignature = Name | GenericParameterCount | GenericArguments | ParameterTypes | ParameterModifiers,
         FunctionPointer = GenericParameterCount | GenericArguments | ParameterTypes | ParameterModifiers,

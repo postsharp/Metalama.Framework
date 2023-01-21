@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class MethodReturnParameter : ReturnParameter
     {
-        public Method DeclaringMethod { get; }
+        private Method DeclaringMethod { get; }
 
         public override IHasParameters DeclaringMember => this.DeclaringMethod;
 

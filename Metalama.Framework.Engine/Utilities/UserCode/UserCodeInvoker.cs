@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CompileTime;
@@ -279,6 +280,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return this.InvokeAsync( Wrapper, context );
         }
 
+        [PublicAPI]
         public async Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )
@@ -294,6 +296,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
         }
 
+        [PublicAPI]
         public async Task<bool> TryInvokeAsync( Func<Task> func, UserCodeExecutionContext context )
         {
             async Task<bool> Wrapper()
@@ -308,6 +311,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return result.IsSuccessful;
         }
 
+        [PublicAPI]
         public async Task<FallibleResult<TResult>> TryInvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )

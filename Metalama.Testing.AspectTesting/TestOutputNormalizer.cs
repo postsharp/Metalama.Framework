@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -7,6 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Testing.AspectTesting;
 
+[PublicAPI]
 public static class TestOutputNormalizer
 {
     private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );

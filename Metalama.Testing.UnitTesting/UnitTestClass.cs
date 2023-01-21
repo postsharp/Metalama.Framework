@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
@@ -61,6 +62,7 @@ namespace Metalama.Testing.UnitTesting
         /// <summary>
         /// Creates a collection of additional services that can then be passed to <see cref="CreateTestContext(IAdditionalServiceCollection)"/>.
         /// </summary>
+        [PublicAPI]
         protected static IAdditionalServiceCollection CreateAdditionalServiceCollection( params IService[] services )
         {
             return new AdditionalServiceCollection( services );

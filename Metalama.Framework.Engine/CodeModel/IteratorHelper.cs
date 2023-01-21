@@ -31,6 +31,8 @@ internal static partial class IteratorHelper
             _ => false
         };
 
+    // TODO: Check why this is not used.
+    // Resharper disable once UnusedMember.Global
     public static bool IsIteratorMethod( AccessorDeclarationSyntax accessor )
         => accessor switch
         {

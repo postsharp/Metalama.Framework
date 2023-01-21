@@ -12,7 +12,5 @@ namespace Metalama.Framework.Engine.Templating
         SyntaxNode AddLocationAnnotation( SyntaxNode originalNode, SyntaxNode transformedNode );
 
         SyntaxToken AddLocationAnnotation( SyntaxToken originalToken );
-
-        SyntaxNode AddLocationAnnotationsRecursive( SyntaxNode node );
     }
 }

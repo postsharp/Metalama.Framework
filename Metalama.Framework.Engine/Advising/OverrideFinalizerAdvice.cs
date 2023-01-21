@@ -11,6 +11,9 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
+    // TODO: Check why this class is unused.
+    // ReSharper disable once UnusedType.Global
+
     internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod>
     {
         private readonly BoundTemplateMethod _boundTemplate;

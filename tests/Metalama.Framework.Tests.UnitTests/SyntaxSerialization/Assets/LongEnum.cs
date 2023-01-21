@@ -2,7 +2,9 @@
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
-    public enum LongEnum
+    // Resharper disable UnusedMember.Global
+
+    internal enum LongEnum
     {
         First,
         Second

@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.RunTime;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -153,8 +152,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
-
-        public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public override void Freeze()
         {

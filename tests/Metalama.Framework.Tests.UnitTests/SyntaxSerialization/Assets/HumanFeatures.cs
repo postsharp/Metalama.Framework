@@ -8,8 +8,6 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
     internal enum HumanFeatures : byte
     {
         Tall = 1,
-        Old = 2,
-        Smart = 4,
         Wise = 8
     }
 }

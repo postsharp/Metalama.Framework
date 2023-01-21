@@ -25,24 +25,15 @@ namespace Metalama.Framework.Engine.Templating
 
             public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
 
-            public ExpressionSyntax Default
-                => this.LiteralExpression(
-                    this.Kind( SyntaxKind.DefaultLiteralExpression ),
-                    this.Token( this.Kind( SyntaxKind.DefaultKeyword ) ) );
-
             public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
 
-#pragma warning disable CA1822 // Mark members as static
-            public TypeSyntax Type( ITypeSymbol type )
+            public static TypeSyntax Type( ITypeSymbol type )
                 => type switch
                 {
                     IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
                         OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
                     _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
                 };
-
-            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => OurSyntaxGenerator.CompileTime.TypeOrNamespace( type );
-#pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
             {

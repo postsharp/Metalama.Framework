@@ -9,6 +9,7 @@ using Xunit;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable PropertyCanBeMadeInitOnly.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable UnusedType.Global
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
@@ -241,12 +242,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class SimpleClassSerializer : ReferenceTypeSerializer<SimpleClass>
             {
-                public override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "x", obj.X );
                 }
 
-                public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
 
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {

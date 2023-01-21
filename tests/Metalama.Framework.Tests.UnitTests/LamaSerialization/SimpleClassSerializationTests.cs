@@ -377,7 +377,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new SimpleExplicitlySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     SimpleExplicitlySerializedClass<T> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -385,7 +385,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     constructorArguments.SetValue( "_", obj.Value );
                 }
 
-                public override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
@@ -452,7 +452,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey )! );
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     ExplicitlySerializedClass<TForCtor, TForField> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -462,7 +462,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "n", obj.Nullable );
                 }
 
-                public override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Field = initializationArguments.GetValue<TForField>( _fieldKey );
                     obj.Nullable = initializationArguments.GetValue<int?>( "n" );

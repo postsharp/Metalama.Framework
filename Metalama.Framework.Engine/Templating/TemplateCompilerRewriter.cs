@@ -717,7 +717,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
                             nameof(ITemplateSyntaxFactory.Serialize),
-                            this.MetaSyntaxFactory.Type( expressionType ) ),
+                            MetaSyntaxFactoryImpl.Type( expressionType ) ),
                         ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
                 }
                 else
@@ -1026,7 +1026,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var replacementNode = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            this.MetaSyntaxFactory.Type( method.ContainingType ),
+                            MetaSyntaxFactoryImpl.Type( method.ContainingType ),
                             IdentifierName( method.Name ) ),
                         ArgumentList( SeparatedList( arguments ) ) )
                     .WithSymbolAnnotationsFrom( node )
