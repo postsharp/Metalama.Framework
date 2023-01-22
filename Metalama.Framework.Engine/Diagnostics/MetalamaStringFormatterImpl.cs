@@ -2,10 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Globalization;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -14,17 +14,9 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// <summary>
     /// Formats arguments passed to a diagnostic.
     /// </summary>
-    public sealed class MetalamaStringFormatter : CultureInfo, ICustomFormatter
+    internal sealed class MetalamaStringFormatterImpl : MetalamaStringFormatter
     {
-        internal static readonly MetalamaStringFormatter Instance = new();
-
-        private MetalamaStringFormatter() : base( InvariantCulture.Name ) { }
-
-        public override object? GetFormat( Type? formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
-
-        public static string Format( FormattableString message ) => message.ToString( Instance );
-
-        public string Format( string? format, object? arg, IFormatProvider? formatProvider )
+        public override string Format( string? format, object? arg, IFormatProvider? formatProvider )
         {
             try
             {
