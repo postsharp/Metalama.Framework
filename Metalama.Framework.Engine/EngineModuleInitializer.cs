@@ -12,7 +12,6 @@ namespace Metalama.Framework.Engine;
 
 [PublicAPI]
 public static class EngineModuleInitializer
-
 {
     static EngineModuleInitializer()
     {
