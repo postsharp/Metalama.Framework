@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         static CompilationModel()
         {
-            ModuleInitializer.EnsureInitialized();
+            EngineModuleInitializer.EnsureInitialized();
         }
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
