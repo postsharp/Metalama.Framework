@@ -18,6 +18,8 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         protected SerializationTestsBase()
         {
+            EngineModuleInitializer.EnsureInitialized();
+
             var globalServiceProvider = ServiceProvider<IGlobalService>.Empty;
             globalServiceProvider = globalServiceProvider.WithService( new UserCodeInvoker( globalServiceProvider ) );
             var serviceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( globalServiceProvider );
