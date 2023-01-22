@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriter,
-                this.ServiceProvider.Underlying,
+                this.ServiceProvider,
                 this.GetCancellationToken( cancellationToken ) );
 
         /// <summary>

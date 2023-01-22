@@ -25,7 +25,7 @@ public static class ServiceProviderFactory
 
     static ServiceProviderFactory()
     {
-        ModuleInitializer.EnsureInitialized();
+        EngineModuleInitializer.EnsureInitialized();
     }
 
     /// <summary>

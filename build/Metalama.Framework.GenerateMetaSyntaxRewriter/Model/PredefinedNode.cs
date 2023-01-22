@@ -5,5 +5,6 @@
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
     // Must be public.
+    // Resharper disable MemberCanBeInternal
     public sealed class PredefinedNode : TreeType { }
 }

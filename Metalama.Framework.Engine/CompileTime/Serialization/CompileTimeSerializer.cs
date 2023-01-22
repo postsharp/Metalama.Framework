@@ -7,6 +7,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class CompileTimeSerializer
     {
+        static CompileTimeSerializer()
+        {
+            EngineModuleInitializer.EnsureInitialized();
+        }
+        
         private readonly ProjectServiceProvider _serviceProvider;
 
         /// <summary>
