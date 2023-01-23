@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.SerializationError
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.SerializationErrorWeaklyTyped
 {
     [CompileTime]
     class Aspect
@@ -11,7 +11,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.SerializationE
         [TestTemplate]
         dynamic? Template()
         {
-            Console.WriteLine(meta.RunTime(meta.Target.Method));
+            object method = meta.Target.Method;
+            Console.WriteLine(meta.RunTime(method));
             return default;
         }
     }

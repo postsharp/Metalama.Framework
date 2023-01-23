@@ -413,5 +413,13 @@ namespace Metalama.Framework.Engine.Templating
                 "'{0}' cannot be partial because it is a template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ITypeSymbol, string)> CompileTimeTypeInInvocationOfRuntimeMethod
+            = new(
+                "LAMA0253",
+                "Compile-time-only types cannot be used in invocations of run-time methods.",
+                "Compile-time-only type '{0}' cannot be used in the invocation of run-time method '{1}'.",
+                _category,
+                Error );
     }
 }

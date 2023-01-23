@@ -1012,12 +1012,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     parameter = null;
                 }
 
-                var argumentType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
+                var parameterType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
                 ExpressionSyntax transformedArgumentValue;
 
                 // Transform the argument value.
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( argumentType ) )
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType ) )
                 {
                     // dynamic or dynamic[]
 
@@ -1033,6 +1033,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"argument of the run-time method '{node.Expression}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
+                    }
+
+                    var argumentType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
+
+                    if ( argumentType != null && this._symbolScopeClassifier.GetTemplatingScope( argumentType ) == TemplatingScope.CompileTimeOnly )
+                    {
+                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod, argument.Expression, (argumentType, node.Expression.ToString()) );
                     }
                 }
                 else
