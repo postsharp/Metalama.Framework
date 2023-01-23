@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
@@ -35,6 +36,7 @@ public readonly struct TestableCancellationToken
         return token._cancellationToken;
     }
 
+    [DebuggerStepThrough]
     internal TestableCancellationToken( CancellationToken cancellationToken, TestableCancellationTokenSource? testableSource = null )
     {
         this._cancellationToken = cancellationToken;
