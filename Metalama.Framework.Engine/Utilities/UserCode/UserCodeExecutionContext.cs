@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
 
-        internal CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
+        private CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
 
         internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -211,7 +211,13 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.MetaApi );
 
         internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
-            => new(
+        {
+            if ( ReferenceEquals( this._compilation, compilation ) && diagnostics == this.Diagnostics )
+            {
+                return this;
+            }
+
+            return new UserCodeExecutionContext(
                 this.ServiceProvider,
                 diagnostics,
                 this.InvokedMember,
@@ -221,6 +227,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this._throwOnUnsupportedDependencies,
                 new SyntaxBuilderImpl( compilation ),
                 this.MetaApi );
+        }
 
         internal void AddDependency( IDeclaration declaration )
         {

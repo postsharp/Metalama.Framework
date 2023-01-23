@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var declaredSymbol = (INamedTypeSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) );
+                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
                 if ( !declaredSymbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, serializableInterface ) ) )
                 {

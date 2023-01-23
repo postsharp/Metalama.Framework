@@ -12,14 +12,14 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
 internal sealed class AddAttributeCodeAction : ICodeAction
 {
+    private readonly AttributeConstruction _attribute;
+
     public IDeclaration TargetDeclaration { get; }
-
-    public AttributeConstruction Attribute { get; }
-
+    
     public AddAttributeCodeAction( IDeclaration targetDeclaration, AttributeConstruction attribute )
     {
         this.TargetDeclaration = targetDeclaration;
-        this.Attribute = attribute;
+        this._attribute = attribute;
     }
 
     public async Task ExecuteAsync( CodeActionContext context )
@@ -46,7 +46,7 @@ internal sealed class AddAttributeCodeAction : ICodeAction
         var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
         var generationContext = SyntaxGenerationContext.Create( context.CompilationContext, originalNode );
-        var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this.Attribute );
+        var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this._attribute );
 
         var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );
 

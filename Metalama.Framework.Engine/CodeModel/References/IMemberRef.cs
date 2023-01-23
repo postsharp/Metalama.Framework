@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using System.Reflection;
 
 // ReSharper disable UnusedMemberInSuper.Global
 
@@ -18,7 +17,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Gets the member name without resolving to the target.
         /// </summary>
-        [Obfuscation( Exclude = true )] // Working around an obfuscator bug. 
         string Name { get; }
     }
 }

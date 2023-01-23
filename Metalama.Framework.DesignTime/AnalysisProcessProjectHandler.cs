@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -31,9 +32,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly QuietPeriodTimer _dirtyProjectQuietPeriodTimer;
+    private readonly ITaskRunner _taskRunner;
+
     private volatile bool _disposed;
     private volatile TestableCancellationTokenSource? _currentCancellationSource;
-
     private long _pipelineSnapshotIdWhenLastDirty;
 
     protected SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
@@ -45,6 +47,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         var options = serviceProvider.GetRequiredService<IGlobalOptions>();
 
+        this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         this._dirtyProjectQuietPeriodTimer = new QuietPeriodTimer( options.QuietPeriodTimerDelay, this.Logger );
         this._dirtyProjectQuietPeriodTimer.Tick += this.OnDirtyProjectDelayed;
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -138,7 +141,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             this.Logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectKey}'. Need to generate them synchronously." );
 
-            if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
+            if ( this._taskRunner.RunSynchronously( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
                 // Publish the changes asynchronously.
                 // But do not make publishing cancellable because the user process expects the source to be published from the moment
@@ -172,12 +175,20 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                 return false;
             }
 
-            var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
+            var compilationResult = await pipeline.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken );
 
             if ( !compilationResult.IsSuccessful )
             {
-                this.Logger.Warning?.Log(
-                    $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+                if ( this.Logger.Warning != null )
+                {
+                    this.Logger.Warning.Log(
+                        $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed with {compilationResult.Diagnostics.Length} diagnostics." );
+
+                    foreach ( var diag in compilationResult.Diagnostics )
+                    {
+                        this.Logger.Warning.Log( diag.ToString() );
+                    }
+                }
 
                 this.Logger.Trace?.Log(
                     " Compilation references: " + string.Join(

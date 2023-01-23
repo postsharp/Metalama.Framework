@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class OverrideOperatorTransformation : OverrideMemberTransformation
     {
-        public BoundTemplateMethod BoundTemplate { get; }
+        private BoundTemplateMethod BoundTemplate { get; }
 
         private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
@@ -90,9 +90,9 @@ namespace Metalama.Framework.Engine.Transformations
             return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
-        private BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context )
+        private SyntaxUserExpression CreateProceedExpression( in MemberInjectionContext context )
         {
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 context.AspectReferenceSyntaxProvider.GetOperatorReference(
                     this.ParentAdvice.AspectLayerId,
                     this.OverriddenDeclaration,

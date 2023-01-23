@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -10,10 +11,11 @@ using System;
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// The context object passed to the single parameter of validators added using <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/>.
+    /// The context object passed to the single parameter of validators added using <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences{TValidator}"/>.
     /// </summary>
     /// <seealso href="@validation"/>
     [CompileTime]
+    [PublicAPI]
     public readonly struct ReferenceValidationContext
     {
         private readonly IDiagnosticSink _diagnostics;

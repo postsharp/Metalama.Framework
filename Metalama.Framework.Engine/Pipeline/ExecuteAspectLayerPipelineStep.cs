@@ -25,14 +25,14 @@ namespace Metalama.Framework.Engine.Pipeline;
 internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 {
     private readonly List<AspectInstance> _aspectInstances = new();
-    private readonly ITaskScheduler _taskScheduler;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     public ExecuteAspectLayerPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(
         parent,
         stepId,
         aspectLayer )
     {
-        this._taskScheduler = parent.PipelineConfiguration.ServiceProvider.GetRequiredService<ITaskScheduler>();
+        this._concurrentTaskRunner = parent.PipelineConfiguration.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
     }
 
     public void AddAspectInstance( in ResolvedAspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance.AspectInstance );
@@ -56,7 +56,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         var aspectInstancesOfSameType = new ConcurrentLinkedList<ImmutableArray<AspectInstance>>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
-        await this._taskScheduler.RunInParallelAsync(
+        await this._concurrentTaskRunner.RunInParallelAsync(
             instancesByType,
             t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, aspectInstancesOfSameType, cancellationToken ),
             cancellationToken );

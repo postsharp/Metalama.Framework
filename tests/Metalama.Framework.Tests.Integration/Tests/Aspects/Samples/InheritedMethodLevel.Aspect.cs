@@ -9,12 +9,13 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.InheritedMethodLevel
 {
-    [Inherited]
+    [Inheritable]
     internal class InheritedAspectAttribute : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Hacked!");
+            Console.WriteLine( "Hacked!" );
+
             return meta.Proceed();
         }
     }

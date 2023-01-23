@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
@@ -15,131 +14,123 @@ using System.Linq;
 using System.Threading;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+internal static class ProceedHelper
 {
-    internal static class ProceedHelper
+    public static SyntaxUserExpression CreateProceedDynamicExpression(
+        SyntaxGenerationContext generationContext,
+        ExpressionSyntax invocationExpression,
+        TemplateKind selectedTemplateKind,
+        IMethod overriddenMethod )
     {
-        public static BuiltUserExpression CreateProceedDynamicExpression(
-            SyntaxGenerationContext generationContext,
-            ExpressionSyntax invocationExpression,
-            BoundTemplateMethod template,
-            IMethod overriddenMethod )
-            => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
+        var runtimeAspectHelperType =
+            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
-        public static BuiltUserExpression CreateProceedDynamicExpression(
-            SyntaxGenerationContext generationContext,
-            ExpressionSyntax invocationExpression,
-            TemplateKind selectedTemplateKind,
-            IMethod overriddenMethod )
+        switch ( selectedTemplateKind )
         {
-            var runtimeAspectHelperType =
-                generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
-
-            switch ( selectedTemplateKind )
-            {
-                case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo:
-                    {
-                        // The target method is a yield-based iterator.
-
-                        ExpressionSyntax expression;
-
-                        if ( !(iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator) )
-                        {
-                            // The target method is a non-async iterator.
-                            // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
-
-                            expression =
-                                SyntaxFactory.InvocationExpression(
-                                        SyntaxFactory.MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            runtimeAspectHelperType,
-                                            SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
-                                    .WithArgumentList(
-                                        SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation );
-                        }
-                        else
-                        {
-                            // The target method is an async iterator.
-                            // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
-
-                            expression = GenerateAwaitBufferAsync();
-                        }
-
-                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
-                    }
-
-                case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
-                    {
-                        // The target method is an async method (but not an async iterator).
-                        // Generate: `( await BASE(ARGS) )`.
-
-                        var taskResultType = asyncInfo.ResultType;
-
-                        var awaitExpression = SyntaxFactory.AwaitExpression(
-                            SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
-                            invocationExpression );
-
-                        ExpressionSyntax expression =
-                            overriddenMethod.Compilation.GetCompilationModel()
-                                .Comparers.Default.Equals(
-                                    overriddenMethod.ReturnType,
-                                    overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
-                                ? awaitExpression
-                                : SyntaxFactory.ParenthesizedExpression( awaitExpression )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation );
-
-                        return
-                            new BuiltUserExpression(
-                                expression.WithAdditionalAnnotations( Simplifier.Annotation ),
-                                taskResultType );
-                    }
-
-                case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
-                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
-                    {
-                        var expression = GenerateAwaitBufferAsync();
-
-                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
-                    }
-            }
-
-            // This is a default method, or a non-default template.
-            // Generate: `BASE(ARGS)`
-            return new BuiltUserExpression(
-                invocationExpression,
-                overriddenMethod.ReturnType );
-
-            ExpressionSyntax GenerateAwaitBufferAsync()
-            {
-                var arguments = SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) );
-
-                var cancellationTokenParameter = overriddenMethod.Parameters
-                    .OfParameterType<CancellationToken>()
-                    .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
-
-                if ( cancellationTokenParameter != null )
+            case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIteratorMethod: true } iteratorInfo:
                 {
-                    arguments = arguments.AddArguments( SyntaxFactory.Argument( SyntaxFactory.IdentifierName( cancellationTokenParameter.Name ) ) );
+                    // The target method is a yield-based iterator.
+
+                    ExpressionSyntax expression;
+
+                    if ( !(iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator) )
+                    {
+                        // The target method is a non-async iterator.
+                        // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
+
+                        expression =
+                            SyntaxFactory.InvocationExpression(
+                                    SyntaxFactory.MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        runtimeAspectHelperType,
+                                        SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                                .WithArgumentList(
+                                    SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
+                                .WithAdditionalAnnotations( Simplifier.Annotation );
+                    }
+                    else
+                    {
+                        // The target method is an async iterator.
+                        // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
+
+                        expression = GenerateAwaitBufferAsync();
+                    }
+
+                    return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
                 }
 
-                var bufferExpression =
-                    SyntaxFactory.InvocationExpression(
-                            SyntaxFactory.MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                runtimeAspectHelperType,
-                                SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
-                        .WithArgumentList( arguments )
-                        .WithAdditionalAnnotations( Simplifier.Annotation );
+            case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
+                {
+                    // The target method is an async method (but not an async iterator).
+                    // Generate: `( await BASE(ARGS) )`.
 
-                var expression = SyntaxFactory.ParenthesizedExpression(
-                        SyntaxFactory.AwaitExpression(
-                            SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
-                            bufferExpression ) )
+                    var taskResultType = asyncInfo.ResultType;
+
+                    var awaitExpression = SyntaxFactory.AwaitExpression(
+                        SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                        invocationExpression );
+
+                    ExpressionSyntax expression =
+                        overriddenMethod.Compilation.GetCompilationModel()
+                            .Comparers.Default.Equals(
+                                overriddenMethod.ReturnType,
+                                overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
+                            ? awaitExpression
+                            : SyntaxFactory.ParenthesizedExpression( awaitExpression )
+                                .WithAdditionalAnnotations( Simplifier.Annotation );
+
+                    return
+                        new SyntaxUserExpression(
+                            expression.WithAdditionalAnnotations( Simplifier.Annotation ),
+                            taskResultType );
+                }
+
+            case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
+                { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
+                {
+                    var expression = GenerateAwaitBufferAsync();
+
+                    return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
+                }
+        }
+
+        // This is a default method, or a non-default template.
+        // Generate: `BASE(ARGS)`
+        return new SyntaxUserExpression(
+            invocationExpression,
+            overriddenMethod.ReturnType );
+
+        ExpressionSyntax GenerateAwaitBufferAsync()
+        {
+            var arguments = SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) );
+
+            var cancellationTokenParameter = overriddenMethod.Parameters
+                .OfParameterType<CancellationToken>()
+                .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
+
+            if ( cancellationTokenParameter != null )
+            {
+                arguments = arguments.AddArguments( SyntaxFactory.Argument( SyntaxFactory.IdentifierName( cancellationTokenParameter.Name ) ) );
+            }
+
+            var bufferExpression =
+                SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            runtimeAspectHelperType,
+                            SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
+                    .WithArgumentList( arguments )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
-                return expression;
-            }
+            var expression = SyntaxFactory.ParenthesizedExpression(
+                    SyntaxFactory.AwaitExpression(
+                        SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                        bufferExpression ) )
+                .WithAdditionalAnnotations( Simplifier.Annotation );
+
+            return expression;
         }
     }
 }

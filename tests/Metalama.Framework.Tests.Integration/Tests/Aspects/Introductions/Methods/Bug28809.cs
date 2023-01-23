@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Template]
         protected virtual void OnPropertyChanged( string propertyName )
         {
-            var @event = (IEvent) meta.Tags["event"]!;
+            var @event = (IEvent)meta.Tags["event"]!;
             @event.Invokers.Final.Raise( meta.This, meta.This, new PropertyChangedEventArgs( propertyName ) );
         }
     }

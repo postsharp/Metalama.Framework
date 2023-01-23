@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         static CompilationModel()
         {
-            ModuleInitializer.EnsureInitialized();
+            EngineModuleInitializer.EnsureInitialized();
         }
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly AspectRepository _aspectRepository;
+        internal AspectRepository AspectRepository { get; }
 
         private readonly DerivedTypeIndex _derivedTypes;
 
@@ -58,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public DeclarationFactory Factory { get; }
 
-        IAspectRepository ICompilationInternal.AspectRepository => this._aspectRepository;
+        IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
         public IProject Project { get; }
 
@@ -66,16 +65,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public PartialCompilation PartialCompilation { get; }
 
-        public MetricManager MetricManager { get; }
+        internal MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository ) : base(
-            partialCompilation.Compilation.Assembly )
+        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
-            this._aspectRepository = aspectRepository ?? new IncrementalAspectRepository();
+            this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -139,7 +137,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.AddTransformation( transformation );
                 }
 
-                this.IsMutable = false;
+                this._isMutable = false;
 
                 // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
@@ -162,13 +160,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( aspectInstances != null )
             {
-                this._aspectRepository = this._aspectRepository.WithAspectInstances( aspectInstances );
+                this.AspectRepository = this.AspectRepository.WithAspectInstances( aspectInstances );
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable ) : base( prototype.Symbol )
+        private CompilationModel( CompilationModel prototype, bool mutable )
         {
-            this.IsMutable = mutable;
+            this._isMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
@@ -193,9 +191,14 @@ namespace Metalama.Framework.Engine.CodeModel
             this._depthsCache = prototype._depthsCache;
             this._redirectionCache = prototype._redirectionCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
-            this._aspectRepository = prototype._aspectRepository;
+            this.AspectRepository = prototype.AspectRepository;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
+        }
+
+        private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository ) : this( prototype, false )
+        {
+            this.AspectRepository = aspectRepository;
         }
 
         internal CompilationModel WithTransformationsAndAspectInstances(
@@ -209,6 +212,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return new CompilationModel( this, introducedDeclarations, aspectInstances );
         }
+
+        internal CompilationModel WithAspectRepository( AspectRepository aspectRepository )
+            => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository );
 
         [Memo]
         public INamedTypeCollection Types
@@ -244,15 +250,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
-        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
+        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
+            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
         }
 
-        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
-            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
+        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
+            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), options );
 
         public int Revision { get; }
 
@@ -268,7 +274,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this;
 
-        public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
+        internal IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allMemberAttributesByTypeName[AttributeHelper.GetShortName( type.Name )]
                 .Select(
                     a =>
@@ -338,7 +344,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( namedType.DeclaringAssembly.IsExternal )
             {
-                throw new InvalidOperationException( $"Cannot compute the depth of '{namedType.FullName}' because it is an external type." );
+                return 0;
             }
 
             var reference = namedType.ToTypedRef<IDeclaration>();
@@ -394,7 +400,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 
@@ -403,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 
-        public string? Name => this.RoslynCompilation.AssemblyName;
+        internal string? Name => this.RoslynCompilation.AssemblyName;
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
@@ -414,16 +420,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclaration OriginalDefinition => this;
 
         internal GenericMap EmptyGenericMap { get; }
-
-        public bool ContainsType( INamedTypeSymbol type )
-        {
-            if ( this.PartialCompilation.IsPartial && !this.PartialCompilation.Types.Contains( type ) )
-            {
-                return false;
-            }
-
-            return this.CompilationContext.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
-        }
 
         bool IAssembly.IsExternal => false;
 
@@ -438,11 +434,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        public CompilationModel CreateMutableClone() => new( this, true );
+        internal CompilationModel CreateMutableClone() => new( this, true );
 
-        public bool Freeze() => this.IsMutable = false;
+        internal void Freeze() => this._isMutable = false;
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+
+        [Memo]
+        public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
     }
 }

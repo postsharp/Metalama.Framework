@@ -42,17 +42,11 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
+                     && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-                    {
-                        members.Add( this.GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
-                    }
-                    else
-                    {
-                        members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol ) );
-                    }
+                    members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -180,7 +174,7 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) )
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
-        private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+        private static EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
             EqualsValueClauseSyntax? initializerExpression;
 
@@ -202,7 +196,8 @@ namespace Metalama.Framework.Engine.Linking
                             .Body.AssertNotNull()
                             .Statements.Single();
 
-                    var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
+                    var expression = ((InvocationExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).ArgumentList.Arguments[0]
+                        .Expression;
 
                     initializerExpression = EqualsValueClause( expression );
 
@@ -217,8 +212,9 @@ namespace Metalama.Framework.Engine.Linking
             return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
         }
 
-        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
-            => FieldDeclaration(
+        // Event backing field is intentionally an event field to handle thread-safety.
+        private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
+            => EventFieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
                         ? TokenList(
@@ -237,13 +233,58 @@ namespace Metalama.Framework.Engine.Linking
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetOriginalImplEvent(
+            EventDeclarationSyntax @event,
+            IEventSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
+            var existingAccessorList = @event.AccessorList.AssertNotNull();
+
+            var transformedAccessorList =
+                existingAccessorList
+                    .WithAccessors(
+                        List(
+                            existingAccessorList.Accessors.SelectAsArray(
+                                a =>
+                                    TransformAccessor(
+                                        a,
+                                        a.Kind() switch
+                                        {
+                                            SyntaxKind.AddAccessorDeclaration => symbol.AddMethod.AssertNotNull(),
+                                            SyntaxKind.RemoveAccessorDeclaration => symbol.RemoveMethod.AssertNotNull(),
+                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
+                                        } ) ) ) )
+                    .WithSourceCodeAnnotation();
+
             return this.GetSpecialImplEvent(
                 @event.Type,
-                @event.AccessorList.AssertNotNull().WithSourceCodeAnnotation(),
+                transformedAccessorList.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
+
+            AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
+            {
+                var semantic = accessorSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                var context = new InliningContextIdentifier( semantic );
+
+                var substitutedBody =
+                    accessorDeclaration.Body != null
+                        ? (BlockSyntax) RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        : null;
+
+                var substitutedExpressionBody =
+                    accessorDeclaration.ExpressionBody != null
+                        ? (ArrowExpressionClauseSyntax) RewriteBody(
+                            accessorDeclaration.ExpressionBody,
+                            accessorSymbol,
+                            new SubstitutionContext( this, generationContext, context ) )
+                        : null;
+
+                return
+                    accessorDeclaration
+                        .WithBody( substitutedBody )
+                        .WithExpressionBody( substitutedExpressionBody );
+            }
         }
 
         private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )

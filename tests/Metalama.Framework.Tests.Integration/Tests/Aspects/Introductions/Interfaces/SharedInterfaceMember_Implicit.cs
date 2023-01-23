@@ -10,32 +10,30 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Share
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface1));
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface2));
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface1) );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2) );
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         public void Method()
         {
-            Console.WriteLine("Interface member.");
+            Console.WriteLine( "Interface member." );
         }
     }
 
-    public interface IInterface1 
+    public interface IInterface1
     {
         void Method();
     }
 
-    public interface IInterface2 
+    public interface IInterface2
     {
         void Method();
     }
 
     // <target>
     [Introduction]
-    public class TargetClass 
-    {
-    }
+    public class TargetClass { }
 }

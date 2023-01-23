@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private readonly bool _ownsDomain;
 
-        public IProjectOptions ProjectOptions { get; }
+        protected IProjectOptions ProjectOptions { get; }
 
         protected CompileTimeDomain Domain { get; }
 

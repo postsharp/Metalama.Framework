@@ -25,7 +25,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
     public DesignTimeClassificationService() : this(
         DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeUserProcessServiceProviderFactory>() ) { }
 
-    public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
+    private DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
@@ -45,7 +45,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
             return EmptyDesignTimeClassifiedTextCollection.Instance;
         }
 
-        var projectOptions = this._msBuildProjectOptionsFactory.GetInstance( analyzerConfigOptionsProvider );
+        var projectOptions = this._msBuildProjectOptionsFactory.GetProjectOptions( analyzerConfigOptionsProvider );
 
         var classificationService = this._projectClassificationServices.GetOrAdd( projectOptions, this.CreateClassificationService );
 

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -7,6 +8,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -19,6 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// The main compile-time entry point of Metalama. An implementation of Metalama.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public sealed class SourceTransformer : ISourceTransformer
     {
         public void Execute( TransformerContext context )
@@ -37,7 +40,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Try.Metalama ships its own project options using the async-local service provider.
                 var projectOptions = (IProjectOptions?) serviceProvider.GetService( typeof(IProjectOptions) );
 
-                projectOptions ??= MSBuildProjectOptionsFactory.Default.GetInstance(
+                projectOptions ??= MSBuildProjectOptionsFactory.Default.GetProjectOptions(
                     context.AnalyzerConfigOptionsProvider,
                     context.Plugins,
                     context.Options );
@@ -46,9 +49,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
+                var taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
+
                 // ReSharper disable once AccessToDisposedClosure
                 var pipelineResult =
-                    TaskHelper.RunAndWait(
+                    taskRunner.RunSynchronously(
                         () => pipeline.ExecuteAsync(
                             new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                             context.Compilation,

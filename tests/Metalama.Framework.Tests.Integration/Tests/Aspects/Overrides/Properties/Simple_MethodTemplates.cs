@@ -20,6 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public dynamic? GetTemplate()
         {
             Console.WriteLine( "This is the overridden getter." );
+
             return meta.Proceed();
         }
 
@@ -41,12 +42,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
 

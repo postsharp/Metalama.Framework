@@ -41,6 +41,8 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
+    private readonly ITaskRunner _taskRunner;
 
     public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
@@ -50,6 +52,10 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     {
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         serviceProvider = serviceProvider.WithService( this );
+
+        this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+
+        this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
 
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
@@ -69,7 +75,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     {
         try
         {
-            await this.ResumePipelinesAsync( CancellationToken.None );
+            await this.ResumePipelinesAsync( AsyncExecutionContext.Get(), CancellationToken.None );
         }
         catch ( Exception e )
         {
@@ -98,7 +104,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
         else
         {
-            var options = new MSBuildProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions );
+            var options = this._projectOptionsFactory.GetProjectOptions( project );
 
             return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences, cancellationToken );
         }
@@ -162,15 +168,19 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
-    public async ValueTask ResumePipelinesAsync( CancellationToken cancellationToken )
+    public async ValueTask ResumePipelinesAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken )
     {
         Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
 
         // Resuming all pipelines.
+        var tasks = new List<Task>();
+
         foreach ( var pipeline in this._pipelinesByProjectKey.Values )
         {
-            await pipeline.ResumeAsync( cancellationToken );
+            tasks.Add( pipeline.ResumeAsync( executionContext.Fork(), cancellationToken ) );
         }
+
+        await Task.WhenAll( tasks );
     }
 
     private async Task OnExternalBuildCompletedAsync( ProjectKey projectKey )
@@ -181,7 +191,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         {
             // We don't do it concurrently because ResetCacheAsync is most likely synchronous.
 
-            await pipeline.ResetCacheAsync( this._globalCancellationToken );
+            await pipeline.ResetCacheAsync( AsyncExecutionContext.Get(), this._globalCancellationToken );
         }
 
         // In case the event hub got out of sync (which should not happen), we reset its status.
@@ -202,7 +212,9 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         [NotNullWhen( true )] out CompilationResult? compilationResult,
         out ImmutableArray<Diagnostic> diagnostics )
     {
-        var result = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
+        var result = this._taskRunner.RunSynchronously(
+            () => this.ExecuteAsync( options, compilation, AsyncExecutionContext.Get(), cancellationToken ),
+            cancellationToken );
 
         if ( result.IsSuccessful )
         {
@@ -223,6 +235,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         IProjectOptions projectOptions,
         Compilation compilation,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
         // Force to create the pipeline.
@@ -234,24 +247,32 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
 
         // Call the execution method that assumes that the pipeline exists or waits for it.
-        return this.ExecuteAsync( compilation, cancellationToken );
+        return this.ExecuteAsync( compilation, executionContext, cancellationToken );
     }
 
     public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
         => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
+    internal Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+        Compilation compilation,
+        AsyncExecutionContext executionContext,
+        TestableCancellationToken cancellationToken = default )
+        => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
+
     internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
+        bool autoResumePipeline,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
     {
         var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
         if ( pipeline == null )
         {
-            return default;
+            return FallibleResultWithDiagnostics<CompilationResult>.Failed( "Cannot get the pipeline." );
         }
 
-        return await pipeline.ExecuteAsync( compilation, cancellationToken );
+        return await pipeline.ExecuteAsync( compilation, autoResumePipeline, executionContext, cancellationToken );
     }
 
     public virtual void Dispose()
@@ -261,6 +282,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             designTimeAspectPipeline.Dispose();
         }
 
+        this._eventHub.ExternalBuildCompletedEvent.UnregisterHandler( this.OnExternalBuildCompletedAsync );
         this._pipelinesByProjectKey.Clear();
         this.Domain.Dispose();
     }
@@ -313,6 +335,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
     async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> IAspectPipelineConfigurationProvider.GetConfigurationAsync(
         PartialCompilation compilation,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
         var pipeline = await this.GetPipelineAndWaitAsync( compilation.Compilation, cancellationToken );
@@ -322,6 +345,6 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( ImmutableArray<Diagnostic>.Empty );
         }
 
-        return await pipeline.GetConfigurationAsync( compilation, true, cancellationToken );
+        return await pipeline.GetConfigurationAsync( compilation, true, executionContext, cancellationToken );
     }
 }

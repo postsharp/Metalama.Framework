@@ -7,7 +7,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     /// </summary>
     public interface IFieldOrPropertyBuilder : IFieldOrProperty, IFieldOrPropertyOrIndexerBuilder
     {
-        IExpression? InitializerExpression { get; set; }
+        /// <summary>
+        /// Gets or sets the initializer expression (i.e. the expression at the right hand of the equal sign).
+        /// </summary>
+        new IExpression? InitializerExpression { get; set; }
 
         new bool IsRequired { get; set; }
     }

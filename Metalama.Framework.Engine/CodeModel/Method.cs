@@ -18,114 +18,116 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal sealed class Method : MethodBase, IMethodImpl
 {
-    internal sealed class Method : MethodBase, IMethodImpl
+    public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
     {
-        public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
+        if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
         {
-            if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
+            throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
+        }
+    }
+
+    [Memo]
+    public IParameter ReturnParameter => new MethodReturnParameter( this );
+
+    [Memo]
+    public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
+
+    [Memo]
+    public IGenericParameterList TypeParameters
+        => new TypeParameterList(
+            this,
+            this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+                .ToList() );
+
+    [Memo]
+    public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+
+    public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+
+    public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
+
+    [Memo]
+    public IMethod MethodDefinition
+        => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
+
+    public bool IsExtern => this.MethodSymbol.IsExtern;
+
+    public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
+
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+    {
+        var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
+
+        return new Method( symbolWithGenericArguments, this.Compilation );
+    }
+
+    [Memo]
+    public IInvokerFactory<IMethodInvoker> Invokers
+        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+
+    public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
+
+    public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
+
+    [Memo]
+    public override bool IsAsync
+        => this.MethodSymbol.MetadataToken == 0
+            ? this.MethodSymbol.IsAsync
+            : this.MethodSymbol.GetAttributes()
+                .Any( a => a.AttributeConstructor?.ContainingType.Name is nameof(AsyncStateMachineAttribute) or nameof(AsyncIteratorStateMachineAttribute) );
+
+    public IMethod? OverriddenMethod
+    {
+        get
+        {
+            var overriddenMethod = this.MethodSymbol.OverriddenMethod;
+
+            if ( overriddenMethod != null )
             {
-                throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
+                return this.Compilation.Factory.GetMethod( overriddenMethod );
             }
-        }
-
-        [Memo]
-        public IParameter ReturnParameter => new MethodReturnParameter( this );
-
-        [Memo]
-        public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
-
-        [Memo]
-        public IGenericParameterList TypeParameters
-            => new TypeParameterList(
-                this,
-                this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
-                    .ToList() );
-
-        [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
-
-        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
-
-        public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
-
-        [Memo]
-        public IMethod MethodDefinition
-            => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
-
-        public bool IsExtern => this.MethodSymbol.IsExtern;
-
-        public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
-
-        IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
-        {
-            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
-
-            return new Method( symbolWithGenericArguments, this.Compilation );
-        }
-
-        [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
-
-        public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
-
-        public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
-
-        [Memo]
-        public override bool IsAsync
-            => this.MethodSymbol.MetadataToken == 0
-                ? this.MethodSymbol.IsAsync
-                : this.MethodSymbol.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(AsyncStateMachineAttribute) );
-
-        public IMethod? OverriddenMethod
-        {
-            get
+            else
             {
-                var overriddenMethod = this.MethodSymbol.OverriddenMethod;
-
-                if ( overriddenMethod != null )
-                {
-                    return this.Compilation.Factory.GetMethod( overriddenMethod );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        [Memo]
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-            => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
-                .ToList();
-
-        public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
-
-        public IMemberWithAccessors? DeclaringMember
-            => this.MethodSymbol.AssociatedSymbol != null
-                ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IMemberWithAccessors
-                : null;
-
-        public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
-
-        public IMember? OverriddenMember => this.OverriddenMethod;
-
-        public bool IsCanonicalGenericInstance
-        {
-            get
-            {
-                for ( var i = 0; i < this.MethodSymbol.TypeParameters.Length; i++ )
-                {
-                    if ( !this.MethodSymbol.TypeArguments[i].Equals( this.MethodSymbol.TypeParameters[0] ) )
-                    {
-                        return false;
-                    }
-                }
-
-                return this.DeclaringType.IsCanonicalGenericInstance;
+                return null;
             }
         }
     }
+
+    [Memo]
+    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
+        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
+            .ToList();
+
+    public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
+
+    public IMemberWithAccessors? DeclaringMember
+        => this.MethodSymbol.AssociatedSymbol != null
+            ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IMemberWithAccessors
+            : null;
+
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+
+    public IMember? OverriddenMember => this.OverriddenMethod;
+
+    public bool IsCanonicalGenericInstance
+    {
+        get
+        {
+            for ( var i = 0; i < this.MethodSymbol.TypeParameters.Length; i++ )
+            {
+                if ( !this.MethodSymbol.TypeArguments[i].Equals( this.MethodSymbol.TypeParameters[0] ) )
+                {
+                    return false;
+                }
+            }
+
+            return this.DeclaringType.IsCanonicalGenericInstance;
+        }
+    }
+
+    public bool? IsIteratorMethod => IteratorHelper.IsIteratorMethod( this.MethodSymbol );
 }

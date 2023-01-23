@@ -3,21 +3,20 @@
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Linking.Inlining
-{
-    internal abstract class PropertyGetInliner : PropertyInliner
-    {
-        public override bool IsValidForTargetSymbol( ISymbol symbol )
-        {
-            var property =
-                symbol is IPropertySymbol propertySymbol
-                    ? propertySymbol
-                    : symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol associatedProperty }
-                        ? associatedProperty
-                        : null;
+namespace Metalama.Framework.Engine.Linking.Inlining;
 
-            return property is { GetMethod: { } }
-                   && !IteratorHelper.IsIterator( property.GetMethod );
-        }
+internal abstract class PropertyGetInliner : PropertyInliner
+{
+    public override bool IsValidForTargetSymbol( ISymbol symbol )
+    {
+        var property =
+            symbol is IPropertySymbol propertySymbol
+                ? propertySymbol
+                : symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol associatedProperty }
+                    ? associatedProperty
+                    : null;
+
+        return property is { GetMethod: { } }
+               && !IteratorHelper.IsIteratorMethod( property.GetMethod );
     }
 }

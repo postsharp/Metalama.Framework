@@ -88,7 +88,7 @@ namespace MoreLinq
         /// buffered. Each grouping is therefore yielded as soon as it
         /// is complete and before the next grouping occurs.
         /// </remarks>
-        public static IEnumerable<IGrouping<TKey, TSource>> GroupAdjacent<TSource, TKey>(
+        private static IEnumerable<IGrouping<TKey, TSource>> GroupAdjacent<TSource, TKey>(
             this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector,
             IEqualityComparer<TKey>? comparer )
@@ -104,40 +104,6 @@ namespace MoreLinq
             }
 
             return GroupAdjacent( source, keySelector, e => e, comparer );
-        }
-
-        /// <summary>
-        /// Groups the adjacent elements of a sequence according to a
-        /// specified key selector function and projects the elements for
-        /// each group by using a specified function.
-        /// </summary>
-        /// <typeparam name="TSource">The type of the elements of
-        /// <paramref name="source"/>.</typeparam>
-        /// <typeparam name="TKey">The type of the key returned by
-        /// <paramref name="keySelector"/>.</typeparam>
-        /// <typeparam name="TElement">The type of the elements in the
-        /// resulting groupings.</typeparam>
-        /// <param name="source">A sequence whose elements to group.</param>
-        /// <param name="keySelector">A function to extract the key for each
-        /// element.</param>
-        /// <param name="elementSelector">A function to map each source
-        /// element to an element in the resulting grouping.</param>
-        /// <returns>A sequence of groupings where each grouping
-        /// (<see cref="IGrouping{TKey,TElement}"/>) contains the key
-        /// and the adjacent elements (of type <typeparamref name="TElement"/>)
-        /// in the same order as found in the source sequence.</returns>
-        /// <remarks>
-        /// This method is implemented by using deferred execution and
-        /// streams the groupings. The grouping elements, however, are
-        /// buffered. Each grouping is therefore yielded as soon as it
-        /// is complete and before the next grouping occurs.
-        /// </remarks>
-        public static IEnumerable<IGrouping<TKey, TElement>> GroupAdjacent<TSource, TKey, TElement>(
-            this IEnumerable<TSource> source,
-            Func<TSource, TKey> keySelector,
-            Func<TSource, TElement> elementSelector )
-        {
-            return GroupAdjacent( source, keySelector, elementSelector, null );
         }
 
         /// <summary>
@@ -169,7 +135,7 @@ namespace MoreLinq
         /// buffered. Each grouping is therefore yielded as soon as it
         /// is complete and before the next grouping occurs.
         /// </remarks>
-        public static IEnumerable<IGrouping<TKey, TElement>> GroupAdjacent<TSource, TKey, TElement>(
+        private static IEnumerable<IGrouping<TKey, TElement>> GroupAdjacent<TSource, TKey, TElement>(
             this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector,
             Func<TSource, TElement> elementSelector,
@@ -195,123 +161,6 @@ namespace MoreLinq
                 keySelector,
                 elementSelector,
                 CreateGroupAdjacentGrouping,
-                comparer ?? EqualityComparer<TKey>.Default );
-        }
-
-        /// <summary>
-        /// Groups the adjacent elements of a sequence according to a
-        /// specified key selector function. The keys are compared by using
-        /// a comparer and each group's elements are projected by using a
-        /// specified function.
-        /// </summary>
-        /// <typeparam name="TSource">The type of the elements of
-        /// <paramref name="source"/>.</typeparam>
-        /// <typeparam name="TKey">The type of the key returned by
-        /// <paramref name="keySelector"/>.</typeparam>
-        /// <typeparam name="TResult">The type of the elements in the
-        /// resulting sequence.</typeparam>
-        /// <param name="source">A sequence whose elements to group.</param>
-        /// <param name="keySelector">A function to extract the key for each
-        /// element.</param>
-        /// <param name="resultSelector">A function to map each key and
-        /// associated source elements to a result object.</param>
-        /// <returns>A collection of elements of type
-        /// <typeparamref name="TResult" /> where each element represents
-        /// a projection over a group and its key.</returns>
-        /// <remarks>
-        /// This method is implemented by using deferred execution and
-        /// streams the groupings. The grouping elements, however, are
-        /// buffered. Each grouping is therefore yielded as soon as it
-        /// is complete and before the next grouping occurs.
-        /// </remarks>
-        public static IEnumerable<TResult> GroupAdjacent<TSource, TKey, TResult>(
-            this IEnumerable<TSource> source,
-            Func<TSource, TKey> keySelector,
-            Func<TKey, IEnumerable<TSource>, TResult> resultSelector )
-        {
-            if ( source == null )
-            {
-                throw new ArgumentNullException( nameof(source) );
-            }
-
-            if ( keySelector == null )
-            {
-                throw new ArgumentNullException( nameof(keySelector) );
-            }
-
-            if ( resultSelector == null )
-            {
-                throw new ArgumentNullException( nameof(resultSelector) );
-            }
-
-            // This should be removed once the target framework is bumped to something that supports covariance
-            TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
-
-            return GroupAdjacentImpl(
-                source,
-                keySelector,
-                i => i,
-                ResultSelectorWrapper,
-                EqualityComparer<TKey>.Default );
-        }
-
-        /// <summary>
-        /// Groups the adjacent elements of a sequence according to a
-        /// specified key selector function. The keys are compared by using
-        /// a comparer and each group's elements are projected by using a
-        /// specified function.
-        /// </summary>
-        /// <typeparam name="TSource">The type of the elements of
-        /// <paramref name="source"/>.</typeparam>
-        /// <typeparam name="TKey">The type of the key returned by
-        /// <paramref name="keySelector"/>.</typeparam>
-        /// <typeparam name="TResult">The type of the elements in the
-        /// resulting sequence.</typeparam>
-        /// <param name="source">A sequence whose elements to group.</param>
-        /// <param name="keySelector">A function to extract the key for each
-        /// element.</param>
-        /// <param name="resultSelector">A function to map each key and
-        /// associated source elements to a result object.</param>
-        /// <param name="comparer">An <see cref="IEqualityComparer{TKey}"/> to
-        /// compare keys.</param>
-        /// <returns>A collection of elements of type
-        /// <typeparamref name="TResult" /> where each element represents
-        /// a projection over a group and its key.</returns>
-        /// <remarks>
-        /// This method is implemented by using deferred execution and
-        /// streams the groupings. The grouping elements, however, are
-        /// buffered. Each grouping is therefore yielded as soon as it
-        /// is complete and before the next grouping occurs.
-        /// </remarks>
-        public static IEnumerable<TResult> GroupAdjacent<TSource, TKey, TResult>(
-            this IEnumerable<TSource> source,
-            Func<TSource, TKey> keySelector,
-            Func<TKey, IEnumerable<TSource>, TResult> resultSelector,
-            IEqualityComparer<TKey>? comparer )
-        {
-            if ( source == null )
-            {
-                throw new ArgumentNullException( nameof(source) );
-            }
-
-            if ( keySelector == null )
-            {
-                throw new ArgumentNullException( nameof(keySelector) );
-            }
-
-            if ( resultSelector == null )
-            {
-                throw new ArgumentNullException( nameof(resultSelector) );
-            }
-
-            // This should be removed once the target framework is bumped to something that supports covariance
-            TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
-
-            return GroupAdjacentImpl(
-                source,
-                keySelector,
-                i => i,
-                ResultSelectorWrapper,
                 comparer ?? EqualityComparer<TKey>.Default );
         }
 

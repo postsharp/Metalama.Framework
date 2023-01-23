@@ -1,7 +1,7 @@
 [Override]
 internal partial class TargetClass
 {
-  private EventHandler? _targetEvent1;
+  private event EventHandler? _targetEvent1;
   public event EventHandler? TargetEvent1
   {
     add
@@ -20,7 +20,7 @@ internal partial class TargetClass
 }
 internal partial class TargetClass
 {
-  private EventHandler? _targetEvent2;
+  private event EventHandler? _targetEvent2;
   public event EventHandler? TargetEvent2
   {
     add
@@ -39,7 +39,7 @@ internal partial class TargetClass
 }
 internal partial class TargetClass
 {
-  private EventHandler? _targetEvent3;
+  private event EventHandler? _targetEvent3;
   public event EventHandler? TargetEvent3
   {
     add

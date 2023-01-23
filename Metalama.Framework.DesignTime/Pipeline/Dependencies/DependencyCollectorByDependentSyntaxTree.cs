@@ -25,7 +25,7 @@ internal sealed class DependencyCollectorByDependentSyntaxTree
     public void AddSyntaxTreeDependency( ProjectKey masterCompilation, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
-        if ( this.IsReadOnly )
+        if ( this._isReadOnly )
         {
             throw new InvalidOperationException();
         }
@@ -41,7 +41,7 @@ internal sealed class DependencyCollectorByDependentSyntaxTree
     public void AddPartialTypeDependency( ProjectKey masterProject, TypeDependencyKey masterPartialType )
     {
 #if DEBUG
-        if ( this.IsReadOnly )
+        if ( this._isReadOnly )
         {
             throw new InvalidOperationException();
         }
@@ -55,11 +55,11 @@ internal sealed class DependencyCollectorByDependentSyntaxTree
     }
 
 #if DEBUG
-    public bool IsReadOnly { get; private set; }
+    private bool _isReadOnly;
 
     public void Freeze()
     {
-        this.IsReadOnly = true;
+        this._isReadOnly = true;
 
         foreach ( var child in this._dependenciesByMasterProject.Values )
         {

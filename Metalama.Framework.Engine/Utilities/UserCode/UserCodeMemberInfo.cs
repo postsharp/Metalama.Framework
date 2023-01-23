@@ -29,8 +29,6 @@ internal readonly struct UserCodeMemberInfo : IFormattable
 
     public static UserCodeMemberInfo FromSymbol( ISymbol? member ) => new( member );
 
-    public static UserCodeMemberInfo FromExpression( Expression expression ) => new( expression );
-
     public Location? GetDiagnosticLocation()
         => this._underlying switch
         {

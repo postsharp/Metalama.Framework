@@ -78,7 +78,7 @@ namespace Metalama.Testing.AspectTesting
             }
 
             var serviceProviderForThisTest = testContext.ServiceProvider
-                .WithService( new Observer( testResult ) )
+                .WithService( new Observer( testContext.ServiceProvider, testResult ) )
                 .AddLicenseConsumptionManagerForTest( testInput );
 
             var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, testContext.Domain );
@@ -404,7 +404,7 @@ namespace Metalama.Testing.AspectTesting
             // Compare with expected program outputs.
             string? expectedOutput;
 
-            var actualProgramOutput = NormalizeEndOfLines( testResult.ProgramOutput );
+            var actualProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( testResult.ProgramOutput );
 
             // Update the file in obj/transformed if it is different.
             var actualProgramOutputPath = Path.Combine(
@@ -436,7 +436,7 @@ namespace Metalama.Testing.AspectTesting
                 this.Logger?.WriteLine( actualProgramOutput );
                 this.Logger?.WriteLine( "=====================" );
 
-                expectedOutput = NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
+                expectedOutput = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
             }
             else
             {

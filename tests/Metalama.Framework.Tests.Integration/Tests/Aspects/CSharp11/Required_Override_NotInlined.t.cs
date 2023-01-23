@@ -1,42 +1,37 @@
 public class C
 {
-    [global::Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.Required_Override_NotInlined.TheAspect]
-    public required global::System.Int32 Field
+  private global::System.Int32 _field;
+  [global::Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.Required_Override_NotInlined.TheAspect]
+  public required global::System.Int32 Field
+  {
+    get
     {
-        get
-        {
-            return this.Field_Source;
-        }
-
-        set
-        {
-            if (value != this.Field_Source)
-            {
-                global::System.Console.WriteLine("Changed");
-                this.Field_Source = value;
-            }
-        }
+      return this._field;
     }
-
-    private global::System.Int32 Field_Source { get; set; }
-
-    [TheAspect]
-    public required int Property
+    set
     {
-        get
-        {
-            return this.Property_Source;
-        }
-
-        set
-        {
-            if (value != this.Property_Source)
-            {
-                global::System.Console.WriteLine("Changed");
-                this.Property_Source = value;
-            }
-        }
+      if (value != this._field)
+      {
+        global::System.Console.WriteLine("Changed");
+        this._field = value;
+      }
     }
-
-    private int Property_Source { get; set; }
+  }
+  private int _property;
+  [TheAspect]
+  public required int Property
+  {
+    get
+    {
+      return this._property;
+    }
+    set
+    {
+      if (value != this._property)
+      {
+        global::System.Console.WriteLine("Changed");
+        this._property = value;
+      }
+    }
+  }
 }

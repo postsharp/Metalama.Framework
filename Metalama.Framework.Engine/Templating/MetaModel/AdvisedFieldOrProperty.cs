@@ -12,10 +12,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedFieldOrProperty<T> : AdvisedFieldOrPropertyOrIndexer<T>, IAdvisedFieldOrProperty, IUserExpression
+    internal abstract class AdvisedFieldOrProperty<T> : AdvisedFieldOrPropertyOrIndexer<T>, IAdvisedFieldOrProperty, IUserExpression
         where T : IFieldOrProperty, IDeclarationImpl
     {
-        public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
+        protected AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
 
         public bool? IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
 
@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
         public bool IsRequired => this.Underlying.IsRequired;
+
+        public IExpression? InitializerExpression => this.Underlying.InitializerExpression;
 
         private IExpression ToExpression()
         {
@@ -39,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public ref object? Value => ref RefHelper.Wrap( this.ToExpression() );
 
-        protected ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        private ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl(

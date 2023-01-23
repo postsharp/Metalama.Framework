@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents a metadata reference. This class is JSON-serializable.
     /// </summary>
+    [JsonObject]
     public sealed class TestAssemblyReference
     {
         public string? Path { get; set; }

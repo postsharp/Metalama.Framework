@@ -355,10 +355,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         switch ( node )
         {
-            case NameSyntax name:
+            case NameSyntax:
+            case TupleTypeSyntax:
                 // If the node is an identifier, it means it should have a symbol (or at least candidates)
                 // and the scope is given by the symbol.
-                return this.GetCommonSymbolScope( this._syntaxTreeAnnotationMap.GetCandidateSymbols( name ) )
+                // The same applies to tuples.
+                return this.GetCommonSymbolScope( this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ) )
                     .GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
 
             case NullableTypeSyntax nullableType:
@@ -736,7 +738,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             default:
                 {
-                    if ( this._templateMemberClassifier.HasTemplateKeywordAttribute( symbol ) )
+                    if ( TemplateMemberSymbolClassifier.HasTemplateKeywordAttribute( symbol ) )
                     {
                         nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                     }
@@ -876,7 +878,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         ScopeContext? context;
 
-        if ( scope == TemplatingScope.CompileTimeOnly )
+        if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.CompileTimeOnlyReturningBoth )
         {
             context = this._currentScopeContext.CompileTimeOnly( $"element of the compile-time collection '{node.Expression}'" );
         }
@@ -1161,6 +1163,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var annotatedExpression = this.Visit( node.Expression );
 
+        if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Type ) &&
+             !this._templateMemberClassifier.IsNodeOfDynamicType( annotatedExpression ) )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.DynamicVariableSetToNonDynamic,
+                node.Identifier,
+                node.Identifier.Text );
+        }
+
         TemplatingScope forEachScope;
         string reason;
 
@@ -1421,15 +1432,27 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         var transformedType = this.Visit( node.Type );
 
-        if ( this._templateMemberClassifier.IsNodeOfDynamicType( transformedType )
-             && !(node.Type is IdentifierNameSyntax { Identifier.Text: "var" }) )
+        if ( this._templateMemberClassifier.IsNodeOfDynamicType( transformedType ) )
         {
-            foreach ( var variable in node.Variables.Where( v => v.Initializer == null ) )
+            foreach ( var variable in node.Variables )
             {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.CannotUseDynamicInUninitializedLocal,
-                    variable.Identifier,
-                    variable.Identifier.Text );
+                if ( variable.Initializer == null )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotUseDynamicInUninitializedLocal,
+                        variable.Identifier,
+                        variable.Identifier.Text );
+                }
+                else
+                {
+                    if ( !this._templateMemberClassifier.IsNodeOfDynamicType( variable.Initializer.Value ) )
+                    {
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.DynamicVariableSetToNonDynamic,
+                            variable.Identifier,
+                            variable.Identifier.Text );
+                    }
+                }
             }
         }
 
@@ -1535,6 +1558,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             return node;
         }
     }
+
+    // This method is called from the classification service. Constructors are never templates, so it can be skipped.
+    public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) => node;
 
     public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         => this.VisitMemberDeclaration(
@@ -1700,6 +1726,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     public override SyntaxNode VisitCastExpression( CastExpressionSyntax node )
     {
+        if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Type ) )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                node.Type.GetLocation(),
+                default );
+        }
+
         TypeSyntax annotatedType;
         var annotatedExpression = this.Visit( node.Expression );
         var expressionScope = this.GetNodeScope( annotatedExpression );
@@ -1733,6 +1767,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             case SyntaxKind.IsExpression:
             case SyntaxKind.AsExpression:
+                if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Right ) )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                        node.Right.GetLocation(),
+                        default );
+                }
+
                 var annotatedType = (TypeSyntax) this.Visit( node.Right );
                 var annotatedExpression = this.Visit( node.Left );
                 var transformedNode = node.WithLeft( annotatedExpression ).WithRight( annotatedType );
@@ -1796,6 +1838,49 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
+    }
+
+    public override SyntaxNode VisitConditionalExpression( ConditionalExpressionSyntax node )
+    {
+        var annotatedCondition = this.Visit( node.Condition );
+        var conditionScope = this.GetNodeScope( annotatedCondition );
+
+        ExpressionSyntax annotatedWhenTrue;
+        ExpressionSyntax annotatedWhenFalse;
+        ScopeContext? scopeContext;
+
+        if ( conditionScope.GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            scopeContext = null;
+        }
+        else
+        {
+            scopeContext = this._currentScopeContext.RunTimePreferred( $"run-time conditional expression with the condition '{node.Condition}'" );
+        }
+
+        using ( this.WithScopeContext( scopeContext ) )
+        {
+            annotatedWhenTrue = this.Visit( node.WhenTrue );
+            annotatedWhenFalse = this.Visit( node.WhenFalse );
+        }
+
+        var combinedScope = TemplatingScope.RunTimeOnly;
+
+        // Mark the whole expression as compile-time only if all three sub-expressions are compile-time
+        if ( scopeContext == null &&
+             this.GetNodeScope( annotatedWhenTrue ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly &&
+             this.GetNodeScope( annotatedWhenFalse ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            combinedScope = TemplatingScope.CompileTimeOnly;
+        }
+
+        return node.Update(
+                annotatedCondition,
+                node.QuestionToken,
+                annotatedWhenTrue,
+                node.ColonToken,
+                annotatedWhenFalse )
+            .AddScopeAnnotation( combinedScope );
     }
 
     public override SyntaxNode VisitForStatement( ForStatementSyntax node )
@@ -1974,7 +2059,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     #region Lambda expressions
 
-    public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+    private SyntaxNode? VisitLambdaExpression<T>( T node, Func<T, SyntaxNode?> callBase )
+        where T : LambdaExpressionSyntax
     {
         if ( node.ExpressionBody != null )
         {
@@ -1987,26 +2073,36 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // it means Expression is a Block
             this.ReportUnsupportedLanguageFeature( node.ArrowToken, "statement lambda" );
 
-            return base.VisitParenthesizedLambdaExpression( node );
+            return callBase( node );
         }
+    }
+
+    public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+    {
+        if ( node.ReturnType != null && this._templateMemberClassifier.IsNodeOfDynamicType( node.ReturnType ) )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                node.ReturnType.GetLocation(),
+                default );
+        }
+
+        foreach ( var parameter in node.ParameterList.Parameters )
+        {
+            if ( parameter.Type != null && this._templateMemberClassifier.IsNodeOfDynamicType( parameter.Type ) )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                    parameter.Type.GetLocation(),
+                    default );
+            }
+        }
+
+        return this.VisitLambdaExpression( node, base.VisitParenthesizedLambdaExpression );
     }
 
     public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-    {
-        if ( node.ExpressionBody != null )
-        {
-            var annotatedExpression = this.Visit( node.ExpressionBody );
-
-            return node.WithExpressionBody( annotatedExpression ).WithScopeAnnotationFrom( annotatedExpression );
-        }
-        else
-        {
-            // it means Expression is a Block
-            this.ReportUnsupportedLanguageFeature( node.ArrowToken, "statement lambda" );
-
-            return base.VisitSimpleLambdaExpression( node );
-        }
-    }
+        => this.VisitLambdaExpression( node, base.VisitSimpleLambdaExpression );
 
     #endregion
 
@@ -2037,7 +2133,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 transformedWhen,
                 node.EqualsGreaterThanToken,
                 transformedExpression )
-            .AddScopeAnnotation( combinedScope );
+            .AddScopeAnnotation( combinedScope )
+            .AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
     }
 
     public override SyntaxNode VisitSwitchExpression( SwitchExpressionSyntax node )
@@ -2062,7 +2159,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             transformedArms = node.Arms.SelectAsArray( a => this.Visit( a ) );
 
-            this.RequireScope( transformedArms, governingExpressionScope, "a compile-time switch expression" );
+            var reason = governingExpressionScope == TemplatingScope.RunTimeOnly
+                ? "a run-time switch expression"
+                : "a compile-time switch expression";
+
+            this.RequireScope( transformedArms, governingExpressionScope, reason );
         }
 
         return node.Update(
@@ -2109,7 +2210,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             using ( this.WithScopeContext( labelContext ) )
             {
-                transformedLabels = section.Labels.SelectAsArray( l => this.Visit( l ) );
+                transformedLabels = section.Labels.SelectAsArray( this.Visit )!;
 
                 if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                 {
@@ -2274,10 +2375,28 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return transformedNode;
     }
 
-    public override SyntaxNode VisitGenericName( GenericNameSyntax node )
+    public override SyntaxNode VisitRefType( RefTypeSyntax node )
     {
+        var transformedNode = (RefTypeSyntax) base.VisitRefType( node )!;
+
+        var scope = this.GetNodeScope( transformedNode.Type );
+
+        if ( scope == TemplatingScope.Dynamic )
+        {
+            // We cannot have a ref to dynamic.
+            this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+        }
+
+        return transformedNode;
+    }
+
+    private T VisitGenericNameCore<T>( T node, Func<T, SyntaxNode> callBase, Func<TemplatingScope, T, T>? addColor = null )
+        where T : SyntaxNode
+    {
+        addColor ??= ( _, n ) => n;
+
         var scope = this.GetNodeScope( node );
-        GenericNameSyntax transformedNode;
+        T transformedNode;
 
         switch ( scope )
         {
@@ -2303,32 +2422,63 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                     using ( this.WithScopeContext( context ) )
                     {
-                        transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                        transformedNode = (T) callBase( node );
                     }
                 }
                 else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                 {
-                    var context = this._currentScopeContext.RunTimeOnly( "a generic argument of run-time declaration" );
+                    var context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
 
                     using ( this.WithScopeContext( context ) )
                     {
-                        transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                        transformedNode = (T) callBase( node );
                     }
                 }
                 else
                 {
-                    transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                    transformedNode = (T) callBase( node );
                 }
 
                 break;
         }
 
-        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-        var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+        transformedNode = addColor( scope, transformedNode );
 
-        return
-            transformedNode.WithIdentifier( annotatedIdentifier ).AddScopeAnnotation( scope );
+        return transformedNode.AddScopeAnnotation( scope );
     }
+
+    public override SyntaxNode VisitGenericName( GenericNameSyntax node )
+    {
+        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
+
+        // If any type parameters on a member are explicitly 'dynamic', report error.
+        // (Types have their own error, LAMA0227.)
+        if ( symbol is not ITypeSymbol )
+        {
+            foreach ( var argument in node.TypeArgumentList.Arguments )
+            {
+                if ( this._templateMemberClassifier.IsNodeOfDynamicType( argument ) )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                        argument.GetLocation(),
+                        default );
+                }
+            }
+        }
+
+        return this.VisitGenericNameCore(
+            node,
+            base.VisitGenericName!,
+            ( scope, transformedNode ) =>
+            {
+                var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+
+                return transformedNode.WithIdentifier( annotatedIdentifier );
+            } );
+    }
+
+    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! );
 
     public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {
@@ -2621,4 +2771,17 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     public override SyntaxNode VisitInitializerExpression( InitializerExpressionSyntax node )
         => base.VisitInitializerExpression( node )!.AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
+
+    public override SyntaxNode? VisitDefaultExpression( DefaultExpressionSyntax node )
+    {
+        if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Type ) )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
+                node.Type.GetLocation(),
+                default );
+        }
+
+        return base.VisitDefaultExpression( node );
+    }
 }

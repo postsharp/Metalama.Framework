@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    public static class GlobalJsonHelper
+    internal static class GlobalJsonHelper
     {
         /// <summary>
         /// Writes a global.json file to the specified directory.

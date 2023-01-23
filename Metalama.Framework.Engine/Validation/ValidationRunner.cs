@@ -37,10 +37,12 @@ internal sealed class ValidationRunner
     /// </summary>
     public ValidationResult RunAll( CompilationModel initialCompilation, CompilationModel finalCompilation )
     {
-        var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
-        this.RunDeclarationValidators( initialCompilation, finalCompilation, userDiagnosticSink );
+        var initialCompilationWithEnhancements = initialCompilation.WithAspectRepository( finalCompilation.AspectRepository );
 
-        var transitiveValidators = this.RunReferenceValidators( initialCompilation, userDiagnosticSink );
+        var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
+        this.RunDeclarationValidators( initialCompilationWithEnhancements, finalCompilation, userDiagnosticSink );
+
+        var transitiveValidators = this.RunReferenceValidators( initialCompilationWithEnhancements, userDiagnosticSink );
 
         return new ValidationResult( transitiveValidators, userDiagnosticSink.ToImmutable() );
     }

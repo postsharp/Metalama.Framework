@@ -12,13 +12,15 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal sealed class IndexerInvoker : Invoker, IIndexerInvoker
     {
+        private readonly IIndexer _indexer;
+
         private ExpressionSyntax CreateIndexerAccess(
             TypedExpressionSyntaxImpl instance,
             TypedExpressionSyntaxImpl[]? args,
             SyntaxGenerationContext generationContext )
         {
-            var receiver = this.Indexer.GetReceiverSyntax( instance, generationContext );
-            var arguments = this.Indexer.GetArguments( this.Indexer.Parameters, args, generationContext );
+            var receiver = this._indexer.GetReceiverSyntax( instance, generationContext );
+            var arguments = this._indexer.GetArguments( this._indexer.Parameters, args, generationContext );
 
             var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
 
@@ -29,13 +31,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 this.CreateIndexerAccess(
                     TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
                     TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
                     syntaxGenerationContext ),
-                this.Indexer.Type,
-                isReferenceable: this.Indexer.Writeability != Writeability.None );
+                this._indexer.Type,
+                isReferenceable: this._indexer.Writeability != Writeability.None );
         }
 
         public object SetValue( object? instance, object value, params object?[] args )
@@ -52,14 +54,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 propertyAccess,
                 TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
-            return new BuiltUserExpression( expression, this.Indexer.Type );
+            return new SyntaxUserExpression( expression, this._indexer.Type );
         }
 
         public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )
         {
-            this.Indexer = indexer;
+            this._indexer = indexer;
         }
-
-        public IIndexer Indexer { get; }
     }
 }

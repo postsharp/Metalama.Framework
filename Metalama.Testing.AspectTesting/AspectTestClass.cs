@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
@@ -82,6 +83,7 @@ public abstract class AspectTestClass
     /// Executes a test.
     /// </summary>
     /// <param name="relativePath">Relative path of the file relatively to the directory of the caller code.</param>
+    [PublicAPI]
     protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
     {
         var testSuiteAssembly = this.GetType().Assembly;

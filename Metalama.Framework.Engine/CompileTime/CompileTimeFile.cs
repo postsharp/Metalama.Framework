@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Templating.Mapping;
 using Microsoft.CodeAnalysis.Text;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -12,7 +11,6 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents a file in a <see cref="CompileTimeProject"/>. This class is serialized
     /// to Json as a part of the <see cref="CompileTimeProjectManifest"/>.
     /// </summary>
-    [Obfuscation( Exclude = true /* JSON */ )]
     [JsonObject]
     internal sealed class CompileTimeFile
     {

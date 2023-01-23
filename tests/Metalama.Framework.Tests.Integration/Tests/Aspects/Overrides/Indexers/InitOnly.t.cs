@@ -5,7 +5,7 @@ internal class TargetClass
   public TargetClass()
   {
     this[42] = 42;
-    this.Foo = 42;
+    Foo = 42;
   }
   public int this[int x]
   {

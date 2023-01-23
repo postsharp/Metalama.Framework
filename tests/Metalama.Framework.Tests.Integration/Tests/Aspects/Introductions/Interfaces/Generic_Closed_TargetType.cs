@@ -1,4 +1,6 @@
-﻿// @Skipped(#32359)
+﻿#if TEST_OPTIONS
+// @Skipped(#32359)
+#endif
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -13,9 +15,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests introducing closed generic interface with a type argument set to the target type currently results in an error.
      */
 
-    public interface IInterface<T> 
+    public interface IInterface<T>
     {
-        void Foo(T t); 
+        void Foo( T t );
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -24,13 +26,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(aspectBuilder.Target));
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target ) );
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass 
-    { 
-    }
+    public class TargetClass { }
 }

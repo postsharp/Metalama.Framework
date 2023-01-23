@@ -13,9 +13,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     public class OverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Advice.Override( builder.Target, nameof(Template) );
         }
 
         [Template]
@@ -23,13 +23,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
+
                 return default;
             }
 
             set
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
             }
         }
     }
@@ -44,12 +45,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
 

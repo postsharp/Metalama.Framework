@@ -33,7 +33,7 @@ public abstract class SourceGeneratorResult : IEquatable<SourceGeneratorResult>
         return this.GetDigest() == other.GetDigest();
     }
 
-    public ulong GetDigest()
+    internal ulong GetDigest()
     {
         if ( this._digest == 0 )
         {
@@ -56,5 +56,5 @@ public abstract class SourceGeneratorResult : IEquatable<SourceGeneratorResult>
     /// <summary>
     /// Adds the content represented by the current object to a <see cref="SourceProductionContext"/>.
     /// </summary>
-    public abstract void ProduceContent( SourceProductionContext context );
+    internal abstract void ProduceContent( SourceProductionContext context );
 }

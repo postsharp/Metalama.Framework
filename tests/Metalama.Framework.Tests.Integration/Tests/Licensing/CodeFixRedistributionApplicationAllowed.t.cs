@@ -11,7 +11,7 @@ class Dummy
 internal class TargetCode
 {
   [SuggestMyAttributeRedistributableAttribute]
-  [CodeFixRedistribution.Dependency.MyAttribute]
+  [My]
   private int Method(int a)
   {
     return a;

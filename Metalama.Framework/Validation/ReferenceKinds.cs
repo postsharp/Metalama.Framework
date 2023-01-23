@@ -11,7 +11,7 @@ namespace Metalama.Framework.Validation
     /// <seealso href="@validation"/>
     [CompileTime]
     [Flags]
-    public enum ReferenceKinds
+    public enum ReferenceKinds : long
     {
         None = 0,
         All = -1,
@@ -33,6 +33,8 @@ namespace Metalama.Framework.Validation
         RefType = 1 << 15,
         TupleType = 1 << 16,
         Invocation = 1 << 17,
-        Assignment = 1 << 18
+        Assignment = 1 << 18,
+        OverrideMember = 1 << 19,
+        InterfaceMemberImplementation = 1 << 20
     }
 }

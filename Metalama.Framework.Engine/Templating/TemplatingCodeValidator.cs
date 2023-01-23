@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var semanticModelProvider = compilationContext.SemanticModelProvider;
 
             var hasError = false;
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Templating
             return !hasError;
         }
 
-        public static bool Validate(
+        public static void Validate(
             ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
 
-            return Validate(
+            Validate(
                 serviceProvider,
                 compilationContext,
                 semanticModel,
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Templating
                 cancellationToken );
         }
 
-        public static bool Validate(
+        public static void Validate(
             ProjectServiceProvider serviceProvider,
             CompilationContext compilationContext,
             SemanticModel semanticModel,
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             try
             {
-                return ValidateCore(
+                ValidateCore(
                     serviceProvider,
                     semanticModel,
                     compilationContext,
@@ -93,9 +93,6 @@ namespace Metalama.Framework.Engine.Templating
                     // aspect, so an exception in this code would have a large impact without any workaround. However, this code has no
                     // other use than reporting diagnostics, so skipping it is safer than failing the compilation. 
                     handler.ReportException( e, reportDiagnostic, true, out _ );
-
-                    // We return successfully because we want the compilation to continue regardless.
-                    return true;
                 }
             }
         }

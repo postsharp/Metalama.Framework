@@ -4,7 +4,6 @@ using Metalama.Backstage.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 #if DEBUG
 using System.Runtime.Versioning;
@@ -15,7 +14,6 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
-    [Obfuscation( Exclude = true /* JSON */ )]
     [JsonObject]
     internal sealed class CompileTimeProjectManifest
     {

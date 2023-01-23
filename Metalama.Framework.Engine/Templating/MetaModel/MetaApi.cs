@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Project;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -128,8 +127,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 Debugger.Break();
             }
         }
-
-        public IExecutionScenario ExecutionScenario => this._common.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

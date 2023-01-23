@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable InconsistentlySynchronizedField
+
 namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 
 public sealed partial class DesignTimeEntryPointManager
@@ -61,9 +63,10 @@ public sealed partial class DesignTimeEntryPointManager
                 }
             }
 
-            result[0] = task.Result;
+            result[0] = await task;
         }
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public ICompilerServiceProvider[] GetRegisteredProviders() => this._parent._providers.ToArray();
 
         public IDisposable ObserveOnContractVersionMismatchDetected( ServiceProviderEventHandler observer )
@@ -85,9 +88,7 @@ public sealed partial class DesignTimeEntryPointManager
                 {
                     foreach ( var entryPoint in this._parent._providers )
                     {
-#pragma warning disable CS0618
-                        if ( version == MatchAllVersion || entryPoint.Version == version )
-#pragma warning restore CS0618
+                        if ( entryPoint.Version == version )
                         {
                             if ( this.ValidateContractVersions( entryPoint.ContractVersions ) )
                             {

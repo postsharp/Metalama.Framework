@@ -1,8 +1,9 @@
 [Introduction]
 [Override]
 internal class TargetClass
-{ // TODO: It is expected that the field attributes is not properly moved to the backing field as Roslyn currently does not expose the backing field.
-  private EventHandler? _eventField;
+{
+  private event EventHandler? _eventField;
+  // TODO: It is expected that the field attributes is not properly moved to the backing field as Roslyn currently does not expose the backing field.
   [EventOnly]
   public event EventHandler? EventField
   {
@@ -19,7 +20,7 @@ internal class TargetClass
       this._eventField -= value;
     }
   }
-  private global::System.EventHandler? _introducedEventField;
+  private event global::System.EventHandler? _introducedEventField;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes.EventOnlyAttribute]
   public event global::System.EventHandler? IntroducedEventField
   {

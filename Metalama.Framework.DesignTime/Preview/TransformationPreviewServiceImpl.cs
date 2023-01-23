@@ -15,7 +15,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 {
     public TransformationPreviewServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    public async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
+    internal async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         TestableCancellationToken cancellationToken = default )
@@ -43,7 +43,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 
         var errorMessages = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray();
 
-        if ( !pipelineResult.IsSuccessful )
+        if ( !pipelineResult.IsSuccessful || errorMessages.Length > 0 )
         {
             return SerializablePreviewTransformationResult.Failure( errorMessages );
         }

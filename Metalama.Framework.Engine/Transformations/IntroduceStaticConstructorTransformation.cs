@@ -57,7 +57,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         };
     }
 
-    public MemberRef<IMember> ReplacedMember { get; }
+    private MemberRef<IMember> ReplacedMember { get; }
 
     public override InsertPosition InsertPosition => this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition();
 

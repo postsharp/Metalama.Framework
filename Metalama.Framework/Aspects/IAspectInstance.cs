@@ -29,6 +29,8 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         bool IsSkipped { get; }
 
+        bool IsInheritable { get; }
+
         /// <summary>
         /// Gets the other instances of the same <see cref="AspectClass"/> on the same <see cref="IAspectPredecessor.TargetDeclaration"/>.
         /// When several instances of the same <see cref="AspectClass"/> are found on the same <see cref="IAspectPredecessor.TargetDeclaration"/>,

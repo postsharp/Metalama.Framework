@@ -13,11 +13,11 @@ namespace Metalama.Framework.DesignTime.SourceGeneration;
 /// </summary>
 public sealed class TextSourceGeneratorResult : SourceGeneratorResult
 {
-    public ImmutableDictionary<string, string> Sources { get; }
+    private readonly ImmutableDictionary<string, string> _sources;
 
     public TextSourceGeneratorResult( ImmutableDictionary<string, string> sources )
     {
-        this.Sources = sources;
+        this._sources = sources;
     }
 
     protected override ulong ComputeDigest()
@@ -25,7 +25,7 @@ public sealed class TextSourceGeneratorResult : SourceGeneratorResult
         var xxh = new XXH64();
         ulong hash = 0;
 
-        foreach ( var source in this.Sources )
+        foreach ( var source in this._sources )
         {
             xxh.Reset();
             xxh.Update( source.Key );
@@ -37,13 +37,13 @@ public sealed class TextSourceGeneratorResult : SourceGeneratorResult
         return hash;
     }
 
-    public override void ProduceContent( SourceProductionContext context )
+    internal override void ProduceContent( SourceProductionContext context )
     {
-        foreach ( var source in this.Sources )
+        foreach ( var source in this._sources )
         {
             context.AddSource( source.Key, source.Value );
         }
     }
 
-    public override string ToString() => $"{nameof(TextSourceGeneratorResult)} Count={this.Sources.Count}";
+    public override string ToString() => $"{nameof(TextSourceGeneratorResult)} Count={this._sources.Count}";
 }

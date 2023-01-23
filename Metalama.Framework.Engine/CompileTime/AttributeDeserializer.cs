@@ -32,11 +32,6 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         // Coverage: ignore
-        public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
-            where T : Attribute
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
-
-        // Coverage: ignore
         public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
         {
@@ -198,8 +193,22 @@ namespace Metalama.Framework.Engine.CompileTime
                         return false;
                     }
 
+                    var setter = property.SetMethod ?? property.GetSetMethod( true );
+
+                    if ( setter == null )
+                    {
+                        diagnosticAdder.Report(
+                            AttributeDeserializerDiagnostics.PropertyHasNoSetter.CreateRoslynDiagnostic(
+                                attribute.GetDiagnosticLocation(),
+                                arg.Key ) );
+
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
                     if ( !this._userCodeInvoker.TryInvoke(
-                            () => property.SetValue( localAttributeInstance, translatedValue ),
+                            () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
                             executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
                     {
                         attributeInstance = null;

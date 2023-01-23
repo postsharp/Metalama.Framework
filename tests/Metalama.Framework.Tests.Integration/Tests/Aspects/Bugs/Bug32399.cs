@@ -6,7 +6,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32399;
 
-[Inherited]
+[Inheritable]
 [EditorExperience( SuggestAsLiveTemplate = true )]
 internal class DeepCloneAttribute : TypeAspect
 {

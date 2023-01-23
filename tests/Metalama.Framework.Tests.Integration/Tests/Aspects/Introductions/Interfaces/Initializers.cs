@@ -33,7 +33,5 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [IntroduceAspect]
-    public class TargetClass
-    {
-    }
+    public class TargetClass { }
 }

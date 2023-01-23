@@ -2,7 +2,7 @@
 [Introduction]
 internal class TargetClass
 {
-  private EventHandler? _event;
+  private event EventHandler? _event;
   public event EventHandler? Event
   {
     add
@@ -16,7 +16,7 @@ internal class TargetClass
       this._event -= value;
     }
   }
-  private static EventHandler? _staticEvent;
+  private static event EventHandler? _staticEvent;
   public static event EventHandler? StaticEvent
   {
     add
@@ -30,7 +30,7 @@ internal class TargetClass
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple.TargetClass._staticEvent -= value;
     }
   }
-  private global::System.EventHandler? _introducedEvent;
+  private event global::System.EventHandler? _introducedEvent;
   public event global::System.EventHandler? IntroducedEvent
   {
     add
@@ -44,7 +44,7 @@ internal class TargetClass
       this._introducedEvent -= value;
     }
   }
-  private static global::System.EventHandler? _introducedStaticEvent;
+  private static event global::System.EventHandler? _introducedStaticEvent;
   public static event global::System.EventHandler? IntroducedStaticEvent
   {
     add

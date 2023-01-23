@@ -120,6 +120,9 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this.AddItem( member.ToRef() );
     }
 
+    // TODO: Verify why Remove is never called.
+    // Resharper disable UnusedMember.Global
+
     public void Remove( MemberRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();

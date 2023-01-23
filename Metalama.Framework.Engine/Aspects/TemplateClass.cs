@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -32,6 +31,7 @@ namespace Metalama.Framework.Engine.Aspects
         protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+        private readonly TemplateClass? _baseClass;
 
         protected TemplateClass(
             ProjectServiceProvider serviceProvider,
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Aspects
             string shortName )
         {
             this.ServiceProvider = serviceProvider;
-            this.BaseClass = baseClass;
+            this._baseClass = baseClass;
             this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
 
@@ -59,11 +59,6 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public string ShortName { get; }
-
-        /// <summary>
-        /// Gets metadata of the base aspect class.
-        /// </summary>
-        public TemplateClass? BaseClass { get; }
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
@@ -107,7 +102,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
@@ -121,7 +115,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var classifier = new TemplateMemberSymbolClassifier( compilationContext );
 
-            var members = this.BaseClass?.Members.ToBuilder()
+            var members = this._baseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
 
             foreach ( var memberSymbol in type.GetMembers() )

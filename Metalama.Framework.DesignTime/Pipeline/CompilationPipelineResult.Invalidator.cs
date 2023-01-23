@@ -39,7 +39,8 @@ internal sealed partial class CompilationPipelineResult
                 this._invalidSyntaxTreeBuilders.ToImmutable(),
                 this._parent.IntroducedSyntaxTrees,
                 this._parent._inheritableAspects,
-                this._parent.Validators );
+                this._parent.Validators,
+                this._parent.Configuration );
         }
     }
 }

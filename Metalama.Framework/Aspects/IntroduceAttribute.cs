@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -14,6 +15,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
+    [PublicAPI]
     public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
         private TemplateAttributeProperties _properties = new();
@@ -70,17 +72,6 @@ namespace Metalama.Framework.Aspects
             builder.MustBeOfType( typeof(IMemberOrNamedType) );
 
             builder.MustBeExplicitlyDeclared();
-
-            builder.AddRule(
-                new EligibilityRule<IDeclaration>(
-                    EligibleScenarios.Inheritance,
-                    x =>
-                    {
-                        var t = x.GetClosestNamedType();
-
-                        return t != null && t.TypeKind != TypeKind.Interface;
-                    },
-                    _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
 
             var isEffectivelyInstance =
                 (this.Scope, adviceMember.IsStatic) switch
@@ -161,7 +152,7 @@ namespace Metalama.Framework.Aspects
 
             switch ( targetType )
             {
-                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct) }:
+                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface) }:
                     builder.Diagnostics.Report(
                         FrameworkDiagnosticDescriptors.CannotApplyAdviceOnTypeOrItsMembers.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, targetType.TypeKind) ) );

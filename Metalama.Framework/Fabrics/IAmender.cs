@@ -7,18 +7,26 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Fabrics
 {
-    /// <summary>
-    /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
-    /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
-    /// </summary>
     [InternalImplement]
     [CompileTime]
-    public interface IAmender<T> : IAspectReceiverSelector<T>
-        where T : class, IDeclaration
+    public interface IAmender
     {
         /// <summary>
         /// Gets the project being built.
         /// </summary>
         IProject Project { get; }
+    }
+
+    /// <summary>
+    /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
+    /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
+    /// </summary>
+    public interface IAmender<out T> : IAmender, IAspectReceiverSelector<T>
+        where T : class, IDeclaration
+    {
+        /// <summary>
+        /// Gets an object that allows to add child advice and to validate code and code references.
+        /// </summary>
+        IAspectReceiver<T> Outbound { get; }
     }
 }

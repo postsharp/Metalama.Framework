@@ -3,39 +3,42 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
-[assembly:AspectOrder(typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute))]
+
+[assembly: AspectOrder( typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly
 {
     public class OverrideIndexerAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors(indexer, nameof(GetIndexer), null);
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
             }
 
             foreach (var indexer in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors(indexer, nameof(GetIndexer), null);
+                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
             }
         }
 
         [Template]
         public dynamic? GetIndexer()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }
+
     public class OverridePropertyAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors(property, nameof(GetProperty), nameof(SetProperty));
+                builder.Advice.OverrideAccessors( property, nameof(GetProperty), nameof(SetProperty) );
             }
         }
 
@@ -43,14 +46,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         public dynamic? GetProperty()
         {
             var indexer = meta.Target.Type.Indexers.First();
-            return indexer.Invokers.Base!.GetValue(meta.This, 42);
+
+            return indexer.Invokers.Base!.GetValue( meta.This, 42 );
         }
 
         [Template]
         public void SetProperty()
         {
             var indexer = meta.Target.Type.Indexers.First();
-            indexer.Invokers.Base!.SetValue(meta.This, meta.Target.Parameters.Last(), 42);
+            indexer.Invokers.Base!.SetValue( meta.This, meta.Target.Parameters.Last(), 42 );
         }
     }
 
@@ -62,19 +66,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         public TargetClass()
         {
             this[42] = 42;
-            this.Foo = 42;
+            Foo = 42;
         }
 
-        public int this[int x]
+        public int this[ int x ]
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             init
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
@@ -82,12 +87,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             init
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
     }

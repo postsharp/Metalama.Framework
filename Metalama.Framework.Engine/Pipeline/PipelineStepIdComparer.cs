@@ -82,13 +82,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 return compareAspectDepth;
             }
 
-            var comparePhase = x.Phase.CompareTo( y.Phase );
-
-            if ( comparePhase != 0 )
-            {
-                return comparePhase;
-            }
-
             var compareAdviceTargetDepth = x.AdviceTargetDepth.CompareTo( y.AdviceTargetDepth );
 
             if ( compareAdviceTargetDepth != 0 )

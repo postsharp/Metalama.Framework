@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -18,6 +19,7 @@ namespace Metalama.Framework.Eligibility;
 /// </summary>
 /// <seealso href="@eligibility"/>
 [CompileTime]
+[PublicAPI]
 public static partial class EligibilityExtensions
 {
     /// <summary>
@@ -360,7 +362,7 @@ public static partial class EligibilityExtensions
     public static void MustBeRunTimeOnly( this IEligibilityBuilder<INamedType> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => member.ExecutionScope == ExecutionScope.RunTime,
-            member => $"the execution scope of {member} must run-time but is {member.Object.ExecutionScope}" );
+            member => $"the execution scope of {member} must be run-time but is {member.Object.ExecutionScope}" );
 
     /// <summary>
     /// Requires the target member or type to be static.
@@ -393,6 +395,14 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.MustSatisfy(
             member => !member.IsAbstract,
             member => $"{member} must not be abstract" );
+
+    /// <summary>
+    /// Forbids the target type from being an interface.
+    /// </summary>
+    public static void MustNotBeInterface( this IEligibilityBuilder<INamedType> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member.TypeKind != TypeKind.Interface,
+            member => $"{member} must not an interface" );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).

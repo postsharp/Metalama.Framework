@@ -5,5 +5,11 @@ namespace Metalama.Framework.Code.Advised
     /// <summary>
     /// Represents the constructor being overwritten or introduced. This interface extends <see cref="IConstructor"/>.
     /// </summary>
-    public interface IAdvisedConstructor : IConstructor { }
+    public interface IAdvisedConstructor : IConstructor
+    {
+        /// <summary>
+        /// Gets the list of constructor parameters.
+        /// </summary>
+        new IAdvisedParameterList Parameters { get; }
+    }
 }

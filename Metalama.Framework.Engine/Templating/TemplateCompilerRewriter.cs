@@ -50,7 +50,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
-    
+
     private TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
@@ -413,15 +413,38 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
     {
-        if ( node.ElementType is IdentifierNameSyntax identifier && string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
+        if ( node.ElementType is IdentifierNameSyntax identifier )
         {
-            // Avoid transforming "dynamic?" into "var?".
-            return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            if ( string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
+            {
+                // Avoid transforming "dynamic?" into "var?".
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            }
+            else if ( this._templateCompileTimeTypeParameterNames.Contains( identifier.Identifier.Text ) )
+            {
+                // Avoid transforming "T?" into e.g. "string??" or "int??".
+
+                // Note that this implementation means that templates behave differently than regular C#.
+                // In C# with unconstrained T substituted with a value type turns T? into e.g. int.
+                // In templates, T? turns into e.g. int?.
+
+                // T.Type.IsNullable == true
+                var isNullableType = BinaryExpression(
+                    SyntaxKind.EqualsExpression,
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName( identifier.Identifier ),
+                            IdentifierName( nameof(TemplateTypeArgument.Type) ) ),
+                        IdentifierName( nameof(IType.IsNullable) ) ),
+                    SyntaxFactoryEx.LiteralExpression( true ) );
+
+                return ConditionalExpression( isNullableType, this.Transform( node.ElementType ), base.TransformNullableType( node ) );
+            }
         }
-        else
-        {
-            return base.TransformNullableType( node );
-        }
+
+        return base.TransformNullableType( node );
     }
 
     private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
@@ -694,7 +717,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
                             nameof(ITemplateSyntaxFactory.Serialize),
-                            this.MetaSyntaxFactory.Type( expressionType ) ),
+                            MetaSyntaxFactoryImpl.Type( expressionType ) ),
                         ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
                 }
                 else
@@ -1003,7 +1026,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var replacementNode = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            this.MetaSyntaxFactory.Type( method.ContainingType ),
+                            MetaSyntaxFactoryImpl.Type( method.ContainingType ),
                             IdentifierName( method.Name ) ),
                         ArgumentList( SeparatedList( arguments ) ) )
                     .WithSymbolAnnotationsFrom( node )
@@ -1662,6 +1685,42 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 condition,
                 transformedStatement,
                 transformedElseStatement != null ? ElseClause( transformedElseStatement ) : null );
+        }
+    }
+
+    public override SyntaxNode VisitConditionalExpression( ConditionalExpressionSyntax node )
+    {
+        // condition has to be preserved if one of the expressions is throw
+        var runTimeCondition =
+            this.GetTransformationKind( node.Condition ) == TransformationKind.Transform ||
+            node.WhenTrue is ThrowExpressionSyntax || node.WhenFalse is ThrowExpressionSyntax;
+
+        if ( runTimeCondition )
+        {
+            // Run-time conditional expression. Just serialize to syntax.
+            return this.TransformConditionalExpression( node );
+        }
+        else
+        {
+            ExpressionSyntax transformedWhenTrue;
+            ExpressionSyntax transformedWhenFalse;
+
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time sub-expressions, serialize them to syntax.
+                transformedWhenTrue = this.Transform( node.WhenTrue );
+                transformedWhenFalse = this.Transform( node.WhenFalse );
+            }
+            else
+            {
+                transformedWhenTrue = (ExpressionSyntax) this.Visit( node.WhenTrue )!;
+                transformedWhenFalse = (ExpressionSyntax) this.Visit( node.WhenFalse )!;
+            }
+
+            // The condition may contain constructs like typeof or nameof that need to be transformed.
+            var condition = this.TransformCompileTimeCode( node.Condition );
+
+            return ConditionalExpression( condition, transformedWhenTrue, transformedWhenFalse );
         }
     }
 

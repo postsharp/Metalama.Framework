@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -8,14 +7,11 @@ namespace Metalama.Framework.Engine.Formatting
 {
     public partial class FormattedCodeWriter
     {
-        private sealed class FormattingVisitor : SafeSyntaxWalker
+        private sealed class FormattingVisitor : ClassifierBase
         {
-            private readonly ClassifiedTextSpanCollection _textSpans;
+            private bool _visitTrivia;
 
-            public FormattingVisitor( ClassifiedTextSpanCollection textSpans ) : base( SyntaxWalkerDepth.Token )
-            {
-                this._textSpans = textSpans;
-            }
+            public FormattingVisitor( ClassifiedTextSpanCollection textSpans ) : base( textSpans ) { }
 
             protected override void VisitCore( SyntaxNode? node )
             {
@@ -25,16 +21,42 @@ namespace Metalama.Framework.Engine.Formatting
                     return;
                 }
 
-                if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                if ( !this._visitTrivia && !node.ContainsAnnotations )
                 {
-                    this._textSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
-                }
-                else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
-                {
-                    this._textSpans.Add( node.Span, TextSpanClassification.SourceCode );
+                    return;
                 }
 
-                base.VisitCore( node );
+                var setVisitTrivia = node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind );
+
+                // Give preference to source code.
+                // TODO: Ideally, both annotations should not be present as it indicated inefficiency.
+                if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
+                {
+                    this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.SourceCode );
+                }
+                else if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                {
+                    this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
+                }
+
+                if ( setVisitTrivia )
+                {
+                    var previousVisitTrivia = this._visitTrivia;
+                    this._visitTrivia = true;
+
+                    try
+                    {
+                        base.VisitCore( node );
+                    }
+                    finally
+                    {
+                        this._visitTrivia = previousVisitTrivia;
+                    }
+                }
+                else
+                {
+                    base.VisitCore( node );
+                }
 
                 foreach ( var diagnosticAnnotation in node.GetAnnotations( _diagnosticAnnotationName ) )
                 {
@@ -45,7 +67,15 @@ namespace Metalama.Framework.Engine.Formatting
                         span = method.Identifier.Span;
                     }
 
-                    this._textSpans.SetTag( span, DiagnosticTagName, diagnosticAnnotation.Data! );
+                    this.ClassifiedTextSpans.SetTag( span, DiagnosticTagName, diagnosticAnnotation.Data! );
+                }
+            }
+
+            public override void VisitToken( SyntaxToken token )
+            {
+                if ( this._visitTrivia )
+                {
+                    base.VisitToken( token );
                 }
             }
         }

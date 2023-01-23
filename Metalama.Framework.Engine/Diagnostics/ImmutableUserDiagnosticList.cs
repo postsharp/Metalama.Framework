@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     public readonly struct ImmutableUserDiagnosticList
     {
-        public static ImmutableUserDiagnosticList Empty { get; } = new(
+        internal static ImmutableUserDiagnosticList Empty { get; } = new(
             ImmutableArray<Diagnostic>.Empty,
             ImmutableArray<ScopedSuppression>.Empty,
             ImmutableArray<CodeFixInstance>.Empty );
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public ImmutableArray<CodeFixInstance> CodeFixes { get; }
 
-        public ImmutableUserDiagnosticList(
+        private ImmutableUserDiagnosticList(
             ImmutableArray<Diagnostic> diagnostics,
             ImmutableArray<ScopedSuppression> suppressions,
             ImmutableArray<CodeFixInstance> codeFixes )
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             ImmutableArray<CodeFixInstance> codeFixes = default )
             : this( diagnostics.ToImmutableArray(), suppressions, codeFixes ) { }
 
-        public ImmutableUserDiagnosticList Concat( in ImmutableUserDiagnosticList other )
+        internal ImmutableUserDiagnosticList Concat( in ImmutableUserDiagnosticList other )
             => new(
                 this.ReportedDiagnostics.AddRange( other.ReportedDiagnostics ),
                 this.DiagnosticSuppressions.AddRange( other.DiagnosticSuppressions ),

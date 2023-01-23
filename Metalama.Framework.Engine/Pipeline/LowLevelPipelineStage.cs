@@ -59,10 +59,10 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             aspectInstances,
             input.Compilation,
             diagnostics.Report,
-            new AspectWeaverHelperImpl( pipelineConfiguration.ServiceProvider, compilation ),
             pipelineConfiguration.ServiceProvider.Underlying,
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,
+            compilationModel.CompilationContext,
             cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(

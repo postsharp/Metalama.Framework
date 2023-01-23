@@ -44,10 +44,5 @@ internal sealed class AsyncEvent<T>
         {
             this._parent._handlers.TryRemove( handler, out _ );
         }
-
-        public void UnregisterHandler( Action<T> handler )
-        {
-            this._parent._handlers.TryRemove( handler, out _ );
-        }
     }
 }

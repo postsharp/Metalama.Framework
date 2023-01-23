@@ -1,66 +1,83 @@
 ﻿using System;
 using System.Linq;
+using Castle.DynamicProxy.Generators;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_BaseInvoker;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.FieldPromotion_BaseInvoker;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(PromoteAttribute))]
+[assembly: AspectOrder(typeof(After), typeof(Override), typeof(Before))]
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_BaseInvoker
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.FieldPromotion_BaseInvoker;
+
+public class Override : TypeAspect
 {
-    public class PromoteAttribute : TypeAspect
+    public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-            builder.Advice.Override(builder.Target.Fields.OfName("Field").Single(), nameof(PropertyTemplate));
-        }
-
-        [Template]
-        public dynamic? PropertyTemplate
-        {
-            get
-            {
-                Console.WriteLine("This is aspect code.");
-
-                return meta.Proceed();
-            }
-            set
-            {
-                Console.WriteLine("This is aspect code.");
-                meta.Proceed();
-            }
-        }
+        builder.Advice.OverrideAccessors(builder.Target.Fields.OfName("Field").Single(), nameof(Template), nameof(Template));
+        builder.Advice.OverrideAccessors(builder.Target.Fields.OfName("Field_Static").Single(), nameof(Template), nameof(Template));
     }
 
-    public class OverrideAttribute : TypeAspect
+    [Template]
+    public dynamic? Template()
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-            builder.Advice.Override(builder.Target.FieldsAndProperties.OfName("Field").Single(), nameof(PropertyTemplate));
-        }
-
-        [Template]
-        public dynamic? PropertyTemplate
-        {
-            get
-            {
-                Console.WriteLine("Override");
-                return meta.Target.FieldOrProperty.Invokers.Base!.GetValue(meta.This);
-            }
-
-            set
-            {
-                Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.Invokers.Base!.SetValue(meta.This, value);
-            }
-        }
+        Console.WriteLine("Override");
+        return meta.Proceed();
     }
 
-    // <target>
-    [Promote]
-    [Override]
-    internal class TargetClass
+    [Introduce]
+    public void Introduced()
     {
-        public int Field;
+        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
     }
+}
+
+public class Before : TypeAspect
+{
+    [Introduce]
+    public void IntroducedBefore()
+    {
+        _ = meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
+    }
+}
+
+public class After : TypeAspect
+{
+    [Introduce]
+    public void IntroducedAfter()
+    {
+        _ = meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Properties.OfName("Field").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Properties.OfName("Field_Static").Single().Invokers.Base!.SetValue(null, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.GetValue(meta.This);
+        meta.Target.Type.Fields.OfName("Field_NoOverride").Single().Invokers.Base!.SetValue(meta.This, 42);
+        _ = meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.GetValue(null);
+        meta.Target.Type.Fields.OfName("Field_Static_NoOverride").Single().Invokers.Base!.SetValue(null, 42);
+    }
+}
+
+// <target>
+[Before]
+[Override]
+[After]
+public class Target
+{
+    public int Field;
+    public static int Field_Static;
+    public int Field_NoOverride;
+    public static int Field_Static_NoOverride;
 }

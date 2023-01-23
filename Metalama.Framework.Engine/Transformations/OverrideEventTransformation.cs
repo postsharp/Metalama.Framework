@@ -25,13 +25,13 @@ namespace Metalama.Framework.Engine.Transformations
     {
         private readonly IObjectReader? _parameters;
 
-        public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
+        private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public TemplateMember<IEvent>? EventTemplate { get; }
+        private TemplateMember<IEvent>? EventTemplate { get; }
 
-        public BoundTemplateMethod? AddTemplate { get; }
+        private BoundTemplateMethod? AddTemplate { get; }
 
-        public BoundTemplateMethod? RemoveTemplate { get; }
+        private BoundTemplateMethod? RemoveTemplate { get; }
 
         public OverrideEventTransformation(
             Advice advice,
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Transformations
             SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpression = new BuiltUserExpression(
+            var proceedExpression = new SyntaxUserExpression(
                 accessor.MethodKind switch
                 {
                     MethodKind.EventAdd => this.CreateAddExpression( generationContext ),

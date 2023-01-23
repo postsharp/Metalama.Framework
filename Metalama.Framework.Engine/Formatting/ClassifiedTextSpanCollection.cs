@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        internal ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
         {
             this._sourceText = sourceText;
         }
@@ -37,17 +37,17 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Adds a marked <see cref="TextSpan"/>.
         /// </summary>
-        public void Add( in TextSpan span, TextSpanClassification classification )
+        internal void Add( in TextSpan span, TextSpanClassification classification )
         {
             this.SetSpanImpl( span, classification, null, null );
         }
 
-        public void Add( in TextSpan span, TextSpanClassification classification, string? tagName, string? tagValue )
+        internal void Add( in TextSpan span, TextSpanClassification classification, string? tagName, string? tagValue )
         {
             this.SetSpanImpl( span, classification, tagName, tagValue );
         }
 
-        public void SetTag( in TextSpan span, string tagName, string tagValue )
+        internal void SetTag( in TextSpan span, string tagName, string tagValue )
         {
             this.SetSpanImpl( span, null, tagName, tagValue );
         }
@@ -233,6 +233,14 @@ namespace Metalama.Framework.Engine.Formatting
 
         public int Count => this._spans.Count;
 
+        private static bool IsColored( TextSpanClassification classification )
+            => classification is not (
+                TextSpanClassification.Default or
+                TextSpanClassification.RunTime or
+                TextSpanClassification.Excluded or
+                TextSpanClassification.SourceCode or
+                TextSpanClassification.NeutralTrivia);
+
         /// <summary>
         /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
         /// </summary>
@@ -259,8 +267,8 @@ namespace Metalama.Framework.Engine.Formatting
                     return;
                 }
 
-                if ( enumerator.Current.Value.Classification is not (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
-                     && nextEnumerator.Current.Value.Classification is TextSpanClassification.Default or TextSpanClassification.NeutralTrivia )
+                if ( IsColored( enumerator.Current.Value.Classification )
+                     && !IsColored( nextEnumerator.Current.Value.Classification ) )
                 {
                     var span = enumerator.Current.Value.Span;
                     var rawSpanLength = span.Length;

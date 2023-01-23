@@ -64,5 +64,5 @@ internal sealed class DesignTimeValidatorInstance
             this._referenceKinds,
             this.Implementation.Implementation,
             this.Implementation.State,
-            this._driver.MethodName.AssertNotNull() );
+            this._driver.MethodName );
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Services;
 using System;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities;
 
+[PublicAPI]
 public sealed class DotNetTool
 {
     private readonly IPlatformInfo _platformInfo;

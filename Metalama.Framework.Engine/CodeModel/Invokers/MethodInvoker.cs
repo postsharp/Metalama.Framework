@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
         }
 
-        private BuiltUserExpression CreateInvocationExpression(
+        private SyntaxUserExpression CreateInvocationExpression(
             ExpressionSyntax? instanceExpression,
             SimpleNameSyntax name,
             ArgumentSyntax[]? arguments,
@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 }
             }
 
-            return new BuiltUserExpression( expression, returnType );
+            return new SyntaxUserExpression( expression, returnType );
         }
     }
 }

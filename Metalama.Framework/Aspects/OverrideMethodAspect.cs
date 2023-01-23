@@ -1,11 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+#pragma warning disable VSTHRD200
 
 namespace Metalama.Framework.Aspects
 {
@@ -14,6 +17,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@overriding-methods"/>
     [AttributeUsage( AttributeTargets.Method )]
+    [PublicAPI]
     public abstract class OverrideMethodAspect : MethodAspect
     {
         /// <inheritdoc />

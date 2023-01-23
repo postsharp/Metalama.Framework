@@ -42,5 +42,7 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether <c>internal</c> members of the current assembly are accessible from a given assembly. 
         /// </summary>
         bool AreInternalsVisibleFrom( IAssembly assembly );
+
+        IAssemblyCollection ReferencedAssemblies { get; }
     }
 }

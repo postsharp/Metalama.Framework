@@ -7,12 +7,10 @@ namespace Metalama.Framework.Engine.Templating
     /// <summary>
     /// Annotates syntax nodes with <see cref="Location"/> annotations that can then be resolved by <see cref="ILocationAnnotationMap"/>.
     /// </summary>
-    public interface ILocationAnnotationMapBuilder : ILocationAnnotationMap
+    internal interface ILocationAnnotationMapBuilder : ILocationAnnotationMap
     {
         SyntaxNode AddLocationAnnotation( SyntaxNode originalNode, SyntaxNode transformedNode );
 
         SyntaxToken AddLocationAnnotation( SyntaxToken originalToken );
-
-        SyntaxNode AddLocationAnnotationsRecursive( SyntaxNode node );
     }
 }

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly IAssemblySymbol _assemblySymbol;
 
-        public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation, assemblySymbol )
+        public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
         {
             this._assemblySymbol = assemblySymbol;
         }
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited => false;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 
         public INamespace GlobalNamespace => this.Compilation.Factory.GetNamespace( this._assemblySymbol.GlobalNamespace );
 
@@ -43,10 +43,16 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamedTypeCollection AllTypes => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, true );
 
-        public bool AreInternalsVisibleFrom( IAssembly assembly ) => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+        public bool AreInternalsVisibleFrom( IAssembly assembly )
+            => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+
+        [Memo]
+        public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );
 
         public override SyntaxTree? PrimarySyntaxTree => null;
 
         public override IDeclarationOrigin Origin => DeclarationOrigin.External;
+
+        public override IAssembly DeclaringAssembly => this;
     }
 }

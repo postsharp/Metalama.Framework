@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
@@ -22,6 +23,7 @@ namespace Metalama.Testing.UnitTesting;
 /// <summary>
 /// A context in which a Metalama unit test can run, configured with most required Metalama services and optionally some mocks.
 /// </summary>
+[PublicAPI]
 public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvider, IDateTimeProvider
 {
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
@@ -29,12 +31,17 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private readonly bool _isRoot;
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
-    private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
+    private readonly StrongBox<CompileTimeDomain?> _domain;
 
     private volatile CancellationTokenSource? _timeout;
     private CancellationTokenRegistration? _timeoutAction;
 
     internal TestProjectOptions ProjectOptions { get; }
+
+    /// <summary>
+    /// Gets the directory that was specifically created for the current test and where all specific files should be stored.
+    /// </summary>
+    public string BaseDirectory => this.ProjectOptions.BaseDirectory;
 
     /// <summary>
     /// Gets the <see cref="ProjectServiceProvider"/> for the current context.
@@ -71,7 +78,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
-        this._domain = new StrongBox<UnloadableCompileTimeDomain?>();
+        this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
         this.ProjectOptions = new TestProjectOptions( contextOptions );
@@ -87,11 +94,13 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
-        typedAdditionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+        typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
         backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
+
+        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
@@ -212,22 +221,23 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     internal CompilationModel CreateCompilationModel( Compilation compilation ) => (CompilationModel) this.CreateCompilation( compilation );
 
-    private UnloadableCompileTimeDomain CreateDomain()
+    private CompileTimeDomain CreateDomain()
     {
-        var domain = new UnloadableCompileTimeDomain();
-
         // Prevents the ProjectOptions from being disposed while the domain is in used, because the domain typically
         // locks files in the directory created by ProjectOptions.
         this.ProjectOptions.AddFileLocker();
 
 #if NET5_0_OR_GREATER
+        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
-#endif
 
         return domain;
+#else
+        return new CompileTimeDomain();
+#endif
     }
 
-    internal UnloadableCompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
+    internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 
     string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
     {

@@ -14,11 +14,6 @@ internal abstract class MemberOrNamedTypeCollection<TMember> : DeclarationCollec
     protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, UpdatableMemberCollection<TMember> sourceItems ) :
         base( containingDeclaration, sourceItems ) { }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemberOrNamedTypeCollection{TMember}"/> class that represents an empty list.
-    /// </summary>
-    protected MemberOrNamedTypeCollection() { }
-
     public IEnumerable<TMember> OfName( string name )
     {
         var typedSource = (UpdatableMemberCollection<TMember>) this.Source;

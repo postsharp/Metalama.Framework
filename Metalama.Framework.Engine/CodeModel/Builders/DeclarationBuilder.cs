@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// </summary>
     internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
     {
+        private readonly AttributeBuilderCollection _attributes = new();
+        
         protected DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
@@ -38,9 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 
-        IAttributeCollection IDeclaration.Attributes => this.Attributes;
-
-        public AttributeBuilderCollection Attributes { get; } = new();
+        IAttributeCollection IDeclaration.Attributes => this._attributes;
 
         public abstract DeclarationKind DeclarationKind { get; }
 
@@ -70,21 +70,21 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.CheckNotFrozen();
 
-            this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+            this._attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
         }
 
         public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
         {
             this.CheckNotFrozen();
 
-            this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+            this._attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
         }
 
         public void RemoveAttributes( INamedType type )
         {
             this.CheckNotFrozen();
 
-            this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+            this._attributes.RemoveAll( a => a.Type.Is( type ) );
         }
 
         public virtual void Freeze() => this.IsFrozen = true;
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree();
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 

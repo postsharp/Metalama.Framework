@@ -11,9 +11,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests introducing closed generic type with a concrete type argument.
      */
 
-    public interface IInterface<T> 
+    public interface IInterface<T>
     {
-        void Foo(T t); 
+        void Foo( T t );
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -22,33 +22,25 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(TypeFactory.GetType(SpecialType.Int32)));
-
-
-            aspectBuilder.Advice.ImplementInterface(
-                aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(TypeFactory.GetType(typeof(int[]))));
-
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( TypeFactory.GetType( SpecialType.Int32 ) ) );
 
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(TypeFactory.GetType(typeof(Tuple<int, int>))));
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( TypeFactory.GetType( typeof(int[]) ) ) );
+
+            aspectBuilder.Advice.ImplementInterface(
+                aspectBuilder.Target,
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( TypeFactory.GetType( typeof(Tuple<int, int>) ) ) );
         }
 
         [InterfaceMember]
-        public void Foo(int t)
-        {
-        }
+        public void Foo( int t ) { }
 
         [InterfaceMember]
-        public void Foo(int[] t)
-        {
-        }
+        public void Foo( int[] t ) { }
 
         [InterfaceMember]
-        public void Foo(Tuple<int, int> t)
-        {
-        }
+        public void Foo( Tuple<int, int> t ) { }
     }
 
     // <target>

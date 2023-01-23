@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public EventBuilder EventBuilder { get; }
 
-        public override MemberBuilder MemberBuilder => this.EventBuilder;
+        protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
-        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
+        protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
         [Memo]
         public INamedType Type => this.Compilation.Factory.GetDeclaration( this.EventBuilder.Type );

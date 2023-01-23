@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
 
-        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
+        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
             this._typeSymbol = typeSymbol;
         }
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
 

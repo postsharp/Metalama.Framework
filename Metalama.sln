@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
 		Build\RoslynVersion\Latest.imports = Build\RoslynVersion\Latest.imports
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
@@ -29,13 +30,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Obfuscator", "Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.Contracts", "Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Integration", "Tests\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj", "{69EB8F34-975E-46AD-8EA1-A592A629CCD6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests.Internals", "Tests\Metalama.Framework.Tests.UnitTests.Internals\Metalama.Framework.Tests.UnitTests.Internals.csproj", "{7D8C16EE-B822-4AE3-B9C1-810C010573D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests", "Tests\Metalama.Framework.Tests.UnitTests\Metalama.Framework.Tests.UnitTests.csproj", "{7D8C16EE-B822-4AE3-B9C1-810C010573D6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Testing.AspectTesting", "Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
@@ -47,19 +46,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.EditorEx
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Package", "Metalama.Framework.Package\Metalama.Framework.Package.csproj", "{4E1A4B01-E613-459B-8104-940D2FB7A063}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Integration.Internals", "Tests\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj", "{496B8623-F88E-4346-A192-DA18B19457A3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.CompileTime", "Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj", "{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests", "Tests\Metalama.Framework.Tests.UnitTests\Metalama.Framework.Tests.UnitTests.csproj", "{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Workspaces", "Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Workspaces", "Tests\Metalama.Framework.Tests.Workspaces\Metalama.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.LinqPad", "Metalama.LinqPad\Metalama.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.LinqPad.Tests", "Tests\Metalama.LinqPad.Tests\Metalama.LinqPad.Tests.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.VisualStudio", "Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj", "{0B6E6000-3E37-4E6E-871D-682B41F8A59E}"
 EndProject
@@ -113,10 +104,6 @@ Global
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -149,18 +136,10 @@ Global
 		{4E1A4B01-E613-459B-8104-940D2FB7A063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E1A4B01-E613-459B-8104-940D2FB7A063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E1A4B01-E613-459B-8104-940D2FB7A063}.Release|Any CPU.Build.0 = Release|Any CPU
-		{496B8623-F88E-4346-A192-DA18B19457A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{496B8623-F88E-4346-A192-DA18B19457A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{496B8623-F88E-4346-A192-DA18B19457A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{496B8623-F88E-4346-A192-DA18B19457A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F215547-1833-486E-BC25-F403E89C8B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F215547-1833-486E-BC25-F403E89C8B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F215547-1833-486E-BC25-F403E89C8B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -169,14 +148,6 @@ Global
 		{6B0B4099-06FA-408A-8230-5F952198245B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B0B4099-06FA-408A-8230-5F952198245B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B0B4099-06FA-408A-8230-5F952198245B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0B6E6000-3E37-4E6E-871D-682B41F8A59E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B6E6000-3E37-4E6E-871D-682B41F8A59E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B6E6000-3E37-4E6E-871D-682B41F8A59E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -232,14 +203,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {19660464-978E-4457-846E-B399BB6A3884}
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54} = {19660464-978E-4457-846E-B399BB6A3884}
-		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B} = {19660464-978E-4457-846E-B399BB6A3884}
 		{69EB8F34-975E-46AD-8EA1-A592A629CCD6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{7D8C16EE-B822-4AE3-B9C1-810C010573D6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{496B8623-F88E-4346-A192-DA18B19457A3} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{6B0B4099-06FA-408A-8230-5F952198245B} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{F0AABDD7-6BB4-4D82-BFF6-A579DE66A695} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}
 		{EFC05CF5-CEE0-4797-8452-DEE7005E0C67} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}
 		{B49E9655-A6AD-4CF0-ACE3-EF54DA937D20} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}

@@ -15,10 +15,10 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class Parameter : Declaration, IParameterImpl
     {
-        public IParameterSymbol ParameterSymbol { get; }
+        private readonly IParameterSymbol _parameterSymbol;
 
         [Memo]
-        public Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
+        private Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this._parameterSymbol.ContainingSymbol );
 
         public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
@@ -26,44 +26,44 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
-        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
-            this.ParameterSymbol = symbol;
+            this._parameterSymbol = symbol;
         }
 
         public RefKind RefKind
-            => this.ParameterSymbol.RefKind switch
+            => this._parameterSymbol.RefKind switch
             {
                 Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
                 Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
                 Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
                 Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
-                _ => throw new InvalidOperationException( $"Roslyn RefKind {this.ParameterSymbol.RefKind} not recognized." )
+                _ => throw new InvalidOperationException( $"Roslyn RefKind {this._parameterSymbol.RefKind} not recognized." )
             };
 
         [Memo]
-        public IType Type => this.Compilation.Factory.GetIType( this.ParameterSymbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._parameterSymbol.Type );
 
-        public string Name => this.ParameterSymbol.Name;
+        public string Name => this._parameterSymbol.Name;
 
-        public int Index => this.ParameterSymbol.Ordinal;
+        public int Index => this._parameterSymbol.Ordinal;
 
-        public bool IsParams => this.ParameterSymbol.IsParams;
+        public bool IsParams => this._parameterSymbol.IsParams;
 
         public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override ISymbol Symbol => this.ParameterSymbol;
+        public override ISymbol Symbol => this._parameterSymbol;
 
         public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
-            => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
+            => this.DeclaringMember.GetDerivedDeclarations( options ).Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
         public TypedConstant? DefaultValue
-            => this.ParameterSymbol.HasExplicitDefaultValue
-                ? TypedConstant.Create( this.ParameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
+            => this._parameterSymbol.HasExplicitDefaultValue
+                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
                 : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

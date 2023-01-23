@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamedType? DeclaringType
+        protected INamedType? DeclaringType
         {
             get
             {
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract MemberInfo ToMemberInfo();
 
-        protected MemberOrNamedType( CompilationModel compilation, ISymbol symbol ) : base( compilation, symbol ) { }
+        protected MemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
 
         public Accessibility Accessibility
         {

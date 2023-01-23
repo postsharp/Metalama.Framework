@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Templating
     /// Exposes a method that allows to resolve the original <see cref="Location"/> of a transformed node based on
     /// annotations.
     /// </summary>
-    public interface ILocationAnnotationMap
+    internal interface ILocationAnnotationMap
     {
         Location? GetLocation( SyntaxNodeOrToken node );
     }

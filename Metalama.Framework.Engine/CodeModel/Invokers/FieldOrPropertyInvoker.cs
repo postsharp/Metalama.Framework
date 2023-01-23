@@ -3,9 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new BuiltUserExpression(
+            return new SyntaxUserExpression(
                 this.CreatePropertyExpression(
                     TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 propertyAccess,
                 TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new BuiltUserExpression( expression, this.Member.Type );
+            return new SyntaxUserExpression( expression, this.Member.Type );
         }
     }
 }

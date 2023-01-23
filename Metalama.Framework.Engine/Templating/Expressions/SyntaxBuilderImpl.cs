@@ -5,14 +5,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
-using System.Reflection;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -31,7 +30,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     private OurSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
-    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
+    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
     {
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
@@ -44,7 +43,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
     }
 
-    [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
     public IExpression Capture( object? expression ) => new CapturedUserExpression( this.Compilation, expression );
@@ -58,7 +56,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new BuiltUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
+        return new SyntaxUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
     }
 
     public IStatement ParseStatement( string code )
@@ -112,7 +110,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped )
     {
         ExpressionSyntax expression;
-        IType type;
 
         if ( value == null )
         {
@@ -125,9 +122,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
             expression = GetLiteralImpl( value, specialType, stronglyTyped );
         }
 
-        type = this._compilation.Factory.GetSpecialType( specialType );
+        IType type = this._compilation.Factory.GetSpecialType( specialType );
 
-        return new BuiltUserExpression( expression, type );
+        return new SyntaxUserExpression( expression, type );
     }
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )
@@ -157,9 +154,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
 
     public object TypedConstant( in TypedConstant typedConstant )
-        => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
+        => new SyntaxUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
 
-    public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type );
+    public IExpression ThisExpression( INamedType type ) => new SyntaxUserExpression( SyntaxFactory.ThisExpression(), type );
 
     public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
     {

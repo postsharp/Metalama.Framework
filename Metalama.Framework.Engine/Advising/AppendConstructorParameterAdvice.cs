@@ -90,9 +90,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
             this._parameterName,
             this._parameterType,
             RefKind.None,
-            this );
-
-        parameterBuilder.DefaultValue = this._defaultValue;
+            this ) { DefaultValue = this._defaultValue };
 
         var parameter = parameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
 
@@ -112,7 +110,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
             var derivedConstructors = compilation
-                .GetDerivedTypes( baseConstructor.DeclaringType, false )
+                .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
                 .Where( c => c.InitializerKind != ConstructorInitializerKind.This );
 
@@ -177,9 +175,8 @@ internal sealed class AppendConstructorParameterAdvice : Advice
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None,
-                            this );
+                            this ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
-                        recursiveParameterBuilder.DefaultValue = pullParameterAction.ParameterDefaultValue;
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
 
                         addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );

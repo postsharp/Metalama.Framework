@@ -1,16 +1,16 @@
 internal class C
 {
-    private int _p;
-    [TheAspect]
-    private int P
+  private int _p;
+  [TheAspect]
+  private int P
+  {
+    get
     {
-        get
-        {
-            return this._p;
-        }
-        set
-        {
-            this._p = value;
-        }
+      return this._p;
     }
+    set
+    {
+      this._p = value;
+    }
+  }
 }

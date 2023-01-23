@@ -198,7 +198,7 @@ internal sealed partial class DesignTimeAspectPipeline
             var newConfiguration = this.Configuration;
 
             // Detect changes in the syntax trees of the tracked compilation.
-            var newChanges = await this._pipeline.ProjectVersionProvider.GetCompilationChangesAsync(
+            var newChanges = await this._pipeline._projectVersionProvider.GetCompilationChangesAsync(
                 this.ProjectVersion?.Compilation,
                 newCompilation,
                 cancellationToken );
@@ -294,7 +294,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 {
                     var invalidator = this.PipelineResult.ToInvalidator();
 
-                    newDependencyGraph = await this._pipeline.ProjectVersionProvider.ProcessCompilationChangesAsync(
+                    newDependencyGraph = await this._pipeline._projectVersionProvider.ProcessCompilationChangesAsync(
                         newChanges,
                         this._dependencies,
                         invalidator.InvalidateSyntaxTree,
@@ -571,7 +571,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
             // in case of cancellation. From our point of view, this is a safe place to commit.
-            state = state.SetPipelineResult( compilation, result, newDependencies );
+            state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
             // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
             ExecuteValidators( ref state, compilation, configuration, cancellationToken );
@@ -595,7 +595,8 @@ internal sealed partial class DesignTimeAspectPipeline
             var validationRunner = new DesignTimeValidatorRunner(
                 configuration.ServiceProvider,
                 state.PipelineResult,
-                configuration.ProjectModel );
+                configuration.ProjectModel,
+                compilation );
 
             IEnumerable<SyntaxTree> syntaxTreesToValidate;
 
@@ -613,7 +614,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
 
-            var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject );
+            var userDiagnosticSink = new UserDiagnosticSink( configuration.DiagnosticManifest );
 
             // TODO: this can be parallelized.
 
@@ -654,13 +655,18 @@ internal sealed partial class DesignTimeAspectPipeline
         private PipelineState SetPipelineResult(
             PartialCompilation compilation,
             DesignTimePipelineExecutionResult pipelineResult,
-            DependencyGraph dependencies )
+            DependencyGraph dependencies,
+            DesignTimeProjectVersion projectVersion,
+            AspectPipelineConfiguration configuration )
         {
-            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
+            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult, configuration );
 
-            return new PipelineState( this, this.ProjectVersion.AssertNotNull(), compilationResult, dependencies );
+            return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }
 
-        public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );
+        public PipelineState Pause()
+        {
+            return new PipelineState( this, DesignTimeAspectPipelineStatus.Paused );
+        }
     }
 }

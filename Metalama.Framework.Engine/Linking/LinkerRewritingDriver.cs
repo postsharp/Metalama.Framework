@@ -28,17 +28,17 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed partial class LinkerRewritingDriver
     {
-        public ProjectServiceProvider ServiceProvider { get; }
+        private ProjectServiceProvider ServiceProvider { get; }
 
         public LinkerInjectionRegistry InjectionRegistry { get; }
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
-        public CompilationContext IntermediateCompilationContext { get; }
+        private CompilationContext IntermediateCompilationContext { get; }
 
         public Compilation IntermediateCompilation => this.IntermediateCompilationContext.Compilation;
 
-        internal LinkerAnalysisRegistry AnalysisRegistry { get; }
+        private LinkerAnalysisRegistry AnalysisRegistry { get; }
 
         public LinkerRewritingDriver(
             ProjectServiceProvider serviceProvider,
@@ -64,19 +64,19 @@ namespace Metalama.Framework.Engine.Linking
         {
             var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
-            var rewrittenBody = this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBody = RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
             // Add the SourceCode annotation, if it is source code.
-            if ( !(semantic.Symbol.GetPrimarySyntaxReference() is { } primarySyntax
-                   && primarySyntax.GetSyntax().HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
+            if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
-                rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
+                rewrittenBlock = rewrittenBlock.WithSourceCodeAnnotation();
             }
 
             if ( triviaSource == null )
             {
-                // Strip the trivia from the block.
-                return rewrittenBody
+                // Strip the trivia from the block and add a flattenable annotation.
+                return rewrittenBlock
                     .WithOpenBraceToken(
                         Token( SyntaxKind.OpenBraceToken )
                             .WithLeadingTrivia( ElasticMarker )
@@ -109,21 +109,21 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( shouldRemoveExistingTrivia )
                 {
-                    rewrittenBody =
-                        rewrittenBody
-                            .WithOpenBraceToken( rewrittenBody.OpenBraceToken.WithoutTrivia() )
-                            .WithCloseBraceToken( rewrittenBody.CloseBraceToken.WithoutTrivia() )
+                    rewrittenBlock =
+                        rewrittenBlock
+                            .WithOpenBraceToken( rewrittenBlock.OpenBraceToken.WithoutTrivia() )
+                            .WithCloseBraceToken( rewrittenBlock.CloseBraceToken.WithoutTrivia() )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {
-                    rewrittenBody =
-                        rewrittenBody
+                    rewrittenBlock =
+                        rewrittenBlock
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
 
                 // Keep all trivia from the source block and add trivias from the root block.
-                return Block( rewrittenBody )
+                return Block( rewrittenBlock )
                     .WithOpenBraceToken(
                         Token( SyntaxKind.OpenBraceToken )
                             .WithLeadingTrivia( openBraceLeadingTrivia.Add( ElasticMarker ) )
@@ -133,6 +133,65 @@ namespace Metalama.Framework.Engine.Linking
                             .WithLeadingTrivia( closeBraceLeadingTrivia.Add( ElasticMarker ) )
                             .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
+
+            static BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
+            {
+                // TODO: Convert to block.
+                if ( symbol.ReturnsVoid )
+                {
+                    switch ( node )
+                    {
+                        case null:
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                        // return
+                        //     SyntaxFactoryEx.FormattedBlock()
+                        //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case BlockSyntax rewrittenBlock:
+                            return rewrittenBlock;
+
+                        case ArrowExpressionClauseSyntax rewrittenArrowClause:
+                            return
+                                Block( ExpressionStatement( rewrittenArrowClause.Expression ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        default:
+                            throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                    }
+                }
+                else
+                {
+                    switch ( node )
+                    {
+                        case null:
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                        // return
+                        //     Block(
+                        //             ReturnStatement(
+                        //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                        //                 Token( SyntaxKind.SemicolonToken ) ) )
+                        //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case ArrowExpressionClauseSyntax rewrittenArrowClause:
+                            return
+                                SyntaxFactoryEx.FormattedBlock(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                            rewrittenArrowClause.Expression,
+                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                        case BlockSyntax rewrittenBlock:
+                            return rewrittenBlock;
+
+                        default:
+                            throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                    }
+                }
             }
         }
 
@@ -282,7 +341,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
+        private static SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
 #pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new SubstitutingRewriter( context );
@@ -323,9 +382,7 @@ namespace Metalama.Framework.Engine.Linking
                                 return rewrittenBlock;
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
-                                return
-                                    Block( ExpressionStatement( rewrittenArrowClause.Expression ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                return rewrittenArrowClause;
 
                             default:
                                 throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
@@ -347,13 +404,7 @@ namespace Metalama.Framework.Engine.Linking
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
-                                return
-                                    SyntaxFactoryEx.FormattedBlock(
-                                            ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                                rewrittenArrowClause.Expression,
-                                                Token( SyntaxKind.SemicolonToken ) ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                return rewrittenArrowClause;
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
@@ -533,7 +584,7 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( "Empty" ) );
         }
 
-        public static string GetSpecialMemberName( ISymbol symbol, string suffix )
+        private static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
             switch ( symbol )
             {

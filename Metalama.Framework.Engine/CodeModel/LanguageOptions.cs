@@ -15,15 +15,14 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal sealed class LanguageOptions : IEquatable<LanguageOptions>
 {
     private static readonly StructuralDictionaryComparer<string, string> _featureComparer = new( EqualityComparer<string>.Default );
-
+    private readonly ImmutableDictionary<string, string> _features;
+    
     public LanguageVersion Version { get; }
-
-    public ImmutableDictionary<string, string> Features { get; }
 
     private LanguageOptions( LanguageVersion version, ImmutableDictionary<string, string> features )
     {
         this.Version = version;
-        this.Features = features;
+        this._features = features;
     }
 
     public static LanguageOptions Default { get; } = new( SupportedCSharpVersions.Default, ImmutableDictionary<string, string>.Empty );
@@ -31,7 +30,7 @@ internal sealed class LanguageOptions : IEquatable<LanguageOptions>
     internal LanguageOptions( CSharpParseOptions options ) : this( options.LanguageVersion, options.Features.ToImmutableDictionary() ) { }
 
     internal CSharpParseOptions ToParseOptions()
-        => SupportedCSharpVersions.DefaultParseOptions.WithLanguageVersion( this.Version ).WithFeatures( this.Features );
+        => SupportedCSharpVersions.DefaultParseOptions.WithLanguageVersion( this.Version ).WithFeatures( this._features );
 
     public bool Equals( LanguageOptions? other )
     {
@@ -45,7 +44,7 @@ internal sealed class LanguageOptions : IEquatable<LanguageOptions>
             return true;
         }
 
-        return this.Version == other.Version && _featureComparer.Equals( this.Features, other.Features );
+        return this.Version == other.Version && _featureComparer.Equals( this._features, other._features );
     }
 
     public override bool Equals( object? obj )
@@ -68,7 +67,7 @@ internal sealed class LanguageOptions : IEquatable<LanguageOptions>
         return this.Equals( (LanguageOptions) obj );
     }
 
-    public override int GetHashCode() => HashCode.Combine( (int) this.Version, _featureComparer.GetHashCode( this.Features ) );
+    public override int GetHashCode() => HashCode.Combine( (int) this.Version, _featureComparer.GetHashCode( this._features ) );
 
     public static bool operator ==( LanguageOptions? left, LanguageOptions? right ) => Equals( left, right );
 

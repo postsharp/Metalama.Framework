@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Meth
 
 public class MyAttribute : Attribute { }
 
-[Inherited]
+[Inheritable]
 public class MyAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )

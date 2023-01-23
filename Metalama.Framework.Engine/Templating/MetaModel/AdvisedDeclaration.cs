@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool CanBeInherited => this.Underlying.CanBeInherited;
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => this.Underlying.GetDerivedDeclarations();
 
         public bool Equals( IDeclaration? other ) => this.Underlying.Equals( other );
 

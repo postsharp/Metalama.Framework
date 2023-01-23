@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+internal sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     public TestDesignTimeAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, domain ) { }
 
@@ -50,7 +50,7 @@ public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 }
 
 // ReSharper disable NotAccessedPositionalProperty.Global
-public sealed record TestDesignTimeAspectPipelineResult(
+internal sealed record TestDesignTimeAspectPipelineResult(
     bool Success,
     ImmutableArray<Diagnostic> Diagnostics,
     ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );

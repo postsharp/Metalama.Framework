@@ -33,7 +33,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
             .SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
     }
 
-    public Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
+    internal Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {
         var compilationName = compilation.Name ?? "(unnamed)";
 

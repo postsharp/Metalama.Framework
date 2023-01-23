@@ -6,16 +6,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty(builder.Target, nameof(PropertyWithRestrictedGet));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(AutoPropertyWithRestrictedGet));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(PropertyWithRestrictedSet));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(AutoPropertyWithRestrictedSet));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(PropertyWithRestrictedInit));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(AutoPropertyWithRestrictedInit));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter));
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedGet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedGet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedSet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedSet) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedInit) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedInit) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter) );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter) );
         }
 
         [Template]
@@ -26,9 +26,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            set
-            {
-            }
+            set { }
         }
 
         [Template]
@@ -42,14 +40,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            private set
-            {
-            }
+            private set { }
         }
 
         [Template]
         public int AutoPropertyWithRestrictedSet { get; private set; }
-
 
         [Template]
         public int PropertyWithRestrictedInit
@@ -59,9 +54,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            private init
-            {
-            }
+            private init { }
         }
 
         [Template]

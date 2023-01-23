@@ -105,7 +105,7 @@ public sealed class LicenseVerifier : IProjectService
         }
     }
 
-    internal void VerifyCanValidator( AspectPredecessor predecessor )
+    internal void VerifyCanAddValidator( AspectPredecessor predecessor )
     {
         if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
@@ -129,7 +129,7 @@ public sealed class LicenseVerifier : IProjectService
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
         };
 
-    public static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
         var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
 
@@ -214,15 +214,9 @@ public sealed class LicenseVerifier : IProjectService
                 (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
     }
 
-    internal void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
+    internal void VerifyCanBeInherited( AspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
-        if ( prototype == null )
-        {
-            // This happens only with abstract classes.
-            return;
-        }
-
-        if ( aspectClass.IsInherited && !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
             diagnostics.Report( LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic( null, aspectClass.ShortName ) );
         }

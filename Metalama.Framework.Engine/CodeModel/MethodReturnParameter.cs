@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class MethodReturnParameter : ReturnParameter
     {
-        public Method DeclaringMethod { get; }
+        private Method DeclaringMethod { get; }
 
         public override IHasParameters DeclaringMember => this.DeclaringMethod;
 
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
             => this.DeclaringMember.GetContainedDeclarations().Select( d => ((IMethod) d).ReturnParameter );
 
         [Memo]

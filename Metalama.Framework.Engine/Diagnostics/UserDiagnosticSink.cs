@@ -53,14 +53,24 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject?.ClosureDiagnosticManifest, null ) { }
+        
+        public UserDiagnosticSink( DiagnosticManifest? diagnosticManifest ) : this( diagnosticManifest, null ) { }
 
         internal UserDiagnosticSink(
             CompileTimeProject? compileTimeProject,
             CodeFixFilter? codeFixFilter,
+            CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply ) : this(
+            compileTimeProject?.ClosureDiagnosticManifest,
+            codeFixFilter,
+            codeFixAvailability ) { }
+
+        private UserDiagnosticSink(
+            DiagnosticManifest? diagnosticManifest,
+            CodeFixFilter? codeFixFilter,
             CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
         {
-            this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
+            this._diagnosticManifest = diagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
             this._codeFixAvailability = codeFixAvailability;
         }
@@ -78,9 +88,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             this._codeFixes = null;
         }
 
-        public int ErrorCount { get; private set; }
-
-        public int Revision { get; private set; }
+        internal int ErrorCount { get; private set; }
 
         public void Report( Diagnostic diagnostic )
         {
@@ -90,8 +98,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             {
                 this.ErrorCount++;
             }
-
-            this.Revision++;
         }
 
         /// <summary>
@@ -148,14 +154,12 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Suppress( ScopedSuppression suppression )
+        private void Suppress( ScopedSuppression suppression )
         {
             LazyInitializer.EnsureInitialized( ref this._suppressions ).Add( suppression );
-
-            this.Revision++;
         }
 
-        public void Suppress( IEnumerable<ScopedSuppression> suppressions )
+        internal void Suppress( IEnumerable<ScopedSuppression> suppressions )
         {
             foreach ( var suppression in suppressions )
             {
@@ -176,7 +180,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesDiagnostic( definition.Id ) )
             {
                 throw new InvalidOperationException(
-                    $"The aspect cannot report the diagnostic {definition.Id} because the DiagnosticDefinition is not declared as a static field or property of the aspect class." );
+                    $"The aspect cannot report the diagnostic {definition.Id} because the DiagnosticDefinition is not declared as a static field or property of a compile-time class." );
             }
         }
 
@@ -214,13 +218,11 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, codeFixes: codeFixes ) );
         }
 
-        public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )
+        internal void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )
         {
             foreach ( var codeFix in codeFixes )
             {
                 LazyInitializer.EnsureInitialized( ref this._codeFixes ).Add( codeFix );
-
-                this.Revision++;
             }
         }
     }

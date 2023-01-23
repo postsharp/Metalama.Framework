@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly INamespaceSymbol _symbol;
 
-        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited => false;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );

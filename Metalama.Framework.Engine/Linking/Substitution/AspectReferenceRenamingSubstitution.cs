@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -21,6 +22,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public AspectReferenceRenamingSubstitution( ResolvedAspectReference aspectReference )
         {
+            // Auto properties and event field default semantics should not get here.
+            Invariant.AssertNot(
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
+                && property.IsAutoProperty() == true );
+
+            Invariant.AssertNot(
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } 
+                && @event.IsEventField() == true );
+
             this._aspectReference = aspectReference;
         }
 
@@ -84,6 +94,32 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
             switch ( currentNode )
             {
+                case MemberAccessExpressionSyntax 
+                { 
+                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                    Name.Identifier.Text : LinkerInjectionHelperProvider.FinalizeMemberName                            
+                }:
+                    // Finalizer invocation.
+
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( targetMemberName ) );
+
+                case MemberAccessExpressionSyntax
+                {
+                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                    Name.Identifier.Text: var operatorName
+                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != Code.OperatorKind.None:
+                    // Operator invocation.
+
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                            IdentifierName( targetMemberName ) );
+
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     // The reference expression is member access.
 

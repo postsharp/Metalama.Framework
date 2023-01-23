@@ -1,42 +1,42 @@
 [NotifyPropertyChanged]
 internal class Car : global::System.ComponentModel.INotifyPropertyChanged
 {
+  private string? _make;
   public string? Make
   {
     get
     {
-      return this.Make_Source;
+      return this._make;
     }
     set
     {
       var value_1 = value;
-      if (value_1 != this.Make_Source)
+      if (value_1 != this._make)
       {
         this.OnPropertyChanged("Make");
-        this.Make_Source = value;
+        this._make = value;
       }
       return;
     }
   }
-  private string? Make_Source { get; set; }
+  private double _power;
   public double Power
   {
     get
     {
-      return this.Power_Source;
+      return this._power;
     }
     set
     {
       var value_1 = value;
-      if (value_1 != this.Power_Source)
+      if (value_1 != this._power)
       {
         this.OnPropertyChanged("Power");
-        this.Power_Source = value;
+        this._power = value;
       }
       return;
     }
   }
-  private double Power_Source { get; set; }
   protected virtual void OnPropertyChanged(global::System.String name)
   {
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));

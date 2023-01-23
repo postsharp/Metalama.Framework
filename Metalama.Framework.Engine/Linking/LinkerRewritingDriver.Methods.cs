@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
             MethodDeclarationSyntax methodDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -138,13 +138,31 @@ namespace Metalama.Framework.Engine.Linking
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
-            => this.GetSpecialImplMethod(
+        {
+            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+            var context = new InliningContextIdentifier( semantic );
+
+            var substitutedBody =
+                method.Body != null
+                    ? (BlockSyntax) RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            var substitutedExpressionBody =
+                method.ExpressionBody != null
+                    ? (ArrowExpressionClauseSyntax) RewriteBody(
+                        method.ExpressionBody,
+                        symbol,
+                        new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            return this.GetSpecialImplMethod(
                 method,
-                method.Body.WithSourceCodeAnnotation(),
-                method.ExpressionBody.WithSourceCodeAnnotation(),
+                substitutedBody.WithSourceCodeAnnotation(),
+                substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
+        }
 
         private MemberDeclarationSyntax GetEmptyImplMethod(
             MethodDeclarationSyntax method,

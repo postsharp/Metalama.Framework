@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -16,11 +16,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override(property, nameof(Template));
+                builder.Advice.Override( property, nameof(Template) );
             }
         }
 
@@ -29,14 +29,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
                 _ = meta.Proceed();
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
                 meta.Proceed();
             }
@@ -54,7 +55,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [MethodOnly]
             [return: ReturnValueOnly]
             get;
-
             [MethodOnly]
             [param: ParamOnly]
             [return: ReturnValueOnly]
@@ -70,7 +70,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [return: ReturnValueOnly]
             get
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
+
                 return meta.Proceed();
             }
 
@@ -79,41 +80,29 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [return: ReturnValueOnly]
             set
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
                 _ = meta.Proceed();
             }
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
-    public class FieldOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Field )]
+    public class FieldOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Property)]
-    public class PropertyOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Property )]
+    public class PropertyOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MethodOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Method )]
+    public class MethodOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.ReturnValue)]
-    public class ReturnValueOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.ReturnValue )]
+    public class ReturnValueOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class ParamOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Parameter )]
+    public class ParamOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class FieldAndPropertyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
+    public class FieldAndPropertyAttribute : Attribute { }
 
     // <target>
     [Introduction]
@@ -129,7 +118,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [MethodOnly]
             [return: ReturnValueOnly]
             get;
-
             [MethodOnly]
             [param: ParamOnly]
             [return: ReturnValueOnly]
@@ -144,7 +132,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [return: ReturnValueOnly]
             get
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
+
                 return 42;
             }
 
@@ -153,7 +142,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [return: ReturnValueOnly]
             set
             {
-                Console.WriteLine("Original Property");
+                Console.WriteLine( "Original Property" );
             }
         }
     }

@@ -1,12 +1,20 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssembly
 {
-    [Inherited]
+    [Inheritable]
     public class Aspect : TypeAspect
     {
         [Introduce]
         public void Introduced() { }
+
+        public override void BuildEligibility( IEligibilityBuilder<INamedType> builder )
+        {
+            base.BuildEligibility( builder );
+            builder.ExceptForInheritance().MustNotBeInterface();
+        }
     }
 
     [Aspect]

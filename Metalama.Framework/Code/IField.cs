@@ -12,5 +12,12 @@ namespace Metalama.Framework.Code
     {
         [CompileTimeReturningRunTime]
         FieldInfo ToFieldInfo();
+
+        /// <summary>
+        /// Gets the value of the field, if the field is a <c>const</c>. Not to be confused with the <see cref="IFieldOrProperty.InitializerExpression"/>,
+        /// which is available even if the field is not <c>const</c>, but only when the field is defined in source code (as opposed to being defined
+        /// in a referenced assembly).
+        /// </summary>
+        TypedConstant? ConstantValue { get; }
     }
 }

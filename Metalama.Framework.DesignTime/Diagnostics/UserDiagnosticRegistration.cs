@@ -2,14 +2,13 @@
 
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
-using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticsConfiguration"/>.
     /// </summary>
-    [Obfuscation( Exclude = true /* JSON */ )]
+    [JsonObject]
     public sealed class UserDiagnosticRegistration
     {
         [JsonConstructor]

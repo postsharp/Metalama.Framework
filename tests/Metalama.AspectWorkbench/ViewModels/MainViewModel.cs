@@ -50,6 +50,8 @@ namespace Metalama.AspectWorkbench.ViewModels
 
         public FlowDocument? CompiledTemplateDocument { get; set; }
 
+        // TODO: Check why this is not used 
+        // Resharper disable UnusedAutoPropertyAccessor.Global
         public string? CompiledTemplatePath { get; set; }
 
         public FlowDocument? TransformedCodeDocument { get; set; }
@@ -64,7 +66,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
         public DetailPaneContent DetailPaneContent { get; set; }
 
-        public string? ActualProgramOutput { get; set; }
+        public string? ActualProgramOutput { get; private set; }
 
         public string? ExpectedProgramOutput { get; set; }
 
@@ -170,7 +172,6 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                     var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplatePath = testSyntaxTree.OutputCompileTimePath;
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
 
                     if ( testResult.CompileTimeCompilation != null )
@@ -233,8 +234,8 @@ namespace Metalama.AspectWorkbench.ViewModels
             else
             {
                 // Compare the output and shows the result.
-                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
-                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
+                if ( TestOutputNormalizer.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
+                     TestOutputNormalizer.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
                 {
                     errorsDocument.Blocks.Add(
                         new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );

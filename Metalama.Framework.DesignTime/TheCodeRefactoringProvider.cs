@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Services;
@@ -22,6 +23,7 @@ namespace Metalama.Framework.DesignTime
     /// run in the analysis process. The current implementation only wraps these interfaces for Visual Studio.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public class TheCodeRefactoringProvider : CodeRefactoringProvider
     {
         static TheCodeRefactoringProvider()
@@ -64,7 +66,8 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                var projectOptions =
+                    MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsFrameworkEnabled )
                 {

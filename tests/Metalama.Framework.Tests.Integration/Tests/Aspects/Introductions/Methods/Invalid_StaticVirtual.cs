@@ -11,12 +11,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ImplicitlyStaticExplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        public static DiagnosticDefinition<string> ManualAssert = new("MANUAL_ASSERT", Severity.Warning, "{0}");
+        public static DiagnosticDefinition<string> ManualAssert = new( "MANUAL_ASSERT", Severity.Warning, "{0}" );
 
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Diagnostics.Report(ManualAssert.WithArguments("Manually assert that 3 errors are reported on this class."));
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ImplicitlyStaticExplicitlyVirtual), buildMethod: b => b.IsVirtual = true);
+            builder.Diagnostics.Report( ManualAssert.WithArguments( "Manually assert that 3 errors are reported on this class." ) );
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ImplicitlyStaticExplicitlyVirtual), buildMethod: b => b.IsVirtual = true );
         }
 
         [Template]
@@ -25,11 +25,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
             return meta.Proceed();
         }
     }
+
     public class ExplicitlyStaticImplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ExplicitlyStaticImplicitlyVirtual), scope: IntroductionScope.Static);
+            builder.Advice.IntroduceMethod( builder.Target, nameof(Method_ExplicitlyStaticImplicitlyVirtual), scope: IntroductionScope.Static );
         }
 
         [Template]
@@ -41,9 +42,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ExplicitlyStaticExplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Method_ExplicitlyStaticExplicitlyVirtual), scope: IntroductionScope.Static, buildMethod: b => b.IsVirtual = true);
+            builder.Advice.IntroduceMethod(
+                builder.Target,
+                nameof(Method_ExplicitlyStaticExplicitlyVirtual),
+                scope: IntroductionScope.Static,
+                buildMethod: b => b.IsVirtual = true );
         }
 
         [Template]
@@ -57,7 +62,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     [ImplicitlyStaticExplicitlyVirtualIntroduction]
     [ExplicitlyStaticImplicitlyVirtualIntroduction]
     [ExplicitlyStaticExplicitlyVirtualIntroduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

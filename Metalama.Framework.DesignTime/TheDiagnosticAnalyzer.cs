@@ -33,8 +33,7 @@ namespace Metalama.Framework.DesignTime
     public class TheDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     {
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-
-        protected ILogger Logger { get; }
+        private readonly ILogger _logger;
 
         [UsedImplicitly]
         public TheDiagnosticAnalyzer() : this(
@@ -42,7 +41,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
         {
-            this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
 
@@ -74,14 +73,14 @@ namespace Metalama.Framework.DesignTime
 
                 var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
 
-                this.Logger.Trace?.Log(
+                this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
                 var projectOptions = context.ProjectOptions;
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
-                    this.Logger.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    this._logger.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
 
                     return;
                 }
@@ -104,7 +103,7 @@ namespace Metalama.Framework.DesignTime
                 // Execute the analysis that are not performed in the pipeline.
                 void ReportDiagnostic( Diagnostic diagnostic )
                 {
-                    this.Logger.Trace?.Log( $"Reporting {FormatDiagnostic( diagnostic )}." );
+                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( diagnostic )}." );
 
                     diagnosticCount++;
 
@@ -129,7 +128,7 @@ namespace Metalama.Framework.DesignTime
 
                 if ( !pipelineResult.IsSuccessful )
                 {
-                    this.Logger.Trace?.Log(
+                    this._logger.Trace?.Log(
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
 
                     diagnostics = filteredPipelineDiagnostics;
@@ -168,7 +167,7 @@ namespace Metalama.Framework.DesignTime
                     }
                 }
 
-                this.Logger.Trace?.Log(
+                this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): completed. {diagnosticCount} diagnostic(s) reported." );
             }
             catch ( Exception e )
@@ -201,7 +200,7 @@ namespace Metalama.Framework.DesignTime
                 }
                 else
                 {
-                    this.Logger.Warning?.Log( $"The diagnostic {diagnostic.Id} is not supported at design time. Wrapping it." );
+                    this._logger.Warning?.Log( $"The diagnostic {diagnostic.Id} is not supported at design time. Wrapping it." );
 
                     var descriptor =
                         diagnostic.Severity switch
@@ -223,12 +222,12 @@ namespace Metalama.Framework.DesignTime
 
                 if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
                 {
-                    this.Logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}" );
+                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}" );
                     reportDiagnostic( designTimeDiagnostic );
                 }
                 else
                 {
-                    this.Logger.Trace?.Log( "Finding the source tree." );
+                    this._logger.Trace?.Log( "Finding the source tree." );
 
                     // Find the new syntax tree in the compilation.
 
@@ -242,7 +241,7 @@ namespace Metalama.Framework.DesignTime
                     if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
                     {
                         // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
-                        this.Logger.Warning?.Log( $"Cannot find the source node for {FormatDiagnostic( diagnostic )}." );
+                        this._logger.Warning?.Log( $"Cannot find the source node for {FormatDiagnostic( diagnostic )}." );
 
                         continue;
                     }
@@ -256,7 +255,7 @@ namespace Metalama.Framework.DesignTime
                     if ( newToken.IsKind( SyntaxKind.None ) )
                     {
                         // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
-                        this.Logger.Warning?.Log( $"Cannot find the source token for {FormatDiagnostic( diagnostic )}." );
+                        this._logger.Warning?.Log( $"Cannot find the source token for {FormatDiagnostic( diagnostic )}." );
 
                         continue;
                     }
@@ -285,7 +284,7 @@ namespace Metalama.Framework.DesignTime
                             location: newLocation,
                             properties: designTimeDiagnostic.Properties );
 
-                    this.Logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
+                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
                     reportDiagnostic( relocatedDiagnostic );
                 }
             }

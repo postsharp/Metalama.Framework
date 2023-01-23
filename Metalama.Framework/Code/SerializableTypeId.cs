@@ -30,8 +30,9 @@ public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
     public static bool operator !=( SerializableTypeId left, SerializableTypeId right ) => !left.Equals( right );
 
     public IType Resolve( ICompilation compilation ) => this.Resolve( compilation, null );
-    
-    public IType Resolve( ICompilation compilation, IReadOnlyDictionary<string, IType>? genericArguments ) => ((ICompilationInternal) compilation).Factory.GetTypeFromId( this, genericArguments );
+
+    public IType Resolve( ICompilation compilation, IReadOnlyDictionary<string, IType>? genericArguments )
+        => ((ICompilationInternal) compilation).Factory.GetTypeFromId( this, genericArguments );
 
     public override string ToString() => this.Id;
 }

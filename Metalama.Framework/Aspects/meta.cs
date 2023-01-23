@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
+#pragma warning disable VSTHRD200
+
 // ReSharper disable UnusedParameter.Global
 // ReSharper disable once InconsistentNaming
 namespace Metalama.Framework.Aspects
@@ -24,7 +26,7 @@ namespace Metalama.Framework.Aspects
     public static class meta
 #pragma warning restore SA1300, IDE1006 // Element should begin with upper-case letter
     {
-        internal static IMetaApi CurrentContext => MetalamaExecutionContext.CurrentInternal.MetaApi ?? throw CreateException();
+        private static IMetaApi CurrentContext => MetalamaExecutionContext.CurrentInternal.MetaApi ?? throw CreateException();
 
         private static void CheckContext()
         {

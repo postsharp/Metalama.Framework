@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal sealed class OverridePropertyTransformation : OverridePropertyBaseTransformation
     {
-        public BoundTemplateMethod? GetTemplate { get; }
+        private BoundTemplateMethod? GetTemplate { get; }
 
-        public BoundTemplateMethod? SetTemplate { get; }
+        private BoundTemplateMethod? SetTemplate { get; }
 
         public OverridePropertyTransformation(
             Advice advice,

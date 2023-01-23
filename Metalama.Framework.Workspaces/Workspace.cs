@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -7,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
@@ -16,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +28,7 @@ namespace Metalama.Framework.Workspaces
     /// Represents a set of projects. Workspaces can be created using the <see cref="WorkspaceCollection"/> class.  When projects target several frameworks,
     /// they are represented by several instances of the <see cref="Project"/> class in the workspace.
     /// </summary>
+    [PublicAPI]
     public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
         private readonly WorkspaceCollection _collection;
@@ -34,18 +38,29 @@ namespace Metalama.Framework.Workspaces
         internal string Key { get; }
 
         private ProjectSet _projects;
+        private readonly ITaskRunner _taskRunner;
 
         static Workspace()
         {
             if ( MSBuildLocator.CanRegister )
             {
-                MSBuildLocator.RegisterDefaults();
+                try
+                {
+                    MSBuildLocator.RegisterDefaults();
+                }
+                catch ( InvalidOperationException e )
+                {
+                    throw new DotNetSdkLoadException(
+                        $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?",
+                        e );
+                }
             }
 
             WorkspaceServices.Initialize();
         }
 
         private Workspace(
+            GlobalServiceProvider serviceProvider,
             ImmutableArray<string> loadedPaths,
             ImmutableDictionary<string, string>? properties,
             string key,
@@ -61,6 +76,7 @@ namespace Metalama.Framework.Workspaces
             this._collection = collection;
             this._domain = domain;
             this._introspectionOptions = introspectionOptions;
+            this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         }
 
         /// <summary>
@@ -101,7 +117,7 @@ namespace Metalama.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSet(
+            this._projects = await LoadProjectSetAsync(
                 this.LoadedPaths,
                 this.Properties,
                 this._collection,
@@ -115,12 +131,13 @@ namespace Metalama.Framework.Workspaces
 
         public Workspace Reload( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this.ReloadAsync( restore, cancellationToken ).Wait( cancellationToken );
+            this._taskRunner.RunSynchronously( () => this.ReloadAsync( restore, cancellationToken ) );
 
             return this;
         }
 
         internal static async Task<Workspace> LoadAsync(
+            GlobalServiceProvider serviceProvider,
             string key,
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
@@ -131,9 +148,17 @@ namespace Metalama.Framework.Workspaces
             var domain = new CompileTimeDomain();
 
             var introspectionOptions = new IntrospectionOptionsBox();
-            var projectSet = await LoadProjectSet( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
+            var projectSet = await LoadProjectSetAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
 
-            return new Workspace( projects, properties, key, projectSet, collection, domain, introspectionOptions );
+            return new Workspace(
+                serviceProvider,
+                projects,
+                properties,
+                key,
+                projectSet,
+                collection,
+                domain,
+                introspectionOptions );
         }
 
         private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
@@ -142,7 +167,7 @@ namespace Metalama.Framework.Workspaces
             dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
         }
 
-        private static async Task<ProjectSet> LoadProjectSet(
+        private static async Task<ProjectSet> LoadProjectSetAsync(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,

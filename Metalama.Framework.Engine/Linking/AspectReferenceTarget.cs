@@ -13,41 +13,18 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the target symbol. For accessor reference this is always the target property, indexer or event.
         /// </summary>
-        public ISymbol Symbol { get; }
+        private ISymbol Symbol { get; }
 
         /// <summary>
         /// Gets the semantic of the symbol that is referenced.
         /// </summary>
-        public IntermediateSymbolSemanticKind SemanticKind { get; }
+        private IntermediateSymbolSemanticKind SemanticKind { get; }
 
         /// <summary>
         /// Gets the kind of target. For properties/events/indexers this specifies which accessor is referenced.
         /// </summary>
-        public AspectReferenceTargetKind TargetKind { get; }
-
-        /// <summary>
-        /// Gets the target semantic (method, property, event).
-        /// </summary>
-        /// <returns></returns>
-        public IntermediateSymbolSemantic TargetSemantic => new( this.Symbol, this.SemanticKind );
-
-        /// <summary>
-        /// Gets the target semantic body (method, property accessor, event accessor).
-        /// </summary>
-        /// <returns></returns>
-        public IntermediateSymbolSemantic<IMethodSymbol> GetTargetSemanticBody
-            => new(
-                (this.Symbol, this.TargetKind) switch
-                {
-                    (IMethodSymbol method, AspectReferenceTargetKind.Self) => method,
-                    (IPropertySymbol { GetMethod: { } getMethod }, AspectReferenceTargetKind.PropertyGetAccessor) => getMethod,
-                    (IPropertySymbol { SetMethod: { } setMethod }, AspectReferenceTargetKind.PropertySetAccessor) => setMethod,
-                    (IEventSymbol { AddMethod: { } addMethod }, AspectReferenceTargetKind.EventAddAccessor) => addMethod,
-                    (IEventSymbol { RemoveMethod: { } removeMethod }, AspectReferenceTargetKind.EventRemoveAccessor) => removeMethod,
-                    _ => throw new AssertionFailedException( $"Unexpected combination: ('{this.Symbol}', {this.TargetKind})." )
-                },
-                this.SemanticKind );
-
+        private AspectReferenceTargetKind TargetKind { get; }
+        
         public AspectReferenceTarget( ISymbol symbol, IntermediateSymbolSemanticKind semantic, AspectReferenceTargetKind targetKind )
         {
             // Normalize the target.

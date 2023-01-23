@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.TestApp.Aspects
 {
-    [Inherited]
+    [Inheritable]
     class InheritedAspect : TypeAspect
     {
         [Introduce]
         public void IntroducedMethod() { }
+
+        public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
+        {
+            base.BuildEligibility(builder);
+            builder.ExceptForInheritance().MustNotBeInterface();
+        }
     }
 }

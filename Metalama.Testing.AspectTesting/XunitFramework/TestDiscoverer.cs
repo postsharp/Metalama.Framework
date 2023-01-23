@@ -100,7 +100,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                     this._messageSink?.Trace( $"Processing directory '{directory}'." );
 
                     // If the directory is included, index the files.
-                    var runnerFileName = "_Runner.cs";
+                    const string runnerFileName = "_Runner.cs";
 
                     foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                     {
@@ -183,7 +183,11 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
             while ( pendingTasks.Value > 0 )
             {
+                // Waiting synchronously here is safe because the execution context is always a background process,
+                // and addressing the warning otherwise is cumbersome.
+#pragma warning disable VSTHRD002
                 Task.WhenAll( tasks ).Wait();
+#pragma warning restore VSTHRD002
             }
         }
 

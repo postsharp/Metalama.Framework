@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this._symbol;
 
-        public Event( IEventSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        public Event( IEventSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
@@ -8,6 +9,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +26,6 @@ namespace Metalama.Framework.Engine.Linking
         private sealed class SubstitutionGenerator
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
-            private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
@@ -39,7 +40,11 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
                 _eventFieldRaiseReferencesByContainingSemantic;
 
-            private readonly ITaskScheduler _taskScheduler;
+            private readonly IReadOnlyDictionary<
+                IntermediateSymbolSemantic<IMethodSymbol>, 
+                IReadOnlyList<CallerAttributeReference>> _callerMemberReferencesByContainingSemantic;
+
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
             public SubstitutionGenerator(
                 ProjectServiceProvider serviceProvider,
@@ -52,11 +57,11 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
                 IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences,
                 IReadOnlyList<ForcefullyInitializedType> forcefullyInitializedTypes,
-                IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences )
+                IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences,
+                IReadOnlyList<CallerAttributeReference> callerMemberReferences )
             {
-                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._syntaxHandler = syntaxHandler;
-                this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
@@ -71,25 +76,28 @@ namespace Metalama.Framework.Engine.Linking
                         .Distinct()
                         .ToList();
 
-                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences );
-                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences );
+                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences, x => x.ContainingSemantic );
+                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences, x => x.ContainingSemantic );
+                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody( callerMemberReferences, x => x.ContainingSemantic );
 
-                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
-                    IndexReferenceByContainingBody( IReadOnlyList<IntermediateSymbolSemanticReference> references )
+                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<T>>
+                    IndexReferenceByContainingBody<T>( IReadOnlyList<T> references, Func<T, IntermediateSymbolSemantic<IMethodSymbol>> getContainingSemanticFunc )
                 {
-                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
+                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<T>>();
 
-                    foreach ( var redirectedSymbolReference in references )
+                    foreach ( var data in references )
                     {
-                        if ( !dict.TryGetValue( redirectedSymbolReference.ContainingSemantic, out var list ) )
+                        var containingSemantic = getContainingSemanticFunc( data );
+
+                        if ( !dict.TryGetValue( containingSemantic, out var list ) )
                         {
-                            dict[redirectedSymbolReference.ContainingSemantic] = list = new List<IntermediateSymbolSemanticReference>();
+                            dict[containingSemantic] = list = new List<T>();
                         }
 
-                        list.Add( redirectedSymbolReference );
+                        list.Add( data );
                     }
 
-                    return dict.ToDictionary( x => x.Key, x => (IReadOnlyList<IntermediateSymbolSemanticReference>) x.Value );
+                    return dict.ToDictionary( x => x.Key, x => (IReadOnlyList<T>) x.Value );
                 }
             }
 
@@ -116,10 +124,19 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( nonInlinedReference.OriginalSymbol )
+                            switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case IPropertySymbol { Parameters.Length: > 0 }:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
+                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field.
+                                    // Take care to include interface event fields that are containing initializer expressions.
+                                    AddSubstitution( context, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -153,13 +170,27 @@ namespace Metalama.Framework.Engine.Linking
                                 context,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
+                        }
+                    }
+
+                    // Add substitutions for caller member references.
+                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( nonInlinedSemanticBody, out var callerMemberReferences ) )
+                    {
+                        foreach ( var reference in callerMemberReferences )
+                        {
+                            AddSubstitution(
+                                context,
+                                new CallerMemberSubstitution(
+                                    reference.InvocationExpression,
+                                    reference.ReferencingOverrideTarget,
+                                    reference.TargetMethod,
+                                    reference.ParametersToFix ) );
                         }
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync(
+                await this._concurrentTaskRunner.RunInParallelAsync(
                     this._nonInlinedSemantics.Union( this._additionalTransformedSemantics ),
                     ProcessNonInlinedSemantic,
                     cancellationToken );
@@ -218,16 +249,19 @@ namespace Metalama.Framework.Engine.Linking
                         var referencedSymbol = inliningSpecification.TargetSemantic.Symbol;
                         var root = this._syntaxHandler.GetCanonicalRootNode( referencedSymbol );
 
-                        if ( root is not StatementSyntax )
+                        switch ( root )
                         {
-                            AddSubstitution(
-                                inliningSpecification.ContextIdentifier,
-                                CreateOriginalBodySubstitution( 
-                                    root,
-                                    inliningSpecification.AspectReference.ContainingBody,
-                                    referencedSymbol,
-                                    inliningSpecification.UseSimpleInlining,
-                                    inliningSpecification.ReturnVariableIdentifier ) );
+                            case not StatementSyntax:
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    CreateOriginalBodySubstitution(
+                                        root,
+                                        inliningSpecification.AspectReference.ContainingBody,
+                                        referencedSymbol,
+                                        inliningSpecification.UseSimpleInlining,
+                                        inliningSpecification.ReturnVariableIdentifier ) );
+
+                                break;
                         }
                     }
 
@@ -236,10 +270,18 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( inliningSpecification.AspectReference.OriginalSymbol )
+                            switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case IPropertySymbol { Parameters.Length: > 0 }:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
+                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -277,13 +319,30 @@ namespace Metalama.Framework.Engine.Linking
                                 inliningSpecification.ContextIdentifier,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
+                        }
+                    }
+
+                    // Add substitutions for caller member references.
+                    if ( this._callerMemberReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var callerAttributeReferences )
+                         && inliningSpecification.ContextIdentifier.DestinationSemantic.Kind != IntermediateSymbolSemanticKind.Final )
+                    {
+                        // We only want to substitute when we are inlining into non-final semantic.
+
+                        foreach ( var reference in callerAttributeReferences )
+                        {
+                            AddSubstitution(
+                                inliningSpecification.ContextIdentifier,
+                                new CallerMemberSubstitution( 
+                                    reference.InvocationExpression,
+                                    reference.ReferencingOverrideTarget,
+                                    reference.TargetMethod,
+                                    reference.ParametersToFix ) );
                         }
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
 
                 void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType )
                 {
@@ -306,7 +365,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
 
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
@@ -323,20 +382,22 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol referencingSymbol, IMethodSymbol targetSymbol, bool usingSimpleInlining, string? returnVariableIdentifier )
+            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution(
+                SyntaxNode root,
+                IMethodSymbol referencingSymbol,
+                IMethodSymbol targetSymbol,
+                bool usingSimpleInlining,
+                string? returnVariableIdentifier )
             {
                 switch (root, targetSymbol)
                 {
-                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property }):
-                        return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
-
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, usingSimpleInlining, returnVariableIdentifier );
-
-                    case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
-                        Invariant.Assert( returnVariableIdentifier == null );
-
-                        return new EventFieldSubstitution( variableDeclarator, targetSymbol );
+                        return new ExpressionBodySubstitution(
+                            arrowExpressionClause,
+                            referencingSymbol,
+                            targetSymbol,
+                            usingSimpleInlining,
+                            returnVariableIdentifier );
 
                     case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );

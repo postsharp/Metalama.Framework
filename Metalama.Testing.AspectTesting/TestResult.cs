@@ -102,7 +102,8 @@ internal sealed class TestResult : IDisposable
 
     public TestContext? TestContext { get; set; }
 
-    internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
+    internal async Task AddInputDocumentAsync( Document document, string? path )
+        => this._syntaxTrees.Add( await TestSyntaxTree.CreateAsync( path, document, this ) );
 
     private static string CleanMessage( string text )
     {
@@ -198,7 +199,7 @@ internal sealed class TestResult : IDisposable
     {
         if ( this._frozen )
         {
-            throw new InvalidOperationException( "The test result can no longer be modified." );
+            return;
         }
 
         this._frozen = true;
@@ -259,7 +260,7 @@ internal sealed class TestResult : IDisposable
         {
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
-            if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
+            if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
             {
                 // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
                 // on the input compilation because they would potentially not map properly to the output compilation.
@@ -371,7 +372,32 @@ internal sealed class TestResult : IDisposable
 
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
     {
-        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`\n";
+        var message = $"// {d.Severity} {d.Id} ";
+
+        var testInputOptions = this.TestInput!.Options;
+
+        if ( testInputOptions.IncludeLineNumberInDiagnosticReport == true )
+        {
+            message +=
+                $"at line {d.Location.GetLineSpan().StartLinePosition.Line + 1}";
+        }
+        else
+        {
+            message += $"on `{this.GetTextUnderDiagnostic( d )}`";
+        }
+
+        if ( testInputOptions.RemoveDiagnosticMessage != true )
+        {
+            message += $": `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`";
+        }
+        else
+        {
+            message += ".";
+        }
+
+        message += "\n";
+
+        yield return message;
 
         foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
         {

@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
         {
             builder.Advice.ImplementInterface(builder.Target, (INamedType)TypeFactory.GetType(typeof(IntroducedInterface)));
 
-            builder.With(x => x.Methods).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
         }
 
         [InterfaceMember(IsExplicit = false)]

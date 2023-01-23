@@ -59,7 +59,7 @@ public class Target
       // Comment before Aspect2.
       Console.WriteLine("Aspect2");
       // Comment mid Aspect2.
-      return this._bar;
+      return _bar;
     // Comment after Aspect2.
     // Comment after Aspect1.
     // After Bar.get semicolon.

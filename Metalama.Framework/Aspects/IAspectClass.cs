@@ -41,9 +41,10 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets a value indicating whether instances of this aspect class are inherited by derived declarations.
-        /// This property can be set by adding the <see cref="InheritedAttribute"/> custom attribute to the aspect class.
+        /// This property returns <c>null</c> when the aspect class implements the <see cref="IConditionallyInheritableAspect"/>, because each aspect instance
+        /// can decide whether it is inheritable or not. This property returns <c>true</c> when the aspect class is annotated with the <see cref="InheritableAttribute"/> custom attribute.
         /// </summary>
-        bool IsInherited { get; }
+        bool? IsInheritable { get; }
 
         /// <summary>
         /// Gets a value indicating whether the aspect class derives from <see cref="System.Attribute" />.

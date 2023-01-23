@@ -88,6 +88,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
+        // TODO: If we support introducing const fields, implement ConstantValue.
+        public TypedConstant? ConstantValue => null;
+
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public bool IsRequired { get; set; }

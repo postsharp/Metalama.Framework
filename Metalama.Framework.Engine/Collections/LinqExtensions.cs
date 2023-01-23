@@ -1,14 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.Collections;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// ReSharper disable ParameterTypeCanBeEnumerable.Global
 // ReSharper disable CheckNamespace
 
 namespace System.Linq;
 
+[PublicAPI]
 public static class LinqExtensions
 {
     [Obsolete( "Use SelectAsEnumerable, SelectAsArray, or SelectAsArray." )]

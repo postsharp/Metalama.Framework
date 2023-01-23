@@ -6,12 +6,15 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SerializableDeclarationIdProvider
 {
+    private const string _assemblyPrefix = "Assembly:";
+
     private static readonly char[] _separators = new[] { ';', '=' };
 
     public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( DeclarationRefTargetKind.Default );
@@ -29,7 +32,7 @@ public static class SerializableDeclarationIdProvider
     public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
         => TryGetSerializableId( symbol, DeclarationRefTargetKind.Default, out id );
 
-    internal static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
+    private static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
     {
         switch ( symbol )
         {
@@ -58,6 +61,13 @@ public static class SerializableDeclarationIdProvider
                     var parentId = DocumentationCommentId.CreateDeclarationId( typeParameterSymbol.ContainingSymbol ).AssertNotNull();
 
                     id = new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameterSymbol.Ordinal}" );
+
+                    return true;
+                }
+
+            case IAssemblySymbol assemblySymbol:
+                {
+                    id = new SerializableDeclarationId( $"{_assemblyPrefix}{assemblySymbol.Identity}" );
 
                     return true;
                 }
@@ -104,13 +114,29 @@ public static class SerializableDeclarationIdProvider
                 _ => null
             };
         }
+        else if ( id.Id.StartsWith( _assemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+        {
+            if ( !AssemblyIdentity.TryParseDisplayName( id.Id.Substring( _assemblyPrefix.Length ), out var assemblyIdentity ) )
+            {
+                throw new AssertionFailedException( $"Cannot parse the id '{id.Id}'." );
+            }
+
+            if ( compilation.Assembly.Identity.Equals( assemblyIdentity ) )
+            {
+                return compilation.Assembly;
+            }
+            else
+            {
+                return compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( a => a.Identity.Equals( assemblyIdentity ) );
+            }
+        }
         else
         {
             return DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
         }
     }
 
-    public static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
+    internal static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
@@ -148,6 +174,15 @@ public static class SerializableDeclarationIdProvider
                     .RaiseMethod?.ReturnParameter,
                 _ => null
             };
+        }
+        else if ( id.Id.StartsWith( _assemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+        {
+            if ( !AssemblyIdentity.TryParseDisplayName( id.Id.Substring( _assemblyPrefix.Length ), out var assemblyIdentity ) )
+            {
+                throw new AssertionFailedException( $"Cannot parse the id '{id.Id}'." );
+            }
+
+            return compilation.Factory.GetAssembly( assemblyIdentity );
         }
         else
         {

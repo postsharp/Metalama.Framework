@@ -16,7 +16,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         where T : class, IMemberOrNamedType
     {
         public static readonly MemberRefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
-        public static readonly MemberRefEqualityComparer<T> IncludeNullability = new( SymbolEqualityComparer.IncludeNullability );
 
         private readonly SymbolEqualityComparer _symbolEqualityComparer;
 

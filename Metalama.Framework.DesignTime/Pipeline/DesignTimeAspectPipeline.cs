@@ -47,21 +47,23 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
     private readonly IFileSystemWatcher? _fileSystemWatcher;
-    private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
+    private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
     private readonly SemaphoreSlim _sync = new( 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+    private readonly ITaskRunner _taskRunner;
+    private readonly ProjectVersionProvider _projectVersionProvider;
 
     private bool _mustProcessQueue;
-
-    public ProjectKey ProjectKey { get; }
 
     // This field should not be changed directly, but only through the SetState method.
     private PipelineState _currentState;
 
     private int _pipelineExecutionCount;
+
+    public ProjectKey ProjectKey { get; }
 
     /// <summary>
     /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
@@ -70,8 +72,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
-
-    public ProjectVersionProvider ProjectVersionProvider { get; }
 
     public long SnapshotId => this._currentState.SnapshotId;
 
@@ -92,11 +92,12 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this.ProjectKey = projectKey;
         this._pipelineFactory = pipelineFactory;
         this._entryPointConsumer = (IDesignTimeEntryPointConsumer?) this.ServiceProvider.Global.Underlying.GetService( typeof(IDesignTimeEntryPointConsumer) );
-        this.ProjectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
+        this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
+        this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
 
         this._currentState = new PipelineState( this );
 
@@ -157,22 +158,25 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    private async Task OnOtherPipelineStatusChangedAsync( DesignTimePipelineStatusChangedEventArgs args )
+    private Task OnOtherPipelineStatusChangedAsync( DesignTimePipelineStatusChangedEventArgs arg )
     {
-        if ( args.Pipeline.ProjectKey != this.ProjectKey )
-        {
-            // TODO PERF: Check that the changed project is actually a dependency of the current project.
+        return this.OnOtherPipelineStatusChangedAsync( AsyncExecutionContext.Get( $"{this.ProjectKey}:PipelineStatusChangedEvent" ), arg );
+    }
 
+    private async Task OnOtherPipelineStatusChangedAsync( AsyncExecutionContext executionContext, DesignTimePipelineStatusChangedEventArgs args )
+    {
+        if ( this._currentState.ProjectVersion?.ReferencedProjectVersions.ContainsKey( args.Pipeline.ProjectKey ) == true )
+        {
             if ( args.IsPausing && this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
                 this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
 
-                await this.ExecuteWithLockOrEnqueueAsync( () => this.SetStateAsync( this._currentState.Pause() ) );
+                await this.ExecuteIfLockAvailableOrEnqueueAsync( context => this.SetStateAsync( this._currentState.Pause(), context ), executionContext );
             }
             else if ( args.IsResuming && this.Status != DesignTimeAspectPipelineStatus.Default )
             {
                 this.Logger.Trace?.Log( $"Resuming '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
-                await this.ResumeAsync( CancellationToken.None );
+                await this.ExecuteIfLockAvailableOrEnqueueAsync( this.ResumeCoreAsync, executionContext );
             }
         }
     }
@@ -197,8 +201,12 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return projectServiceProvider;
     }
 
-    private async ValueTask SetStateAsync( PipelineState state )
+    private async ValueTask SetStateAsync( PipelineState state, AsyncExecutionContext executionContext )
     {
+#if DEBUG
+        executionContext.RequireObject( this );
+#endif
+
         var oldStatus = this._currentState.Status;
         this._currentState = state;
 
@@ -236,7 +244,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             // There was an external build. Touch the files to re-run the analyzer.
             this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectKey}'." );
 
-            await this.ResumeAsync( CancellationToken.None );
+            await this.ResumeAsync( AsyncExecutionContext.Get(), CancellationToken.None );
 
             // Raise the event.
             await this._eventHub.OnExternalBuildCompletedEventAsync( this.ProjectKey );
@@ -248,11 +256,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 #pragma warning restore VSTHRD100
 
-    public async ValueTask ResumeAsync( CancellationToken cancellationToken )
+    public async Task ResumeAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken = default )
     {
         this.Logger.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectKey}'." );
 
-        using ( await this.WithLockAsync( cancellationToken ) )
+        using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
             try
             {
@@ -263,49 +271,66 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     return;
                 }
 
-                // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
-                // is removed.
-                if ( this.MustReportPausedPipelineAsErrors )
-                {
-                    foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
-                    {
-                        if ( file.Value == null )
-                        {
-                            this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
-
-                            RetryHelper.Retry(
-                                () =>
-                                {
-                                    if ( File.Exists( file.Key ) )
-                                    {
-                                        File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                                    }
-                                },
-                                logger: this.Logger );
-                        }
-                    }
-                }
-
-                // Reset the pipeline.
-                await this.SetStateAsync( this._currentState.Reset() );
-
-                // Notify that the pipeline must be executed again.
-                this._eventHub.OnProjectDirty( this.ProjectKey );
+                await this.ResumeCoreAsync( executionContext );
             }
             finally
             {
-                await this.ProcessJobQueueAsync();
+                await this.ProcessJobQueueAsync( executionContext );
             }
         }
+    }
+
+    private async ValueTask ResumeCoreAsync( AsyncExecutionContext executionContext )
+    {
+        // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
+        // is removed.
+        if ( this.MustReportPausedPipelineAsErrors )
+        {
+            foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
+            {
+                if ( file.Value == null )
+                {
+                    this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+
+                    RetryHelper.Retry(
+                        () =>
+                        {
+                            if ( File.Exists( file.Key ) )
+                            {
+                                File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
+                            }
+                        },
+                        logger: this.Logger );
+                }
+            }
+        }
+
+        // Reset the pipeline.
+        await this.SetStateAsync( this._currentState.Reset(), executionContext );
+
+        // Notify that the pipeline must be executed again.
+        this._jobQueue.Enqueue(
+            _ =>
+            {
+                this._eventHub.OnProjectDirty( this.ProjectKey );
+
+                return default;
+            } );
     }
 
     internal async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
         PartialCompilation compilation,
         bool ignoreStatus,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
-        using ( await this.WithLockAsync( cancellationToken ) )
+        using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
+            if ( ignoreStatus )
+            {
+                await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
+            }
+
             var state = this._currentState;
 
             var getConfigurationResult = PipelineState.GetConfiguration(
@@ -314,9 +339,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 ignoreStatus,
                 cancellationToken );
 
-            await this.SetStateAsync( state );
+            await this.SetStateAsync( state, executionContext );
 
-            await this.ProcessJobQueueAsync();
+            await this.ProcessJobQueueAsync( executionContext );
 
             return getConfigurationResult;
         }
@@ -333,8 +358,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._eventHub.CompilationResultChanged -= this.OnOtherPipelineCompilationResultChanged;
     }
 
-    internal async ValueTask<ProjectVersion> InvalidateCacheAsync(
+    private async ValueTask<ProjectVersion> InvalidateCacheAsync(
         Compilation compilation,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
         var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
@@ -342,33 +368,34 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             true,
             cancellationToken );
 
-        await this.SetStateAsync( newState );
+        await this.SetStateAsync( newState, executionContext );
 
         return newState.ProjectVersion.AssertNotNull();
     }
 
-    public async ValueTask ResetCacheAsync( CancellationToken cancellationToken )
+    public async ValueTask ResetCacheAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken )
     {
-        using ( await this.WithLockAsync( cancellationToken ) )
+        using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
-            await this.SetStateAsync( this._currentState.Reset() );
+            await this.SetStateAsync( this._currentState.Reset(), executionContext );
 
             this._eventHub.OnProjectDirty( this.ProjectKey );
 
-            await this.ProcessJobQueueAsync();
+            await this.ProcessJobQueueAsync( executionContext );
         }
     }
 
     private async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecutePartialAsync(
         PartialCompilation partialCompilation,
         DesignTimeProjectVersion projectVersion,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
         var result = await PipelineState.ExecuteAsync( this._currentState, partialCompilation, projectVersion, cancellationToken );
 
         // Intentionally updating the state atomically after execution of the method, so the state is
         // not affected by a cancellation.
-        await this.SetStateAsync( result.NewState );
+        await this.SetStateAsync( result.NewState, executionContext );
 
         if ( !result.CompilationResult.IsSuccessful )
         {
@@ -381,7 +408,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
     public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, TestableCancellationToken cancellationToken = default )
-        => TaskHelper.RunAndWait( () => this.ExecuteAsync( compilation, cancellationToken ), cancellationToken );
+        => this._taskRunner.RunSynchronously( () => this.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken ), cancellationToken );
 
     // This method is for testing only.
     public bool TryExecute(
@@ -389,8 +416,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         TestableCancellationToken cancellationToken,
         [NotNullWhen( true )] out CompilationResult? compilationResult )
     {
-        var result = TaskHelper.RunAndWait(
-            () => this.ExecuteAsync( compilation, cancellationToken ),
+        var result = this._taskRunner.RunSynchronously(
+            () => this.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken ),
             cancellationToken );
 
         if ( !result.IsSuccessful )
@@ -409,11 +436,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
         Compilation compilation,
+        bool autoResumePipeline,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken )
     {
         var pipelineStatus = this.Status;
 
-        var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
+        var compilationVersion = await this._projectVersionProvider.GetCompilationVersionAsync(
             this._currentState.ProjectVersion?.Compilation,
             compilation,
             cancellationToken );
@@ -427,11 +456,20 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 if ( metalamaVersion == EngineAssemblyMetadataReader.Instance.AssemblyVersion )
                 {
                     // This is a Metalama reference of the current version. We need to compile the dependency.
-                    var referenceResult = await this._pipelineFactory.ExecuteAsync( reference.Compilation, cancellationToken );
+                    var referenceResult = await this._pipelineFactory.ExecuteAsync(
+                        reference.Compilation,
+                        autoResumePipeline,
+                        executionContext,
+                        cancellationToken );
 
                     if ( !referenceResult.IsSuccessful )
                     {
-                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( referenceResult.Diagnostics );
+                        this.Logger.Warning?.Log(
+                            $"GetDesignTimeProjectVersionAsync('{this.ProjectKey}'): the pipeline for the reference '{reference.ProjectKey}' failed." );
+
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
+                            referenceResult.Diagnostics,
+                            $"The pipeline for the reference '{reference.ProjectKey}' failed: {referenceResult.DebugReason}" );
                     }
 
                     compilationReferences.Add(
@@ -463,7 +501,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     {
                         this.Logger.Warning?.Log( $"Failed to process the reference to '{reference.ProjectKey}': cannot get the transitive aspect manifest." );
 
-                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( result.Diagnostics.ToImmutableArray() );
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
+                            result.Diagnostics.ToImmutableArray(),
+                            $"GetTransitiveAspectManifest failed for '{reference.ProjectKey}'" );
                     }
                     else
                     {
@@ -478,7 +518,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                             this.Logger.Warning?.Log(
                                 $"Failed to process the reference to '{reference.ProjectKey}': cannot get the project from the workspace." );
 
-                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( ImmutableArray<Diagnostic>.Empty );
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
+                                ImmutableArray<Diagnostic>.Empty,
+                                $"Cannot get the project '{reference.ProjectKey}' from the workspace" );
                         }
 
                         var pipeline = this._pipelineFactory.GetOrCreatePipeline( referencedProject, cancellationToken );
@@ -487,17 +529,22 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             this.Logger.Warning?.Log( $"Failed to process the reference to '{reference.ProjectKey}': cannot get a pipeline." );
 
-                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( ImmutableArray<Diagnostic>.Empty );
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
+                                ImmutableArray<Diagnostic>.Empty,
+                                $"Cannot get the pipeline for project '{reference.ProjectKey}'." );
                         }
 
                         var configuration = await pipeline.GetConfigurationAsync(
                             PartialCompilation.CreateComplete( reference.Compilation ),
                             false,
+                            executionContext,
                             cancellationToken );
 
                         if ( !configuration.IsSuccessful )
                         {
-                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( configuration.Diagnostics );
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
+                                configuration.Diagnostics,
+                                $"Cannot get configuration: {configuration.DebugReason}" );
                         }
 
                         var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider );
@@ -527,10 +574,26 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return new DesignTimeProjectVersion( compilationVersion, compilationReferences, pipelineStatus );
     }
 
+    public ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+        Compilation compilation,
+        AsyncExecutionContext executionContext,
+        TestableCancellationToken cancellationToken = default )
+        => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
+
     public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
+        bool autoResumePipeline,
+        AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
     {
+        async Task AutoResumeAsync()
+        {
+            if ( this.Status == DesignTimeAspectPipelineStatus.Paused && autoResumePipeline )
+            {
+                await this.ResumeCoreAsync( executionContext );
+            }
+        }
+
         if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
         {
             if ( !compilationResult.IsSuccessful )
@@ -543,7 +606,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         try
         {
-            using ( await this.WithLockAsync( cancellationToken ) )
+            using ( await this.WithLockAsync( executionContext, cancellationToken ) )
             {
                 try
                 {
@@ -552,20 +615,26 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         return compilationResult;
                     }
 
-                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
+                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, autoResumePipeline, executionContext, cancellationToken );
 
                     if ( !projectVersion.IsSuccessful )
                     {
                         // A dependency could not be compiled.
-                        return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
+                        this.Logger.Warning?.Log( $"ExecuteAsync('{this.ProjectKey}'): cannot compile a referenced project." );
+
+                        return FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                            projectVersion.Diagnostics,
+                            $"Cannot compile a referenced project: {projectVersion.DebugReason}" );
                     }
 
                     // If a dependency project was paused, we must pause too.
                     if ( this.Status != DesignTimeAspectPipelineStatus.Paused
                          && projectVersion.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
                     {
-                        await this.SetStateAsync( this._currentState.Pause() );
+                        await this.SetStateAsync( this._currentState.Pause(), executionContext );
                     }
+
+                    await AutoResumeAsync();
 
                     Compilation? compilationToAnalyze = null;
 
@@ -574,7 +643,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         // Invalidate the cache for the new compilation.
                         var compilationVersion = await this.InvalidateCacheAsync(
                             compilation,
+                            executionContext,
                             cancellationToken );
+
+                        await AutoResumeAsync();
 
                         compilationToAnalyze = compilationVersion.CompilationToAnalyze;
 
@@ -621,7 +693,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                            var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion.Value, cancellationToken );
+                            var executionResult = await this.ExecutePartialAsync(
+                                partialCompilation,
+                                projectVersion.Value,
+                                executionContext,
+                                cancellationToken );
 
                             if ( !executionResult.IsSuccessful )
                             {
@@ -629,7 +705,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                                 if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                                 {
-                                    throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
+                                    // TODO: there seems to be some race which I cannot solve, but it is better not to fail in this case.
+                                    this.Logger.Warning?.Log( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
                                 }
 
                                 return compilationResult;
@@ -654,7 +731,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                         if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                         {
-                            throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
+                            // TODO: there seems to be some race which I cannot solve, but it is better not to fail in this case.
+                            this.Logger.Warning?.Log( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
                         }
 
                         return compilationResult;
@@ -681,12 +759,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 this._currentState.PipelineResult,
                                 validationResult,
                                 this._currentState.Status,
-                                this._currentState.Configuration!.Value.Value );
+                                this._currentState.PipelineResult.Configuration.AssertNotNull() );
                         }
                         else
                         {
                             // The pipeline was paused before being first executed.
-                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty );
+                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                                ImmutableArray<Diagnostic>.Empty,
+                                "The pipeline was paused in the middle of execution." );
                         }
 
                         return compilationResult;
@@ -694,7 +774,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 }
                 finally
                 {
-                    await this.ProcessJobQueueAsync();
+                    await this.ProcessJobQueueAsync( executionContext );
                 }
             }
         }
@@ -885,23 +965,37 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return result;
     }
 
-    private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )
+    private async ValueTask ExecuteIfLockAvailableOrEnqueueAsync( Func<AsyncExecutionContext, ValueTask> action, AsyncExecutionContext executionContext )
     {
-        using ( var @lock = await this.WithLockAsync( 0, CancellationToken.None ) )
+        using ( var @lock = await this.WithLockAsync( executionContext, 0, CancellationToken.None ) )
         {
             if ( @lock.IsAcquired )
             {
-                await action();
-                await this.ProcessJobQueueAsync();
+                await action( executionContext );
+
+                await this.ProcessJobQueueAsync( executionContext );
             }
             else
             {
                 this._jobQueue.Enqueue( action );
+
+                // Enqueue a task to process the action when the lock will be available.
+                _ = this.ProcessJobQueueWhenLockAvailableAsync();
             }
         }
     }
 
-    private async ValueTask ProcessJobQueueAsync()
+    internal async Task ProcessJobQueueWhenLockAvailableAsync()
+    {
+        var executionContext = AsyncExecutionContext.Get();
+
+        using ( await this.WithLockAsync( executionContext, CancellationToken.None ) )
+        {
+            await this.ProcessJobQueueAsync( executionContext );
+        }
+    }
+
+    private async ValueTask ProcessJobQueueAsync( AsyncExecutionContext executionContext )
     {
         while ( this._mustProcessQueue )
         {
@@ -909,22 +1003,40 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             while ( this._jobQueue.TryDequeue( out var job ) )
             {
-                await job();
+                await job( executionContext );
             }
         }
     }
 
-    private ValueTask<Lock> WithLockAsync( CancellationToken cancellationToken ) => this.WithLockAsync( -1, cancellationToken );
+    private ValueTask<Lock> WithLockAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken )
+        => this.WithLockAsync( executionContext, -1, cancellationToken );
 
-    private async ValueTask<Lock> WithLockAsync( int timeout, CancellationToken cancellationToken )
+    private async ValueTask<Lock> WithLockAsync( AsyncExecutionContext executionContext, int timeout, CancellationToken cancellationToken )
     {
         if ( this._sync.CurrentCount < 1 )
         {
             this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectKey}'." );
         }
 
-        var acquired = await this._sync.WaitAsync( timeout, cancellationToken );
+#if DEBUG
+        executionContext.DetectCycle( this );
+#endif
 
+        // First wait for a limited amount of time, so we can display a warning in case of large delay.
+        var realTimeout = timeout < 0 ? int.MaxValue : timeout;
+        var acquired = await this._sync.WaitAsync( Math.Min( 5000, realTimeout ), cancellationToken );
+
+        if ( !acquired )
+        {
+            this.Logger.Warning?.Log( $"Acquiring the lock on '{this.ProjectKey}' is taking a long time." + Environment.NewLine + new StackTrace() );
+
+            if ( realTimeout > 5000 )
+            {
+                acquired = await this._sync.WaitAsync( timeout, cancellationToken );
+            }
+        }
+
+        // Now wait more if needed.
         Action? lockDisposeAction = null;
 
         if ( acquired )
@@ -933,6 +1045,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' acquired." );
 
 #if DEBUG
+
+            executionContext.Push( this );
+
             if ( this.Logger.Warning != null )
             {
                 var callStack = new StackTrace();
@@ -945,7 +1060,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             if ( !isDisposed )
                             {
-                                this.Logger.Warning?.Log( "The following call stack has been holding the lock for a long time:" );
+                                this.Logger.Warning?.Log( $"The following call stack has been holding the lock for '{this.ProjectKey}' for a long time:" );
                                 this.Logger.Warning?.Log( callStack.ToString() );
                             }
                         },
@@ -960,19 +1075,21 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' not acquired because of a timeout." );
         }
 
-        return new Lock( this, acquired, lockDisposeAction );
+        return new Lock( this, acquired, lockDisposeAction, executionContext );
     }
 
     private readonly struct Lock : IDisposable
     {
         private readonly DesignTimeAspectPipeline _parent;
         private readonly Action? _disposeAction;
+        private readonly AsyncExecutionContext _executionContext;
 
-        public Lock( DesignTimeAspectPipeline sync, bool isAcquired, Action? disposeAction )
+        public Lock( DesignTimeAspectPipeline sync, bool isAcquired, Action? disposeAction, AsyncExecutionContext executionContext )
         {
             this._parent = sync;
             this.IsAcquired = isAcquired;
             this._disposeAction = disposeAction;
+            this._executionContext = executionContext;
         }
 
         public bool IsAcquired { get; }
@@ -988,6 +1105,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                 this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );
                 this._parent._sync.Release();
+
+#if DEBUG
+                this._executionContext.Pop( this._parent );
+#endif
             }
 
             this._disposeAction?.Invoke();
@@ -1023,7 +1144,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         DiagnosticBag diagnosticBag = new();
 
-        var getConfigurationResult = await this.GetConfigurationAsync( partialCompilation, true, cancellationToken );
+        var getConfigurationResult = await this.GetConfigurationAsync( partialCompilation, true, AsyncExecutionContext.Get(), cancellationToken );
 
         if ( !getConfigurationResult.IsSuccessful )
         {

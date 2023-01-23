@@ -30,7 +30,7 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
       global::System.Console.WriteLine("This is introduced interface member.");
     }
   }
-  private global::System.EventHandler? _eventField;
+  private event global::System.EventHandler? _eventField;
   event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.EventField
   {
     add

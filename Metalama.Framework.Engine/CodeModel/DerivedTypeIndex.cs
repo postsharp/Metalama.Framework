@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -32,19 +34,34 @@ namespace Metalama.Framework.Engine.CodeModel
         private bool IsContainedInCurrentCompilation( INamedTypeSymbol type )
             => SymbolEqualityComparer.Default.Equals( this._compilation.Assembly, type.ContainingAssembly );
 
-        public IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, bool deep )
+        internal IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
         {
-            return deep
-                ? this.GetDerivedTypesDeepCore( baseType )
-                : this.GetDerivedTypesShallowCore( baseType );
+            return options switch
+            {
+                DerivedTypesOptions.All => this.GetAllDerivedTypesCore( baseType ),
+                DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypesCore( baseType ),
+                DerivedTypesOptions.FirstLevelWithinCompilationOnly => this.GetFirstLevelDerivedTypesCore( baseType ),
+                _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
+            };
         }
 
-        private IEnumerable<INamedTypeSymbol> GetDerivedTypesDeepCore( INamedTypeSymbol baseType )
+        private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
             => this._relationships[baseType]
-                .SelectManyRecursive( t => this._relationships[t], throwOnDuplicate: false )
+                .SelectManyRecursiveInternal( t => this._relationships[t], throwOnDuplicate: false )
                 .Where( this.IsContainedInCurrentCompilation );
 
-        private IEnumerable<INamedTypeSymbol> GetDerivedTypesShallowCore( INamedTypeSymbol baseType )
+        private IEnumerable<INamedTypeSymbol> GetDirectlyDerivedTypesCore( INamedTypeSymbol baseType )
+        {
+            foreach ( var type in this._relationships[baseType] )
+            {
+                if ( this.IsContainedInCurrentCompilation( type ) )
+                {
+                    yield return type;
+                }
+            }
+        }
+
+        private IEnumerable<INamedTypeSymbol> GetFirstLevelDerivedTypesCore( INamedTypeSymbol baseType )
         {
             var set = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
             GetDerivedTypesRecursive( baseType );

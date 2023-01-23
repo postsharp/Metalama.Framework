@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIndexerTransformation
     {
-        public new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
+        private new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
 
         protected OverrideIndexerBaseTransformation(
             Advice advice,
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
             return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, "__linker_param") );
         }
 
-        protected BuiltUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
+        protected SyntaxUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
             => accessor.MethodKind switch
             {
                 MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this.CreateProceedGetExpression( context ),
                     templateKind,
                     this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-                MethodKind.PropertySet => new BuiltUserExpression(
+                MethodKind.PropertySet => new SyntaxUserExpression(
                     this.CreateProceedSetExpression( context ),
                     this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )

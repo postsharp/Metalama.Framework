@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -40,6 +42,7 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
+        [UsedImplicitly]
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
 
         /// <summary>
@@ -53,6 +56,7 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the full path of the code for the output compile-time syntax tree.
         /// </summary>
+        [UsedImplicitly]
         public string? OutputCompileTimePath { get; private set; }
 
         public string? HtmlInputRunTimePath { get; internal set; }
@@ -109,12 +113,19 @@ namespace Metalama.Testing.AspectTesting
             }
         }
 
-        internal TestSyntaxTree( string? inputPath, Document document, TestResult parent )
+        private TestSyntaxTree( string? inputPath, Document document, TestResult parent, SyntaxTree syntaxTree )
         {
             this.InputDocument = document;
             this._parent = parent;
             this.InputPath = inputPath;
-            this.InputSyntaxTree = document.GetSyntaxTreeAsync().Result!;
+            this.InputSyntaxTree = syntaxTree;
+        }
+
+        public static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
+        {
+            var syntaxTree = await document.GetSyntaxTreeAsync();
+
+            return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
         }
     }
 }

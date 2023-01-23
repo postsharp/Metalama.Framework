@@ -2,13 +2,14 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-public sealed partial class InheritableAspectInstance : IAspectInstance
+public sealed partial class InheritableAspectInstance : IAspectInstance, IAspectPredecessorImpl
 {
     private readonly IAspectClass? _aspectClass;
 
@@ -19,6 +20,8 @@ public sealed partial class InheritableAspectInstance : IAspectInstance
     public IAspectClass AspectClass => this._aspectClass ?? throw new InvalidOperationException();
 
     bool IAspectInstance.IsSkipped => false;
+
+    public bool IsInheritable => true;
 
     public ImmutableArray<IAspectInstance> SecondaryInstances { get; private set; }
 
@@ -33,6 +36,7 @@ public sealed partial class InheritableAspectInstance : IAspectInstance
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {
         this.TargetDeclaration = aspectInstance.TargetDeclaration;
+        this.TargetDeclarationDepth = ((IAspectPredecessorImpl) aspectInstance).TargetDeclarationDepth;
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;
         this.AspectState = aspectInstance.AspectState;
@@ -53,4 +57,11 @@ public sealed partial class InheritableAspectInstance : IAspectInstance
     }
 
     public override string ToString() => $"{nameof(InheritableAspectInstance)}, Aspect={this.Aspect}, Target={this.TargetDeclaration}";
+
+    public FormattableString FormatPredecessor( ICompilation compilation )
+        => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration.GetTarget( compilation )}'";
+
+    Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => null;
+
+    public int TargetDeclarationDepth { get; }
 }

@@ -33,13 +33,13 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _compilationContext;
-        private readonly ITaskScheduler _taskScheduler;
+        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         public LinkerInjectionStep( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         {
             this._serviceProvider = serviceProvider;
             this._compilationContext = compilationContext;
-            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
         }
 
         public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
@@ -124,14 +124,17 @@ namespace Metalama.Framework.Engine.Linking
 
             var transformationsBySyntaxTree = input.Transformations.GroupBy( t => t.TransformedSyntaxTree );
 
-            await this._taskScheduler.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
+            await this._concurrentTaskRunner.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
 
-            await this._taskScheduler.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunInParallelAsync(
                 introductionMemberLevelTransformations.Values,
                 t => t.Sort( transformationComparer ),
                 cancellationToken );
 
-            await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
+            await this._concurrentTaskRunner.RunInParallelAsync(
+                symbolMemberLevelTransformations.Values,
+                t => t.Sort( transformationComparer ),
+                cancellationToken );
 
             var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
@@ -156,9 +159,9 @@ namespace Metalama.Framework.Engine.Linking
 
             var intermediateCompilation = input.InitialCompilation;
 
-            void RewriteSyntaxTree( SyntaxTree initialSyntaxTree )
+            async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
             {
-                var oldRoot = initialSyntaxTree.GetRoot();
+                var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
                 var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
 
                 if ( oldRoot != newRoot )
@@ -172,7 +175,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await this._taskScheduler.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
+            await this._concurrentTaskRunner.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
             var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
             var transformations = syntaxTreeMapping.SelectAsList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );

@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -18,7 +17,6 @@ using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating
@@ -177,11 +175,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return SyntaxFactory.List( statementList );
         }
-
-        public SeparatedSyntaxList<T> SeparatedList<T>( params T[] items )
-            where T : SyntaxNode
-            => SyntaxFactory.SeparatedList( items );
-
+        
         public SyntaxKind Boolean( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         // This method is called when the expression of 'return' is a non-dynamic expression.
@@ -347,8 +341,6 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public IUserExpression Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
-
-        public ValueTask<object?> ProceedAsync() => meta.Proceed();
 
         public ExpressionSyntax GetDynamicSyntax( object? expression )
         {

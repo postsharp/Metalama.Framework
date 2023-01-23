@@ -6,9 +6,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         private readonly Action<Diagnostic> _addDiagnostic;
         private IPartialCompilation _compilation;
 
-        public IServiceProvider<IProjectService> ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the type of aspects that must be handled.
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             }
         }
 
-        public AspectWeaverHelper Helper { get; }
+        public ICompilationServices CompilationServices { get; }
 
         private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> called for each <see cref="SyntaxTree"/> in the compilation.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+        public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriter,
                 this.ServiceProvider,
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         {
             cancellationToken = this.GetCancellationToken( cancellationToken );
 
-            var taskScheduler = this.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = this.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
             var nodesBySyntaxTree = this.AspectInstances.Values
                 .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
@@ -104,15 +104,15 @@ namespace Metalama.Framework.Engine.AspectWeavers
 
             ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
-            await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTree, cancellationToken );
+            await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
-            void ProcessSyntaxTree( IGrouping<SyntaxTree, SyntaxReference> group )
+            async Task ProcessSyntaxTreeAsync( IGrouping<SyntaxTree, SyntaxReference> group )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var oldTree = @group.Key;
                 var outerRewriter = new Rewriter( group.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
-                var oldRoot = oldTree.GetRoot();
+                var oldRoot = await oldTree.GetRootAsync( cancellationToken );
                 var newRoot = outerRewriter.Visit( oldRoot )!;
 
                 if ( oldRoot != newRoot )
@@ -129,10 +129,10 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            AspectWeaverHelper helper,
-            IServiceProvider<IProjectService> serviceProvider,
+            ProjectServiceProvider serviceProvider,
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
+            ICompilationServices compilationServices,
             CancellationToken cancellationToken )
         {
             this.AspectClass = aspectClass;
@@ -142,7 +142,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this.Project = project;
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.CancellationToken = cancellationToken;
-            this.Helper = helper;
             this.ServiceProvider = serviceProvider;
         }
 

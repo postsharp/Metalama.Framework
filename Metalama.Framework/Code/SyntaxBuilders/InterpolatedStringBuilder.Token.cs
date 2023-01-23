@@ -8,9 +8,15 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         {
             public object? Expression { get; }
 
-            public Token( object? expression )
+            public int? Alignment { get; }
+
+            public string? Format { get; }
+
+            public Token( object? expression, int? alignment, string? format )
             {
                 this.Expression = expression;
+                this.Alignment = alignment;
+                this.Format = format;
             }
         }
     }

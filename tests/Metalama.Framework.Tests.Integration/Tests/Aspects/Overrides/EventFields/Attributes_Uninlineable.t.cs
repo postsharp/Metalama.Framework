@@ -2,6 +2,7 @@
 [Override]
 internal class TargetClass
 {
+  private event EventHandler? _eventField;
   [EventOnly]
   public event EventHandler? EventField
   {
@@ -9,18 +10,18 @@ internal class TargetClass
     add
     {
       global::System.Console.WriteLine("This is the overridden add.");
-      this.EventField_Source += value;
-      this.EventField_Source += value;
+      this._eventField += value;
+      this._eventField += value;
     }
     [MethodOnly]
     remove
     {
       global::System.Console.WriteLine("This is the overridden remove.");
-      this.EventField_Source -= value;
-      this.EventField_Source -= value;
+      this._eventField -= value;
+      this._eventField -= value;
     }
   }
-  private EventHandler? EventField_Source;
+  private event global::System.EventHandler? _introducedEventField;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable.EventOnlyAttribute]
   public event global::System.EventHandler? IntroducedEventField
   {
@@ -28,16 +29,15 @@ internal class TargetClass
     add
     {
       global::System.Console.WriteLine("This is the overridden add.");
-      this.IntroducedEventField_Source += value;
-      this.IntroducedEventField_Source += value;
+      this._introducedEventField += value;
+      this._introducedEventField += value;
     }
     [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable.MethodOnlyAttribute]
     remove
     {
       global::System.Console.WriteLine("This is the overridden remove.");
-      this.IntroducedEventField_Source -= value;
-      this.IntroducedEventField_Source -= value;
+      this._introducedEventField -= value;
+      this._introducedEventField -= value;
     }
   }
-  private global::System.EventHandler? IntroducedEventField_Source;
 }

@@ -5,15 +5,19 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -25,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this._symbol;
 
-        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }
@@ -76,7 +80,32 @@ namespace Metalama.Framework.Engine.CodeModel
             => false;
 #endif
 
+        [Memo]
+        public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
+
+        private IExpression? GetInitializerExpressionCore()
+        {
+            var expression = this._symbol.GetPrimaryDeclaration() switch
+            {
+                VariableDeclaratorSyntax variable => variable.Initializer?.Value,
+                EnumMemberDeclarationSyntax enumMember => enumMember.EqualsValue?.Value,
+                _ => null
+            };
+
+            if ( expression == null )
+            {
+                return null;
+            }
+            else
+            {
+                return new SourceUserExpression( expression, this.Type );
+            }
+        }
+
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
+
+        [Memo]
+        public TypedConstant? ConstantValue => TypedConstant.Create( this._symbol.ConstantValue, this.Type );
 
         public override bool IsExplicitInterfaceImplementation => false;
 

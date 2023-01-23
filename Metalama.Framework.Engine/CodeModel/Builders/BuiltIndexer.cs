@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.RunTime;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,53 +14,53 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class BuiltIndexer : BuiltMember, IIndexerImpl
     {
+        private readonly IndexerBuilder _indexerBuilder;
+
         public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
-            this.IndexerBuilder = builder;
+            this._indexerBuilder = builder;
         }
 
-        public IndexerBuilder IndexerBuilder { get; }
+        protected override MemberBuilder MemberBuilder => this._indexerBuilder;
 
-        public override MemberBuilder MemberBuilder => this.IndexerBuilder;
+        protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._indexerBuilder;
 
-        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.IndexerBuilder;
+        public RefKind RefKind => this._indexerBuilder.RefKind;
 
-        public RefKind RefKind => this.IndexerBuilder.RefKind;
-
-        public Writeability Writeability => this.IndexerBuilder.Writeability;
+        public Writeability Writeability => this._indexerBuilder.Writeability;
 
         [Memo]
-        public IType Type => this.Compilation.Factory.GetIType( this.IndexerBuilder.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._indexerBuilder.Type );
 
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.IndexerBuilder.ToTypedRef<IHasParameters>() ) );
+                this.GetCompilationModel().GetParameterCollection( this._indexerBuilder.ToTypedRef<IHasParameters>() ) );
 
         [Memo]
-        public IMethod? GetMethod => this.IndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.GetMethod ) : null;
+        public IMethod? GetMethod
+            => this._indexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.GetMethod ) : null;
 
         [Memo]
-        public IMethod? SetMethod => this.IndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.SetMethod ) : null;
+        public IMethod? SetMethod
+            => this._indexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.SetMethod ) : null;
 
         [Memo]
         public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
 
         [Memo]
-        public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this.IndexerBuilder.OverriddenIndexer );
+        public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
-            => this.IndexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+            => this._indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
-        public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => this.IndexerBuilder.ToFieldOrPropertyOrIndexerInfo();
-
-        public PropertyInfo ToPropertyInfo() => this.IndexerBuilder.ToPropertyInfo();
+        public PropertyInfo ToPropertyInfo() => this._indexerBuilder.ToPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors => this.IndexerBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
+        public IEnumerable<IMethod> Accessors => this._indexerBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
     }
 }

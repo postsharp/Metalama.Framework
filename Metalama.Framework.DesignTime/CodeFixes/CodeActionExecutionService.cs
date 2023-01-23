@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 
@@ -17,7 +18,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
     private readonly ILogger _logger;
     private readonly WorkspaceProvider _workspaceProvider;
 
-    public CodeActionExecutionService( GlobalServiceProvider serviceProvider )
+    internal CodeActionExecutionService( GlobalServiceProvider serviceProvider )
     {
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
@@ -62,6 +63,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
         var getConfigurationResult = await pipeline.GetConfigurationAsync(
             partialCompilation,
             true,
+            AsyncExecutionContext.Get(),
             cancellationToken.ToTestable() );
 
         if ( !getConfigurationResult.IsSuccessful )

@@ -1,32 +1,45 @@
-internal class Targets
+// Warning CS8601 on `(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.B?.Clone()`: `Possible null reference assignment.`
+// Warning CS8601 on `(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)this.C?.Clone()`: `Possible null reference assignment.`
+// Warning CS8601 on `(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.G?.Clone()`: `Possible null reference assignment.`
+[DeepClone]
+internal partial class AutomaticallyCloneable : global::System.ICloneable
 {
-  [DeepClone]
-  private class AutomaticallyCloneable : global::System.ICloneable
+  public int A;
+  public ManuallyCloneable B;
+  public AutomaticallyCloneable C;
+  public NotCloneable D;
+  public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable Clone()
   {
-    private int a;
-    private ManuallyCloneable? b;
-    private AutomaticallyCloneable? c;
-    public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone()
-    {
-      var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)base.MemberwiseClone());
-      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).b = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable? )((global::System.ICloneable)this.b).Clone());
-      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).c = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable? )((global::System.ICloneable)this.c).Clone());
-      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone;
-    }
-    global::System.Object global::System.ICloneable.Clone()
-    {
-      return (global::System.Object)this.Clone();
-    }
+    var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)base.MemberwiseClone();
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone).B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.B?.Clone());
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone).C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)this.C?.Clone());
+    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone;
   }
-  [DeepClone]
-  private class Derived : AutomaticallyCloneable
+  global::System.Object global::System.ICloneable.Clone()
   {
-    private string d;
-    public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived Clone()
-    {
-      var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)base.Clone());
-      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone).d = ((global::System.String)((global::System.ICloneable)this.d).Clone());
-      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone;
-    }
+    return (global::System.Object)this.Clone();
+  }
+}
+internal class ManuallyCloneable : ICloneable
+{
+  public int E;
+  public object Clone()
+  {
+    return new ManuallyCloneable()
+    {E = this.E};
+  }
+}
+internal class NotCloneable
+{
+  public int F;
+}
+internal partial class Derived : AutomaticallyCloneable
+{
+  public ManuallyCloneable G { get; private set; }
+  public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived Clone()
+  {
+    var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)base.Clone();
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)clone).G = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.G?.Clone());
+    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)clone;
   }
 }

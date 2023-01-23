@@ -9,7 +9,11 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+// ReSharper disable MemberCanBeMadeStatic.Global
+
 namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+#pragma warning disable CA1822 // Mark members as static
 
 internal sealed class AttributeClassificationService : IProjectService
 {
@@ -40,6 +44,7 @@ internal sealed class AttributeClassificationService : IProjectService
         }
     }
 
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public bool MustCopyTemplateAttribute( IAttribute attribute )
     {
         var fullName = attribute.Type.FullName;
@@ -55,9 +60,7 @@ internal sealed class AttributeClassificationService : IProjectService
         return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
     }
 
-#pragma warning disable CA1822 // Mark members as static
     public bool MustCopyTemplateAttribute( AttributeData attribute )
-#pragma warning restore CA1822 // Mark members as static
     {
         var fullName = attribute.AttributeConstructor.AssertNotNull().ContainingType.GetFullName().AssertNotNull();
 
@@ -68,7 +71,10 @@ internal sealed class AttributeClassificationService : IProjectService
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
              fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) )
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.IteratorStateMachineAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute", StringComparison.Ordinal ) )
         {
             return true;
         }

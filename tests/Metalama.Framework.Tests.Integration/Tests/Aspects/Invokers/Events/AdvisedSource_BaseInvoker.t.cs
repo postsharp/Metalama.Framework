@@ -14,17 +14,17 @@ internal class TargetClass
     }
   }
   private event EventHandler Event_Source { add => this._field += value; remove => this._field -= value; }
+  private event EventHandler? _eventField;
   [Test]
   public event EventHandler? EventField
   {
     add
     {
-      this.EventField_Source += value;
+      this._eventField += value;
     }
     remove
     {
-      this.EventField_Source -= value;
+      this._eventField -= value;
     }
   }
-  private EventHandler? EventField_Source;
 }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine;
@@ -21,6 +22,7 @@ namespace Metalama.Testing.UnitTesting
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.
     /// </summary>
+    [PublicAPI]
     public static class TestCompilationFactory
     {
         private static readonly ConcurrentDictionary<Assembly, PortableExecutableReference> _metadataReferenceCache = new();
@@ -97,6 +99,9 @@ namespace Metalama.Testing.UnitTesting
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
             _ = typeof(DynamicAttribute);
+#if NETFRAMEWORK
+            _ = Assembly.Load( "System.Reflection, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" );
+#endif
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
                     a => !a.IsDynamic && _allowedSystemAssemblies.Contains( a.GetName().Name.AssertNotNull() )

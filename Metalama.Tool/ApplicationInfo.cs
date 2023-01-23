@@ -8,16 +8,16 @@ namespace Metalama.DotNetTools
 {
     internal class ApplicationInfo : ApplicationInfoBase
     {
-        public ApplicationInfo() : base( typeof( ApplicationInfo ).Assembly ) { }
+        public ApplicationInfo() : base( typeof(ApplicationInfo).Assembly ) { }
 
-        public override string Name => typeof( ApplicationInfo ).Assembly.GetName().Name!;
+        public override string Name => typeof(ApplicationInfo).Assembly.GetName().Name!;
     }
 
     internal class VersionCommand : BaseCommand<BaseCommandSettings>
     {
         protected override void Execute( ExtendedCommandContext context, BaseCommandSettings settings )
         {
-            context.Console.WriteSuccess(EngineAssemblyMetadataReader.Instance.PackageVersion);           
+            context.Console.WriteSuccess( EngineAssemblyMetadataReader.Instance.PackageVersion );
         }
     }
 }

@@ -20,10 +20,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int Method()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return 42;
         }
     }
@@ -37,9 +38,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     [Introduction]
     public class TargetClass
     {
-        public int Method(int x)
+        public int Method( int x )
         {
-            Console.WriteLine("This is original method.");
+            Console.WriteLine( "This is original method." );
+
             return x;
         }
     }

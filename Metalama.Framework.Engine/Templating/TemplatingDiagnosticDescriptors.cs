@@ -18,16 +18,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private const string _category = "Metalama.Template";
 
-        internal static readonly DiagnosticDefinition<(string Expression, string ParentExpression)>
-            CannotReferenceRuntimeExpressionFromBuildTimeExpression
-                = new(
-                    "LAMA0100",
-                    "Cannot reference a run-time expression from a compile-time expression",
-                    "Cannot reference the run-time expression {0} because the parent expression {1} is compile-time",
-                    _category,
-                    Error );
-
-        public static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
+        internal static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
             = new(
                 "LAMA0101",
                 "The C# language feature is not supported.",
@@ -50,22 +41,6 @@ namespace Metalama.Framework.Engine.Templating
                 + "one for run-time variables, and one for compile-time variables",
                 "Local variables {0} cannot be declared in the same declaration. "
                 + "Split them into different declarations; one for run-time variables, and one for compile-time variables",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<string> UnsupportedContextForProceed
-            = new(
-                "LAMA0106",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<(string Expression, ITypeSymbol ExpressionType)> CannotConvertBuildTime
-            = new(
-                "LAMA0107",
-                "Cannot convert an expression into compile-time code because the expression is of an unsupported type",
-                "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 Error );
 
@@ -142,15 +117,15 @@ namespace Metalama.Framework.Engine.Templating
                     + "next build and you may get errors related to the absence of generated source. "
                     + "To resume analysis, finish the work on all compile-time logic, then build the project (even if the run-time code still has issues).",
                     _category,
-                    Error );
+                    Warning );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace)>
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace, string AttributeName)>
             CompileTimeCodeNeedsNamespaceImport
                 = new(
                     "LAMA0119",
                     "The declaration contains compile-time code but it does not import the proper namespaces.",
                     "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import the '{1}' namespaces. "
-                    + "This may cause an inconsistent design-time experience. Import this namespace explicitly.",
+                    + "This may cause an inconsistent design-time experience. Add the [{2}] attribute to '{0}' and import this namespace explicitly.",
                     _category,
                     Error );
 
@@ -200,16 +175,7 @@ namespace Metalama.Framework.Engine.Templating
                 = new(
                     "LAMA0224",
                     "Cannot declare local variable with the dynamic type if the variable is not initialized.",
-                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized. Use 'var'.",
-                    _category,
-                    Error );
-
-        internal static readonly DiagnosticDefinition<string>
-            CallToExpressionMustHaveExplicitCast
-                = new(
-                    "LAMA0225",
-                    "Calls to meta.Expression must be explicitly cast to IExpression.",
-                    "The call to '{0}' must be explicitly cast to IExpression.",
+                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized.",
                     _category,
                     Error );
 
@@ -225,7 +191,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0227",
                 "'dynamic' is forbidden as a generic parameter type or array element type in a template.",
-                "The type '{0}' is forbidden in a template: 'dynamic' cannot be used as a generic argument type or an array element type.",
+                "The type '{0}' is forbidden in a template: 'dynamic' cannot be used as a generic argument type, an array element type, a tuple element type or a ref type.",
                 _category,
                 Error );
 
@@ -312,15 +278,6 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol>
-            InvalidScope
-                = new(
-                    "LAMA0239",
-                    "Arrays or generic types of 'dynamic' are forbidden.",
-                    "The type or signature of '{0}' is invalid: arrays or generic types of 'dynamic' are forbidden.",
-                    _category,
-                    Error );
-
         internal static readonly DiagnosticDefinition<(string ParentExpression, string Expression1, string Scope1, string Expression2, string Scope2)>
             ExpressionScopeConflictBecauseOfChildren
                 = new(
@@ -387,6 +344,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0249",
                 "Template code cannot contain unsafe code",
                 "'{0}' cannot contain unsafe code because it is a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<None> ForbiddenDynamicUseInTemplate
+            = new(
+                "LAMA0250",
+                "Template code cannot use dynamic like this",
+                "This use of 'dynamic' is not allowed in a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<string> DynamicVariableSetToNonDynamic
+            = new(
+                "LAMA0251",
+                "Dynamic variables cannot be set to non-dynamic values.",
+                "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
                 _category,
                 Error );
     }

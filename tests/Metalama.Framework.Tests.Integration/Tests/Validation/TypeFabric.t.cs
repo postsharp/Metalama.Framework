@@ -1,6 +1,3 @@
-// Warning MY001 on `Validate`: `Reference constraint of type 'Other' in declaration 'ValidatedClass.Fabric.AmendType(ITypeAmender)'.`
-// Warning MY001 on `context`: `Reference constraint of type 'Other' in declaration 'ValidatedClass.Fabric.Validate(in ReferenceValidationContext)'.`
-// Warning MY001 on `context`: `Reference constraint of type 'Other' in declaration 'ValidatedClass.Fabric.Validate(in ReferenceValidationContext)'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' in declaration 'DerivedClass'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'FieldType' in declaration 'DerivedClass._field1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass._field2'.`

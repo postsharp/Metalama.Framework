@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         public DiagnosticDefinitionDiscoveryService() : this(
             ServiceProvider<IProjectService>.Empty.WithServices( new UserCodeInvoker( ServiceProvider<IGlobalService>.Empty ) ) ) { }
 
-        public DiagnosticDefinitionDiscoveryService( ProjectServiceProvider serviceProvider )
+        internal DiagnosticDefinitionDiscoveryService( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider.Underlying;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
             => types.SelectAsEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
-        public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
+        internal IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
             => types.SelectAsEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )

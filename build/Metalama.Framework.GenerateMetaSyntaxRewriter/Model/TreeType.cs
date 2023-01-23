@@ -30,6 +30,6 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         public List<TreeTypeChild> Children { get; set; } = new();
 
         [XmlIgnore]
-        public RoslynVersion MinimalRoslynVersion { get; set; }
+        internal RoslynVersion MinimalRoslynVersion { get; set; }
     }
 }

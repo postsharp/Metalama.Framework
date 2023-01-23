@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -24,13 +25,14 @@ public static class ServiceProviderFactory
 
     static ServiceProviderFactory()
     {
-        ModuleInitializer.EnsureInitialized();
+        EngineModuleInitializer.EnsureInitialized();
     }
 
     /// <summary>
     /// Gets or sets the <see cref="AdditionalServiceCollection"/> that will be used by the <see cref="GetServiceProvider(System.IServiceProvider?,Metalama.Framework.Engine.Services.AdditionalServiceCollection?)"/> method if
     /// none is supplied by the caller of this method.
     /// </summary>
+    [PublicAPI]
     public static ServiceProviderFactoryConfiguration? AsyncLocalConfiguration
     {
         get => _asyncLocalConfiguration.Value;
@@ -57,13 +59,14 @@ public static class ServiceProviderFactory
         }
 
         serviceProvider = serviceProvider
-            .TryWithService<IGlobalOptions>( _ => new DefaultGlobalOptions() )
-            .TryWithService<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
-            .TryWithService<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
-            .TryWithService<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
-            .TryWithService( sp => new UserCodeInvoker( sp ) )
-            .TryWithService( _ => new ReferenceAssemblyLocatorProvider() )
-            .TryWithService<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
+            .WithServiceConditional<ITaskRunner>( _ => new TaskRunner() )
+            .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
+            .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
+            .WithServiceConditional<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
+            .WithServiceConditional<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
+            .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
+            .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
+            .WithServiceConditional<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
 
         return serviceProvider;
     }
@@ -104,31 +107,31 @@ public static class ServiceProviderFactory
             projectServiceProvider = additionalServices.ProjectServices.Build( projectServiceProvider );
         }
 
-        if ( projectServiceProvider.GetService<ITaskScheduler>() == null )
+        if ( projectServiceProvider.GetService<IConcurrentTaskRunner>() == null )
         {
             // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
             // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
             // We randomize the ordering of execution to improve the test relevance.
-            ITaskScheduler taskScheduler;
+            IConcurrentTaskRunner concurrentTaskRunner;
 
             if ( projectOptions.IsTest )
             {
-                taskScheduler = new RandomizingSingleThreadedTaskScheduler( serviceProvider );
+                concurrentTaskRunner = new RandomizingSingleThreadedTaskRunner( serviceProvider );
             }
             else
             {
-                taskScheduler = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler();
+                concurrentTaskRunner = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskRunner() : new SingleThreadedTaskRunner();
             }
 
-            projectServiceProvider = projectServiceProvider.WithService( taskScheduler );
+            projectServiceProvider = projectServiceProvider.WithService( concurrentTaskRunner );
         }
 
         projectServiceProvider = projectServiceProvider
-            .TryWithService<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
-            .TryWithService<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
-            .TryWithService( _ => new SyntaxSerializationService() )
-            .TryWithService( sp => new CompilationContextFactory( sp ) )
-            .TryWithService( sp => new ObjectReaderFactory( sp ) );
+            .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
+            .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
+            .WithServiceConditional( _ => new SyntaxSerializationService() )
+            .WithServiceConditional( sp => new CompilationContextFactory( sp ) )
+            .WithServiceConditional( sp => new ObjectReaderFactory( sp ) );
 
         return projectServiceProvider;
     }

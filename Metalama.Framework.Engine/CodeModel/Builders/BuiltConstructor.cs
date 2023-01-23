@@ -10,22 +10,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 {
-    public ConstructorBuilder ConstructorBuilder { get; }
-
     public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( compilation, constructorBuilder )
     {
         this.ConstructorBuilder = constructorBuilder;
     }
 
-    public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.ConstructorBuilder;
+    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.ConstructorBuilder;
 
-    public override MemberBuilder MemberBuilder => this.ConstructorBuilder;
+    protected override MemberBuilder MemberBuilder => this.ConstructorBuilder;
 
     public IParameterList Parameters => ParameterList.Empty;
 
     public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;
+
+    public ConstructorBuilder ConstructorBuilder { get; }
 
     public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();
 

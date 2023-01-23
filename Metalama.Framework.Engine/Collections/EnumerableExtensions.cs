@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Engine.Collections
     /// <summary>
     /// Provides extension methods to the <see cref="IEnumerable{T}"/> and similar interfaces.
     /// </summary>
+    [PublicAPI]
     public static class EnumerableExtensions
     {
         /// <summary>

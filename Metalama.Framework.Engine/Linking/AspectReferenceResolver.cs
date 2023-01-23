@@ -184,12 +184,17 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( targetIntroductionInjectedMember == null )
                 {
-                    // There is no introduction, i.e. this is a user source symbol.
+                    // There is no introduction, i.e. this is a user source symbol. If there are no overrides, use the final semantic.
+                    var targetSemantic =
+                        overrideIndices.Count > 0
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,
@@ -565,12 +570,11 @@ namespace Metalama.Framework.Engine.Linking
                     case { Name: LinkerInjectionHelperProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
                         rootNode = expression;
+                        targetSymbolSource = expression;
 
                         targetSymbol = containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
-
-                        targetSymbolSource = expression;
 
                         return;
 
@@ -595,10 +599,11 @@ namespace Metalama.Framework.Engine.Linking
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
                         // Referencing an operator.
+                        rootNode = expression;
+                        targetSymbolSource = expression;
+
                         if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
-                            rootNode = expression;
-
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -607,15 +612,9 @@ namespace Metalama.Framework.Engine.Linking
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
-
-                            targetSymbolSource = expression;
-
-                            return;
                         }
                         else
                         {
-                            rootNode = expression;
-
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -623,11 +622,9 @@ namespace Metalama.Framework.Engine.Linking
                                         m.Parameters.Length == 1
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
-
-                            targetSymbolSource = expression;
-
-                            return;
                         }
+
+                        return;
 
                     default:
                         throw new AssertionFailedException( $"Unexpected helper method: '{helperMethod}'." );

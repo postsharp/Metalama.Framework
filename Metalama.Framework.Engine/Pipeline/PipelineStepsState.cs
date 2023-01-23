@@ -150,10 +150,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         previousStep = currentStep;
     }
 
-    public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
+    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
     {
-        var success = true;
-
         foreach ( var aspectSource in aspectSources )
         {
             foreach ( var aspectType in aspectSource.AspectClasses )
@@ -177,7 +175,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     else
                     {
                         // There is a unique depth and TargetKind for the AspectSource step step.
-                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
+                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, -1 );
 
                         if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
                         {
@@ -185,8 +183,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
                                     (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
-
-                            success = false;
 
                             continue;
                         }
@@ -197,8 +193,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                 }
             }
         }
-
-        return success;
     }
 
     public ImmutableArray<AspectInstance> ExecuteAspectSource(
@@ -295,28 +289,34 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Gets aspects that can be inherited.
         var inheritableAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.AspectClass.IsInherited )
+            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.IsInheritable )
             .ToList();
 
-        // Gets aspects that have been inherited by the source. 
+        // Gets aspects that have been inherited by the source, including abstract instances that can in turn be only inherited. 
         var inheritedAspectInstancesInProject = inheritableAspectInstances
             .SelectMany(
                 a => a.TargetDeclaration.GetDerivedDeclarations()
                     .Where( d => !IsExcluded( d ) )
                     .Select( d => (TargetDeclaration: (IDeclarationImpl) d, DerivedAspectInstance: a.AspectInstance.CreateDerivedInstance( d )) )
-                    .Where( x => x.DerivedAspectInstance.ComputeEligibility( x.TargetDeclaration ).IncludesAll( EligibleScenarios.Aspect ) )
+                    .Select(
+                        x => (x.TargetDeclaration, x.DerivedAspectInstance, Eligibility: x.DerivedAspectInstance.ComputeEligibility( x.TargetDeclaration )) )
+                    .Where( x => x.Eligibility.IncludesAny( EligibleScenarios.Aspect | EligibleScenarios.Inheritance ) )
                     .Select(
                         x =>
                             new ResolvedAspectInstance(
                                 x.DerivedAspectInstance,
                                 x.TargetDeclaration,
-                                EligibleScenarios.Aspect ) ) )
+                                x.Eligibility ) ) )
             .ToList();
 
         // Index these aspects. 
         this.AddAspectInstances( concreteAspectInstances );
-        this.AddAspectInstances( inheritedAspectInstancesInProject );
-        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectAsImmutableArray( x => x.AspectInstance ) );
+        this.AddAspectInstances( inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ) );
+
+        // Index the inheritable aspects for the aspect manifest. It must also include indirectly inheritable aspect instances.
+        this.AddInheritableAspectInstances(
+            inheritableAspectInstances.Concat( inheritedAspectInstancesInProject.Where( a => a.AspectInstance.IsInheritable ) )
+                .Select( x => x.AspectInstance ) );
 
         return concreteAspectInstances.SelectAsImmutableArray( x => x.AspectInstance );
     }
@@ -358,7 +358,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         return true;
     }
 
-    public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
+    private void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
     {
         foreach ( var aspectInstance in aspectInstances )
         {
@@ -371,7 +371,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
                     aspectTargetTypeDeclaration.Depth,
                     aspectTargetDeclaration.Depth,
-                    PipelineStepPhase.Initialize,
                     -1 );
 
                 if ( this._currentStep != null && this._comparer.Compare( this._currentStep.Id, stepId ) >= 0 )
@@ -400,7 +399,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public void AddInheritableAspectInstances( IReadOnlyList<AspectInstance> inheritedAspectInstances )
+    private void AddInheritableAspectInstances( IEnumerable<AspectInstance> inheritedAspectInstances )
     {
         foreach ( var aspectInstance in inheritedAspectInstances )
         {
@@ -423,14 +422,12 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
+    public void AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
     {
         foreach ( var source in validatorSources )
         {
             this._validatorSources.Add( source );
         }
-
-        return true;
     }
 
     public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );

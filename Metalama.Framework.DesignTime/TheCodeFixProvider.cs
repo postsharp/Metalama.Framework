@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
@@ -29,6 +30,7 @@ namespace Metalama.Framework.DesignTime
     /// class invokes the code action in the analysis process using <see cref="ICodeActionExecutionService"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public class TheCodeFixProvider : CodeFixProvider
     {
         static TheCodeFixProvider()
@@ -84,7 +86,7 @@ namespace Metalama.Framework.DesignTime
                 return;
             }
 
-            var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project );
+            var projectOptions = MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.Document.Project );
 
             if ( !projectOptions.IsFrameworkEnabled )
             {

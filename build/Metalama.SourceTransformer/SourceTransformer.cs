@@ -7,11 +7,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.SourceTransformer
 {
     [Transformer]
+    [UsedImplicitly]
     internal class SourceTransformer : ISourceTransformer
     {
         public void Execute( TransformerContext context )

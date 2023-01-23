@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,6 +16,8 @@ namespace Metalama.Testing.AspectTesting
     /// This class is JSON-serializable. Another way to define options is to add a file named <c>metalamaTests.json</c> into the test directory or
     /// any parent directory.
     /// </summary>
+    [PublicAPI]
+    [JsonObject]
     public class TestOptions
     {
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
@@ -268,6 +272,31 @@ namespace Metalama.Testing.AspectTesting
         public string? MainMethod { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether memory leaks should be detected. This features is supported from .NET 6. Leaks are detected
+        /// by trying to unload the <c>AssemblyLoadContext</c>. If it fails to unload in due time, it means that Metalama or the user code has
+        /// a static reference to compile-time assemblies. To enable this option in a test, add this comment to your test file: <c>// @CheckMemoryLeaks</c>.
+        /// </summary>
+        public bool? CheckMemoryLeaks { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the line number should be included in reports of warnings or errors in the consolidated test output.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @IncludeLineNumberInDiagnosticReport</c>.
+        /// </summary>
+        public bool? IncludeLineNumberInDiagnosticReport { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating that the test output should not include the transformed code, but only the diagnostics.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveOutputCode</c>.
+        /// </summary>
+        public bool? RemoveOutputCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating that the test output should not include the diagnostic message, but only the diagnostic ID.
+        /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @RemoveDiagnosticMessage</c>. 
+        /// </summary>
+        public bool? RemoveDiagnosticMessage { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -337,6 +366,14 @@ namespace Metalama.Testing.AspectTesting
             this.ExpectedException ??= baseOptions.ExpectedException;
 
             this.MainMethod ??= baseOptions.MainMethod;
+
+            this.CheckMemoryLeaks ??= baseOptions.CheckMemoryLeaks;
+
+            this.IncludeLineNumberInDiagnosticReport ??= baseOptions.IncludeLineNumberInDiagnosticReport;
+
+            this.RemoveOutputCode ??= baseOptions.RemoveOutputCode;
+
+            this.RemoveDiagnosticMessage ??= baseOptions.RemoveDiagnosticMessage;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -398,13 +435,13 @@ namespace Metalama.Testing.AspectTesting
                             {
                                 case AspectTesting.TestScenario.PreviewLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
 
                                     break;
 
                                 case AspectTesting.TestScenario.ApplyLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
 
                                     break;
                             }
@@ -582,6 +619,26 @@ namespace Metalama.Testing.AspectTesting
 
                     case "MainMethod":
                         this.MainMethod = optionArg;
+
+                        break;
+
+                    case "CheckMemoryLeaks":
+                        this.CheckMemoryLeaks = true;
+
+                        break;
+
+                    case "IncludeLineNumberInDiagnosticReport":
+                        this.IncludeLineNumberInDiagnosticReport = true;
+
+                        break;
+
+                    case "RemoveOutputCode":
+                        this.RemoveOutputCode = true;
+
+                        break;
+
+                    case "RemoveDiagnosticMessage":
+                        this.RemoveDiagnosticMessage = true;
 
                         break;
 

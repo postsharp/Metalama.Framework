@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldBuilder FieldBuilder { get; }
 
-        public override MemberBuilder MemberBuilder => this.FieldBuilder;
+        protected override MemberBuilder MemberBuilder => this.FieldBuilder;
 
-        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.FieldBuilder;
+        protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.FieldBuilder;
 
         public Writeability Writeability => this.FieldBuilder.Writeability;
 
@@ -46,7 +46,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsRequired => this.FieldBuilder.IsRequired;
 
+        public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
+
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
+
+        public TypedConstant? ConstantValue => this.FieldBuilder.ConstantValue;
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

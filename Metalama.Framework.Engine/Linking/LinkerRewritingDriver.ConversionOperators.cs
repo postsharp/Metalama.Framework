@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteConversionOperator(
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteConversionOperator(
             ConversionOperatorDeclarationSyntax operatorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( this.GetOriginalImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplConversionOperator( operatorDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -98,13 +98,29 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberDeclarationSyntax GetOriginalImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol )
-            => this.GetSpecialImplConversionOperator(
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
+        {
+            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+            var context = new InliningContextIdentifier( semantic );
+
+            var substitutedBody =
+                @operator.Body != null
+                    ? (BlockSyntax) RewriteBody( @operator.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            var substitutedExpressionBody =
+                @operator.ExpressionBody != null
+                    ? (ArrowExpressionClauseSyntax) RewriteBody( @operator.ExpressionBody, symbol, new SubstitutionContext( this, generationContext, context ) )
+                    : null;
+
+            return this.GetSpecialImplConversionOperator(
                 @operator,
-                @operator.Body.WithSourceCodeAnnotation(),
-                @operator.ExpressionBody.WithSourceCodeAnnotation(),
+                substitutedBody.WithSourceCodeAnnotation(),
+                substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
+        }
 
         private MemberDeclarationSyntax GetEmptyImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,

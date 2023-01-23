@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         protected BuiltMember( CompilationModel compilation, MemberBuilder builder ) : base( compilation, builder ) { }
 
-        public abstract MemberBuilder MemberBuilder { get; }
+        protected abstract MemberBuilder MemberBuilder { get; }
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 

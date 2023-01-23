@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VersionNeutral;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Services;
@@ -43,7 +44,8 @@ public abstract class DesignTimeServiceProviderFactory
         }
     }
 
-    protected virtual ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider ) => serviceProvider;
+    protected virtual ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
+        => serviceProvider.WithServiceConditional<IProjectOptionsFactory>( _ => MSBuildProjectOptionsFactory.Default );
 
     protected virtual CompilerServiceProvider CreateCompilerServiceProvider() => new();
 
@@ -86,7 +88,7 @@ public abstract class DesignTimeServiceProviderFactory
         return _sharedServiceProvider;
     }
 
-    public ServiceProvider<IGlobalService> GetServiceProvider( ServiceProvider<IGlobalService> serviceProvider )
+    internal ServiceProvider<IGlobalService> GetServiceProvider( ServiceProvider<IGlobalService> serviceProvider )
     {
         // Add the services that may be required by the CompilerServiceProvider.
         serviceProvider = serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );

@@ -12,7 +12,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
-public static class ReflectionSignatureBuilder
+internal static class ReflectionSignatureBuilder
 {
     public static bool HasTypeArgument( IMethod method )
         => TypeArgumentDetector.Instance.Visit( method.ReturnType.GetSymbol() )

@@ -3,7 +3,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Remove;
 
 public class MyAspect : Aspect, IAspect<IDeclaration>
@@ -16,11 +15,9 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
     }
 }
 
-
 internal class KeepItAttribute : Attribute { }
 
 #pragma warning disable CS0414, CS1696, CS8618, CS0067
-
 
 // <target>
 [MyAspect]
@@ -30,11 +27,13 @@ internal class C
     [KeepIt]
     private C() { }
 
-    [MyAspect, KeepIt]
+    [MyAspect]
+    [KeepIt]
     [return: MyAspect]
     private void M( [MyAspect] int p ) { }
 
-    [MyAspect, KeepIt]
+    [MyAspect]
+    [KeepIt]
     private int _a = 5, _b = 3;
 
     [MyAspect]

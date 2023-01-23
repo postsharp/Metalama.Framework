@@ -19,7 +19,7 @@ internal sealed class ApplyAspectCodeAction<TTarget> : ICodeAction
 {
     public TTarget TargetDeclaration { get; }
 
-    public IAspect<TTarget> Aspect { get; }
+    private IAspect<TTarget> Aspect { get; }
 
     public ApplyAspectCodeAction( TTarget targetDeclaration, IAspect<TTarget> aspect )
     {
