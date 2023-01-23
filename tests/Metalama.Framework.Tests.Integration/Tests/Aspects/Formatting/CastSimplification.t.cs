@@ -1,0 +1,28 @@
+using System;
+using System.Linq;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Templating;
+#pragma warning disable CS0169 // Field is not used
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.CastSimplification;
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
+class Aspect : OverrideMethodAspect
+{
+    public override dynamic OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+}
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
+class TargetCode : ICloneable
+{
+    string s;
+    TargetCode tc;
+    [Aspect]
+    TargetCode Method()
+    {
+        var clone = (TargetCode)MemberwiseClone();
+        clone.s = (string)this.s.Clone();
+        clone.tc = (TargetCode)((ICloneable)this.tc).Clone();
+        return clone;
+    }
+    object ICloneable.Clone() => new();
+}
