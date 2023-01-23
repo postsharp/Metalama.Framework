@@ -30,11 +30,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectState
 
             return meta.Proceed();
         }
+    }
 
-        private class State : IAspectState
-        {
-            public int Value { get; set; }
-        }
+    internal class State : IAspectState
+    {
+        public int Value { get; set; }
     }
 
     // <target>

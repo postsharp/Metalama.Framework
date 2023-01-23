@@ -23,13 +23,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk
         {
             return context.RewriteAspectTargetsAsync( new Rewriter() );
         }
+    }
 
-        private class Rewriter : SafeSyntaxRewriter
+    internal class Rewriter : SafeSyntaxRewriter
+    {
+        public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
-            {
-                return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed );
-            }
+            return base.VisitMethodDeclaration(node)!.WithLeadingTrivia(SyntaxFactory.Comment("// Rewritten."), SyntaxFactory.CarriageReturnLineFeed);
         }
     }
 
