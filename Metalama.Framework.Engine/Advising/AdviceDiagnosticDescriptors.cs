@@ -152,6 +152,16 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, INamedType InterfaceType, IMember InterfaceTypeMember)>
+            ExplicitInterfaceMemberHasDifferentAccessors = new(
+                "LAMA0517",
+                "Cannot implement an explicit interface member explicitly when the member of the interface type has an incompatible accessors.",
+                "The aspect '{0}' cannot implement explicit interface member '{1}' in the type '{2}' because the interface type '{3}' "
+                +
+                "contains a member {4} which has an incompatible set of accessors. Adding additional accessors is possible only for implicit interface members.",
+                _category,
+                Error );
+
         // Sub-range 520-549: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
