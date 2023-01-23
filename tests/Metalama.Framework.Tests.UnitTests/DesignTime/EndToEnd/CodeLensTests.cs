@@ -1,25 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
-using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.UnitTesting;
 using Microsoft.VisualStudio.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
-public class CodeLensTests : DistributedDesignTimeTestBase
+#pragma warning disable VSTHRD200
+
+public sealed class CodeLensTests : DistributedDesignTimeTestBase
 {
     public CodeLensTests( ITestOutputHelper? testOutputHelper ) : base( testOutputHelper ) { }
 
