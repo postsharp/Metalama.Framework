@@ -50,7 +50,7 @@ class TheClass {}
         // Initialize the workspace.
         var projectKey = testContext.WorkspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
         await testContext.AnalysisProcessEndpoint.RegisterProjectAsync( projectKey );
-        var compilation = await testContext.WorkspaceProvider.GetCompilationAsync( projectKey );
+        var compilation = (await testContext.WorkspaceProvider.GetCompilationAsync( projectKey ))!;
 
         // We need to run the pipeline because code lens does not run it on its own.
         var project = testContext.WorkspaceProvider.GetProject( "project" );
@@ -58,17 +58,17 @@ class TheClass {}
         await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
 
         // Test the CodeLens service.
-        var theClassSymbol = compilation.GetTypeByMetadataName( "TheClass" );
+        var theClassSymbol = compilation.GetTypeByMetadataName( "TheClass" )!;
 
         var codeLensService = new CodeLensService( testContext.UserProcessServiceProvider );
 
-        ICodeLensSummary?[] summary = new ICodeLensSummary[1];
+        var summary = new ICodeLensSummary[1];
         await codeLensService.GetCodeLensSummaryAsync( compilation, theClassSymbol, summary );
 
         Assert.NotNull( summary[0] );
         Assert.Equal( "1 aspect", summary[0].Description );
 
-        ICodeLensDetails?[] details = new ICodeLensDetails[1];
+        var details = new ICodeLensDetails[1];
         await codeLensService.GetCodeLensDetailsAsync( compilation, theClassSymbol, details );
 
         Assert.NotNull( details[0] );
