@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Testing.AspectTesting.Utilities;
@@ -32,34 +33,40 @@ public abstract class AspectTestClass
 
     private readonly ITestOutputHelper _logger;
     private readonly GlobalServiceProvider _serviceProvider;
+    private readonly ITestAssemblyMetadataReader _metadataReader;
 
     private sealed record AssemblyAssets(
         TestProjectProperties ProjectProperties,
         TestDirectoryOptionsReader OptionsReader );
 
     private static readonly WeakCache<Assembly, AssemblyAssets> _cache = new();
+    private readonly IFileSystem _fileSystem;
 
-    private static AssemblyAssets GetAssemblyAssets( Assembly assembly )
+    private static AssemblyAssets GetAssemblyAssets( GlobalServiceProvider serviceProvider, Assembly assembly )
         => _cache.GetOrAdd(
             assembly,
             a =>
             {
                 var assemblyInfo = new ReflectionAssemblyInfo( a );
-                var discoverer = new TestDiscoverer( assemblyInfo );
+                var discoverer = new TestDiscoverer( serviceProvider, assemblyInfo );
 
                 var projectProperties = discoverer.GetTestProjectProperties();
 
                 return new AssemblyAssets(
                     projectProperties,
-                    new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
+                    new TestDirectoryOptionsReader( serviceProvider, projectProperties.ProjectDirectory ) );
             } );
 
     protected AspectTestClass( ITestOutputHelper logger )
     {
         this._logger = logger;
+        this._metadataReader = new TestAssemblyMetadataReader();
 
         this._serviceProvider = ServiceProviderFactory.GetServiceProvider()
-            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) );
+            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) )
+            .WithService( this._metadataReader );
+
+        this._fileSystem = this._serviceProvider.GetRequiredBackstageService<IFileSystem>();
     }
 
     protected virtual string GetDirectory( string callerMemberName )
@@ -87,17 +94,18 @@ public abstract class AspectTestClass
     protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
     {
         var testSuiteAssembly = this.GetType().Assembly;
-        var assemblyAssets = GetAssemblyAssets( testSuiteAssembly );
-        var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
+        var assemblyAssets = GetAssemblyAssets( this._serviceProvider, testSuiteAssembly );
+        var projectReferences = this._metadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
 
         var directory = this.GetDirectory( callerMemberName! );
 
         var fullPath = Path.Combine( directory, relativePath );
 
         this._logger.WriteLine( "Test input file: " + fullPath );
-        var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
+        var projectRelativePath = this._fileSystem.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
-        var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
+        var testInputFactory = new TestInput.Factory();
+        var testInput = testInputFactory.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
 
         var testOptions = new TestContextOptions
         {

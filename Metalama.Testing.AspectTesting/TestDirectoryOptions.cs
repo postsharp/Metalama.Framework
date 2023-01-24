@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Newtonsoft.Json;
-using System.IO;
 
 namespace Metalama.Testing.AspectTesting
 {
@@ -15,9 +15,9 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public bool? Exclude { get; set; }
 
-        internal static TestDirectoryOptions ReadFile( string path )
+        internal static TestDirectoryOptions ReadFile( IFileSystem fileSystem, string path )
         {
-            var json = File.ReadAllText( path );
+            var json = fileSystem.ReadAllText( path );
 
             return JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
         }

@@ -25,7 +25,7 @@ public static class ServiceProviderFactory
 
     static ServiceProviderFactory()
     {
-        EngineModuleInitializer.EnsureInitialized();
+        MetalamaEngineModuleInitializer.EnsureInitialized();
     }
 
     /// <summary>

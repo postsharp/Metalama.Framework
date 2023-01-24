@@ -95,7 +95,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             this.ErrorsDocument = new FlowDocument();
             this.TransformedCodeDocument = null;
 
-            var testInput = TestInput.FromSource( _projectProperties, this.SourceCode, this.CurrentPath );
+            var testInput = TestInput.Factory.Default.FromSource( _projectProperties, this.SourceCode, this.CurrentPath );
 
             var metadataReferences = TestCompilationFactory.GetMetadataReferences().ToMutableList();
             metadataReferences.Add( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
@@ -285,7 +285,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory;
+            var projectDirectory = TestInput.Factory.Default.FromSource( _projectProperties, "", path ).ProjectDirectory;
             var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectAsImmutableArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
@@ -328,7 +328,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             this._currentTest ??= new TemplateTest();
 
-            this._currentTest.Input = TestInput.FromSource( _projectProperties, this.SourceCode, filePath );
+            this._currentTest.Input = TestInput.Factory.Default.FromSource( _projectProperties, this.SourceCode, filePath );
             this._currentTest.ExpectedTransformedCode = this.ExpectedTransformedCode ?? string.Empty;
             this._currentTest.ExpectedProgramOutput = this.ExpectedProgramOutput ?? string.Empty;
 

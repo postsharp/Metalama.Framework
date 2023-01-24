@@ -17,6 +17,11 @@ namespace Metalama.Framework.Engine.Diagnostics
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
+        static DiagnosticDefinitionDiscoveryService()
+        {
+            MetalamaEngineModuleInitializer.EnsureInitialized();
+        }
+
         // This constructor is called in a path where no user code is involved
         public DiagnosticDefinitionDiscoveryService() : this(
             ServiceProvider<IProjectService>.Empty.WithServices( new UserCodeInvoker( ServiceProvider<IGlobalService>.Empty ) ) ) { }

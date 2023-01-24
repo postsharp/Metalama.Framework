@@ -33,7 +33,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 Assert.NotNull( relativePath );
             }
 
-            if ( Directory.GetDirectories( directory ).Length > 0 && Directory.GetFiles( directory ).Length > 0 )
+            if ( this._testFactory.FileSystem.GetDirectories( directory ).Length > 0 && this._testFactory.FileSystem.GetFiles( directory ).Length > 0 )
             {
                 if ( string.IsNullOrEmpty( relativePath ) )
                 {

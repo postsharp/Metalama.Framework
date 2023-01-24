@@ -35,7 +35,7 @@ namespace Metalama.AspectWorkbench.Model
 
             return new TemplateTest
             {
-                Input = TestInput.FromSource( projectProperties, testSource, filePath ),
+                Input = TestInput.Factory.Default.FromSource( projectProperties, testSource, filePath ),
                 ExpectedTransformedCode = expectedTransformedCode,
                 ExpectedProgramOutput = expectedProgramOutput
             };

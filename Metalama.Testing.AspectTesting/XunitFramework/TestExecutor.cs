@@ -24,21 +24,37 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         private static readonly object _launchingDebuggerLock = new();
         private readonly GlobalServiceProvider _serviceProvider;
         private readonly ITaskRunner _taskRunner;
+        private readonly ITestAssemblyMetadataReader _metadataReader;
 
-        public TestExecutor( AssemblyName assemblyName )
+        public TestExecutor( GlobalServiceProvider serviceProvider, AssemblyName assemblyName )
         {
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
-            TestDiscoverer discoverer = new( assemblyInfo );
+            TestDiscoverer discoverer = new( serviceProvider, assemblyInfo );
             var projectProperties = discoverer.GetTestProjectProperties();
-            this._factory = new TestFactory( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ), assemblyInfo );
-            this._serviceProvider = ServiceProviderFactory.GetServiceProvider();
+
+            this._factory = new TestFactory(
+                serviceProvider,
+                projectProperties,
+                new TestDirectoryOptionsReader( serviceProvider, projectProperties.ProjectDirectory ),
+                assemblyInfo );
+
+            this._serviceProvider = serviceProvider;
             this._taskRunner = this._serviceProvider.GetRequiredService<ITaskRunner>();
+            this._metadataReader = this._serviceProvider.GetRequiredService<ITestAssemblyMetadataReader>();
+        }
+
+        public TestExecutor( GlobalServiceProvider serviceProvider, TestFactory factory )
+        {
+            this._factory = factory;
+            this._serviceProvider = serviceProvider;
+            this._taskRunner = this._serviceProvider.GetRequiredService<ITaskRunner>();
+            this._metadataReader = this._serviceProvider.GetRequiredService<ITestAssemblyMetadataReader>();
         }
 
         void IDisposable.Dispose() { }
 
-        ITestCase ITestFrameworkExecutor.Deserialize( string value )
+        public ITestCase Deserialize( string value )
         {
             return new TestCase( this._factory, value );
         }
@@ -51,13 +67,13 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             throw new NotImplementedException();
         }
 
-        void ITestFrameworkExecutor.RunTests(
+        public void RunTests(
             IEnumerable<ITestCase> testCases,
             IMessageSink executionMessageSink,
             ITestFrameworkExecutionOptions executionOptions )
         {
             var hasLaunchedDebugger = false;
-            var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.ProjectProperties.ProjectDirectory );
+            var directoryOptionsReader = new TestDirectoryOptionsReader( this._serviceProvider, this._factory.ProjectProperties.ProjectDirectory );
 
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
@@ -85,15 +101,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 collectionMetrics.Finished += () =>
                 {
                     executionMessageSink.OnMessage(
-                        new TestCollectionFinished(
-                            collection,
-                            collection.Key,
-                            collectionMetrics.ExecutionTime,
-                            collectionMetrics.TestsRun,
-                            collectionMetrics.TestFailed,
-                            collectionMetrics.TestSkipped ) );
-
-                    executionMessageSink.OnMessage(
                         new TestAssemblyFinished(
                             collection,
                             collection.Key.TestAssembly,
@@ -101,9 +108,18 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                             collectionMetrics.TestsRun,
                             collectionMetrics.TestFailed,
                             collectionMetrics.TestSkipped ) );
+
+                    executionMessageSink.OnMessage(
+                        new TestCollectionFinished(
+                            collection,
+                            collection.Key,
+                            collectionMetrics.ExecutionTime,
+                            collectionMetrics.TestsRun,
+                            collectionMetrics.TestFailed,
+                            collectionMetrics.TestSkipped ) );
                 };
 
-                var projectMetadata = TestAssemblyMetadataReader.GetMetadata( collection.Key.TestAssembly.Assembly );
+                var projectMetadata = this._metadataReader.GetMetadata( collection.Key.TestAssembly.Assembly );
 
                 lock ( _launchingDebuggerLock )
                 {
@@ -224,7 +240,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             {
                 testMetrics.OnTestStarted();
 
-                var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
+                var testInput = this._factory.TestInputFactory.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
                 var testOptions = new TestContextOptions
                 {
@@ -237,6 +253,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 {
                     executionMessageSink.OnMessage( new TestSkipped( test, testInput.SkipReason ) );
 
+                    // This raises the messages on parent nodes and need to be called last.
                     testMetrics.OnTestSkipped();
                 }
                 else
@@ -249,15 +266,14 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                     await testRunner.RunAndAssertAsync( testInput, testOptions );
 
-                    testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
-
                     executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
+
+                    // This raises the messages on parent nodes and need to be called last.
+                    testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
                 }
             }
             catch ( Exception e )
             {
-                testMetrics.OnTestFailed( testStopwatch.Elapsed );
-
                 IFailureInformation failureInformation;
 
                 if ( e is AggregateException { InnerExceptions.Count: 1 } aggregateException )
@@ -278,6 +294,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                         failureInformation.Messages,
                         failureInformation.StackTraces,
                         failureInformation.ExceptionParentIndices ) );
+
+                // This will raise the events on parents, so it should be last.
+                testMetrics.OnTestFailed( testStopwatch.Elapsed );
             }
         }
     }
