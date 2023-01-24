@@ -20,8 +20,6 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         public ImmutableArray<TemplateClassMemberParameter> RunTimeParameters { get; } = Parameters.Where( p => !p.IsCompileTime ).ToImmutableArray();
 
-        public ImmutableArray<TemplateClassMemberParameter> CompileTimeParameters { get; } = Parameters.Where( p => p.IsCompileTime ).ToImmutableArray();
-
         public ImmutableDictionary<string, TemplateClassMemberParameter> IndexedParameters { get; } =
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Templating
@@ -20,6 +21,7 @@ namespace Metalama.Framework.Engine.Templating
             /// The original node is cloned. This kind of transformation is currently only used
             /// to validate that the generated code is correct.
             /// </summary>
+            [UsedImplicitly]
             Clone,
 
             /// <summary>

@@ -107,7 +107,7 @@ namespace Metalama.Compiler
 
         var rewriter = new RunTimeAssemblyRewriter( serviceProvider, compilationContext );
 
-        var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider.Underlying );
+        var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider );
 
         if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
         {
@@ -371,7 +371,8 @@ namespace Metalama.Compiler
             return transformedNode;
         }
 
-        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod ).WithTrailingTrivia( ElasticSpace );
+        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod )
+            .WithTrailingTrivia( ElasticSpace );
 
         return transformedNode.WithModifiers( default )
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )

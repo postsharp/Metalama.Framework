@@ -18,8 +18,6 @@ internal sealed class SyntaxProcessingException : Exception
         this.SyntaxNode = node;
     }
 
-    public Location? Location => this.SyntaxNode?.GetLocation();
-
     public SyntaxNode? SyntaxNode { get; }
 
     public static bool ShouldWrapException( Exception exception, SyntaxNode? node )

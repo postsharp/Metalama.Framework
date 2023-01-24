@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public sealed class NullDiagnosticAdder : IDiagnosticAdder
+    internal sealed class NullDiagnosticAdder : IDiagnosticAdder
     {
         private readonly ILogger _logger;
 

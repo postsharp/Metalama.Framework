@@ -9,12 +9,12 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class Contract
     {
+        private readonly ContractDirection _direction;
+
         public Ref<IDeclaration> TargetDeclaration { get; }
 
         public TemplateMember<IMethod> Template { get; }
-
-        public ContractDirection Direction { get; }
-
+        
         public IObjectReader Tags { get; }
 
         public IObjectReader TemplateArguments { get; }
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Advising
             // Resolve the default value before storing the direction.
             if ( direction == ContractDirection.Default )
             {
-                this.Direction = targetDeclaration switch
+                this._direction = targetDeclaration switch
                 {
                     IParameter { IsReturnParameter: true } => ContractDirection.Output,
                     IParameter { RefKind: RefKind.Out } => ContractDirection.Output,
@@ -51,13 +51,13 @@ namespace Metalama.Framework.Engine.Advising
                     throw new AssertionFailedException( $"Unexpected declaration for input contract: '{targetDeclaration}'." );
                 }
 
-                this.Direction = direction;
+                this._direction = direction;
             }
         }
 
         public bool AppliesTo( ContractDirection direction )
         {
-            return this.Direction == direction || this.Direction == ContractDirection.Both;
+            return this._direction == direction || this._direction == ContractDirection.Both;
         }
     }
 }

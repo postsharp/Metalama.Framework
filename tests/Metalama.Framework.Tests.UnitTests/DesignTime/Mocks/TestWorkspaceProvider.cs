@@ -29,7 +29,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
 
     protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
 
-    public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null, string[]? preprocessorSymbols = null )
+    private ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null, string[]? preprocessorSymbols = null )
     {
         if ( this._projectIdsByProjectName.TryGetValue( projectName, out var projectData ) )
         {
@@ -82,7 +82,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
     public Microsoft.CodeAnalysis.Project GetProject( string projectName )
         => this._workspace.CurrentSolution.GetProject( this._projectIdsByProjectName[projectName].ProjectId ).AssertNotNull();
 
-    public void AddOrUpdateDocuments( string projectName, Dictionary<string, string> code )
+    private void AddOrUpdateDocuments( string projectName, Dictionary<string, string> code )
     {
         var projectData = this._projectIdsByProjectName[projectName];
 

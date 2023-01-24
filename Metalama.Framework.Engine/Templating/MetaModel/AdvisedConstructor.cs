@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         [Memo]
         public IAdvisedParameterList Parameters => new AdvisedParameterList( this.Underlying );
 
-        IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
+        IParameterList IHasParameters.Parameters => this.Parameters.AsParameterList();
 
         public ConstructorInitializerKind InitializerKind => this.Underlying.InitializerKind;
 

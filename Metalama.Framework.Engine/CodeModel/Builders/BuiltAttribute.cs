@@ -12,39 +12,39 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     {
+        private readonly AttributeBuilder _attributeBuilder;
+
         public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
-            this.AttributeBuilder = builder;
+            this._attributeBuilder = builder;
         }
 
         IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
-        public AttributeBuilder AttributeBuilder { get; }
-
-        public override DeclarationBuilder Builder => this.AttributeBuilder;
+        public override DeclarationBuilder Builder => this._attributeBuilder;
 
         [Memo]
-        public INamedType Type => this.Compilation.Factory.GetDeclaration( this.AttributeBuilder.Constructor.DeclaringType );
+        public INamedType Type => this.Compilation.Factory.GetDeclaration( this._attributeBuilder.Constructor.DeclaringType );
 
         [Memo]
-        public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this.AttributeBuilder.Constructor );
+        public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this._attributeBuilder.Constructor );
 
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments
-            => this.AttributeBuilder.ConstructorArguments.Select( a => TypedConstant.Create( a.Value, this.GetCompilationModel().Factory.GetIType( a.Type ) ) )
+            => this._attributeBuilder.ConstructorArguments.Select( a => TypedConstant.Create( a.Value, this.GetCompilationModel().Factory.GetIType( a.Type ) ) )
                 .ToImmutableArray();
 
         [Memo]
         public INamedArgumentList NamedArguments
             => new NamedArgumentList(
-                this.AttributeBuilder.NamedArguments.SelectAsList(
+                this._attributeBuilder.NamedArguments.SelectAsList(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
                         TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 
-        public IRef<IDeclaration> TargetDeclaration => this.AttributeBuilder.ContainingDeclaration.ToRef();
+        public IRef<IDeclaration> TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
     }

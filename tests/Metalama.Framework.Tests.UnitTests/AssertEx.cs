@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public static class AssertEx
+    internal static class AssertEx
     {
         public static void DynamicEquals( object expression, string expected )
         {
@@ -19,17 +19,6 @@ namespace Metalama.Framework.Tests.UnitTests
             var actual = meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
-        }
-
-        public static void DynamicThrows<T>( Func<object?> func )
-            where T : Exception
-            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
-
-        public static void DynamicThrows<T>( object expression )
-            where T : Exception
-        {
-            var meta = (IUserExpression) expression;
-            Assert.Throws<T>( () => meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
         }
 
         internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Func<object?> testCode )

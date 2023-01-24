@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public override bool IsAssignable { get; }
 
-        public ExpressionSyntax Expression { get; }
+        protected ExpressionSyntax Expression { get; }
 
         protected override string ToStringCore() => this.Expression.ToString();
     }

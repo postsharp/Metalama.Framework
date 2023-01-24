@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        internal ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
         {
             this._sourceText = sourceText;
         }
@@ -37,17 +37,17 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Adds a marked <see cref="TextSpan"/>.
         /// </summary>
-        public void Add( in TextSpan span, TextSpanClassification classification )
+        internal void Add( in TextSpan span, TextSpanClassification classification )
         {
             this.SetSpanImpl( span, classification, null, null );
         }
 
-        public void Add( in TextSpan span, TextSpanClassification classification, string? tagName, string? tagValue )
+        internal void Add( in TextSpan span, TextSpanClassification classification, string? tagName, string? tagValue )
         {
             this.SetSpanImpl( span, classification, tagName, tagValue );
         }
 
-        public void SetTag( in TextSpan span, string tagName, string tagValue )
+        internal void SetTag( in TextSpan span, string tagName, string tagValue )
         {
             this.SetSpanImpl( span, null, tagName, tagValue );
         }

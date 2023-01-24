@@ -1,7 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Utilities;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
         [InlineData( new[] { 1, 2 }, "1, 2" )]
         public void Format( object value, string expected )
         {
+            EngineModuleInitializer.EnsureInitialized();
             var formatter = MetalamaStringFormatter.Instance;
             Assert.Equal( expected, formatter.Format( "", value, formatter ) );
         }

@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public sealed class SyntaxGenerationContext : ISyntaxGenerationContext
+    internal sealed class SyntaxGenerationContext : ISyntaxGenerationContext
     {
         internal Compilation Compilation => this.CompilationContext.Compilation;
 

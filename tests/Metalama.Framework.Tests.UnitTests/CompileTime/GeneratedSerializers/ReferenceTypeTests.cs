@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void MutableMembers()
         {
             // Verifies that serializable type with mutable members can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -54,7 +54,7 @@ public class A : ICompileTimeSerializable
         public void ReadOnlyValueTypeMembers()
         {
             // Verifies that serializable type with read-only members can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -99,7 +99,7 @@ public class A : ICompileTimeSerializable
         public void ReadOnlyReferenceTypeMembers()
         {
             // Verifies that serializable type with read-only members can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -157,6 +157,8 @@ public class B
         public void InitOnlyReferenceTypeMembers()
         {
             // Verifies that serializable type with init-only members can be serialized and deserialized.
+
+            // ReSharper disable once ConvertToConstant.Local
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -217,7 +219,7 @@ public class B
         {
             // Verifies that serializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -254,7 +256,7 @@ public class A : ICompileTimeSerializable
         public void GenericClass()
         {
             // Verifies that serializable generic type can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -296,7 +298,7 @@ public class A<T> : ICompileTimeSerializable
         public void ClosedGenericValue()
         {
             // Verifies that generated serializer correctly handles a field/property of closed generic type.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -356,7 +358,7 @@ public class B : ICompileTimeSerializable
         public void OpenGenericValue()
         {
             // Verifies that generated serializer correctly handles a field/property of open generic type.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -410,7 +412,7 @@ public class B<T> : ICompileTimeSerializable
         public void Nested()
         {
             // Verifies that serializable nested type can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -454,7 +456,7 @@ public class A
         public void NestedGeneric()
         {
             // Verifies that serializable nested generic type can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]

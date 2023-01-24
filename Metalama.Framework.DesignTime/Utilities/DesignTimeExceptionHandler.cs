@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Utilities
     {
         // It is critical that OperationCanceledException is NOT handled, i.e. this exception should flow to the caller, otherwise VS will be satisfied
         // with the incomplete results it received, and cache them. 
-        public static bool MustHandle( Exception e )
+        internal static bool MustHandle( Exception e )
             => e switch
             {
                 OperationCanceledException => false,

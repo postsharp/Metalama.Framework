@@ -25,7 +25,7 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
     private readonly DesignTimeConfiguration _licensingConfiguration;
     private readonly WorkspaceProvider _workspaceProvider;
 
-    public CodeRefactoringDiscoveryService( GlobalServiceProvider serviceProvider )
+    internal CodeRefactoringDiscoveryService( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

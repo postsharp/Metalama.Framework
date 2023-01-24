@@ -22,7 +22,7 @@ public sealed class SymbolTranslatorTests : UnitTestClass
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System;
 
 namespace Ns1 

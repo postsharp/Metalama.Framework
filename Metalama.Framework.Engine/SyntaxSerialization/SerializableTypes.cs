@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public SerializableTypes( IEnumerable<ITypeSymbol> serializableTypes )
         {
             this._serializableTypes = serializableTypes
-                .SelectRecursive( t => t.BaseType )
+                .SelectRecursiveInternal( t => t.BaseType )
                 .Where( t => t.SpecialType != SpecialType.System_Object )
                 .Select( t => t.GetDocumentationCommentId().AssertNotNull() )
                 .ToImmutableHashSet();

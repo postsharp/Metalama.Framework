@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
             ConstructorDeclarationSyntax constructorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )

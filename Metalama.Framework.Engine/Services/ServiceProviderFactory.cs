@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -24,13 +25,14 @@ public static class ServiceProviderFactory
 
     static ServiceProviderFactory()
     {
-        ModuleInitializer.EnsureInitialized();
+        EngineModuleInitializer.EnsureInitialized();
     }
 
     /// <summary>
     /// Gets or sets the <see cref="AdditionalServiceCollection"/> that will be used by the <see cref="GetServiceProvider(System.IServiceProvider?,Metalama.Framework.Engine.Services.AdditionalServiceCollection?)"/> method if
     /// none is supplied by the caller of this method.
     /// </summary>
+    [PublicAPI]
     public static ServiceProviderFactoryConfiguration? AsyncLocalConfiguration
     {
         get => _asyncLocalConfiguration.Value;

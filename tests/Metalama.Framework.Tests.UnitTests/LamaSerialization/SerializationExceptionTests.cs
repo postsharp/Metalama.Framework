@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,10 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
+    // ReSharper disable MemberCanBeInternal
+    // ReSharper disable MemberCanBeProtected.Global
+    // ReSharper disable UnusedType.Global
+
     public enum Fail
     {
         None,
@@ -28,14 +32,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
 
             try
             {
                 formatter.Serialize( references, memoryStream );
             }
-            catch ( LamaSerializationException ex )
+            catch ( CompileTimeSerializationException ex )
             {
                 Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
                 Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
@@ -52,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -61,7 +65,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             {
                 formatter.Deserialize( memoryStream );
             }
-            catch ( LamaSerializationException ex )
+            catch ( CompileTimeSerializationException ex )
             {
                 Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
                 Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
@@ -72,14 +76,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             Child.NSerialized = 0;
 
             try
             {
                 formatter.Serialize( new Child { Fail = Fail.Write }, Stream.Null );
             }
-            catch ( LamaSerializationException ex )
+            catch ( CompileTimeSerializationException ex )
             {
                 Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
                 Assert.Equal( 2, Child.NSerialized );
@@ -89,7 +93,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             Child.NSerialized = 0;
 
             formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
@@ -99,7 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -108,7 +112,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             {
                 formatter.Deserialize( stream );
             }
-            catch ( LamaSerializationException ex )
+            catch ( CompileTimeSerializationException ex )
             {
                 Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
 
@@ -120,7 +124,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -156,23 +160,23 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Base();
                 }
 
-                public override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     if ( obj.Fail == Fail.Write )
                     {
-                        throw new LamaSerializationException();
+                        throw new CompileTimeSerializationException();
                     }
 
                     initializationArguments.SetValue( "Fail", obj.Fail );
                 }
 
-                public override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
                 {
                     obj.Fail = initializationArguments.GetValue<Fail>( "Fail" );
 
                     if ( obj.Fail == Fail.Read )
                     {
-                        throw new LamaSerializationException();
+                        throw new CompileTimeSerializationException();
                     }
                 }
             }
@@ -189,12 +193,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Child();
                 }
 
-                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     new Base.Serializer().SerializeObject( obj, constructorArguments, initializationArguments );
                 }
 
-                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     new Base.Serializer().DeserializeFields( obj, initializationArguments );
                 }
@@ -221,12 +225,15 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new ReferenceToChildren();
                 }
 
-                public override void SerializeObject( ReferenceToChildren obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject(
+                    ReferenceToChildren obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "Children", obj.Children );
                 }
 
-                public override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<List<Child>>( "Children" ).AssertNotNull();
                 }

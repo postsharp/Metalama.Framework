@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.CompileTimeContracts;
 
@@ -25,9 +24,6 @@ public interface ITemplateSyntaxFactory
     StatementSyntax? ToStatement( ExpressionSyntax expression );
 
     SyntaxList<StatementSyntax> ToStatementList( List<StatementOrTrivia> list );
-
-    SeparatedSyntaxList<T> SeparatedList<T>( params T[] items )
-        where T : SyntaxNode;
 
     SyntaxKind Boolean( bool value );
 
@@ -57,9 +53,7 @@ public interface ITemplateSyntaxFactory
     ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse );
 
     IUserExpression? Proceed( string methodName );
-
-    ValueTask<object?> ProceedAsync();
-
+    
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
     TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null );

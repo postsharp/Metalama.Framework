@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Services;
 using Metalama.Framework.Engine.Options;
@@ -8,6 +9,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
+[UsedImplicitly]
 public class VsAnalysisProcessSourceGenerator : AnalysisProcessSourceGenerator
 {
     public VsAnalysisProcessSourceGenerator() : this( VsServiceProviderFactory.GetServiceProvider() ) { }

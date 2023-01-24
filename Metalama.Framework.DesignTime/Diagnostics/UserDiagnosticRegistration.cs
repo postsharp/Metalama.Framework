@@ -8,6 +8,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticsConfiguration"/>.
     /// </summary>
+    [JsonObject]
     public sealed class UserDiagnosticRegistration
     {
         [JsonConstructor]

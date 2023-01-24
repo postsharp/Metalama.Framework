@@ -21,7 +21,7 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
 
     public int ParameterIndex { get; }
 
-    public ExpressionSyntax Value { get; }
+    private ExpressionSyntax Value { get; }
 
     public IntroduceConstructorInitializerArgumentTransformation( Advice advice, IConstructor constructor, int parameterIndex, ExpressionSyntax value ) : base(
         advice )

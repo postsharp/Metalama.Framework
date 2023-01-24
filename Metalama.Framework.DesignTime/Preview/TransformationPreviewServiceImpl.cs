@@ -15,7 +15,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 {
     public TransformationPreviewServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    public async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
+    internal async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         TestableCancellationToken cancellationToken = default )

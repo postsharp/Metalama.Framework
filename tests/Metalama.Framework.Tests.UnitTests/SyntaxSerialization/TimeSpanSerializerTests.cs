@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             var ts = TimeSpan.FromMinutes( 38 );
-            var ticks = 38 * TimeSpan.TicksPerMinute;
+            const long ticks = 38 * TimeSpan.TicksPerMinute;
             Assert.Equal( "new global::System.TimeSpan(" + ticks + "L)", testContext.Serialize( ts ).ToString() );
         }
 

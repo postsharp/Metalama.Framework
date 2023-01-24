@@ -100,7 +100,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                     this._messageSink?.Trace( $"Processing directory '{directory}'." );
 
                     // If the directory is included, index the files.
-                    var runnerFileName = "_Runner.cs";
+                    const string runnerFileName = "_Runner.cs";
 
                     foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                     {

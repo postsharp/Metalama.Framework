@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -52,6 +51,4 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
         => TransformationLinkerOrderComparer.Instance.Compare( this._transformation, ((IntrospectionTransformation?) other)?._transformation );
 
     public override string ToString() => this.Description.ToString( MetalamaStringFormatter.Instance );
-
-    public FormattableString ToFormattableString() => this.Description;
 }

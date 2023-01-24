@@ -11,9 +11,12 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
+    // TODO: Check why this class is unused.
+    // ReSharper disable once UnusedType.Global
+
     internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod>
     {
-        public BoundTemplateMethod BoundTemplate { get; }
+        private readonly BoundTemplateMethod _boundTemplate;
 
         public OverrideFinalizerAdvice(
             IAspectInstanceInternal aspect,
@@ -24,7 +27,7 @@ namespace Metalama.Framework.Engine.Advising
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this.BoundTemplate = boundTemplate;
+            this._boundTemplate = boundTemplate;
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideFinalizer;
@@ -35,7 +38,7 @@ namespace Metalama.Framework.Engine.Advising
             Action<ITransformation> addTransformation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+            addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

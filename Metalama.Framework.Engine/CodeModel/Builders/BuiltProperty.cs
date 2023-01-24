@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public PropertyBuilder PropertyBuilder { get; }
 
-        public override MemberBuilder MemberBuilder => this.PropertyBuilder;
+        protected override MemberBuilder MemberBuilder => this.PropertyBuilder;
 
-        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
+        protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 

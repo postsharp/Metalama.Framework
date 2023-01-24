@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Advising
     {
         private readonly BoundTemplateMethod _template;
 
-        public TemplateTypeRewriter( BoundTemplateMethod template )
+        private TemplateTypeRewriter( BoundTemplateMethod template )
         {
             this._template = template;
         }

@@ -11,34 +11,31 @@ namespace Metalama.Framework.Engine.Pipeline
     internal readonly struct PipelineStepId : IEquatable<PipelineStepId>
     {
         public AspectLayerId AspectLayerId { get; }
-
-        public PipelineStepPhase Phase { get; }
-
+        
         public int AspectTargetTypeDepth { get; }
 
         public int AspectTargetDepth { get; }
 
         public int AdviceTargetDepth { get; }
 
-        public PipelineStepId( AspectLayerId aspectLayerId, int aspectTargetTypeDepth, int aspectTargetDepth, PipelineStepPhase phase, int adviceTargetDepth )
+        public PipelineStepId( AspectLayerId aspectLayerId, int aspectTargetTypeDepth, int aspectTargetDepth, int adviceTargetDepth )
         {
             this.AspectLayerId = aspectLayerId;
-            this.Phase = phase;
             this.AspectTargetTypeDepth = aspectTargetTypeDepth;
             this.AspectTargetDepth = aspectTargetDepth;
             this.AdviceTargetDepth = adviceTargetDepth;
         }
 
         public bool Equals( PipelineStepId other )
-            => this.AspectLayerId.Equals( other.AspectLayerId ) && this.AspectTargetTypeDepth == other.AspectTargetTypeDepth && this.Phase == other.Phase
-               && this.AspectTargetDepth == other.AspectTargetDepth && this.AdviceTargetDepth == other.AdviceTargetDepth;
+            => this.AspectLayerId.Equals( other.AspectLayerId ) && this.AspectTargetTypeDepth == other.AspectTargetTypeDepth 
+                                                                && this.AspectTargetDepth == other.AspectTargetDepth && this.AdviceTargetDepth == other.AdviceTargetDepth;
 
         public override bool Equals( object? obj ) => obj is PipelineStepId other && this.Equals( other );
 
         public override int GetHashCode()
-            => HashCode.Combine( this.AspectLayerId, this.AspectTargetTypeDepth, this.AspectTargetDepth, this.Phase, this.AdviceTargetDepth );
+            => HashCode.Combine( this.AspectLayerId, this.AspectTargetTypeDepth, this.AspectTargetDepth, this.AdviceTargetDepth );
 
         public override string ToString()
-            => $"{this.AspectLayerId}:{this.AspectTargetTypeDepth}:{this.AspectTargetDepth}:{this.Phase}:{this.AdviceTargetDepth}";
+            => $"{this.AspectLayerId}:{this.AspectTargetTypeDepth}:{this.AspectTargetDepth}:{this.AdviceTargetDepth}";
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
+    // Resharper disable UnusedMember.Global
     internal enum World
     {
         Mercury,

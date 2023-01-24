@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,6 +16,8 @@ namespace Metalama.Testing.AspectTesting
     /// This class is JSON-serializable. Another way to define options is to add a file named <c>metalamaTests.json</c> into the test directory or
     /// any parent directory.
     /// </summary>
+    [PublicAPI]
+    [JsonObject]
     public class TestOptions
     {
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );

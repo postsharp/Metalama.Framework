@@ -16,8 +16,6 @@ internal sealed class TestProjectProperties
 {
     private readonly string? _projectDirectory;
 
-    public bool HasProjectDirectory => this._projectDirectory != null;
-
     public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException();
 
     public ImmutableArray<string> PreprocessorSymbols { get; }

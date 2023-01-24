@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void Field()
         {
             // Verifies that serializable type with a non-serialized field can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -53,7 +53,7 @@ public class A : ICompileTimeSerializable
         public void Property()
         {
             // Verifies that serializable type with a non-serialized property can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -95,7 +95,7 @@ public class A : ICompileTimeSerializable
         public void PropertyBackingField()
         {
             // Verifies that serializable type with a non-serialized auto-property backing field can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -137,7 +137,7 @@ public class A : ICompileTimeSerializable
         public void StaticProperty()
         {
             // Verifies that serializable type with a static property can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -177,7 +177,7 @@ public class A : ICompileTimeSerializable
         public void StaticField()
         {
             // Verifies that serializable type with a static field can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -217,7 +217,7 @@ public class A : ICompileTimeSerializable
         public void NonAutoProperty()
         {
             // Verifies that serializable type with a non-auto property can be serialized and deserialized and the property is not used.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]

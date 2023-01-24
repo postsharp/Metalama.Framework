@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public IDeclaration Declaration { get; }
 
-        public ScopedSuppression( SuppressionDefinition definition, IDeclaration declaration )
+        internal ScopedSuppression( SuppressionDefinition definition, IDeclaration declaration )
         {
             this.Definition = definition;
             this.Declaration = declaration;

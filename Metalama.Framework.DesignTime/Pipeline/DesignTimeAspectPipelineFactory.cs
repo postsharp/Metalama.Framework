@@ -282,6 +282,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             designTimeAspectPipeline.Dispose();
         }
 
+        this._eventHub.ExternalBuildCompletedEvent.UnregisterHandler( this.OnExternalBuildCompletedAsync );
         this._pipelinesByProjectKey.Clear();
         this.Domain.Dispose();
     }

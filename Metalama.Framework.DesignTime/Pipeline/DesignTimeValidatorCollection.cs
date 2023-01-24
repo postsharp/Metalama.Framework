@@ -43,12 +43,12 @@ internal sealed class DesignTimeValidatorCollection
             foreach ( var validator in group )
             {
                 hasher.Reset();
-                validator.GetLongHashCode( hasher );
+                var digest = validator.GetLongHashCode( hasher );
 
                 // XOR is a poor hashing function but, to compute `combined`, we must have a _commutative_ hashing function
                 // because our input is unordered. Ordering the input would increase significantly increase the computation time
                 // and we would loose the benefit of a hash over structural equality comparison.
-                combined ^= hasher.Digest();
+                combined ^= digest;
             }
         }
 

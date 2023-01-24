@@ -19,9 +19,9 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
         this.AttributeType = attributeType;
     }
 
-    public IDeclaration TargetDeclaration { get; }
+    private IDeclaration TargetDeclaration { get; }
 
-    public INamedType AttributeType { get; }
+    private INamedType AttributeType { get; }
 
     public async Task ExecuteAsync( CodeActionContext context )
     {

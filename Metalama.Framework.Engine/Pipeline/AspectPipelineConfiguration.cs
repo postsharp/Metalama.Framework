@@ -35,7 +35,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
         internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
-        public CompileTimeProject? CompileTimeProject { get; }
+        internal CompileTimeProject? CompileTimeProject { get; }
+
+        public DiagnosticManifest? DiagnosticManifest => this.CompileTimeProject?.ClosureDiagnosticManifest;
 
         internal CompileTimeProjectLoader CompileTimeProjectLoader { get; }
 
@@ -45,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ProjectServiceProvider ServiceProvider { get; }
 
-        public ImmutableArray<MetadataReference> MetadataReferences { get; }
+        private ImmutableArray<MetadataReference> MetadataReferences { get; }
 
         internal CodeFixFilter CodeFixFilter { get; }
 

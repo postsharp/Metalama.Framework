@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -40,9 +38,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                     Error,
                     "Aspect applied to incorrect kind of declaration." );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
-            new( "LAMA0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
-
         internal static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)> MemberRequiresNArguments =
             new( "LAMA0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
 
@@ -75,7 +70,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     Error,
                     "Cannot use an expression in an out or ref parameter." );
 
-        internal static readonly DiagnosticDefinition<(string TypeNane, string? AssemblyName)> CannotFindType =
+        internal static readonly DiagnosticDefinition<(string TypeName, string? AssemblyName)> CannotFindType =
             new( "LAMA0020", _category, "Cannot find the type '{0}' of assembly '{1}'.", Error, "Cannot find a type" );
 
         internal static readonly DiagnosticDefinition<string> CycleInAspectOrdering =
@@ -93,22 +88,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             Error,
             "Cannot add an aspect to a previous step of the compilation pipeline." );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, AdviceKind AdviceKind, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep =
-            new(
-                "LAMA0023",
-                _category,
-                "The aspect '{0}' cannot add an {1} advice to '{2}' because this declaration has already been processed.",
-                Error,
-                "Cannot add an advice to a previous step of the compilation pipeline." );
-
-        internal static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod)>
-            TemplateMemberMissesAttribute = new(
-                "LAMA0024",
-                "The template member does not have the expected custom attribute.",
-                "The template {0} '{1}' must be annotated with the custom attribute [{2}] otherwise it cannot be used with the dynamic advice '{3}'.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
             "LAMA0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
@@ -123,30 +102,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             Error,
             "Cannot find an assembly required by the compile-time assembly." );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IDeclarationBuilder MemberBuilder, INamedType AttributeType)>
-            CompatibleAttributeConstructorDoesNotExist = new(
-                "LAMA0028",
-                _category,
-                "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
-                Error,
-                "Compatible attribute constructor does not exist." );
-
-        internal static readonly DiagnosticDefinition<string>
-            InvalidCachedManifestFile = new(
-                "LAMA0029",
-                _category,
-                "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.",
-                Error,
-                "The compile-time project manifest file is corrupted." );
-
-        internal static readonly DiagnosticDefinition<string>
-            InvalidCompileTimeProjectResource = new(
-                "LAMA0030",
-                _category,
-                "The compile-time project in assembly '{0}' is corrupted.",
-                Error,
-                "The compile-time project resource file was corrupted." );
-
         internal static readonly DiagnosticDefinition<(string TemplateName, string ClassName)>
             TemplateWithSameNameAlreadyDefined = new(
                 "LAMA0032",
@@ -160,14 +115,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "LAMA0033",
                 _category,
                 "The class '{0}' defines a member named '{1}', but the member is not annotated with the [Template] custom attribute.",
-                Error,
-                "The member does not have a template custom attribute." );
-
-        internal static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
-            TemplateIsOfTheWrongType = new(
-                "LAMA0034",
-                _category,
-                "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with [{3}].",
                 Error,
                 "The member does not have a template custom attribute." );
 
@@ -375,16 +322,8 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "'ref' members cannot be used as templates.",
                 _category );
 
-        internal static readonly DiagnosticDefinition<IPropertySymbol> TemplatePropertyCannotBeAutomatic =
-            new(
-                "LAMA0061",
-                Error,
-                "The property '{0}' cannot be an automatic property because it is a template.",
-                "Template properties cannot be automatic properties.",
-                _category );
-
         // TODO: Use formattable string (C# does not seem to find extension methods).
-        public static readonly DiagnosticDefinition<string>
+        internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(
                 "LAMA0099",
                 "Feature is not yet supported.",

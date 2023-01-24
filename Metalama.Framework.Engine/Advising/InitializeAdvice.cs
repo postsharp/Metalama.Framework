@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class InitializeAdvice : Advice
 {
-    public InitializerKind Kind { get; }
+    private readonly InitializerKind _kind;
 
-    public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
+    private new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
     protected InitializeAdvice(
         IAspectInstanceInternal aspect,
@@ -28,7 +28,7 @@ internal abstract class InitializeAdvice : Advice
         InitializerKind kind,
         string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
     {
-        this.Kind = kind;
+        this._kind = kind;
     }
 
     public override AdviceImplementationResult Implement(
@@ -50,7 +50,7 @@ internal abstract class InitializeAdvice : Advice
 
         IConstructor? staticConstructor;
 
-        if ( this.Kind == InitializerKind.BeforeTypeConstructor )
+        if ( this._kind == InitializerKind.BeforeTypeConstructor )
         {
             staticConstructor = containingType.StaticConstructor;
 
@@ -70,14 +70,14 @@ internal abstract class InitializeAdvice : Advice
             targetDeclaration switch
             {
                 IConstructor constructor => new[] { constructor },
-                INamedType => this.Kind switch
+                INamedType => this._kind switch
                 {
                     InitializerKind.BeforeTypeConstructor =>
                         new[] { staticConstructor.AssertNotNull() },
                     InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
                             .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
-                    _ => throw new AssertionFailedException( $"Unexpected initializer kind: {this.Kind}." )
+                    _ => throw new AssertionFailedException( $"Unexpected initializer kind: {this._kind}." )
                 },
                 _ => throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." )
             };

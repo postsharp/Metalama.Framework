@@ -20,10 +20,7 @@ public readonly struct DeclarationEnhancements<T>
         this._declaration = declaration;
     }
 
-    /// <summary>
-    /// Gets the declaration represented by the current <see cref="DeclarationEnhancements{T}"/>.
-    /// </summary>
-    public T Declaration => this._declaration ?? throw new InvalidOperationException( $"The DeclarationEnhancements is not initialized." );
+    private T Declaration => this._declaration ?? throw new InvalidOperationException( $"The DeclarationEnhancements is not initialized." );
 
     /// <summary>
     /// Gets the set of instances of a specified type of aspects that have been applied to a specified declaration.

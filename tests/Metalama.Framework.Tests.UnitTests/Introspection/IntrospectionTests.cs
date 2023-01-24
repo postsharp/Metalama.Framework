@@ -15,7 +15,7 @@ public sealed class IntrospectionTests : UnitTestClass
     [Fact]
     public async Task Success()
     {
-        var code = @"
+        const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -68,7 +68,7 @@ class MyClass
     [Fact]
     public async Task UserError()
     {
-        var code = @"
+        const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -117,7 +117,7 @@ class MyClass
     [Fact]
     public async Task SyntaxErrorInCompileTimeCode()
     {
-        var code = @"
+        const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;

@@ -10,15 +10,11 @@ internal sealed class DeclarationOrigin : IDeclarationOrigin
 
     public static IDeclarationOrigin CompilerGeneratedSource { get; } = new DeclarationOrigin( DeclarationOriginKind.Source, true );
 
-    public static IDeclarationOrigin Generator { get; } = new DeclarationOrigin( DeclarationOriginKind.Generator, false );
-
-    public static IDeclarationOrigin CompilerGeneratedGeneratorSource { get; } = new DeclarationOrigin( DeclarationOriginKind.Generator, true );
-
     public static IDeclarationOrigin External { get; } = new DeclarationOrigin( DeclarationOriginKind.External, false );
 
     public static IDeclarationOrigin CompilerGeneratedExternal { get; } = new DeclarationOrigin( DeclarationOriginKind.External, false );
 
-    public DeclarationOrigin( DeclarationOriginKind kind, bool isCompilerGenerated )
+    private DeclarationOrigin( DeclarationOriginKind kind, bool isCompilerGenerated )
     {
         this.Kind = kind;
         this.IsCompilerGenerated = isCompilerGenerated;

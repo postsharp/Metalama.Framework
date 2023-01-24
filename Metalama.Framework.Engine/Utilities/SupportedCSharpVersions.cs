@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
@@ -12,6 +13,7 @@ namespace Metalama.Framework.Engine.Utilities;
 /// <summary>
 /// Exposes the versions of the C# language supported by Metalama.
 /// </summary>
+[PublicAPI]
 public static class SupportedCSharpVersions
 {
     /// <summary>
@@ -30,7 +32,7 @@ public static class SupportedCSharpVersions
     public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
         LanguageVersion.CSharp10
 #if ROSLYN_4_4_0_OR_GREATER
-,
+       ,
         LanguageVersion.CSharp11
 #endif
     );

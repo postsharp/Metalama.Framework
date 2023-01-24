@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         protected BuiltMemberOrNamedType( CompilationModel compilation, MemberOrNamedTypeBuilder builder ) : base( compilation, builder ) { }
 
-        public abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
+        protected abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
 
         public Accessibility Accessibility => this.MemberOrNamedTypeBuilder.Accessibility;
 
@@ -29,7 +29,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
-
-        public object Target => throw new NotImplementedException();
     }
 }

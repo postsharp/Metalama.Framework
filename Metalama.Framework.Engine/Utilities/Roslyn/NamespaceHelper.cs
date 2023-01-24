@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static string GetFullMetadataName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetFullMetadataName()!;
 
-        public static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
+        private static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
             => symbol == null ? null : _fullMetadataCache.GetOrAdd( symbol, s => GetFullName( s, '+', true ) );
 
         private static string? GetFullName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
@@ -60,23 +60,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             AppendNameRecursive( symbol );
 
             return stringBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Returns the left part before the last '.' of a string.
-        /// </summary>
-        public static string GetNamespace( string fullName )
-        {
-            var index = fullName.LastIndexOf( '.' );
-
-            if ( index >= 0 )
-            {
-                return fullName.Substring( 0, index - 1 );
-            }
-            else
-            {
-                return "";
-            }
         }
     }
 }

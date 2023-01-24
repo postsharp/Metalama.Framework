@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 
 namespace Metalama.Framework.Aspects;
@@ -11,6 +12,7 @@ namespace Metalama.Framework.Aspects;
 /// The current layer is exposed in the <see cref="IAspectBuilder.Layer"/> property.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
+[PublicAPI]
 public sealed class LayersAttribute : Attribute
 {
     public string[] Layers { get; }

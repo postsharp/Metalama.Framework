@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+        private IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         [Memo]

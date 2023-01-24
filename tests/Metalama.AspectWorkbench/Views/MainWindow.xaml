@@ -96,7 +96,7 @@
 
             <DockPanel Grid.Column="4" Visibility="{Binding Path=CompiledTemplateVisibility}">
                 <TextBlock DockPanel.Dock="Top">
-                    <Hyperlink Name="compiledTemplateHyperlink" Click="CompiledTemplateHyperlink_OnClick">
+                    <Hyperlink Click="CompiledTemplateHyperlink_OnClick">
                         Compiled Template
                     </Hyperlink>
                 </TextBlock>
@@ -128,7 +128,7 @@
 
                 <DockPanel Grid.Row="0">
                     <TextBlock DockPanel.Dock="Top">Expected Program Output</TextBlock>
-                    <TextBox Name="expectedProgramOutputBox" Text="{Binding ExpectedProgramOutput, Mode=TwoWay}"
+                    <TextBox Text="{Binding ExpectedProgramOutput, Mode=TwoWay}"
                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas"
                              AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" />
@@ -140,7 +140,7 @@
 
                 <DockPanel Grid.Row="3">
                     <TextBlock DockPanel.Dock="Top">Actual Program Output</TextBlock>
-                    <TextBlock Name="programOutputRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                FontFamily="Consolas" Text="{Binding ActualProgramOutput}" />
                 </DockPanel>
             </Grid>

@@ -6,11 +6,11 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class LinkerGeneratedAnnotationExtensions
     {
-        public const string AnnotationKind = "MetalamaAspectLinkerGeneratedNode";
+        private const string _annotationKind = "MetalamaAspectLinkerGeneratedNode";
 
         public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxNode node )
         {
-            var annotations = node.GetAnnotations( AnnotationKind );
+            var annotations = node.GetAnnotations( _annotationKind );
 
             LinkerGeneratedFlags flags = default;
 
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxTrivia trivia )
         {
-            var annotations = trivia.GetAnnotations( AnnotationKind );
+            var annotations = trivia.GetAnnotations( _annotationKind );
 
             LinkerGeneratedFlags flags = default;
 
@@ -45,12 +45,12 @@ namespace Metalama.Framework.Engine.Linking
         public static T WithLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )
             where T : SyntaxNode
         {
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
+            return node.WithAdditionalAnnotations( new SyntaxAnnotation( _annotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
         }
 
         public static SyntaxTrivia WithLinkerGeneratedFlags( this SyntaxTrivia trivia, in LinkerGeneratedFlags flags )
         {
-            return trivia.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
+            return trivia.WithAdditionalAnnotations( new SyntaxAnnotation( _annotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
         }
     }
 }

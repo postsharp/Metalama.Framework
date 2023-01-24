@@ -28,17 +28,17 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed partial class LinkerRewritingDriver
     {
-        public ProjectServiceProvider ServiceProvider { get; }
+        private ProjectServiceProvider ServiceProvider { get; }
 
         public LinkerInjectionRegistry InjectionRegistry { get; }
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
-        public CompilationContext IntermediateCompilationContext { get; }
+        private CompilationContext IntermediateCompilationContext { get; }
 
         public Compilation IntermediateCompilation => this.IntermediateCompilationContext.Compilation;
 
-        internal LinkerAnalysisRegistry AnalysisRegistry { get; }
+        private LinkerAnalysisRegistry AnalysisRegistry { get; }
 
         public LinkerRewritingDriver(
             ProjectServiceProvider serviceProvider,
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
-            var rewrittenBody = this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
+            var rewrittenBody = RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
             var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
             // Add the SourceCode annotation, if it is source code.
@@ -341,7 +341,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
+        private static SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
 #pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new SubstitutingRewriter( context );
@@ -584,7 +584,7 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( "Empty" ) );
         }
 
-        public static string GetSpecialMemberName( ISymbol symbol, string suffix )
+        private static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
             switch ( symbol )
             {

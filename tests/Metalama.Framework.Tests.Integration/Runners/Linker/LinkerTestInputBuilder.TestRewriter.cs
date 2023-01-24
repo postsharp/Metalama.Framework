@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         private const string _testTemporaryNodeAnnotationId = "LinkerTestTemporaryNode";
         private static int _nextNodeId;
 
-        public static T AssignNodeId<T>( T node )
+        private static T AssignNodeId<T>( T node )
             where T : SyntaxNode
         {
             if ( node is EventFieldDeclarationSyntax eventFieldDecl )

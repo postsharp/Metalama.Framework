@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override bool IsPartial => true;
 
-            public override PartialCompilation Update(
+            internal override PartialCompilation Update(
                 IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )
             {

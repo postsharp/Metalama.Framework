@@ -6,7 +6,7 @@ using System.Collections.Generic;
 // ReSharper disable CheckNamespace
 namespace System.Linq
 {
-    public static class PortableEnumerableExtensions
+    internal static class PortableEnumerableExtensions
     {
         public static HashSet<T> ToHashSet<T>( this IEnumerable<T> collection, IEqualityComparer<T>? comparer = null )
         {

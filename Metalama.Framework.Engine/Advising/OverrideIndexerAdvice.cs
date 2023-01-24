@@ -13,9 +13,8 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer>
     {
-        public BoundTemplateMethod? GetTemplate { get; }
-
-        public BoundTemplateMethod? SetTemplate { get; }
+        private readonly BoundTemplateMethod? _getTemplate;
+        private readonly BoundTemplateMethod? _setTemplate;
 
         public OverrideIndexerAdvice(
             IAspectInstanceInternal aspect,
@@ -28,8 +27,8 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this.GetTemplate = getTemplate.ExplicitlyImplementedOrNull();
-            this.SetTemplate = setTemplate.ExplicitlyImplementedOrNull();
+            this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
+            this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            addTransformation( new OverrideIndexerTransformation( this, targetDeclaration, this.GetTemplate, this.SetTemplate, this.Tags ) );
+            addTransformation( new OverrideIndexerTransformation( this, targetDeclaration, this._getTemplate, this._setTemplate, this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

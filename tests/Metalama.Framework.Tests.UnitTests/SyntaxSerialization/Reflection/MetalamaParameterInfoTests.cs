@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestParameter()
         {
-            var code = "class Target { public static int Method(int target) => 2*target; }";
+            const string code = "class Target { public static int Method(int target) => 2*target; }";
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericParameter_GenericInMethod()
         {
-            var code = "class Target { public static int Method<T>(T target) => 4; }";
+            const string code = "class Target { public static int Method<T>(T target) => 4; }";
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericParameter_GenericInTypeAndMethod()
         {
-            var code = "class Target<T> { public static int Method<U>(System.Tuple<T,U> target) => 4; }";
+            const string code = "class Target<T> { public static int Method<U>(System.Tuple<T,U> target) => 4; }";
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
@@ -81,7 +81,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestParameterInSecondPlace()
         {
-            var code = "class Target { public static int Method(float ignored, int target) => 2*target; }";
+            const string code = "class Target { public static int Method(float ignored, int target) => 2*target; }";
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestReturnParameter()
         {
-            var code = "class Target { public static string Method(float ignored, int target) => null; }";
+            const string code = "class Target { public static string Method(float ignored, int target) => null; }";
             var serialized = this.SerializeReturnParameter( code );
 
             this.AssertEqual(
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestReturnParameterOfProperty()
         {
-            var code = "class Target { public static string Property => null; }";
+            const string code = "class Target { public static string Property => null; }";
             var serialized = this.SerializeReturnParameterOfProperty( code );
 
             this.AssertEqual(
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestParameterOfIndexer()
         {
-            var code = "class Target { public int this[int target] { get {return 0;} set{} }}";
+            const string code = "class Target { public int this[int target] { get {return 0;} set{} }}";
             var serialized = this.SerializeIndexerParameter( code );
 
             this.AssertEqual(

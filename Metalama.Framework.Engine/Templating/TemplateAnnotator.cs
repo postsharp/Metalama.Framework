@@ -738,7 +738,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             default:
                 {
-                    if ( this._templateMemberClassifier.HasTemplateKeywordAttribute( symbol ) )
+                    if ( TemplateMemberSymbolClassifier.HasTemplateKeywordAttribute( symbol ) )
                     {
                         nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                     }
@@ -2210,7 +2210,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             using ( this.WithScopeContext( labelContext ) )
             {
-                transformedLabels = section.Labels.SelectAsArray( l => this.Visit( l ) );
+                transformedLabels = section.Labels.SelectAsArray( this.Visit )!;
 
                 if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                 {
@@ -2478,8 +2478,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             } );
     }
 
-    public override SyntaxNode VisitTupleType( TupleTypeSyntax node )
-        => this.VisitGenericNameCore( node, base.VisitTupleType! );
+    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! );
 
     public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {

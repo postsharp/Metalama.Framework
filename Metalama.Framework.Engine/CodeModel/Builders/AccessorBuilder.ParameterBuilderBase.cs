@@ -30,11 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override int Index { get; }
 
-            public override bool IsParams
-            {
-                get => false;
-                set => throw new NotSupportedException();
-            }
+            public override bool IsParams => false;
 
             public override IDeclaration ContainingDeclaration => this.Accessor;
 

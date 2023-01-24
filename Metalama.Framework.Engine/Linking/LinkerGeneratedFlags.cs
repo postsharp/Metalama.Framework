@@ -7,6 +7,7 @@ namespace Metalama.Framework.Engine.Linking
     [Flags]
     internal enum LinkerGeneratedFlags
     {
+        // Resharper disable UnusedMember.Global
         None = 0,
 
         /// <summary>
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         EmptyLabeledStatement = 2,
 
         /// <summary>
-        /// Empty statement that was added by the linker to carry trivias, which should be attached to surrounding statements.
+        /// Empty statement that was added by the linker to carry trivia, which should be attached to surrounding statements.
         /// </summary>
         EmptyTriviaStatement = 4,
 

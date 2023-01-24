@@ -19,20 +19,19 @@ namespace Metalama.Framework.Engine.Advising
         where TBuilder : MemberBuilder
     {
         private readonly Action<TBuilder>? _buildAction;
+        private readonly IntroductionScope _scope;
 
-        public IntroductionScope Scope { get; }
+        protected OverrideStrategy OverrideStrategy { get; }
 
-        public OverrideStrategy OverrideStrategy { get; }
+        protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
-        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
-
-        public TBuilder Builder { get; protected init; }
+        protected TBuilder Builder { get; init; }
 
         protected TemplateMember<TMember>? Template { get; }
 
         protected string MemberName { get; }
 
-        public IObjectReader Tags { get; }
+        protected IObjectReader Tags { get; }
 
         protected IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
@@ -57,11 +56,11 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( scope != IntroductionScope.Default )
             {
-                this.Scope = scope;
+                this._scope = scope;
             }
             else if ( templateAttribute is IntroduceAttribute introduceAttribute )
             {
-                this.Scope = introduceAttribute.Scope;
+                this._scope = introduceAttribute.Scope;
             }
 
             this.OverrideStrategy = overrideStrategy;
@@ -92,7 +91,7 @@ namespace Metalama.Framework.Engine.Advising
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
-            switch ( this.Scope )
+            switch ( this._scope )
             {
                 case IntroductionScope.Default:
                     if ( this.Template?.Declaration is { IsStatic: true } )
@@ -122,7 +121,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected IntroductionScope: {this.Scope}." );
+                    throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." );
             }
 
             if ( this.Template != null )

@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Formatting
             return (finalDocument, finalSyntax);
         }
 
-        public static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        internal static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Formatting
             return compilation.Update( syntaxTreeReplacements );
         }
 
-        public static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        internal static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
             var formattedCompilation = compilation;
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
@@ -151,6 +151,6 @@ namespace Metalama.Framework.Engine.Formatting
         // Code formatting is used by TryMetalama only now. Somehow TryMetalama also builds through the command line for some
         // initialization, which triggers an error because we don't ship all necessary assemblies.
 
-        public static bool CanFormat => AppDomainUtility.HasAnyLoadedAssembly( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
+        internal static bool CanFormat => AppDomainUtility.HasAnyLoadedAssembly( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
     }
 }

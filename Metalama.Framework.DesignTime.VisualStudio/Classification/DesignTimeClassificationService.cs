@@ -25,7 +25,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
     public DesignTimeClassificationService() : this(
         DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeUserProcessServiceProviderFactory>() ) { }
 
-    public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
+    private DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();

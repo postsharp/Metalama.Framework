@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class BaseDependencyCollector
 {
-    public IProjectVersion ProjectVersion { get; }
+    protected IProjectVersion ProjectVersion { get; }
 
     /// <summary>
     /// Gets the <see cref="PartialCompilation"/> for which the dependency graph was collected.
@@ -91,7 +91,7 @@ internal class BaseDependencyCollector
     }
 
 #if DEBUG
-    public bool IsReadOnly { get; private set; }
+    protected bool IsReadOnly { get; private set; }
 
     public void Freeze()
     {

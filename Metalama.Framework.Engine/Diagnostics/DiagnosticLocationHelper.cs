@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// </summary>
     public static class DiagnosticLocationHelper
     {
-        public static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
+        internal static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
 
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public static Location? GetDiagnosticLocation( this SyntaxNode node )
+        internal static Location? GetDiagnosticLocation( this SyntaxNode node )
         {
             switch ( node )
             {
@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( this AttributeData attribute )
+        internal static Location? GetDiagnosticLocation( this AttributeData attribute )
         {
             var application = attribute.ApplicationSyntaxReference;
 

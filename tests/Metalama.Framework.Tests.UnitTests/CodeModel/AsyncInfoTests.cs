@@ -19,7 +19,7 @@ public sealed class AsyncInfoTests : UnitTestClass
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {
     int Method() { return 42; }
@@ -41,7 +41,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {
     void Method() {}
@@ -63,7 +63,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -86,7 +86,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -109,7 +109,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -132,7 +132,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -155,7 +155,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -179,7 +179,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -202,7 +202,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -225,7 +225,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -248,7 +248,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Threading.Tasks;
 class C
 {
@@ -272,7 +272,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
@@ -310,7 +310,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
@@ -360,7 +360,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
@@ -410,7 +410,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 class C
 {
@@ -433,7 +433,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System.Collections.Generic;
 using System.Threading;
 class C

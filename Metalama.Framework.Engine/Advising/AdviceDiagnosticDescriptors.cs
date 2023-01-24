@@ -133,16 +133,6 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
-            ImplicitInterfaceMemberIsNotCompatible = new(
-                "LAMA0515",
-                "Cannot implement an implicit interface member when the target type already contains a declaration that is not compatible with this interface member.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
-                +
-                "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, OverrideStrategy Strategy)>
             InterfaceUnsupportedOverrideStrategy = new(
                 "LAMA0516",

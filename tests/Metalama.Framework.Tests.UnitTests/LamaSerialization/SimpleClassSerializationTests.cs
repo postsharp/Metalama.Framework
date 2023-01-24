@@ -1,13 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
+
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
@@ -264,7 +269,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -281,7 +286,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         private void TestSimpleExplicitlySerializedClass<T>( T value )
         {
             var initialObject = new SimpleExplicitlySerializedClass<T>( value );
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -300,7 +305,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         private void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -372,7 +377,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new SimpleExplicitlySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     SimpleExplicitlySerializedClass<T> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -380,7 +385,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     constructorArguments.SetValue( "_", obj.Value );
                 }
 
-                public override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
+                internal override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
@@ -447,7 +452,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey )! );
                 }
 
-                public override void SerializeObject(
+                internal override void SerializeObject(
                     ExplicitlySerializedClass<TForCtor, TForField> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -457,7 +462,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "n", obj.Nullable );
                 }
 
-                public override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Field = initializationArguments.GetValue<TForField>( _fieldKey );
                     obj.Nullable = initializationArguments.GetValue<int?>( "n" );

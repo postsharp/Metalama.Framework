@@ -61,12 +61,6 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         // Not sure what this is used for.
-        public SyntaxNode AddLocationAnnotationsRecursive( SyntaxNode node )
-        {
-            var rewriter = new AnnotatingRewriter( null, this, false, NullDiagnosticAdder.Instance );
-
-            return rewriter.Visit( node )!;
-        }
 
         private SyntaxNodeOrToken AddLocationAnnotation( SyntaxNodeOrToken originalNode, SyntaxNodeOrToken annotatedNode )
         {

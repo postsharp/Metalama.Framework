@@ -86,6 +86,7 @@ namespace Metalama.Testing.UnitTesting
             Interlocked.Increment( ref this._fileLockers );
         }
 
+        // Resharper disable once UnusedMember.Global
         public void RemoveFileLocker()
         {
             if ( Interlocked.Decrement( ref this._fileLockers ) == 0 )

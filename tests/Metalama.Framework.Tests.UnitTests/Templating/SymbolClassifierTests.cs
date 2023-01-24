@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 class C : TypeAspect 
 {
@@ -76,7 +76,7 @@ class C : TypeAspect
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 class C 
@@ -105,7 +105,7 @@ class D : System.IDisposable
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [assembly: RunTimeOrCompileTime]
 class C 
@@ -121,7 +121,7 @@ class C
         [Fact]
         public void MarkedAsCompileTimeOnly()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [CompileTime]
@@ -149,7 +149,7 @@ class C
 
             // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 [RunTimeOrCompileTime]
@@ -169,7 +169,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = "class C {}";
+            const string code = "class C {}";
             var compilation = testContext.CreateCompilationModel( code, addMetalamaReferences: false );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
@@ -183,7 +183,7 @@ class C
 
             // The main purpose of these tests is to check that there is no infinite recursion.
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
@@ -206,7 +206,7 @@ internal class C : TypeAspect
 
             // The main purpose of these tests is to check that there is no infinite recursion.
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
@@ -237,7 +237,7 @@ internal class C : TypeAspect
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
@@ -270,7 +270,7 @@ internal class C : TypeAspect
         [Fact]
         public void TypeArgumentBug()
         {
-            var code = @"
+            const string code = @"
 using System.Collections.Immutable;
 
 class C 
@@ -307,7 +307,7 @@ class C
         [Fact]
         public void RecordStruct()
         {
-            var code = @"record struct S ( int X );
+            const string code = @"record struct S ( int X );
 ";
 
             using var testContext = this.CreateTestContext();
@@ -320,7 +320,7 @@ class C
         [Fact]
         public void NestedClassCompileTimeByInheritance()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 
 class C : TypeAspect 
@@ -339,7 +339,7 @@ class C : TypeAspect
         [Fact]
         public void ConflictDiagnostic()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

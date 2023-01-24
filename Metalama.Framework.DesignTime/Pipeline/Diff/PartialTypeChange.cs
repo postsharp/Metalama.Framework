@@ -20,6 +20,9 @@ internal readonly struct PartialTypeChange
         this.Kind = kind;
     }
 
+    // TODO: Check why we never call Merge.
+    // ReSharper disable once UnusedMember.Global
+
     public PartialTypeChange Merge( PartialTypeChange change )
         => (this.Kind, change.Kind) switch
         {

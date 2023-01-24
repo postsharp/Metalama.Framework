@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestFieldLikeEvent()
         {
-            var code = "class Target { public event System.Action Activated; }";
+            const string code = "class Target { public event System.Action Activated; }";
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestCustomEvent()
         {
-            var code = "class Target { public event System.Action Activated { add { } remove { } } }";
+            const string code = "class Target { public event System.Action Activated { add { } remove { } } }";
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestCustomGenericEvent()
         {
-            var code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
+            const string code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(

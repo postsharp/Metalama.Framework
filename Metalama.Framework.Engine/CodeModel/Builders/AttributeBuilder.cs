@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -14,7 +15,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal sealed class AttributeBuilder : DeclarationBuilder, IAttribute
+    internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     {
         private readonly IAttributeData _attributeConstruction;
 
@@ -47,7 +48,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedArgumentList NamedArguments => this._attributeConstruction.NamedArguments;
 
-        public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
+        public FormattableString FormatPredecessor( ICompilation compilation ) => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
+
+        Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => null;
+
+        int IAspectPredecessorImpl.TargetDeclarationDepth => this.ContainingDeclaration.Depth + 1;
 
         [Memo]
         public override SyntaxTree PrimarySyntaxTree

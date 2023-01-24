@@ -17,92 +17,91 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 {
     private readonly BuiltMember _builtMember;
+    private readonly AccessorBuilder _accessorBuilder;
 
     public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
     {
         this._builtMember = builtMember;
-        this.AccessorBuilder = builder;
+        this._accessorBuilder = builder;
     }
 
-    public AccessorBuilder AccessorBuilder { get; }
+    public override DeclarationBuilder Builder => this._accessorBuilder;
 
-    public override DeclarationBuilder Builder => this.AccessorBuilder;
+    public Accessibility Accessibility => this._accessorBuilder.Accessibility;
 
-    public Accessibility Accessibility => this.AccessorBuilder.Accessibility;
+    public string Name => this._accessorBuilder.Name;
 
-    public string Name => this.AccessorBuilder.Name;
+    public bool IsAbstract => this._accessorBuilder.IsAbstract;
 
-    public bool IsAbstract => this.AccessorBuilder.IsAbstract;
+    public bool IsStatic => this._accessorBuilder.IsStatic;
 
-    public bool IsStatic => this.AccessorBuilder.IsStatic;
+    public bool IsVirtual => this._accessorBuilder.IsVirtual;
 
-    public bool IsVirtual => this.AccessorBuilder.IsVirtual;
+    public bool IsSealed => this._accessorBuilder.IsSealed;
 
-    public bool IsSealed => this.AccessorBuilder.IsSealed;
+    public bool IsReadOnly => this._accessorBuilder.IsReadOnly;
 
-    public bool IsReadOnly => this.AccessorBuilder.IsReadOnly;
-
-    public bool IsOverride => this.AccessorBuilder.IsOverride;
+    public bool IsOverride => this._accessorBuilder.IsOverride;
 
     public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    public bool IsNew => this.AccessorBuilder.IsNew;
+    public bool IsNew => this._accessorBuilder.IsNew;
 
-    public bool IsAsync => this.AccessorBuilder.IsAsync;
+    public bool IsAsync => this._accessorBuilder.IsAsync;
 
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this.AccessorBuilder.ToTypedRef<IHasParameters>() ) );
+            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToTypedRef<IHasParameters>() ) );
 
-    public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
+    public MethodKind MethodKind => this._accessorBuilder.MethodKind;
 
-    public OperatorKind OperatorKind => this.AccessorBuilder.OperatorKind;
+    public OperatorKind OperatorKind => this._accessorBuilder.OperatorKind;
 
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.Compilation.Factory.GetIType( this._accessorBuilder.ReturnParameter.Type );
 
     public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.GetIType( t ) );
+    public IReadOnlyList<IType> TypeArguments => this._accessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.GetIType( t ) );
 
-    public bool IsGeneric => this.AccessorBuilder.IsGeneric;
+    public bool IsGeneric => this._accessorBuilder.IsGeneric;
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this.AccessorBuilder.ConstructGenericInstance( typeArguments );
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._accessorBuilder.ConstructGenericInstance( typeArguments );
 
     [Memo]
     public IInvokerFactory<IMethodInvoker> Invokers
         => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
-    public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
+    public IMethod? OverriddenMethod => this._accessorBuilder.OverriddenMethod;
 
     public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
+    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this._accessorBuilder.ExplicitInterfaceImplementations;
 
-    public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
+    public MethodInfo ToMethodInfo() => this._accessorBuilder.ToMethodInfo();
 
     IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
 
-    public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
+    public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
 
-    public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
+    public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this._accessorBuilder.OverriddenMember );
 
-    public bool? IsIteratorMethod => this.AccessorBuilder.IsIteratorMethod;
+    public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 }

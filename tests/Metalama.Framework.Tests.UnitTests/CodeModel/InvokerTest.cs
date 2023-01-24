@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Methods()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     void ToString(string format) {}
@@ -112,7 +112,7 @@ class TargetCode
         [Fact]
         public void OpenGenerics()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     class Nested<T1> {
@@ -187,7 +187,7 @@ class TargetCode
         [Fact]
         public void Generics()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     class Nested<T1> {
@@ -281,7 +281,7 @@ class TargetCode
         [Fact]
         public void Parameters()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     void Method( ref int i, ref long j )
@@ -318,7 +318,7 @@ class TargetCode
         [Fact]
         public void Properties()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     TargetCode P { get; set; }
@@ -365,7 +365,7 @@ class TargetCode
         [Fact]
         public void PropertyAccessors()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     TargetCode P { get; set; }
@@ -402,7 +402,7 @@ class TargetCode
         [Fact]
         public void Events()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     event System.EventHandler MyEvent;
@@ -443,7 +443,7 @@ class TargetCode
         [Fact]
         public void EventAccessors()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     event System.EventHandler MyEvent;
@@ -489,7 +489,7 @@ class TargetCode
         [Fact]
         public void ToArrayTest()
         {
-            var code = @"
+            const string code = @"
 class TargetCode
 {
     void A( int a, string b, object c, out System.DateTime d, ref System.TimeSpan e)

@@ -3,6 +3,7 @@
 using System;
 
 // ReSharper disable IdentifierTypo
+// Resharper disable UnusedMember.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {

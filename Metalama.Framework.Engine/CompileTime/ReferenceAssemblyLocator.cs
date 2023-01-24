@@ -52,16 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public ImmutableArray<string> SystemAssemblyPaths { get; }
 
-        /// <summary>
-        /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
-        /// </summary>
-        public ImmutableHashSet<string> SystemAssemblyNames { get; }
-
         public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
-
-        public bool IsSystemAssemblyName( string assemblyName )
-            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
-               || this.SystemAssemblyNames.Contains( assemblyName );
 
         public bool IsStandardAssemblyName( string assemblyName )
             => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
@@ -160,9 +151,6 @@ namespace Metalama.Framework.Engine.CompileTime
             // Get system assemblies.
             this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
             this.SystemAssemblyPaths = this._referenceAssembliesManifest.Assemblies;
-
-            this.SystemAssemblyNames = this.SystemAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
-                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
             this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
@@ -284,10 +272,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
                 // dynamic code at compile time. We prefer compilation errors.
-                
+
                 // We intentionally refer to the lowest supported Roslyn API version.
                 // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
-                
+
                 var projectText =
                     $@"
 <Project Sdk='Microsoft.NET.Sdk'>

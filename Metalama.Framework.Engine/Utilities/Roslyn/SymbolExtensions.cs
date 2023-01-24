@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     public static class SymbolExtensions
     {
         // Coverage: ignore
-        public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
+        internal static SpecialType ToOurSpecialType( this RoslynSpecialType type )
             => type switch
             {
                 RoslynSpecialType.System_Byte => SpecialType.Byte,
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => SpecialType.None
             };
 
-        public static RoslynSpecialType ToRoslynSpecialType( this SpecialType type )
+        internal static RoslynSpecialType ToRoslynSpecialType( this SpecialType type )
             => type switch
             {
                 SpecialType.Byte => RoslynSpecialType.System_Byte,
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => RoslynSpecialType.None
             };
 
-        public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType )
+        internal static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType )
         {
             if ( namedType.IsUnboundGenericType )
             {
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return true;
         }
 
-        public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
+        internal static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
             for ( var t = type; t != null; t = t.BaseType )
             {
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return false;
         }
 
-        public static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
+        internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
         private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
         {
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-        public static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
+        internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
         {
             if ( member.ContainingType == null )
             {
@@ -153,7 +153,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return false;
         }
 
-        public static bool Is( this ITypeSymbol left, ITypeSymbol right )
+        internal static bool Is( this ITypeSymbol left, ITypeSymbol right )
         {
             if ( left is IErrorTypeSymbol )
             {
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-        public static bool IsAccessor( this IMethodSymbol method )
+        internal static bool IsAccessor( this IMethodSymbol method )
             => method.MethodKind switch
             {
                 MethodKind.PropertyGet => true,
@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
-        public static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
+        internal static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
         {
             if ( symbol.DeclaringSyntaxReferences.IsEmpty )
             {
@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
 
-        public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
+        internal static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch
             {
                 IMethodSymbol methodSymbol => methodSymbol.ExplicitInterfaceImplementations.Any(),
@@ -255,17 +255,17 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
-        public static IFieldSymbol? GetBackingField( this IPropertySymbol property )
+        internal static IFieldSymbol? GetBackingField( this IPropertySymbol property )
             => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
 
         // ReSharper disable once UnusedParameter.Global
 
-        public static IFieldSymbol? GetBackingField( this IEventSymbol @event )
+        internal static IFieldSymbol? GetBackingField( this IEventSymbol @event )
 
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
             => null;
 
-        public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
+        internal static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
         {
             if ( symbol == null )
             {
@@ -283,12 +283,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 
-        public static bool HasDefaultConstructor( this INamedTypeSymbol type )
+        internal static bool HasDefaultConstructor( this INamedTypeSymbol type )
             => type.TypeKind == TypeKind.Struct ||
                (type is { TypeKind: TypeKind.Class, IsAbstract: false } &&
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-        public static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )
+        internal static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )
         {
             return compilation.IsSymbolAccessibleWithin(
                 symbol,
@@ -299,7 +299,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 } );
         }
 
-        public static FrameworkName? GetTargetFramework( this Compilation compilation )
+        internal static FrameworkName? GetTargetFramework( this Compilation compilation )
         {
             var attribute = compilation.Assembly.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(TargetFrameworkAttribute) );
 
@@ -318,7 +318,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return new FrameworkName( frameworkNameString );
         }
 
-        public static bool IsCompilerGenerated( this ISymbol declaration )
+        internal static bool IsCompilerGenerated( this ISymbol declaration )
         {
             return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
         }
@@ -326,7 +326,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Gets the kind of operator based represented by the method.
         /// </summary>
-        public static OperatorKind GetOperatorKind( this IMethodSymbol method ) => SymbolHelpers.GetOperatorKindFromName( method.Name );
+        internal static OperatorKind GetOperatorKind( this IMethodSymbol method ) => SymbolHelpers.GetOperatorKindFromName( method.Name );
 
         public static INamedTypeSymbol GetTopmostContainingType( this INamedTypeSymbol type )
             => type.ContainingType == null ? type : type.ContainingType.GetTopmostContainingType();

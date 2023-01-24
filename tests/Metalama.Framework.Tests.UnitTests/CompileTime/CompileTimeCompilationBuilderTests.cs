@@ -41,7 +41,7 @@ namespace Foo
 ",
                 ignoreErrors: true );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Foo;
 
@@ -61,7 +61,7 @@ namespace Foo
         [Fact]
         public void Attributes()
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
@@ -118,7 +118,7 @@ class A : Attribute
         {
             // This tests that we can create compile-time assemblies that have reference projects in the same solution with compile-time code.
 
-            var referencedCode = @"
+            const string referencedCode = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -126,7 +126,7 @@ public class ReferencedClass
 }
 ";
 
-            var referencingCode = @"
+            const string referencingCode = @"
 
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
@@ -160,7 +160,7 @@ class ReferencingClass
         {
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
-            var indirectlyReferencedCode = @"
+            const string indirectlyReferencedCode = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -168,7 +168,7 @@ public class ReferencedClass
 }
 ";
 
-            var directlyReferencedCode = @"
+            const string directlyReferencedCode = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class MiddleClass
@@ -177,7 +177,7 @@ public class MiddleClass
 }
 ";
 
-            var referencingCode = @"
+            const string referencingCode = @"
 
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
@@ -270,7 +270,7 @@ public class VersionedClass
 }
 ".ReplaceOrdinal( "$version", version.ToString( CultureInfo.InvariantCulture ) );
 
-            var classA = @"
+            const string classA = @"
 
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
@@ -280,7 +280,7 @@ class A
 }
 ";
 
-            var classB = @"
+            const string classB = @"
 
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
@@ -366,7 +366,7 @@ class B
             // We need to be able to have a compile-time assembly even if there is an error in run-time-only code,
             // otherwise the design-time experience is doomed to fail.
 
-            var code = @"
+            const string code = @"
 
 using Metalama.Framework.Fabrics;
 [CompileTime]
@@ -401,7 +401,7 @@ class C
         [Fact]
         public void CacheWithSameLoader()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -456,7 +456,7 @@ public class ReferencedClass
         [Fact]
         public void CacheWithDifferentIdentityButSameCodeSameLoader()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -498,7 +498,7 @@ public class ReferencedClass
         [Fact]
         public void CacheWithDifferentIdentityButSameCodeDifferentLoader()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -540,7 +540,7 @@ public class ReferencedClass
         [Fact]
         public void CacheWithDifferentLoader()
         {
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -602,7 +602,7 @@ public class ReferencedClass
         [Fact]
         public void CleanCacheAndDeserialize()
         {
-            var referencedCode = @"
+            const string referencedCode = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
@@ -610,7 +610,7 @@ public class ReferencedClass
 }
 ";
 
-            var referencingCode = @"
+            const string referencingCode = @"
 
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
@@ -682,14 +682,14 @@ class ReferencingClass
 
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
-            var referencedCode = @"
+            const string referencedCode = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
 }";
 
-            var referencingCode = @"/* Intentionally empty. */";
+            const string referencingCode = @"/* Intentionally empty. */";
 
             // Emit the referenced assembly.
             var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
@@ -736,7 +736,7 @@ public class ReferencedClass
         [Fact]
         public void RewriteTypeOf()
         {
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -760,7 +760,7 @@ public class RunTimeOnlyClass
 }
 ";
 
-            var expected = @"
+            const string expected = @"
 using global::System;
 using global::Metalama.Framework.Aspects;
 
@@ -811,7 +811,7 @@ public class CompileTimeOnlyClass
 
             using var testContext = this.CreateTestContext( mocks );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -844,7 +844,7 @@ public class Anything
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -879,7 +879,7 @@ public class SomeRunTimeClass
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -969,7 +969,7 @@ public class MyAspect : OverrideMethodAspect
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -984,7 +984,7 @@ class CompileTimeClass { }
 
             var compileTimeCode = GetCompileTimeCode( testContext, code, OutputKind.ConsoleApplication );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -1000,7 +1000,7 @@ class CompileTimeClass { }
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Fabrics;
 
@@ -1023,7 +1023,7 @@ namespace SomeNamespace
 
             var compileTimeCode = GetCompileTimeCode( testContext, code );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.CompileTimeContracts;
@@ -1105,7 +1105,7 @@ namespace SomeNamespace
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -1138,7 +1138,7 @@ public delegate void SomeDelegate();
 
             var compileTimeCode = GetCompileTimeCode( testContext, code );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -1175,7 +1175,7 @@ public delegate void SomeDelegate();
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -1188,7 +1188,7 @@ public interface SomeInterface
 
             var compileTimeCode = GetCompileTimeCode( testContext, code );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Metalama.Framework.Aspects;
 
@@ -1208,7 +1208,7 @@ public interface SomeInterface
             // Create a compilation that depends on a preprocessor symbol.
             using var testContext1 = this.CreateTestContext();
 
-            var code1 = @"
+            const string code1 = @"
 using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 #if SYMBOL
@@ -1276,7 +1276,7 @@ Intentional syntax error.
         {
             using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
-            var code = @"
+            const string code = @"
 #region Namespaces
 using System;
 using Metalama.Framework.Aspects;
@@ -1325,7 +1325,7 @@ class C {
 
             var compileTimeCode = GetCompileTimeCode( testContext, code );
 
-            var expected = @"
+            const string expected = @"
 using System;
 using Metalama.Framework.Aspects;
 

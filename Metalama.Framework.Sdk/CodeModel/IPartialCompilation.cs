@@ -34,7 +34,6 @@ public interface IPartialCompilation
     /// <summary>
     /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
     /// </summary>
-    /// <seealso cref="PartialCompilationExtensions.UpdateSyntaxTrees(Metalama.Framework.Engine.CodeModel.IPartialCompilation,System.Func{Microsoft.CodeAnalysis.SyntaxTree,System.Threading.CancellationToken,Microsoft.CodeAnalysis.SyntaxTree},System.Threading.CancellationToken)"/>
     /// <seealso cref="PartialCompilationExtensions.RewriteSyntaxTreesAsync"/>
     IPartialCompilation WithSyntaxTreeTransformations( IReadOnlyList<SyntaxTreeTransformation>? transformations = null );
 

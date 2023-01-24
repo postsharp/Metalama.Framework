@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using System.Collections.Concurrent;
 
@@ -44,6 +45,7 @@ public sealed class TaskBag
         this._pendingTasks.TryAdd( taskId, (task, asyncAction) );
     }
 
+    [PublicAPI]
     public async Task WaitAllAsync()
     {
 #pragma warning disable VSTHRD003

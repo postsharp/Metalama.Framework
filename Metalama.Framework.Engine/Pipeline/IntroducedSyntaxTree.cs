@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public SyntaxTree GeneratedSyntaxTree { get; }
 
-        public IntroducedSyntaxTree( string name, SyntaxTree sourceSyntaxTree, SyntaxTree generatedSyntaxTree )
+        internal IntroducedSyntaxTree( string name, SyntaxTree sourceSyntaxTree, SyntaxTree generatedSyntaxTree )
         {
             IdentifierHelper.ValidateSyntaxTreeName( name );
 

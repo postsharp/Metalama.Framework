@@ -19,7 +19,7 @@ public sealed class CodeModelUpdateTests : UnitTestClass
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -50,7 +50,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -81,7 +81,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -107,7 +107,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -133,7 +133,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
   void M() {}
@@ -154,7 +154,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 void M(int p){}
@@ -178,7 +178,7 @@ void M(int p){}
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 void M(int p){}
@@ -205,7 +205,7 @@ void M(int p){}
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -231,7 +231,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -254,7 +254,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -280,7 +280,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
 }";
@@ -303,7 +303,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
    public C() {}
@@ -326,7 +326,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
   
@@ -349,7 +349,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 class C
 {    
   
@@ -376,7 +376,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"";
+        const string code = @"";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
@@ -398,7 +398,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 [System.Serializable]
 class C
 {    

@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
+    // Resharper disable UnusedMember.Global
     public sealed class Field : TreeTypeChild
     {
         [XmlAttribute]
@@ -41,9 +42,9 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         public bool IsOptional => this.Optional == "true";
 
         [XmlIgnore]
-        public RoslynVersion MinimalRoslynVersion { get; set; }
+        internal RoslynVersion MinimalRoslynVersion { get; set; }
 
         [XmlIgnore]
-        public Dictionary<Kind, RoslynVersion> KindsMinimalRoslynVersions { get; set; }
+        internal Dictionary<Kind, RoslynVersion> KindsMinimalRoslynVersions { get; set; }
     }
 }

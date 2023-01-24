@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Services;
 using System;
@@ -14,6 +15,7 @@ namespace Metalama.Framework.Engine.Services;
 /// This object is a service itself. The test runner registers it as a global service because some pipelines
 /// recreate the service providers from the global provider.
 /// </remarks>
+[PublicAPI]
 public sealed class AdditionalServiceCollection : IAdditionalServiceCollection
 {
     private readonly ConcurrentStack<IDisposable> _disposables = new();

@@ -1,13 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities
 {
+    [PublicAPI]
     public static class StringExtensions
     {
-        public static string TrimSuffix( this string s, string suffix )
+        internal static string TrimSuffix( this string s, string suffix )
             => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
         public static string ReplaceOrdinal( this string s, string oldValue, string newValue )
