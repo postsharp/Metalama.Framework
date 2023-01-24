@@ -142,13 +142,23 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, INamedType InterfaceType, IMember InterfaceTypeMember)>
-            ExplicitInterfaceMemberHasDifferentAccessors = new(
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            InterfacePropertyIsMissingAccessor = new(
                 "LAMA0517",
-                "Cannot implement an explicit interface member explicitly when the member of the interface type has an incompatible accessors.",
-                "The aspect '{0}' cannot implement explicit interface member '{1}' in the type '{2}' because the interface type '{3}' "
+                "Cannot implement an interface property, the template is missing an accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' because the template '{3}' "
                 +
-                "contains a member {4} which has an incompatible set of accessors. Adding additional accessors is possible only for implicit interface members.",
+                "is missing '{4}' accessor.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            ExplicitInterfacePropertyHasSuperficialAccessor = new(
+                "LAMA0518",
+                "Cannot implement an interface property, the template has superficial accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' explicitly because the template '{3}' "
+                +
+                "has superficial '{4}' accessor.",
                 _category,
                 Error );
 

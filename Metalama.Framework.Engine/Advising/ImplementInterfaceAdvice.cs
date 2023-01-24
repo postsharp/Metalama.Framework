@@ -404,26 +404,56 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         var hasSetter =
                             interfaceProperty.SetMethod != null || (!isExplicit && templateProperty?.Declaration.SetMethod != null);
 
-                        var getMethodMismatch =
-                            templateProperty != null && isExplicit && (interfaceProperty.GetMethod == null) ^ (templateProperty.Declaration.GetMethod == null);
+                        // Check that there are no accessors required by interface that are missing from the template.
 
-                        var setMethodMismatch =
-                            templateProperty != null && isExplicit && (interfaceProperty.SetMethod == null) ^ (templateProperty.Declaration.SetMethod == null);
-
-                        var writeabilityMismatch = 
-                            templateProperty != null 
-                            && interfaceProperty.Writeability is Writeability.InitOnly or Writeability.All
-                            && interfaceProperty.Writeability != templateProperty.Declaration.Writeability;
-
-                        if ( templateProperty != null && (getMethodMismatch || setMethodMismatch || writeabilityMismatch) )
+                        if ( templateProperty != null )
                         {
-                            // Set of accessors is different for explicit interface member.
+                            var getMethodMissingFromTemplate = interfaceProperty.GetMethod != null && templateProperty.Declaration.GetMethod == null;
+                            var setMethodMissingFromTemplate = interfaceProperty.SetMethod != null && templateProperty.Declaration.SetMethod == null;
+                            var getMethodSuperficialInTemplate = interfaceProperty.GetMethod == null && templateProperty.Declaration.GetMethod != null;
+                            var setMethodSuperficialInTemplate = interfaceProperty.SetMethod == null && templateProperty.Declaration.SetMethod != null;
+                            var setInitOnlyInTemplate = templateProperty.Declaration.Writeability is Writeability.InitOnly;
+                            var setInitOnlyInInterface = interfaceProperty.Writeability is Writeability.InitOnly;
 
-                            diagnostics.Report(
-                                AdviceDiagnosticDescriptors.ExplicitInterfaceMemberHasDifferentAccessors.CreateRoslynDiagnostic(
-                                    targetType.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, templateProperty.Declaration, targetType, interfaceSpecification.InterfaceType,
-                                     interfaceProperty) ) );
+                            var missingAccessor =
+                                (getMethodMissingFromTemplate, setMethodMissingFromTemplate, setInitOnlyInTemplate, setInitOnlyInInterface) switch
+                                {
+                                    (true, _, _, _ ) => "get", // Missing getter.
+                                    (false, true, _, false ) => "set", // Missing setter.
+                                    (false, true, _, true ) => "init", // Missing init-only setter.
+                                    (false, false, true, false ) => "set", // Interface has setter, template has init-only setter.
+                                    (false, false, false, true ) => "init", // Interface has init-only setter, templ
+                                    _ => null,
+                                };
+
+                            if ( missingAccessor != null)
+                            {
+                                diagnostics.Report(
+                                    AdviceDiagnosticDescriptors.InterfacePropertyIsMissingAccessor.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, missingAccessor) ) );
+
+                                continue;
+                            }
+
+                            var superficialAccessor =
+                                (isExplicit, getMethodSuperficialInTemplate, setMethodSuperficialInTemplate, setInitOnlyInTemplate) switch
+                                {
+                                    (true, true, _, _ ) => "get", // Superficial getter.
+                                    (true, false, true, false ) => "set", // Superficial setter.
+                                    (true, false, true, true ) => "init", // Superficial init-only setter.
+                                    _ => null,
+                                };
+
+                            if ( superficialAccessor != null )
+                            {
+                                diagnostics.Report(
+                                    AdviceDiagnosticDescriptors.ExplicitInterfacePropertyHasSuperficialAccessor.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, superficialAccessor) ) );
+
+                                continue;
+                            }
                         }
 
                         var hasImplicitSetter = templateProperty?.Declaration.SetMethod?.IsImplicitlyDeclared ?? false;
