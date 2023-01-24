@@ -253,11 +253,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> CompileTimeTypesCannotBeNestedTypes
+        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> RunTimeTypesCannotHaveCompileTimeTypesExceptClasses
             = new(
                 "LAMA0231",
-                "Compile-time types cannot be nested types.",
-                "The compile-time type '{0}' cannot be a nested type. The only compile-time type that can be nested in another type is a class inheriting '{1}'.",
+                "Run-time types cannot have other compile-time types than classes.",
+                "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
                 _category,
                 Error );
 

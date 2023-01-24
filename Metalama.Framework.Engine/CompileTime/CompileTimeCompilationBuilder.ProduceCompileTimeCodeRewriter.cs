@@ -258,10 +258,13 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         childSymbol ) );
                                             }
 
-                                            // Check that it inherits TypeFabric.
+                                            // Check that it implements ITypeFabric.
                                             if ( !this._runTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
-                                                // already reported as LAMA0231 by TemplatingCodeValidator
+                                                this._diagnosticAdder.Report(
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
+                                                        childSymbol.GetDiagnosticLocation(),
+                                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }
@@ -320,7 +323,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                             {
-                                // already reported as LAMA0231 by TemplatingCodeValidator
+                                this._diagnosticAdder.Report(
+                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
+                                        childSymbol.GetDiagnosticLocation(),
+                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                 this.Success = false;
                             }

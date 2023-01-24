@@ -21,11 +21,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.NameOf
 
             Console.WriteLine( "FromBuildAspect:" + ( (State) meta.AspectInstance.AspectState! ).Names );
         }
-    }
 
-    internal class State : IAspectState
-    {
-        public string Names = "";
+        private class State : IAspectState
+        {
+            public string Names = "";
+        }
     }
 
     // <target>

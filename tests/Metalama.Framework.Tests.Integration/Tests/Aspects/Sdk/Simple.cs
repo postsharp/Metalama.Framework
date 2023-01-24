@@ -20,13 +20,13 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
         {
             return context.RewriteAspectTargetsAsync( new Rewriter() );
         }
-    }
 
-    internal class Rewriter : SafeSyntaxRewriter
-    {
-        public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
+        private class Rewriter : SafeSyntaxRewriter
         {
-            return base.VisitMethodDeclaration(node)!.WithLeadingTrivia(SyntaxFactory.Comment("// Rewritten."), SyntaxFactory.CarriageReturnLineFeed);
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
+            {
+                return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed );
+            }
         }
     }
 
