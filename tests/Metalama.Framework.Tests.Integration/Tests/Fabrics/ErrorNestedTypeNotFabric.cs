@@ -22,5 +22,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorNestedTyp
 
         [CompileTime]
         private class C { }
+
+        [RunTimeOrCompileTime]
+        private class C2 { }
     }
 }
