@@ -15,3 +15,5 @@ public class IntroducePrivateFieldAttribute : OverrideMethodAspect
         return meta.Proceed();
     }
 }
+
+internal class IC { }

@@ -186,7 +186,6 @@ namespace Metalama.Compiler
     private T VisitFieldOrEventFieldDeclaration<T>( T node, Func<T, List<VariableDeclaratorSyntax>, T> replaceVariables )
         where T : BaseFieldDeclarationSyntax
     {
-        var anyChange = false;
         var variables = new List<VariableDeclaratorSyntax>();
         ISymbol? lastTemplateSymbol = null;
         var transformedNode = node;
@@ -201,24 +200,19 @@ namespace Metalama.Compiler
             {
                 lastTemplateSymbol = symbol;
 
-                if ( variable.Initializer != null )
-                {
-                    anyChange = true;
-                    transformedVariable = variable.WithInitializer( null );
-                }
+                transformedVariable = variable
+                    .WithInitializer( null )
+                    .WithIncludeInReferenceAssemblyAnnotation();
             }
 
             variables.Add( transformedVariable );
         }
 
-        if ( anyChange )
-        {
-            transformedNode = replaceVariables( node, variables );
-        }
-
         if ( lastTemplateSymbol != null )
         {
-            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, lastTemplateSymbol );
+            transformedNode = replaceVariables( node, variables );
+
+            transformedNode = this.PreserveAndAddAttribute( transformedNode, node, lastTemplateSymbol );
         }
 
         return transformedNode;
@@ -238,7 +232,7 @@ namespace Metalama.Compiler
         {
             var isAsync = symbol.IsAsync;
             var isIteratorMethod = IteratorHelper.IsIteratorMethod( node );
-            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, symbol, isAsync, isIteratorMethod );
+            transformedNode = this.PreserveAndAddAttribute( transformedNode, node, symbol, isAsync, isIteratorMethod );
         }
 
         return transformedNode;
@@ -289,7 +283,7 @@ namespace Metalama.Compiler
                         .WithSemicolonToken( default );
             }
 
-            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, symbol );
+            transformedNode = this.PreserveAndAddAttribute( transformedNode, node, symbol );
 
             void ReplaceAccessor( SyntaxKind accessorKind, IMethodSymbol? accessorSymbol )
             {
@@ -298,7 +292,7 @@ namespace Metalama.Compiler
                 if ( accessor != null )
                 {
                     var transformedAccessor = transformedNode.AccessorList!.Accessors.First( a => a.IsKind( accessorKind ) );
-                    var accessorMadePublic = this.MakePublicAccessor( transformedAccessor, accessor, accessorSymbol.AssertNotNull() );
+                    var accessorMadePublic = this.PreserveAndAddAtrribute( transformedAccessor, accessor, accessorSymbol.AssertNotNull() );
                     transformedNode = transformedNode.ReplaceNode( transformedAccessor, accessorMadePublic );
                 }
             }
@@ -325,13 +319,13 @@ namespace Metalama.Compiler
 
         if ( this.IsTemplate( symbol ) )
         {
-            transformedNode = this.MakePublicAndAddAttribute( transformedNode, node, symbol );
+            transformedNode = this.PreserveAndAddAttribute( transformedNode, node, symbol );
         }
 
         return transformedNode;
     }
 
-    private T MakePublicAndAddAttribute<T>( T transformedNode, T originalNode, ISymbol symbol, bool isAsyncMethod = false, bool isIteratorMethod = false )
+    private T PreserveAndAddAttribute<T>( T transformedNode, T originalNode, ISymbol symbol, bool isAsyncMethod = false, bool isIteratorMethod = false )
         where T : MemberDeclarationSyntax
     {
         var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
@@ -345,35 +339,29 @@ namespace Metalama.Compiler
         var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod )
             .WithTrailingTrivia( ElasticLineFeed );
 
-        var newModifiers = transformedNode.Modifiers.Where( n => !n.IsAccessModifierKeyword() ).ToList();
-
-        newModifiers.Insert( 0, Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) );
-
-        return (T) transformedNode.WithModifiers( TokenList( newModifiers ) )
+        return (T) transformedNode.WithIncludeInReferenceAssemblyAnnotation()
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
             .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
     }
 
-    private AccessorDeclarationSyntax MakePublicAccessor(
+    private AccessorDeclarationSyntax PreserveAndAddAtrribute(
         AccessorDeclarationSyntax transformedNode,
         AccessorDeclarationSyntax originalNode,
         IMethodSymbol symbol )
     {
-        var isAsyncMethod = symbol.IsAsync;
         var isIteratorMethod = IteratorHelper.IsIteratorMethod( symbol );
         var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected
-             && !isIteratorMethod
-             && !isAsyncMethod )
+             && !isIteratorMethod )
         {
             // No change is needed.
             return transformedNode;
         }
 
-        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod ).WithTrailingTrivia( ElasticSpace );
+        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod: false, isIteratorMethod ).WithTrailingTrivia( ElasticSpace );
 
-        return transformedNode.WithModifiers( default )
+        return transformedNode.WithIncludeInReferenceAssemblyAnnotation()
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
             .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
     }

@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using System;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.PrivateFieldAccessibility;
