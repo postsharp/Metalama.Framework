@@ -410,8 +410,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         {
                             var getMethodMissingFromTemplate = interfaceProperty.GetMethod != null && templateProperty.Declaration.GetMethod == null;
                             var setMethodMissingFromTemplate = interfaceProperty.SetMethod != null && templateProperty.Declaration.SetMethod == null;
-                            var getMethodSuperficialInTemplate = interfaceProperty.GetMethod == null && templateProperty.Declaration.GetMethod != null;
-                            var setMethodSuperficialInTemplate = interfaceProperty.SetMethod == null && templateProperty.Declaration.SetMethod != null;
+                            var getMethodUnexpectedInTemplate = interfaceProperty.GetMethod == null && templateProperty.Declaration.GetMethod != null;
+                            var setMethodUnexpectedInTemplate = interfaceProperty.SetMethod == null && templateProperty.Declaration.SetMethod != null;
                             var setInitOnlyInTemplate = templateProperty.Declaration.Writeability is Writeability.InitOnly;
                             var setInitOnlyInInterface = interfaceProperty.Writeability is Writeability.InitOnly;
 
@@ -436,21 +436,21 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 continue;
                             }
 
-                            var superficialAccessor =
-                                (isExplicit, getMethodSuperficialInTemplate, setMethodSuperficialInTemplate, setInitOnlyInTemplate) switch
+                            var unexpectedAccessor =
+                                (isExplicit, getMethodUnexpectedInTemplate, setMethodUnexpectedInTemplate, setInitOnlyInTemplate) switch
                                 {
-                                    (true, true, _, _) => "get", // Superficial getter.
-                                    (true, false, true, false) => "set", // Superficial setter.
-                                    (true, false, true, true) => "init", // Superficial init-only setter.
+                                    (true, true, _, _) => "get", // Unexpected getter.
+                                    (true, false, true, false) => "set", // Unexpected setter.
+                                    (true, false, true, true) => "init", // Unexpected init-only setter.
                                     _ => null,
                                 };
 
-                            if ( superficialAccessor != null )
+                            if ( unexpectedAccessor != null )
                             {
                                 diagnostics.Report(
                                     AdviceDiagnosticDescriptors.ExplicitInterfacePropertyHasSuperficialAccessor.CreateRoslynDiagnostic(
                                         targetType.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, superficialAccessor) ) );
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, unexpectedAccessor) ) );
 
                                 continue;
                             }
