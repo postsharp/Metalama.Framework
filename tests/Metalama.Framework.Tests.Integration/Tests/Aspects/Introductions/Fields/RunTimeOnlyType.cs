@@ -6,9 +6,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Field
 public class Aspect : TypeAspect
 {
     [Introduce]
-    internal RunTimeClass? Event;
+    public RunTimeClass? Event;
 }
 
 // <target>
 [Aspect]
-internal class RunTimeClass { }
+public class RunTimeClass { }

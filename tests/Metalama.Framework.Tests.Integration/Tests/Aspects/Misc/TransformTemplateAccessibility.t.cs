@@ -30,9 +30,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTempl
       get => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Private, IsAsync = false, IsIteratorMethod = false)]
       set => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); }
     [Template]
-    private int _fieldTemplate;
+    [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Private, IsAsync = false, IsIteratorMethod = false)]
+    public int _fieldTemplate;
     [Template]
-    internal event EventHandler? EventTemplate;
+    [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Internal, IsAsync = false, IsIteratorMethod = false)]
+    public event EventHandler? EventTemplate;
   }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 }

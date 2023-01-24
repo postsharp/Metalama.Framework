@@ -142,6 +142,26 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            InterfacePropertyIsMissingAccessor = new(
+                "LAMA0517",
+                "Cannot implement an interface property, the template is missing an accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' because the template '{3}' "
+                +
+                "is missing a '{4}' accessor.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            ExplicitInterfacePropertyHasSuperficialAccessor = new(
+                "LAMA0518",
+                "Cannot implement an interface property, the template has superficial accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' explicitly because the template '{3}' "
+                +
+                "has an unexpected '{4}' accessor.",
+                _category,
+                Error );
+
         // Sub-range 520-549: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(

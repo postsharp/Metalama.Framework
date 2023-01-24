@@ -199,7 +199,7 @@ namespace Metalama.Compiler
 
             if ( this.IsTemplate( symbol ) )
             {
-                firstTemplateSymbol = null;
+                firstTemplateSymbol = symbol;
 
                 if ( variable.Initializer != null )
                 {
