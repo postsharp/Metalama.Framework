@@ -4,6 +4,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.AspectTesting.Utilities;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,6 +24,11 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
     [Serializable]
     internal class TestDiscoverer : LongLivedMarshalByRefObject, ITestFrameworkDiscoverer
     {
+        static TestDiscoverer()
+        {
+            TestingServices.Initialize();
+        }
+        
         private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly IAssemblyInfo _assembly;
         private readonly IMessageSink? _messageSink;
