@@ -67,7 +67,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 if ( testCase.SkipReason == null )
                 {
-                    var relativePath = PathUtil.GetRelativePath( this.Directory, testCase.FullPath );
+                    var relativePath = discoverer.FileSystem.GetRelativePath( this.Directory, testCase.FullPath );
 
                     yield return new object[] { relativePath };
                 }

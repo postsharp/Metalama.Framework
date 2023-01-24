@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     {
         static CompileTimeSerializer()
         {
-            EngineModuleInitializer.EnsureInitialized();
+            MetalamaEngineModuleInitializer.EnsureInitialized();
         }
         
         private readonly ProjectServiceProvider _serviceProvider;

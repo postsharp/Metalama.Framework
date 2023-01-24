@@ -28,7 +28,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 if ( testCase.SkipReason == null )
                 {
-                    var relativePath = PathUtil.GetRelativePath( projectDirectory, testCase.FullPath );
+                    var relativePath = discoverer.FileSystem.GetRelativePath( projectDirectory, testCase.FullPath );
 
                     yield return new object[] { relativePath };
                 }

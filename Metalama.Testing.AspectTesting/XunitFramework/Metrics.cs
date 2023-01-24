@@ -56,6 +56,10 @@ internal sealed class Metrics
 
     public void OnTestStarted()
     {
+        // To have a consistent event order for the test runner, we need to raise the parent events first.
+
+        this._parent?.OnTestStarted();
+
         if ( Interlocked.Increment( ref this._testsStarted ) == 1 )
         {
             lock ( this._eventLock )
@@ -63,8 +67,6 @@ internal sealed class Metrics
                 this.Started?.Invoke();
             }
         }
-
-        this._parent?.OnTestStarted();
     }
 
     private void OnTestFinished()
@@ -84,22 +86,29 @@ internal sealed class Metrics
     {
         Interlocked.Increment( ref this._testsRun );
         Interlocked.Add( ref this._executionTime, (long) duration.TotalMilliseconds );
-        this._parent?.OnTestSucceeded( duration );
         this.OnTestFinished();
+
+        // To have a consistent event order for the test runner, we need to raise the parent events last.
+        this._parent?.OnTestSucceeded( duration );
     }
 
     public void OnTestFailed( TimeSpan duration )
     {
         Interlocked.Increment( ref this._testFailed );
         Interlocked.Add( ref this._executionTime, (long) duration.TotalMilliseconds );
-        this._parent?.OnTestFailed( duration );
+
         this.OnTestFinished();
+
+        // To have a consistent event order for the test runner, we need to raise the parent events last.
+        this._parent?.OnTestFailed( duration );
     }
 
     public void OnTestSkipped()
     {
         Interlocked.Increment( ref this._testSkipped );
-        this._parent?.OnTestSkipped();
         this.OnTestFinished();
+
+        // To have a consistent event order for the test runner, we need to raise the parent events last.
+        this._parent?.OnTestSkipped();
     }
 }

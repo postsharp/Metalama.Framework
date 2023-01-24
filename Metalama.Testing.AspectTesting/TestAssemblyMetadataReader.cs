@@ -14,12 +14,14 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Reads the set of <see cref="TestAssemblyReference"/> from the project.
     /// </summary>
-    internal static class TestAssemblyMetadataReader
+    internal class TestAssemblyMetadataReader : ITestAssemblyMetadataReader
     {
         private static readonly ConcurrentDictionary<string, TestAssemblyMetadata> _projectOptionsCache = new();
 
-        public static TestAssemblyMetadata GetMetadata( IAssemblyInfo assembly )
-            => _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, _ => GetMetadataCore( assembly ) );
+        public TestAssemblyMetadata GetMetadata( IAssemblyInfo assembly )
+        {
+            return _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, _ => GetMetadataCore( assembly ) );
+        }
 
         private static TestAssemblyMetadata GetMetadataCore( IAssemblyInfo assembly )
         {

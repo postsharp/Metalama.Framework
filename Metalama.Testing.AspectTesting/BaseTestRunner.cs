@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -45,6 +46,7 @@ internal abstract partial class BaseTestRunner
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
     private readonly TestProjectReferences _references;
+    private readonly IFileSystem _fileSystem;
 
     protected GlobalServiceProvider ServiceProvider { get; }
 
@@ -58,6 +60,7 @@ internal abstract partial class BaseTestRunner
         this.ServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
+        this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
     }
 
     /// <summary>
@@ -184,7 +187,7 @@ internal abstract partial class BaseTestRunner
         {
             // ReSharper disable once MethodHasAsyncOverload
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
         }
 
         try
@@ -259,7 +262,7 @@ internal abstract partial class BaseTestRunner
             foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
                 var includedFullPath = Path.GetFullPath( Path.Combine( testDirectory, includedFile ) );
-                var includedText = File.ReadAllText( includedFullPath );
+                var includedText = this._fileSystem.ReadAllText( includedFullPath );
 
                 var includedFileName = Path.GetFileName( includedFullPath );
 
@@ -307,9 +310,9 @@ internal abstract partial class BaseTestRunner
                 {
                     var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
 
-                    if ( File.Exists( path ) )
+                    if ( this._fileSystem.FileExists( path ) )
                     {
-                        var code = File.ReadAllText( path );
+                        var code = this._fileSystem.ReadAllText( path );
                         (project, _) = await AddDocumentAsync( project, parseOptions, "___GlobalUsings.cs", code, true );
                     }
                 }
@@ -344,13 +347,13 @@ internal abstract partial class BaseTestRunner
                 var dependencyName = Path.GetFileNameWithoutExtension( basePath ) + ".Dependency.cs";
                 var dependencyPath = Path.GetFullPath( Path.Combine( testDirectory, dependencyName ) );
 
-                if ( !File.Exists( dependencyPath ) )
+                if ( !this._fileSystem.FileExists( dependencyPath ) )
                 {
                     return (baseProject, ImmutableArray<MetadataReference>.Empty);
                 }
 
                 // Add documents to the dependency project.
-                var includedText = File.ReadAllText( dependencyPath );
+                var includedText = this._fileSystem.ReadAllText( dependencyPath );
 
                 var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
                     preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
@@ -499,17 +502,17 @@ internal abstract partial class BaseTestRunner
         var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, false );
 
         // If the expectation file does not exist, create it with some placeholder content.
-        if ( !File.Exists( expectedTransformedPath ) )
+        if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
         {
             // Coverage: ignore
 
-            File.WriteAllText(
+            this._fileSystem.WriteAllText(
                 expectedTransformedPath,
                 "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
         }
 
         // Read expectations from the file.
-        var expectedSourceText = File.ReadAllText( expectedTransformedPath );
+        var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
         var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, preserveWhitespace, true );
 
         // Update the file in obj/transformed if it is different.
@@ -521,10 +524,10 @@ internal abstract partial class BaseTestRunner
             Path.GetDirectoryName( testInput.RelativePath ) ?? "",
             Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
-        Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
+        this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
         var storedTransformedSourceText =
-            File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
+            this._fileSystem.FileExists( actualTransformedPath ) ? this._fileSystem.ReadAllText( actualTransformedPath ) : null;
 
         // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
         // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
@@ -535,17 +538,17 @@ internal abstract partial class BaseTestRunner
                  != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
             {
                 // The test output is correct but it must be formatted.
-                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+                this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
             }
             else if ( expectedSourceText != storedTransformedSourceText )
             {
                 // Write the exact expected file to the actual file because the only differences are in EOL.
-                File.WriteAllText( actualTransformedPath, expectedSourceText );
+                this._fileSystem.WriteAllText( actualTransformedPath, expectedSourceText );
             }
         }
         else
         {
-            File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+            this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
         }
 
         if ( this.Logger != null )
@@ -652,9 +655,9 @@ internal abstract partial class BaseTestRunner
             testInput.ProjectProperties.TargetFramework,
             Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
 
-        if ( !Directory.Exists( htmlDirectory ) )
+        if ( !this._fileSystem.DirectoryExists( htmlDirectory ) )
         {
-            Directory.CreateDirectory( htmlDirectory );
+            this._fileSystem.CreateDirectory( htmlDirectory );
         }
 
         // Write each document individually.
@@ -677,7 +680,7 @@ internal abstract partial class BaseTestRunner
             var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
             var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
 
-            var outputHtml = File.CreateText( outputHtmlPath );
+            var outputHtml = new StreamWriter( this._fileSystem.OpenWrite( outputHtmlPath ) );
 
             using ( outputHtml.IgnoreAsyncDisposable() )
             {
@@ -704,7 +707,7 @@ internal abstract partial class BaseTestRunner
         this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
         // Write the input document.
-        var inputTextWriter = File.CreateText( inputHtmlPath );
+        var inputTextWriter = new StreamWriter( this._fileSystem.OpenWrite( inputHtmlPath ) );
 
         using ( inputTextWriter.IgnoreAsyncDisposable() )
         {
@@ -738,14 +741,14 @@ internal abstract partial class BaseTestRunner
             {
                 var directory = Path.Combine( Path.GetTempPath(), "Metalama", "InvalidAssemblies" );
 
-                if ( !Directory.Exists( directory ) )
+                if ( !this._fileSystem.DirectoryExists( directory ) )
                 {
-                    Directory.CreateDirectory( directory );
+                    this._fileSystem.CreateDirectory( directory );
                 }
 
                 var diagnosticFile = Path.Combine( directory, RandomIdGenerator.GenerateId() + ".dll" );
 
-                using ( var diagnosticStream = File.Create( diagnosticFile ) )
+                using ( var diagnosticStream = this._fileSystem.OpenWrite( diagnosticFile ) )
                 {
                     stream.Seek( 0, SeekOrigin.Begin );
                     stream.CopyTo( diagnosticStream );

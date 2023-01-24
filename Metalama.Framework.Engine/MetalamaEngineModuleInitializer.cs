@@ -11,9 +11,9 @@ using Microsoft.CodeAnalysis.Simplification;
 namespace Metalama.Framework.Engine;
 
 [PublicAPI]
-public static class EngineModuleInitializer
+public static class MetalamaEngineModuleInitializer
 {
-    static EngineModuleInitializer()
+    static MetalamaEngineModuleInitializer()
     {
         TypeOfResolver.Resolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
         FormattingAnnotations.Initialize( Simplifier.Annotation );

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -20,6 +22,7 @@ namespace Metalama.Testing.AspectTesting
         /// <param name="testName">Short name of the test. Typically a relative path.</param>
         /// <param name="sourceCode">Full source of the input code.</param>
         private TestInput(
+            IFileSystem fileSystem,
             TestProjectProperties projectProperties,
             string testName,
             string sourceCode,
@@ -52,11 +55,11 @@ namespace Metalama.Testing.AspectTesting
                 // Find companion files.
                 var directory = Path.GetDirectoryName( fullPath )!;
 
-                foreach ( var companionFile in Directory.EnumerateFiles( directory, Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
+                foreach ( var companionFile in fileSystem.EnumerateFiles( directory, Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
                 {
                     if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        this.Options.IncludedFiles.Add( PathUtil.GetRelativePath( directory, companionFile ) );
+                        this.Options.IncludedFiles.Add( fileSystem.GetRelativePath( directory, companionFile ) );
                     }
                 }
             }
@@ -93,68 +96,6 @@ namespace Metalama.Testing.AspectTesting
             this.FullPath = fullPath;
             this.Options = options;
             this.SkipReason = skipReason;
-        }
-
-        [ExcludeFromCodeCoverage]
-        [UsedImplicitly]
-        internal static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
-        {
-            var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
-
-            if ( projectDirectory != null )
-            {
-                var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
-
-                return new TestInput(
-                    projectProperties,
-                    Path.GetFileNameWithoutExtension( path ),
-                    sourceCode,
-                    directoryOptionsReader,
-                    projectDirectory,
-                    PathUtil.GetRelativePath( projectDirectory, path ),
-                    path );
-            }
-            else
-            {
-                // Coverage: ignore
-                // The project could not be found. Continue without reading directory options.
-
-                return new TestInput( projectProperties, "interactive", sourceCode );
-            }
-
-            static string? FindProjectDirectory( string? directory )
-            {
-                if ( directory == null )
-                {
-                    return null;
-                }
-
-                if ( Directory.GetFiles( directory, "*.csproj" ).Length > 0 )
-                {
-                    return directory;
-                }
-                else
-                {
-                    var parentDirectory = Path.GetDirectoryName( directory );
-
-                    return FindProjectDirectory( parentDirectory );
-                }
-            }
-        }
-
-        internal static TestInput FromFile( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
-        {
-            var fullPath = Path.Combine( directoryOptionsReader.ProjectDirectory, relativePath );
-            var sourceCode = File.ReadAllText( fullPath );
-
-            return new TestInput(
-                projectProperties,
-                Path.GetFileNameWithoutExtension( relativePath ),
-                sourceCode,
-                directoryOptionsReader,
-                projectProperties.ProjectDirectory,
-                relativePath,
-                fullPath );
         }
 
         internal TestInput WithSource( string newSource )
@@ -214,5 +155,85 @@ namespace Metalama.Testing.AspectTesting
         /// Gets a value indicating whether the current test must be skipped.
         /// </summary>
         public bool IsSkipped => this.SkipReason != null;
+
+        internal sealed class Factory
+        {
+            private readonly GlobalServiceProvider _serviceProvider;
+            private readonly IFileSystem _fileSystem;
+
+            public static Factory Default { get; } = new();
+
+            public Factory() : this( ServiceProviderFactory.GetServiceProvider() ) { }
+
+            public Factory( GlobalServiceProvider serviceProvider )
+            {
+                this._serviceProvider = serviceProvider;
+                this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
+            }
+
+            [ExcludeFromCodeCoverage]
+            [UsedImplicitly]
+            public TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
+            {
+                var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
+
+                if ( projectDirectory != null )
+                {
+                    var directoryOptionsReader = new TestDirectoryOptionsReader( this._serviceProvider, projectDirectory );
+
+                    return new TestInput(
+                        this._fileSystem,
+                        projectProperties,
+                        Path.GetFileNameWithoutExtension( path ),
+                        sourceCode,
+                        directoryOptionsReader,
+                        projectDirectory,
+                        this._fileSystem.GetRelativePath( projectDirectory, path ),
+                        path );
+                }
+                else
+                {
+                    // Coverage: ignore
+                    // The project could not be found. Continue without reading directory options.
+
+                    return new TestInput( this._fileSystem, projectProperties, "interactive", sourceCode );
+                }
+
+                string? FindProjectDirectory( string? directory )
+                {
+                    if ( directory == null )
+                    {
+                        return null;
+                    }
+
+                    if ( this._fileSystem.GetFiles( directory, "*.csproj" ).Length > 0 )
+                    {
+                        return directory;
+                    }
+                    else
+                    {
+                        var parentDirectory = Path.GetDirectoryName( directory );
+
+                        return FindProjectDirectory( parentDirectory );
+                    }
+                }
+            }
+
+            public TestInput FromFile( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
+            {
+                var fullPath = Path.Combine( directoryOptionsReader.ProjectDirectory, relativePath );
+                var sourceCode = this._fileSystem.ReadAllText( fullPath );
+
+                return new TestInput(
+                    this._fileSystem,
+                    projectProperties,
+                    Path.GetFileNameWithoutExtension( relativePath ),
+                    sourceCode,
+                    directoryOptionsReader,
+                    projectProperties.ProjectDirectory,
+                    relativePath,
+                    fullPath );
+            }
+        }
     }
 }
