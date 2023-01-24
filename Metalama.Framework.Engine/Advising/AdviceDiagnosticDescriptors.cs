@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                 "Cannot implement an interface property, the template is missing an accessor.",
                 "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' because the template '{3}' "
                 +
-                "is missing '{4}' accessor.",
+                "is missing a '{4}' accessor.",
                 _category,
                 Error );
 
@@ -158,7 +158,7 @@ namespace Metalama.Framework.Engine.Advising
                 "Cannot implement an interface property, the template has superficial accessor.",
                 "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' explicitly because the template '{3}' "
                 +
-                "has superficial '{4}' accessor.",
+                "has an unexpected '{4}' accessor.",
                 _category,
                 Error );
 
