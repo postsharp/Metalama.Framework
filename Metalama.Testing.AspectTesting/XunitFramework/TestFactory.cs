@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine.Services;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Reflection;
@@ -10,7 +12,13 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 {
     internal sealed class TestFactory
     {
+        public GlobalServiceProvider ServiceProvider { get; }
+
         public TestProjectProperties ProjectProperties { get; }
+
+        public TestInput.Factory TestInputFactory { get; }
+
+        public IFileSystem FileSystem { get; }
 
         public string ProjectName { get; }
 
@@ -19,8 +27,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public TestDirectoryOptionsReader DirectoryOptionsReader { get; }
 
-        public TestFactory( TestProjectProperties projectProperties, string directory, string assemblyName )
-            : this( projectProperties, new TestDirectoryOptionsReader( directory ), LoadAssembly( assemblyName ) ) { }
+        public TestFactory( GlobalServiceProvider serviceProvider, TestProjectProperties projectProperties, string directory, string assemblyName )
+            : this( serviceProvider, projectProperties, new TestDirectoryOptionsReader( serviceProvider, directory ), LoadAssembly( assemblyName ) ) { }
 
         private static ReflectionAssemblyInfo LoadAssembly( string assemblyName )
         {
@@ -29,7 +37,11 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             return new ReflectionAssemblyInfo( assembly );
         }
 
-        public TestFactory( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, IAssemblyInfo assemblyInfo )
+        public TestFactory(
+            GlobalServiceProvider serviceProvider,
+            TestProjectProperties projectProperties,
+            TestDirectoryOptionsReader directoryOptionsReader,
+            IAssemblyInfo assemblyInfo )
         {
             this.DirectoryOptionsReader = directoryOptionsReader;
 
@@ -37,6 +49,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this.ProjectName = Path.GetFileName( this.ProjectProperties.ProjectDirectory );
             this.Collection = new TestCollection( this );
             this.AssemblyInfo = assemblyInfo;
+            this.ServiceProvider = serviceProvider;
+            this.TestInputFactory = new TestInput.Factory( serviceProvider );
+            this.FileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
         }
 
         public TestMethod GetTestMethod( string relativePath ) => this._methods.GetOrAdd( relativePath, p => new TestMethod( this, p ) );

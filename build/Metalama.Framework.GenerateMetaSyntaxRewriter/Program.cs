@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter
 {
-    internal class Program
+    internal static class Program
     {
         private static int Main( string[] args )
         {

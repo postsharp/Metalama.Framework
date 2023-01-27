@@ -150,10 +150,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         previousStep = currentStep;
     }
 
-    public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
+    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
     {
-        var success = true;
-
         foreach ( var aspectSource in aspectSources )
         {
             foreach ( var aspectType in aspectSource.AspectClasses )
@@ -177,7 +175,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     else
                     {
                         // There is a unique depth and TargetKind for the AspectSource step step.
-                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
+                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, -1 );
 
                         if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
                         {
@@ -185,8 +183,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
                                     (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
-
-                            success = false;
 
                             continue;
                         }
@@ -197,8 +193,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                 }
             }
         }
-
-        return success;
     }
 
     public ImmutableArray<AspectInstance> ExecuteAspectSource(
@@ -377,7 +371,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
                     aspectTargetTypeDeclaration.Depth,
                     aspectTargetDeclaration.Depth,
-                    PipelineStepPhase.Initialize,
                     -1 );
 
                 if ( this._currentStep != null && this._comparer.Compare( this._currentStep.Id, stepId ) >= 0 )
@@ -429,14 +422,12 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
+    public void AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
     {
         foreach ( var source in validatorSources )
         {
             this._validatorSources.Add( source );
         }
-
-        return true;
     }
 
     public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );

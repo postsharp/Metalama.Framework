@@ -4,23 +4,23 @@ internal partial class Person : global::System.ComponentModel.INotifyPropertyCha
   public Person()
   {
   }
+  private string _firstName;
   public string FirstName
   {
     get
     {
-      return this.FirstName_Source;
+      return this._firstName;
     }
     set
     {
-      if (value != this.FirstName_Source)
+      if (value != this._firstName)
       {
-        this.FirstName_Source = value;
+        this._firstName = value;
         OnPropertyChanged("FirstName");
       }
       return;
     }
   }
-  private string FirstName_Source { get; set; }
   public string FullName
   {
     get
@@ -28,23 +28,23 @@ internal partial class Person : global::System.ComponentModel.INotifyPropertyCha
       return $"{FirstName} {LastName}";
     }
   }
+  private string _lastName;
   public string LastName
   {
     get
     {
-      return this.LastName_Source;
+      return this._lastName;
     }
     set
     {
-      if (value != this.LastName_Source)
+      if (value != this._lastName)
       {
-        this.LastName_Source = value;
+        this._lastName = value;
         OnPropertyChanged("LastName");
       }
       return;
     }
   }
-  private string LastName_Source { get; set; }
   protected void OnPropertyChanged(global::System.String name)
   {
     PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestType()
         {
-            var code = "class Target {  }";
+            const string code = "class Target {  }";
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target)", serialized );
 
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericType()
         {
-            var code = "class Target<TKey,TValue> {  }";
+            const string code = "class Target<TKey,TValue> {  }";
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target<,>)", serialized );
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestArrayType()
         {
-            var code = "class Target { int[] Property { get; set; } }";
+            const string code = "class Target { int[] Property { get; set; } }";
             var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestMultidimensionalArrayType()
         {
-            var code = "class Target { int[,] Property { get; set; } }";
+            const string code = "class Target { int[,] Property { get; set; } }";
             var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(

@@ -198,7 +198,7 @@ internal sealed partial class DesignTimeAspectPipeline
             var newConfiguration = this.Configuration;
 
             // Detect changes in the syntax trees of the tracked compilation.
-            var newChanges = await this._pipeline.ProjectVersionProvider.GetCompilationChangesAsync(
+            var newChanges = await this._pipeline._projectVersionProvider.GetCompilationChangesAsync(
                 this.ProjectVersion?.Compilation,
                 newCompilation,
                 cancellationToken );
@@ -294,7 +294,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 {
                     var invalidator = this.PipelineResult.ToInvalidator();
 
-                    newDependencyGraph = await this._pipeline.ProjectVersionProvider.ProcessCompilationChangesAsync(
+                    newDependencyGraph = await this._pipeline._projectVersionProvider.ProcessCompilationChangesAsync(
                         newChanges,
                         this._dependencies,
                         invalidator.InvalidateSyntaxTree,
@@ -614,7 +614,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
 
-            var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject );
+            var userDiagnosticSink = new UserDiagnosticSink( configuration.DiagnosticManifest );
 
             // TODO: this can be parallelized.
 

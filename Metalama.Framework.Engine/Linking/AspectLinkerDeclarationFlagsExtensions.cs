@@ -8,10 +8,5 @@ namespace Metalama.Framework.Engine.Linking
         {
             return (value & flags) == flags;
         }
-
-        public static bool HasAnyFlagFast( this AspectLinkerDeclarationFlags value, AspectLinkerDeclarationFlags flags )
-        {
-            return (value & flags) != 0;
-        }
     }
 }

@@ -17,7 +17,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
     private readonly IConstructor _targetConstructor;
     private readonly Func<SyntaxGenerationContext, StatementSyntax> _initializationStatement;
 
-    public IMemberOrNamedType ContextDeclaration { get; }
+    private IMemberOrNamedType ContextDeclaration { get; }
 
     public IMember TargetMember => this._targetConstructor;
 

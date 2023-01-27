@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -18,9 +19,9 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
 {
-    public BoundTemplateMethod BoundTemplate { get; }
+    private readonly BoundTemplateMethod _boundTemplate;
 
-    public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+    private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceMethodAdvice(
         IAspectInstanceInternal aspect,
@@ -46,7 +47,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             layerName,
             tags )
     {
-        this.BoundTemplate = boundTemplate;
+        this._boundTemplate = boundTemplate;
 
         this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
     }
@@ -59,7 +60,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
         base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
         this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
-        var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
+        var typeRewriter = TemplateTypeRewriter.Get( this._boundTemplate );
 
         // Handle iterator info.
         this.Builder.SetIsIteratorMethod( this.Template.IsIteratorMethod );
@@ -152,7 +153,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
+            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
             this.Builder.IsOverride = false;
             this.Builder.IsNew = false;
 
@@ -204,7 +205,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._boundTemplate, this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -216,7 +217,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = false;
                         this.Builder.OverriddenMethod = existingMethod;
 
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
 
                         addTransformation( overriddenMethod );
                         addTransformation( this.Builder.ToTransformation() );
@@ -227,7 +228,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                 case OverrideStrategy.Override:
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._boundTemplate, this.Tags );
                         addTransformation( overriddenMethod );
 
                         return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -246,7 +247,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = true;
                         this.Builder.IsNew = false;
                         this.Builder.OverriddenMethod = existingMethod;
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
                         addTransformation( overriddenMethod );

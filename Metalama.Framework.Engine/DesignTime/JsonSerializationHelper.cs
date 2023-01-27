@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.DesignTime;
 
 public static partial class JsonSerializationHelper
 {
-    public static SyntaxAnnotation ToSyntaxAnnotation( this SerializableAnnotation serializableAnnotation )
+    private static SyntaxAnnotation ToSyntaxAnnotation( this SerializableAnnotation serializableAnnotation )
         => serializableAnnotation.Kind switch
         {
             SerializableAnnotationKind.Formatter => Formatter.Annotation,
@@ -43,7 +43,7 @@ public static partial class JsonSerializationHelper
         return unannotatedTree.WithRootAndOptions( rewriter.Visit( unannotatedTree.GetRoot() )!, options );
     }
 
-    public static SyntaxNode ToSyntaxNode( this SerializableSyntaxTree serializableSyntaxTree, CancellationToken cancellationToken = default )
+    internal static SyntaxNode ToSyntaxNode( this SerializableSyntaxTree serializableSyntaxTree, CancellationToken cancellationToken = default )
     {
         var unannotatedTree = CSharpSyntaxTree.ParseText( serializableSyntaxTree.Text, CSharpParseOptions.Default );
         var rewriter = new AnnotationWriter( serializableSyntaxTree, cancellationToken );

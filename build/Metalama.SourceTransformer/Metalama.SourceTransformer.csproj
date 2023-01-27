@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
     </ItemGroup>
 
 

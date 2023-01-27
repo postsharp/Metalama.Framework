@@ -10,7 +10,6 @@
 
     <ItemGroup>
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
         <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />

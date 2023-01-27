@@ -6,6 +6,8 @@ using Xunit;
 
 #pragma warning disable SA1401 // Fields should be private
 
+// Resharper disable UnassignedField.Global
+
 namespace Metalama.Framework.Tests.UnitTests.RunTime
 {
     public sealed class FieldOrPropertyInfoTests

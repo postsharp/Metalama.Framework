@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Services;
 using System;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     /// <summary>
     /// Defines a method <see cref="Invoke{TResult,TPayload}"/> that is invoked when user-written code must be invoked.
     /// </summary>
+    [PublicAPI] // Implemented by Metalama.Try.
     public interface IUserCodeInvokerHook : IGlobalService
     {
         /// <summary>

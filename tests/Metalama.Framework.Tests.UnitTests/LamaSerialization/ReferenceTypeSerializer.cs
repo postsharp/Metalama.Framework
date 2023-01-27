@@ -16,8 +16,8 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             this.DeserializeFields( (T) obj, initializationArguments );
         }
 
-        public abstract void SerializeObject( T obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments );
+        internal abstract void SerializeObject( T obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments );
 
-        public abstract void DeserializeFields( T obj, IArgumentsReader initializationArguments );
+        internal abstract void DeserializeFields( T obj, IArgumentsReader initializationArguments );
     }
 }

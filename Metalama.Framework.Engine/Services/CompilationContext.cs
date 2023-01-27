@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationContext
+public sealed class CompilationContext : ICompilationServices
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
@@ -33,6 +33,8 @@ public sealed class CompilationContext
     internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
 
     public Compilation Compilation { get; }
+
+    IReflectionMapper ICompilationServices.ReflectionMapper => this.ReflectionMapper;
 
     [Memo]
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
@@ -68,19 +70,19 @@ public sealed class CompilationContext
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
-    public CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
+    internal CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
         return SyntaxGenerationContext.Create( this, node );
     }
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxTree tree, int nodeSpanStart )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxTree tree, int nodeSpanStart )
     {
         return SyntaxGenerationContext.Create( this, tree, nodeSpanStart );
     }
 
-    public SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial = false )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial = false )
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }

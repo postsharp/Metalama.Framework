@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-public class SingleThreadedTaskRunner : IConcurrentTaskRunner
+internal class SingleThreadedTaskRunner : IConcurrentTaskRunner
 {
     public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull

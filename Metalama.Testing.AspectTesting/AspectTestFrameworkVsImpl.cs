@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting.XunitFramework;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -11,10 +12,12 @@ namespace Metalama.Testing.AspectTesting
     [ExcludeFromCodeCoverage]
     internal sealed class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
     {
+        private readonly GlobalServiceProvider _serviceProvider;
         private readonly IMessageSink? _messageSink;
 
-        public AspectTestFrameworkVsImpl( IMessageSink? messageSink )
+        public AspectTestFrameworkVsImpl( GlobalServiceProvider serviceProvider, IMessageSink? messageSink )
         {
+            this._serviceProvider = serviceProvider;
             this._messageSink = messageSink;
         }
 
@@ -22,9 +25,10 @@ namespace Metalama.Testing.AspectTesting
 
         ISourceInformation ISourceInformationProvider.GetSourceInformation( ITestCase testCase ) => (ISourceInformation) testCase;
 
-        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly ) => new TestDiscoverer( assembly, this._messageSink );
+        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly )
+            => new TestDiscoverer( this._serviceProvider, assembly, this._messageSink );
 
-        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( assemblyName );
+        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( this._serviceProvider, assemblyName );
 
         ISourceInformationProvider ITestFramework.SourceInformationProvider
         {

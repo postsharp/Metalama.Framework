@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Skipped(#28879 - Invokers.Base is null for an override aspect applied to a field)
-#endif
-
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSource_FinalInvoker
 {

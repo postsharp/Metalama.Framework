@@ -17,7 +17,7 @@ public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         this._maxClientCount = maxClientCount;
     }
 
-    public int ClientCount => this._pipes.Count;
+    internal int ClientCount => this._pipes.Count;
 
 #pragma warning disable VSTHRD100 // Avoid "async void".
     /// <summary>
@@ -78,7 +78,7 @@ public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
         this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': got a client." );
 
-        var rpc = this.CreateRpc( pipe );
+        var rpc = CreateRpc( pipe );
         this.ConfigureRpc( rpc );
 
         rpc.Disconnected += this.OnRpcDisconnected;

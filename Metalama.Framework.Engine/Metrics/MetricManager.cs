@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Metrics
     /// <summary>
     /// Manages the metric providers and routes metric requests to them.
     /// </summary>
-    public sealed class MetricManager : IProjectService
+    internal sealed class MetricManager : IProjectService
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<Type, object?> _metricProviders = new();

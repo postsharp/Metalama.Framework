@@ -18,7 +18,7 @@ public sealed class SerializableDeclarationIdTests : UnitTestClass
     [Fact]
     public void TestAllDeclarations()
     {
-        var code = @"
+        const string code = @"
 
 class C<T> 
 {

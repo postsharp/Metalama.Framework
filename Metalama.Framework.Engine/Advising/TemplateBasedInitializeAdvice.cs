@@ -11,9 +11,8 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     {
-        public BoundTemplateMethod BoundTemplate { get; }
-
-        public IObjectReader Tags { get; }
+        private readonly BoundTemplateMethod _boundTemplate;
+        private readonly IObjectReader _tags;
 
         public TemplateBasedInitializeAdvice(
             IAspectInstanceInternal aspect,
@@ -25,8 +24,8 @@ namespace Metalama.Framework.Engine.Advising
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
         {
-            this.BoundTemplate = boundTemplate;
-            this.Tags = tags;
+            this._boundTemplate = boundTemplate;
+            this._tags = tags;
         }
 
         protected override void AddTransformation( IMemberOrNamedType targetDeclaration, IConstructor targetCtor, Action<ITransformation> addTransformation )
@@ -35,8 +34,8 @@ namespace Metalama.Framework.Engine.Advising
                 this,
                 targetDeclaration,
                 targetCtor,
-                this.BoundTemplate,
-                this.Tags );
+                this._boundTemplate,
+                this._tags );
 
             addTransformation( initialization );
         }

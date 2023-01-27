@@ -1,17 +1,17 @@
 class Target : ITest
 {
+  private int _foo;
   int ITest.Foo
   {
     get
     {
-      return this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Foo_Source;
+      return this._foo;
     }
     set
     {
-      this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Foo_Source = value;
+      this._foo = value;
     }
   }
-  private int Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Foo_Source { get; set; }
   int ITest.Bar()
   {
     return this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Bar_Source();

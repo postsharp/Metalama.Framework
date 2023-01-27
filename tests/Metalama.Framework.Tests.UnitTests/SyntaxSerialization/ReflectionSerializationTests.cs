@@ -11,13 +11,13 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         [Fact]
         public void MethodHandleTest()
         {
-            var code = @"
+            const string code = @"
 class C
 {
     void M() {}
 }";
 
-            var expression = "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:C.M\"))";
+            const string expression = "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:C.M\"))";
 
             var methodInfo = (MethodInfo) this.ExecuteExpression( code, expression )!;
 
@@ -27,9 +27,9 @@ class C
         [Fact]
         public void TestGenericMethod()
         {
-            var code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
+            const string code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
 
-            var serialized =
+            const string serialized =
                 "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
 
             var methodInfo = (MethodInfo) this.ExecuteExpression( code, serialized )!;
@@ -39,9 +39,9 @@ class C
         [Fact]
         public void TestFieldInGenericType()
         {
-            var code = "class Target<T> { int f; }";
+            const string code = "class Target<T> { int f; }";
 
-            var serialized = @"
+            const string serialized = @"
 System.Reflection.FieldInfo.GetFieldFromHandle(
     Metalama.Compiler.Intrinsics.GetRuntimeFieldHandle(""F:Target`1.f""),
     Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))";
@@ -53,8 +53,8 @@ System.Reflection.FieldInfo.GetFieldFromHandle(
         [Fact]
         public void TestGenericType()
         {
-            var code = "class Target<T> { }";
-            var serialized = "System.Type.GetTypeFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
+            const string code = "class Target<T> { }";
+            const string serialized = "System.Type.GetTypeFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
             var type = (Type) this.ExecuteExpression( code, serialized )!;
             Assert.Equal( "Target`1", type.FullName );
         }

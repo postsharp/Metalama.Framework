@@ -26,5 +26,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Gets or sets the method return type.
         /// </summary>
         new IType ReturnType { get; set; }
+
+        new bool IsReadOnly { get; set; }
     }
 }

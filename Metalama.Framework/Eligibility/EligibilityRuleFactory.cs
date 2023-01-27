@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -12,6 +13,7 @@ namespace Metalama.Framework.Eligibility;
 /// Creates instances of the <see cref="IEligibilityRule{T}"/> interface, which can then be used by the <see cref="IAspectBuilder{TAspectTarget}.VerifyEligibility"/> method.
 /// </summary>
 [CompileTime]
+[PublicAPI]
 public static partial class EligibilityRuleFactory
 {
     private static readonly IEligibilityRule<IDeclaration> _overrideDeclaringTypeRule = CreateRule<IDeclaration, INamedType>(

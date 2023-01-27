@@ -12,8 +12,6 @@ public enum DiagnosticSource
     /// </summary>
     Metalama,
 
-    /// <summary>
-    /// The diagnostic is produced by the C# compiler.
-    /// </summary>
+    // Resharper disable UnusedMember.Global
     CSharp
 }

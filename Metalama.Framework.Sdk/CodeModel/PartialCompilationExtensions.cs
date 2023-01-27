@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -18,6 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Extension methods for the <see cref="IPartialCompilation"/> interface.
     /// </summary>
+    [PublicAPI]
     public static class PartialCompilationExtensions
     {
         /// <summary>
@@ -83,7 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
             CSharpSyntaxRewriter rewriter,
-            IServiceProvider<IProjectService> serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CancellationToken cancellationToken = default )
         {
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();

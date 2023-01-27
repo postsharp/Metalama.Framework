@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSubstitution
     {
-        public BlockSyntax RootBlock { get; }
+        private BlockSyntax RootBlock { get; }
 
         public BlockWithReturnBeforeUsingLocalSubstitution( BlockSyntax rootBlock )
         {

@@ -29,7 +29,7 @@ public sealed class VsCodeRefactoringProviderTests : DistributedDesignTimeTestBa
 
         await testContext.WhenInitialized.WithCancellation( testContext.CancellationToken );
 
-        var code = """
+        const string code = """
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

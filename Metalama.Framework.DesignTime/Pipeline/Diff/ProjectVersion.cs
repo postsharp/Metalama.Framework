@@ -48,19 +48,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.CompilationToAnalyze = compilationToAnalyze;
         }
 
-        /// <summary>
-        /// Returns a copy of the current <see cref="ProjectVersion"/> that differs only by the <see cref="Compilation"/> property.
-        /// </summary>
-        public ProjectVersion WithCompilation( Compilation compilation )
-            => new(
-                this.Strategy,
-                this.ProjectKey,
-                compilation,
-                this.CompilationToAnalyze,
-                this.SyntaxTrees,
-                this.ReferencedProjectVersions,
-                this.ReferencedPortableExecutables );
-
         public static ProjectVersion Create(
             Compilation compilation,
             ProjectKey projectKey,

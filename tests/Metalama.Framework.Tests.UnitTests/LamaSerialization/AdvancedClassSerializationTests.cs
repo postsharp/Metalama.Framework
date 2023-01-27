@@ -1,13 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using System;
 using System.IO;
 using Xunit;
 
-// ReSharper disable UnusedMember.Local
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable UnusedType.Global
+// Resharper disable MemberCanBePrivate.Global
+// Resharper disable ClassNeverInstantiated.Global
+// Resharper disable UnusedMember.Global
+// Resharper disable UnusedMember.Local
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
@@ -25,7 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             mother.Children[1] = ch2;
             mother.Children[2] = ch3;
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( mother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -46,7 +51,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( brother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -71,7 +76,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             children[0] = brother;
             children[1] = sister;
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( children, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -98,7 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var spouse1 = new Parent( "Mono" );
             spouse1.Spouse = spouse1;
 
-            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
+            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( spouse1, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -135,14 +140,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Parent( constructorArguments.GetValue<string>( _nameKey ).AssertNotNull() );
                 }
 
-                public override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _childrenKey, obj.Children );
                     initializationArguments.SetValue( _spouseKey, obj.Spouse );
                     constructorArguments.SetValue( _nameKey, obj.Name );
                 }
 
-                public override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<Child[]>( _childrenKey );
                     obj.Spouse = initializationArguments.GetValue<Parent>( _spouseKey );
@@ -172,7 +177,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new Child();
                 }
 
-                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _nameKey, obj.Name );
                     initializationArguments.SetValue( _motherKey, obj.Mother );
@@ -180,7 +185,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( _siblingKey, obj.Sibling );
                 }
 
-                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     obj.Name = initializationArguments.GetValue<string>( _nameKey );
                     obj.Mother = initializationArguments.GetValue<Parent>( _motherKey );
@@ -211,12 +216,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     return new IgnoringType();
                 }
 
-                public override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                internal override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     throw new NotImplementedException();
                 }
 
-                public override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
+                internal override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
                 {
                     throw new NotImplementedException();
                 }

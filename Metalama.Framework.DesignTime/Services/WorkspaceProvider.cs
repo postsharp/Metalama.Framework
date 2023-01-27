@@ -13,7 +13,7 @@ internal abstract class WorkspaceProvider : IGlobalService, IDisposable
 {
     private readonly TimeBasedCache<ProjectKey, ProjectId> _projectKeyToProjectIdMap = new( TimeSpan.FromMinutes( 10 ) );
 
-    public ILogger Logger { get; }
+    protected ILogger Logger { get; }
 
     protected WorkspaceProvider( GlobalServiceProvider serviceProvider )
     {

@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -56,9 +55,5 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
         }
-
-        public TExtension GetExtension<TExtension>()
-            where TExtension : IMetric
-            => this.Compilation.MetricManager.GetMetric<TExtension>( this );
     }
 }

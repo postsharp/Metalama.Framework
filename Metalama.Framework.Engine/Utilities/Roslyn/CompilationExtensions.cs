@@ -11,13 +11,13 @@ public static class CompilationExtensions
 {
     private static readonly WeakCache<Compilation, ImmutableDictionary<string, SyntaxTree>> _indexedSyntaxTreesCache = new();
 
-    public static ImmutableDictionary<string, SyntaxTree> GetIndexedSyntaxTrees( this Compilation compilation )
+    internal static ImmutableDictionary<string, SyntaxTree> GetIndexedSyntaxTrees( this Compilation compilation )
         => _indexedSyntaxTreesCache.GetOrAdd( compilation, GetIndexedSyntaxTreesCore );
 
     private static ImmutableDictionary<string, SyntaxTree> GetIndexedSyntaxTreesCore( Compilation compilation )
         => compilation.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => x );
 
-    public static INamespaceSymbol? GetDescendant( this INamespaceSymbol parentNamespace, string ns )
+    internal static INamespaceSymbol? GetDescendant( this INamespaceSymbol parentNamespace, string ns )
     {
         var namespaceCursor = parentNamespace;
 

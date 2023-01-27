@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         /// <summary>
         /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
         /// </summary>
-        public ITypeSymbol? ExpressionType { get; }
+        private ITypeSymbol? ExpressionType { get; }
 
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.

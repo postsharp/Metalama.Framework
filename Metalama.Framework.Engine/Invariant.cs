@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 #else
 #endif
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -16,6 +17,7 @@ namespace Metalama.Framework.Engine
     /// A utility class that checks runtime invariant and throws <see cref="AssertionFailedException"/> in case of failure.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [PublicAPI]
     public static class Invariant
     {
         /// <summary>

@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();

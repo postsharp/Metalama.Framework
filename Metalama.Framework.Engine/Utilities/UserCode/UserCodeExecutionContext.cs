@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
 
-        internal CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
+        private CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
 
         internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );

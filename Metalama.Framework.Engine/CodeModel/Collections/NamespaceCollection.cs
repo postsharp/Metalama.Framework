@@ -14,12 +14,6 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             declaringType,
             sourceItems ) { }
 
-        private NamespaceCollection() { }
-
-        public static NamespaceCollection Empty { get; } = new();
-
         public INamespace? OfName( string name ) => this.SingleOrDefault( ns => ns.Name == name );
-
-        public INamespace? OfFullName( string name ) => this.SingleOrDefault( ns => ns.FullName == name );
     }
 }

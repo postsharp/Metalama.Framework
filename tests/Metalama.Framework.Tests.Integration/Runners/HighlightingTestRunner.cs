@@ -143,10 +143,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             this.Logger?.WriteLine( "Expected HTML: " + expectedHtmlPath );
 
-            var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
+            var expectedHighlightedSource = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 
             var htmlPath = actualHtmlPath;
-            var htmlContent = NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
+            var htmlContent = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
             Assert.Equal( expectedHighlightedSource, htmlContent );
         }

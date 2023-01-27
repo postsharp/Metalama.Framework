@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Engine.Services;
 /// <summary>
 /// Gives access to project-scoped services. A wrapper around <see cref="ServiceProvider{T}"/> for <see cref="IProjectService"/>.
 /// </summary>
+[PublicAPI]
 public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }

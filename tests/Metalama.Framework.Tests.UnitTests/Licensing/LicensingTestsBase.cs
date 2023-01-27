@@ -12,9 +12,9 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class LicensingTestsBase : UnitTestClass
+    public abstract class LicensingTestsBase : UnitTestClass
     {
-        public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
+        protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
         protected async Task<DiagnosticBag> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
         {

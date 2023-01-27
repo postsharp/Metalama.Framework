@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
@@ -25,7 +26,6 @@ namespace Metalama.Framework.Engine.Linking
         private sealed class SubstitutionGenerator
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
-            private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
@@ -62,7 +62,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._syntaxHandler = syntaxHandler;
-                this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
@@ -125,9 +124,17 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( nonInlinedReference.OriginalSymbol )
+                            switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case IPropertySymbol { Parameters.Length: > 0 }:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
+                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field.
+                                    // Take care to include interface event fields that are containing initializer expressions.
+                                    AddSubstitution( context, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     // TODO: Currently unused because indexer inlining is not supported.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
@@ -163,8 +170,7 @@ namespace Metalama.Framework.Engine.Linking
                                 context,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
                     }
 
@@ -256,17 +262,6 @@ namespace Metalama.Framework.Engine.Linking
                                         inliningSpecification.ReturnVariableIdentifier ) );
 
                                 break;
-
-                            case BlockSyntax { Parent: AccessorDeclarationSyntax { Parent.Parent: EventDeclarationSyntax eventDeclaration } }
-                                when eventDeclaration.GetLinkerDeclarationFlags().HasAnyFlagFast( AspectLinkerDeclarationFlags.HasHiddenInitializerExpression ):
-                                // The event field has hidden initializer expression annotation.
-                                // This means that the expression is hidden in the body of the accessor and the whole accessor body needs to be replaced.
-
-                                AddSubstitution(
-                                    inliningSpecification.ContextIdentifier,
-                                    new EventFieldSubstitution( root, referencedSymbol ) );
-
-                                break;
                         }
                     }
 
@@ -275,10 +270,18 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( inliningSpecification.AspectReference.OriginalSymbol )
+                            switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case IPropertySymbol { Parameters.Length: > 0 }:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
+                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceBackingFieldSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
                                     break;
@@ -316,8 +319,7 @@ namespace Metalama.Framework.Engine.Linking
                                 inliningSpecification.ContextIdentifier,
                                 new EventFieldRaiseSubstitution(
                                     reference.ReferencingNode,
-                                    (IEventSymbol) reference.TargetSemantic.Symbol,
-                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
+                                    (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
                     }
 
@@ -389,9 +391,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 switch (root, targetSymbol)
                 {
-                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property }):
-                        return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
-
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution(
                             arrowExpressionClause,
@@ -399,11 +398,6 @@ namespace Metalama.Framework.Engine.Linking
                             targetSymbol,
                             usingSimpleInlining,
                             returnVariableIdentifier );
-
-                    case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
-                        Invariant.Assert( returnVariableIdentifier == null );
-
-                        return new EventFieldSubstitution( variableDeclarator, targetSymbol );
 
                     case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );

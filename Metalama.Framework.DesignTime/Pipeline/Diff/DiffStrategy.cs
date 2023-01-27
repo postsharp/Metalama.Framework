@@ -4,7 +4,6 @@ using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -38,21 +37,6 @@ internal sealed class DiffStrategy
             (true, false) => CompileTimeChangeKind.NoLongerCompileTime,
             (false, true) => CompileTimeChangeKind.NewlyCompileTime
         };
-
-    public static ulong ComputeCompileTimeProjectHash( ImmutableDictionary<string, SyntaxTreeVersion> syntaxTreeVersions )
-    {
-        XXH64 hasher = new();
-
-        foreach ( var syntaxTree in syntaxTreeVersions )
-        {
-            if ( syntaxTree.Value.HasCompileTimeCode )
-            {
-                hasher.Update( syntaxTree.Value.DeclarationHash );
-            }
-        }
-
-        return hasher.Digest();
-    }
 
     /// <summary>
     /// Determines whether two syntax trees are significantly different. This overload is called from tests.

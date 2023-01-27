@@ -77,7 +77,7 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
             Environment.NewLine,
             dependencyCollector.EnumeratePartialTypeDependencies().Select( x => $"'{x.MasterType}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
-        var expectedDependencies = @"'Class1'->'Class2_1.cs'
+        const string expectedDependencies = @"'Class1'->'Class2_1.cs'
 'Class1'->'Class2_2.cs'
 'Class1'->'Class3.cs'
 'Class2'->'Class3.cs'
@@ -123,7 +123,7 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
             Environment.NewLine,
             dependencyCollector.EnumeratePartialTypeDependencies().Select( x => $"'{x.MasterType}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
-        var expectedDependencies = @"'Class1'->'Class2_1.cs'
+        const string expectedDependencies = @"'Class1'->'Class2_1.cs'
 'Class1'->'Class2_2.cs'
 'Class1'->'Class3.cs'
 'Class2'->'Class3.cs'

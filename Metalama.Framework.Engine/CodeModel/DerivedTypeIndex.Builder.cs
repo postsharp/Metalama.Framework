@@ -9,14 +9,14 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public partial class DerivedTypeIndex
 {
-    public sealed class Builder
+    internal sealed class Builder
     {
         private readonly Compilation _compilation;
         private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder _relationships;
 
         private readonly ImmutableHashSet<INamedTypeSymbol>.Builder _processedTypes;
 
-        public Builder( Compilation compilation )
+        internal Builder( Compilation compilation )
         {
             this._compilation = compilation;
             this._relationships = new ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder( SymbolEqualityComparer.Default );

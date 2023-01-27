@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         public void SimpleStruct()
         {
             // Verifies that serializable struct type can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
@@ -60,7 +60,7 @@ public struct A : ICompileTimeSerializable
         public void ReadonlyStruct()
         {
             // Verifies that serializable readonly struct type can be serialized and deserialized.
-            var code = @"
+            const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]

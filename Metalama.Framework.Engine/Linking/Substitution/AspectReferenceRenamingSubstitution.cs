@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -21,6 +22,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public AspectReferenceRenamingSubstitution( ResolvedAspectReference aspectReference )
         {
+            // Auto properties and event field default semantics should not get here.
+            Invariant.AssertNot(
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
+                && property.IsAutoProperty() == true );
+
+            Invariant.AssertNot(
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } 
+                && @event.IsEventField() == true );
+
             this._aspectReference = aspectReference;
         }
 

@@ -43,7 +43,7 @@ internal partial class OurSyntaxGenerator
 
     public bool IsNullAware { get; }
 
-    protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
+    private OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
     {
         this._syntaxGenerator = syntaxGenerator;
         this.IsNullAware = nullAware;
@@ -176,7 +176,10 @@ internal partial class OurSyntaxGenerator
 
     public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
+    // ReSharper disable once MemberCanBeMadeStatic.Global
+
 #pragma warning disable CA1822 // Can be made static
+
     public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
         =>
 
@@ -306,6 +309,8 @@ internal partial class OurSyntaxGenerator
             return this.LiteralExpression( typedConstant.Value! );
         }
     }
+
+    // ReSharper disable once MemberCanBeMadeStatic.Global
 
 #pragma warning disable CA1822
     public ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )

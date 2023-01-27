@@ -65,17 +65,7 @@ internal class TemplateMemberSymbolClassifier
         => symbol.Name == nameof(meta.RunTime) &&
            symbol.ContainingType.GetDocumentationCommentId() == this.MetaType.GetDocumentationCommentId();
 
-    public bool HasTemplateKeywordAttribute( ISymbol symbol )
+    public static bool HasTemplateKeywordAttribute( ISymbol symbol )
         => symbol.GetAttributes()
             .Any( a => a.AttributeClass != null && SymbolExtensions.AnyBaseType( a.AttributeClass, t => t.Name == nameof(TemplateKeywordAttribute) ) );
-
-    public bool ReferencesCompileTemplateTypeParameter( ITypeSymbol symbol )
-        => symbol switch
-        {
-            ITypeParameterSymbol typeParameter => this.IsCompileTimeTemplateTypeParameter( typeParameter ),
-            IPointerTypeSymbol pointerType => this.ReferencesCompileTemplateTypeParameter( pointerType.PointedAtType ),
-            IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
-            INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),
-            _ => false
-        };
 }

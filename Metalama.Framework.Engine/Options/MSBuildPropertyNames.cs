@@ -2,10 +2,12 @@
 
 // ReSharper disable InconsistentNaming
 
+using JetBrains.Annotations;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
 
+[PublicAPI]
 public static class MSBuildPropertyNames
 {
     public const string MetalamaBuildTouchFile = nameof(MetalamaBuildTouchFile);

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Testing.AspectTesting.Utilities;
 using Metalama.Testing.AspectTesting.XunitFramework;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace Metalama.Testing.AspectTesting
     /// This attribute will not include subdirectories that contain a file named <c>_Runner.cs</c>, nor subdirectories that are covered by
     /// another test method of the same class. It also takes into account the <c>metalamaTests.config</c> file.
     /// </summary>
+    [PublicAPI]
     public sealed class CurrentDirectoryAttribute : DataAttribute
     {
         /// <summary>
@@ -65,7 +67,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 if ( testCase.SkipReason == null )
                 {
-                    var relativePath = PathUtil.GetRelativePath( this.Directory, testCase.FullPath );
+                    var relativePath = discoverer.FileSystem.GetRelativePath( this.Directory, testCase.FullPath );
 
                     yield return new object[] { relativePath };
                 }

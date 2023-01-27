@@ -14,7 +14,7 @@ internal sealed class CompilationSetResult : ICompilationSetResult
 {
     private readonly string _name;
 
-    public ImmutableArray<IIntrospectionCompilationResult> CompilationResults { get; }
+    private ImmutableArray<IIntrospectionCompilationResult> CompilationResults { get; }
 
     public CompilationSetResult( ImmutableArray<IIntrospectionCompilationResult> compilationsResults, string name )
     {

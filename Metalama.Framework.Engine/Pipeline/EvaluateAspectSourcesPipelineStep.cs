@@ -19,7 +19,7 @@ internal sealed class EvaluateAspectSourcesPipelineStep : PipelineStep
 
     public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
         parent,
-        new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 ),
+        new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, -1 ),
         aspectLayer ) { }
 
     public override Task<CompilationModel> ExecuteAsync(

@@ -6,9 +6,9 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class ReflectionTestBase : SerializerTestsBase
+    public abstract class ReflectionTestBase : SerializerTestsBase
     {
-        public ReflectionTestBase( ITestOutputHelper helper ) : base( helper ) { }
+        protected ReflectionTestBase( ITestOutputHelper helper ) : base( helper ) { }
 
         /// <summary>
         /// As <see cref="Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         /// </summary>
         /// <param name="expected">Expected value.</param>
         /// <param name="actual">Actual value from test.</param>
-        public void AssertEqual( string expected, string actual )
+        protected void AssertEqual( string expected, string actual )
         {
             if ( expected == actual )
             {

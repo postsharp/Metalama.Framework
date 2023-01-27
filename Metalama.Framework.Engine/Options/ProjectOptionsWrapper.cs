@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Options;
 /// </summary>
 public abstract class ProjectOptionsWrapper : IProjectOptions
 {
-    protected IProjectOptions Wrapped { get; }
+    private IProjectOptions Wrapped { get; }
 
     protected ProjectOptionsWrapper( IProjectOptions wrapped )
     {

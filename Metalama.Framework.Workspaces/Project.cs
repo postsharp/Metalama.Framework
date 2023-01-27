@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
@@ -27,10 +28,12 @@ namespace Metalama.Framework.Workspaces
 
         internal bool IsMetalamaOutputEvaluated { get; private set; }
 
+        [PublicAPI]
         public string Path { get; }
 
         internal ICompilation Compilation { get; }
 
+        [PublicAPI]
         public string TargetFramework => this._projectOptions.TargetFramework;
 
         internal Project(
@@ -83,6 +86,7 @@ namespace Metalama.Framework.Workspaces
             }
         }
 
+        [PublicAPI]
         [Memo]
         public string Name => System.IO.Path.GetFileNameWithoutExtension( this.Path );
 

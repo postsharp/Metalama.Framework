@@ -133,6 +133,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override Type OutputType => typeof(Dictionary<,>);
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
+        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }
 }

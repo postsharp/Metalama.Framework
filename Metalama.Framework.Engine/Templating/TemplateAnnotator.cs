@@ -738,7 +738,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             default:
                 {
-                    if ( this._templateMemberClassifier.HasTemplateKeywordAttribute( symbol ) )
+                    if ( TemplateMemberSymbolClassifier.HasTemplateKeywordAttribute( symbol ) )
                     {
                         nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                     }
@@ -1012,12 +1012,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     parameter = null;
                 }
 
-                var argumentType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
+                var parameterType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
                 ExpressionSyntax transformedArgumentValue;
 
                 // Transform the argument value.
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( argumentType ) )
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType ) )
                 {
                     // dynamic or dynamic[]
 
@@ -1033,6 +1033,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"argument of the run-time method '{node.Expression}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
+                    }
+
+                    var argumentType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
+
+                    if ( argumentType != null && this._symbolScopeClassifier.GetTemplatingScope( argumentType ) == TemplatingScope.CompileTimeOnly )
+                    {
+                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod, argument.Expression, (argumentType, node.Expression.ToString()) );
                     }
                 }
                 else
@@ -1227,8 +1234,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var transformedType = this.Visit( node.Type );
         var scope = this.GetNodeScope( transformedType );
 
+        var typeSymbol = this._syntaxTreeAnnotationMap.GetExpressionType( node.Type )!;
+
         var context = scope == TemplatingScope.CompileTimeOnly
-            ? this._currentScopeContext.CompileTimeOnly( $"local variable of compile-time '{node.Type}'" )
+            ? this._currentScopeContext.CompileTimeOnly( $"local variable of compile-time type '{typeSymbol}'" )
             : null;
 
         VariableDesignationSyntax transformedDesignation;
@@ -1458,7 +1467,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
         {
-            using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{node.Type}'" ) ) )
+            var typeSymbol = this._syntaxTreeAnnotationMap.GetExpressionType( node.Type )!;
+
+            using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{typeSymbol}'" ) ) )
             {
                 // ReSharper disable once RedundantSuppressNullableWarningExpression
                 var transformedVariables = node.Variables.SelectAsEnumerable( v => this.Visit( v )! );
@@ -1840,6 +1851,49 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
     }
 
+    public override SyntaxNode VisitConditionalExpression( ConditionalExpressionSyntax node )
+    {
+        var annotatedCondition = this.Visit( node.Condition );
+        var conditionScope = this.GetNodeScope( annotatedCondition );
+
+        ExpressionSyntax annotatedWhenTrue;
+        ExpressionSyntax annotatedWhenFalse;
+        ScopeContext? scopeContext;
+
+        if ( conditionScope.GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            scopeContext = null;
+        }
+        else
+        {
+            scopeContext = this._currentScopeContext.RunTimePreferred( $"run-time conditional expression with the condition '{node.Condition}'" );
+        }
+
+        using ( this.WithScopeContext( scopeContext ) )
+        {
+            annotatedWhenTrue = this.Visit( node.WhenTrue );
+            annotatedWhenFalse = this.Visit( node.WhenFalse );
+        }
+
+        var combinedScope = TemplatingScope.RunTimeOnly;
+
+        // Mark the whole expression as compile-time only if all three sub-expressions are compile-time
+        if ( scopeContext == null &&
+             this.GetNodeScope( annotatedWhenTrue ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly &&
+             this.GetNodeScope( annotatedWhenFalse ).GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        {
+            combinedScope = TemplatingScope.CompileTimeOnly;
+        }
+
+        return node.Update(
+                annotatedCondition,
+                node.QuestionToken,
+                annotatedWhenTrue,
+                node.ColonToken,
+                annotatedWhenFalse )
+            .AddScopeAnnotation( combinedScope );
+    }
+
     public override SyntaxNode VisitForStatement( ForStatementSyntax node )
     {
         // This is a quick-and-dirty implementation that all for statements runtime.
@@ -2116,7 +2170,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             transformedArms = node.Arms.SelectAsArray( a => this.Visit( a ) );
 
-            this.RequireScope( transformedArms, governingExpressionScope, "a compile-time switch expression" );
+            var reason = governingExpressionScope == TemplatingScope.RunTimeOnly
+                ? "a run-time switch expression"
+                : "a compile-time switch expression";
+
+            this.RequireScope( transformedArms, governingExpressionScope, reason );
         }
 
         return node.Update(
@@ -2163,7 +2221,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             using ( this.WithScopeContext( labelContext ) )
             {
-                transformedLabels = section.Labels.SelectAsArray( l => this.Visit( l ) );
+                transformedLabels = section.Labels.SelectAsArray( this.Visit )!;
 
                 if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                 {
@@ -2380,7 +2438,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 }
                 else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                 {
-                    var context = this._currentScopeContext.RunTimeOnly( "a generic argument of run-time declaration" );
+                    var context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
 
                     using ( this.WithScopeContext( context ) )
                     {
@@ -2431,8 +2489,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             } );
     }
 
-    public override SyntaxNode VisitTupleType( TupleTypeSyntax node )
-        => this.VisitGenericNameCore( node, base.VisitTupleType! );
+    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! );
 
     public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {

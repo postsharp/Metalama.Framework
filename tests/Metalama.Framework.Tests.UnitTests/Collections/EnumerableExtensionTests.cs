@@ -42,8 +42,8 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             Node d = new( c, b );
             var list = new[] { d, a };
 
-            Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursive( n => n.Children, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
-            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
+            Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursiveInternal( n => n.Children, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
+            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursiveInternal( n => n.Children, throwOnDuplicate: true ) );
         }
 
         [Fact]

@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
-        public ISymbol? GetOverrideTarget( LinkerInjectedMember overrideInjectedMember )
+        private ISymbol? GetOverrideTarget( LinkerInjectedMember overrideInjectedMember )
         {
             if ( !this._overrideTargetMap.TryGetValue( overrideInjectedMember, out var overrideTarget ) )
             {
@@ -432,6 +432,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         // Not yet used.
+        // Resharper disable UnusedMember.Global
         [ExcludeFromCodeCoverage]
         public ISymbol? GetPreviousOverride( ISymbol symbol )
         {

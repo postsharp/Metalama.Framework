@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 
 namespace Metalama.Framework.Engine.Formatting
 {
+    [JsonObject]
     public sealed class DiagnosticAnnotation
     {
         [JsonConstructor]

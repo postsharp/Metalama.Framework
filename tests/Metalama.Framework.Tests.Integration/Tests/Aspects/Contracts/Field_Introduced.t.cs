@@ -6,8 +6,7 @@ internal class Target
   {
     get
     {
-      global::System.String returnValue;
-      returnValue = this._existingField;
+      var returnValue = this._existingField;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -28,8 +27,7 @@ internal class Target
   {
     get
     {
-      global::System.String? returnValue;
-      returnValue = this._introducedField;
+      var returnValue = this._introducedField;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     public static class CompileTimeConstants
     {
-        public static string GetPrefixedSyntaxTreeName( string name ) => "(" + name + ")";
+        internal static string GetPrefixedSyntaxTreeName( string name ) => "(" + name + ")";
 
         public static bool IsPredefinedSyntaxTree( string path )
         {
@@ -16,8 +16,8 @@ namespace Metalama.Framework.Engine.CompileTime
             return fileName.StartsWith( "(", StringComparison.Ordinal ) && fileName.EndsWith( ")", StringComparison.Ordinal );
         }
 
-        public const string CompileTimeProjectResourceName = "Metalama.CompileTimeProject";
+        internal const string CompileTimeProjectResourceName = "Metalama.CompileTimeProject";
 
-        public const string InheritableAspectManifestResourceName = "Metalama.InheritableAspects";
+        internal const string InheritableAspectManifestResourceName = "Metalama.InheritableAspects";
     }
 }

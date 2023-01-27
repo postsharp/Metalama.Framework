@@ -20,9 +20,6 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
     {
         private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 
-        [Obsolete( "Specify the exact version." )]
-        public static Version MatchAllVersion { get; } = new( 9999, 99 );
-
         [ExcludeFromCodeCoverage]
         public static IDesignTimeEntryPointManager Instance { get; }
 

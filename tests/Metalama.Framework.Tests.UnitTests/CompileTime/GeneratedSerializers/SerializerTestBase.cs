@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             return project!;
         }
 
-        private protected static Type GetLamaSerializerType( Type type )
+        private static Type GetLamaSerializerType( Type type )
         {
             var lamaSerializerTypes =
                 type.GetNestedTypes()

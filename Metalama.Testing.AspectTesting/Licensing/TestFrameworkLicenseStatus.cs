@@ -10,9 +10,9 @@ namespace Metalama.Testing.AspectTesting.Licensing
 {
     internal sealed class TestFrameworkLicenseStatus
     {
-        public bool IsLicensed { get; }
+        private bool IsLicensed { get; }
 
-        public IReadOnlyList<LicensingMessage> Messages { get; }
+        private IReadOnlyList<LicensingMessage> Messages { get; }
 
         public TestFrameworkLicenseStatus( string testAssemblyName, string? projectLicense, bool ignoreUserProfileLicenses )
         {

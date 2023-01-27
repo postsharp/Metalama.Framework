@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void FieldInNestedType()
         {
-            var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
+            const string code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void MethodInDerivedType()
         {
-            var code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
+            const string code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestDerivedGenericType()
         {
-            var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
+            const string code = "class Target<T1> { } class User<T2> : Target<T2> { }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestHalfTypes()
         {
-            var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
+            const string code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
 
             using var testContext = this.CreateSerializationTestContext( code );
 
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .ToString();
 
             this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
-            var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
+            const string code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
 
             using var testContext2 = this.CreateSerializationTestContext( code2 );
 

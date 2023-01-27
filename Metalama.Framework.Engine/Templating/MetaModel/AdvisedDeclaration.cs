@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Underlying = underlying;
         }
 
-        protected internal T Underlying { get; }
+        protected T Underlying { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Underlying.ToDisplayString( format, context );

@@ -39,7 +39,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         otherVersionServiceProvider.Initialize( serviceProvider.WithService( otherVersionPipelineFactory ) );
         entryPointManager.RegisterServiceProvider( otherVersionServiceProvider );
 
-        var masterCode = """
+        const string masterCode = """
 using System;
 using Metalama.Framework.Aspects;
 
@@ -58,7 +58,7 @@ public interface TheInterface
 
 """;
 
-        var dependentCode = """
+        const string dependentCode = """
 public class TheClass : TheInterface
 {
    

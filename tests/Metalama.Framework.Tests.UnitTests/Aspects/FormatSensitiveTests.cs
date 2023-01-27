@@ -15,7 +15,7 @@ public sealed class FormatSensitiveTests : AspectTestBase
     {
         using var testContext = this.CreateTestContext();
 
-        var code = @"
+        const string code = @"
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
@@ -72,24 +72,24 @@ After:
             .NormalizeWhitespace()
             .ToString();
 
-        var expectedTransformedProperty = @"
+        const string expectedTransformedProperty = @"
 [PropOverride]
 public string Prop132
 {
     get
     {
-        return (global::System.String)this.Prop132_Source?.ToUpper();
+        return (global::System.String)this._prop132?.ToUpper();
     }
 
     set
     {
         if (true)
         {
-            this.Prop132_Source = value;
+            this._prop132 = value;
         }
 
         if (true)
-            this.Prop132_Source = value;
+            this._prop132 = value;
         if (true)
         {
         // x
@@ -97,7 +97,7 @@ public string Prop132
 
         if (true)
         {
-            this.Prop132_Source = value;
+            this._prop132 = value;
         }
     }
 }";

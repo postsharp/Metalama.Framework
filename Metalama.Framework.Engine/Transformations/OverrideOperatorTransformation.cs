@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class OverrideOperatorTransformation : OverrideMemberTransformation
     {
-        public BoundTemplateMethod BoundTemplate { get; }
+        private BoundTemplateMethod BoundTemplate { get; }
 
         private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 

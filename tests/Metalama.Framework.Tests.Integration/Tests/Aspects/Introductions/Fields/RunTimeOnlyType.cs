@@ -11,4 +11,4 @@ public class Aspect : TypeAspect
 
 // <target>
 [Aspect]
-public class RunTimeClass { }
+internal class RunTimeClass { }

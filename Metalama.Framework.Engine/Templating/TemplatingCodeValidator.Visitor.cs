@@ -288,6 +288,20 @@ namespace Metalama.Framework.Engine.Templating
                                 (this._currentDeclaration!, this._currentScope!.Value.ToDisplayString()) ) );
                     }
                 }
+
+                // Forbid partial templates.
+                var partialKeyword = modifiers.FirstOrDefault( m => m.IsKind( SyntaxKind.PartialKeyword ) );
+
+                if ( partialKeyword.IsKind( SyntaxKind.PartialKeyword ) )
+                {
+                    if ( this._currentTemplateInfo is { IsNone: false } )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.PartialTemplateMethodsForbidden.CreateRoslynDiagnostic(
+                                partialKeyword.GetLocation(),
+                                this._currentDeclaration! ) );
+                    }
+                }
             }
 
             public override void VisitMethodDeclaration( MethodDeclarationSyntax node )

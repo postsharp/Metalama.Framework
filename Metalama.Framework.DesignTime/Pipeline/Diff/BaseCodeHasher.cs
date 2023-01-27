@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -12,11 +13,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// Base for the auto-generated <see cref="RunTimeCodeHasher"/> and <see cref="CompileTimeCodeHasher"/>.
 /// Generates a hash that is unique enough under the desired invariants.
 /// </summary>
+[UsedImplicitly( ImplicitUseTargetFlags.WithMembers )]
 public abstract class BaseCodeHasher : SafeSyntaxWalker
 {
     private readonly XXH64 _hasher;
 
-    public StringBuilder? Log { get; private set; }
+    internal StringBuilder? Log { get; private set; }
 
     internal void EnableLogging() => this.Log = new StringBuilder();
 

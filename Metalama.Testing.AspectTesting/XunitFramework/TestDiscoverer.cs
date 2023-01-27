@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.AspectTesting.Utilities;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,21 +24,38 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
     [Serializable]
     internal class TestDiscoverer : LongLivedMarshalByRefObject, ITestFrameworkDiscoverer
     {
+        static TestDiscoverer()
+        {
+            TestingServices.Initialize();
+        }
+        
         private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly IAssemblyInfo _assembly;
         private readonly IMessageSink? _messageSink;
+        private readonly GlobalServiceProvider _serviceProvider;
 
-        public TestDiscoverer( IAssemblyInfo assembly, IMessageSink? messageSink = null )
+        public IFileSystem FileSystem { get; }
+
+        private readonly ITestAssemblyMetadataReader _metadataReader;
+
+        public TestDiscoverer( IAssemblyInfo assembly, IMessageSink? messageSink = null ) : this(
+            ServiceProviderFactory.GetServiceProvider().WithService( new TestAssemblyMetadataReader() ),
+            assembly,
+            messageSink ) { }
+
+        public TestDiscoverer( GlobalServiceProvider serviceProvider, IAssemblyInfo assembly, IMessageSink? messageSink = null )
         {
             this._assembly = assembly;
-
             this._messageSink = messageSink;
+            this._serviceProvider = serviceProvider;
+            this.FileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
+            this._metadataReader = serviceProvider.GetRequiredService<ITestAssemblyMetadataReader>();
 
-            var attrib = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();
+            var attribute = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();
 
-            if ( attrib != null )
+            if ( attribute != null )
             {
-                this.TargetFramework = attrib.GetConstructorArguments().Cast<string>().First();
+                this.TargetFramework = attribute.GetConstructorArguments().Cast<string>().First();
             }
             else
             {
@@ -47,7 +67,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public TestProjectProperties GetTestProjectProperties()
         {
-            var metadata = TestAssemblyMetadataReader.GetMetadata( this._assembly );
+            var metadata = this._metadataReader.GetMetadata( this._assembly );
 
             return new TestProjectProperties( metadata.ProjectDirectory, metadata.ParserSymbols, metadata.TargetFramework, metadata.License );
         }
@@ -71,8 +91,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._messageSink?.Trace( $"Discovering tests in directory '{subDirectory}'." );
 
             var projectProperties = this.GetTestProjectProperties();
-            TestDirectoryOptionsReader reader = new( projectProperties.ProjectDirectory );
-            TestFactory factory = new( projectProperties, reader, this._assembly );
+            TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.ProjectDirectory );
+            TestFactory factory = new( this._serviceProvider, projectProperties, reader, this._assembly );
 
             ConcurrentBag<Task> tasks = new();
             var pendingTasks = new StrongBox<int>( 0 );
@@ -100,9 +120,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                     this._messageSink?.Trace( $"Processing directory '{directory}'." );
 
                     // If the directory is included, index the files.
-                    var runnerFileName = "_Runner.cs";
+                    const string runnerFileName = "_Runner.cs";
 
-                    foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
+                    foreach ( var testPath in this.FileSystem.EnumerateFiles( directory, "*.cs" ) )
                     {
                         var fileName = Path.GetFileName( testPath );
 
@@ -128,7 +148,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                         this._messageSink?.Trace( $"Including the file '{testPath}'" );
 
-                        var testCase = new TestCase( factory, PathUtil.GetRelativePath( projectProperties.ProjectDirectory, testPath ) );
+                        var testCase = new TestCase( factory, this.FileSystem.GetRelativePath( projectProperties.ProjectDirectory, testPath ) );
 
                         this._messageSink?.Trace(
                             $"    {((ITestCase) testCase).TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name} " +
@@ -146,7 +166,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                     // Process children directories.
 
-                    foreach ( var nestedDir in Directory.EnumerateDirectories( directory ) )
+                    foreach ( var nestedDir in this.FileSystem.EnumerateDirectories( directory ) )
                     {
                         if ( excludedSubdirectories.Contains( nestedDir ) )
                         {

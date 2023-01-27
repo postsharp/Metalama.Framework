@@ -9,21 +9,20 @@ namespace Metalama.Framework.Engine.CodeModel
     internal sealed class GenericMap
     {
         private readonly Compilation _compilation;
+        private readonly ImmutableArray<ITypeSymbol> _typeArguments;
         private Mapper? _mapper;
-
-        public ImmutableArray<ITypeSymbol> TypeArguments { get; }
 
         public GenericMap( Compilation compilation ) : this( ImmutableArray<ITypeSymbol>.Empty, compilation ) { }
 
         private GenericMap( ImmutableArray<ITypeSymbol> typeArguments, Compilation compilation )
         {
-            this.TypeArguments = typeArguments;
+            this._typeArguments = typeArguments;
             this._compilation = compilation;
         }
 
         public ITypeSymbol Map( ITypeSymbol type )
         {
-            if ( this.TypeArguments.IsEmpty )
+            if ( this._typeArguments.IsEmpty )
             {
                 return type;
             }
@@ -44,20 +43,20 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( typeArguments.IsEmpty )
             {
-                if ( this.TypeArguments.IsEmpty )
+                if ( this._typeArguments.IsEmpty )
                 {
                     return this;
                 }
                 else
                 {
-                    return new GenericMap( this.TypeArguments, this._compilation );
+                    return new GenericMap( this._typeArguments, this._compilation );
                 }
             }
             else
             {
-                var mappedTypeArgumentsBuilder = ImmutableArray.CreateBuilder<ITypeSymbol>( this.TypeArguments.Length );
+                var mappedTypeArgumentsBuilder = ImmutableArray.CreateBuilder<ITypeSymbol>( this._typeArguments.Length );
 
-                foreach ( var typeArgument in this.TypeArguments )
+                foreach ( var typeArgument in this._typeArguments )
                 {
                     mappedTypeArgumentsBuilder.Add( this.Map( typeArgument ) );
                 }
@@ -140,7 +139,7 @@ namespace Metalama.Framework.Engine.CodeModel
             public override ITypeSymbol VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
 
             public override ITypeSymbol VisitTypeParameter( ITypeParameterSymbol symbol )
-                => symbol.DeclaringType != null ? this._parent.TypeArguments[symbol.Ordinal] : symbol;
+                => symbol.DeclaringType != null ? this._parent._typeArguments[symbol.Ordinal] : symbol;
         }
     }
 }

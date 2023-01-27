@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     public void Foo()
@@ -72,7 +72,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     public void Foo(int x)
@@ -135,7 +135,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     public void Foo()
@@ -180,7 +180,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     public void Foo()
@@ -215,7 +215,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class C
 {
     public void Foo() // 0
@@ -324,7 +324,7 @@ class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"
+            const string code = @"
 class A
 {
     public void Foo() {}

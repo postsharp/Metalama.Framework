@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Framework.Engine.Templating;
 
 // This type is copied from the Roslyn source code. The member integer values must match.
-
+// Resharper disable UnusedMember.Global
 [Flags]
 internal enum ObjectDisplayOptions
 {

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    public sealed class CompileTimeProject : IProjectService
+    internal sealed class CompileTimeProject : IProjectService
     {
         private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
         private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
@@ -79,9 +79,9 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
 
-        public CompileTimeDomain Domain { get; }
+        private CompileTimeDomain Domain { get; }
 
-        internal DiagnosticManifest DiagnosticManifest { get; }
+        private DiagnosticManifest DiagnosticManifest { get; }
 
         private Assembly? _assembly;
 
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.CompileTime
         internal IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
 
         [Memo]
-        internal ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
+        private ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
             => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
@@ -426,8 +426,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 return type;
             }
         }
-
-        public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName! );
 
         public Type GetType( string reflectionName, string runTimeAssemblyName )
         {

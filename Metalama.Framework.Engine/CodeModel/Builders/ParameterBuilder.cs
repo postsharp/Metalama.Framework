@@ -16,7 +16,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private TypedConstant? _defaultValue;
         private RefKind _refKind;
         private IType _type;
-        private bool _isParams;
 
         public override RefKind RefKind
         {
@@ -79,16 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override bool IsParams
-        {
-            get => this._isParams;
-            set
-            {
-                this.CheckNotFrozen();
-
-                this._isParams = value;
-            }
-        }
+        public override bool IsParams => false;
 
         public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 

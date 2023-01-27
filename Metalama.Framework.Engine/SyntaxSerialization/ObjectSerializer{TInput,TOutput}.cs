@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -21,6 +22,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// <param name="obj">An object to serialize. Not null.</param>
         /// <param name="serializationContext"></param>
         /// <returns>An expression that creates such an object.</returns>
+        [UsedImplicitly]
         public abstract ExpressionSyntax Serialize( TInput obj, SyntaxSerializationContext serializationContext );
 
         protected ObjectSerializer( SyntaxSerializationService service ) : base( service ) { }

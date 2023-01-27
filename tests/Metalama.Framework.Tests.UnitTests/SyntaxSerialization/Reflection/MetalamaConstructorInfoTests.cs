@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestConstructor()
         {
-            var code = "class Target { public Target(int hello) { } }";
+            const string code = "class Target { public Target(int hello) { } }";
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestGenericConstructor()
         {
-            var code = "class Target<T> where T: struct { public Target(T hello) { } }";
+            const string code = "class Target<T> where T: struct { public Target(T hello) { } }";
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         [Fact]
         public void TestDefaultConstructor()
         {
-            var code = "class Target {  }";
+            const string code = "class Target {  }";
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(

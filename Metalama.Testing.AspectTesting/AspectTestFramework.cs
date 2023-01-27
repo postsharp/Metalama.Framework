@@ -1,5 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Diagnostics;
@@ -14,6 +18,7 @@ namespace Metalama.Testing.AspectTesting
     /// Implementation of a Xunit test framework for Metalama. Falls back to the default XUnit framework in Resharper or Rider.
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [UsedImplicitly]
     public class AspectTestFramework : ITestFramework
     {
         static AspectTestFramework()
@@ -38,25 +43,27 @@ namespace Metalama.Testing.AspectTesting
                 Debugger.Launch();
             }
 
-            if ( Process.GetCurrentProcess().ProcessName.StartsWith( "ResharperTestRunner", StringComparison.OrdinalIgnoreCase ) )
+            if ( ProcessUtilities.ProcessKind == ProcessKind.ResharperTestRunner )
             {
-                messageSinkOrNull?.Trace( $"Resharper detected. Using the legacy test runner." );
+                messageSinkOrNull?.Trace( $"Resharper test runner detected. Using the legacy test framework." );
 
                 this._implementation = new XunitTestFramework( messageSink );
             }
             else
             {
-                messageSinkOrNull?.Trace( $"Resharper NOT detected. Using the customized test runner." );
+                messageSinkOrNull?.Trace( $"Resharper NOT detected. Using the customized test framework." );
 
-                this._implementation = new AspectTestFrameworkVsImpl( messageSinkOrNull );
+                this._implementation = new AspectTestFrameworkVsImpl(
+                    ServiceProviderFactory.GetServiceProvider().WithService( new TestAssemblyMetadataReader() ),
+                    messageSinkOrNull );
             }
         }
 
         void IDisposable.Dispose() { }
 
-        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly ) => this._implementation.GetDiscoverer( assembly );
+        public ITestFrameworkDiscoverer GetDiscoverer( IAssemblyInfo assembly ) => this._implementation.GetDiscoverer( assembly );
 
-        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => this._implementation.GetExecutor( assemblyName );
+        public ITestFrameworkExecutor GetExecutor( AssemblyName assemblyName ) => this._implementation.GetExecutor( assemblyName );
 
         ISourceInformationProvider ITestFramework.SourceInformationProvider
         {

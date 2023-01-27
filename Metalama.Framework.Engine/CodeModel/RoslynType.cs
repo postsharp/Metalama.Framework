@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         protected CompilationModel Compilation { get; }
 
-        public T Symbol { get; }
+        protected T Symbol { get; }
 
         protected RoslynType( T symbol, CompilationModel compilation )
         {

@@ -18,6 +18,6 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         [XmlElement( ElementName = "Kind", Type = typeof(Kind) )]
         public List<Kind> Kinds { get; set; } = new();
 
-        public List<Field> Fields { get; } = new();
+        internal List<Field> Fields { get; } = new();
     }
 }

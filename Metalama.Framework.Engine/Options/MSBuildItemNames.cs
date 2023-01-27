@@ -2,8 +2,11 @@
 
 // ReSharper disable InconsistentNaming
 
+using JetBrains.Annotations;
+
 namespace Metalama.Framework.Engine.Options;
 
+[PublicAPI]
 public static class MSBuildItemNames
 {
     public const string MetalamaCompileTimePackage = nameof(MetalamaCompileTimePackage);

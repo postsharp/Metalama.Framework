@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// <summary>
     /// Provides a method <see cref="ToArray"/> that converts a tuple into an array.
     /// </summary>
+    [UsedImplicitly]
     internal sealed class ValueTupleAdapter
     {
         private static readonly ConcurrentDictionary<Type, Func<object, object[]>> _cache = new();

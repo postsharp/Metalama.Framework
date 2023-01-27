@@ -23,14 +23,11 @@ namespace Metalama.Framework.Engine.Advising;
 internal sealed partial class ImplementInterfaceAdvice : Advice
 {
     private readonly List<InterfaceSpecification> _interfaceSpecifications;
+    private readonly INamedType _interfaceType;
+    private readonly OverrideStrategy _overrideStrategy;
+    private readonly IObjectReader _tags;
 
-    public INamedType InterfaceType { get; }
-
-    public OverrideStrategy OverrideStrategy { get; }
-
-    public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
-
-    public IObjectReader Tags { get; }
+    private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public ImplementInterfaceAdvice(
         IAspectInstanceInternal aspect,
@@ -42,10 +39,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         string? layerName,
         IObjectReader tags ) : base( aspect, template, targetType, sourceCompilation, layerName )
     {
-        this.InterfaceType = interfaceType;
-        this.OverrideStrategy = overrideStrategy;
+        this._interfaceType = interfaceType;
+        this._overrideStrategy = overrideStrategy;
         this._interfaceSpecifications = new List<InterfaceSpecification>();
-        this.Tags = tags;
+        this._tags = tags;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
@@ -54,7 +51,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
     {
         base.Initialize( serviceProvider, diagnosticAdder );
 
-        switch ( this.OverrideStrategy )
+        switch ( this._overrideStrategy )
         {
             case OverrideStrategy.Fail:
             case OverrideStrategy.Ignore:
@@ -64,24 +61,24 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.InterfaceUnsupportedOverrideStrategy.CreateRoslynDiagnostic(
                         this.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
-                         this.OverrideStrategy) ) );
+                        (this.Aspect.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
+                         this._overrideStrategy) ) );
 
                 break;
         }
 
-        if ( this.InterfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
+        if ( this._interfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(
                     this.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )) ) );
+                    (this.Aspect.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )) ) );
 
             // No other diagnostics should be reported after this.
             return;
         }
 
-        if ( !this.InterfaceType.IsFullyBound() )
+        if ( !this._interfaceType.IsFullyBound() )
         {
             // Temporary limitation.
             throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
@@ -96,8 +93,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =
-            new[] { (this.InterfaceType, IsTopLevel: true) }
-                .Concat( this.InterfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
+            new[] { (InterfaceType: this._interfaceType, IsTopLevel: true) }
+                .Concat( this._interfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                 .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
         // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.
@@ -113,7 +110,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              interfaceMethod) ) );
                 }
                 else if (
@@ -125,7 +122,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              methodTemplate.Declaration,
                              interfaceMethod) ) );
                 }
@@ -149,7 +146,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              interfaceProperty) ) );
                 }
                 else if (
@@ -159,7 +156,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              propertyTemplate.Declaration,
                              interfaceProperty) ) );
                 }
@@ -176,7 +173,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              interfaceEvent) ) );
                 }
                 else if ( !this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, eventTemplate.Declaration.Type ) )
@@ -184,7 +181,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              eventTemplate.Declaration,
                              interfaceEvent) ) );
                 }
@@ -278,7 +275,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             // Validate that the interface must be introduced to the specific target.
             if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
             {
-                if ( this.OverrideStrategy == OverrideStrategy.Fail )
+                if ( this._overrideStrategy == OverrideStrategy.Fail )
                 {
                     diagnostics.Report(
                         AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
@@ -296,7 +293,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 // Collect implemented interface members and add non-observable transformations.
                 MemberBuilder memberBuilder;
 
-                var mergedTags = ObjectReader.Merge( this.Tags, memberSpec.Tags );
+                var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
 
                 bool isExplicit;
 
@@ -337,6 +334,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         var isIteratorMethod = templateMethod?.IsIteratorMethod ?? redirectionTargetMethod.AssertNotNull().IsIteratorMethod() == true;
 
                         memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit );
+
+                        CopyAttributes( interfaceMethod, memberBuilder );
+
                         interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                         if ( templateMethod != null )
@@ -382,7 +382,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     break;
 
                                 default:
-                                    throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
+                                    throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
                             }
                         }
                         else
@@ -393,16 +393,68 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         var isAutoProperty = templateProperty?.Declaration.IsAutoPropertyOrField == true;
 
                         var getAccessibility =
-                            templateProperty?.Declaration.GetMethod?.Accessibility ?? Accessibility.Public;
+                            templateProperty?.GetAccessorAccessibility ?? Accessibility.Public;
 
                         var setAccessibility =
-                            templateProperty?.Declaration.SetMethod?.Accessibility ?? Accessibility.Public;
+                            templateProperty?.SetAccessorAccessibility ?? Accessibility.Public;
 
                         var hasGetter =
                             interfaceProperty.GetMethod != null || (!isExplicit && templateProperty?.Declaration.GetMethod != null);
 
                         var hasSetter =
-                            interfaceProperty.GetMethod != null || (!isExplicit && templateProperty?.Declaration.GetMethod != null);
+                            interfaceProperty.SetMethod != null || (!isExplicit && templateProperty?.Declaration.SetMethod != null);
+
+                        // Check that there are no accessors required by interface that are missing from the template.
+
+                        if ( templateProperty != null )
+                        {
+                            var getMethodMissingFromTemplate = interfaceProperty.GetMethod != null && templateProperty.Declaration.GetMethod == null;
+                            var setMethodMissingFromTemplate = interfaceProperty.SetMethod != null && templateProperty.Declaration.SetMethod == null;
+                            var getMethodUnexpectedInTemplate = interfaceProperty.GetMethod == null && templateProperty.Declaration.GetMethod != null;
+                            var setMethodUnexpectedInTemplate = interfaceProperty.SetMethod == null && templateProperty.Declaration.SetMethod != null;
+                            var setInitOnlyInTemplate = templateProperty.Declaration.Writeability is Writeability.InitOnly;
+                            var setInitOnlyInInterface = interfaceProperty.Writeability is Writeability.InitOnly;
+
+                            var missingAccessor =
+                                (getMethodMissingFromTemplate, setMethodMissingFromTemplate, setInitOnlyInTemplate, setInitOnlyInInterface) switch
+                                {
+                                    (true, _, _, _ ) => "get", // Missing getter.
+                                    (false, true, _, false ) => "set", // Missing setter.
+                                    (false, true, _, true ) => "init", // Missing init-only setter.
+                                    (false, false, true, false ) => "set", // Interface has setter, template has init-only setter.
+                                    (false, false, false, true ) => "init", // Interface has init-only setter, template has setter.
+                                    _ => null,
+                                };
+
+                            if ( missingAccessor != null )
+                            {
+                                diagnostics.Report(
+                                    AdviceDiagnosticDescriptors.InterfacePropertyIsMissingAccessor.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, missingAccessor) ) );
+
+                                continue;
+                            }
+
+                            var unexpectedAccessor =
+                                (isExplicit, getMethodUnexpectedInTemplate, setMethodUnexpectedInTemplate, setInitOnlyInTemplate) switch
+                                {
+                                    (true, true, _, _ ) => "get", // Unexpected getter.
+                                    (true, false, true, false ) => "set", // Unexpected setter.
+                                    (true, false, true, true ) => "init", // Unexpected init-only setter.
+                                    _ => null,
+                                };
+
+                            if ( unexpectedAccessor != null )
+                            {
+                                diagnostics.Report(
+                                    AdviceDiagnosticDescriptors.ExplicitInterfacePropertyHasSuperficialAccessor.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, unexpectedAccessor) ) );
+
+                                continue;
+                            }
+                        }
 
                         var hasImplicitSetter = templateProperty?.Declaration.SetMethod?.IsImplicitlyDeclared ?? false;
 
@@ -417,6 +469,21 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             isExplicit,
                             hasImplicitSetter,
                             mergedTags );
+
+                        if ( templateProperty != null )
+                        {
+                            CopyAttributes( templateProperty.Declaration, propertyBuilder );
+
+                            if ( hasGetter )
+                            {
+                                CopyAttributes( templateProperty.Declaration.GetMethod.AssertNotNull(), (DeclarationBuilder) propertyBuilder.GetMethod.AssertNotNull() );
+                            }
+
+                            if ( hasSetter )
+                            {
+                                CopyAttributes( templateProperty.Declaration.SetMethod.AssertNotNull(), (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
+                            }
+                        }
 
                         memberBuilder = propertyBuilder;
                         interfaceMemberMap.Add( interfaceProperty, memberBuilder );
@@ -454,7 +521,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         break;
 
                     case IIndexer:
-                        throw new NotImplementedException();
+                        throw new NotImplementedException( "Implementing interface indexers is not yet supported." );
 
                     case IEvent interfaceEvent:
                         var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
@@ -479,7 +546,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     break;
 
                                 default:
-                                    throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
+                                    throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
                             }
                         }
                         else
@@ -490,6 +557,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         var isEventField = templateEvent?.Declaration.IsEventField() ?? false;
 
                         var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
+
+                        if ( templateEvent != null )
+                        {
+                            CopyAttributes( templateEvent.Declaration, eventBuilder );
+                            CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.AddMethod.AssertNotNull() );
+                            CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.RemoveMethod.AssertNotNull() );
+                        }
+
                         memberBuilder = eventBuilder;
                         interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
@@ -527,6 +602,19 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                     default:
                         throw new AssertionFailedException( $"Unexpected kind of declaration: '{memberSpec.InterfaceMember}'." );
+                }
+
+                void CopyAttributes( IDeclaration interfaceMember, DeclarationBuilder builder )
+                {
+                    var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
+                    foreach ( var codeElementAttribute in interfaceMember.Attributes )
+                    {
+                        if ( classificationService.MustCopyTemplateAttribute( codeElementAttribute ) )
+                        {
+                            builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
+                        }
+                    }
                 }
 
                 addTransformation( memberBuilder.ToTransformation() );

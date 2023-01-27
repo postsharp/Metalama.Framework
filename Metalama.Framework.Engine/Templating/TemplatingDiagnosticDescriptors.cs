@@ -18,16 +18,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private const string _category = "Metalama.Template";
 
-        internal static readonly DiagnosticDefinition<(string Expression, string ParentExpression)>
-            CannotReferenceRuntimeExpressionFromBuildTimeExpression
-                = new(
-                    "LAMA0100",
-                    "Cannot reference a run-time expression from a compile-time expression",
-                    "Cannot reference the run-time expression {0} because the parent expression {1} is compile-time",
-                    _category,
-                    Error );
-
-        public static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
+        internal static readonly DiagnosticDefinition<string> LanguageFeatureIsNotSupported
             = new(
                 "LAMA0101",
                 "The C# language feature is not supported.",
@@ -50,22 +41,6 @@ namespace Metalama.Framework.Engine.Templating
                 + "one for run-time variables, and one for compile-time variables",
                 "Local variables {0} cannot be declared in the same declaration. "
                 + "Split them into different declarations; one for run-time variables, and one for compile-time variables",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<string> UnsupportedContextForProceed
-            = new(
-                "LAMA0106",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<(string Expression, ITypeSymbol ExpressionType)> CannotConvertBuildTime
-            = new(
-                "LAMA0107",
-                "Cannot convert an expression into compile-time code because the expression is of an unsupported type",
-                "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 Error );
 
@@ -204,15 +179,6 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<string>
-            CallToExpressionMustHaveExplicitCast
-                = new(
-                    "LAMA0225",
-                    "Calls to meta.Expression must be explicitly cast to IExpression.",
-                    "The call to '{0}' must be explicitly cast to IExpression.",
-                    _category,
-                    Error );
-
         internal static readonly DiagnosticDefinition<(ISymbol Symbol, ISymbol RunTimeSymbol, ISymbol CompileTimeSymbol)> TemplatingScopeConflict
             = new(
                 "LAMA0226",
@@ -241,7 +207,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0229",
                 "Types that are both compile-time and run-time are forbidden in run-time-only types.",
-                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTime].",
+                "The type '{0}' cannot be [CompileOrRunTime] because it is nested in a run-time-only type.",
                 _category,
                 Error );
 
@@ -253,11 +219,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> RunTimeTypesCannotHaveCompileTimeTypesExceptClasses
+        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type TypeFabric)> RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
             = new(
                 "LAMA0231",
-                "Run-time types cannot have other compile-time types than classes.",
-                "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
+                "Compile-time types cannot be nested in run-time types, except for type fabrics.",
+                "The compile-time type '{0}' cannot be nested in a run-time type. The only compile-time type that can be nested in run-time type is a class inheriting '{1}'.",
                 _category,
                 Error );
 
@@ -309,15 +275,6 @@ namespace Metalama.Framework.Engine.Templating
                     "LAMA0238",
                     "Only templates of [Template] kind can have a dynamic type or signature.",
                     "'{0}' cannot be of 'dynamic' type because the type '{1}' is {2} and '{0}' is not a template.",
-                    _category,
-                    Error );
-
-        internal static readonly DiagnosticDefinition<ISymbol>
-            InvalidScope
-                = new(
-                    "LAMA0239",
-                    "Arrays or generic types of 'dynamic' are forbidden.",
-                    "The type or signature of '{0}' is invalid: arrays or generic types of 'dynamic' are forbidden.",
                     _category,
                     Error );
 
@@ -403,6 +360,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0251",
                 "Dynamic variables cannot be set to non-dynamic values.",
                 "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartialTemplateMethodsForbidden
+            = new(
+                "LAMA0252",
+                "Template methods cannot be partial",
+                "'{0}' cannot be partial because it is a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ITypeSymbol, string)> CompileTimeTypeInInvocationOfRuntimeMethod
+            = new(
+                "LAMA0253",
+                "Compile-time-only types cannot be used in invocations of run-time methods.",
+                "Compile-time-only type '{0}' cannot be used in the invocation of run-time method '{1}'.",
                 _category,
                 Error );
     }

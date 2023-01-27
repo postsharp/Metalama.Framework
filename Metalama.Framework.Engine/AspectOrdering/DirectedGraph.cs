@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
         private readonly SimpleLinkedListNode<int>?[] _predecessors;
 
         public const int NotDiscovered = int.MaxValue;
-        public const int Cycle = int.MinValue;
+        private const int _cycle = int.MinValue;
 
         private readonly int _size;
 
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     if ( hasCycle )
                     {
                         // We just discovered that the successor is part of a cycle.
-                        distances[successor] = Cycle;
+                        distances[successor] = _cycle;
                         directPredecessors[successor] = current;
 
                         return successor;
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
                         queue.Enqueue( new NodeInfo { Node = successor, NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath ) } );
                     }
-                    else if ( successorDistance == Cycle )
+                    else if ( successorDistance == _cycle )
                     {
                         // We have already discovered that the successor is part of a cycle.
                     }

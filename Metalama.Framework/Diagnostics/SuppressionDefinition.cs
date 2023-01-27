@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Diagnostics
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Diagnostics
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTime]
+    [PublicAPI]
     public sealed class SuppressionDefinition
     {
         /// <summary>

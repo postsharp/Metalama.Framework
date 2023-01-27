@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -14,6 +15,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
+    [PublicAPI]
     public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
         private TemplateAttributeProperties _properties = new();

@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="implicitUsings"></param>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         /// <param name="logger"></param>
-        public TemplatingTestRunner(
+        private TemplatingTestRunner(
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,

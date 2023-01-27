@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Metalama.Framework.Engine.Services
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <typeparamref name="TBase"/> and implemented by this object.
     /// </summary>
+    [PublicAPI]
     public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
@@ -99,14 +101,6 @@ namespace Metalama.Framework.Engine.Services
             where T : class, TBase
             => this.GetService<T>() == null ? this.WithService( func( this ) ) : this;
 
-        public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
-            where T : TBase
-        {
-            var serviceNode = new ServiceNode( typeof(T), sp => func( (ServiceProvider<TBase>) sp ) );
-
-            return this.WithService( serviceNode, false );
-        }
-
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
         /// <summary>
@@ -151,7 +145,7 @@ namespace Metalama.Framework.Engine.Services
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
         /// When the next service provider has been set before, it gets replaced.
         /// </remarks>
-        public ServiceProvider<TBase> WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
+        internal ServiceProvider<TBase> WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public T? GetService<T>()
             where T : class, TBase

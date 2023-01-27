@@ -42,17 +42,11 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
+                     && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-                    {
-                        members.Add( this.GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
-                    }
-                    else
-                    {
-                        members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
-                    }
+                    members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -202,7 +196,8 @@ namespace Metalama.Framework.Engine.Linking
                             .Body.AssertNotNull()
                             .Statements.Single();
 
-                    var expression = ((InvocationExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).ArgumentList.Arguments[0].Expression;
+                    var expression = ((InvocationExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).ArgumentList.Arguments[0]
+                        .Expression;
 
                     initializerExpression = EqualsValueClause( expression );
 
@@ -238,18 +233,18 @@ namespace Metalama.Framework.Engine.Linking
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private MemberDeclarationSyntax GetOriginalImplEvent( 
-            EventDeclarationSyntax @event, 
+        private MemberDeclarationSyntax GetOriginalImplEvent(
+            EventDeclarationSyntax @event,
             IEventSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
             var existingAccessorList = @event.AccessorList.AssertNotNull();
-            
+
             var transformedAccessorList =
                 existingAccessorList
                     .WithAccessors(
                         List(
-                            existingAccessorList.Accessors.SelectAsArray( 
+                            existingAccessorList.Accessors.SelectAsArray(
                                 a =>
                                     TransformAccessor(
                                         a,
@@ -257,7 +252,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.AddAccessorDeclaration => symbol.AddMethod.AssertNotNull(),
                                             SyntaxKind.RemoveAccessorDeclaration => symbol.RemoveMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" ),
+                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 
@@ -274,12 +269,15 @@ namespace Metalama.Framework.Engine.Linking
 
                 var substitutedBody =
                     accessorDeclaration.Body != null
-                        ? (BlockSyntax) this.RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        ? (BlockSyntax) RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
                         : null;
 
                 var substitutedExpressionBody =
                     accessorDeclaration.ExpressionBody != null
-                        ? (ArrowExpressionClauseSyntax) this.RewriteBody( accessorDeclaration.ExpressionBody, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        ? (ArrowExpressionClauseSyntax) RewriteBody(
+                            accessorDeclaration.ExpressionBody,
+                            accessorSymbol,
+                            new SubstitutionContext( this, generationContext, context ) )
                         : null;
 
                 return

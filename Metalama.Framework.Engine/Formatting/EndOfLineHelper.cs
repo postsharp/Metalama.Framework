@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        public static void DetermineEndOfLineStyle( CompilationUnitSyntax compilationUnit, out EndOfLineStyle endOfLineStyle, out bool isMixed )
+        private static void DetermineEndOfLineStyle( CompilationUnitSyntax compilationUnit, out EndOfLineStyle endOfLineStyle, out bool isMixed )
         {
             var visitor = new TriviaWalker();
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Formatting
         }
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        public static EndOfLineStyle GetEndOfLineStyle( in Span<char> chars )
+        private static EndOfLineStyle GetEndOfLineStyle( in Span<char> chars )
         {
             if ( chars.Length >= 1 )
             {

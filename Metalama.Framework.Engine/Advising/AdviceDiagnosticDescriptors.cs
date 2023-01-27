@@ -133,22 +133,32 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
-            ImplicitInterfaceMemberIsNotCompatible = new(
-                "LAMA0515",
-                "Cannot implement an implicit interface member when the target type already contains a declaration that is not compatible with this interface member.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
-                +
-                "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, OverrideStrategy Strategy)>
             InterfaceUnsupportedOverrideStrategy = new(
                 "LAMA0516",
                 "Using unsupported override strategy for interface type.",
                 "The aspect '{0}' cannot implement interface '{1}' in type '{2}' with 'whenExists={3}' because it is not supported." +
                 "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            InterfacePropertyIsMissingAccessor = new(
+                "LAMA0517",
+                "Cannot implement an interface property, the template is missing an accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' because the template '{3}' "
+                +
+                "is missing a '{4}' accessor.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+            ExplicitInterfacePropertyHasSuperficialAccessor = new(
+                "LAMA0518",
+                "Cannot implement an interface property, the template has superficial accessor.",
+                "The aspect '{0}' cannot implement an interface property '{1}' in the type '{2}' explicitly because the template '{3}' "
+                +
+                "has an unexpected '{4}' accessor.",
                 _category,
                 Error );
 

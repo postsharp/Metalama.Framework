@@ -99,8 +99,7 @@ internal sealed class RewriterHelper
         // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
         if ( method.Body == null && method.ExpressionBody == null )
         {
-            // Should not be called with an abstract method.
-            throw new ArgumentOutOfRangeException( nameof(method) );
+            throw new ArgumentException( "Should not be called with a method without a body.", nameof(method) );
         }
 
         // Otherwise we need to preserve "asyncness" and "iteratorness" of the method.

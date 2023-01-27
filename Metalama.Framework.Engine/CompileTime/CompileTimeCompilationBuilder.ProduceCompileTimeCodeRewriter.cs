@@ -6,8 +6,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -258,11 +258,11 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         childSymbol ) );
                                             }
 
-                                            // Check that it implements ITypeFabric.
+                                            // Check that it inherits TypeFabric.
                                             if ( !this._runTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
                                                         (childSymbol, typeof(TypeFabric)) ) );
 
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                             {
                                 this._diagnosticAdder.Report(
-                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
+                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
                                         (childSymbol, typeof(TypeFabric)) ) );
 

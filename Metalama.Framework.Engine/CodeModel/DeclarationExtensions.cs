@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public static class DeclarationExtensions
     {
-        public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
+        internal static DeclarationKind GetDeclarationKind( this ISymbol symbol )
             => symbol switch
             {
                 INamespaceSymbol => DeclarationKind.Namespace,
@@ -51,23 +50,15 @@ namespace Metalama.Framework.Engine.CodeModel
                 IEventSymbol => DeclarationKind.Event,
                 ITypeSymbol => DeclarationKind.None,
                 IModuleSymbol => DeclarationKind.Compilation,
-                _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
+                _ => throw new ArgumentException( $"Unexpected symbol: {symbol.GetType().Name}.", nameof(symbol) )
             };
-
-        /// <summary>
-        /// Gets a value indicating whether a symbol is exposed to the user code model.
-        /// </summary>
-        /// <param name="m"></param>
-        /// <returns></returns>
-        public static bool IsVisible( this ISymbol m )
-            => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && string.Equals( m.MetadataName, ".ctor", StringComparison.Ordinal ));
 
         /// <summary>
         /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
         /// </summary>
         /// <param name="declaration"></param>
         /// <returns></returns>
-        public static IEnumerable<IDeclaration> GetContainedDeclarations( this IDeclaration declaration )
+        internal static IEnumerable<IDeclaration> GetContainedDeclarations( this IDeclaration declaration )
             => declaration.SelectManyRecursive(
                 child => child switch
                 {
@@ -89,58 +80,27 @@ namespace Metalama.Framework.Engine.CodeModel
                     _ => null
                 } );
 
-        /// <summary>
-        /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        public static IEnumerable<ISymbol> GetContainedSymbols( this ISymbol symbol )
-            => symbol switch
-            {
-                IAssemblySymbol compilation => compilation.GetTypes(),
-                INamedTypeSymbol namedType => namedType.GetMembers().Where( IsVisible ).Concat( namedType.TypeParameters ),
-                IMethodSymbol method => method.Parameters.Concat<ISymbol>( method.TypeParameters ),
-                IPropertySymbol property => property.Parameters,
-                _ => Array.Empty<ISymbol>()
-            };
-
-        internal static IEnumerable<AttributeRef> ToAttributeLinks(
-            this IEnumerable<AttributeData> attributes,
-            ISymbol declaringSymbol,
-            Compilation compilation )
-            => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol, compilation ) ) );
-
-        internal static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol, Compilation compilation )
-            => symbol switch
-            {
-                IMethodSymbol method => method
-                    .GetAttributes()
-                    .ToAttributeLinks( method, compilation )
-                    .Concat( method.GetReturnTypeAttributes().Select( a => new AttributeRef( a, Ref.ReturnParameter( method, compilation ) ) ) ),
-                _ => symbol.GetAttributes().ToAttributeLinks( symbol, compilation )
-            };
-
         internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
 
         internal static Ref<T> ToTypedRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
-        public static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
+        internal static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
             => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation, compilation );
 
         internal static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
             => new( ((IDeclarationImpl) member).ToRef() );
 
-        public static Location? GetDiagnosticLocation( this IDeclaration declaration )
+        internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
             => declaration switch
             {
                 IDiagnosticLocationImpl hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntaxImpl[]? arguments )
+        private static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntaxImpl[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -252,15 +212,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new InvalidOperationException( $"Roslyn RefKind {roslynRefKind} not recognized here." )
             };
 
-        internal static Microsoft.CodeAnalysis.RefKind ToRoslynRefKind( this RefKind ourRefKind )
-            => ourRefKind switch
-            {
-                RefKind.None => Microsoft.CodeAnalysis.RefKind.None,
-                RefKind.Ref => Microsoft.CodeAnalysis.RefKind.Ref,
-                RefKind.RefReadOnly => Microsoft.CodeAnalysis.RefKind.RefReadOnly,
-                _ => throw new InvalidOperationException( $"RefKind {ourRefKind} not recognized." )
-            };
-
         internal static Accessibility ToOurVisibility( this Microsoft.CodeAnalysis.Accessibility accessibility )
             => accessibility switch
             {
@@ -274,65 +225,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-        internal static Microsoft.CodeAnalysis.Accessibility ToRoslynAccessibility( this Accessibility accessibility )
-            => accessibility switch
-            {
-                Accessibility.Private => Microsoft.CodeAnalysis.Accessibility.Private,
-                Accessibility.PrivateProtected => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
-                Accessibility.Protected => Microsoft.CodeAnalysis.Accessibility.Protected,
-                Accessibility.Internal => Microsoft.CodeAnalysis.Accessibility.Internal,
-                Accessibility.ProtectedInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
-                Accessibility.Public => Microsoft.CodeAnalysis.Accessibility.Public,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-        internal static DeclarationModifiers ToDeclarationModifiers( this IMember member )
-        {
-            var modifiers = DeclarationModifiers.None;
-
-            if ( member.IsAbstract )
-            {
-                modifiers |= DeclarationModifiers.Abstract;
-            }
-
-            if ( member.IsSealed )
-            {
-                modifiers |= DeclarationModifiers.Sealed;
-            }
-
-            if ( member is IField { Writeability: Writeability.ConstructorOnly } )
-            {
-                modifiers |= DeclarationModifiers.ReadOnly;
-            }
-
-            if ( member.IsStatic )
-            {
-                modifiers |= DeclarationModifiers.Static;
-            }
-
-            if ( member.IsVirtual )
-            {
-                modifiers |= DeclarationModifiers.Virtual;
-            }
-
-            if ( member.IsOverride )
-            {
-                modifiers |= DeclarationModifiers.Override;
-            }
-
-            if ( member.IsNew )
-            {
-                modifiers |= DeclarationModifiers.New;
-            }
-
-            if ( member.IsAsync )
-            {
-                modifiers |= DeclarationModifiers.Async;
-            }
-
-            return modifiers;
-        }
-
         internal static string ToDisplayString( this DeclarationKind kind )
             => kind switch
             {
@@ -340,7 +232,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => kind.ToString().ToLowerInvariant()
             };
 
-        public static SyntaxToken ToOperatorKeyword( this OperatorKind operatorKind )
+        internal static SyntaxToken ToOperatorKeyword( this OperatorKind operatorKind )
             => operatorKind switch
             {
                 OperatorKind.ImplicitConversion => SyntaxFactory.Token( SyntaxKind.ImplicitKeyword ),
@@ -372,7 +264,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new AssertionFailedException( $"Unexpected OperatorKind: {operatorKind}." )
             };
 
-        public static string ToOperatorMethodName( this OperatorKind operatorKind )
+        internal static string ToOperatorMethodName( this OperatorKind operatorKind )
             => operatorKind switch
             {
                 OperatorKind.ImplicitConversion => WellKnownMemberNames.ImplicitConversionName,
@@ -481,7 +373,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
+        internal static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
             => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
 
         /// <summary>
@@ -490,7 +382,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IIndexer? FindClosestVisibleIndexer( this INamedType namedType, IIndexer signatureTemplate )
+        internal static IIndexer? FindClosestVisibleIndexer( this INamedType namedType, IIndexer signatureTemplate )
             => namedType.AllIndexers.OfExactSignature( signatureTemplate );
 
         /// <summary>
@@ -499,14 +391,14 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="namedType">Type.</param>
         /// <param name="name">Member name.</param>
         /// <returns>A property of the given signature that is visible from the given type or <c>null</c> if no such property exists.</returns>
-        public static IMember? FindClosestUniquelyNamedMember(
+        internal static IMember? FindClosestUniquelyNamedMember(
             this INamedType namedType,
             string name )
             => namedType.AllProperties.OfName( name ).FirstOrDefault() ??
                (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
                namedType.AllEvents.OfName( name ).FirstOrDefault();
 
-        public static bool IsEventField( this IEvent @event )
+        internal static bool IsEventField( this IEvent @event )
         {
             switch ( @event )
             {
@@ -532,13 +424,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public static bool IsCompilerGenerated( this IDeclaration declaration )
+        private static bool IsCompilerGenerated( this IDeclaration declaration )
         {
             return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
                    == true;
         }
 
-        public static bool IsFullyBound( this INamedType type )
+        internal static bool IsFullyBound( this INamedType type )
         {
             return DoesNotContainGenericParameters( type );
 
@@ -561,14 +453,14 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
+        internal static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
             return !ctor.IsStatic && ctor is { IsImplicitlyDeclared: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct };
         }
 
-        public static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
+        internal static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
 
-        public static T Translate<T>( this T declaration, ICompilation newCompilation )
+        internal static T Translate<T>( this T declaration, ICompilation newCompilation )
             where T : IDeclaration
             => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration );
     }

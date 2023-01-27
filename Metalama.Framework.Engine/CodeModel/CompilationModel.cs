@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         static CompilationModel()
         {
-            ModuleInitializer.EnsureInitialized();
+            MetalamaEngineModuleInitializer.EnsureInitialized();
         }
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        public AspectRepository AspectRepository { get; }
+        internal AspectRepository AspectRepository { get; }
 
         private readonly DerivedTypeIndex _derivedTypes;
 
@@ -66,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public PartialCompilation PartialCompilation { get; }
 
-        public MetricManager MetricManager { get; }
+        internal MetricManager MetricManager { get; }
 
         private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
         {
@@ -138,7 +137,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.AddTransformation( transformation );
                 }
 
-                this.IsMutable = false;
+                this._isMutable = false;
 
                 // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
@@ -167,7 +166,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private CompilationModel( CompilationModel prototype, bool mutable )
         {
-            this.IsMutable = mutable;
+            this._isMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
@@ -275,7 +274,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this;
 
-        public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
+        internal IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allMemberAttributesByTypeName[AttributeHelper.GetShortName( type.Name )]
                 .Select(
                     a =>
@@ -410,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 
-        public string? Name => this.RoslynCompilation.AssemblyName;
+        internal string? Name => this.RoslynCompilation.AssemblyName;
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
@@ -421,16 +420,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclaration OriginalDefinition => this;
 
         internal GenericMap EmptyGenericMap { get; }
-
-        public bool ContainsType( INamedTypeSymbol type )
-        {
-            if ( this.PartialCompilation.IsPartial && !this.PartialCompilation.Types.Contains( type ) )
-            {
-                return false;
-            }
-
-            return this.CompilationContext.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
-        }
 
         bool IAssembly.IsExternal => false;
 
@@ -445,9 +434,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        public CompilationModel CreateMutableClone() => new( this, true );
+        internal CompilationModel CreateMutableClone() => new( this, true );
 
-        public bool Freeze() => this.IsMutable = false;
+        internal void Freeze() => this._isMutable = false;
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

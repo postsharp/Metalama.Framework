@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -17,6 +18,7 @@ public abstract class DeclarativeAdviceAttribute : Attribute, IAdviceAttribute
     /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
     /// using the <see cref="LayersAttribute"/> custom attribute.
     /// </summary>
+    [PublicAPI]
     public string? Layer { get; set; }
 
     /// <summary>

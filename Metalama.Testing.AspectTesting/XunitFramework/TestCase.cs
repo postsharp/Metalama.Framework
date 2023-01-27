@@ -23,7 +23,12 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info )
         {
-            this._factory = new TestFactory( this._factory.ProjectProperties, info.GetValue<string>( "basePath" ), info.GetValue<string>( "assemblyName" ) );
+            this._factory = new TestFactory(
+                this._factory.ServiceProvider,
+                this._factory.ProjectProperties,
+                info.GetValue<string>( "basePath" ),
+                info.GetValue<string>( "assemblyName" ) );
+
             this._relativePath = info.GetValue<string>( "relativePath" );
         }
 
@@ -36,7 +41,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         string ITestCase.DisplayName => Path.GetFileNameWithoutExtension( this._relativePath );
 
-        public string? SkipReason => TestInput.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).SkipReason;
+        public string? SkipReason
+            => this._factory.TestInputFactory.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).SkipReason;
 
         ISourceInformation ITestCase.SourceInformation
         {

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the local function that contains this reference or <c>null</c> if it contained within a normal method.
         /// </summary>
-        public IMethodSymbol? ContainingLocalFunction { get; }
+        private IMethodSymbol? ContainingLocalFunction { get; }
 
         /// <summary>
         /// Gets the body that contains the reference, i.e. local function or containing semantic.

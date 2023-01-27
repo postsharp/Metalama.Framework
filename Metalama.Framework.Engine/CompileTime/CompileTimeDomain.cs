@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -12,6 +13,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+
+// Resharper disable ClassWithVirtualMembersNeverInherited.Global
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -70,12 +73,13 @@ namespace Metalama.Framework.Engine.CompileTime
             return null;
         }
 
-        // ReSharper disable once VirtualMemberNeverOverridden.Global
+        // ReSharper disable once VirtualMemberNeverOverridden.Global, 
 
         /// <summary>
         /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
         /// but it can be overwritten for .NET Core.
         /// </summary>
+        [PublicAPI] // Overridden by Metalama.Try.
         public virtual Assembly LoadAssembly( string path )
         {
             try

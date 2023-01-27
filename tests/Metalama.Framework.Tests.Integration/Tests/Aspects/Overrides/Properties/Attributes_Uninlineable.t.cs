@@ -2,6 +2,9 @@
 [Override]
 internal class TargetClass
 {
+  [FieldOnly]
+  [FieldAndProperty]
+  private int _autoProperty;
   [FieldAndProperty]
   [PropertyOnly]
   public int AutoProperty
@@ -11,8 +14,8 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      _ = this.AutoProperty_Source;
-      return this.AutoProperty_Source;
+      _ = this._autoProperty;
+      return this._autoProperty;
     }
     [MethodOnly]
     [param: ParamOnly]
@@ -20,13 +23,10 @@ internal class TargetClass
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.AutoProperty_Source = value;
-      this.AutoProperty_Source = value;
+      this._autoProperty = value;
+      this._autoProperty = value;
     }
   }
-  [field: FieldOnly]
-  [field: FieldAndProperty]
-  private int AutoProperty_Source { get; set; }
   [FieldAndProperty]
   [PropertyOnly]
   public int Property
@@ -61,6 +61,8 @@ internal class TargetClass
       Console.WriteLine("Original Property");
     }
   }
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldOnlyAttribute]
+  private global::System.Int32 _introducedAutoProperty;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldAndPropertyAttribute]
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.PropertyOnlyAttribute]
   public global::System.Int32 IntroducedAutoProperty
@@ -68,18 +70,16 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      _ = this.IntroducedAutoProperty_Source;
-      return this.IntroducedAutoProperty_Source;
+      _ = this._introducedAutoProperty;
+      return this._introducedAutoProperty;
     }
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      this.IntroducedAutoProperty_Source = value;
-      this.IntroducedAutoProperty_Source = value;
+      this._introducedAutoProperty = value;
+      this._introducedAutoProperty = value;
     }
   }
-  [field: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldOnlyAttribute]
-  private global::System.Int32 IntroducedAutoProperty_Source { get; set; }
   private global::System.Int32 IntroducedProperty_Introduction
   {
     get

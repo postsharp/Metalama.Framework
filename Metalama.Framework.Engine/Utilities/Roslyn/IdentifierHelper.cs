@@ -1,34 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal static class IdentifierHelper
 {
-    private static bool IsIdentifierStartCharacter( char ch )
-        => ch switch
-        {
-            // '\u0061'
-            // '\u0041'
-            < 'a' and < 'A' => false,
-
-            // identifier-start-character:
-            //   letter-character
-            //   _ (the underscore character U+005F)
-            < 'a' => ch is <= 'Z' or '_' // '\u005A'
-           ,
-
-            // '\u007A'
-            <= 'z' => true,
-
-            // max ASCII
-            <= '\u007F' => false,
-            _ => IsLetterChar( CharUnicodeInfo.GetUnicodeCategory( ch ) )
-        };
-
     /// <summary>
     /// Returns true if the Unicode character can be a part of an identifier.
     /// </summary>
@@ -60,34 +38,6 @@ internal static class IdentifierHelper
                            || IsFormattingChar( cat );
                 }
         }
-    }
-
-    /// <summary>
-    /// Check that the name is a valid Unicode identifier.
-    /// </summary>
-    public static bool IsValidIdentifier( [NotNullWhen( returnValue: true )] string? name )
-    {
-        if ( string.IsNullOrEmpty( name ) )
-        {
-            return false;
-        }
-
-        if ( !IsIdentifierStartCharacter( name[0] ) )
-        {
-            return false;
-        }
-
-        var nameLength = name.Length;
-
-        for ( var i = 1; i < nameLength; i++ )
-        {
-            if ( !IsIdentifierPartCharacter( name[i] ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static bool IsLetterChar( UnicodeCategory cat )
@@ -142,17 +92,6 @@ internal static class IdentifierHelper
         //   A unicode-escape-sequence representing a character of the class Pc
 
         return cat == UnicodeCategory.ConnectorPunctuation;
-    }
-
-    /// <summary>
-    /// Returns true if the Unicode character is a formatting character (Unicode class Cf).
-    /// </summary>
-    /// <param name="ch">The Unicode character.</param>
-    internal static bool IsFormattingChar( char ch )
-    {
-        // There are no FormattingChars in ASCII range
-
-        return ch > 127 && IsFormattingChar( CharUnicodeInfo.GetUnicodeCategory( ch ) );
     }
 
     /// <summary>

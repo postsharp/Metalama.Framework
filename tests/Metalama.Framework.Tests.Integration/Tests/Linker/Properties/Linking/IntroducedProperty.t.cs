@@ -24,14 +24,9 @@ class Target
   }
   private int Bar_Empty
   {
-    get
-    {
-      Console.WriteLine("This is introduced code (discarded).");
-      return 0;
-    }
+    get => default(int);
     set
     {
-      Console.WriteLine("This is introduced code (discarded).");
     }
   }
   public int Foo_Override0

@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
-            this._parent.LicenseVerifier?.VerifyCanValidator( this._parent.AspectPredecessor );
+            this._parent.LicenseVerifier?.VerifyCanAddValidator( this._parent.AspectPredecessor );
 
             this._parent.AddValidatorSource( validatorSource );
         }

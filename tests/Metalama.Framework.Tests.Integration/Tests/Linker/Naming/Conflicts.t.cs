@@ -1,17 +1,17 @@
 class Target
 {
+  private int _foo4;
   public int Foo
   {
     get
     {
-      return this.Foo_Source4;
+      return this._foo4;
     }
     set
     {
-      this.Foo_Source4 = value;
+      this._foo4 = value;
     }
   }
-  private int Foo_Source4 { get; set; }
   public int _foo { get; set; }
   public int Foo_Source { get; set; }
   public int _foo1()

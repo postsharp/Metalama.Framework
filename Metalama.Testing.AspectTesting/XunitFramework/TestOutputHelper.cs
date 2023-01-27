@@ -7,7 +7,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 {
     internal sealed class TestOutputHelper : ITestOutputHelper
     {
-        public StringWriter StringWriter { get; } = new();
+        private StringWriter StringWriter { get; } = new();
 
         public void WriteLine( string message ) => this.StringWriter.WriteLine( message );
 

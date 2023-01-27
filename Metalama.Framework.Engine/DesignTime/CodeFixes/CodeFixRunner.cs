@@ -40,38 +40,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 TestableCancellationToken cancellationToken );
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
-            Document document,
-            Diagnostic diagnostic,
-            string codeFixTitle,
-            bool isComputingPreview,
-            TestableCancellationToken cancellationToken = default )
-        {
-            var project = document.Project;
-            var compilation = await project.GetCompilationAsync( cancellationToken );
-
-            if ( compilation == null )
-            {
-                return CodeActionResult.Empty;
-            }
-
-            var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
-
-            if ( syntaxTree == null )
-            {
-                return CodeActionResult.Empty;
-            }
-
-            return await this.ExecuteCodeFixAsync(
-                compilation,
-                syntaxTree,
-                diagnostic.Id,
-                diagnostic.Location.SourceSpan,
-                codeFixTitle,
-                isComputingPreview,
-                cancellationToken );
-        }
-
-        public async Task<CodeActionResult> ExecuteCodeFixAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
             string diagnosticId,

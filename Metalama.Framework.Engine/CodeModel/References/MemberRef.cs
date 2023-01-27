@@ -33,11 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._underlying = declarationRef.As<T>();
         }
 
-        public MemberRef( in Ref<T> declarationRef )
-        {
-            this._underlying = declarationRef;
-        }
-
         public object? Target => this._underlying.Target;
 
         public SerializableDeclarationId ToSerializableId() => this._underlying.ToSerializableId();

@@ -17,10 +17,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
             => MetalamaExecutionContext.CurrentInternal.SyntaxBuilder
                ?? throw new InvalidOperationException( "This service is not available in the current execution context." );
 
-        /// <summary>
-        /// Gets the underlying <see cref="System.Text.StringBuilder"/>.
-        /// </summary>
-        public StringBuilder StringBuilder { get; }
+        private protected StringBuilder StringBuilder { get; }
 
         private protected SyntaxBuilder()
         {

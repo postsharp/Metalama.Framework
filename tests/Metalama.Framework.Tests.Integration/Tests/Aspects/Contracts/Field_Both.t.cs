@@ -6,8 +6,7 @@ internal class Target
   {
     get
     {
-      global::System.String returnValue;
-      returnValue = this._q1;
+      var returnValue = this._q1;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -32,8 +31,7 @@ internal struct TargetStruct
   {
     get
     {
-      global::System.String returnValue;
-      returnValue = this._q1;
+      var returnValue = this._q1;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
