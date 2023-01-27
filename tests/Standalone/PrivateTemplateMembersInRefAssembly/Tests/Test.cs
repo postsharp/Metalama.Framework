@@ -4,6 +4,6 @@ namespace Tests;
 
 partial class Program
 {
-    [Err]
+    [IntroducePrivateMembers]
     public void Foo() { }
 }
