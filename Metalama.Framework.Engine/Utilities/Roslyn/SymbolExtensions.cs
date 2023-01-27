@@ -117,21 +117,22 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
-        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
-        {
-            foreach ( var type in ns.GetTypeMembers() )
-            {
-                yield return type;
-            }
+        internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
-            foreach ( var namespaceMember in ns.GetNamespaceMembers() )
-            {
-                foreach ( var type in namespaceMember.GetTypes() )
-                {
-                    yield return type;
-                }
-            }
-        }
+        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
+            => Enumerable.Concat(
+                ns.GetTypeMembers(),
+                ns.GetNamespaceMembers().SelectMany( nsMember => nsMember.GetTypes() ) );
+
+        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol ns )
+            => Enumerable.Concat(
+                ns.GetTypeMembers().SelectMany( typeMember => typeMember.GetSelfAndTypes() ),
+                ns.GetNamespaceMembers().SelectMany( nsMember => nsMember.GetAllTypes() ) );
+
+        private static IEnumerable<INamedTypeSymbol> GetSelfAndTypes( this INamedTypeSymbol type )
+            => Enumerable.Prepend(
+                type.GetTypeMembers().SelectMany( typeMember => typeMember.GetSelfAndTypes() ),
+                type );
 
         internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
         {
