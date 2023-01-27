@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int Property_GetOnly { get; }
         int Property_ExpressionBody { get; }
         int AutoProperty { get; set; }
-        int AutoProperty_PrivateSetter { get; }
+        int AutoProperty_PrivateSetter { get; set; }
         event EventHandler? EventField;
         event EventHandler? Event;
     }

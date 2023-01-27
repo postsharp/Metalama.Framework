@@ -44,40 +44,40 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember]
-        private void VoidMethod() { }
+        public void VoidMethod() { }
 
         [InterfaceMember]
-        private int Method( int x, string y )
+        public int Method( int x, string y )
         {
             return x;
         }
 
         [InterfaceMember]
-        private int Method_Ref( ref int x )
+        public int Method_Ref( ref int x )
         {
             return x;
         }
 
         [InterfaceMember]
-        private T? GenericMethod<T>( T? x )
+        public T? GenericMethod<T>( T? x )
         {
             return x;
         }
 
         [InterfaceMember]
-        private T? GenericMethod_Multiple<T, U>( T? x, U? y )
+        public T? GenericMethod_Multiple<T, U>( T? x, U? y )
         {
             return x;
         }
 
         [InterfaceMember]
-        private T? GenericMethod_MultipleReverse<T, U>( U? x, T? y )
+        public T? GenericMethod_MultipleReverse<T, U>( U? x, T? y )
         {
             return y;
         }
 
         [InterfaceMember]
-        private T? GenericMethod_NestedParam<T>( List<T> x )
+        public T? GenericMethod_NestedParam<T>( List<T> x )
         {
             if (x.Count > 0)
             {
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember]
-        private T? GenericMethod_DoubleNestedParam<T>( List<List<T>> x )
+        public T? GenericMethod_DoubleNestedParam<T>( List<List<T>> x )
         {
             if (x.Count > 0)
             {
@@ -110,13 +110,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember]
-        private T? GenericMethod_Ref<T>( ref T? x )
+        public T? GenericMethod_Ref<T>( ref T? x )
         {
             return x;
         }
 
         [InterfaceMember]
-        private void GenericMethod_Out<T>( out T? x )
+        public void GenericMethod_Out<T>( out T? x )
         {
             x = default;
         }

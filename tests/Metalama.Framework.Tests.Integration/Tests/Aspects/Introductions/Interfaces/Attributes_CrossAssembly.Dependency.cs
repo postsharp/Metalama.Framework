@@ -43,14 +43,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         [InterfaceMember(IsExplicit = false)]
         [TestAspect]
-        private void Method()
+        public void Method()
         {
             Console.WriteLine("Introduced interface member");
         }
 
         [InterfaceMember(IsExplicit = false)]
         [TestAspect]
-        private int Property
+        public int Property
         {
             [TestAspect("Getter")]
             get
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         [InterfaceMember(IsExplicit = false)]
         [TestAspect]
-        private int AutoProperty
+        public int AutoProperty
         {
             [TestAspect("Getter")]
             get;
@@ -77,11 +77,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         [InterfaceMember(IsExplicit = false)]
         [TestAspect]
-        private event EventHandler? EventField;
+        public event EventHandler? EventField;
 
         [InterfaceMember(IsExplicit = false)]
         [TestAspect]
-        private event EventHandler? Event
+        public event EventHandler? Event
         {
             [TestAspect("Adder")]
             add { }

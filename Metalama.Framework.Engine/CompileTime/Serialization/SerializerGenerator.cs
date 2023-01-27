@@ -690,6 +690,13 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
             if ( member is IFieldSymbol field )
             {
+                // System.Int32 (and similar types) contains a private field of type Int32
+                // skip it to avoid stack overflow
+                if ( SymbolEqualityComparer.Default.Equals( field.Type, type ) )
+                {
+                    continue;
+                }
+
                 if ( this.ContainsAnySerializableReferences( field.Type ) )
                 {
                     return true;

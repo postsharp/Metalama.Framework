@@ -103,33 +103,71 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             var introducedInterface = pair.Key;
             List<MemberSpecification> memberSpecifications = new();
 
-            foreach ( var interfaceMethod in introducedInterface.Methods )
+            void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch)
+                where T : class, IMember
             {
-                if ( !TryGetAspectInterfaceMethod( interfaceMethod, out var methodTemplate ) )
+                var memberTemplate = getAspectInterfaceMember( interfaceMember );
+
+                if ( memberTemplate == null )
                 {
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             interfaceMethod) ) );
+                             interfaceMember) ) );
                 }
-                else if (
-                    !SignatureTypeSymbolComparer.Instance.Equals(
-                        interfaceMethod.ReturnParameter.Type.GetSymbol().AssertNotNull(),
-                        methodTemplate.Declaration.ReturnParameter.Type.GetSymbol().AssertNotNull() )
-                    || interfaceMethod.ReturnParameter.RefKind != methodTemplate.Declaration.ReturnParameter.RefKind )
+                else if ( !membersMatch( memberTemplate.Declaration ) )
                 {
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             methodTemplate.Declaration,
-                             interfaceMethod) ) );
+                             memberTemplate.Declaration,
+                             interfaceMember) ) );
                 }
                 else
                 {
-                    memberSpecifications.Add( new MemberSpecification( interfaceMethod, null, methodTemplate.Cast<IMember>(), null ) );
+                    var memberSpecification = new MemberSpecification( interfaceMember, null, memberTemplate.Cast<IMember>(), null );
+
+                    var isPublic = memberTemplate.Accessibility == Accessibility.Public;
+
+                    if ( interfaceMember is IPropertyOrIndexer property )
+                    {
+                        if ( property.GetMethod != null )
+                        {
+                            isPublic &= memberTemplate.GetAccessorAccessibility == Accessibility.Public;
+                        }
+
+                        if ( property.SetMethod != null )
+                        {
+                            isPublic &= memberTemplate.SetAccessorAccessibility == Accessibility.Public;
+                        }
+                    }
+
+                    if ( !memberSpecification.IsExplicit && !isPublic )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.ImplicitInterfaceImplementationHasToBePublic.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this._interfaceType, memberTemplate.Declaration) ) );
+                    }
+                    else
+                    {
+                        memberSpecifications.Add( memberSpecification );
+                    }
                 }
+            }
+
+            foreach ( var interfaceMethod in introducedInterface.Methods )
+            {
+                TryAddMember(
+                    interfaceMethod,
+                    GetAspectInterfaceMethod,
+                    templateMethod =>
+                        SignatureTypeSymbolComparer.Instance.Equals(
+                            interfaceMethod.ReturnParameter.Type.GetSymbol().AssertNotNull(),
+                            templateMethod.ReturnParameter.Type.GetSymbol().AssertNotNull() )
+                        && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind );
             }
 
             foreach ( var interfaceIndexer in introducedInterface.Indexers )
@@ -141,111 +179,60 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             foreach ( var interfaceProperty in introducedInterface.Properties )
             {
-                if ( !TryGetAspectInterfaceProperty( interfaceProperty, out var propertyTemplate ) )
-                {
-                    diagnosticAdder.Report(
-                        AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                            this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             interfaceProperty) ) );
-                }
-                else if (
-                    !this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, propertyTemplate.Declaration.Type )
-                    || interfaceProperty.RefKind != propertyTemplate.Declaration.RefKind )
-                {
-                    diagnosticAdder.Report(
-                        AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
-                            this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             propertyTemplate.Declaration,
-                             interfaceProperty) ) );
-                }
-                else
-                {
-                    memberSpecifications.Add( new MemberSpecification( interfaceProperty, null, propertyTemplate.Cast<IMember>(), null ) );
-                }
+                TryAddMember(
+                    interfaceProperty,
+                    GetAspectInterfaceProperty,
+                    templateProperty =>
+                        this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, templateProperty.Type )
+                        && interfaceProperty.RefKind == templateProperty.RefKind );
             }
 
             foreach ( var interfaceEvent in introducedInterface.Events )
             {
-                if ( !TryGetAspectInterfaceEvent( interfaceEvent, out var eventTemplate ) )
-                {
-                    diagnosticAdder.Report(
-                        AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                            this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             interfaceEvent) ) );
-                }
-                else if ( !this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, eventTemplate.Declaration.Type ) )
-                {
-                    diagnosticAdder.Report(
-                        AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
-                            this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             eventTemplate.Declaration,
-                             interfaceEvent) ) );
-                }
-                else
-                {
-                    memberSpecifications.Add( new MemberSpecification( interfaceEvent, null, eventTemplate.Cast<IMember>(), null ) );
-                }
+                TryAddMember(
+                    interfaceEvent,
+                    GetAspectInterfaceEvent,
+                    templateEvent =>
+                        this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, templateEvent.Type ) );
             }
 
             this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, memberSpecifications ) );
         }
 
-        bool TryGetAspectInterfaceMethod(
-            IMethod interfaceMethod,
-            [NotNullWhen( true )] out TemplateMember<IMethod>? aspectMethod )
+        TemplateMember<IMethod>? GetAspectInterfaceMethod( IMethod interfaceMethod )
         {
             var method = aspectType.AllMethods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
 
             if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
             {
-                aspectMethod = TemplateMemberFactory.Create( method, classMember );
-
-                return true;
+                return TemplateMemberFactory.Create( method, classMember );
             }
 
-            aspectMethod = null;
-
-            return false;
+            return null;
         }
 
-        bool TryGetAspectInterfaceProperty(
-            IProperty interfaceProperty,
-            [NotNullWhen( true )] out TemplateMember<IProperty>? aspectProperty )
+        TemplateMember<IProperty>? GetAspectInterfaceProperty( IProperty interfaceProperty )
         {
             var property = aspectType.AllProperties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
 
             if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
             {
-                aspectProperty = TemplateMemberFactory.Create( property, classMember );
-
-                return true;
+                return TemplateMemberFactory.Create( property, classMember );
             }
 
-            aspectProperty = null;
-
-            return false;
+            return null;
         }
 
-        bool TryGetAspectInterfaceEvent(
-            IEvent interfaceEvent,
-            [NotNullWhen( true )] out TemplateMember<IEvent>? aspectEvent )
+        TemplateMember<IEvent>? GetAspectInterfaceEvent( IEvent interfaceEvent )
         {
             var @event = aspectType.AllEvents.SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
 
             if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
             {
-                aspectEvent = TemplateMemberFactory.Create( @event, classMember );
-
-                return true;
+                return TemplateMemberFactory.Create( @event, classMember );
             }
 
-            aspectEvent = null;
-
-            return false;
+            return null;
         }
 
         bool TryGetInterfaceMemberTemplate(
