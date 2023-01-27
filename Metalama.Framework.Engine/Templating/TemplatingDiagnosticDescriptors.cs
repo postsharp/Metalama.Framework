@@ -207,7 +207,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0229",
                 "Types that are both compile-time and run-time are forbidden in run-time-only types.",
-                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTime].",
+                "The type '{0}' cannot be [CompileOrRunTime] because it is nested in a run-time-only type.",
                 _category,
                 Error );
 
@@ -219,11 +219,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> RunTimeTypesCannotHaveCompileTimeTypesExceptClasses
+        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type TypeFabric)> RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
             = new(
                 "LAMA0231",
-                "Run-time types cannot have other compile-time types than classes.",
-                "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
+                "Compile-time types cannot be nested in run-time types, except for type fabrics.",
+                "The compile-time type '{0}' cannot be nested in a run-time type. The only compile-time type that can be nested in run-time type is a class inheriting '{1}'.",
                 _category,
                 Error );
 
@@ -360,6 +360,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0251",
                 "Dynamic variables cannot be set to non-dynamic values.",
                 "Dynamic variable '{0}' cannot be set to a non-dynamic value.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartialTemplateMethodsForbidden
+            = new(
+                "LAMA0252",
+                "Template methods cannot be partial",
+                "'{0}' cannot be partial because it is a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ITypeSymbol, string)> CompileTimeTypeInInvocationOfRuntimeMethod
+            = new(
+                "LAMA0253",
+                "Compile-time-only types cannot be used in invocations of run-time methods.",
+                "Compile-time-only type '{0}' cannot be used in the invocation of run-time method '{1}'.",
                 _category,
                 Error );
     }
