@@ -2056,4 +2056,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         return base.VisitTypeOfExpression( node );
     }
+
+    protected override ExpressionSyntax TransformCastExpression( CastExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformCastExpression( node ) );
+
+    protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
 }
