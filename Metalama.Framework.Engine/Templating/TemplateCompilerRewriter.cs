@@ -666,8 +666,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         switch ( expressionType.Name )
         {
             case "dynamic":
-            case "Task" when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
-                             expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+            case "Task" or "ConfiguredTaskAwaitable"
+                when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+                     expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
             case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
                 when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
@@ -1779,7 +1780,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
                || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
                {
-                   Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
+                   Name: "Task" or "ConfiguredTaskAwaitable" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
                });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
