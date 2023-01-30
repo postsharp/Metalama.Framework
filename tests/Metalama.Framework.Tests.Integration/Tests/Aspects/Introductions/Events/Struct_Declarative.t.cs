@@ -3,16 +3,16 @@
 [Introduction]
 internal struct TargetStruct
 {
-  private int _existingField;
-  public TargetStruct(int x)
-  {
-    this._existingField = x;
-  }
-  public static void Foo(global::System.Object? sender, global::System.EventArgs args)
-  {
-  }
-  public event global::System.EventHandler? IntroducedEvent = default;
-  public event global::System.EventHandler? IntroducedEvent_Initializer = (global::System.EventHandler? )global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Struct_Declarative.IntroductionAttribute.Foo;
-  public event global::System.EventHandler? IntroducedEvent_Static = default;
-  public event global::System.EventHandler? IntroducedEvent_Static_Initializer = (global::System.EventHandler? )global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Struct_Declarative.IntroductionAttribute.Foo;
+    private int _existingField;
+    public TargetStruct(int x)
+    {
+        this._existingField = x;
+    }
+    public static void Foo(global::System.Object? sender, global::System.EventArgs args)
+    {
+    }
+    public event global::System.EventHandler? IntroducedEvent = default;
+    public event global::System.EventHandler? IntroducedEvent_Initializer = (global::System.EventHandler?)Foo;
+    public event global::System.EventHandler? IntroducedEvent_Static = default;
+    public event global::System.EventHandler? IntroducedEvent_Static_Initializer = (global::System.EventHandler?)Foo;
 }
