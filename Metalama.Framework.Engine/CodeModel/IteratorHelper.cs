@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -44,6 +45,14 @@ internal static partial class IteratorHelper
 
     public static bool IsIteratorMethod( IMethodSymbol method )
     {
+        if ( method.IsAsync &&
+             (method.ReturnType.OriginalDefinition.GetFullName() == "System.Collections.Generic.IAsyncEnumerable"
+              || method.ReturnType.OriginalDefinition.GetFullName() == "System.Collections.Generic.IAsyncEnumerator") )
+        {
+            // Async method that returns IAsyncEnumerable/tor is always an iterator even when no yield is present.
+            return true;
+        }
+
         var isIterator = method.DeclaringSyntaxReferences.Any(
             r => r.GetSyntax() switch
             {
