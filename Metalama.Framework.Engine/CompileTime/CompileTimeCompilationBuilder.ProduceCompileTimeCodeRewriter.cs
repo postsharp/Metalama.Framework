@@ -471,7 +471,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Add non-implemented members of IAspect, IEligible and IProjectData.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
-                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
+                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, deduplicate: true );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {

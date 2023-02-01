@@ -209,7 +209,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.References = references;
 
             this._assembly = assembly;
-            this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
+            this.ClosureProjects = this.SelectManyRecursive( p => p.References, includeThis: true, deduplicate: true ).ToImmutableList();
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
             this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectAsImmutableArray( p => p.DiagnosticManifest ) );
 
