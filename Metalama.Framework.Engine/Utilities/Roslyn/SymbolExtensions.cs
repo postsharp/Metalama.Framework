@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -115,24 +116,21 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return false;
         }
 
+        /// <summary>
+        /// Get top-level (non-nested) types in an assembly.
+        /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
+        /// <summary>
+        /// Get all types in an assembly, including nested types.
+        /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
         private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
-            => Enumerable.Concat(
-                ns.GetTypeMembers(),
-                ns.GetNamespaceMembers().SelectMany( nsMember => nsMember.GetTypes() ) );
+            => ns.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
 
         private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol ns )
-            => Enumerable.Concat(
-                ns.GetTypeMembers().SelectMany( typeMember => typeMember.GetSelfAndTypes() ),
-                ns.GetNamespaceMembers().SelectMany( nsMember => nsMember.GetAllTypes() ) );
-
-        private static IEnumerable<INamedTypeSymbol> GetSelfAndTypes( this INamedTypeSymbol type )
-            => Enumerable.Prepend(
-                type.GetTypeMembers().SelectMany( typeMember => typeMember.GetSelfAndTypes() ),
-                type );
+            => ns.GetTypes().SelectMany( type => type.SelectManyRecursive( type => type.GetTypeMembers(), includeThis: true ) );
 
         internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
         {
