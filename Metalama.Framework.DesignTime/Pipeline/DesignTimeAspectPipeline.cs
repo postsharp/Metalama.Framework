@@ -335,7 +335,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             var getConfigurationResult = PipelineState.GetConfiguration(
                 ref state,
-                compilation,
+                compilation.Compilation,
                 ignoreStatus,
                 cancellationToken );
 
@@ -928,7 +928,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             // Check if the aspect class is accessible from the symbol.
 
-            var aspectClassSymbol = compilationContext.SerializableTypeIdProvider.ResolveId( aspectClass.TypeId );
+            var aspectClassSymbol = compilationContext.SerializableTypeIdResolver.ResolveId( aspectClass.TypeId );
 
             if ( !compilation.IsSymbolAccessibleWithin( aspectClassSymbol, (ISymbol?) symbol.GetClosestContainingType() ?? symbol.ContainingAssembly ) )
             {

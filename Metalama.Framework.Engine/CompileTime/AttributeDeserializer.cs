@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -18,7 +19,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal sealed class AttributeDeserializer
+    internal sealed class AttributeDeserializer : IProjectService
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;

@@ -418,7 +418,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         {
-            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdProvider.ResolveId( serializableTypeId, genericArguments );
+            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
             return this.GetIType( symbol );
         }

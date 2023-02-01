@@ -18,6 +18,9 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
 
+        [Obsolete( "Redundant call" )]
+        public static CompilationModel GetCompilationModel( this CompilationModel compilation ) => compilation;
+
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )

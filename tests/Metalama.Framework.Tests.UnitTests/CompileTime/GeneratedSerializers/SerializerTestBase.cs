@@ -22,7 +22,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                 code,
                 name: "test_A" );
 
+            var templateDiscoveryContextProvider = new CacheableTemplateDiscoveryContextProvider( runtimeCompilation, testContext.ServiceProvider );
+
             var compileTimeCompilationBuilder = new CompileTimeCompilationBuilder( testContext.ServiceProvider, domain );
+
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -33,8 +36,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                     Array.Empty<CompileTimeProject>(),
                     diagnosticBag,
                     false,
-                    CancellationToken.None,
-                    out var project ),
+                    out var project,
+                    templateDiscoveryContextProvider,
+                    CancellationToken.None ),
                 string.Join( "\n", diagnosticBag.SelectAsEnumerable( x => x.ToString() ) ) );
 
             return project!;

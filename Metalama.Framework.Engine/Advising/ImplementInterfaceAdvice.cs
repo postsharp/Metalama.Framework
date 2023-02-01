@@ -88,8 +88,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.            
 
-        var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
-        var aspectType = this.SourceCompilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
+        var aspectType = this.Aspect.AspectClass.GetNamedType( this.SourceCompilation );
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =
@@ -103,7 +102,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             var introducedInterface = pair.Key;
             List<MemberSpecification> memberSpecifications = new();
 
-            void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch)
+            void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch )
                 where T : class, IMember
             {
                 var memberTemplate = getAspectInterfaceMember( interfaceMember );
@@ -405,12 +404,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             var missingAccessor =
                                 (getMethodMissingFromTemplate, setMethodMissingFromTemplate, setInitOnlyInTemplate, setInitOnlyInInterface) switch
                                 {
-                                    (true, _, _, _ ) => "get", // Missing getter.
-                                    (false, true, _, false ) => "set", // Missing setter.
-                                    (false, true, _, true ) => "init", // Missing init-only setter.
-                                    (false, false, true, false ) => "set", // Interface has setter, template has init-only setter.
-                                    (false, false, false, true ) => "init", // Interface has init-only setter, template has setter.
-                                    _ => null,
+                                    (true, _, _, _) => "get",              // Missing getter.
+                                    (false, true, _, false) => "set",      // Missing setter.
+                                    (false, true, _, true) => "init",      // Missing init-only setter.
+                                    (false, false, true, false) => "set",  // Interface has setter, template has init-only setter.
+                                    (false, false, false, true) => "init", // Interface has init-only setter, template has setter.
+                                    _ => null
                                 };
 
                             if ( missingAccessor != null )
@@ -426,10 +425,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             var unexpectedAccessor =
                                 (isExplicit, getMethodUnexpectedInTemplate, setMethodUnexpectedInTemplate, setInitOnlyInTemplate) switch
                                 {
-                                    (true, true, _, _ ) => "get", // Unexpected getter.
-                                    (true, false, true, false ) => "set", // Unexpected setter.
-                                    (true, false, true, true ) => "init", // Unexpected init-only setter.
-                                    _ => null,
+                                    (true, true, _, _) => "get",         // Unexpected getter.
+                                    (true, false, true, false) => "set", // Unexpected setter.
+                                    (true, false, true, true) => "init", // Unexpected init-only setter.
+                                    _ => null
                                 };
 
                             if ( unexpectedAccessor != null )
@@ -437,7 +436,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 diagnostics.Report(
                                     AdviceDiagnosticDescriptors.ExplicitInterfacePropertyHasSuperficialAccessor.CreateRoslynDiagnostic(
                                         targetType.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration, unexpectedAccessor) ) );
+                                        (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration,
+                                         unexpectedAccessor) ) );
 
                                 continue;
                             }
@@ -463,12 +463,16 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                             if ( hasGetter )
                             {
-                                CopyAttributes( templateProperty.Declaration.GetMethod.AssertNotNull(), (DeclarationBuilder) propertyBuilder.GetMethod.AssertNotNull() );
+                                CopyAttributes(
+                                    templateProperty.Declaration.GetMethod.AssertNotNull(),
+                                    (DeclarationBuilder) propertyBuilder.GetMethod.AssertNotNull() );
                             }
 
                             if ( hasSetter )
                             {
-                                CopyAttributes( templateProperty.Declaration.SetMethod.AssertNotNull(), (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
+                                CopyAttributes(
+                                    templateProperty.Declaration.SetMethod.AssertNotNull(),
+                                    (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
                             }
                         }
 

@@ -116,7 +116,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
             this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
-            var compilation = this.LastCompilation.GetCompilationModel();
+            var compilation = this.LastCompilation;
 
             this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
 

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.UnitTesting;
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
 
-            var compileTimeType = (CompileTimeType) compilationServices.CompileTimeTypeFactory.Get( typeSymbol );
+            var compileTimeType = compilationServices.CompileTimeTypeFactory.Get( typeSymbol );
 
             var expectedTypeName = type.FullName.AssertNotNull()
 #if NET5_0_OR_GREATER

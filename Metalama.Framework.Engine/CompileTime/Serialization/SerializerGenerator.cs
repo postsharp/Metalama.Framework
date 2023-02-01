@@ -27,7 +27,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         Compilation runTimeCompilation,
         Compilation compileTimeCompilation,
         SyntaxGenerationContext context,
-        IReadOnlyCollection<CompileTimeProject> compileTimeProjects )
+        IEnumerable<CompileTimeProject> compileTimeProjects )
     {
         this._context = context;
 

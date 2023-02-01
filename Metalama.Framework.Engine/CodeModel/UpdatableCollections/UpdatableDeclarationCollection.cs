@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -139,9 +140,24 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     protected virtual bool IsSymbolIncluded( ISymbol symbol ) => !this.IsHidden( symbol );
 
     private bool IsHidden( ISymbol symbol )
-        => symbol.DeclaredAccessibility == Accessibility.Private
-            && !SymbolEqualityComparer.Default.Equals( symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
-            && !this.Compilation.CompilationContext.SymbolClassificationService.IsTemplate( symbol );
+    {
+        // Private symbols of external assemblies must be hidden because these references are not available in a PE reference (i.e. at compile time)
+        // but are available in a CompilationReference (i.e. at design time, if both projects are in the same solution).
+        if ( symbol.DeclaredAccessibility == Accessibility.Private
+             && !this.Compilation.Options.ShowExternalPrivateMembers
+             && !SymbolEqualityComparer.Default.Equals( symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly ) )
+        {
+            return true;
+        }
+
+        // Symbols defined by a our own source generator must be hidden.
+        if ( SourceGeneratorHelper.IsGeneratedSymbol( symbol ) )
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public struct Enumerator : IEnumerator<TRef>
     {

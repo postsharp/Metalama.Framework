@@ -57,16 +57,14 @@ namespace Metalama.Framework.Engine.Fabrics
                 .SelectMany( x => x.Project.TransitiveFabricTypes.SelectAsEnumerable( t => (x.Project, x.Depth, Type: t) ) )
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
-                .Select( x => x.Project.GetType( x.Type ) )
-                .Select( x => (StaticFabricDriver?) this.CreateDriver( x, compilationModel.RoslynCompilation, diagnosticAdder ) )
+                .Select( x => (StaticFabricDriver?) this.CreateDriver( x.Project, x.Type, compilationModel.RoslynCompilation, diagnosticAdder ) )
                 .WhereNotNull();
 
             // Discover the fabrics inside the current project.
             var fabrics =
                 compileTimeProject.FabricTypes
                     .OrderBy( t => t )
-                    .Select( compileTimeProject.GetType )
-                    .Select( x => this.CreateDriver( x, compilationModel.RoslynCompilation, diagnosticAdder ) )
+                    .Select( x => this.CreateDriver( compileTimeProject, x, compilationModel.RoslynCompilation, diagnosticAdder ) )
                     .WhereNotNull()
                     .ToOrderedList( x => x );
 
@@ -107,8 +105,13 @@ namespace Metalama.Framework.Engine.Fabrics
             return new FabricsConfiguration( aspectSources.ToImmutable(), validatorSources.ToImmutable() );
         }
 
-        private FabricDriver? CreateDriver( Type fabricType, Compilation runTimeCompilation, IDiagnosticAdder diagnostics )
+        private FabricDriver? CreateDriver(
+            CompileTimeProject compileTimeProject,
+            string fabricTypeName,
+            Compilation runTimeCompilation,
+            IDiagnosticAdder diagnostics )
         {
+            var fabricType = compileTimeProject.GetType( fabricTypeName );
             var constructor = fabricType.GetConstructor( Type.EmptyTypes );
 
             if ( constructor == null )
@@ -128,16 +131,16 @@ namespace Metalama.Framework.Engine.Fabrics
             switch ( fabric )
             {
                 case TypeFabric typeFabric:
-                    return TypeFabricDriver.Create( this, typeFabric, runTimeCompilation );
+                    return TypeFabricDriver.Create( this, compileTimeProject, typeFabric, runTimeCompilation );
 
                 case TransitiveProjectFabric transitiveCompilationFabric:
-                    return ProjectFabricDriver.Create( this, transitiveCompilationFabric, runTimeCompilation );
+                    return ProjectFabricDriver.Create( this, compileTimeProject, transitiveCompilationFabric, runTimeCompilation );
 
                 case ProjectFabric compilationFabric:
-                    return ProjectFabricDriver.Create( this, compilationFabric, runTimeCompilation );
+                    return ProjectFabricDriver.Create( this, compileTimeProject, compilationFabric, runTimeCompilation );
 
                 case NamespaceFabric namespaceFabric:
-                    return NamespaceFabricDriver.Create( this, namespaceFabric, runTimeCompilation );
+                    return NamespaceFabricDriver.Create( this, compileTimeProject, namespaceFabric, runTimeCompilation );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected fabric type: '{fabricType.FullName}." );

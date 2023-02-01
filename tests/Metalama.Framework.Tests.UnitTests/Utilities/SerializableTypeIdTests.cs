@@ -16,11 +16,11 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     public SerializableTypeIdTests( ITestOutputHelper? testOutputHelper ) : base( testOutputHelper )
     {
         var compilation = TestCompilationFactory.CreateCSharpCompilation( "" );
-        this._provider = new SerializableTypeIdProvider( compilation );
+        this._resolver = new SerializableTypeIdResolver( compilation );
         this._reflectionMapper = new ReflectionMapper( compilation );
     }
 
-    private readonly SerializableTypeIdProvider _provider;
+    private readonly SerializableTypeIdResolver _resolver;
     private readonly ReflectionMapper _reflectionMapper;
 
     [Theory]
@@ -39,9 +39,9 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     public void TestType( Type type )
     {
         var symbol = this._reflectionMapper.GetTypeSymbol( type );
-        var id = SerializableTypeIdProvider.GetId( symbol );
+        var id = symbol.GetSerializableTypeId();
         this.TestOutput.WriteLine( id.Id );
-        var roundTripType = this._provider.ResolveId( id );
+        var roundTripType = this._resolver.ResolveId( id );
         Assert.True( SymbolEqualityComparer.Default.Equals( symbol, roundTripType ) );
     }
 }

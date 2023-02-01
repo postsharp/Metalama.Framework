@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                IReadOnlyCollection<CompileTimeProject> referencedProjects,
+                IEnumerable<CompileTimeProject> referencedProjects,
                 CancellationToken cancellationToken )
             {
                 this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
@@ -262,9 +262,10 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( !this._runTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
-                                                        childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof(TypeFabric)) ) );
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
+                                                        .CreateRoslynDiagnostic(
+                                                            childSymbol.GetDiagnosticLocation(),
+                                                            (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }

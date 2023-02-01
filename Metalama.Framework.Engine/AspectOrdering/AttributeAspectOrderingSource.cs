@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,10 @@ namespace Metalama.Framework.Engine.AspectOrdering
         private readonly Compilation _compilation;
         private readonly AttributeDeserializer _attributeDeserializer;
 
-        public AttributeAspectOrderingSource( Compilation compilation, CompileTimeProjectLoader loader )
+        public AttributeAspectOrderingSource( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             this._compilation = compilation;
-            this._attributeDeserializer = loader.AttributeDeserializer;
+            this._attributeDeserializer = serviceProvider.GetRequiredService<AttributeDeserializer>();
         }
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )

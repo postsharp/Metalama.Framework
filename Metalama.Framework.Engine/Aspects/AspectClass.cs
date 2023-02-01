@@ -101,7 +101,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         Type aspectType,
         IAspect? prototype,
         IDiagnosticAdder diagnosticAdder,
-        CompilationContext compilationContext ) : base(
+        ITemplateReflectionContext compilationContext ) : base(
         serviceProvider,
         compilationContext,
         typeSymbol,
@@ -330,7 +330,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         AspectClass? baseAspectClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        CompilationContext compilationContext,
+        ITemplateReflectionContext templateReflectionContext,
         AspectDriverFactory aspectDriverFactory,
         [NotNullWhen( true )] out AspectClass? aspectClass )
     {
@@ -375,7 +375,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             aspectReflectionType,
             prototype,
             diagnosticAdder,
-            compilationContext );
+            templateReflectionContext );
 
         if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
         {

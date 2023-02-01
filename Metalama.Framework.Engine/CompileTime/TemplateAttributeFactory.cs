@@ -24,7 +24,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
     {
         this._compilation = compilation;
         this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();
-        this._attributeDeserializer = serviceProvider.GetRequiredService<CompileTimeProjectLoader>().AttributeDeserializer;
+        this._attributeDeserializer = serviceProvider.GetRequiredService<AttributeDeserializer>();
     }
 
     public bool TryGetTemplateAttribute(

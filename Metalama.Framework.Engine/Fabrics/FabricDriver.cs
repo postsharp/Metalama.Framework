@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -20,6 +21,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Fabric Fabric { get; }
 
+        public CompileTimeProject CompileTimeProject { get; }
+
         protected FabricDriver( CreationData creationData )
         {
             this.FabricManager = creationData.FabricManager;
@@ -30,16 +33,22 @@ namespace Metalama.Framework.Engine.Fabrics
             this.FabricTypeFullName = creationData.FabricType.GetFullMetadataName().AssertNotNull();
             this.FabricTypeShortName = creationData.FabricType.Name;
             this.DiagnosticLocation = creationData.FabricType.GetDiagnosticLocation();
+            this.CompileTimeProject = creationData.CompileTimeProject;
         }
 
         protected record struct CreationData(
             Fabric Fabric,
             FabricManager FabricManager,
+            CompileTimeProject CompileTimeProject,
             INamedTypeSymbol FabricType,
             string OriginalPath,
             Compilation Compilation );
 
-        protected static CreationData GetCreationData( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+        protected static CreationData GetCreationData(
+            FabricManager fabricManager,
+            CompileTimeProject compileTimeProject,
+            Fabric fabric,
+            Compilation runTimeCompilation )
         {
             var originalPath = fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
 
@@ -60,7 +69,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     .GetTypeSymbol( fabric.GetType() );
             }
 
-            return new CreationData( fabric, fabricManager, symbol, originalPath, runTimeCompilation );
+            return new CreationData( fabric, fabricManager, compileTimeProject, symbol, originalPath, runTimeCompilation );
         }
 
         public Location? DiagnosticLocation { get; }

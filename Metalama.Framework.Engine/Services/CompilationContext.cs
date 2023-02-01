@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
@@ -10,7 +11,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationContext : ICompilationServices
+public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
@@ -27,12 +28,25 @@ public sealed class CompilationContext : ICompilationServices
     }
 
     [Memo]
-    internal CompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdProvider );
+    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
     internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
 
+    ISymbolClassifier ITemplateReflectionContext.SymbolClassifier => this.SymbolClassifier;
+
     public Compilation Compilation { get; }
+
+    AttributeDeserializer ITemplateReflectionContext.AttributeDeserializer => this.AttributeDeserializer;
+
+    CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
+    {
+        // When the current CompilationContext is used for reflecting the template code
+        // (because the template is defined in source code, so it does not have its own ITemplateReflectionContext),
+        // we use the source compilation.
+
+        return (CompilationModel) sourceCompilation;
+    }
 
     IReflectionMapper ICompilationServices.ReflectionMapper => this.ReflectionMapper;
 
@@ -43,7 +57,7 @@ public sealed class CompilationContext : ICompilationServices
     internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
 
     [Memo]
-    internal AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this._serviceProvider, this ) );
+    internal AttributeDeserializer AttributeDeserializer => this._serviceProvider.GetRequiredService<AttributeDeserializer>();
 
     private ISymbolClassifier GetSymbolClassifierCore()
     {
@@ -55,7 +69,7 @@ public sealed class CompilationContext : ICompilationServices
     }
 
     [Memo]
-    public SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
+    public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );

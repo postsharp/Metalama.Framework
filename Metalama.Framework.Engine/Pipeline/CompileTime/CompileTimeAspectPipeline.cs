@@ -75,10 +75,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ImmutableArray<ManagedResource> resources,
             TestableCancellationToken cancellationToken = default )
         {
-            // Metalama.Compiler preserves non-public template members in reference assemblies thanks to IncludeInReferenceAssemblyAnnotation.
-            // This option is then necessary to make them actually visible from Roslyn symbols.
-            compilation = compilation.WithOptions( compilation.Options.WithMetadataImportOptions( MetadataImportOptions.All ) );
-
             var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
@@ -125,7 +121,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
 
             // Initialize the pipeline and generate the compile-time project.
-            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
+            if ( !this.TryInitialize( diagnosticAdder, partialCompilation.Compilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
             {
                 return default;
             }

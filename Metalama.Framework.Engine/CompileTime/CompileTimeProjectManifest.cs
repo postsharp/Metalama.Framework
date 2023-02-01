@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -65,6 +67,26 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public string MetalamaVersion { get; } =
             AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
+
+        public Version? MetalamaAssemblyVersion
+        {
+            get
+            {
+                var indexOfDash = this.MetalamaVersion.IndexOfOrdinal( '-' );
+                var versionNumber = indexOfDash < 0 ? this.MetalamaVersion : this.MetalamaVersion.Substring( 0, indexOfDash );
+
+                if ( Version.TryParse( versionNumber, out var parsedVersion ) )
+                {
+                    return parsedVersion;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public static Version RequiredMetalamaVersion { get; } = new( 2023, 0, 101 );
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.

@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
             if ( configuration == null )
             {
-                if ( !this.TryInitialize( diagnostics, partialCompilation, null, null, cancellationToken, out configuration ) )
+                if ( !this.TryInitialize( diagnostics, partialCompilation.Compilation, null, null, cancellationToken, out configuration ) )
                 {
                     return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Failed( diagnostics.ToImmutableArray() );
                 }

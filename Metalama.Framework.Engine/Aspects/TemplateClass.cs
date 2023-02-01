@@ -31,25 +31,27 @@ namespace Metalama.Framework.Engine.Aspects
         protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+        private readonly ITemplateReflectionContext _templateReflectionContext;
         private readonly TemplateClass? _baseClass;
 
-        protected TemplateClass(
+        private protected TemplateClass(
             ProjectServiceProvider serviceProvider,
-            CompilationContext compilationContext,
+            ITemplateReflectionContext templateReflectionContext,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             string shortName )
         {
             this.ServiceProvider = serviceProvider;
+            this._templateReflectionContext = templateReflectionContext;
             this._baseClass = baseClass;
-            this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( templateReflectionContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
 
             // This condition is to work around fakes.
             if ( !typeSymbol.GetType().Assembly.IsDynamic )
             {
-                this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
+                this.TypeId = typeSymbol.GetSerializableTypeId();
             }
             else
             {
@@ -109,11 +111,11 @@ namespace Metalama.Framework.Engine.Aspects
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers(
-            CompilationContext compilationContext,
+            ITemplateReflectionContext templateReflectionContext,
             INamedTypeSymbol type,
             IDiagnosticAdder diagnosticAdder )
         {
-            var classifier = new TemplateMemberSymbolClassifier( compilationContext );
+            var classifier = new TemplateMemberSymbolClassifier( templateReflectionContext.SymbolClassifier );
 
             var members = this._baseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
@@ -348,5 +350,8 @@ namespace Metalama.Framework.Engine.Aspects
                 return (DeclarativeAdviceAttribute) attribute;
             }
         }
+
+        public INamedType GetNamedType( ICompilation compilation )
+            => this._templateReflectionContext.GetCompilationModel( compilation ).Factory.GetTypeByReflectionName( this.FullName );
     }
 }

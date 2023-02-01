@@ -68,6 +68,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 _ => null,
                 null,
+                null,
                 _frameworkAssembly,
                 initialDiagnosticManifest );
 
@@ -78,6 +79,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
+        private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
         private CompileTimeDomain Domain { get; }
 
@@ -95,6 +97,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the identity of the run-time assembly for which this compile-time project was created.
         /// </summary>
         public AssemblyIdentity RunTimeIdentity { get; }
+
+        public ITemplateReflectionContext? TemplateReflectionContext => this._cacheableTemplateDiscoveryContextProvider?.GetTemplateDiscoveryContext();
 
         /// <summary>
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
@@ -196,6 +200,7 @@ namespace Metalama.Framework.Engine.CompileTime
             string? compiledAssemblyPath,
             Func<string, TextMapFile?>? getLocationMap,
             string? directory,
+            CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
             Assembly? assembly = null,
             DiagnosticManifest? diagnosticManifest = null )
         {
@@ -203,6 +208,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._getLocationMap = getLocationMap;
             this.Directory = directory;
+            this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
             this._compileTimeIdentity = compileTimeIdentity;
@@ -245,7 +251,8 @@ namespace Metalama.Framework.Engine.CompileTime
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
             string? sourceDirectory,
-            Func<string, TextMapFile?> getLocationMap )
+            Func<string, TextMapFile?> getLocationMap,
+            CacheableTemplateDiscoveryContextProvider? templateDiscoveryContextProvider )
             => new(
                 serviceProvider,
                 domain,
@@ -255,7 +262,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 manifest,
                 compiledAssemblyPath,
                 getLocationMap,
-                sourceDirectory );
+                sourceDirectory,
+                templateDiscoveryContextProvider );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
@@ -266,7 +274,17 @@ namespace Metalama.Framework.Engine.CompileTime
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+            => new(
+                serviceProvider,
+                domain,
+                runTimeIdentity,
+                compileTimeIdentity,
+                references ?? Array.Empty<CompileTimeProject>(),
+                null,
+                null,
+                null,
+                null,
+                null );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> for an assembly that contains Metalama compile-time code but has not been transformed. This is the case
@@ -278,6 +296,7 @@ namespace Metalama.Framework.Engine.CompileTime
             CompileTimeDomain domain,
             AssemblyIdentity assemblyIdentity,
             string assemblyPath,
+            CacheableTemplateDiscoveryContextProvider? templateDiscoveryContextProvider,
             [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
@@ -343,6 +362,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 assemblyPath,
                 null,
                 null,
+                templateDiscoveryContextProvider,
                 assembly );
 
             return true;

@@ -292,7 +292,7 @@ namespace Metalama.Compiler
                 if ( accessor != null )
                 {
                     var transformedAccessor = transformedNode.AccessorList!.Accessors.First( a => a.IsKind( accessorKind ) );
-                    var accessorMadePublic = this.PreserveAndAddAtrribute( transformedAccessor, accessor, accessorSymbol.AssertNotNull() );
+                    var accessorMadePublic = this.PreserveAndAddAttribute( transformedAccessor, accessor, accessorSymbol.AssertNotNull() );
                     transformedNode = transformedNode.ReplaceNode( transformedAccessor, accessorMadePublic );
                 }
             }
@@ -344,7 +344,7 @@ namespace Metalama.Compiler
             .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
     }
 
-    private AccessorDeclarationSyntax PreserveAndAddAtrribute(
+    private AccessorDeclarationSyntax PreserveAndAddAttribute(
         AccessorDeclarationSyntax transformedNode,
         AccessorDeclarationSyntax originalNode,
         IMethodSymbol symbol )

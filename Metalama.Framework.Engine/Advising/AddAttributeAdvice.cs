@@ -23,7 +23,7 @@ internal sealed class AddAttributeAdvice : Advice
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IDeclaration targetDeclaration,
-        ICompilation sourceCompilation,
+        CompilationModel sourceCompilation,
         IAttributeData attribute,
         OverrideStrategy overrideStrategy,
         string? layerName ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )

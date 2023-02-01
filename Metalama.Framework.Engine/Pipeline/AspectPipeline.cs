@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
-            PartialCompilation compilation,
+            Compilation compilation,
             ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
@@ -102,12 +102,12 @@ namespace Metalama.Framework.Engine.Pipeline
             this.PipelineInitializationCount++;
 
             // Check that we have the system library.
-            var objectType = compilation.Compilation.GetSpecialType( SpecialType.System_Object );
+            var objectType = compilation.GetSpecialType( SpecialType.System_Object );
 
             if ( objectType.Kind == SymbolKind.ErrorType ) { }
 
             // Check that Metalama is enabled for the project.            
-            if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
+            if ( !this.IsMetalamaEnabled( compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
                 // Metalama not installed.
 
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Check the Metalama version.
-            var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation ).ToList();
 
             if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] > EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
@@ -136,19 +136,18 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
-            // Create dependencies.
-
-            var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
-
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProjectFromCompilation(
-                    compilation.Compilation,
-                    projectLicenseInfo,
-                    compileTimeTreesHint,
-                    diagnosticAdder,
-                    false,
-                    cancellationToken,
-                    out var compileTimeProject ) )
+            var compileTimeProjectRepository = CompileTimeProjectRepository.Create(
+                this.Domain,
+                this.ServiceProvider,
+                compilation,
+                diagnosticAdder,
+                false,
+                projectLicenseInfo,
+                compileTimeTreesHint,
+                cancellationToken );
+
+            if ( compileTimeProjectRepository == null )
             {
                 this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot get the compile-time compilation." );
 
@@ -157,8 +156,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
+            var compileTimeProject = compileTimeProjectRepository.RootProject;
+
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader );
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( compileTimeProjectRepository );
 
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
@@ -233,7 +234,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( licenseConsumptionManager != null )
             {
-                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.Compilation.AssemblyName );
+                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.AssemblyName );
 
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {
@@ -249,7 +250,7 @@ namespace Metalama.Framework.Engine.Pipeline
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
 
             // Creates a project model that includes the final service provider.
-            var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
+            var projectModel = new ProjectModel( compilation, projectServiceProviderWithProject );
 
             // Create a compilation model for the aspect initialization.
             var compilationModel = CompilationModel.CreateInitialInstance( projectModel, compilation );
@@ -258,7 +259,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
             // we don't want to leak the compilation for the design-time scenario.
             var serviceProviderForAspectClassFactory =
-                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation.Compilation ) );
+                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation ) );
 
             var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, serviceProviderForAspectClassFactory );
             var aspectTypeFactory = new AspectClassFactory( driverFactory );
@@ -278,7 +279,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation, loader ),
+                new AttributeAspectOrderingSource( projectServiceProviderWithProject, compilation ),
                 new AspectLayerOrderingSource( aspectClasses ),
                 new FrameworkAspectOrderingSource( aspectClasses )
             };
@@ -349,12 +350,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
-                loader,
+                compileTimeProjectRepository,
                 fabricsConfiguration,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
                 this.FilterCodeFix,
-                compilation.Compilation.ExternalReferences );
+                compilation.ExternalReferences );
 
             return true;
 
@@ -436,7 +437,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
-                new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
+                new CompilationAspectSource( configuration.ServiceProvider, aspectClasses ),
                 transitiveAspectSource );
 
             var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
@@ -498,7 +499,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             if ( pipelineConfiguration == null )
             {
-                if ( !this.TryInitialize( diagnosticAdder, compilation, null, null, cancellationToken, out pipelineConfiguration ) )
+                if ( !this.TryInitialize( diagnosticAdder, compilation.Compilation, null, null, cancellationToken, out pipelineConfiguration ) )
                 {
                     return default;
                 }

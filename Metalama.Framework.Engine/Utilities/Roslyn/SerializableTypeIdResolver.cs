@@ -13,13 +13,13 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public sealed class SerializableTypeIdProvider
+public sealed class SerializableTypeIdResolver
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
     private readonly Compilation _compilation;
 
-    internal SerializableTypeIdProvider( Compilation compilation )
+    internal SerializableTypeIdResolver( Compilation compilation )
     {
 #if DEBUG
         if ( compilation.AssemblyName == "empty" )
@@ -29,11 +29,6 @@ public sealed class SerializableTypeIdProvider
 #endif
         this._compilation = compilation;
         this._resolver = new Resolver( compilation, null );
-    }
-
-    internal static SerializableTypeId GetId( ITypeSymbol symbol )
-    {
-        return new SerializableTypeId( OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol ).ToString() );
     }
 
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )

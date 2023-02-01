@@ -79,7 +79,9 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly CompilationContextFactory _compilationContextFactory;
     private readonly ITempFileManager _tempFileManager;
 
-    public CompileTimeCompilationBuilder( ProjectServiceProvider serviceProvider, CompileTimeDomain domain )
+    public CompileTimeCompilationBuilder(
+        ProjectServiceProvider serviceProvider,
+        CompileTimeDomain domain )
     {
         this._serviceProvider = serviceProvider;
         this._domain = domain;
@@ -289,7 +291,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         }
     }
 
-    private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IReadOnlyCollection<CompileTimeProject> referencedProjects )
+    private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
     {
         var assemblyLocator = this._serviceProvider.GetReferenceAssemblyLocator();
 
@@ -623,7 +625,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
     private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
         Compilation runTimeCompilation,
-        IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
+        IEnumerable<SyntaxTree> compileTimeSyntaxTrees,
         CancellationToken cancellationToken )
     {
         var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
@@ -670,8 +672,9 @@ internal sealed partial class CompileTimeCompilationBuilder
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
-        CancellationToken cancellationToken,
-        out CompileTimeProject? project )
+        out CompileTimeProject? project,
+        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
+        CancellationToken cancellationToken )
     {
         // If the compilation does not reference Metalama.Framework, do not create a compile-time project.
         if ( !runTimeCompilation.References.OfType<PortableExecutableReference>()
@@ -695,8 +698,9 @@ internal sealed partial class CompileTimeCompilationBuilder
             compileTimeArtifacts.GlobalUsings,
             diagnosticSink,
             cacheOnly,
-            cancellationToken,
-            out project );
+            cacheableTemplateDiscoveryContextProvider,
+            out project,
+            cancellationToken );
     }
 
     private bool TryGetCompileTimeProjectFromCache(
@@ -705,7 +709,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         OutputPaths outputPaths,
         ulong projectHash,
         ProjectLicenseInfo? projectLicenseInfo,
-        out CompileTimeProject? project )
+        out CompileTimeProject? project,
+        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider )
     {
         this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' )" );
 
@@ -763,7 +768,8 @@ internal sealed partial class CompileTimeCompilationBuilder
             manifest,
             outputPaths.Pe,
             outputPaths.Directory,
-            TextMapFile.ReadForSource );
+            TextMapFile.ReadForSource,
+            cacheableTemplateDiscoveryContextProvider );
 
         this._cache.Add( projectHash, project );
 
@@ -778,8 +784,9 @@ internal sealed partial class CompileTimeCompilationBuilder
         ImmutableArray<UsingDirectiveSyntax> globalUsings,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
-        CancellationToken cancellationToken,
-        out CompileTimeProject? project )
+        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
+        out CompileTimeProject? project,
+        CancellationToken cancellationToken )
     {
         // Check the in-process cache.
         var (sourceHash, projectHash, outputPaths) =
@@ -791,7 +798,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                 outputPaths,
                 projectHash,
                 projectLicenseInfo,
-                out project ) )
+                out project,
+                cacheableTemplateDiscoveryContextProvider ) )
         {
             if ( cacheOnly )
             {
@@ -810,7 +818,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                         outputPaths,
                         projectHash,
                         projectLicenseInfo,
-                        out project ) )
+                        out project,
+                        cacheableTemplateDiscoveryContextProvider ) )
                 {
                     // Coverage: ignore (this depends on a multi-threaded condition)
                     return true;
@@ -925,7 +934,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                         manifest,
                         outputPaths.Pe,
                         outputPaths.Directory,
-                        name => textMapDirectory.GetByName( name ) );
+                        name => textMapDirectory.GetByName( name ),
+                        cacheableTemplateDiscoveryContextProvider );
 
                     this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
 
@@ -945,7 +955,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
         Compilation runTimeCompilation,
         IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
-        IReadOnlyList<CompileTimeProject> referencedProjects )
+        IEnumerable<CompileTimeProject> referencedProjects )
     {
         var targetFramework = runTimeCompilation.GetTargetFramework();
 

@@ -34,14 +34,20 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
-            => new( project, compilation, aspectRepository );
+            => new( project, compilation, aspectRepository, CompilationModelOptions.Default );
 
         public static CompilationModel CreateInitialInstance(
             IProject project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository );
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default );
+
+        internal static CompilationModel CreateInitialInstance(
+            IProject project,
+            Compilation compilation,
+            CompilationModelOptions options )
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -67,7 +73,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
+        internal CompilationModelOptions Options { get; }
+
+        private CompilationModel(
+            IProject project,
+            PartialCompilation partialCompilation,
+            AspectRepository? aspectRepository,
+            CompilationModelOptions? options )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
@@ -81,6 +93,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
+            this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
             static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
@@ -170,6 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
+            this.Options = prototype.Options;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;

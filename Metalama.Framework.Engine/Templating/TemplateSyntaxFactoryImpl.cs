@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return SyntaxFactory.List( statementList );
         }
-        
+
         public SyntaxKind Boolean( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         // This method is called when the expression of 'return' is a non-dynamic expression.
@@ -367,7 +367,7 @@ namespace Metalama.Framework.Engine.Templating
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdProvider.ResolveId( new SerializableTypeId( type ) )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ) )
                 : null;
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext, false );

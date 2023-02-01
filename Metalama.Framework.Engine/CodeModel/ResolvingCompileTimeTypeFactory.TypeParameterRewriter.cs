@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed partial class CompileTimeTypeFactory
+internal partial class ResolvingCompileTimeTypeFactory
 {
     internal sealed class TypeParameterRewriter : TypeRewriter
     {

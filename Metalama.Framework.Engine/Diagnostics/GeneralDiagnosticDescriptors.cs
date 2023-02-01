@@ -322,6 +322,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "'ref' members cannot be used as templates.",
                 _category );
 
+        internal static readonly DiagnosticDefinition<(AssemblyIdentity AssemblyIdentity, string Version, string MinimalAcceptableVersion)>
+            DependencyMustBeRecompiled =
+                new(
+                    "LAMA0061",
+                    Error,
+                    "The referenced assembly '{0}' has been compiled with Metalama {1} and must be recompiled with version {2} or higher.",
+                    "The referenced assembly must be recompiled with a more recent version of Metalama.",
+                    _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

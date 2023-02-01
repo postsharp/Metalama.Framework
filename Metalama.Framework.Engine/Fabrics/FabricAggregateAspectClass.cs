@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
@@ -56,6 +57,14 @@ namespace Metalama.Framework.Engine.Fabrics
         public ImmutableArray<AspectLayer> Layers { get; } = ImmutableArray.Create( new AspectLayer( "<Fabric>", null ) );
 
         EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
+
+        public INamedType GetNamedType( ICompilation compilation )
+        {
+            var projectTemplateReflectionContext = this.Project.TemplateReflectionContext ?? ((CompilationModel) compilation).CompilationContext;
+
+            return projectTemplateReflectionContext.GetCompilationModel( (CompilationModel) compilation )
+                .Factory.GetTypeByReflectionName( this.FullName );
+        }
 
         EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

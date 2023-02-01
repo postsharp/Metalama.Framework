@@ -72,5 +72,7 @@ namespace Metalama.Framework.Engine.Fabrics
             EligibleScenarios requestedEligibility,
             IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This aspect is always eligible." );
+
+        INamedType IAspectClassImpl.GetNamedType( ICompilation compilation ) => throw new NotSupportedException();
     }
 }

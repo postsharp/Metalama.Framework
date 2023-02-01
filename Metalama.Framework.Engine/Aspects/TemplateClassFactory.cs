@@ -37,13 +37,11 @@ internal abstract class TemplateClassFactory<T>
             return Array.Empty<T>();
         }
 
-        var compilation = compilationContext.Compilation;
-
         // Add the abstract aspect classes from the framework because they define the abstract templates. The knowledge of abstract templates
         // is used by AspectClass. It is easier to do it here than to do it at the level of CompileTimeProject.
         // We assume the compilation references a single version of Metalama.Framework.
 
-        var frameworkAspectClasses = this.GetFrameworkClasses( compilation );
+        var frameworkAspectClasses = this.GetFrameworkClasses( compilationContext );
 
         // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
         var aspectTypeDataDictionary =
@@ -52,7 +50,9 @@ internal abstract class TemplateClassFactory<T>
                 .Select(
                     item =>
                     {
-                        var typeSymbol = compilation.GetTypeByMetadataName( item.TypeName );
+                        var templateDiscoveryContext = item.Project.TemplateReflectionContext ?? compilationContext;
+
+                        var typeSymbol = templateDiscoveryContext.Compilation.GetTypeByMetadataName( item.TypeName );
 
                         if ( typeSymbol == null )
                         {
@@ -71,11 +71,12 @@ internal abstract class TemplateClassFactory<T>
                             return null;
                         }
 
-                        return new TemplateTypeData(
+                        return new TemplateClassData(
                             item.Project,
                             item.TypeName,
                             typeSymbol,
-                            item.Project.GetType( typeName ) );
+                            item.Project.GetType( typeName ),
+                            templateDiscoveryContext );
                     } )
                 .WhereNotNull()
                 .Concat( frameworkAspectClasses )
@@ -83,10 +84,10 @@ internal abstract class TemplateClassFactory<T>
                     item => item.TypeName,
                     item => item );
 
-        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, serviceProvider, compilationContext );
+        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, serviceProvider );
     }
 
-    protected abstract IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation );
+    protected abstract IEnumerable<TemplateClassData> GetFrameworkClasses( CompilationContext compilationContext );
 
     protected abstract IEnumerable<string> GetTypeNames( CompileTimeProject project );
 
@@ -95,7 +96,7 @@ internal abstract class TemplateClassFactory<T>
     /// </summary>
     internal IReadOnlyList<T> GetClasses(
         ProjectServiceProvider serviceProvider,
-        CompilationContext compilationContext,
+        ITemplateReflectionContext templateReflectionContext,
         IReadOnlyList<INamedTypeSymbol> types,
         CompileTimeProject compileTimeProject,
         IDiagnosticAdder diagnosticAdder )
@@ -104,22 +105,27 @@ internal abstract class TemplateClassFactory<T>
             .SelectAsImmutableArray( t => (Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull()) )
             .ToDictionary(
                 t => t.ReflectionName,
-                t => new TemplateTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
+                t => new TemplateClassData(
+                    compileTimeProject,
+                    t.ReflectionName,
+                    t.Symbol,
+                    compileTimeProject.GetType( t.ReflectionName ),
+                    templateReflectionContext ) );
 
-        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, serviceProvider, compilationContext );
+        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, serviceProvider );
     }
 
     private IReadOnlyList<T> GetClasses(
-        Dictionary<string, TemplateTypeData> templateTypeDataDictionary,
+        Dictionary<string, TemplateClassData> templateTypeDataDictionary,
         IDiagnosticAdder diagnosticAdder,
-        ProjectServiceProvider serviceProvider,
-        CompilationContext compilationContext )
+        ProjectServiceProvider serviceProvider )
     {
         // A local function that recursively processes an aspect type.
         bool TryProcessType(
             INamedTypeSymbol templateTypeSymbol,
             Type aspectReflectionType,
             CompileTimeProject? project,
+            ITemplateReflectionContext templateDiscoveryContext,
             [NotNullWhen( true )] out T? metadata )
         {
             if ( this._classes.TryGetValue( templateTypeSymbol, out var existingValue ) )
@@ -137,7 +143,12 @@ internal abstract class TemplateClassFactory<T>
 
                 if ( templateTypeDataDictionary.TryGetValue( templateTypeSymbol.BaseType.GetReflectionName().AssertNotNull(), out var baseData ) )
                 {
-                    if ( !TryProcessType( templateTypeSymbol.BaseType, aspectReflectionType.BaseType!, baseData.Project, out baseTemplateClass ) )
+                    if ( !TryProcessType(
+                            templateTypeSymbol.BaseType,
+                            aspectReflectionType.BaseType!,
+                            baseData.Project,
+                            templateDiscoveryContext,
+                            out baseTemplateClass ) )
                     {
                         metadata = null;
 
@@ -157,7 +168,7 @@ internal abstract class TemplateClassFactory<T>
                     baseTemplateClass,
                     project,
                     diagnosticAdder,
-                    compilationContext,
+                    templateDiscoveryContext,
                     out metadata ) )
             {
                 return false;
@@ -173,7 +184,12 @@ internal abstract class TemplateClassFactory<T>
 
         foreach ( var attributeTypeData in templateTypeDataDictionary.Values )
         {
-            if ( TryProcessType( attributeTypeData.TypeSymbol, attributeTypeData.ReflectionType, attributeTypeData.Project, out var metadata ) )
+            if ( TryProcessType(
+                    attributeTypeData.TypeSymbol,
+                    attributeTypeData.ReflectionType,
+                    attributeTypeData.Project,
+                    attributeTypeData.TemplateReflectionContext,
+                    out var metadata ) )
             {
                 resultList.Add( metadata );
             }
@@ -189,8 +205,13 @@ internal abstract class TemplateClassFactory<T>
         T? otherTemplateClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        CompilationContext compilationContext,
+        ITemplateReflectionContext templateReflectionContext,
         [NotNullWhen( true )] out T? templateClass );
 
-    protected sealed record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
+    protected sealed record TemplateClassData(
+        CompileTimeProject? Project,
+        string TypeName,
+        INamedTypeSymbol TypeSymbol,
+        Type ReflectionType,
+        ITemplateReflectionContext TemplateReflectionContext );
 }

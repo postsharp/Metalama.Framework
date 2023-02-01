@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -39,7 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public DiagnosticManifest? DiagnosticManifest => this.CompileTimeProject?.ClosureDiagnosticManifest;
 
-        internal CompileTimeProjectLoader CompileTimeProjectLoader { get; }
+        internal CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
         internal FabricsConfiguration? FabricsConfiguration { get; }
 
@@ -58,10 +57,10 @@ namespace Metalama.Framework.Engine.Pipeline
             IReadOnlyDictionary<string, OtherTemplateClass> otherTemplateClasses,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader,
+            CompileTimeProjectRepository compileTimeProjectRepository,
             FabricsConfiguration? fabricsConfiguration,
             ProjectModel projectModel,
-            ServiceProvider<IProjectService> serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CodeFixFilter codeFixFilter,
             ImmutableArray<MetadataReference> metadataReferences )
         {
@@ -71,7 +70,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.OtherTemplateClasses = otherTemplateClasses;
             this.AspectLayers = aspectLayers;
             this.CompileTimeProject = compileTimeProject;
-            this.CompileTimeProjectLoader = compileTimeProjectLoader;
+            this.CompileTimeProjectRepository = compileTimeProjectRepository;
             this.FabricsConfiguration = fabricsConfiguration;
             this.ProjectModel = projectModel;
             this.ServiceProvider = serviceProvider;
@@ -79,7 +78,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.MetadataReferences = metadataReferences;
         }
 
-        public AspectPipelineConfiguration WithServiceProvider( ServiceProvider<IProjectService> serviceProvider )
+        public AspectPipelineConfiguration WithServiceProvider( ProjectServiceProvider serviceProvider )
             => new(
                 this.Domain,
                 this.Stages,
@@ -87,7 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.OtherTemplateClasses,
                 this.AspectLayers,
                 this.CompileTimeProject,
-                this.CompileTimeProjectLoader,
+                this.CompileTimeProjectRepository,
                 this.FabricsConfiguration,
                 this.ProjectModel,
                 serviceProvider,
@@ -104,7 +103,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.OtherTemplateClasses,
                     this.AspectLayers,
                     this.CompileTimeProject,
-                    this.CompileTimeProjectLoader,
+                    this.CompileTimeProjectRepository,
                     this.FabricsConfiguration,
                     this.ProjectModel,
                     this.ServiceProvider,
