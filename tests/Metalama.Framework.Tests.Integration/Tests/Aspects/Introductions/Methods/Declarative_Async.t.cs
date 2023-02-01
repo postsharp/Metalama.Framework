@@ -1,6 +1,3 @@
-// Warning CS1998 on `IntroducedMethod_TaskInt_Empty`: `This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.`
-// Warning CS1998 on `IntroducedMethod_TaskVoid_Empty`: `This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.`
-// Warning CS1998 on `IntroducedMethod_Void_Empty`: `This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.`
 [Introduction]
 internal class TargetClass
 {

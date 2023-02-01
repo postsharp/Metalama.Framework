@@ -45,9 +45,8 @@ internal static partial class IteratorHelper
 
     public static bool IsIteratorMethod( IMethodSymbol method )
     {
-        if ( method.IsAsync &&
-             (method.ReturnType.OriginalDefinition.GetFullName() == "System.Collections.Generic.IAsyncEnumerable"
-              || method.ReturnType.OriginalDefinition.GetFullName() == "System.Collections.Generic.IAsyncEnumerator") )
+        if ( method.IsAsync
+             && GetEnumerableKind( method.ReturnType ) is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator )
         {
             // Async method that returns IAsyncEnumerable/tor is always an iterator even when no yield is present.
             return true;

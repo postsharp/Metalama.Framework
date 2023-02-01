@@ -1,5 +1,6 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
+// @IgnoredDiagnostic(CS1998)
 #endif
 
 using System;

@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @IgnoredDiagnostic(CS1998)
+#endif
+
 using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
