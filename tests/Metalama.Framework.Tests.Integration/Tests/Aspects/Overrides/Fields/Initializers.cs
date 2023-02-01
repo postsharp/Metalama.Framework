@@ -30,7 +30,17 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         }
     }
 
+    public class IntroductionAttribute : TypeAspect
+    {
+        [Introduce]
+        public int IntroducedField = meta.ThisType.StaticField;
+
+        [Introduce]
+        public static int IntroducedStaticField = meta.ThisType.StaticField;
+    }
+
     // <target>
+    [Introduction]
     internal class TargetClass
     {
         [Override]
