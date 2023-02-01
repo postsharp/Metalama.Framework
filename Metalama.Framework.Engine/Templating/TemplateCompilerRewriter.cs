@@ -1063,7 +1063,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {
-            var templateParameter = parameter;
+            var templateParameter = parameter.WithDefault( null );
             var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
             var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
 

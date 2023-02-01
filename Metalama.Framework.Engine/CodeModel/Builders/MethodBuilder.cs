@@ -85,9 +85,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
         this.CheckNotFrozen();
 
         var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
-        var typeConstant = defaultValue != null ? TypedConstant.Create( defaultValue, iType ) : default;
+        TypedConstant? typedConstant = defaultValue != null ? TypedConstant.Create( defaultValue.Value.Value, iType ) : null;
 
-        return this.AddParameter( name, iType, refKind, typeConstant );
+        return this.AddParameter( name, iType, refKind, typedConstant );
     }
 
     public ITypeParameterBuilder AddTypeParameter( string name )
