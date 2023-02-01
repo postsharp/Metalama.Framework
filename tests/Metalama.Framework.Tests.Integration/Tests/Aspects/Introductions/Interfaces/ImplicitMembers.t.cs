@@ -1,34 +1,47 @@
 [Introduction]
 public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
 {
-  public global::System.Int32 AutoProperty { get; set; }
-  public global::System.Int32 Property
-  {
-    get
+    public global::System.Int32 AutoProperty { get; set; }
+    public global::System.Int32 AutoProperty_PrivateSet { get; private set; }
+    public global::System.Int32 Property
     {
-      global::System.Console.WriteLine("This is introduced interface member.");
-      return (global::System.Int32)42;
+        get
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+            return (global::System.Int32)42;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+        }
     }
-    set
+    public global::System.Int32 Property_PrivateSet
     {
-      global::System.Console.WriteLine("This is introduced interface member.");
+        get
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+            return (global::System.Int32)42;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+        }
     }
-  }
-  public global::System.Int32 InterfaceMethod()
-  {
-    global::System.Console.WriteLine("This is introduced interface member.");
-    return default(global::System.Int32);
-  }
-  public event global::System.EventHandler Event
-  {
-    add
+    public global::System.Int32 InterfaceMethod()
     {
-      global::System.Console.WriteLine("This is introduced interface member.");
+        global::System.Console.WriteLine("This is introduced interface member.");
+        return default(global::System.Int32);
     }
-    remove
+    public event global::System.EventHandler Event
     {
-      global::System.Console.WriteLine("This is introduced interface member.");
+        add
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+        }
+        remove
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+        }
     }
-  }
-  public event global::System.EventHandler EventField;
+    public event global::System.EventHandler EventField;
 }

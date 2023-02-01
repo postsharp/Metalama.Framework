@@ -70,11 +70,12 @@ internal sealed class AttributeClassificationService : IProjectService
     private static bool IsCompilerOrMetalamaAttribute( string fullAttributeName )
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.IteratorStateMachineAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute", StringComparison.Ordinal ) )
+             fullAttributeName is "System.Runtime.CompilerServices.NullableAttribute" or
+                 "System.Runtime.CompilerServices.CompilerGeneratedAttribute" or
+                 "System.Runtime.CompilerServices.AsyncStateMachineAttribute" or
+                 "System.Runtime.CompilerServices.IteratorStateMachineAttribute" or
+                 "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute" or
+                 "System.Diagnostics.DebuggerBrowsableAttribute" )
         {
             return true;
         }
