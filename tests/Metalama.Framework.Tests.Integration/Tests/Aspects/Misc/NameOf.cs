@@ -16,10 +16,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.NameOf
         public override void Validate( dynamic? value )
         {
             Console.WriteLine(
-                "FromTemplate: " + meta.CompileTime(
+                "From template run-time: " +
+                    string.Join(", ", nameof(value), nameof(MyAspect), nameof(MyDateTime), nameof(C), nameof(MyDateTime.UtcNow)));
+
+            Console.WriteLine(
+                "From template compile-time: " + meta.CompileTime(
                     string.Join( ", ", nameof(value), nameof(MyAspect), nameof(MyDateTime), nameof(C), nameof(MyDateTime.UtcNow) ) ) );
 
-            Console.WriteLine( "FromBuildAspect:" + ( (State) meta.AspectInstance.AspectState! ).Names );
+            Console.WriteLine( "From BuildAspect: " + ( (State) meta.AspectInstance.AspectState! ).Names );
         }
 
         private class State : IAspectState
