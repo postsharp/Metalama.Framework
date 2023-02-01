@@ -50,8 +50,22 @@ namespace Metalama.Framework.Engine.Transformations
                 returnValueName = null;
             }
 
+            var iteratorInfo = this.OverriddenDeclaration.GetIteratorInfo();
+            var asyncInfo = this.OverriddenDeclaration.GetAsyncInfo();
+
+            // Determine the kind of template the transformation will simulate.
+            var templateKind = (iteratorInfo, asyncInfo) switch
+            {
+                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable }, _) => TemplateKind.IEnumerable,
+                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator }, _) => TemplateKind.IEnumerator,
+                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }, _) => TemplateKind.IAsyncEnumerable,
+                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator }, _) => TemplateKind.IAsyncEnumerator,
+                (_, { IsAsync: true }) => TemplateKind.Async,
+                _ => TemplateKind.Default,
+            };
+
             // Rewrite the method body.
-            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToExpressionSyntax( context.SyntaxGenerationContext );
+            var proceedExpression = this.CreateProceedExpression( context, templateKind ).ToExpressionSyntax( context.SyntaxGenerationContext );
 
             var statements = new List<StatementSyntax>();
 
@@ -60,54 +74,161 @@ namespace Metalama.Framework.Engine.Transformations
                 statements.AddRange( inputFilterBodies );
             }
 
-            if ( outputFilterBodies is { Count: > 0 } )
+            if ( templateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
             {
-                if ( returnValueName != null )
+                if ( outputFilterBodies is { Count: > 0 } )
                 {
-                    statements.Add(
-                        LocalDeclarationStatement(
-                            VariableDeclaration(
-                                    IdentifierName(
-                                        Identifier(
-                                            TriviaList(),
-                                            SyntaxKind.VarKeyword,
-                                            "var",
-                                            "var",
-                                            TriviaList( ElasticSpace ) ) ) )
-                                .WithVariables(
-                                    SingletonSeparatedList(
-                                        VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
-                                            .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
+                    throw new NotImplementedException( "Contracts on return values of iterators are not yet supported." );
                 }
                 else
                 {
-                    statements.Add( ExpressionStatement( proceedExpression ) );
-                }
+                    var returnItemName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnItem" );
 
-                statements.AddRange( outputFilterBodies );
-
-                if ( returnValueName != null )
-                {
                     statements.Add(
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            IdentifierName( returnValueName ),
-                            Token( SyntaxKind.SemicolonToken ) ) );
+                        ForEachStatement(
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.IsAsync
+                                ? Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) )
+                                : default,
+                            Token( SyntaxKind.ForEachKeyword ),
+                            Token( SyntaxKind.OpenParenToken ),
+                            IdentifierName( Identifier( TriviaList(), SyntaxKind.VarKeyword, "var", "var", TriviaList( ElasticSpace ) ) ),
+                            Identifier( returnItemName ),
+                            Token( TriviaList( ElasticSpace ), SyntaxKind.InKeyword, TriviaList( ElasticSpace ) ),
+                            proceedExpression,
+                            Token( SyntaxKind.CloseParenToken ),
+                            Block(
+                                YieldStatement(
+                                    SyntaxKind.YieldReturnStatement,
+                                    Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                                    Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                    IdentifierName( returnItemName ),
+                                    Token( SyntaxKind.SemicolonToken ) ) ) ) );
+                }
+            }
+            else if ( templateKind is TemplateKind.IEnumerator or TemplateKind.IAsyncEnumerator )
+            {
+                if ( outputFilterBodies is { Count: > 0 } )
+                {
+                    throw new NotImplementedException( "Contracts on return values of iterators are not yet supported." );
+                }
+                else
+                {
+                    var enumeratorName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnEnumerator" );
+
+                    statements.Add(
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                IdentifierName( Identifier( TriviaList(), SyntaxKind.VarKeyword, "var", "var", TriviaList( ElasticSpace ) ) ),
+                                SingletonSeparatedList(
+                                    VariableDeclarator(
+                                        Identifier( enumeratorName ),
+                                        null,
+                                        EqualsValueClause( proceedExpression ) ) ) ) ) );
+
+                    ExpressionSyntax moveNextExpression =
+                        this.OverriddenDeclaration.IsAsync
+                            ? AwaitExpression(
+                                Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                InvocationExpression(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName( enumeratorName ),
+                                        IdentifierName( "MoveNextAsync" ) ) ) )
+                            : InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName( enumeratorName ),
+                                    IdentifierName( "MoveNext" ) ) );
+
+                    statements.Add(
+                        WhileStatement(
+                            List<AttributeListSyntax>(),
+                            Token( TriviaList(), SyntaxKind.WhileKeyword, TriviaList() ),
+                            Token( TriviaList(), SyntaxKind.OpenParenToken, TriviaList() ),
+                            moveNextExpression,
+                            Token( TriviaList(), SyntaxKind.CloseParenToken, TriviaList() ),
+                            Block(
+                                YieldStatement(
+                                    SyntaxKind.YieldReturnStatement,
+                                    Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                                    Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName( enumeratorName ),
+                                        IdentifierName( "Current" ) ),
+                                    Token( SyntaxKind.SemicolonToken ) ) ) ) );
                 }
             }
             else
             {
-                if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
+                if ( outputFilterBodies is { Count: > 0 } )
                 {
-                    statements.Add( ExpressionStatement( proceedExpression ) );
+                    if ( returnValueName != null )
+                    {
+                        var returnValueExpression =
+                            this.OverriddenDeclaration.IsAsync
+                                ? AwaitExpression(
+                                    Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                    proceedExpression )
+                                : proceedExpression;
+
+                        statements.Add(
+                            LocalDeclarationStatement(
+                                VariableDeclaration(
+                                        IdentifierName(
+                                            Identifier(
+                                                TriviaList(),
+                                                SyntaxKind.VarKeyword,
+                                                "var",
+                                                "var",
+                                                TriviaList( ElasticSpace ) ) ) )
+                                    .WithVariables(
+                                        SingletonSeparatedList(
+                                            VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
+                                                .WithInitializer( EqualsValueClause( returnValueExpression ) ) ) ) ) );
+                    }
+                    else
+                    {
+                        statements.Add( ExpressionStatement( proceedExpression ) );
+                    }
+
+                    statements.AddRange( outputFilterBodies );
+
+                    if ( returnValueName != null )
+                    {
+                        statements.Add(
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                IdentifierName( returnValueName ),
+                                Token( SyntaxKind.SemicolonToken ) ) );
+                    }
                 }
                 else
                 {
-                    statements.Add(
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            proceedExpression,
-                            Token( SyntaxKind.SemicolonToken ) ) );
+                    if ( this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
+                    {
+                        if ( this.OverriddenDeclaration.IsAsync )
+                        {
+                            statements.Add(
+                                ExpressionStatement(
+                                    AwaitExpression(
+                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                        proceedExpression ) ) );
+                        }
+                        else
+                        {
+                            statements.Add( ExpressionStatement( proceedExpression ) );
+                        }
+                    }
+                    else
+                    {
+                        statements.Add(
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                proceedExpression,
+                                Token( SyntaxKind.SemicolonToken ) ) );
+                    }
                 }
             }
 
