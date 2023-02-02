@@ -43,12 +43,13 @@ namespace Metalama.Framework.Engine.Advising
             var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>();
             var templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
-            var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
+            var templateReflectionContext = this._templateMember.TemplateClass.GetTemplateReflectionContext( compilation.CompilationContext );
+            var type = templateReflectionContext.Compilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
 
             var symbol = type.GetMembers( this._templateMember.Name )
                 .Single( m => classifier.IsTemplate( m ) );
 
-            var declaration = compilation.Factory.GetDeclaration( symbol );
+            var declaration = templateReflectionContext.GetCompilationModel( compilation ).Factory.GetDeclaration( symbol );
 
             if ( declaration is not T typedSymbol )
             {
@@ -59,7 +60,11 @@ namespace Metalama.Framework.Engine.Advising
             // Create the attribute instance.
 
             if ( !templateAttributeFactory
-                    .TryGetTemplateAttribute( this._templateMember.TemplateInfo.Id, compilation.RoslynCompilation, ThrowingDiagnosticAdder.Instance, out var attribute ) )
+                    .TryGetTemplateAttribute(
+                        this._templateMember.TemplateInfo.Id,
+                        compilation.RoslynCompilation,
+                        ThrowingDiagnosticAdder.Instance,
+                        out var attribute ) )
             {
                 throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
             }

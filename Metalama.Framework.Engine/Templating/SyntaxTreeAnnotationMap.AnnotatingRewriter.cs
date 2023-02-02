@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._symbolToAnnotationMap.TryGetValue( s, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._map._symbolIdGenerator.GetId( s ) );
+                            annotation = new SyntaxAnnotation(_symbolAnnotationKind);
                             this._map._symbolToAnnotationMap[s] = annotation;
                             this._map._annotationToSymbolMap[annotation] = s;
                         }
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._map._symbolIdGenerator.GetId( declaredSymbol ) );
+                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind  );
                             this._map._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                             this._map._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                         }
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._map._symbolIdGenerator.GetId( typeInfo.Type ) );
+                            annotation = SymbolAnnotationMapper.GetOrCreateAnnotation( _expressionTypeAnnotationKind, typeInfo.Type );
                             this._map._typeToAnnotationMap[typeInfo.Type] = annotation;
                             this._map._annotationToTypeMap[annotation] = typeInfo.Type;
                         }

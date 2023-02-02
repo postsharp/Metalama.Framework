@@ -88,7 +88,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.            
 
-        var aspectType = this.Aspect.AspectClass.GetNamedType( this.SourceCompilation );
+        var templateReflectionContext = this.Aspect.AspectClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
+
+        var aspectType = templateReflectionContext.GetCompilationModel( this.SourceCompilation )
+            .Factory.GetTypeByReflectionName( this.Aspect.AspectClass.FullName );
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =

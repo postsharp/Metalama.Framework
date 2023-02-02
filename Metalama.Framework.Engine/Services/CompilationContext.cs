@@ -36,11 +36,13 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         return (CompilationModel) sourceCompilation;
     }
 
+    public bool IsCacheable => false;
+
     IReflectionMapper ICompilationServices.ReflectionMapper => this.ReflectionMapper;
 
     [Memo]
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
-    
+
     [Memo]
     public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
 

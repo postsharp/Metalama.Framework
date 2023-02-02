@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -58,13 +59,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
 
-        public INamedType GetNamedType( ICompilation compilation )
-        {
-            var projectTemplateReflectionContext = this.Project.TemplateReflectionContext ?? ((CompilationModel) compilation).CompilationContext;
-
-            return projectTemplateReflectionContext.GetCompilationModel( (CompilationModel) compilation )
-                .Factory.GetTypeByReflectionName( this.FullName );
-        }
+        public ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
+            => this.Project.TemplateReflectionContext ?? compilationContext;
 
         EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

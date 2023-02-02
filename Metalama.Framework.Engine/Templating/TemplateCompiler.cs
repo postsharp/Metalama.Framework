@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating
             this._serviceProvider = serviceProvider;
             this._compilationContext = compilationContext;
             this._templateManifestBuilder = templateManifestBuilder;
-            this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( compilationContext.SourceCompilation );
+            this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap();
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
 
             var syntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();

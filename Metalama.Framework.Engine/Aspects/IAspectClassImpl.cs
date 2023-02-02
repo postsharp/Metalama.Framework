@@ -4,8 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -32,11 +32,6 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable );
 
-        /// <summary>
-        /// Gets the <see cref="INamedType"/> for the aspect class given a <see cref="CompilationModel"/>. If the aspect class is defined in an external assembly,
-        /// the returned type will not be in given <see cref="CompilationModel"/>.
-        /// </summary>
-        /// <param name="compilation"></param>
-        INamedType GetNamedType( ICompilation compilation );
+        ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext );
     }
 }

@@ -43,7 +43,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
                 options: (CSharpCompilationOptions?) this._compilation.Options.WithMetadataImportOptions( MetadataImportOptions.All ) )
             : this._compilation;
 
-        return new CacheableContext( compilation, this );
+        return new CacheableContext( compilation, this, this._mustEnlargeVisibility );
     }
 
     public ITemplateReflectionContext GetTemplateDiscoveryContext() => this._lazyImpl.Value;
@@ -53,9 +53,10 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         private readonly CacheableTemplateDiscoveryContextProvider _parent;
         private readonly Lazy<CompilationModel> _compilationModel;
 
-        public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent )
+        public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent, bool isCacheable )
         {
             this._parent = parent;
+            this.IsCacheable = isCacheable;
             this.Compilation = compilation;
 
             this._compilationModel = new Lazy<CompilationModel>(
@@ -68,6 +69,8 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         public Compilation Compilation { get; }
 
         public CompilationModel GetCompilationModel( ICompilation sourceCompilation ) => this._compilationModel.Value;
+
+        public bool IsCacheable { get; }
 
         public override string ToString() => $"CacheableContext EnlargedVisibility={this._parent._mustEnlargeVisibility}";
     }

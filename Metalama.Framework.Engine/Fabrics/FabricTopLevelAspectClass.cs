@@ -66,6 +66,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
 
+        ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext ) => throw new NotSupportedException();
+
         EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
         FormattableString IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
@@ -73,6 +75,5 @@ namespace Metalama.Framework.Engine.Fabrics
             IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This aspect is always eligible." );
 
-        INamedType IAspectClassImpl.GetNamedType( ICompilation compilation ) => throw new NotSupportedException();
     }
 }

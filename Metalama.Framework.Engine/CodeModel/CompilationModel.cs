@@ -254,6 +254,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
+        [Obsolete("This method call is redundant.")]
         public override CompilationModel Compilation => this;
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;

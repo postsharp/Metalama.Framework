@@ -488,6 +488,9 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         }
     }
 
+    ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext )
+        => this.GetTemplateReflectionContext( compilationContext );
+
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
     {
         var targetDeclaration = describedObject.Object;

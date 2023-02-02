@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Aspects
         protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
-        private readonly ITemplateReflectionContext _templateReflectionContext;
+        private readonly ITemplateReflectionContext? _templateReflectionContext;
         private readonly TemplateClass? _baseClass;
         private readonly ITemplateInfoService _symbolClassificationService;
         private readonly TemplateAttributeFactory _templateAttributeFactory;
@@ -47,11 +47,15 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.ServiceProvider = serviceProvider;
             this._symbolClassificationService = serviceProvider.GetRequiredService<ITemplateInfoService>();
-            this._templateReflectionContext = templateReflectionContext;
             this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
             this._baseClass = baseClass;
             this.Members = this.GetMembers( typeSymbol, templateReflectionContext.Compilation, diagnosticAdder );
             this.ShortName = shortName;
+
+            if ( templateReflectionContext.IsCacheable )
+            {
+                this._templateReflectionContext = templateReflectionContext;
+            }
 
             // This condition is to work around fakes.
             if ( !typeSymbol.GetType().Assembly.IsDynamic )
@@ -145,7 +149,11 @@ namespace Metalama.Framework.Engine.Aspects
 
                 IAdviceAttribute? attribute = null;
 
-                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute( templateInfo.Id, compilation, diagnosticAdder, out attribute ) )
+                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute(
+                        templateInfo.Id,
+                        compilation,
+                        diagnosticAdder,
+                        out attribute ) )
                 {
                     continue;
                 }
@@ -364,7 +372,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        public INamedType GetNamedType( ICompilation compilation )
-            => this._templateReflectionContext.GetCompilationModel( compilation ).Factory.GetTypeByReflectionName( this.FullName );
+        internal ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
+            => this._templateReflectionContext ?? compilationContext;
     }
 }

@@ -11,4 +11,6 @@ internal interface ITemplateReflectionContext
     Compilation Compilation { get; }
 
     CompilationModel GetCompilationModel( ICompilation sourceCompilation );
+
+    bool IsCacheable { get; }
 }

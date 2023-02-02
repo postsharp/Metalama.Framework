@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Globalization;
@@ -18,9 +19,9 @@ internal static class ExpressionTypeAnnotationHelper
     {
         if ( type != null && compilation != null && !node.GetAnnotations( _typeAnnotationKind ).Any() )
         {
-            var syntaxAnnotation = new SyntaxAnnotation(
+            var syntaxAnnotation = SymbolAnnotationMapper.GetOrCreateAnnotation( 
                 _typeAnnotationKind,
-                SymbolIdGenerator.GetInstance( compilation ).GetId( type ).ToString( CultureInfo.InvariantCulture ) );
+                type );
 
             ExpressionSyntax AddAnnotationRecursive( ExpressionSyntax n )
             {
@@ -51,17 +52,11 @@ internal static class ExpressionTypeAnnotationHelper
 
         if ( typeAnnotation != null! )
         {
-            var symbolId = typeAnnotation.Data!;
-
-            type = (ITypeSymbol) SymbolIdGenerator.GetInstance( compilation ).GetSymbol( symbolId );
-
-            return true;
+            type = (ITypeSymbol) SymbolAnnotationMapper.GetSymbolFromAnnotation( typeAnnotation );
         }
-        else if ( SyntaxTreeAnnotationMap.TryGetExpressionType( node, compilation, out var symbol ) )
+        else if ( SyntaxTreeAnnotationMap.TryGetExpressionType( node, out var symbol ) )
         {
             type = (ITypeSymbol) symbol;
-
-            return true;
         }
         else
         {
@@ -69,5 +64,9 @@ internal static class ExpressionTypeAnnotationHelper
 
             return false;
         }
+
+        type = (ITypeSymbol)type.Translate( null, compilation );
+
+        return true;
     }
 }
