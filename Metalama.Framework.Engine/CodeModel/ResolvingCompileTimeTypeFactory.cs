@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal partial class ResolvingCompileTimeTypeFactory : CompileTimeTypeFactory
+internal sealed partial class ResolvingCompileTimeTypeFactory : CompileTimeTypeFactory
 {
     private readonly SerializableTypeIdResolver _serializableTypeIdResolver;
 

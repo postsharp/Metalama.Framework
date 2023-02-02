@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class NullTemplateInfo : ITemplateInfo
+internal sealed class NullTemplateInfo : ITemplateInfo
 {
     public static ITemplateInfo Instance { get; } = new NullTemplateInfo();
 

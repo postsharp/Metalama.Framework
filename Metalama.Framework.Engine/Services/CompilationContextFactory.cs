@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -21,9 +20,6 @@ namespace Metalama.Framework.Engine.Services
         internal CompilationContextFactory() { }
 
         public CompilationContext GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this ) );
-
-        [Memo]
-        internal CompilationContext Empty => new( EmptyCompilation, this );
 
         public void Dispose() => this._instances.Dispose();
     }

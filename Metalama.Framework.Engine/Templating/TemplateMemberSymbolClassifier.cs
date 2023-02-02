@@ -8,11 +8,11 @@ using SymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SymbolExtens
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal class TemplateMemberSymbolClassifier
+internal abstract class TemplateMemberSymbolClassifier
 {
     public ISymbolClassifier SymbolClassifier { get; }
 
-    public TemplateMemberSymbolClassifier( ISymbolClassifier symbolClassifier )
+    protected TemplateMemberSymbolClassifier( ISymbolClassifier symbolClassifier )
     {
         this.SymbolClassifier = symbolClassifier;
     }

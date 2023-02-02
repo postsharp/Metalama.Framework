@@ -12,11 +12,11 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// An implementation of <see cref="CompileTimeTypeResolver"/> that will resolve any type of an assembly that
 /// is already loaded in the AppDomain.
 /// </summary>
-internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
+internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 {
     private readonly ReferenceAssemblyLocator _assemblyLocator;
 
-    public CurrentAppDomainTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    protected CurrentAppDomainTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
     }

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal interface IUserCodeAttributeDeserializer : IAttributeDeserializer, IProjectService { }
 
-internal class UserCodeAttributeDeserializer : AttributeDeserializer, IUserCodeAttributeDeserializer
+internal sealed class UserCodeAttributeDeserializer : AttributeDeserializer, IUserCodeAttributeDeserializer
 {
     public UserCodeAttributeDeserializer( ProjectServiceProvider serviceProvider ) : base(
         serviceProvider,

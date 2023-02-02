@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public DiagnosticManifest? DiagnosticManifest => this.CompileTimeProject?.ClosureDiagnosticManifest;
 
-        internal CompileTimeProjectRepository CompileTimeProjectRepository { get; }
+        private CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
         internal FabricsConfiguration? FabricsConfiguration { get; }
 

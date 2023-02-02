@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class ClassifyingCompilationContextFactory : IProjectService, IDisposable
+internal sealed class ClassifyingCompilationContextFactory : IProjectService, IDisposable
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly WeakCache<Compilation, ClassifyingCompilationContext> _instances = new();
@@ -17,7 +17,7 @@ internal class ClassifyingCompilationContextFactory : IProjectService, IDisposab
     public ClassifyingCompilationContextFactory( ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
-        this._compilationContextFactory = serviceProvider.GetRequiredService<CompilationContextFactory>();
+        this._compilationContextFactory = serviceProvider.Global.GetRequiredService<CompilationContextFactory>();
     }
 
     public ClassifyingCompilationContext GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, this.GetInstanceCore );

@@ -188,7 +188,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
-        var compilationContextFactory = this._serviceProvider.GetRequiredService<CompilationContextFactory>();
+        var compilationContextFactory = this._serviceProvider.Global.GetRequiredService<CompilationContextFactory>();
         var compileTimeCompilationContext = compilationContextFactory.GetInstance( compileTimeCompilation );
 
         var templateSymbolManifestBuilder = new TemplateProjectManifestBuilder( compilationContext.SourceCompilation );
@@ -678,7 +678,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
         out CompileTimeProject? project,
-        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
         CancellationToken cancellationToken )
         => this.TryGetCompileTimeProject(
             this._compilationContextFactory.GetInstance( compilation ),

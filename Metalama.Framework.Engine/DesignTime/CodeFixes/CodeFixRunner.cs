@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 syntaxTree.FilePath,
                 diagnosticSpan );
 
-            var compilationServices = configuration.ServiceProvider!.Value.GetRequiredService<CompilationContextFactory>()
+            var compilationServices = configuration.ServiceProvider!.Value.Global.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( partialCompilation.Compilation );
 
             var designTimeConfiguration = configuration.Configuration;

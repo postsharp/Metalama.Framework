@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Templating
 
             // ReSharper restore PossibleMultipleEnumeration
 
-            var compileTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>()
+            var compileTimeCompilationContext = this._serviceProvider.Global.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( compileTimeCompilation );
 
             // Compile the syntax tree.

@@ -10,16 +10,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// Adds a <see cref="SymbolClassifier"/> to a <see cref="CompilationContext"/>.
 /// </summary>
-internal class ClassifyingCompilationContext
+internal sealed class ClassifyingCompilationContext
 {
     public ClassifyingCompilationContext( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
-        this.ServiceProvider = serviceProvider;
         this.CompilationContext = compilationContext;
         this.SymbolClassifier = SymbolClassifier.GetSymbolClassifier( serviceProvider, compilationContext.Compilation );
     }
-
-    public ProjectServiceProvider ServiceProvider { get; }
 
     public CompilationContext CompilationContext { get; }
 

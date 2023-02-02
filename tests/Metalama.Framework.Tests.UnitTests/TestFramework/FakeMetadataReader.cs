@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-internal class FakeMetadataReader : ITestAssemblyMetadataReader
+internal sealed class FakeMetadataReader : ITestAssemblyMetadataReader
 {
     private readonly string _projectDirectory;
 

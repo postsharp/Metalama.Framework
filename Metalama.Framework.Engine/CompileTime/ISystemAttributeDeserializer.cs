@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal interface ISystemAttributeDeserializer : IAttributeDeserializer, IProjectService { }
 
-internal class SystemAttributeDeserializer : AttributeDeserializer, ISystemAttributeDeserializer
+internal sealed class SystemAttributeDeserializer : AttributeDeserializer, ISystemAttributeDeserializer
 {
     public SystemAttributeDeserializer( ProjectServiceProvider serviceProvider ) : base(
         serviceProvider,

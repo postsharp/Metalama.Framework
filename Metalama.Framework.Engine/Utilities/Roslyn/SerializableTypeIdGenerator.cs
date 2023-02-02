@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public static class SerializableTypeIdGenerator
+internal static class SerializableTypeIdGenerator
 {
     internal static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
     {

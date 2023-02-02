@@ -11,7 +11,7 @@ public static class SourceGeneratorHelper
     public static bool IsGeneratedFile( SyntaxTree syntaxTree )
         => syntaxTree.FilePath.StartsWith( "Metalama.Framework.CompilerExtensions", StringComparison.Ordinal );
 
-    public static bool IsGeneratedSymbol( ISymbol symbol )
+    internal static bool IsGeneratedSymbol( ISymbol symbol )
     {
         if ( symbol.DeclaringSyntaxReferences.IsEmpty )
         {

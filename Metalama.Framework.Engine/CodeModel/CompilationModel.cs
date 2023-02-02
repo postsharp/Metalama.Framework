@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
-        public ProjectModel Project { get; }
+        internal ProjectModel Project { get; }
 
         IProject ICompilation.Project => this.Project;
 
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
+            this.CompilationContext = project.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 

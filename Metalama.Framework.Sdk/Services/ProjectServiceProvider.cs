@@ -15,11 +15,12 @@ public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
 
-    public GlobalServiceProvider Global => this.Underlying.FindNext<IGlobalService>() ?? throw new InvalidOperationException();
+    public GlobalServiceProvider Global { get; }
 
     private ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider )
     {
         this.Underlying = serviceProvider;
+        this.Global = this.Underlying.FindNext<IGlobalService>() ?? throw new InvalidOperationException();
     }
 
     public T GetRequiredService<T>()

@@ -14,7 +14,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Reads the set of <see cref="TestAssemblyReference"/> from the project.
     /// </summary>
-    internal class TestAssemblyMetadataReader : ITestAssemblyMetadataReader
+    internal sealed class TestAssemblyMetadataReader : ITestAssemblyMetadataReader
     {
         private static readonly ConcurrentDictionary<string, TestAssemblyMetadata> _projectOptionsCache = new();
 
