@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Options;
@@ -67,7 +68,8 @@ public static class ServiceProviderFactory
             .WithServiceConditional<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
             .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
             .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
-            .WithServiceConditional( _ => new FrameworkCompileTimeProjectFactory() );
+            .WithServiceConditional( _ => new FrameworkCompileTimeProjectFactory() )
+            .WithServiceConditional( _ => new AttributeClassificationService() );
 
         return serviceProvider;
     }
@@ -149,6 +151,7 @@ public static class ServiceProviderFactory
             .WithService( repository )
             .WithService( sp => new ProjectSpecificCompileTimeTypeResolver( sp ) )
             .WithServiceConditional<IUserCodeAttributeDeserializer>( sp => new UserCodeAttributeDeserializer( sp ) )
-            .WithService<SymbolClassificationService>( sp => new SymbolClassificationService( repository ) );
+            .WithService<SymbolClassificationService>( sp => new SymbolClassificationService( repository ) )
+            .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) );
     }
 }

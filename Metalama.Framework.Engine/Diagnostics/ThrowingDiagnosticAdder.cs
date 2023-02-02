@@ -11,4 +11,7 @@ public sealed class ThrowingDiagnosticAdder : IDiagnosticAdder
             throw new DiagnosticException( diagnostic );
         }
     }
+
+    public static IDiagnosticAdder Instance { get; } = new ThrowingDiagnosticAdder();
+
 }

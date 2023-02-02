@@ -597,7 +597,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                 void CopyAttributes( IDeclaration interfaceMember, DeclarationBuilder builder )
                 {
-                    var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+                    var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
                     foreach ( var codeElementAttribute in interfaceMember.Attributes )
                     {

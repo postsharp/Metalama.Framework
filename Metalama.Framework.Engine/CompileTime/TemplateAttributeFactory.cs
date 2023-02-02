@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -16,21 +17,21 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal sealed class TemplateAttributeFactory : IProjectService
 {
     private readonly IAttributeDeserializer _attributeDeserializer;
-    private readonly Compilation _compilation;
-    private readonly INamedTypeSymbol _adviceAttributeType;
 
     private readonly ConcurrentDictionary<SerializableDeclarationId, IAdviceAttribute?> _cacheById = new();
-    private readonly ConcurrentDictionary<ISymbol, IAdviceAttribute?> _cacheBySymbol = new();
+    
+    // We use a WeakCache here because when the service is used at design time, it can be used for several compilations,
+    // and we don't want to prevent GC of symbols.
+    private readonly WeakCache<ISymbol, IAdviceAttribute?> _cacheBySymbol = new();
 
-    public TemplateAttributeFactory( ProjectServiceProvider serviceProvider, Compilation compilation )
+    public TemplateAttributeFactory( ProjectServiceProvider serviceProvider )
     {
-        this._compilation = compilation;
-        this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
     }
 
     public bool TryGetTemplateAttribute(
         SerializableDeclarationId memberId,
+        Compilation compilation,
         IDiagnosticAdder diagnosticAdder,
         [NotNullWhen( true )] out IAdviceAttribute? adviceAttribute )
     {
@@ -44,7 +45,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
                 memberId,
                 m =>
                 {
-                    _ = this.TryGetTemplateAttributeById( m, diagnosticAdder, out var attribute );
+                    _ = this.TryGetTemplateAttributeById( m, compilation, diagnosticAdder, out var attribute );
 
                     return attribute;
                 } );
@@ -54,10 +55,11 @@ internal sealed class TemplateAttributeFactory : IProjectService
 
     private bool TryGetTemplateAttributeById(
         SerializableDeclarationId memberId,
+        Compilation compilation,
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
-        var member = memberId.ResolveToSymbol( this._compilation );
+        var member = memberId.ResolveToSymbol( compilation );
 
         if ( this._cacheBySymbol.TryGetValue( member, out adviceAttribute ) )
         {
@@ -76,6 +78,9 @@ internal sealed class TemplateAttributeFactory : IProjectService
         return adviceAttribute != null;
     }
 
+    private static bool ImplementsAdviceAttributeInterface( INamedTypeSymbol type )
+        => type.AllInterfaces.Any( i => i is { Name: nameof(IAdviceAttribute), ContainingNamespace:{} ns } && ns.GetFullName() == "Metalama.Framework.Advising" );
+
     private bool TryGetTemplateAttributeBySymbol(
         ISymbol member,
         IDiagnosticAdder diagnosticAdder,
@@ -83,7 +88,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
     {
         var attributeData = member
             .GetAttributes()
-            .SingleOrDefault( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._adviceAttributeType ) );
+            .SingleOrDefault( a => a.AttributeClass != null && ImplementsAdviceAttributeInterface( a.AttributeClass ) );
 
         if ( attributeData == null )
         {

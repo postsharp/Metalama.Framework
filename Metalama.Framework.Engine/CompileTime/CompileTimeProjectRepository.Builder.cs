@@ -214,7 +214,6 @@ internal sealed partial class CompileTimeProjectRepository
                     diagnosticSink,
                     cacheOnly,
                     out compileTimeProject,
-                    this._cacheableTemplateDiscoveryContextProvider,
                     cancellationToken ) )
             {
                 this._logger.Warning?.Log( $"TryGetCompileTimeProject failed." );

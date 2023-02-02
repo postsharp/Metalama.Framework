@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Run the linker.
             var linker = new AspectLinker(
-                this._serviceProvider.WithService( new AttributeClassificationService() ),
+                this._serviceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,

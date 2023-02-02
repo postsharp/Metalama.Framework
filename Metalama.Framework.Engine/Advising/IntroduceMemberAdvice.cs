@@ -178,7 +178,7 @@ namespace Metalama.Framework.Engine.Advising
 
         protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
         {
-            var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+            var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
             foreach ( var codeElementAttribute in declaration.Attributes )
             {

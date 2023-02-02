@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
         private readonly ITemplateReflectionContext _templateReflectionContext;
         private readonly TemplateClass? _baseClass;
-        private readonly SymbolClassificationService _symbolClassificationService;
+        private readonly ITemplateInfoService _symbolClassificationService;
         private readonly TemplateAttributeFactory _templateAttributeFactory;
 
         private protected TemplateClass(
@@ -46,11 +46,11 @@ namespace Metalama.Framework.Engine.Aspects
             string shortName )
         {
             this.ServiceProvider = serviceProvider;
-            this._symbolClassificationService = serviceProvider.GetRequiredService<SymbolClassificationService>();
+            this._symbolClassificationService = serviceProvider.GetRequiredService<ITemplateInfoService>();
             this._templateReflectionContext = templateReflectionContext;
             this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
             this._baseClass = baseClass;
-            this.Members = this.GetMembers( typeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( typeSymbol, templateReflectionContext.Compilation, diagnosticAdder );
             this.ShortName = shortName;
 
             // This condition is to work around fakes.
@@ -117,6 +117,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers(
             INamedTypeSymbol type,
+            Compilation compilation,
             IDiagnosticAdder diagnosticAdder )
         {
             var members = this._baseClass?.Members.ToBuilder()
@@ -144,7 +145,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 IAdviceAttribute? attribute = null;
 
-                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute( templateInfo.Id, diagnosticAdder, out attribute ) )
+                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute( templateInfo.Id, compilation, diagnosticAdder, out attribute ) )
                 {
                     continue;
                 }
@@ -354,7 +355,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
-                if ( !templateAttributeFactory.TryGetTemplateAttribute( declarationId, NullDiagnosticAdder.Instance, out var attribute ) )
+                if ( !templateAttributeFactory.TryGetTemplateAttribute( declarationId, compilation, ThrowingDiagnosticAdder.Instance, out var attribute ) )
                 {
                     throw new AssertionFailedException( $"Cannot get a template for '{declarationId}'." );
                 }

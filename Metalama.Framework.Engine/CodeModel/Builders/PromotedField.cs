@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             if ( field.Attributes.Count > 0 )
             {
-                var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+                var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
                 foreach ( var attribute in field.Attributes )
                 {

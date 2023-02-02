@@ -688,7 +688,6 @@ internal sealed partial class CompileTimeCompilationBuilder
             diagnosticSink,
             cacheOnly,
             out project,
-            cacheableTemplateDiscoveryContextProvider,
             cancellationToken );
 
     /// <summary>
@@ -702,7 +701,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
         out CompileTimeProject? project,
-        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
         CancellationToken cancellationToken )
     {
         var runTimeCompilation = compilationContext.SourceCompilation;
@@ -729,7 +727,6 @@ internal sealed partial class CompileTimeCompilationBuilder
             compileTimeArtifacts.GlobalUsings,
             diagnosticSink,
             cacheOnly,
-            cacheableTemplateDiscoveryContextProvider,
             out project,
             cancellationToken );
     }
@@ -815,7 +812,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         ImmutableArray<UsingDirectiveSyntax> globalUsings,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
-        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
         out CompileTimeProject? project,
         CancellationToken cancellationToken )
     {
@@ -832,7 +828,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 projectHash,
                 projectLicenseInfo,
                 out project,
-                cacheableTemplateDiscoveryContextProvider ) )
+                null ) )
         {
             if ( cacheOnly )
             {
@@ -852,7 +848,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         projectHash,
                         projectLicenseInfo,
                         out project,
-                        cacheableTemplateDiscoveryContextProvider ) )
+                        null ) )
                 {
                     // Coverage: ignore (this depends on a multi-threaded condition)
                     return true;
@@ -970,7 +966,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         outputPaths.Pe,
                         outputPaths.Directory,
                         name => textMapDirectory.GetByName( name ),
-                        cacheableTemplateDiscoveryContextProvider );
+                        null );
 
                     this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
 

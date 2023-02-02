@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
@@ -53,10 +55,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
-                    new DefaultProjectOptions(),
-                    TestCompilationFactory.GetMetadataReferences() )
-                .WithService( new AttributeClassificationService() );
+            var serviceProvider = (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
+                new DefaultProjectOptions(),
+                TestCompilationFactory.GetMetadataReferences() );
+
+            serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
+                
+            
+            
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
@@ -129,5 +135,21 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
         }
+
+
+        class LinkerTemplateInfoService : ITemplateInfoService
+        {
+            public ExecutionScope GetExecutionScope( ISymbol symbol ) => throw new System.NotImplementedException();
+
+            public bool IsTemplate( ISymbol symbol ) => throw new System.NotImplementedException();
+
+            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new System.NotImplementedException();
+
+            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new System.NotImplementedException();
+
+            public ITemplateInfo GetTemplateInfo( ISymbol symbol ) => throw new System.NotImplementedException();
+        }
+
+      
     }
 }

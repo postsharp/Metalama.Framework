@@ -17,8 +17,12 @@ internal sealed partial class CompileTimeProjectRepository : IProjectService
     public bool TryGetCompileTimeProject( AssemblyIdentity assemblyIdentity, out CompileTimeProject? compileTimeProject )
         => this._projects.TryGetValue( assemblyIdentity, out compileTimeProject );
 
+    internal static CompileTimeProjectRepository CreateTestInstance()
+        => new CompileTimeProjectRepository( null, default, new Dictionary<AssemblyIdentity, CompileTimeProject?>(), null! );
+    
+    
     private CompileTimeProjectRepository(
-        CompileTimeDomain domain,
+        CompileTimeDomain? domain,
         ProjectServiceProvider serviceProvider,
         Dictionary<AssemblyIdentity, CompileTimeProject?> projects,
         CompileTimeProject rootProject )
@@ -27,7 +31,10 @@ internal sealed partial class CompileTimeProjectRepository : IProjectService
         this._projects = projects;
 
         // Register assemblies into the domain.
-        var referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
-        domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
+        if ( domain != null )
+        {
+            var referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
+            domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
+        }
     }
 }

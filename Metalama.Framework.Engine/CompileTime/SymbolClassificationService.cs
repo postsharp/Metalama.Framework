@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal sealed class SymbolClassificationService : ISymbolClassificationService
+internal sealed class SymbolClassificationService : ITemplateInfoService
 {
     private readonly CompileTimeProjectRepository _repository;
 
@@ -33,4 +33,9 @@ internal sealed class SymbolClassificationService : ISymbolClassificationService
     public bool IsCompileTimeParameter( IParameterSymbol symbol ) => this.GetExecutionScope( symbol ) == ExecutionScope.CompileTime;
 
     public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => this.GetExecutionScope( symbol ) == ExecutionScope.CompileTime;
+}
+
+internal interface ITemplateInfoService : ISymbolClassificationService
+{
+    ITemplateInfo GetTemplateInfo( ISymbol symbol );
 }

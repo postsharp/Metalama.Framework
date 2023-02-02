@@ -39,7 +39,6 @@ namespace Metalama.Framework.Tests.UnitTests
             var compileTimeProject = compileTimeProjectRepository.RootProject;
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
-            serviceProvider = serviceProvider.WithService( new TemplateAttributeFactory( serviceProvider, compilation.RoslynCompilation ) );
 
             var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, serviceProvider ) );
 

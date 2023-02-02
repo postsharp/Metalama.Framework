@@ -256,16 +256,12 @@ namespace Metalama.Framework.Engine.Pipeline
             var compilationModel = CompilationModel.CreateInitialInstance( projectModel, compilation );
 
             // Create aspect types.
-            // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
-            // we don't want to leak the compilation for the design-time scenario.
-            var serviceProviderForAspectClassFactory =
-                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation ) );
 
-            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, serviceProviderForAspectClassFactory );
+            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, projectServiceProviderWithProject );
             var aspectTypeFactory = new AspectClassFactory( driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetClasses(
-                    serviceProviderForAspectClassFactory,
+                    projectServiceProviderWithProject,
                     compilationModel.CompilationContext,
                     compileTimeProject,
                     diagnosticAdder )
@@ -297,7 +293,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var otherTemplateClassFactory = new OtherTemplateClassFactory();
 
             var otherTemplateClasses = otherTemplateClassFactory.GetClasses(
-                    serviceProviderForAspectClassFactory,
+                    projectServiceProviderWithProject,
                     compilationModel.CompilationContext,
                     compileTimeProject,
                     diagnosticAdder )
@@ -505,13 +501,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            // Add services that have a reference to the compilation.
-            pipelineConfiguration =
-                pipelineConfiguration.WithServiceProvider(
-                    pipelineConfiguration.ServiceProvider
-                        .Underlying
-                        .WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) )
-                        .WithService( new AttributeClassificationService() ) );
+           
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

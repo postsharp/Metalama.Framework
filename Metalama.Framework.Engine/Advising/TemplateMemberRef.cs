@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advising
             // Create the attribute instance.
 
             if ( !templateAttributeFactory
-                    .TryGetTemplateAttribute( this._templateMember.TemplateInfo.Id, NullDiagnosticAdder.Instance, out var attribute ) )
+                    .TryGetTemplateAttribute( this._templateMember.TemplateInfo.Id, compilation.RoslynCompilation, ThrowingDiagnosticAdder.Instance, out var attribute ) )
             {
                 throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
             }
