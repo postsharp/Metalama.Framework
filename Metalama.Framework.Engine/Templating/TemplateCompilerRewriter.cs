@@ -870,17 +870,26 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
             {
-                return this.MetaSyntaxFactory.InvocationExpression(
-                    this.MetaSyntaxFactory.IdentifierName(
-                        this.MetaSyntaxFactory.Identifier(
-                            SyntaxFactoryEx.Default,
-                            this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.Default ) ),
-                    this.MetaSyntaxFactory.ArgumentList(
-                        this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                            this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                if ( transformationKind == TransformationKind.Transform )
+                {
+                    return this.MetaSyntaxFactory.InvocationExpression(
+                        this.MetaSyntaxFactory.IdentifierName(
+                            this.MetaSyntaxFactory.Identifier(
+                                SyntaxFactoryEx.Default,
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.Default ) ),
+                        this.MetaSyntaxFactory.ArgumentList(
+                            this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                }
+                else
+                {
+                    // since expression references a parameter, we can just call ToString() on it
+                    return InvocationExpression(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof( this.ToString ) ) ) );
+                }
             }
 
             var symbolName = symbol?.Name ?? "<error>";
@@ -1885,6 +1894,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         case SymbolKind.Event:
                         case SymbolKind.Method:
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
+
+                            if ( !this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).IsNone )
+                            {
+                                // If the field is a template, assume it's an introduction and don't qualify it.
+                                break;
+                            }
+
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
                                 this.Transform( OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol.ContainingType ) ),

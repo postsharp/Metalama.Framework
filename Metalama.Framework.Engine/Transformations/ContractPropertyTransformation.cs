@@ -53,7 +53,15 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     return false;
                 }
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default )
+                var templateKind =
+                    accessor.GetIteratorInfo() switch
+                    {
+                        { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable } => TemplateKind.IEnumerable,
+                        { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator } => TemplateKind.IEnumerator,
+                        _ => TemplateKind.Default,
+                    };
+
+                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, templateKind )
                     .ToExpressionSyntax( syntaxGenerationContext );
 
                 return true;

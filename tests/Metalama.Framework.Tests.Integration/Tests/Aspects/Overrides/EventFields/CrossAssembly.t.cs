@@ -2,74 +2,74 @@
 [Introduction]
 internal class TargetClass
 {
-  private event EventHandler? _existingEvent;
-  public event EventHandler? ExistingEvent
-  {
-    add
+    private event EventHandler? _existingEvent;
+    public event EventHandler? ExistingEvent
     {
-      global::System.Console.WriteLine("Override");
-      this._existingEvent += value;
-      return;
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this._existingEvent += value;
+            return;
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this._existingEvent -= value;
+            return;
+        }
     }
-    remove
+    private event EventHandler? _existingEvent_Initializer = Foo;
+    public event EventHandler? ExistingEvent_Initializer
     {
-      global::System.Console.WriteLine("Override");
-      this._existingEvent -= value;
-      return;
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this._existingEvent_Initializer += value;
+            return;
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this._existingEvent_Initializer -= value;
+            return;
+        }
     }
-  }
-  private event EventHandler? _existingEvent_Initializer = Foo;
-  public event EventHandler? ExistingEvent_Initializer
-  {
-    add
+    public static void Foo(object? sender, EventArgs args)
     {
-      global::System.Console.WriteLine("Override");
-      this._existingEvent_Initializer += value;
-      return;
     }
-    remove
+    public static void Bar(global::System.Object? sender, global::System.EventArgs args)
     {
-      global::System.Console.WriteLine("Override");
-      this._existingEvent_Initializer -= value;
-      return;
     }
-  }
-  public static void Foo(object? sender, EventArgs args)
-  {
-  }
-  public static void Bar(global::System.Object? sender, global::System.EventArgs args)
-  {
-  }
-  private event global::System.EventHandler? _introducedEvent;
-  public event global::System.EventHandler? IntroducedEvent
-  {
-    add
+    private event global::System.EventHandler? _introducedEvent;
+    public event global::System.EventHandler? IntroducedEvent
     {
-      global::System.Console.WriteLine("Override");
-      this._introducedEvent += value;
-      return;
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this._introducedEvent += value;
+            return;
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this._introducedEvent -= value;
+            return;
+        }
     }
-    remove
+    private event global::System.EventHandler? _introducedEvent_Initializer = (global::System.EventHandler?)Bar;
+    public event global::System.EventHandler? IntroducedEvent_Initializer
     {
-      global::System.Console.WriteLine("Override");
-      this._introducedEvent -= value;
-      return;
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this._introducedEvent_Initializer += value;
+            return;
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this._introducedEvent_Initializer -= value;
+            return;
+        }
     }
-  }
-  private event global::System.EventHandler? _introducedEvent_Initializer = (global::System.EventHandler? )global::Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.CrossAssembly.IntroductionAttribute.Bar;
-  public event global::System.EventHandler? IntroducedEvent_Initializer
-  {
-    add
-    {
-      global::System.Console.WriteLine("Override");
-      this._introducedEvent_Initializer += value;
-      return;
-    }
-    remove
-    {
-      global::System.Console.WriteLine("Override");
-      this._introducedEvent_Initializer -= value;
-      return;
-    }
-  }
 }

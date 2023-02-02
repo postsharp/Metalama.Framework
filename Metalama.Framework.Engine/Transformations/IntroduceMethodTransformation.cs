@@ -85,15 +85,28 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+            // Async iterator can have empty body and still be in iterator, returning anything is invalid.
             var block = SyntaxFactoryEx.FormattedBlock(
-                !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
-                    ? new StatementSyntax[]
-                    {
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
-                            Token( SyntaxKind.SemicolonToken ) )
-                    }
+                !methodBuilder.ReturnParameter.Type.Is( typeof(void) ) 
+                    ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
+                        ? new StatementSyntax[]
+                        {
+                            SyntaxFactoryEx.FormattedBlock(
+                                YieldStatement(
+                                    SyntaxKind.YieldBreakStatement,
+                                    List<AttributeListSyntax>(),
+                                    Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                                    Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
+                                    null,
+                                    Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
+                        }
+                        : new StatementSyntax[]
+                        {
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
+                                Token( SyntaxKind.SemicolonToken ) )
+                        }
                     : Array.Empty<StatementSyntax>() );
 
             var method =

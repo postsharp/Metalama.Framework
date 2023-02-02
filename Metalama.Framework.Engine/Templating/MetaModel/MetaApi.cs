@@ -185,9 +185,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = fieldOrPropertyOrIndexer.DeclaringType;
         }
 
-        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection ) : this(
-            fieldOrPropertyOrIndexer,
-            common )
+        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection = null )
+            : this( (IDeclaration) fieldOrPropertyOrIndexer, common )
         {
             this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
             {

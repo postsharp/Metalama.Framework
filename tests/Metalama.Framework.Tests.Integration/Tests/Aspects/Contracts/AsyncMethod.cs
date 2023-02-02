@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-public sealed class NotNullCheckAttribute : TypeAspect
+public sealed class TestAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
@@ -26,7 +26,8 @@ public sealed class NotNullCheckAttribute : TypeAspect
             }
 
             if (method.ReturnType.IsReferenceType.GetValueOrDefault()
-                && !method.ReturnType.IsNullable.GetValueOrDefault())
+                && !method.ReturnType.IsNullable.GetValueOrDefault()
+                && !method.GetAsyncInfo().ResultType.Is(SpecialType.Void) )
             {
                 builder.Advice.AddContract(
                     method.ReturnParameter,
@@ -56,22 +57,36 @@ public sealed class NotNullCheckAttribute : TypeAspect
 }
 
 // <target>
-[NotNullCheck]
+[Test]
 public class TestClass
 {
-    public string DoSomething( string text )
+    public string DoSomething(string text)
     {
-        Console.WriteLine( "Hello" );
+        Console.WriteLine("Hello");
 
         return null!;
     }
 
-    public async Task<string> DoSomethingAsync( string text )
+    public async Task DoSomethingAsync(string text)
     {
         await Task.Yield();
 
-        Console.WriteLine( "Hello" );
+        Console.WriteLine("Hello");
+    }
+
+    public async Task<string> DoSomethingAsyncT(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
 
         return null!;
+    }
+
+    public async void DoSomethingAsyncVoid(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
     }
 }

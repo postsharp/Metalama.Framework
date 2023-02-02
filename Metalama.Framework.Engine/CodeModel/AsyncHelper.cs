@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private static bool TryGetAsyncInfo( ITypeSymbol returnType, [NotNullWhen( true )] out ITypeSymbol? resultType, out bool hasMethodBuilder )
+        internal static bool TryGetAsyncInfo( ITypeSymbol returnType, [NotNullWhen( true )] out ITypeSymbol? resultType, out bool hasMethodBuilder )
         {
             if ( returnType is not INamedTypeSymbol namedType )
             {

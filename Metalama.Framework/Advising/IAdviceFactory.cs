@@ -24,7 +24,7 @@ namespace Metalama.Framework.Advising
     {
         /// <summary>
         /// Gets the mutable compilation that the current aspect builder is working on. It includes all modifications done by
-        /// the current aspect in the current type thanks to the <see cref="IAdviceFactory"/>.
+        /// the current aspect in the current type using declarative advices and the <see cref="IAdviceFactory"/>.
         /// </summary>
         ICompilation MutableCompilation { get; }
 

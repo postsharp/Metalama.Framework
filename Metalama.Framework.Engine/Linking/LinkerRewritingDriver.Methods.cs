@@ -169,14 +169,32 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
+            var returnType = symbol.ReturnType;
+
+            if ( !AsyncHelper.TryGetAsyncInfo( symbol.ReturnType, out var resultType, out _ ) )
+            {
+                resultType = returnType;
+            }
+
+            var isIterator = IteratorHelper.IsIteratorMethod( symbol );
+
             var emptyBody =
-                symbol.ReturnsVoid
-                    ? SyntaxFactoryEx.FormattedBlock()
-                    : SyntaxFactoryEx.FormattedBlock(
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            DefaultExpression( method.ReturnType ),
-                            Token( SyntaxKind.SemicolonToken ) ) );
+                isIterator
+                    ? SyntaxFactoryEx.FormattedBlock(
+                        YieldStatement(
+                            SyntaxKind.YieldBreakStatement,
+                            List<AttributeListSyntax>(),
+                            Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                            Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
+                            null,
+                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
+                    : resultType.OriginalDefinition.SpecialType == SpecialType.System_Void
+                        ? SyntaxFactoryEx.FormattedBlock()
+                        : SyntaxFactoryEx.FormattedBlock(
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
+                                Token( SyntaxKind.SemicolonToken ) ) );
 
             return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
