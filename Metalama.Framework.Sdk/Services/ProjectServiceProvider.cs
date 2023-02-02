@@ -14,13 +14,16 @@ namespace Metalama.Framework.Engine.Services;
 public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
+    private readonly ServiceProvider<IGlobalService>? _global;
 
-    public GlobalServiceProvider Global { get; }
+    public GlobalServiceProvider Global => this._global ?? throw new InvalidOperationException();
 
     private ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider )
     {
         this.Underlying = serviceProvider;
-        this.Global = this.Underlying.FindNext<IGlobalService>() ?? throw new InvalidOperationException();
+
+        // We cache the global service provider because it is used often.
+        this._global = this.Underlying.FindNext<IGlobalService>();
     }
 
     public T GetRequiredService<T>()
