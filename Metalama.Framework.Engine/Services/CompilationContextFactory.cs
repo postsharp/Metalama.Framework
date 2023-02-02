@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Services
         // This should be used only for tests.
         internal static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );
 
-        // We need a ConditionalWeakTable because of DesignTimeAspectPipeline, which stores the ReflectionMapperFactory service for a long time.
+        // We need a WeakCache because of DesignTimeAspectPipeline, which stores the ReflectionMapperFactory service for a long time.
 
         private readonly WeakCache<Compilation, CompilationContext> _instances = new();
 

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-public class TestExecutorTests : UnitTestClass
+public sealed class TestExecutorTests : UnitTestClass
 {
     [Theory]
     [InlineData(

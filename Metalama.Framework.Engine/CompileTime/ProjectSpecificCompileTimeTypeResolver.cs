@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver, IProjectService
+internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver, IProjectService
 {
     private readonly SystemTypeResolver _systemTypeResolver;
     private readonly CompileTimeProjectRepository _projectRepository;

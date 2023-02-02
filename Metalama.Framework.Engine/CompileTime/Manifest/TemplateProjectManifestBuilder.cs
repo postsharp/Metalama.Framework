@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CompileTime.Manifest;
 
-internal class TemplateProjectManifestBuilder
+internal sealed class TemplateProjectManifestBuilder
 {
     private readonly TemplateSymbolManifest.Builder _rootSymbolBuilder;
 

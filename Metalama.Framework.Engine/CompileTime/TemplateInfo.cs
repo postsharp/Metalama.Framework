@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the <see cref="SymbolId"/> of the template member.
         /// </summary>
-        public SymbolId SymbolId { get; }
+        private SymbolId SymbolId { get; }
 
         public TemplateInfo( SymbolId symbolId, TemplateAttributeType attributeType, IAdviceAttribute? attribute )
         {
