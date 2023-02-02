@@ -13,7 +13,6 @@
      return;
    }
    private readonly global::Dependency.RunTimeOnlyClass _field;
-   [field: global::System.Diagnostics.DebuggerBrowsableAttribute(global::System.Diagnostics.DebuggerBrowsableState.Never)]
    private global::Dependency.RunTimeOnlyClass AutoProperty { get; set; }
    internal global::Dependency.RunTimeOnlyClass Property
    {

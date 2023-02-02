@@ -101,7 +101,6 @@ internal class TargetClass
             return;
         }
     }
-    [global::System.Diagnostics.DebuggerBrowsableAttribute(global::System.Diagnostics.DebuggerBrowsableState.Never)]
     private global::System.Int32 _introducedProperty_Auto;
     public global::System.Int32 IntroducedProperty_Auto
     {
@@ -117,7 +116,6 @@ internal class TargetClass
             return;
         }
     }
-    [global::System.Diagnostics.DebuggerBrowsableAttribute(global::System.Diagnostics.DebuggerBrowsableState.Never)]
     private global::System.Int32 _introducedProperty_AutoInitializer = (global::System.Int32)42;
     public global::System.Int32 IntroducedProperty_AutoInitializer
     {

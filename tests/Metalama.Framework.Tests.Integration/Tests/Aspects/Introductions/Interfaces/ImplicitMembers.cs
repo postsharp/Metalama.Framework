@@ -20,7 +20,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         int Property { get; set; }
 
+        int Property_PrivateSet { get; }
+
         int AutoProperty { get; set; }
+
+        int AutoProperty_PrivateSet { get; }
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -72,7 +76,26 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember]
+        public int Property_PrivateSet
+        {
+            get
+            {
+                Console.WriteLine("This is introduced interface member.");
+
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine("This is introduced interface member.");
+            }
+        }
+
+        [InterfaceMember]
         public int AutoProperty { get; set; }
+
+        [InterfaceMember]
+        public int AutoProperty_PrivateSet { get; private set; }
     }
 
     // <target>
