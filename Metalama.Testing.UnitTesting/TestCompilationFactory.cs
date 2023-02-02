@@ -57,7 +57,7 @@ namespace Metalama.Testing.UnitTesting
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
-            IEnumerable<Assembly> additionalAssemblies,
+            IEnumerable<Assembly>? additionalAssemblies = null,
             bool addMetalamaReferences = true,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
             ImmutableArray<string> implicitUsings = default,

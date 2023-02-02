@@ -77,6 +77,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // we replace the execution scenario for future services in the current pipeline.
             this.ServiceProvider = this.ServiceProvider.WithService( executionScenario, true );
 
+            // Setup the domain.
             if ( domain != null )
             {
                 this.Domain = domain;
@@ -159,8 +160,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var compileTimeProject = compileTimeProjectRepository.RootProject;
 
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( compileTimeProjectRepository );
-
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.

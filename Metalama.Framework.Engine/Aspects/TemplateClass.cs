@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
@@ -33,6 +34,8 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
         private readonly ITemplateReflectionContext _templateReflectionContext;
         private readonly TemplateClass? _baseClass;
+        private readonly SymbolClassificationService _symbolClassificationService;
+        private readonly TemplateAttributeFactory _templateAttributeFactory;
 
         private protected TemplateClass(
             ProjectServiceProvider serviceProvider,
@@ -43,9 +46,11 @@ namespace Metalama.Framework.Engine.Aspects
             string shortName )
         {
             this.ServiceProvider = serviceProvider;
+            this._symbolClassificationService = serviceProvider.GetRequiredService<SymbolClassificationService>();
             this._templateReflectionContext = templateReflectionContext;
+            this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
             this._baseClass = baseClass;
-            this.Members = this.GetMembers( templateReflectionContext, typeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
 
             // This condition is to work around fakes.
@@ -111,18 +116,16 @@ namespace Metalama.Framework.Engine.Aspects
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers(
-            ITemplateReflectionContext templateReflectionContext,
             INamedTypeSymbol type,
             IDiagnosticAdder diagnosticAdder )
         {
-            var classifier = new TemplateMemberSymbolClassifier( templateReflectionContext.SymbolClassifier );
-
             var members = this._baseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateInfo = classifier.SymbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
+                var templateInfo = this._symbolClassificationService.GetTemplateInfo( memberSymbol );
+
                 var memberKey = memberSymbol.Name;
 
                 switch ( templateInfo.AttributeType )
@@ -137,6 +140,13 @@ namespace Metalama.Framework.Engine.Aspects
                         memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
 
                         break;
+                }
+
+                IAdviceAttribute? attribute = null;
+
+                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute( templateInfo.Id, diagnosticAdder, out attribute ) )
+                {
+                    continue;
                 }
 
                 var templateParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
@@ -158,7 +168,8 @@ namespace Metalama.Framework.Engine.Aspects
                                 accessor.Name,
                                 this,
                                 templateInfo,
-                                accessor.GetSymbolId(),
+                                attribute,
+                                accessor.GetSerializableId(),
                                 accessorParameters,
                                 ImmutableArray<TemplateClassMemberParameter>.Empty,
                                 ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
@@ -184,7 +195,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                             foreach ( var parameter in method.Parameters )
                             {
-                                var isCompileTime = classifier.IsCompileTimeParameter( parameter );
+                                var isCompileTime = this._symbolClassificationService.IsCompileTimeParameter( parameter );
 
                                 parameterBuilder.Add(
                                     new TemplateClassMemberParameter(
@@ -204,7 +215,7 @@ namespace Metalama.Framework.Engine.Aspects
                             foreach ( var typeParameter in method.TypeParameters )
                             {
                                 var isCompileTime =
-                                    classifier.IsCompileTimeTemplateTypeParameter( typeParameter );
+                                    this._symbolClassificationService.IsCompileTimeTypeParameter( typeParameter );
 
                                 typeParameterBuilder.Add(
                                     new TemplateClassMemberParameter(
@@ -270,7 +281,8 @@ namespace Metalama.Framework.Engine.Aspects
                     memberKey,
                     this,
                     templateInfo,
-                    memberSymbol.GetSymbolId(),
+                    attribute,
+                    memberSymbol.GetSerializableId(),
                     templateParameters,
                     templateTypeParameters,
                     accessors );
@@ -331,20 +343,20 @@ namespace Metalama.Framework.Engine.Aspects
                 .Select(
                     m =>
                     {
-                        var symbol = m.Value.SymbolId.Resolve( compilation ).AssertNotNull();
+                        var symbol = m.Value.DeclarationId.ResolveToSymbol( compilation ).AssertNotNull();
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )
                 .OrderBy( m => m.Symbol, DeclarativeAdviceSymbolComparer.Instance )
-                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
+                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.DeclarationId )) );
 
-            DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )
+            DeclarativeAdviceAttribute ResolveAttribute( SerializableDeclarationId declarationId )
             {
                 templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
-                if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
+                if ( !templateAttributeFactory.TryGetTemplateAttribute( declarationId, NullDiagnosticAdder.Instance, out var attribute ) )
                 {
-                    throw new AssertionFailedException( $"Cannot get a template for '{templateInfoSymbolId}'." );
+                    throw new AssertionFailedException( $"Cannot get a template for '{declarationId}'." );
                 }
 
                 return (DeclarativeAdviceAttribute) attribute;

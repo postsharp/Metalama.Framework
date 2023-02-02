@@ -1,21 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
+internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver, IProjectService
 {
     private readonly SystemTypeResolver _systemTypeResolver;
     private readonly CompileTimeProjectRepository _projectRepository;
 
-    public ProjectSpecificCompileTimeTypeResolver( ProjectServiceProvider serviceProvider, CompileTimeProjectRepository projectRepository ) : base(
-        serviceProvider )
+    public ProjectSpecificCompileTimeTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
-        this._projectRepository = projectRepository;
+        this._projectRepository = serviceProvider.GetRequiredService<CompileTimeProjectRepository>();
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
     }
 
@@ -55,6 +55,6 @@ internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
             return null;
         }
 
-        return compileTimeProject.GetTypeOrNull( reflectionName );
+        return compileTimeProject?.GetTypeOrNull( reflectionName );
     }
 }

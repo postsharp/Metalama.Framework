@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
@@ -29,53 +30,10 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed class CompileTimeProject : IProjectService
+    internal sealed partial class CompileTimeProject : IProjectService
     {
-        private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
-        private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
+        internal CompileTimeProjectManifest? Manifest { get; }
 
-        private static readonly CompileTimeProjectManifest _frameworkProjectManifest = new(
-            _frameworkAssemblyIdentity.ToString(),
-            _frameworkAssemblyIdentity.ToString(),
-            "",
-            new[] { typeof(InternalImplementAttribute) }
-                .SelectAsImmutableArray( t => t.FullName ),
-            ImmutableArray<string>.Empty,
-            ImmutableArray<string>.Empty,
-            ImmutableArray<string>.Empty,
-            ImmutableArray<string>.Empty,
-            ImmutableArray<string>.Empty,
-            null,
-            0,
-            ImmutableArray<CompileTimeFile>.Empty );
-
-        internal static CompileTimeProject CreateFrameworkProject( ProjectServiceProvider serviceProvider, CompileTimeDomain domain )
-        {
-            var additionalTypes = new[] { typeof(FrameworkDiagnosticDescriptors) };
-            var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
-            var diagnostics = service.GetDiagnosticDefinitions( additionalTypes ).ToImmutableArray();
-            var suppressions = service.GetSuppressionDefinitions( additionalTypes ).ToImmutableArray();
-
-            var initialDiagnosticManifest = new DiagnosticManifest( diagnostics, suppressions );
-
-            var project = new CompileTimeProject(
-                serviceProvider,
-                domain,
-                _frameworkAssemblyIdentity,
-                _frameworkAssemblyIdentity,
-                ImmutableArray<CompileTimeProject>.Empty,
-                _frameworkProjectManifest,
-                null,
-                _ => null,
-                null,
-                null,
-                _frameworkAssembly,
-                initialDiagnosticManifest );
-
-            return project;
-        }
-
-        private readonly CompileTimeProjectManifest? _manifest;
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
@@ -104,24 +62,24 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
         /// declared in the current project.
         /// </summary>
-        public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
+        public IReadOnlyList<string> AspectTypes => this.Manifest?.AspectTypes ?? Array.Empty<string>();
 
-        public IReadOnlyList<string> OtherTemplateTypes => this._manifest?.OtherTemplateTypes ?? Array.Empty<string>();
+        public IReadOnlyList<string> OtherTemplateTypes => this.Manifest?.OtherTemplateTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of types that are exported using the <c>CompilerPlugin</c> attribute.
         /// </summary>
-        public IReadOnlyList<string> PlugInTypes => this._manifest?.PlugInTypes ?? Array.Empty<string>();
+        public IReadOnlyList<string> PlugInTypes => this.Manifest?.PlugInTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of types that implement the <see cref="Fabric"/> interface, but the <see cref="TransitiveProjectFabric"/>.
         /// </summary>
-        public IReadOnlyList<string> FabricTypes => this._manifest?.FabricTypes ?? Array.Empty<string>();
+        public IReadOnlyList<string> FabricTypes => this.Manifest?.FabricTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of types that implement the <see cref="TransitiveProjectFabric"/> interface.
         /// </summary>
-        public IReadOnlyList<string> TransitiveFabricTypes => this._manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
+        public IReadOnlyList<string> TransitiveFabricTypes => this.Manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
@@ -133,7 +91,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        internal IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
+        internal IReadOnlyList<CompileTimeFile> CodeFiles => this.Manifest?.Files ?? Array.Empty<CompileTimeFile>();
 
         [Memo]
         private ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
@@ -150,14 +108,14 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         [Memo]
         public ProjectLicenseInfo ProjectLicenseInfo
-            => this._manifest?.RedistributionLicenseKey == null
+            => this.Manifest?.RedistributionLicenseKey == null
                 ? ProjectLicenseInfo.Empty
-                : new ProjectLicenseInfo( this._manifest.RedistributionLicenseKey );
+                : new ProjectLicenseInfo( this.Manifest.RedistributionLicenseKey );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
         /// </summary>
-        public ulong Hash => this._manifest?.SourceHash ?? 0;
+        public ulong Hash => this.Manifest?.SourceHash ?? 0;
 
         /// <summary>
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that
@@ -190,7 +148,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return this;
         }
 
-        private CompileTimeProject(
+        internal CompileTimeProject(
             ProjectServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
@@ -209,7 +167,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._getLocationMap = getLocationMap;
             this.Directory = directory;
             this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
-            this._manifest = manifest;
+            this.Manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
             this._compileTimeIdentity = compileTimeIdentity;
             this.References = references;
@@ -348,6 +306,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 transitiveFabricTypes,
                 templateProviders,
                 null,
+                TemplateProjectManifest.Empty,
                 null,
                 hash.Digest(),
                 Array.Empty<CompileTimeFile>() );
@@ -391,7 +350,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Write manifest.
                 var manifestEntry = archive.CreateEntry( "manifest.json", CompressionLevel.Optimal );
                 var manifestStream = manifestEntry.Open();
-                this._manifest!.Serialize( manifestStream );
+                this.Manifest!.Serialize( manifestStream );
             }
         }
 

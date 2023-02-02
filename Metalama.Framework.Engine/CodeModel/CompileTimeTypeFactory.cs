@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     internal class CompileTimeTypeFactory : IProjectService
     {
+        // The class is intentionally project-scoped even if does not depend the project because
+        // we want the lifetime and scope of this dictionary to be project-scoped.
         private readonly ConcurrentDictionary<string, CompileTimeType> _instances = new( StringComparer.Ordinal );
 
         public CompileTimeType Get( ITypeSymbol symbol )

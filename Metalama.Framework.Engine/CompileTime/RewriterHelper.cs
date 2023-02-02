@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -21,7 +20,7 @@ internal sealed class RewriterHelper
     public ISymbolClassifier SymbolClassifier { get; }
 
     public RewriterHelper(
-        CompilationContext runTimeCompilationContext,
+        ClassifyingCompilationContext runTimeCompilationContext,
         Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
     {
         this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);

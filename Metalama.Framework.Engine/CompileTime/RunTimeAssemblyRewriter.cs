@@ -89,12 +89,12 @@ namespace Metalama.Compiler
     private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
     private readonly RewriterHelper _rewriterHelper;
 
-    private RunTimeAssemblyRewriter( ProjectServiceProvider serviceProvider, CompilationContext runTimeCompilationContext )
+    private RunTimeAssemblyRewriter( ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
     {
-        this._rewriterHelper = new RewriterHelper( runTimeCompilationContext );
-        this._aspectDriverSymbol = runTimeCompilationContext.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
+        this._rewriterHelper = new RewriterHelper( compilationContext );
+        this._aspectDriverSymbol = compilationContext.SourceCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
         this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
-        this._syntaxGenerationContextFactory = runTimeCompilationContext.SyntaxGenerationContextFactory;
+        this._syntaxGenerationContextFactory = compilationContext.CompilationContext.SyntaxGenerationContextFactory;
     }
 
     private SemanticModelProvider SemanticModelProvider => this._rewriterHelper.SemanticModelProvider;
@@ -103,7 +103,7 @@ namespace Metalama.Compiler
 
     public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, ProjectServiceProvider serviceProvider )
     {
-        var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation.Compilation );
+        var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation.Compilation );
 
         var rewriter = new RunTimeAssemblyRewriter( serviceProvider, compilationContext );
 

@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
@@ -26,9 +25,6 @@ namespace Metalama.Framework.Engine.Services
             this._serviceProvider = serviceProvider.Underlying.WithService( this );
         }
 
-        /// <summary>
-        /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
-        /// </summary>
         public CompilationContext GetInstance( Compilation compilation )
             => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this._serviceProvider, this ) );
 

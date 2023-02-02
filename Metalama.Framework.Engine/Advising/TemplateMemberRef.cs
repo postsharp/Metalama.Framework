@@ -39,10 +39,14 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            var classifier = compilation.CompilationContext.SymbolClassifier;
+            // PERF: do not resolve dependencies here but upstream.
+            var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>();
+            var templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
             var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
-            var symbol = type.GetMembers( this._templateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );
+
+            var symbol = type.GetMembers( this._templateMember.Name )
+                .Single( m => classifier.IsTemplate( m ) );
 
             var declaration = compilation.Factory.GetDeclaration( symbol );
 
@@ -53,21 +57,11 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Create the attribute instance.
-            IAdviceAttribute? attribute;
 
-            if ( this._templateMember.TemplateInfo.Attribute != null )
+            if ( !templateAttributeFactory
+                    .TryGetTemplateAttribute( this._templateMember.TemplateInfo.Id, NullDiagnosticAdder.Instance, out var attribute ) )
             {
-                // If we have a system attribute, return it.
-
-                attribute = this._templateMember.TemplateInfo.Attribute;
-            }
-            else
-            {
-                if ( !serviceProvider.GetRequiredService<TemplateAttributeFactory>()
-                        .TryGetTemplateAttribute( this._templateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out attribute ) )
-                {
-                    throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
-                }
+                throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
             }
 
             if ( attribute is ITemplateAttribute templateAttribute )

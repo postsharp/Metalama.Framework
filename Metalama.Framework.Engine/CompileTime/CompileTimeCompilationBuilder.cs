@@ -7,6 +7,7 @@ using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -76,7 +77,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     }
 
     private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
-    private readonly CompilationContextFactory _compilationContextFactory;
+    private readonly ClassifyingCompilationContextFactory _compilationContextFactory;
     private readonly ITempFileManager _tempFileManager;
 
     public CompileTimeCompilationBuilder(
@@ -88,7 +89,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();
         this._projectOptions = serviceProvider.GetService<IProjectOptions>();
-        this._compilationContextFactory = serviceProvider.GetRequiredService<CompilationContextFactory>();
+        this._compilationContextFactory = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
@@ -160,7 +161,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     }
 
     private bool TryCreateCompileTimeCompilation(
-        Compilation runTimeCompilation,
+        ClassifyingCompilationContext compilationContext,
         IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
         IReadOnlyCollection<CompileTimeProject> referencedProjects,
         ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -168,7 +169,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         IDiagnosticAdder diagnosticSink,
         CancellationToken cancellationToken,
         out Compilation? compileTimeCompilation,
-        out ILocationAnnotationMap? locationAnnotationMap )
+        out ILocationAnnotationMap? locationAnnotationMap,
+        out TemplateProjectManifest? compilationResultManifest )
     {
         locationAnnotationMap = null;
 
@@ -176,28 +178,32 @@ internal sealed partial class CompileTimeCompilationBuilder
         if ( treesWithCompileTimeCode.Count == 0 )
         {
             compileTimeCompilation = null;
+            compilationResultManifest = null;
 
             return true;
         }
 
+        var runTimeCompilation = compilationContext.SourceCompilation;
+
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
-        var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
+        var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
         var compilationContextFactory = this._serviceProvider.GetRequiredService<CompilationContextFactory>();
-        var runTimeCompilationContext = compilationContextFactory.GetInstance( runTimeCompilation );
         var compileTimeCompilationContext = compilationContextFactory.GetInstance( compileTimeCompilation );
 
-        var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilationContext );
+        var templateSymbolManifestBuilder = new TemplateProjectManifestBuilder( compilationContext.SourceCompilation );
+        var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext, templateSymbolManifestBuilder );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
             this,
-            runTimeCompilationContext,
+            compilationContext,
             compileTimeCompilationContext,
             serializableTypes,
             globalUsings,
             diagnosticSink,
             templateCompiler,
             referencedProjects,
+            templateSymbolManifestBuilder,
             cancellationToken );
 
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
@@ -228,6 +234,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             .ToList();
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
+        compilationResultManifest = produceCompileTimeCodeRewriter.GetManifest();
 
         if ( !produceCompileTimeCodeRewriter.Success )
         {
@@ -594,14 +601,16 @@ internal sealed partial class CompileTimeCompilationBuilder
         }
     }
 
-    private (IReadOnlyList<SyntaxTree> SyntaxTrees, ImmutableArray<UsingDirectiveSyntax> GlobalUsings) GetCompileTimeArtifacts(
-        Compilation runTimeCompilation,
+    private static (IReadOnlyList<SyntaxTree> SyntaxTrees, ImmutableArray<UsingDirectiveSyntax> GlobalUsings) GetCompileTimeArtifacts(
+        ClassifyingCompilationContext compilationContext,
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
         CancellationToken cancellationToken )
     {
+        var runTimeCompilation = compilationContext.SourceCompilation;
+
         List<SyntaxTree> compileTimeTrees = new();
         var globalUsings = GetUsingsFromOptions( runTimeCompilation );
-        var classifier = this._compilationContextFactory.GetInstance( runTimeCompilation ).SymbolClassifier;
+        var classifier = compilationContext.SymbolClassifier;
 
         var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 
@@ -623,15 +632,14 @@ internal sealed partial class CompileTimeCompilationBuilder
         return (compileTimeTrees, globalUsings.ToImmutableArray());
     }
 
-    private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
-        Compilation runTimeCompilation,
+    private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
+        ClassifyingCompilationContext runTimeCompilationContext,
         IEnumerable<SyntaxTree> compileTimeSyntaxTrees,
         CancellationToken cancellationToken )
     {
         var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
-        var compilationServices = this._compilationContextFactory.GetInstance( runTimeCompilation );
-        var reflectionMapper = compilationServices.ReflectionMapper;
-        var classifier = compilationServices.SymbolClassifier;
+        var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
+        var classifier = runTimeCompilationContext.SymbolClassifier;
 
         void OnSerializableTypeDiscovered( SerializableTypeInfo type )
         {
@@ -645,7 +653,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
-        var semanticModelProvider = runTimeCompilation.GetSemanticModelProvider();
+        var semanticModelProvider = runTimeCompilationContext.SemanticModelProvider;
 
         foreach ( var tree in compileTimeSyntaxTrees )
         {
@@ -662,11 +670,32 @@ internal sealed partial class CompileTimeCompilationBuilder
         return allSerializableTypes.Values.ToList();
     }
 
+    internal bool TryGetCompileTimeProject(
+        Compilation compilation,
+        ProjectLicenseInfo? projectLicenseInfo,
+        IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+        IReadOnlyList<CompileTimeProject> referencedProjects,
+        IDiagnosticAdder diagnosticSink,
+        bool cacheOnly,
+        out CompileTimeProject? project,
+        CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
+        CancellationToken cancellationToken )
+        => this.TryGetCompileTimeProject(
+            this._compilationContextFactory.GetInstance( compilation ),
+            projectLicenseInfo,
+            compileTimeTreesHint,
+            referencedProjects,
+            diagnosticSink,
+            cacheOnly,
+            out project,
+            cacheableTemplateDiscoveryContextProvider,
+            cancellationToken );
+
     /// <summary>
     /// Tries to create a compile-time <see cref="Compilation"/> given a run-time <see cref="Compilation"/>.
     /// </summary>
     internal bool TryGetCompileTimeProject(
-        Compilation runTimeCompilation,
+        ClassifyingCompilationContext compilationContext,
         ProjectLicenseInfo? projectLicenseInfo,
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
         IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -676,6 +705,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
         CancellationToken cancellationToken )
     {
+        var runTimeCompilation = compilationContext.SourceCompilation;
+
         // If the compilation does not reference Metalama.Framework, do not create a compile-time project.
         if ( !runTimeCompilation.References.OfType<PortableExecutableReference>()
                 .Any(
@@ -688,10 +719,10 @@ internal sealed partial class CompileTimeCompilationBuilder
             return true;
         }
 
-        var compileTimeArtifacts = this.GetCompileTimeArtifacts( runTimeCompilation, compileTimeTreesHint, cancellationToken );
+        var compileTimeArtifacts = GetCompileTimeArtifacts( compilationContext, compileTimeTreesHint, cancellationToken );
 
         return this.TryGetCompileTimeProjectImpl(
-            runTimeCompilation,
+            compilationContext,
             projectLicenseInfo,
             compileTimeArtifacts.SyntaxTrees,
             referencedProjects,
@@ -777,7 +808,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     }
 
     private bool TryGetCompileTimeProjectImpl(
-        Compilation runTimeCompilation,
+        ClassifyingCompilationContext compilationContext,
         ProjectLicenseInfo? projectLicenseInfo,
         IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
         IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -788,6 +819,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         out CompileTimeProject? project,
         CancellationToken cancellationToken )
     {
+        var runTimeCompilation = compilationContext.SourceCompilation;
+
         // Check the in-process cache.
         var (sourceHash, projectHash, outputPaths) =
             this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
@@ -827,7 +860,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 // Generate the C# compilation.
                 if ( !this.TryCreateCompileTimeCompilation(
-                        runTimeCompilation,
+                        compilationContext,
                         sourceTreesWithCompileTimeCode,
                         referencedProjects,
                         globalUsings,
@@ -835,7 +868,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                         diagnosticSink,
                         cancellationToken,
                         out var compileTimeCompilation,
-                        out var locationAnnotationMap ) )
+                        out var locationAnnotationMap,
+                        out var compilationResultManifest ) )
                 {
                     project = null;
 
@@ -921,6 +955,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         transitiveFabricTypes,
                         otherTemplateTypes,
                         referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
+                        compilationResultManifest,
                         projectLicenseInfo?.RedistributionLicenseKey,
                         sourceHash,
                         textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

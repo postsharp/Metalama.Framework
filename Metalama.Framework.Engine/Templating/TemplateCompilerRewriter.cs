@@ -60,7 +60,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         ProjectServiceProvider serviceProvider,
         string templateName,
         TemplateCompilerSemantics syntaxKind,
-        CompilationContext runTimeCompilationContext,
+        ClassifyingCompilationContext runTimeCompilationContext,
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
@@ -71,7 +71,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
-        this._runTimeCompilation = runTimeCompilationContext.Compilation;
+        this._runTimeCompilation = runTimeCompilationContext.SourceCompilation;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;

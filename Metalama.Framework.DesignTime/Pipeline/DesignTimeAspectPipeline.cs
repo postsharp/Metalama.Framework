@@ -813,7 +813,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             TemplatingCodeValidator.Validate(
                 serviceProvider,
-                compilationContext,
+                compilationContext.Compilation,
                 semanticModel,
                 diagnostics.Add,
                 pipelineMustReportPausedPipelineAsErrors,

@@ -20,6 +20,11 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
     private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
 
+    protected bool IsVisible( ISymbol symbol )
+    {
+        return this.Compilation.Project.CompileTimeProject?.Manifest?.Templates?.GetExecutionScope( symbol ) != ExecutionScope.CompileTime;
+    }
+
     public override ImmutableArray<MemberRef<T>> OfName( string name )
     {
         var dictionary = this.GetInitializedDictionary();

@@ -2,32 +2,24 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 #pragma warning disable SA1402
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILazy, IReadOnlyList<TRef>
+internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, IReadOnlyList<TRef>
     where TDeclaration : class, IDeclaration
     where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {
     private List<TRef>? _allItems;
     private volatile int _removeOperationsCount;
 
-    protected UpdatableDeclarationCollection( CompilationModel compilation )
-    {
-        this.Compilation = compilation;
-    }
-
-    public CompilationModel Compilation { get; private set; }
+    protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
 
     /// <summary>
     /// Gets a value indicating whether the construction has been populated for all names.
@@ -135,28 +127,6 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
 
             return this._allItems![index];
         }
-    }
-
-    protected virtual bool IsSymbolIncluded( ISymbol symbol ) => !this.IsHidden( symbol );
-
-    private bool IsHidden( ISymbol symbol )
-    {
-        // Private symbols of external assemblies must be hidden because these references are not available in a PE reference (i.e. at compile time)
-        // but are available in a CompilationReference (i.e. at design time, if both projects are in the same solution).
-        if ( symbol.DeclaredAccessibility == Accessibility.Private
-             && !this.Compilation.Options.ShowExternalPrivateMembers
-             && !SymbolEqualityComparer.Default.Equals( symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly ) )
-        {
-            return true;
-        }
-
-        // Symbols defined by a our own source generator must be hidden.
-        if ( SourceGeneratorHelper.IsGeneratedSymbol( symbol ) )
-        {
-            return true;
-        }
-
-        return false;
     }
 
     public struct Enumerator : IEnumerator<TRef>

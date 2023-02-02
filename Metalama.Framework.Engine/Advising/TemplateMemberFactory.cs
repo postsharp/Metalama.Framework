@@ -31,6 +31,6 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, (ITemplateAttribute) templateClassMember.TemplateInfo.Attribute.AssertNotNull(), selectedKind );
+            => new( implementation, templateClassMember, (ITemplateAttribute) templateClassMember.Attribute.AssertNotNull(), selectedKind );
     }
 }

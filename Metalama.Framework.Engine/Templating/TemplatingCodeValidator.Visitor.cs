@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _isDesignTime;
             private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModel _semanticModel;
-            private readonly CompilationContext _compilationContext;
+            private readonly ClassifyingCompilationContext _compilationContext;
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
             private readonly bool _hasCompileTimeCodeFast;
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Templating
             public Visitor(
                 ProjectServiceProvider serviceProvider,
                 SemanticModel semanticModel,
-                CompilationContext compilationContext,
+                ClassifyingCompilationContext compilationContext,
                 Action<Diagnostic> reportDiagnostic,
                 bool reportCompileTimeTreeOutdatedError,
                 bool isDesignTime,

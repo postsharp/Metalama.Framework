@@ -9,6 +9,17 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
+    public sealed class ThrowingDiagnosticAdder : IDiagnosticAdder
+    {
+        public void Report( Diagnostic diagnostic )
+        {
+            if ( diagnostic.Severity == DiagnosticSeverity.Error )
+            {
+                throw new DiagnosticException( diagnostic );
+            }
+        }
+    }
+
     public sealed class DiagnosticBag : IDiagnosticBag
     {
         private volatile ConcurrentBag<Diagnostic>? _bag;

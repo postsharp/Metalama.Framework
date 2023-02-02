@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -22,11 +23,13 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var serviceProvider = testContext.ServiceProvider;
+
             var compileTimeDomain = testContext.Domain;
 
             var compileTimeProjectRepository = CompileTimeProjectRepository.Create(
                     compileTimeDomain,
-                    testContext.ServiceProvider,
+                    serviceProvider,
                     compilation.RoslynCompilation,
                     NullDiagnosticAdder.Instance )
                 .AssertNotNull();
@@ -35,12 +38,15 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var compileTimeProject = compileTimeProjectRepository.RootProject;
 
-            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+            serviceProvider = serviceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
+            serviceProvider = serviceProvider.WithService( new TemplateAttributeFactory( serviceProvider, compilation.RoslynCompilation ) );
+
+            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, serviceProvider ) );
 
             var aspectNamedTypes = aspectNames.SelectAsImmutableArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
 
             var aspectTypes = aspectTypeFactory.GetClasses(
-                    testContext.ServiceProvider,
+                    serviceProvider,
                     compilation.CompilationContext,
                     aspectNamedTypes,
                     compileTimeProject,
@@ -51,8 +57,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var dependencies = new IAspectOrderingSource[]
             {
-                new AspectLayerOrderingSource( aspectTypes ),
-                new AttributeAspectOrderingSource( testContext.ServiceProvider, compilation.RoslynCompilation )
+                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( serviceProvider, compilation.RoslynCompilation )
             };
 
             if ( AspectLayerSorter.TrySort(

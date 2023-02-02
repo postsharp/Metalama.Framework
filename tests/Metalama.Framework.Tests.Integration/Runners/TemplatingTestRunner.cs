@@ -231,14 +231,15 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( serviceProvider, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance(
-                    new NullProject( serviceProvider ),
+                    new ProjectModel( testResult.InputCompilation, serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
                 var fakeTemplateClassMember = new TemplateClassMember(
                     "Template",
                     "Template",
                     null!,
-                    TemplateInfo.None,
+                    NullTemplateInfo.Instance,
+                    null!,
                     default,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,

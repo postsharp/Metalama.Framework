@@ -114,6 +114,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.IsAbstract = typeSymbol.IsAbstract;
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+        var attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
         this.DiagnosticLocation = typeSymbol.GetDiagnosticLocation();
         this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
@@ -160,7 +161,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                     break;
 
                 case nameof(EditorExperienceAttribute):
-                    if ( !compilationContext.AttributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
+                    if ( !attributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
                             attribute,
                             diagnosticAdder,
                             out var editorExperienceAttribute ) )

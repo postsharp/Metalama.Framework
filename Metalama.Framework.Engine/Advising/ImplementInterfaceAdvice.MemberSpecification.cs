@@ -15,11 +15,12 @@ namespace Metalama.Framework.Engine.Advising
 
             public TemplateMember<IMember>? Template { get; }
 
-            public bool IsExplicit => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.TemplateInfo.Attribute).AssertNotNull().IsExplicit;
+            public bool IsExplicit => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().IsExplicit;
 
             public IObjectReader? Tags { get; }
 
-            public InterfaceMemberOverrideStrategy OverrideStrategy => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.TemplateInfo.Attribute).AssertNotNull().WhenExists;
+            public InterfaceMemberOverrideStrategy OverrideStrategy
+                => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().WhenExists;
 
             public MemberSpecification(
                 IMember interfaceMember,

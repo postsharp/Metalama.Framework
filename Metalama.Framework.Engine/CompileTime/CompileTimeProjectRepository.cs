@@ -15,7 +15,7 @@ internal sealed partial class CompileTimeProjectRepository : IProjectService
     // Maps the identity of the run-time project to the compile-time project.
     private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects;
 
-    public bool TryGetCompileTimeProject( AssemblyIdentity assemblyIdentity, [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
+    public bool TryGetCompileTimeProject( AssemblyIdentity assemblyIdentity, out CompileTimeProject? compileTimeProject )
         => this._projects.TryGetValue( assemblyIdentity, out compileTimeProject );
 
     private CompileTimeProjectRepository(
@@ -31,7 +31,4 @@ internal sealed partial class CompileTimeProjectRepository : IProjectService
         var referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
         domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
     }
-
-    internal AttributeDeserializer CreateAttributeDeserializer( ProjectServiceProvider serviceProvider )
-        => new( serviceProvider, new ProjectSpecificCompileTimeTypeResolver( serviceProvider, this ) );
 }

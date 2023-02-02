@@ -33,18 +33,18 @@ namespace Metalama.Framework.Engine.CodeModel
             MetalamaEngineModuleInitializer.EnsureInitialized();
         }
 
-        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
+        public static CompilationModel CreateInitialInstance( ProjectModel project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
             => new( project, compilation, aspectRepository, CompilationModelOptions.Default );
 
         public static CompilationModel CreateInitialInstance(
-            IProject project,
+            ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null )
             => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default );
 
         internal static CompilationModel CreateInitialInstance(
-            IProject project,
+            ProjectModel project,
             Compilation compilation,
             CompilationModelOptions options )
             => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options );
@@ -65,7 +65,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
-        public IProject Project { get; }
+        public ProjectModel Project { get; }
+
+        IProject ICompilation.Project => this.Project;
 
         internal CompilationContext CompilationContext { get; }
 
@@ -76,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal CompilationModelOptions Options { get; }
 
         private CompilationModel(
-            IProject project,
+            ProjectModel project,
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
             CompilationModelOptions? options )

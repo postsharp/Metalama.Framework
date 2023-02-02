@@ -1,14 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
@@ -90,7 +91,7 @@ class A : Attribute
             using var testContext = this.CreateTestContext();
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
-            var compilation = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), roslynCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );
 
             using var compileTimeDomain = testContext.Domain;
             var loader = CompileTimeProjectRepository.Create( compileTimeDomain, testContext.ServiceProvider, compilation.RoslynCompilation ).AssertNotNull();
@@ -1271,6 +1272,94 @@ namespace RemainingNamespace
 ";
 
             Assert.Equal( expected, compileTimeCode );
+        }
+
+        [Fact]
+        public void Manifest()
+        {
+            const string code = """
+using System;
+using Metalama.Framework.Aspects;
+
+namespace Ns
+{
+    namespace Ns2
+    {
+        class Aspect1 : OverrideMethodAspect
+        {
+            public override dynamic? OverrideMethod() { return meta.Proceed(); }
+        }
+
+        class Aspect2 : OverrideFieldOrPropertyAspect
+        {
+            public override dynamic? OverrideProperty
+            {
+                get => null!;
+                set {}
+            }
+        }
+
+        class RunTimeOnlyClass {}
+
+        [CompileTime]
+        class CompileTimeOnlyClass {}
+
+        class Aspect3 : TypeAspect 
+        {
+            [Template]
+            void TemplateMethod<T1, [CompileTime] T2>( int runTimeParameter, [CompileTime] int compileTimeParameter ) {}
+        }
+    }
+
+}
+
+
+""";
+
+            using var testContext = this.CreateTestContext();
+
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );
+
+            using var compileTimeDomain = testContext.Domain;
+            var loader = CompileTimeProjectRepository.Create( compileTimeDomain, testContext.ServiceProvider, compilation.RoslynCompilation ).AssertNotNull();
+
+            // Roundloop serialization.
+            var json = loader.RootProject.Manifest!.ToJson();
+            var manifest = CompileTimeProjectManifest.FromJson( json );
+
+            // Test the execution scope.
+            void AssertExecutionScope( ExecutionScope expectedScope, IDeclaration declaration )
+            {
+                Assert.Equal( expectedScope, manifest.Templates!.GetExecutionScope( declaration.GetSymbol().AssertNotNull() ) );
+            }
+
+            var aspect1Type = compilation.Types.OfName( "Aspect1" ).Single();
+            AssertExecutionScope( ExecutionScope.RunTimeOrCompileTime, aspect1Type );
+            AssertExecutionScope( ExecutionScope.CompileTime, aspect1Type.Methods.Single() );
+
+            var aspect2Type = compilation.Types.OfName( "Aspect2" ).Single();
+            AssertExecutionScope( ExecutionScope.RunTimeOrCompileTime, aspect2Type );
+            AssertExecutionScope( ExecutionScope.CompileTime, aspect2Type.Properties.Single() );
+            AssertExecutionScope( ExecutionScope.CompileTime, aspect2Type.Properties.Single().GetMethod! );
+
+            AssertExecutionScope( ExecutionScope.RunTime, compilation.Types.OfName( "RunTimeOnlyClass" ).Single() );
+            AssertExecutionScope( ExecutionScope.CompileTime, compilation.Types.OfName( "CompileTimeOnlyClass" ).Single() );
+
+            var aspect3Method = compilation.Types.OfName( "Aspect3" ).Single().Methods.Single();
+            AssertExecutionScope( ExecutionScope.RunTime, aspect3Method.TypeParameters[0] );
+            AssertExecutionScope( ExecutionScope.CompileTime, aspect3Method.TypeParameters[1] );
+            AssertExecutionScope( ExecutionScope.RunTime, aspect3Method.Parameters[0] );
+            AssertExecutionScope( ExecutionScope.CompileTime, aspect3Method.Parameters[1] );
+
+            // Test the template info.
+            void AssertTemplateType( TemplateAttributeType expectedType, IDeclaration declaration )
+            {
+                var templateInfo = manifest.Templates!.GetTemplateInfo( declaration.GetSymbol()! );
+                Assert.Equal( expectedType, templateInfo!.AttributeType );
+            }
+
+            AssertTemplateType( TemplateAttributeType.Template, aspect1Type.Methods.Single() );
         }
     }
 }

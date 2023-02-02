@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
         public TemplateMemberClassifier(
-            CompilationContext runTimeCompilationContext,
+            ClassifyingCompilationContext runTimeCompilationContext,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap ) : base( runTimeCompilationContext.SymbolClassifier )
         {
             var reflectionMapper = runTimeCompilationContext.ReflectionMapper;

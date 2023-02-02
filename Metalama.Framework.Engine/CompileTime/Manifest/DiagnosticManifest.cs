@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.Engine.CompileTime.Manifest
 {
     /// <summary>
     /// Exposes the list of diagnostics and suppressions defined in the project.
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ImmutableArray<SuppressionDefinition> SuppressionDefinitions { get; }
 
-        public static DiagnosticManifest Empty { get; } = new DiagnosticManifest( ImmutableArray<IDiagnosticDefinition>.Empty, ImmutableArray<SuppressionDefinition>.Empty );
+        public static DiagnosticManifest Empty { get; } = new( ImmutableArray<IDiagnosticDefinition>.Empty, ImmutableArray<SuppressionDefinition>.Empty );
 
         public DiagnosticManifest( ImmutableArray<IDiagnosticDefinition> diagnosticDescriptions, ImmutableArray<SuppressionDefinition> suppressionDescriptions )
         {

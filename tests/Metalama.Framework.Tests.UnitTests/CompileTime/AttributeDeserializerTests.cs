@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
             base.ConfigureServices( services );
-            services.AddGlobalService( new HackedSystemTypeResolverFactory() );
+            services.AddProjectService<SystemTypeResolver>( sp => new HackedSystemTypeResolver( sp ) );
         }
 
         private object? GetDeserializedProperty(
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 .AssertNotNull();
 
             var attribute = compilation.Attributes.Single();
-            DiagnosticBag diagnosticBag = new();
+            ThrowingDiagnosticAdder diagnosticBag = new();
 
             if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
@@ -625,15 +626,12 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public T? Property { get; set; }
         }
 
-        private sealed class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
-        {
-            public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
-                => new HackedSystemTypeResolver( serviceProvider, compilationContext );
-        }
-
         private sealed class HackedSystemTypeResolver : SystemTypeResolver
         {
-            public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( serviceProvider ) { }
+            // We provide a non-standard CompileTimeTypeFactory to break a conflict in the initialization of dependencies.
+            // Another CompileTimeTypeFactory instance is created by the ServiceProviderFactory. It should not matter for this test.
+
+            public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider.WithService( new CompileTimeTypeFactory() ) ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;

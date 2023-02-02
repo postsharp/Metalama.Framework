@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -11,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
+public class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
@@ -33,11 +32,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
 
-    ISymbolClassifier ITemplateReflectionContext.SymbolClassifier => this.SymbolClassifier;
-
     public Compilation Compilation { get; }
-
-    AttributeDeserializer ITemplateReflectionContext.AttributeDeserializer => this.AttributeDeserializer;
 
     CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
     {
@@ -54,19 +49,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
 
     [Memo]
-    internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
-
-    [Memo]
-    internal AttributeDeserializer AttributeDeserializer => this._serviceProvider.GetRequiredService<AttributeDeserializer>();
-
-    private ISymbolClassifier GetSymbolClassifierCore()
-    {
-        var hasMetalamaReference = this.Compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
-
-        return hasMetalamaReference
-            ? new SymbolClassifier( this._serviceProvider, this.Compilation, this.AttributeDeserializer )
-            : new SymbolClassifier( this._serviceProvider, null, this.AttributeDeserializer );
-    }
+    internal IAttributeDeserializer AttributeDeserializer => this._serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
 
     [Memo]
     public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
@@ -75,11 +58,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );
 
     [Memo]
-    public ISymbolClassificationService SymbolClassificationService => new SymbolClassificationService( this );
-
-    [Memo]
-    internal SystemTypeResolver SystemTypeResolver
-        => this._serviceProvider.Global.GetRequiredService<ISystemTypeResolverFactory>().Create( this._serviceProvider, this );
+    internal SystemTypeResolver SystemTypeResolver => this._serviceProvider.GetRequiredService<SystemTypeResolver>();
 
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();

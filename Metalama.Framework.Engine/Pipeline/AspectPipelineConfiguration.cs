@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;

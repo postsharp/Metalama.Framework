@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
@@ -61,26 +62,38 @@ internal sealed partial class CompileTimeProjectRepository
         private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
         private readonly CompileTimeDomain _domain;
         private readonly IAssemblyLocator _runTimeAssemblyLocator;
+        private readonly CacheableTemplateDiscoveryContextProvider _cacheableTemplateDiscoveryContextProvider;
+        private readonly ClassifyingCompilationContextFactory _classifyingCompilationContextFactory;
 
-        // May be null in tests.
-        private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
+        private static Compilation CreateEmptyCompilation( ProjectServiceProvider serviceProvider )
+        {
+            var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
+
+            return CSharpCompilation.Create( "empty", references: assemblyLocator.StandardCompileTimeMetadataReferences );
+        }
+
+        // This constructor is used in tests.
+        public Builder(
+            CompileTimeDomain domain,
+            ProjectServiceProvider serviceProvider ) : this( domain, serviceProvider, CreateEmptyCompilation( serviceProvider ) ) { }
 
         public Builder(
             CompileTimeDomain domain,
             ProjectServiceProvider serviceProvider,
-            Compilation? compilation = null /* Only null in tests. */ )
+            Compilation compilation )
         {
             this._serviceProvider = serviceProvider;
+            this._cacheableTemplateDiscoveryContextProvider = new CacheableTemplateDiscoveryContextProvider( compilation, serviceProvider );
 
-            if ( compilation != null )
-            {
-                this._cacheableTemplateDiscoveryContextProvider = new CacheableTemplateDiscoveryContextProvider( compilation, serviceProvider );
-            }
+            this._classifyingCompilationContextFactory = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>();
 
             this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
             this._domain = domain;
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
-            this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
+
+            this._frameworkProject = serviceProvider.Global.GetRequiredService<FrameworkCompileTimeProjectFactory>()
+                .CreateFrameworkProject( serviceProvider, domain, compilation );
+
             this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
         }
@@ -94,8 +107,10 @@ internal sealed partial class CompileTimeProjectRepository
             CancellationToken cancellationToken,
             out CompileTimeProjectRepository? loader )
         {
+            var compilationContext = this._classifyingCompilationContextFactory.GetInstance( compilation );
+
             if ( !this.TryGetCompileTimeProjectFromCompilation(
-                    compilation,
+                    compilationContext,
                     projectLicenseInfo,
                     compileTimeTreesHint,
                     diagnosticSink,
@@ -122,13 +137,31 @@ internal sealed partial class CompileTimeProjectRepository
             return true;
         }
 
+        // This method is only used in tests.
+        internal bool TryGetCompileTimeProjectFromCompilation(
+            Compilation compilation,
+            ProjectLicenseInfo? projectLicenseInfo,
+            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+            IDiagnosticAdder diagnosticSink,
+            bool cacheOnly,
+            CancellationToken cancellationToken,
+            out CompileTimeProject? compileTimeProject )
+            => this.TryGetCompileTimeProjectFromCompilation(
+                this._classifyingCompilationContextFactory.GetInstance( compilation ),
+                projectLicenseInfo,
+                compileTimeTreesHint,
+                diagnosticSink,
+                cacheOnly,
+                cancellationToken,
+                out compileTimeProject );
+
         /// <summary>
         /// Generates a <see cref="CompileTimeProject"/> for a given run-time <see cref="Compilation"/>.
         /// Referenced projects are loaded or generated as necessary. Note that other methods of this class do not
         /// generate projects, they will only ones that have been generated or loaded by this method.
         /// </summary>
-        internal bool TryGetCompileTimeProjectFromCompilation(
-            Compilation runTimeCompilation,
+        private bool TryGetCompileTimeProjectFromCompilation(
+            ClassifyingCompilationContext compilationContext,
             ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IDiagnosticAdder diagnosticSink,
@@ -136,6 +169,8 @@ internal sealed partial class CompileTimeProjectRepository
             CancellationToken cancellationToken,
             out CompileTimeProject? compileTimeProject )
         {
+            var runTimeCompilation = compilationContext.SourceCompilation;
+
             if ( this._projects.TryGetValue( runTimeCompilation.Assembly.Identity, out compileTimeProject ) )
             {
                 return true;
@@ -172,7 +207,7 @@ internal sealed partial class CompileTimeProjectRepository
             }
 
             if ( !this._builder.TryGetCompileTimeProject(
-                    runTimeCompilation,
+                    compilationContext,
                     projectLicenseInfo,
                     compileTimeTreesHint,
                     referencedProjects,
@@ -212,8 +247,10 @@ internal sealed partial class CompileTimeProjectRepository
                         out referencedProject );
 
                 case CompilationReference compilationReference:
+                    var compilationContext = this._classifyingCompilationContextFactory.GetInstance( compilationReference.Compilation );
+
                     return this.TryGetCompileTimeProjectFromCompilation(
-                        compilationReference.Compilation,
+                        compilationContext,
                         null,
                         null,
                         diagnosticSink,
@@ -344,12 +381,12 @@ internal sealed partial class CompileTimeProjectRepository
             var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
             // Check the manifest version.
-            if ( manifest.MetalamaAssemblyVersion == null || manifest.MetalamaAssemblyVersion <= CompileTimeProjectManifest.RequiredMetalamaVersion )
+            if ( manifest.ManifestVersion != CompileTimeProjectManifest.CurrentManifestVersion )
             {
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.DependencyMustBeRecompiled.CreateRoslynDiagnostic(
                         null,
-                        (runTimeAssemblyIdentity, manifest.MetalamaVersion, CompileTimeProjectManifest.RequiredMetalamaVersion.ToString()) ) );
+                        (runTimeAssemblyIdentity, manifest.MetalamaVersion) ) );
 
                 project = null;
 

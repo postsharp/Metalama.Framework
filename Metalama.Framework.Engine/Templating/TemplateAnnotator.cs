@@ -3,9 +3,9 @@
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -36,6 +36,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private readonly CancellationToken _cancellationToken;
     private readonly TemplateMemberClassifier _templateMemberClassifier;
     private readonly TypeParameterDetectionVisitor _typeParameterDetectionVisitor;
+    private TemplateProjectManifestBuilder? _templateProjectManifestBuilder;
 
     /// <summary>
     /// Scope of locally-defined symbols (local variables, anonymous types, ....).
@@ -49,17 +50,19 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private ISymbol? _currentTemplateMember;
 
     public TemplateAnnotator(
-        CompilationContext compilationContext,
+        ClassifyingCompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
         SerializableTypes serializableTypes,
-        CancellationToken cancellationToken )
+        CancellationToken cancellationToken,
+        TemplateProjectManifestBuilder? templateProjectManifestBuilder )
     {
         this._symbolScopeClassifier = compilationContext.SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;
         this._cancellationToken = cancellationToken;
+        this._templateProjectManifestBuilder = templateProjectManifestBuilder;
 
         this._templateMemberClassifier = new TemplateMemberClassifier( compilationContext, syntaxTreeAnnotationMap );
         this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
@@ -1039,7 +1042,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                     if ( argumentType != null && this._symbolScopeClassifier.GetTemplatingScope( argumentType ) == TemplatingScope.CompileTimeOnly )
                     {
-                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod, argument.Expression, (argumentType, node.Expression.ToString()) );
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod,
+                            argument.Expression,
+                            (argumentType, node.Expression.ToString()) );
                     }
                 }
                 else
@@ -1592,9 +1598,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
-            if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnly )
+            if ( symbol != null )
             {
-                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                var scope = this.GetSymbolScope( symbol );
+
+                if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+
+                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
             }
         }
 
@@ -1609,9 +1622,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
-            if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+            if ( symbol != null )
             {
-                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                var scope = this.GetSymbolScope( symbol );
+
+                if ( scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+
+                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
             }
         }
 

@@ -22,12 +22,12 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal sealed class CompilationAspectSource : IAspectSource
 {
-    private readonly AttributeDeserializer _attributeDeserializer;
+    private readonly IAttributeDeserializer _attributeDeserializer;
     private ImmutableDictionaryOfArray<IType, Ref<IDeclaration>>? _exclusions;
 
     public CompilationAspectSource( ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
     {
-        this._attributeDeserializer = serviceProvider.GetRequiredService<AttributeDeserializer>();
+        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
         this.AspectClasses = aspectTypes;
     }
 

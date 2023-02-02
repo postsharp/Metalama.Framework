@@ -8,11 +8,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal interface ITemplateReflectionContext
 {
-    ISymbolClassifier SymbolClassifier { get; }
-
     Compilation Compilation { get; }
-
-    AttributeDeserializer AttributeDeserializer { get; }
 
     CompilationModel GetCompilationModel( ICompilation sourceCompilation );
 }

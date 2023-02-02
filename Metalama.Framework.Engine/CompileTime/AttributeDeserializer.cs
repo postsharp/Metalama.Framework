@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -19,13 +18,23 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal sealed class AttributeDeserializer : IProjectService
+    internal interface IAttributeDeserializer
+    {
+        bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
+            where T : Attribute;
+
+        bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
+
+        bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
+    }
+
+    internal abstract class AttributeDeserializer : IAttributeDeserializer
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+        protected AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;

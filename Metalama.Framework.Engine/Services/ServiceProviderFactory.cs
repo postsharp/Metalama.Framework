@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Options;
@@ -66,7 +67,7 @@ public static class ServiceProviderFactory
             .WithServiceConditional<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
             .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
             .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
-            .WithServiceConditional<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
+            .WithServiceConditional( _ => new FrameworkCompileTimeProjectFactory() );
 
         return serviceProvider;
     }
@@ -129,10 +130,25 @@ public static class ServiceProviderFactory
         projectServiceProvider = projectServiceProvider
             .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
-            .WithServiceConditional( _ => new SyntaxSerializationService() )
-            .WithServiceConditional( sp => new CompilationContextFactory( sp ) )
-            .WithServiceConditional( sp => new ObjectReaderFactory( sp ) );
+            .WithService( _ => new SyntaxSerializationService() )
+            .WithService( sp => new CompileTimeTypeFactory() )
+            .WithService( sp => new CompilationContextFactory( sp ) )
+            .WithServiceConditional<SystemTypeResolver>( sp => new SystemTypeResolver( sp ) )
+            .WithServiceConditional<ISystemAttributeDeserializer>( sp => new SystemAttributeDeserializer( sp ) )
+            .WithService( sp => new ClassifyingCompilationContextFactory( sp ) )
+            .WithService( sp => new ObjectReaderFactory( sp ) );
 
         return projectServiceProvider;
+    }
+
+    internal static ServiceProvider<IProjectService> WithCompileTimeProjectServices(
+        this ProjectServiceProvider serviceProvider,
+        CompileTimeProjectRepository repository )
+    {
+        return serviceProvider.Underlying
+            .WithService( repository )
+            .WithService( sp => new ProjectSpecificCompileTimeTypeResolver( sp ) )
+            .WithServiceConditional<IUserCodeAttributeDeserializer>( sp => new UserCodeAttributeDeserializer( sp ) )
+            .WithService<SymbolClassificationService>( sp => new SymbolClassificationService( repository ) );
     }
 }

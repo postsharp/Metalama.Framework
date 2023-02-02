@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -40,8 +41,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         string FilePath,
         ISymbol Symbol,
         DesignTimeAspectPipeline Pipeline,
-        CompilationPipelineResult PipelineResult,
-        Compilation Compilation );
+        CompilationPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,
@@ -94,7 +94,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        return new CodePointData( filePath, symbol, pipeline, pipelineResult, compilation );
+        return new CodePointData( filePath, symbol, pipeline, pipelineResult );
     }
 
     public async Task<CodeLensSummary> GetCodeLensSummaryAsync(
@@ -145,9 +145,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         CodePointData codePointData,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = codePointData.Pipeline.ServiceProvider.GetRequiredService<CompilationContextFactory>()
-            .GetInstance( codePointData.Compilation )
-            .SymbolClassificationService;
+        var symbolClassificationService = codePointData.Pipeline.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
 
         var symbol = codePointData.Symbol;
 

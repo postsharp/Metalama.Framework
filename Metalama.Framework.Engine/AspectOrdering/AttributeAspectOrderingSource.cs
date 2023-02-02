@@ -14,12 +14,12 @@ namespace Metalama.Framework.Engine.AspectOrdering
     internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
     {
         private readonly Compilation _compilation;
-        private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly IAttributeDeserializer _attributeDeserializer;
 
         public AttributeAspectOrderingSource( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             this._compilation = compilation;
-            this._attributeDeserializer = serviceProvider.GetRequiredService<AttributeDeserializer>();
+            this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
         }
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
