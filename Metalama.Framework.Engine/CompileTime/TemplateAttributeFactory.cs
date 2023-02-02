@@ -36,7 +36,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
     {
         if ( this._cacheById.TryGetValue( memberId, out adviceAttribute ) )
         {
-            return true;
+            return adviceAttribute != null;
         }
 
         adviceAttribute =
@@ -61,7 +61,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
 
         if ( this._cacheBySymbol.TryGetValue( member, out adviceAttribute ) )
         {
-            return true;
+            return adviceAttribute != null;
         }
 
         adviceAttribute = this._cacheBySymbol.GetOrAdd(
@@ -103,15 +103,13 @@ internal sealed class TemplateAttributeFactory : IProjectService
                 {
                     return this.TryGetTemplateAttributeBySymbol( overriddenMember, diagnosticAdder, out adviceAttribute );
                 }
-                else
-                {
-                    throw new AssertionFailedException( $"Cannot find the TemplateAttribute for '{member}'." );
-                }
             }
             else if ( member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
             {
                 return this.TryGetTemplateAttributeBySymbol( associatedSymbol, diagnosticAdder, out adviceAttribute );
             }
+
+            throw new AssertionFailedException( $"Cannot find the TemplateAttribute for '{member}'." );
         }
 
         if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )

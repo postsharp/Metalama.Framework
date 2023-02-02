@@ -18,16 +18,6 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal interface IAttributeDeserializer
-    {
-        bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
-            where T : Attribute;
-
-        bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
-
-        bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
-    }
-
     internal abstract class AttributeDeserializer : IAttributeDeserializer
     {
         private readonly ProjectServiceProvider _serviceProvider;

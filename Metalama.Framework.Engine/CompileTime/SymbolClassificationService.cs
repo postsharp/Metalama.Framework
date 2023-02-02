@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CompileTime;
 

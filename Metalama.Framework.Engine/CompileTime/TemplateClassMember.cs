@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CompileTime
         string Key,
         TemplateClass TemplateClass,
         ITemplateInfo TemplateInfo,
-        IAdviceAttribute Attribute,
+        IAdviceAttribute? Attribute,
         SerializableDeclarationId DeclarationId,
         ImmutableArray<TemplateClassMemberParameter> Parameters,
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,

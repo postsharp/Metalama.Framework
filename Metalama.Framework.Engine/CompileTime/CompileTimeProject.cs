@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
-using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed partial class CompileTimeProject : IProjectService
+    internal sealed class CompileTimeProject : IProjectService
     {
         internal CompileTimeProjectManifest? Manifest { get; }
 

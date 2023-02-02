@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class FrameworkCompileTimeProjectFactory : IGlobalService
+internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
 {
     private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
     private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
@@ -44,7 +44,7 @@ internal class FrameworkCompileTimeProjectFactory : IGlobalService
 
         foreach ( var reflectionType in typesDefiningTemplates )
         {
-            var typeSymbol = assembly.GetTypeByMetadataName( reflectionType.FullName );
+            var typeSymbol = assembly.GetTypeByMetadataName( reflectionType.FullName! ).AssertNotNull();
 
             foreach ( var member in typeSymbol.GetMembers() )
             {

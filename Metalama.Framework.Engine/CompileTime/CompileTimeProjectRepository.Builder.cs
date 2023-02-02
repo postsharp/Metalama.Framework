@@ -318,7 +318,7 @@ internal sealed partial class CompileTimeProjectRepository
 
             if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
             {
-                this._cacheableTemplateDiscoveryContextProvider?.OnPortableExecutableReferenceDiscovered();
+                this._cacheableTemplateDiscoveryContextProvider.OnPortableExecutableReferenceDiscovered();
 
                 var assemblyName = MetadataReferenceCache.GetAssemblyName( assemblyPath );
 

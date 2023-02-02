@@ -36,7 +36,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private readonly CancellationToken _cancellationToken;
     private readonly TemplateMemberClassifier _templateMemberClassifier;
     private readonly TypeParameterDetectionVisitor _typeParameterDetectionVisitor;
-    private TemplateProjectManifestBuilder? _templateProjectManifestBuilder;
+    private readonly TemplateProjectManifestBuilder? _templateProjectManifestBuilder;
 
     /// <summary>
     /// Scope of locally-defined symbols (local variables, anonymous types, ....).

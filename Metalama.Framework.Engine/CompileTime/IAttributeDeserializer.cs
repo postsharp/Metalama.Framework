@@ -1,0 +1,17 @@
+﻿using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Diagnostics;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Metalama.Framework.Engine.CompileTime;
+
+internal interface IAttributeDeserializer
+{
+    bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
+        where T : Attribute;
+
+    bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
+
+    bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
+}
