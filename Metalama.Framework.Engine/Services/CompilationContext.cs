@@ -5,24 +5,17 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Services;
 
-public class CompilationContext : ICompilationServices, ITemplateReflectionContext
+public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
-    // The service provider is intentionally private because the CompilationContext is not created with the latest version of
-    // the service provider. Additionally, the CompilationContext is cached in the CompilationContextFactory and CompilationContextFactory may
-    // return an old instance of CompilationContext, created with an old service provider, even when requested from a new service provider.
-    private readonly ProjectServiceProvider _serviceProvider;
-
-    internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider, CompilationContextFactory factory )
+    internal CompilationContext( Compilation compilation, CompilationContextFactory factory )
     {
         this.Compilation = compilation;
-        this._serviceProvider = serviceProvider;
         this._compilationContextFactory = factory;
     }
 
@@ -47,18 +40,12 @@ public class CompilationContext : ICompilationServices, ITemplateReflectionConte
 
     [Memo]
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
-
-    [Memo]
-    internal IAttributeDeserializer AttributeDeserializer => this._serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
-
+    
     [Memo]
     public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );
-
-    [Memo]
-    internal SystemTypeResolver SystemTypeResolver => this._serviceProvider.GetRequiredService<SystemTypeResolver>();
 
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();

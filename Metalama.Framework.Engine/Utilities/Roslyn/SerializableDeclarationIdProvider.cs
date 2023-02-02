@@ -88,7 +88,10 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    public static ISymbol? ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
+    public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
+        => id.ResolveToSymbolOrNull( compilation ) ?? throw new AssertionFailedException( $"Cannot get a symbol for '{id}'." );
+    
+    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 

@@ -343,7 +343,7 @@ namespace Metalama.Framework.Engine.Aspects
                 .Select(
                     m =>
                     {
-                        var symbol = m.Value.DeclarationId.ResolveToSymbol( compilation ).AssertNotNull();
+                        var symbol = m.Value.DeclarationId.ResolveToSymbol( compilation );
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )

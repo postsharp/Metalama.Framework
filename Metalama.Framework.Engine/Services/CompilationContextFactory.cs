@@ -26,10 +26,10 @@ namespace Metalama.Framework.Engine.Services
         }
 
         public CompilationContext GetInstance( Compilation compilation )
-            => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this._serviceProvider, this ) );
+            => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this ) );
 
         [Memo]
-        internal CompilationContext Empty => new( EmptyCompilation, this._serviceProvider, this );
+        internal CompilationContext Empty => new( EmptyCompilation, this );
 
         public void Dispose() => this._instances.Dispose();
     }

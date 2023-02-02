@@ -50,7 +50,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
             {
                 if ( member.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TemplateAttribute) ) )
                 {
-                    var templateInfo = new TemplateInfo( default, TemplateAttributeType.Template, null );
+                    var templateInfo = new TemplateInfo( TemplateAttributeType.Template, true );
                     builder.AddOrUpdateSymbol( member, TemplatingScope.CompileTimeOnly, templateInfo );
 
                     // Also add to accessors.

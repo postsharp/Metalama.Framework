@@ -88,7 +88,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             IType single = compilation.Types.Single( t => t.Name == "Target" );
-            var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
+            var actual = testContext.Serialize<Type>( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
-            var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
+            var actual = testContext.Serialize<Type>( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }

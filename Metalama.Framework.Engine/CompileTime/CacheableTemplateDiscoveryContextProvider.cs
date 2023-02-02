@@ -50,10 +50,12 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
 
     private sealed class CacheableContext : ITemplateReflectionContext
     {
+        private readonly CacheableTemplateDiscoveryContextProvider _parent;
         private readonly Lazy<CompilationModel> _compilationModel;
 
         public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent )
         {
+            this._parent = parent;
             this.Compilation = compilation;
 
             this._compilationModel = new Lazy<CompilationModel>(
@@ -66,5 +68,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         public Compilation Compilation { get; }
 
         public CompilationModel GetCompilationModel( ICompilation sourceCompilation ) => this._compilationModel.Value;
+
+        public override string ToString() => $"CacheableContext EnlargedVisibility={this._parent._mustEnlargeVisibility}";
     }
 }

@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* Intentionally empty */" );
-            var compilationServices = new CompilationContext( compilation.RoslynCompilation, testContext.ServiceProvider, null! );
+            var compilationServices = new CompilationContext( compilation.RoslynCompilation, null! );
 
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );

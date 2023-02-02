@@ -60,6 +60,12 @@ namespace Metalama.Framework.Engine.CompileTime
             this.IsAbstract = isAbstract;
         }
 
+        public TemplateInfo( TemplateAttributeType attributeType, bool isAbstract )
+        {
+            this.AttributeType = attributeType;
+            this.IsAbstract = isAbstract;
+        }
+
         /// <summary>
         /// Returns a copy of the current <see cref="TemplateInfo"/>, but with the <see cref="IsAbstract"/> property set to <c>true</c>.
         /// </summary>

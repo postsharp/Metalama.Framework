@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -37,10 +38,12 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
 
         private readonly CompilationModel _compilationModel;
+        private readonly SystemTypeResolver _systemTypeResolver;
 
         internal DeclarationFactory( CompilationModel compilation )
         {
             this._compilationModel = compilation;
+            this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>();
         }
 
         private Compilation RoslynCompilation => this._compilationModel.RoslynCompilation;
@@ -599,7 +602,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._compilationModel.CompilationContext.SystemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+            => this._systemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
 
         public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
         {

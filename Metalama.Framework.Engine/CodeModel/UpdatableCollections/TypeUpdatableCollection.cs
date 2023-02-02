@@ -11,6 +11,26 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+    {
+        if ( !base.IsSymbolIncluded( symbol ) )
+        {
+            return false;
+        }
+
+        return IsIncludedRecursive( (INamedTypeSymbol) symbol );
+
+        bool IsIncludedRecursive( INamedTypeSymbol t )
+            => t switch
+            {
+                { ContainingType: { } containingType } => IsIncludedRecursive( containingType ),
+                _ => this.Compilation.PartialCompilation.Types.Contains( t )
+            };
+            
+            
+                                                     
+    }
+
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
             .FirstOrDefault( this.IsSymbolIncluded );

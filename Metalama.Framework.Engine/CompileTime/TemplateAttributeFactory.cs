@@ -57,7 +57,7 @@ internal sealed class TemplateAttributeFactory : IProjectService
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
-        var member = memberId.ResolveToSymbol( this._compilation ).AssertNotNull();
+        var member = memberId.ResolveToSymbol( this._compilation );
 
         if ( this._cacheBySymbol.TryGetValue( member, out adviceAttribute ) )
         {
