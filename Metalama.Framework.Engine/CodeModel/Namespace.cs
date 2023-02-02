@@ -61,10 +61,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         private INamedTypeCollection TypesCore
-            => new NamedTypeCollection(
-                this,
-                new TypeUpdatableCollection( this.Compilation, this._symbol ) );
-
+            => new NamedTypeCollection( this, new TypeUpdatableCollection( this.Compilation, this._symbol ) );
+        
+        
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
         public INamespaceCollection Namespaces

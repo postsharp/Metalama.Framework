@@ -22,7 +22,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
     protected bool IsVisible( ISymbol symbol )
     {
-        return this.Compilation.Project.CompileTimeProject?.Manifest?.Templates?.GetExecutionScope( symbol ) != ExecutionScope.CompileTime;
+        return this.Compilation.Project.ClassificationService?.GetExecutionScope( symbol ) != ExecutionScope.CompileTime;
     }
 
     public override ImmutableArray<MemberRef<T>> OfName( string name )

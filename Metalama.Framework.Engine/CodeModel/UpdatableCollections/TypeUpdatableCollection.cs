@@ -18,18 +18,26 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
             return false;
         }
 
-        return IsIncludedRecursive( (INamedTypeSymbol) symbol );
+        if ( symbol.ContainingAssembly == this.Compilation.RoslynCompilation.Assembly )
+        {
+            
+            // For types defined in the current assembly, we need to take partial compilations into account.
 
-        bool IsIncludedRecursive( INamedTypeSymbol t )
-            => t switch
-            {
-                { ContainingType: { } containingType } => IsIncludedRecursive( containingType ),
-                _ => this.Compilation.PartialCompilation.Types.Contains( t )
-            };
-            
-            
-                                                     
-    }
+            return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
+
+            bool IsIncludedInPartialCompilation( INamedTypeSymbol t )
+                => t switch
+                {
+                    { ContainingType: { } containingType } => IsIncludedInPartialCompilation( containingType ),
+                    _ => this.Compilation.PartialCompilation.Types.Contains( t.OriginalDefinition )
+                };
+        }
+        else
+        {
+            return true;
+        }
+    
+}
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )

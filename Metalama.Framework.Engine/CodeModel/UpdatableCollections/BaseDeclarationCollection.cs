@@ -30,7 +30,7 @@ internal abstract class BaseDeclarationCollection
         }
 
         // Compile-time-only symbols are hidden.
-        if ( this.Compilation.Project.CompileTimeProject?.Manifest?.Templates?.GetExecutionScope( symbol ) == ExecutionScope.CompileTime )
+        if ( this.Compilation.Project.ClassificationService?.GetExecutionScope( symbol ) == ExecutionScope.CompileTime )
         {
             return true;
         }

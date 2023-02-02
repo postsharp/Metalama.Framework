@@ -11,14 +11,14 @@ using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal sealed class ExternalTypeCollection : INamedTypeCollection
+internal sealed class ExternalAssemblyTypeCollection : INamedTypeCollection
 {
     private readonly IAssemblySymbol _symbol;
     private readonly CompilationModel _compilation;
     private readonly bool _includeNestedTypes;
     private List<INamedTypeSymbol>? _types;
 
-    public ExternalTypeCollection( IAssemblySymbol symbol, CompilationModel compilation, bool includeNestedTypes )
+    public ExternalAssemblyTypeCollection( IAssemblySymbol symbol, CompilationModel compilation, bool includeNestedTypes )
     {
         this._symbol = symbol;
         this._compilation = compilation;

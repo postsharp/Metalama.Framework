@@ -40,7 +40,6 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
     private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
-        DesignTimeAspectPipeline Pipeline,
         CompilationPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
@@ -94,7 +93,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        return new CodePointData( filePath, symbol, pipeline, pipelineResult );
+        return new CodePointData( filePath, symbol, pipelineResult );
     }
 
     public async Task<CodeLensSummary> GetCodeLensSummaryAsync(
@@ -145,7 +144,14 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         CodePointData codePointData,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = codePointData.Pipeline.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
+        var symbolClassificationService = codePointData.PipelineResult.Configuration?.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
+
+        if ( symbolClassificationService == null )
+        {
+            summary = null;
+
+            return false;
+        }
 
         var symbol = codePointData.Symbol;
 

@@ -5,6 +5,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
@@ -990,7 +993,8 @@ namespace Ns1
         [Fact]
         public void CompileTimeOnlyTypesAreInvisible()
         {
-            using var testContext = this.CreateTestContext();
+            var testServices = new AdditionalServiceCollection( new TestClassificationService() );
+            using var testContext = this.CreateTestContext(testServices);
 
             const string code = @"
 using Metalama.Framework.Aspects;
@@ -1509,6 +1513,21 @@ class C {}
 
             var blue = enumType.Fields[nameof(ConsoleColor.Blue)];
             Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
+        }
+
+
+        class TestClassificationService : ISymbolClassificationService
+        {
+            public ExecutionScope GetExecutionScope( ISymbol symbol )
+                => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) )
+                    ? ExecutionScope.CompileTime
+                    : ExecutionScope.Default;
+
+            public bool IsTemplate( ISymbol symbol ) => throw new NotImplementedException();
+
+            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new NotImplementedException();
+
+            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new NotImplementedException();
         }
     }
 }

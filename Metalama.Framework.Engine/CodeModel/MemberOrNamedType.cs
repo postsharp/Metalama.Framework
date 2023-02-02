@@ -158,6 +158,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ExecutionScope ExecutionScope
-            => this.Compilation.Project.CompileTimeProject?.Manifest?.Templates?.GetExecutionScope( this.Symbol ) ?? ExecutionScope.RunTime;
+            => this.Compilation.Project.ClassificationService?.GetExecutionScope( this.Symbol ) ?? ExecutionScope.RunTime;
     }
 }

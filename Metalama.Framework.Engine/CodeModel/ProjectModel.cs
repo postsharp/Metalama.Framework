@@ -23,9 +23,9 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly IProjectOptions _projectOptions;
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
 
-        public ProjectServiceProvider ServiceProvider { get; }
+        internal ProjectServiceProvider ServiceProvider { get; }
 
-        internal CompileTimeProject? CompileTimeProject { get; }
+        internal ISymbolClassificationService? ClassificationService { get; }
 
         private bool _isFrozen;
 
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
             compilation.ReferencedAssemblyNames,
             compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames ) { }
 
-        public ProjectModel(
+        internal ProjectModel(
             ProjectServiceProvider serviceProvider,
             IEnumerable<AssemblyIdentity>? references = null,
             IEnumerable<string>? preprocessorSymbolNames = null )
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel
             references ??= Enumerable.Empty<AssemblyIdentity>();
             preprocessorSymbolNames ??= Enumerable.Empty<string>();
 
-            this.CompileTimeProject = serviceProvider.GetService<CompileTimeProject>();
+            this.ClassificationService = serviceProvider.GetService<ISymbolClassificationService>();
             this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.PreprocessorSymbols = preprocessorSymbolNames.ToImmutableHashSet();
