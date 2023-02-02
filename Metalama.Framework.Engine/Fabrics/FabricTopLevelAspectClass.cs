@@ -74,6 +74,5 @@ namespace Metalama.Framework.Engine.Fabrics
             EligibleScenarios requestedEligibility,
             IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This aspect is always eligible." );
-
     }
 }

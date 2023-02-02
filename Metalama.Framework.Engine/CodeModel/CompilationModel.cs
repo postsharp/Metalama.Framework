@@ -85,7 +85,10 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.CompilationContext = project.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
+
+            this.CompilationContext = project.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>()
+                .GetInstance( partialCompilation.Compilation );
+
             this._derivedTypes = partialCompilation.DerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
@@ -254,8 +257,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
-        [Obsolete("This method call is redundant.")]
+#pragma  warning disable CS0809
+        [Obsolete( "This method call is redundant." )]
         public override CompilationModel Compilation => this;
+#pragma  warning restore CS0809        
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 

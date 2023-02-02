@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._symbolToAnnotationMap.TryGetValue( s, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation(_symbolAnnotationKind);
+                            annotation = new SyntaxAnnotation( _symbolAnnotationKind );
                             this._map._symbolToAnnotationMap[s] = annotation;
                             this._map._annotationToSymbolMap[annotation] = s;
                         }
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind  );
+                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind );
                             this._map._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                             this._map._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                         }

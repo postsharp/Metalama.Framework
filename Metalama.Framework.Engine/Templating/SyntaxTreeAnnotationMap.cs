@@ -42,7 +42,6 @@ namespace Metalama.Framework.Engine.Templating
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
-
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
         /// </summary>

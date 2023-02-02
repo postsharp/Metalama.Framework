@@ -888,7 +888,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     // since expression references a parameter, we can just call ToString() on it
                     return InvocationExpression(
-                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof( this.ToString ) ) ) );
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof(this.ToString) ) ) );
                 }
             }
 

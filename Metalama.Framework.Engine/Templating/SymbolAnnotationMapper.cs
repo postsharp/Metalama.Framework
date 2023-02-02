@@ -41,7 +41,5 @@ namespace Metalama.Framework.Engine.Templating
 
             return symbol;
         }
-
-
     }
 }

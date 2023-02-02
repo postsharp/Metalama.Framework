@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Globalization;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
@@ -19,7 +18,7 @@ internal static class ExpressionTypeAnnotationHelper
     {
         if ( type != null && compilation != null && !node.GetAnnotations( _typeAnnotationKind ).Any() )
         {
-            var syntaxAnnotation = SymbolAnnotationMapper.GetOrCreateAnnotation( 
+            var syntaxAnnotation = SymbolAnnotationMapper.GetOrCreateAnnotation(
                 _typeAnnotationKind,
                 type );
 
@@ -65,7 +64,7 @@ internal static class ExpressionTypeAnnotationHelper
             return false;
         }
 
-        type = (ITypeSymbol)type.Translate( null, compilation );
+        type = (ITypeSymbol) type.Translate( null, compilation ).AssertNotNull( $"The symbol '{type}' could not be translated." );
 
         return true;
     }

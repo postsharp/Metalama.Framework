@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Fabrics;
