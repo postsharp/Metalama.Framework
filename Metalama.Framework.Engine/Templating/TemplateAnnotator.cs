@@ -54,8 +54,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
         SerializableTypes serializableTypes,
-        CancellationToken cancellationToken,
-        TemplateProjectManifestBuilder? templateProjectManifestBuilder )
+        TemplateProjectManifestBuilder? templateProjectManifestBuilder,
+        CancellationToken cancellationToken )
     {
         this._symbolScopeClassifier = compilationContext.SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;

@@ -1,20 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -66,7 +62,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testInput.TestName,
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var preliminaryCompilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>()
+            var preliminaryCompilationContext = serviceProvider.Global.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( preliminaryCompilation );
 
             var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
@@ -132,19 +128,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var builder = (LinkerTestInputBuilder) state["builder"]!;
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
-        }
-
-        private class LinkerTemplateInfoService : ITemplateInfoService
-        {
-            public ExecutionScope GetExecutionScope( ISymbol symbol ) => throw new NotImplementedException();
-
-            public bool IsTemplate( ISymbol symbol ) => throw new NotImplementedException();
-
-            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new NotImplementedException();
-
-            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new NotImplementedException();
-
-            public ITemplateInfo GetTemplateInfo( ISymbol symbol ) => throw new NotImplementedException();
         }
     }
 }

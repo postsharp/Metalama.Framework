@@ -8,18 +8,19 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal sealed class TemplateAttributeFactory : IProjectService
+internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 {
     private readonly IAttributeDeserializer _attributeDeserializer;
 
     private readonly ConcurrentDictionary<SerializableDeclarationId, IAdviceAttribute?> _cacheById = new();
-    
+
     // We use a WeakCache here because when the service is used at design time, it can be used for several compilations,
     // and we don't want to prevent GC of symbols.
     private readonly WeakCache<ISymbol, IAdviceAttribute?> _cacheBySymbol = new();
@@ -79,7 +80,8 @@ internal sealed class TemplateAttributeFactory : IProjectService
     }
 
     private static bool ImplementsAdviceAttributeInterface( INamedTypeSymbol type )
-        => type.AllInterfaces.Any( i => i is { Name: nameof(IAdviceAttribute), ContainingNamespace:{} ns } && ns.GetFullName() == "Metalama.Framework.Advising" );
+        => type.AllInterfaces.Any(
+            i => i is { Name: nameof(IAdviceAttribute), ContainingNamespace: { } ns } && ns.GetFullName() == "Metalama.Framework.Advising" );
 
     private bool TryGetTemplateAttributeBySymbol(
         ISymbol member,
@@ -130,4 +132,6 @@ internal sealed class TemplateAttributeFactory : IProjectService
             return true;
         }
     }
+
+    public void Dispose() => this._cacheBySymbol.Dispose();
 }

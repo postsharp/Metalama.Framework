@@ -20,7 +20,6 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
 
         if ( symbol.ContainingAssembly == this.Compilation.RoslynCompilation.Assembly )
         {
-            
             // For types defined in the current assembly, we need to take partial compilations into account.
 
             return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
@@ -36,8 +35,7 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
         {
             return true;
         }
-    
-}
+    }
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )

@@ -90,8 +90,8 @@ namespace Metalama.Framework.Engine.Templating
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serializableTypes,
-                cancellationToken,
-                this._templateManifestBuilder );
+                this._templateManifestBuilder,
+                cancellationToken );
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 

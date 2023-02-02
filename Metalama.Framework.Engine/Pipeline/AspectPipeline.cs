@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -164,69 +163,61 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
-            ImmutableArray<object> allPlugIns;
 
-            if ( compileTimeProject != null )
-            {
-                projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
+            projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
 
-                // Find plug-ins from NuGet packages.
-                var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
+            // Find plug-ins from NuGet packages.
+            var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
 
-                // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
-                // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
-                // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
-                // if they are already provided by ProjectOptions.PlugIns.
+            // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
+            // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
+            // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
+            // if they are already provided by ProjectOptions.PlugIns.
 
-                var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
-                var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
+            var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
 
-                var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
-                    .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
-                    .Select(
-                        t =>
+            var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
+                .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
+                .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
+                .Select(
+                    t =>
+                    {
+                        var type = t.Project.GetType( t.TypeName );
+                        var constructor = type.GetConstructor( Type.EmptyTypes );
+
+                        if ( constructor == null )
                         {
-                            var type = t.Project.GetType( t.TypeName );
-                            var constructor = type.GetConstructor( Type.EmptyTypes );
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
-                            if ( constructor == null )
-                            {
-                                diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
+                            return null;
+                        }
 
-                                return null;
-                            }
+                        var executionContext = new UserCodeExecutionContext(
+                            projectServiceProviderWithoutPlugins,
+                            diagnosticAdder,
+                            UserCodeMemberInfo.FromMemberInfo( constructor ) );
 
-                            var executionContext = new UserCodeExecutionContext(
-                                projectServiceProviderWithoutPlugins,
-                                diagnosticAdder,
-                                UserCodeMemberInfo.FromMemberInfo( constructor ) );
+                        if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            return instance;
+                        }
+                    } )
+                .WhereNotNull()
+                .ToList();
 
-                            if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
-                            {
-                                return null;
-                            }
-                            else
-                            {
-                                return instance;
-                            }
-                        } )
-                    .WhereNotNull()
-                    .ToList();
+            var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
 
-                var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
+            projectServiceProviderWithProject = projectServiceProviderWithProject
+                .WithServices( newPlugIns.OfType<IProjectService>() );
 
-                projectServiceProviderWithProject = projectServiceProviderWithProject
-                    .WithServices( newPlugIns.OfType<IProjectService>() );
-
-                allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
-            }
-            else
-            {
-                allPlugIns = this.ProjectOptions.PlugIns;
-            }
+            var allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
 
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
@@ -300,30 +291,16 @@ namespace Metalama.Framework.Engine.Pipeline
                 .ToImmutableDictionary( x => x.FullName, x => x );
 
             // Add fabrics.
-            ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
-            BoundAspectClassCollection allAspectClasses;
 
-            FabricsConfiguration? fabricsConfiguration;
+            var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
+            var fabricAspectLayer = new OrderedAspectLayer( -1, -1, fabricTopLevelAspectClass.Layer );
 
-            if ( compileTimeProject != null )
-            {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
-                var fabricAspectLayer = new OrderedAspectLayer( -1, -1, fabricTopLevelAspectClass.Layer );
+            var allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
+            var allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
 
-                allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
-                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
-
-                // Execute fabrics.
-                var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
-                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
-            }
-            else
-            {
-                allOrderedAspectLayers = orderedAspectLayers;
-                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>() );
-
-                fabricsConfiguration = null;
-            }
+            // Execute fabrics.
+            var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
+            var fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
 
             // Freeze the project model to prevent any further modification of configuration.
             projectModel.Freeze();
@@ -500,8 +477,6 @@ namespace Metalama.Framework.Engine.Pipeline
                     return default;
                 }
             }
-
-           
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

@@ -9,24 +9,18 @@ using System;
 
 namespace Metalama.Framework.Engine.Services
 {
-    public sealed class CompilationContextFactory : IProjectService, IDisposable
+    public sealed class CompilationContextFactory : IGlobalService, IDisposable
     {
         // This should be used only for tests.
         internal static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );
-
-        private readonly ProjectServiceProvider _serviceProvider;
 
         // We need a ConditionalWeakTable because of DesignTimeAspectPipeline, which stores the ReflectionMapperFactory service for a long time.
 
         private readonly WeakCache<Compilation, CompilationContext> _instances = new();
 
-        internal CompilationContextFactory( ProjectServiceProvider serviceProvider )
-        {
-            this._serviceProvider = serviceProvider.Underlying.WithService( this );
-        }
+        internal CompilationContextFactory() { }
 
-        public CompilationContext GetInstance( Compilation compilation )
-            => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this ) );
+        public CompilationContext GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this ) );
 
         [Memo]
         internal CompilationContext Empty => new( EmptyCompilation, this );

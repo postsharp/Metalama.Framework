@@ -61,6 +61,7 @@ public static class ServiceProviderFactory
         }
 
         serviceProvider = serviceProvider
+            .WithServiceConditional( _ => new CompilationContextFactory() )
             .WithServiceConditional<ITaskRunner>( _ => new TaskRunner() )
             .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
             .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
@@ -134,7 +135,6 @@ public static class ServiceProviderFactory
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
             .WithService( _ => new SyntaxSerializationService() )
             .WithService( _ => new CompileTimeTypeFactory() )
-            .WithService( provider => new CompilationContextFactory( provider ) )
             .WithServiceConditional<SystemTypeResolver>( sp => new SystemTypeResolver( sp ) )
             .WithServiceConditional<ISystemAttributeDeserializer>( sp => new SystemAttributeDeserializer( sp ) )
             .WithService( provider => new ClassifyingCompilationContextFactory( provider ) )
@@ -151,7 +151,7 @@ public static class ServiceProviderFactory
             .WithService( repository )
             .WithService( sp => new ProjectSpecificCompileTimeTypeResolver( sp ) )
             .WithServiceConditional<IUserCodeAttributeDeserializer>( sp => new UserCodeAttributeDeserializer( sp ) )
-            .WithService<SymbolClassificationService>( sp => new SymbolClassificationService( repository ) )
+            .WithService<SymbolClassificationService>( _ => new SymbolClassificationService( repository ) )
             .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) );
     }
 }

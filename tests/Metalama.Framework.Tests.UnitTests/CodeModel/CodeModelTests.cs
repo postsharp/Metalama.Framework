@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
@@ -1515,7 +1514,7 @@ class C {}
             Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
         }
 
-        private class TestClassificationService : ISymbolClassificationService
+        private sealed class TestClassificationService : ISymbolClassificationService
         {
             public ExecutionScope GetExecutionScope( ISymbol symbol )
                 => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) )

@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 #pragma warning disable CA1822 // Mark members as static
 
-internal sealed class AttributeClassificationService : IGlobalService
+internal sealed class AttributeClassificationService : IGlobalService, IDisposable
 {
     private readonly WeakCache<INamedTypeSymbol, bool> _cache = new();
 
@@ -95,4 +94,6 @@ internal sealed class AttributeClassificationService : IGlobalService
 
         return false;
     }
+
+    public void Dispose() => this._cache.Dispose();
 }
