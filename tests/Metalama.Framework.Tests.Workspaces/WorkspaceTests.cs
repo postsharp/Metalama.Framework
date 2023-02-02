@@ -124,7 +124,7 @@ namespace Metalama.Framework.Tests.Workspaces
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        {String.Join( Environment.NewLine, references)}
+        {string.Join( Environment.NewLine, references )}
     </ItemGroup>
 </Project>
 " );

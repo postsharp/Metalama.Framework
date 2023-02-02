@@ -994,7 +994,7 @@ namespace Ns1
         public void CompileTimeOnlyTypesAreInvisible()
         {
             var testServices = new AdditionalServiceCollection( new TestClassificationService() );
-            using var testContext = this.CreateTestContext(testServices);
+            using var testContext = this.CreateTestContext( testServices );
 
             const string code = @"
 using Metalama.Framework.Aspects;
@@ -1515,8 +1515,7 @@ class C {}
             Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
         }
 
-
-        class TestClassificationService : ISymbolClassificationService
+        private class TestClassificationService : ISymbolClassificationService
         {
             public ExecutionScope GetExecutionScope( ISymbol symbol )
                 => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) )

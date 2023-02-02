@@ -14,6 +14,7 @@ using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -60,9 +61,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 TestCompilationFactory.GetMetadataReferences() );
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
-                
-            
-            
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
@@ -136,20 +134,17 @@ namespace Metalama.Framework.Tests.Integration.Runners
             return builder.ProcessSyntaxRoot( syntaxRoot );
         }
 
-
-        class LinkerTemplateInfoService : ITemplateInfoService
+        private class LinkerTemplateInfoService : ITemplateInfoService
         {
-            public ExecutionScope GetExecutionScope( ISymbol symbol ) => throw new System.NotImplementedException();
+            public ExecutionScope GetExecutionScope( ISymbol symbol ) => throw new NotImplementedException();
 
-            public bool IsTemplate( ISymbol symbol ) => throw new System.NotImplementedException();
+            public bool IsTemplate( ISymbol symbol ) => throw new NotImplementedException();
 
-            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new System.NotImplementedException();
+            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new NotImplementedException();
 
-            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new System.NotImplementedException();
+            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new NotImplementedException();
 
-            public ITemplateInfo GetTemplateInfo( ISymbol symbol ) => throw new System.NotImplementedException();
+            public ITemplateInfo GetTemplateInfo( ISymbol symbol ) => throw new NotImplementedException();
         }
-
-      
     }
 }

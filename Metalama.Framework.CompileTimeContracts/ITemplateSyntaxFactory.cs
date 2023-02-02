@@ -53,7 +53,7 @@ public interface ITemplateSyntaxFactory
     ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse );
 
     IUserExpression? Proceed( string methodName );
-    
+
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
     TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null );
