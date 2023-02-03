@@ -234,7 +234,7 @@ namespace Metalama.Framework.Engine.Templating
             if ( value.Type.Equals( SpecialType.Void )
                  || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
             {
-                // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
+                // If the method is void, we invoke the method as a statement (so we don't lose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
                 TypeSyntax variableType;
                 ExpressionSyntax variableValue;
@@ -341,6 +341,9 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public IUserExpression Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
+
+        public IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext )
+            => TemplateExpansionContext.ConfigureAwait( expression, continueOnCapturedContext );
 
         public ExpressionSyntax GetDynamicSyntax( object? expression )
         {

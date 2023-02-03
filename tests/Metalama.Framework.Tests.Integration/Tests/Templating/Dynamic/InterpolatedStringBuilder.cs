@@ -25,7 +25,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
                 s.AddExpression( p.Value );
             }
 
-            s.AddText( ")" );
+            s.AddText( ") {guid=" );
+            s.AddExpression( Guid.Parse( "04cee639-acf2-46e3-be3e-916089c72a1e" ) );
+            s.AddText( "}" );
 
             var is1 = s.ToValue();
             var is2 = s.ToExpression().Value;

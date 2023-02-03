@@ -378,5 +378,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Compile-time-only type '{0}' cannot be used in the invocation of run-time method '{1}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> OnlyLiteralArgumentInConfigureAwaitAfterProceedAsync
+            = new(
+                "LAMA0254",
+                "ConfigureAwait after ProceedAsync has to have literal argument.",
+                "The argument of ConfigureAwait after ProceedAsync can only be 'true' or 'false', it can't be '{0}'.",
+                _category,
+                Error );
     }
 }

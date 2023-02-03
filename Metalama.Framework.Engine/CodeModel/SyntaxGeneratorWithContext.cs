@@ -221,26 +221,20 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     }
 
     public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
-        => SyntaxFactory.ParameterList(
-            SeparatedList(
-                method.Parameters.SelectAsEnumerable(
-                    p => Parameter(
-                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                        p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
-                        Identifier( p.Name ),
-                        null ) ) ) );
+        => SyntaxFactory.ParameterList( this.ParameterListParameters( method, compilation ) );
 
-    public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
-        => BracketedParameterList(
-            SeparatedList(
-                method.Parameters.SelectAsEnumerable(
-                    p => Parameter(
-                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                        p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
-                        Identifier( p.Name ),
-                        null ) ) ) );
+    public BracketedParameterListSyntax ParameterList( IIndexer indexer, CompilationModel compilation )
+        => BracketedParameterList( this.ParameterListParameters( indexer, compilation ) );
+
+    private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation )
+        => SeparatedList(
+            method.Parameters.SelectAsEnumerable(
+                p => Parameter(
+                    this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
+                    p.GetSyntaxModifierList(),
+                    this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                    Identifier( p.Name ),
+                    p.DefaultValue == null ? null : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {
