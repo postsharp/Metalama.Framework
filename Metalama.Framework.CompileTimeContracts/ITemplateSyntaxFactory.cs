@@ -52,8 +52,10 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse );
 
-    IUserExpression? Proceed( string methodName );
-    
+    IUserExpression Proceed( string methodName );
+
+    IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext );
+
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
     TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null );

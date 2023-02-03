@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -469,14 +470,16 @@ namespace Metalama.Framework.Engine.CompileTime
                                         break;
 
                                     case TemplatingScope.Dynamic:
-                                        // Only a few well-known types can have dynamic generic arguments, other are unsupported.
+                                        // Only a few well-known types can have dynamic generic arguments, others are unsupported.
                                         switch ( namedType.Name )
                                         {
                                             case nameof(Task<object>):
+                                            case nameof(ConfiguredTaskAwaitable<object>):
                                             case nameof(ValueTask<object>):
                                             case nameof(IEnumerable<object>):
                                             case nameof(IEnumerator<object>):
                                             case nameof(IAsyncEnumerable<object>):
+                                            case nameof(ConfiguredCancelableAsyncEnumerable<object>):
                                             case nameof(IAsyncEnumerator<object>):
                                                 return TemplatingScope.Dynamic;
 

@@ -336,5 +336,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 INamedTypeSymbol type => type,
                 _ => symbol.ContainingType
             };
+
+        internal static bool IsTaskConfigureAwait( this ISymbol? symbol )
+            => symbol is IMethodSymbol
+            {
+                Name: "ConfigureAwait",
+                ContainingType: var containingType
+            } && containingType.GetFullMetadataName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
     }
 }
