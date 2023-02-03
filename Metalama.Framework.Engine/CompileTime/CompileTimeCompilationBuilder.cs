@@ -953,7 +953,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         compilationResultManifest,
                         projectLicenseInfo?.RedistributionLicenseKey,
                         sourceHash,
-                        textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
+                        textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFileManifest( f ) ).ToImmutableList() );
 
                     project = CompileTimeProject.Create(
                         this._serviceProvider,

@@ -117,7 +117,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
                 CreateFrameworkTemplateProjectManifest( compilation ),
                 null,
                 0,
-                ImmutableArray<CompileTimeFile>.Empty );
+                ImmutableArray<CompileTimeFileManifest>.Empty );
         }
 
         return new CompileTimeProject(

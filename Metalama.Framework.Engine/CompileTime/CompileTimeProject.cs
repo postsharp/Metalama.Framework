@@ -90,10 +90,10 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        internal IReadOnlyList<CompileTimeFile> CodeFiles => this.Manifest?.Files ?? Array.Empty<CompileTimeFile>();
+        internal IReadOnlyList<CompileTimeFileManifest> CodeFiles => this.Manifest?.Files ?? Array.Empty<CompileTimeFileManifest>();
 
         [Memo]
-        private ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
+        private ImmutableDictionaryOfArray<string, (CompileTimeFileManifest File, CompileTimeProject Project)> ClosureCodeFiles
             => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplateProjectManifest.Empty,
                 null,
                 hash.Digest(),
-                Array.Empty<CompileTimeFile>() );
+                Array.Empty<CompileTimeFileManifest>() );
 
             compileTimeProject = new CompileTimeProject(
                 serviceProvider,
@@ -422,7 +422,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 nameof(reflectionName),
                 $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
 
-        internal (CompileTimeFile? File, CompileTimeProject? Project) FindCodeFileFromTransformedPath( string transformedCodePath )
+        internal (CompileTimeFileManifest? File, CompileTimeProject? Project) FindCodeFileFromTransformedPath( string transformedCodePath )
         {
             return this.ClosureCodeFiles[Path.GetFileName( transformedCodePath )]
                 .OrderByDescending( t => t.File.TransformedPath.Length )

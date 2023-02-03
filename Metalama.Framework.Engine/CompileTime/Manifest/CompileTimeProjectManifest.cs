@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             TemplateProjectManifest? templates,
             string? redistributionLicenseKey,
             ulong sourceHash,
-            IReadOnlyList<CompileTimeFile> files,
+            IReadOnlyList<CompileTimeFileManifest> files,
             string? metalamaVersion = null,
             int manifestVersion = 0 )
         {
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// <summary>
         /// Gets the list of code files.
         /// </summary>
-        public IReadOnlyList<CompileTimeFile> Files { get; }
+        public IReadOnlyList<CompileTimeFileManifest> Files { get; }
 
         public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
