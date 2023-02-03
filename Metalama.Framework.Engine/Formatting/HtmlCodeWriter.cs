@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -191,6 +194,68 @@ namespace Metalama.Framework.Engine.Formatting
             }
 
             return stringBuilder.ToString();
+        }
+
+        internal static async Task WriteAllAsync(
+            IProjectOptions projectOptions,
+            ProjectServiceProvider serviceProvider,
+            PartialCompilation partialCompilation,
+            string suffix = "" )
+        {
+            var compilation = partialCompilation.Compilation;
+            var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
+
+            var workspace = new AdhocWorkspace();
+
+            var assemblyName = compilation.AssemblyName.AssertNotNull();
+
+            var projectId = ProjectId.CreateNewId( assemblyName );
+
+            var documents = partialCompilation.SyntaxTrees.Values.Select(
+                d => DocumentInfo.Create(
+                    DocumentId.CreateNewId( projectId, d.FilePath ),
+                    d.FilePath,
+                    filePath: d.FilePath,
+                    loader: TextLoader.From( TextAndVersion.Create( d.GetText(), VersionStamp.Create() ) ) ) );
+
+            var projectInfo = ProjectInfo.Create(
+                projectId,
+                VersionStamp.Create(),
+                assemblyName,
+                assemblyName,
+                "C#",
+                projectOptions.ProjectPath,
+                compilationOptions: compilation.Options,
+                documents: documents,
+                metadataReferences: compilation.References );
+
+            var project = workspace.AddProject( projectInfo );
+            var projectDirectory = Path.GetFullPath( Path.GetDirectoryName( projectOptions.ProjectPath )! );
+            var outputDirectory = Path.Combine( projectDirectory, "obj", "html", projectOptions.TargetFramework ?? "" );
+
+            foreach ( var document in project.Documents )
+            {
+                var documentPath = Path.GetFullPath( document.FilePath.AssertNotNull() );
+
+                if ( !documentPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    // Skipping this document.
+                    continue;
+                }
+
+                var relativePath = documentPath.Substring( projectDirectory.Length + 1 );
+                var outputPath = Path.Combine( outputDirectory, relativePath + suffix + ".html" );
+
+                var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
+                Directory.CreateDirectory( outputSubdirectory );
+                
+#if NET6_0_OR_GREATER
+                await using var textWriter = new StreamWriter( outputPath );
+#else
+                using var textWriter = new StreamWriter( outputPath );
+#endif
+                await writer.WriteAsync( document, textWriter );
+            }
         }
     }
 }

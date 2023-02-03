@@ -37,7 +37,16 @@ namespace Metalama.Framework.Engine.Options
         /// Gets a value indicating whether the output syntax trees must be formatted.
         /// </summary>
         bool FormatOutput { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether HTML files should be written for syntax-highlighted input and transformed
+        /// code of all syntax trees in the project.
+        /// </summary>
+        bool WriteHtml { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the compile-time code must be formatted.
+        /// </summary>
         bool FormatCompileTimeCode { get; }
 
         /// <summary>
@@ -45,6 +54,9 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         bool IsUserCodeTrusted { get; }
 
+        /// <summary>
+        /// Gets the path to the <c>csproj</c> file.
+        /// </summary>
         string? ProjectPath { get; }
 
         /// <summary>
@@ -57,6 +69,9 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         string? TargetFrameworkMoniker { get; }
 
+        /// <summary>
+        /// Gets the build configuration, e.g. <c>Debug</c> or <c>Release</c>.
+        /// </summary>
         string? Configuration { get; }
 
         /// <summary>
