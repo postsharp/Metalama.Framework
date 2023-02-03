@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Base interface for <see cref="IMethod"/>, <see cref="IFieldOrProperty"/>, <see cref="IEvent"/>, and <see cref="INamedType"/>.
+    /// Base interface for <see cref="IMethod"/>, <see cref="IFieldOrPropertyOrIndexer"/>, <see cref="IEvent"/>, and <see cref="INamedType"/>.
     /// </summary>
     public interface IMemberOrNamedType : INamedDeclaration
     {

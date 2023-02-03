@@ -21,6 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         public override dynamic? OverrideMethod()
         {
             int i = 42;
+            int j = 42;
             return meta.Proceed();
         }
     }
@@ -56,6 +57,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         public int TargetMethod_MultipleConflicts()
         {
             int i = 0;
+            int j = 0;
             return 42;
         }
     }

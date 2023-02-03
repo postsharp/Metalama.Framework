@@ -250,7 +250,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     serviceProvider,
                     assembly,
                     compilationModel,
-                    template.ForIntroduction() );
+                    template.WithArguments() );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out var output );
 
@@ -327,7 +327,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     compilation,
                     diagnostics,
-                    template.Template.Cast(),
+                    template.TemplateMember.Cast(),
                     serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
@@ -342,7 +342,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         lexicalScope,
                         serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
-                        template.Template,
+                        template.TemplateMember,
                         proceedExpression,
                         default ),
                     roslynTargetMethod);

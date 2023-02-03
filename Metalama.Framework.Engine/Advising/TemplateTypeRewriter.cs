@@ -16,13 +16,13 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         public static TypeRewriter Get( BoundTemplateMethod template )
-            => template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
+            => template.TemplateMember.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
                 ? Null
                 : new TemplateTypeRewriter( template );
 
         internal override ITypeInternal Visit( TypeParameter typeParameter )
         {
-            if ( this._template.Template.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
+            if ( this._template.TemplateMember.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
                  && templateParameter.IsCompileTime )
             {
                 var value = (TemplateTypeArgument) this._template.TemplateArguments[templateParameter.TemplateIndex!.Value]!;

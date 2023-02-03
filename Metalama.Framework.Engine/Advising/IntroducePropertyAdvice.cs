@@ -19,8 +19,8 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
 {
-    private readonly BoundTemplateMethod? _getTemplate;
-    private readonly BoundTemplateMethod? _setTemplate;
+    private readonly PartiallyBoundTemplateMethod? _getTemplate;
+    private readonly PartiallyBoundTemplateMethod? _setTemplate;
     private readonly bool _isProgrammaticAutoProperty;
 
     public IntroducePropertyAdvice(
@@ -31,8 +31,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         string? explicitName,
         IType? explicitType,
         TemplateMember<IProperty>? propertyTemplate,
-        BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
+        PartiallyBoundTemplateMethod? getTemplate,
+        PartiallyBoundTemplateMethod? setTemplate,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IPropertyBuilder>? buildAction,
@@ -99,20 +99,20 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 this switch
                 {
                     { Template.Declaration.Type: { } propertyType } => propertyType,
-                    { _getTemplate.Template.Declaration.ReturnType: { } getterReturnType } => getterReturnType,
-                    { _setTemplate.Template.Declaration.Parameters: [{ Type: { } setterParameterType }] } => setterParameterType,
+                    { _getTemplate.TemplateMember.Declaration.ReturnType: { } getterReturnType } => getterReturnType,
+                    { _setTemplate.TemplateMember.Declaration.Parameters: [{ Type: { } setterParameterType }] } => setterParameterType,
                     _ => throw new AssertionFailedException( $"Could not determine type of {this.Builder} property." )
                 };
 
             this.Builder.Accessibility =
                 this.Template?.Accessibility ?? (this._getTemplate != null
-                    ? this._getTemplate.Template.Accessibility
-                    : this._setTemplate?.Template.Accessibility).AssertNotNull();
+                    ? this._getTemplate.TemplateMember.Accessibility
+                    : this._setTemplate?.TemplateMember.Accessibility).AssertNotNull();
 
             if ( this.Builder.GetMethod != null )
             {
                 ((AccessorBuilder) this.Builder.GetMethod).SetIsIteratorMethod(
-                    this.Template?.IsIteratorMethod ?? this._getTemplate?.Template.IsIteratorMethod ?? false );
+                    this.Template?.IsIteratorMethod ?? this._getTemplate?.TemplateMember.IsIteratorMethod ?? false );
             }
 
             if ( this.Template != null )
@@ -144,20 +144,20 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
         if ( this._getTemplate != null )
         {
-            CopyTemplateAttributes( this._getTemplate.Template.Declaration, this.Builder.GetMethod!, serviceProvider );
-            CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod!, serviceProvider );
+            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
         }
 
-        if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
+        if ( this._setTemplate != null && this._setTemplate.TemplateMember.Declaration.Parameters.Count > 0 )
         {
-            CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
+            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, this.Builder.SetMethod!, serviceProvider );
 
             CopyTemplateAttributes(
-                this._setTemplate.Template.Declaration.Parameters[0],
+                this._setTemplate.TemplateMember.Declaration.Parameters[0],
                 this.Builder.SetMethod!.Parameters[0],
                 serviceProvider );
 
-            CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
         }
 
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.

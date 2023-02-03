@@ -16,4 +16,11 @@ public static class ConcurrentHashSetExtensions
 
         return hashSet;
     }
+    public static void AddRange<T>( this ImmutableHashSet<T>.Builder hashSetBuilder, IEnumerable<T> items )
+    {
+        foreach ( var item in items )
+        {
+            hashSetBuilder.Add( item );
+        }
+    }
 }

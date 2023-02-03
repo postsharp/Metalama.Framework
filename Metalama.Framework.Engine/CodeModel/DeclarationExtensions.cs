@@ -323,6 +323,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static bool? IsEventField( this IEventSymbol symbol )
             => symbol switch
             {
+                // TODO: partial events.
                 { IsAbstract: true } => false,
                 { DeclaringSyntaxReferences.Length: > 0 } =>
                     symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax ),
@@ -398,20 +399,14 @@ namespace Metalama.Framework.Engine.CodeModel
                (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
                namedType.AllEvents.OfName( name ).FirstOrDefault();
 
-        internal static bool IsEventField( this IEvent @event )
+        internal static bool? IsEventField( this IEvent @event )
         {
             switch ( @event )
             {
                 case Event codeEvent:
                     var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
 
-                    // TODO: partial events.
-                    return eventSymbol.GetPrimaryDeclaration() switch
-                    {
-                        VariableDeclaratorSyntax => true,
-                        { } => false,
-                        _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
-                    };
+                    return eventSymbol.IsEventField();
 
                 case BuiltEvent builtEvent:
                     return builtEvent.EventBuilder.IsEventField;

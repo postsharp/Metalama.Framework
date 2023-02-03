@@ -578,7 +578,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                template.ForIntroduction( this.GetObjectReader( args ) ),
+                template.WithArguments( this.GetObjectReader( args ) ),
                 scope,
                 whenExists,
                 buildMethod,
@@ -613,7 +613,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                template.ForIntroduction( this.GetObjectReader( args ) ),
+                template.WithArguments( this.GetObjectReader( args ) ),
                 whenExists,
                 this._layerName,
                 this.GetObjectReader( tags ) );
@@ -782,8 +782,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get?.ForIntroduction();
-            var setTemplate = accessorTemplates.Set?.ForIntroduction();
+            var getTemplate = accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod.AssertNotNull() );
+            var setTemplate = accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod.AssertNotNull() );
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._state.AspectInstance,
@@ -1049,8 +1049,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 null,
                 null,
                 propertyTemplate,
-                accessorTemplates.Get?.ForIntroduction(),
-                accessorTemplates.Set?.ForIntroduction(),
+                accessorTemplates.Get?.WithArguments(),
+                accessorTemplates.Set?.WithArguments(),
                 scope,
                 whenExists,
                 buildProperty,
@@ -1102,8 +1102,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 name,
                 null,
                 default,
-                getTemplateRef?.ForIntroduction( parameterReaders ),
-                setTemplateRef?.ForIntroduction( parameterReaders ),
+                getTemplateRef?.WithArguments( parameterReaders ),
+                setTemplateRef?.WithArguments( parameterReaders ),
                 scope,
                 whenExists,
                 buildProperty,
@@ -1216,8 +1216,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 targetType,
                 this._compilation,
                 indices,
-                getTemplateRef?.ForIntroduction( parameterReaders ),
-                setTemplateRef?.ForIntroduction( parameterReaders ),
+                getTemplateRef?.WithArguments( parameterReaders ),
+                setTemplateRef?.WithArguments( parameterReaders ),
                 scope,
                 whenExists,
                 buildIndexer,
@@ -1310,8 +1310,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 whenExists,
                 buildEvent,
                 this._layerName,
-                this.GetObjectReader( tags ),
-                ObjectReader.Empty );
+                this.GetObjectReader( tags ) );
 
             return this.ExecuteAdvice<IEvent>( advice );
         }
@@ -1344,6 +1343,8 @@ internal sealed class AdviceFactory : IAdviceFactory
             var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
+            var parameterReaders = this.GetObjectReader( args );
+
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
@@ -1351,14 +1352,13 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._compilation,
                 name,
                 default,
-                addTemplateRef,
-                removeTemplateRef,
+                addTemplateRef?.WithArguments( parameterReaders ),
+                removeTemplateRef?.WithArguments( parameterReaders ),
                 scope,
                 whenExists,
                 buildEvent,
                 this._layerName,
-                this.GetObjectReader( tags ),
-                this.GetObjectReader( args ) );
+                this.GetObjectReader( tags ) );
 
             return this.ExecuteAdvice<IEvent>( advice );
         }

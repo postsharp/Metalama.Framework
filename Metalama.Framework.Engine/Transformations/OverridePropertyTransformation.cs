@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Transformations
             [NotNullWhen( true )] out BlockSyntax? body )
         {
             var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.Template.SelectedKind );
+                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.TemplateMember.SelectedKind );
 
             var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
-                    accessorTemplate.Template.Cast(),
+                    accessorTemplate.TemplateMember.Cast(),
                     this.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -124,11 +124,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                accessorTemplate.Template,
+                accessorTemplate.TemplateMember,
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
 
             return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }

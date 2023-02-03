@@ -7,11 +7,11 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class BoundTemplateMethod
 {
-    public TemplateMember<IMethod> Template { get; }
+    public TemplateMember<IMethod> TemplateMember { get; }
 
     public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
     {
-        this.Template = template;
+        this.TemplateMember = template;
         this.TemplateArguments = templateArguments;
 
 #if DEBUG
@@ -27,14 +27,14 @@ internal sealed class BoundTemplateMethod
     public object?[] GetTemplateArgumentsForMethod( IHasParameters signature )
     {
         Invariant.Assert(
-            this.Template.TemplateClassMember.RunTimeParameters.Length == 0 ||
-            this.Template.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
+            this.TemplateMember.TemplateClassMember.RunTimeParameters.Length == 0 ||
+            this.TemplateMember.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
 
         var newArguments = (object?[]) this.TemplateArguments.Clone();
 
-        for ( var index = 0; index < this.Template.TemplateClassMember.RunTimeParameters.Length; index++ )
+        for ( var index = 0; index < this.TemplateMember.TemplateClassMember.RunTimeParameters.Length; index++ )
         {
-            var runTimeParameter = this.Template.TemplateClassMember.RunTimeParameters[index];
+            var runTimeParameter = this.TemplateMember.TemplateClassMember.RunTimeParameters[index];
             newArguments[runTimeParameter.SourceIndex] = SyntaxFactory.IdentifierName( signature.Parameters[index].Name );
         }
 

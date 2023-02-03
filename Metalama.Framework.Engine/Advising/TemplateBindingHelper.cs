@@ -17,9 +17,54 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class TemplateBindingHelper
     {
-        public static BoundTemplateMethod ForIntroduction( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForIntroduction(
+            this TemplateMember<IMethod> template,
+            IMethod targetMethod,
+            IObjectReader? arguments = null)
         {
-            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
+            return template.ForIntroductionInitial( arguments ).ForIntroductionFinal( targetMethod );
+        }
+
+        public static PartiallyBoundTemplateMethod ForIntroductionInitial( 
+            this TemplateMember<IMethod> template,
+            IObjectReader? arguments = null )
+        {
+            var templateTypeArguments = GetTemplateTypeArguments( template, arguments );
+
+            return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
+        }
+
+        public static BoundTemplateMethod ForIntroductionFinal(
+            this PartiallyBoundTemplateMethod template,
+            IMethod targetMethod )
+        {
+            var arguments = template.Arguments ?? ObjectReader.Empty;
+
+            // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
+            var templateArguments = GetTemplateArguments( template.TemplateMember, arguments );
+
+            // Verify that the template return type matches the target.
+            if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template.TemplateMember, arguments ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                    MetalamaStringFormatter.Format(
+                        $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
+            }
+
+            for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
+            {
+                var templateParameter = template.Declaration.Parameters[template.TemplateMember.TemplateClassMember.RunTimeParameters[i].SourceIndex];
+                var methodParameter = targetMethod.Parameters[i];
+
+                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template.TemplateMember, arguments ) )
+                {
+                    throw new InvalidTemplateSignatureException(
+                        MetalamaStringFormatter.Format(
+                            $"Cannot use the template '{template.Declaration}' to override the operator '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target operator parameter '{methodParameter.Name}'." ) );
+                }
+            }
+
+            return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
 
         public static BoundTemplateMethod ForOperatorIntroduction(
@@ -113,13 +158,13 @@ namespace Metalama.Framework.Engine.Advising
             // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
             var templateArguments = GetTemplateArguments( template, arguments );
 
-            // Verity that the template return type matches the target.
+            // Verify that the template return type matches the target.
             if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template, arguments ) )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
                         $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
-            }
+            }            
 
             // Check that template run-time parameters match the target.
             if ( targetMethod.OperatorKind == OperatorKind.None )
@@ -293,9 +338,26 @@ namespace Metalama.Framework.Engine.Advising
             return false;
         }
 
-        private static object?[] GetTemplateArguments(
+        private static object?[] GetTemplateTypeArguments(
             TemplateMember<IMethod>? template,
-            IObjectReader? compileTimeParameters,
+            IObjectReader? compileTimeArguments )
+        {
+            if ( template == null )
+            {
+                return Array.Empty<object?>();
+            }
+
+            compileTimeArguments ??= ObjectReader.Empty;
+
+            var templateTypeArguments = new List<object?>();
+
+            AddTemplateTypeParameters( template, compileTimeArguments, templateTypeArguments );
+
+            return templateTypeArguments.ToArray();
+        }
+
+        private static object?[] GetTemplateArguments(
+            PartiallyBoundTemplateMethod? template,
             ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
         {
             if ( template == null )
@@ -303,23 +365,64 @@ namespace Metalama.Framework.Engine.Advising
                 return Array.Empty<object?>();
             }
 
-            compileTimeParameters ??= ObjectReader.Empty;
+            var compileTimeArguments = template.Arguments ?? ObjectReader.Empty;
 
-            var templateParameters = new List<object?>();
+            var templateArguments = new List<object?>();
 
-            // Add parameters.
+            // Add arguments for template parameters.
+            AddTemplateParameters( template.TemplateMember, compileTimeArguments, runTimeParameterMapping, templateArguments );
+
+            // Add already prepared arguments for template type parameters.
+            templateArguments.AddRange( template.TypeArguments );
+
+            VerifyArguments( template.TemplateMember, compileTimeArguments );
+
+            return templateArguments.ToArray();
+        }
+
+        private static object?[] GetTemplateArguments(
+            TemplateMember<IMethod>? template,
+            IObjectReader? compileTimeArguments,
+            ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
+        {
+            if ( template == null )
+            {
+                return Array.Empty<object?>();
+            }
+
+            compileTimeArguments ??= ObjectReader.Empty;
+
+            var templateArguments = new List<object?>();
+
+            // Add arguments for template parameters.
+            AddTemplateParameters( template, compileTimeArguments, runTimeParameterMapping, templateArguments );
+
+            // Add arguments for template type parameters.
+            AddTemplateTypeParameters( template, compileTimeArguments, templateArguments );
+
+            VerifyArguments( template, compileTimeArguments );
+
+            return templateArguments.ToArray();
+        }
+
+        private static void AddTemplateParameters( 
+            TemplateMember<IMethod> template, 
+            IObjectReader compileTimeArguments, 
+            ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping, 
+            List<object?> templateArguments )
+        {
             foreach ( var parameter in template.TemplateClassMember.Parameters )
             {
                 if ( parameter.IsCompileTime )
                 {
-                    if ( !compileTimeParameters.TryGetValue( parameter.Name, out var parameterValue ) )
+                    if ( !compileTimeArguments.TryGetValue( parameter.Name, out var parameterValue ) )
                     {
                         throw new InvalidAdviceParametersException(
                             MetalamaStringFormatter.Format(
                                 $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
                     }
 
-                    templateParameters.Add( parameterValue );
+                    templateArguments.Add( parameterValue );
                 }
                 else
                 {
@@ -327,11 +430,13 @@ namespace Metalama.Framework.Engine.Advising
                         ? mapped
                         : IdentifierName( parameter.Name );
 
-                    templateParameters.Add( expression );
+                    templateArguments.Add( expression );
                 }
             }
+        }
 
-            // Add type parameters.
+        private static void AddTemplateTypeParameters( TemplateMember<IMethod> template, IObjectReader compileTimeParameters, List<object?> templateArguments )
+        {
             foreach ( var parameter in template.TemplateClassMember.TypeParameters )
             {
                 if ( parameter.IsCompileTime )
@@ -366,12 +471,15 @@ namespace Metalama.Framework.Engine.Advising
                     var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
                     var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeModel.GetSymbol() ).Type;
 
-                    templateParameters.Add( new TemplateTypeArgument( typeModel, syntax, syntaxForTypeOf ) );
+                    templateArguments.Add( new TemplateTypeArgument( typeModel, syntax, syntaxForTypeOf ) );
                 }
             }
+        }
 
+        private static void VerifyArguments( TemplateMember<IMethod> template, IObjectReader compileTimeArguments )
+        {
             // Check that all provided properties map to a compile-time parameter.
-            foreach ( var name in compileTimeParameters.Keys )
+            foreach ( var name in compileTimeArguments.Keys )
             {
                 if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
                 {
@@ -385,8 +493,6 @@ namespace Metalama.Framework.Engine.Advising
                         MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );
                 }
             }
-
-            return templateParameters.ToArray();
         }
     }
 }
