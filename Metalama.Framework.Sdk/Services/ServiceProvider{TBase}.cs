@@ -101,6 +101,10 @@ namespace Metalama.Framework.Engine.Services
             where T : class, TBase
             => this.GetService<T>() == null ? this.WithService( func( this ) ) : this;
 
+        public ServiceProvider<TBase> WithService<T>( Func<ServiceProvider<TBase>, T> func )
+            where T : class, TBase
+            => this.WithService( func( this ) );
+
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
         /// <summary>

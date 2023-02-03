@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember(IsExplicit = false)]
-        int TemplateWithInit
+        public int TemplateWithInit
         {
             init
             {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember(IsExplicit = false)]
-        int TemplateWithoutInit
+        public int TemplateWithoutInit
         {
             set
             {

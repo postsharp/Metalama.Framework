@@ -70,8 +70,7 @@ internal sealed class TemplateMember<T>
         var compiledTemplateAttribute = GetCompiledTemplateAttribute( implementation );
 
         // The one defined on the [Template] attribute has priority, then on [Accessibility],
-        // the the accessibility of the template itself. The [Accessibility] attribute is added during compilation and the original
-        // declaration is changed to 'public' so that it is not removed in reference assemblies.
+        // then the accessibility of the template itself.
         if ( adviceAttribute is ITemplateAttribute { Properties.Accessibility: { } templateAccessibility } )
         {
             this.Accessibility = templateAccessibility;

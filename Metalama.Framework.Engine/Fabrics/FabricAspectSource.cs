@@ -54,12 +54,11 @@ internal sealed class FabricAspectSource : IAspectSource
             var compileTimeProject = this._fabricManager.CompileTimeProject;
 
             var drivers = driverGroup
-                .Select( x => x.Driver )
                 .Select(
                     x => new FabricTemplateClass(
                         this._fabricManager.ServiceProvider,
-                        x,
-                        compilation.CompilationContext,
+                        x.Driver,
+                        x.Driver.CompileTimeProject.TemplateReflectionContext ?? compilation.CompilationContext,
                         diagnosticAdder,
                         null ) )
                 .ToImmutableArray();

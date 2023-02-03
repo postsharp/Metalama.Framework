@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Testing.AspectTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -75,7 +74,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
         {
-            var initialCompilationModel = CompilationModel.CreateInitialInstance( new NullProject( this._serviceProvider ), inputCompilation );
+            var initialCompilationModel = CompilationModel.CreateInitialInstance(
+                new ProjectModel( inputCompilation.Compilation, this._serviceProvider ),
+                inputCompilation );
 
             FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 

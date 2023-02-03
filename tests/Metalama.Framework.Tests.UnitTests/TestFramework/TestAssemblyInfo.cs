@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-internal class TestAssemblyInfo : IAssemblyInfo
+internal sealed class TestAssemblyInfo : IAssemblyInfo
 {
     public TestAssemblyInfo( string assemblyPath )
     {

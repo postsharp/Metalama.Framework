@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal enum TemplateAttributeType
     {
+        // WARNING! Values are Json-serialized, so they cannot changed.
+
         /// <summary>
         /// Not a template.
         /// </summary>

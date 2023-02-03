@@ -33,16 +33,16 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
-        
-        internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
-            => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
+
+        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
+            => new( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
 
         // For test only.
-        internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
+        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
 
         // For test only.
-        private static Type Create( ITypeSymbol typeSymbol, Compilation compilation )
-            => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
+        private static CompileTimeType Create( ITypeSymbol typeSymbol, Compilation compilation )
+            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace
         {

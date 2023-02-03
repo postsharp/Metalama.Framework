@@ -18,13 +18,13 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal sealed class AttributeDeserializer
+    internal abstract class AttributeDeserializer : IAttributeDeserializer
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+        protected AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;

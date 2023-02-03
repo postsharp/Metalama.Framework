@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -26,8 +27,12 @@ namespace Metalama.Framework.Engine.Fabrics
             this._targetNamespace = creationData.FabricType.ContainingNamespace.GetFullName().AssertNotNull();
         }
 
-        public static NamespaceFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
-            => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
+        public static NamespaceFabricDriver Create(
+            FabricManager fabricManager,
+            CompileTimeProject compileTimeProject,
+            Fabric fabric,
+            Compilation runTimeCompilation )
+            => new( GetCreationData( fabricManager, compileTimeProject, fabric, runTimeCompilation ) );
 
         public override FabricKind Kind => FabricKind.Namespace;
 

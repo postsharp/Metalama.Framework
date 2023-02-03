@@ -126,11 +126,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
-        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol @namespace )
-            => @namespace.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
+        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol namespaceSymbol )
+            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
 
-        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol @namespace )
-            => @namespace.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeThis: true ) );
+        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol namespaceSymbol )
+            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeThis: true ) );
 
         internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
         {

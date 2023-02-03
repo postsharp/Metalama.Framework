@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -9,6 +10,7 @@ using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -19,23 +21,36 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
-        private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
-        private readonly ProjectServiceProvider _serviceProvider;
+
+        internal ProjectServiceProvider ServiceProvider { get; }
+
+        internal ISymbolClassificationService? ClassificationService { get; }
+
         private bool _isFrozen;
 
-        public ProjectModel( Compilation compilation, ProjectServiceProvider serviceProvider )
+        public ProjectModel( Compilation compilation, ProjectServiceProvider serviceProvider ) : this(
+            serviceProvider,
+            compilation.ReferencedAssemblyNames,
+            compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames ) { }
+
+        internal ProjectModel(
+            ProjectServiceProvider serviceProvider,
+            IEnumerable<AssemblyIdentity>? references = null,
+            IEnumerable<string>? preprocessorSymbolNames = null )
         {
+            references ??= Enumerable.Empty<AssemblyIdentity>();
+            preprocessorSymbolNames ??= Enumerable.Empty<string>();
+
+            this.ClassificationService = serviceProvider.GetService<ISymbolClassificationService>();
             this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
-            var anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
 
-            this.PreprocessorSymbols =
-                anySyntaxTree != null ? anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
+            this.PreprocessorSymbols = preprocessorSymbolNames.ToImmutableHashSet();
 
-            this._serviceProvider = serviceProvider.Underlying;
+            this.ServiceProvider = serviceProvider.Underlying;
 
-            this._projectReferences =
-                new Lazy<ImmutableArray<IAssemblyIdentity>>(
-                    () => compilation.ReferencedAssemblyNames.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>() );
+            // Do not evaluate this property lazily because this would keep a reference to the Compilation.
+            this.AssemblyReferences =
+                references.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>();
         }
 
         [Memo]
@@ -46,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string? Path => this._projectOptions.ProjectPath;
 
-        public ImmutableArray<IAssemblyIdentity> AssemblyReferences => this._projectReferences.Value;
+        public ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
 
         public ImmutableHashSet<string> PreprocessorSymbols { get; }
 
@@ -68,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return data;
         }
 
-        IServiceProvider<IProjectService> IProject.ServiceProvider => this._serviceProvider.Underlying;
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
 
         internal void Freeze()
         {

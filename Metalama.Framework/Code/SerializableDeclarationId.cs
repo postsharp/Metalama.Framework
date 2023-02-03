@@ -32,5 +32,5 @@ public readonly struct SerializableDeclarationId : IEquatable<SerializableDeclar
 
     public IDeclaration Resolve( ICompilation compilation ) => ((ICompilationInternal) compilation).Factory.GetDeclarationFromId( this );
 
-    public override string ToString() => this.Id;
+    public override string ToString() => this.Id ?? "(null)";
 }

@@ -66,6 +66,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
 
+        ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext ) => throw new NotSupportedException();
+
         EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
         FormattableString IEligibilityRule<IDeclaration>.GetIneligibilityJustification(

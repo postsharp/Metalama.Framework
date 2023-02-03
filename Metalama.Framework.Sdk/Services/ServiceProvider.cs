@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Services
     {
         internal IServiceProvider? NextProvider { get; private protected set; }
 
-        internal ServiceProvider<T> FindNext<T>()
+        internal ServiceProvider<T>? FindNext<T>()
             where T : class
         {
             for ( var i = this.NextProvider as ServiceProvider; i != null; i = i.NextProvider as ServiceProvider )
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Services
                 }
             }
 
-            throw new InvalidOperationException();
+            return null;
         }
 
         public virtual void Dispose() { }

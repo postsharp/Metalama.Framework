@@ -63,7 +63,7 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
 #if DEBUG
-            
+
             // ReSharper disable once ConvertToConstant.Local
             var useDictionary = true;
 #else
@@ -127,6 +127,8 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
 #if DEBUG
+
+            // ReSharper disable once ConvertToConstant.Local
             var useDictionary = true;
 #else
             var useDictionary = deduplicate;

@@ -155,7 +155,7 @@ public class TargetClass
                 domain,
                 ExecutionScenario.CompileTime );
 
-            var diagnosticList = new DiagnosticBag();
+            var diagnosticList = new ThrowingDiagnosticAdder();
 
             var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default );
 

@@ -4,17 +4,15 @@ using Metalama.Backstage.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-#if DEBUG
 using System.Runtime.Versioning;
-#endif
+using System.Text;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.Engine.CompileTime.Manifest
 {
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
-    [JsonObject]
+    [JsonObject( ItemNullValueHandling = NullValueHandling.Ignore )]
     internal sealed class CompileTimeProjectManifest
     {
         public CompileTimeProjectManifest(
@@ -27,9 +25,12 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string> otherTemplateTypes,
             IReadOnlyList<string>? references,
+            TemplateProjectManifest? templates,
             string? redistributionLicenseKey,
             ulong sourceHash,
-            IReadOnlyList<CompileTimeFile> files )
+            IReadOnlyList<CompileTimeFileManifest> files,
+            string? metalamaVersion = null,
+            int manifestVersion = 0 )
         {
             this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
             this.CompileTimeAssemblyName = compileTimeAssemblyName;
@@ -43,6 +44,9 @@ namespace Metalama.Framework.Engine.CompileTime
             this.RedistributionLicenseKey = redistributionLicenseKey;
             this.SourceHash = sourceHash;
             this.Files = files;
+            this.Templates = templates;
+            this.MetalamaVersion = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
+            this.ManifestVersion = manifestVersion == 0 ? CurrentManifestVersion : manifestVersion;
 
 #if DEBUG
 
@@ -63,8 +67,11 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the version of Metalama that created the compile-time project.
         /// </summary>
-        public string MetalamaVersion { get; } =
-            AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
+        public string MetalamaVersion { get; }
+
+        public int ManifestVersion { get; }
+
+        public const int CurrentManifestVersion = 1;
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
@@ -91,6 +98,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes { get; }
 
+        public TemplateProjectManifest? Templates { get; }
+
         /// <summary>
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
@@ -106,7 +115,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the list of code files.
         /// </summary>
-        public IReadOnlyList<CompileTimeFile> Files { get; }
+        public IReadOnlyList<CompileTimeFileManifest> Files { get; }
 
         public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
@@ -114,7 +123,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var manifestJson = manifestReader.ReadToEnd();
             stream.Close();
 
-            var manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+            var manifest = FromJson( manifestJson );
 
             // Assert that files are properly deserialized.
             foreach ( var file in manifest.Files )
@@ -128,11 +137,15 @@ namespace Metalama.Framework.Engine.CompileTime
             return manifest;
         }
 
+        public static CompileTimeProjectManifest FromJson( string json ) => JsonConvert.DeserializeObject<CompileTimeProjectManifest>( json ).AssertNotNull();
+
         public void Serialize( Stream stream )
         {
-            var manifestJson = JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
+            var manifestJson = this.ToJson();
             using var manifestWriter = new StreamWriter( stream, Encoding.UTF8 );
             manifestWriter.Write( manifestJson );
         }
+
+        public string ToJson() => JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
     }
 }

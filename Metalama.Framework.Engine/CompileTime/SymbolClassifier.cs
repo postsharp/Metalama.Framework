@@ -65,6 +65,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 // This system type is .NET-only but does not affect the scope.
                 .Add( "_Attribute", ("System.Runtime.InteropServices", null, false) );
 
+        public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
+        {
+            var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
+
+            return hasMetalamaReference
+                ? new SymbolClassifier( serviceProvider, compilation )
+                : new SymbolClassifier( serviceProvider, null );
+        }
+
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
@@ -76,7 +85,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
-        private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly IAttributeDeserializer _attributeDeserializer;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -84,9 +93,20 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
+        private SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation? compilation )
+            : this(
+                serviceProvider,
+                compilation,
+                serviceProvider.GetRequiredService<ISystemAttributeDeserializer>(),
+                serviceProvider.GetReferenceAssemblyLocator() ) { }
+
+        private SymbolClassifier(
+            GlobalServiceProvider serviceProvider,
+            Compilation? compilation,
+            IAttributeDeserializer attributeDeserializer,
+            ReferenceAssemblyLocator referenceAssemblyLocator )
         {
-            this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
+            this._referenceAssemblyLocator = referenceAssemblyLocator;
             this._attributeDeserializer = attributeDeserializer;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 

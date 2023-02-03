@@ -16,8 +16,8 @@ namespace Metalama.Framework.Engine.CompileTime
             return fileName.StartsWith( "(", StringComparison.Ordinal ) && fileName.EndsWith( ")", StringComparison.Ordinal );
         }
 
-        internal const string CompileTimeProjectResourceName = "Metalama.CompileTimeProject";
+        internal const string CompileTimeProjectResourceName = "Metalama.CompileTimeProject.zip";
 
-        internal const string InheritableAspectManifestResourceName = "Metalama.InheritableAspects";
+        internal const string InheritableAspectManifestResourceName = "Metalama.InheritableAspects.bin";
     }
 }

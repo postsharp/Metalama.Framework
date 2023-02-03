@@ -27,7 +27,6 @@ namespace Metalama.Framework.Engine.Templating
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
         private const string _expressionTypeAnnotationKind = "type";
-        private readonly SymbolIdGenerator _symbolIdGenerator;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
@@ -42,11 +41,6 @@ namespace Metalama.Framework.Engine.Templating
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
-
-        public SyntaxTreeAnnotationMap( Compilation compilation )
-        {
-            this._symbolIdGenerator = SymbolIdGenerator.GetInstance( compilation );
-        }
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -300,13 +294,13 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Gets a the expression type of a node when the compilation is known. 
         /// </summary>
-        internal static bool TryGetExpressionType( SyntaxNode node, Compilation compilation, [NotNullWhen( true )] out ISymbol? symbol )
+        internal static bool TryGetExpressionType( SyntaxNode node, [NotNullWhen( true )] out ISymbol? symbol )
         {
             var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {
-                symbol = SymbolIdGenerator.GetInstance( compilation ).GetSymbol( annotation.Data! );
+                symbol = SymbolAnnotationMapper.GetSymbolFromAnnotation( annotation );
 
                 return true;
             }

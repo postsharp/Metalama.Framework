@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 
             // Under bug 28733, the following line would throw
             // `AssertionFailedException: The item Class1.Nested of type NonErrorNamedTypeSymbol has been visited twice.`
-            _ = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), partialCompilation );
+            _ = CompilationModel.CreateInitialInstance( new ProjectModel( compilation, testContext.ServiceProvider ), partialCompilation );
         }
 
         [Fact]
@@ -64,7 +63,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             };
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
-            var nullProject = new NullProject( testContext.ServiceProvider );
+            var nullProject = new ProjectModel( testContext.ServiceProvider );
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
@@ -129,7 +128,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             };
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
-            var nullProject = new NullProject( testContext.ServiceProvider );
+            var nullProject = new ProjectModel( testContext.ServiceProvider );
 
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
             var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -88,7 +89,22 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    public static ISymbol? ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
+    [PublicAPI]
+    public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
+    {
+        // Note that the symbol resolution can fail for methods when the method signature contains a type from a missing assembly.
+
+        var symbol = id.ResolveToSymbolOrNull( compilation );
+
+        if ( symbol == null )
+        {
+            throw new AssertionFailedException( $"Cannot get a symbol for '{id}'." );
+        }
+
+        return symbol;
+    }
+
+    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 

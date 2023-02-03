@@ -59,7 +59,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         ProjectServiceProvider serviceProvider,
         string templateName,
         TemplateCompilerSemantics syntaxKind,
-        CompilationContext runTimeCompilationContext,
+        ClassifyingCompilationContext runTimeCompilationContext,
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
@@ -70,7 +70,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
-        this._runTimeCompilation = runTimeCompilationContext.Compilation;
+        this._runTimeCompilation = runTimeCompilationContext.SourceCompilation;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;
@@ -598,7 +598,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case SyntaxKind.TypeOfExpression:
                 {
                     var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
-                    var typeId = SerializableTypeIdProvider.GetId( type ).Id;
+                    var typeId = type.GetSerializableTypeId().Id;
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
@@ -651,7 +651,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     Argument(
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
-                            Literal( SerializableTypeIdProvider.GetId( expressionType ).Id ) ) ) );
+                            Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
         }
 
         if ( expressionType is IErrorTypeSymbol )
@@ -887,7 +887,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     // since expression references a parameter, we can just call ToString() on it
                     return InvocationExpression(
-                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof( this.ToString ) ) ) );
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof(this.ToString) ) ) );
                 }
             }
 
@@ -1340,7 +1340,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // var localSyntaxFactory = syntaxFactory.ForLocalFunction( "typeof(X)", map );
                 var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction ).AssertNotNull();
 
-                var returnType = SerializableTypeIdProvider.GetId( localFunctionSymbol.ReturnType ).Id;
+                var returnType = localFunctionSymbol.ReturnType.GetSerializableTypeId().Id;
 
                 var map = this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType );
 
@@ -2061,7 +2061,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol &&
                   this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
         {
-            var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
+            var typeId = typeSymbol.GetSerializableTypeId().Id;
 
             return this._typeOfRewriter.RewriteTypeOf(
                     typeSymbol,

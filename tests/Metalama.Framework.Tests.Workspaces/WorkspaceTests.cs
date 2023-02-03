@@ -4,6 +4,7 @@ using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -107,8 +108,8 @@ namespace Metalama.Framework.Tests.Workspaces
         {
             var compilationForReferences = TestCompilationFactory.CreateCSharpCompilation( "" );
 
-            var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
-                .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
+            var references = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
+                .Select( r => $"<Reference Include=\"{r.FilePath}\" />" );
 
             var projectPath = Path.Combine( testContext.BaseDirectory, "Project.csproj" );
             var codePath = Path.Combine( testContext.BaseDirectory, "Code.cs" );
@@ -123,7 +124,7 @@ namespace Metalama.Framework.Tests.Workspaces
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include=""{metalamaReference.FilePath}"" />
+        {string.Join( Environment.NewLine, references )}
     </ItemGroup>
 </Project>
 " );
