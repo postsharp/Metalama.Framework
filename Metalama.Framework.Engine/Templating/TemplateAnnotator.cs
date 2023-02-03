@@ -345,6 +345,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
+            // this is to ensure that meta.ProceedAsync().ConfigureAwait(false) is classified as CompileTimeOnlyReturningRuntimeOnly,
+            // so that it's treated like a Proceed expression
+            if ( symbol.IsTaskConfigureAwait() && node is MemberAccessExpressionSyntax { Expression: var configuredExpression } )
+            {
+                symbol = this._syntaxTreeAnnotationMap.GetSymbol( configuredExpression );
+            }
+
             // Dynamic local variables are considered compile-time because they must be transformed. 
             if ( !forAssignment && this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) )
             {

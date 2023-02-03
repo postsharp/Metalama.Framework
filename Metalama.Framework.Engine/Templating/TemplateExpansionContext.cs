@@ -514,6 +514,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         return new ProceedUserExpression( methodName, this );
     }
 
+    public static IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext ) => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
+
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
     private sealed class DisposeCookie : IDisposable
