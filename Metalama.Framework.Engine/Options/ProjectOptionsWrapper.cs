@@ -31,6 +31,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool FormatOutput => this.Wrapped.FormatOutput;
 
+    public virtual bool WriteHtml => this.Wrapped.WriteHtml;
+
     public virtual bool FormatCompileTimeCode => this.Wrapped.FormatCompileTimeCode;
 
     public virtual bool IsUserCodeTrusted => this.Wrapped.IsUserCodeTrusted;
