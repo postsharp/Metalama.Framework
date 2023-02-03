@@ -26,7 +26,7 @@ public class IntroducePrivateMembersAttribute : OverrideMethodAspect
 
     [Introduce]
     private event EventHandler<RunTimeOnlyClass> Event { add {} remove {} }
-
+    
     public override dynamic OverrideMethod()
     {
         Method(_field);
@@ -38,7 +38,7 @@ public class IntroducePrivateMembersAttribute : OverrideMethodAspect
         FieldLikeEvent += (s, e) => Console.WriteLine(e);
 
         Event += (s, e) => Console.WriteLine(e);
-
+        
         return meta.Proceed();
     }
 }

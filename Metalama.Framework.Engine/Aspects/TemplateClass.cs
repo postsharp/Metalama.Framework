@@ -331,18 +331,26 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( ProjectServiceProvider serviceProvider, CompilationModel compilation )
-            => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
+        {
+            var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
+
+            return this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
-                        (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
+                        (IMemberOrNamedType) compilationModelForTemplateReflection.Factory.GetDeclaration(
+                            x.Symbol.Translate( x.SymbolCompilation, compilationModelForTemplateReflection.RoslynCompilation ).AssertNotNull() ),
                         x.TemplateClassMember,
                         x.Attribute ) );
+        }
 
-        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
-            ProjectServiceProvider serviceProvider,
-            Compilation compilation )
+        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>
+            GetDeclarativeAdvice(
+                ProjectServiceProvider serviceProvider,
+                Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;
+
+            var templateReflectionCompilation = this._templateReflectionContext?.Compilation ?? compilation;
 
             // We are sorting the declarative advice by symbol name and not by source order because the source is not available
             // if the aspect library is a compiled assembly.
@@ -352,18 +360,22 @@ namespace Metalama.Framework.Engine.Aspects
                 .Select(
                     m =>
                     {
-                        var symbol = m.Value.DeclarationId.ResolveToSymbol( compilation );
+                        var symbol = m.Value.DeclarationId.ResolveToSymbol( templateReflectionCompilation );
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )
                 .OrderBy( m => m.Symbol, DeclarativeAdviceSymbolComparer.Instance )
-                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.DeclarationId )) );
+                .Select( m => (m.Template, m.Symbol, templateReflectionCompilation, ResolveAttribute( m.Template.DeclarationId )) );
 
             DeclarativeAdviceAttribute ResolveAttribute( SerializableDeclarationId declarationId )
             {
                 templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
-                if ( !templateAttributeFactory.TryGetTemplateAttribute( declarationId, compilation, ThrowingDiagnosticAdder.Instance, out var attribute ) )
+                if ( !templateAttributeFactory.TryGetTemplateAttribute(
+                        declarationId,
+                        templateReflectionCompilation,
+                        ThrowingDiagnosticAdder.Instance,
+                        out var attribute ) )
                 {
                     throw new AssertionFailedException( $"Cannot get a template for '{declarationId}'." );
                 }
