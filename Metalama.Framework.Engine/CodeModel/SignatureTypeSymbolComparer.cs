@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,11 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     internal sealed class SignatureTypeSymbolComparer : IEqualityComparer<ISymbol?>
     {
-        public static SignatureTypeSymbolComparer Instance { get; } = new( SymbolEqualityComparer.Default );
+        public static SignatureTypeSymbolComparer Instance { get; } = new( StructuralSymbolComparer.Default );
 
-        private readonly SymbolEqualityComparer _inner;
+        private readonly StructuralSymbolComparer _inner;
 
-        private SignatureTypeSymbolComparer( SymbolEqualityComparer inner )
+        private SignatureTypeSymbolComparer( StructuralSymbolComparer inner )
         {
             this._inner = inner;
         }
