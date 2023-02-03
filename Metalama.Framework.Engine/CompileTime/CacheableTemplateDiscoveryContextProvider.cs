@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal sealed class CacheableTemplateDiscoveryContextProvider
 {
     private readonly Compilation _compilation;
-    private readonly Lazy<CacheableContext> _lazyImpl;
+    private readonly Lazy<CacheableContext?> _lazyImpl;
     private readonly ProjectServiceProvider _serviceProvider;
     private bool _mustEnlargeVisibility;
 
@@ -26,7 +26,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         this._compilation = compilation;
         this._serviceProvider = serviceProvider;
 
-        this._lazyImpl = new Lazy<CacheableContext>( this.CreateContext );
+        this._lazyImpl = new Lazy<CacheableContext?>( this.CreateContext );
     }
 
     public void OnPortableExecutableReferenceDiscovered()
@@ -34,29 +34,35 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         this._mustEnlargeVisibility = true;
     }
 
-    private CacheableContext CreateContext()
+    private CacheableContext? CreateContext()
     {
-        var compilation = this._mustEnlargeVisibility
-            ? CSharpCompilation.Create(
+        if ( this._mustEnlargeVisibility )
+        {
+            Compilation compilation = CSharpCompilation.Create(
                 nameof(CacheableTemplateDiscoveryContextProvider),
                 references: this._compilation.References.OfType<PortableExecutableReference>(),
-                options: (CSharpCompilationOptions?) this._compilation.Options.WithMetadataImportOptions( MetadataImportOptions.All ) )
-            : this._compilation;
+                options: (CSharpCompilationOptions?) this._compilation.Options.WithMetadataImportOptions( MetadataImportOptions.All ) );
 
-        return new CacheableContext( compilation, this, this._mustEnlargeVisibility );
+            return new CacheableContext( compilation, this );
+        }
+        else
+        {
+            // If we don't have external aspect PE references, we don't need a cacheable ITemplateReflectionContext.
+            // We can always use the source context.
+            return null;
+        }
     }
 
-    public ITemplateReflectionContext GetTemplateDiscoveryContext() => this._lazyImpl.Value;
+    public ITemplateReflectionContext? GetTemplateDiscoveryContext() => this._lazyImpl.Value;
 
     private sealed class CacheableContext : ITemplateReflectionContext
     {
         private readonly CacheableTemplateDiscoveryContextProvider _parent;
         private readonly Lazy<CompilationModel> _compilationModel;
 
-        public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent, bool isCacheable )
+        public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent )
         {
             this._parent = parent;
-            this.IsCacheable = isCacheable;
             this.Compilation = compilation;
 
             this._compilationModel = new Lazy<CompilationModel>(
@@ -70,7 +76,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
 
         public CompilationModel GetCompilationModel( ICompilation sourceCompilation ) => this._compilationModel.Value;
 
-        public bool IsCacheable { get; }
+        public bool IsCacheable => true;
 
         public override string ToString() => $"CacheableContext EnlargedVisibility={this._parent._mustEnlargeVisibility}";
     }
