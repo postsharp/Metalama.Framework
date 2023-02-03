@@ -1,4 +1,4 @@
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMethod;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMethod_NoReturnContract;
 
 using System;
 using System.Linq;
@@ -24,11 +24,6 @@ public sealed class TestAttribute : TypeAspect
                     nameof(ValidateParameter),
                     args: new { parameterName = parameter.Name } );
             }
-
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateMethodResult),
-                args: new { methodName = method.Name });
         }
     }
 
@@ -38,15 +33,6 @@ public sealed class TestAttribute : TypeAspect
         if (value is null)
         {
             throw new ArgumentNullException( parameterName );
-        }
-    }
-
-    [Template]
-    private void ValidateMethodResult( dynamic? value, [CompileTime] string methodName )
-    {
-        if (value is null)
-        {
-            throw new InvalidOperationException( "Method returned null" );
         }
     }
 }
@@ -62,6 +48,13 @@ public class TestClass
         return null!;
     }
 
+    public async Task DoSomethingAsync(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
+    }
+
     public async Task<string> DoSomethingAsyncT(string text)
     {
         await Task.Yield();
@@ -69,5 +62,12 @@ public class TestClass
         Console.WriteLine("Hello");
 
         return null!;
+    }
+
+    public async void DoSomethingAsyncVoid(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
     }
 }

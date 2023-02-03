@@ -1,4 +1,4 @@
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMethod;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMethod_CrossAssembly;
 
 using System;
 using System.Linq;
@@ -25,10 +25,15 @@ public sealed class TestAttribute : TypeAspect
                     args: new { parameterName = parameter.Name } );
             }
 
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateMethodResult),
-                args: new { methodName = method.Name });
+            if (method.ReturnType.IsReferenceType.GetValueOrDefault()
+                && !method.ReturnType.IsNullable.GetValueOrDefault()
+                && !method.GetAsyncInfo().ResultType.Is(SpecialType.Void) )
+            {
+                builder.Advice.AddContract(
+                    method.ReturnParameter,
+                    nameof(ValidateMethodResult),
+                    args: new { methodName = method.Name } );
+            }
         }
     }
 
@@ -48,26 +53,5 @@ public sealed class TestAttribute : TypeAspect
         {
             throw new InvalidOperationException( "Method returned null" );
         }
-    }
-}
-
-// <target>
-[Test]
-public class TestClass
-{
-    public string DoSomething(string text)
-    {
-        Console.WriteLine("Hello");
-
-        return null!;
-    }
-
-    public async Task<string> DoSomethingAsyncT(string text)
-    {
-        await Task.Yield();
-
-        Console.WriteLine("Hello");
-
-        return null!;
     }
 }

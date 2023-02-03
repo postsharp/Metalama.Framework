@@ -57,6 +57,7 @@ internal static partial class SyntaxFactoryEx
             ushort s => LiteralExpression( (int) s, options ),
             double s => LiteralExpression( s, options ),
             float s => LiteralExpression( s, options ),
+            
             // force type suffix for decimal, since code like "decimal d = 3.14;" is not valid
             decimal s => LiteralExpression( s, options | ObjectDisplayOptions.IncludeTypeSuffix ),
             bool b => LiteralExpression( b ),
