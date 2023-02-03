@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -115,23 +116,21 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return false;
         }
 
+        /// <summary>
+        /// Get top-level (non-nested) types in an assembly.
+        /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
-        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
-        {
-            foreach ( var type in ns.GetTypeMembers() )
-            {
-                yield return type;
-            }
+        /// <summary>
+        /// Get all types in an assembly, including nested types.
+        /// </summary>
+        internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
-            foreach ( var namespaceMember in ns.GetNamespaceMembers() )
-            {
-                foreach ( var type in namespaceMember.GetTypes() )
-                {
-                    yield return type;
-                }
-            }
-        }
+        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
+            => ns.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
+
+        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol ns )
+            => ns.GetTypes().SelectMany( type => type.SelectManyRecursive( type => type.GetTypeMembers(), includeThis: true ) );
 
         internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
         {
@@ -337,5 +336,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 INamedTypeSymbol type => type,
                 _ => symbol.ContainingType
             };
+
+        internal static bool IsTaskConfigureAwait( this ISymbol? symbol )
+            => symbol is IMethodSymbol
+            {
+                Name: "ConfigureAwait",
+                ContainingType: var containingType
+            } && containingType.GetFullMetadataName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
     }
 }

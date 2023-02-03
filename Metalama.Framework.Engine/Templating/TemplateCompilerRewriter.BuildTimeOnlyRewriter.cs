@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,6 +58,36 @@ namespace Metalama.Framework.Engine.Templating
                             InvocationExpression(
                                     this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Proceed) ) )
                                 .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
+
+                    return true;
+                }
+
+                // meta.ProceedAsync().ConfigureAwait(false) is also treated like a Proceed() expression
+                else if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node ).IsTaskConfigureAwait()
+                          && node.Expression is MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax innerInvocation }
+                          && node.ArgumentList.Arguments is [{ Expression: var expression }]
+                          && this.TryRewriteProceedInvocation( innerInvocation, out var transformedInner ) )
+                {
+                    if ( expression is not LiteralExpressionSyntax literal )
+                    {
+                        this._parent.Report(
+                            TemplatingDiagnosticDescriptors.OnlyLiteralArgumentInConfigureAwaitAfterProceedAsync.CreateRoslynDiagnostic(
+                                expression.GetLocation(),
+                                expression.ToString() ) );
+
+                        transformedNode = node;
+
+                        return false;
+                    }
+
+                    // tmsf.ConfigureAwait( transformedInner, true/false )
+                    transformedNode =
+                        node.CopyAnnotationsTo(
+                            InvocationExpression(
+                                    this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConfigureAwait) ) )
+                                .AddArgumentListArguments(
+                                    Argument( transformedInner ),
+                                    Argument( literal ) ) );
 
                     return true;
                 }

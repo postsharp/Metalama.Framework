@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -532,8 +531,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => this.CreateRunTimeExpression( expression );
 
     /// <summary>
-    /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntaxImpl"/>
-    /// that represents the input.
+    /// Transforms an <see cref="ExpressionSyntax"/> to an <see cref="ExpressionSyntax"/> that represents the input.
     /// </summary>
     private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
     {
@@ -666,8 +664,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         switch ( expressionType.Name )
         {
             case "dynamic":
-            case "Task" when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
-                             expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+            case "Task" or "ConfiguredTaskAwaitable"
+                when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+                     expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
             case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
                 when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
@@ -870,17 +869,26 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
             {
-                return this.MetaSyntaxFactory.InvocationExpression(
-                    this.MetaSyntaxFactory.IdentifierName(
-                        this.MetaSyntaxFactory.Identifier(
-                            SyntaxFactoryEx.Default,
-                            this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.Default ) ),
-                    this.MetaSyntaxFactory.ArgumentList(
-                        this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                            this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                if ( transformationKind == TransformationKind.Transform )
+                {
+                    return this.MetaSyntaxFactory.InvocationExpression(
+                        this.MetaSyntaxFactory.IdentifierName(
+                            this.MetaSyntaxFactory.Identifier(
+                                SyntaxFactoryEx.Default,
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.Default ) ),
+                        this.MetaSyntaxFactory.ArgumentList(
+                            this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                }
+                else
+                {
+                    // since expression references a parameter, we can just call ToString() on it
+                    return InvocationExpression(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof( this.ToString ) ) ) );
+                }
             }
 
             var symbolName = symbol?.Name ?? "<error>";
@@ -1779,7 +1787,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
                || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
                {
-                   Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
+                   Name: "Task" or "ConfiguredTaskAwaitable" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
                });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )

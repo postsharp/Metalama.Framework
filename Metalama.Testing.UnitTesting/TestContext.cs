@@ -89,7 +89,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         // We intentionally replace (override) backstage services by ours.
         var backstageServices = ServiceProvider<IBackstageService>.Empty
             .WithService( this )
-            .WithService( platformInfo );
+            .WithService( platformInfo )
+            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 

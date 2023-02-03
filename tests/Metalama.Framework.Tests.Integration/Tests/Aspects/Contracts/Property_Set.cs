@@ -28,6 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
         public string Q
         {
             get => q;
+
             set => q = value + "-";
         }
     }

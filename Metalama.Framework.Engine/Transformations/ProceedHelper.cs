@@ -64,7 +64,8 @@ internal static class ProceedHelper
             case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
                 {
                     // The target method is an async method (but not an async iterator).
-                    // Generate: `( await BASE(ARGS) )`.
+                    // Generate (non-void): `( await BASE(ARGS) )`.
+                    //           Or (void): `await BASE(ARGS)`.
 
                     var taskResultType = asyncInfo.ResultType;
 
@@ -73,10 +74,7 @@ internal static class ProceedHelper
                         invocationExpression );
 
                     ExpressionSyntax expression =
-                        overriddenMethod.Compilation.GetCompilationModel()
-                            .Comparers.Default.Equals(
-                                overriddenMethod.ReturnType,
-                                overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
+                        taskResultType.Is( SpecialType.Void )
                             ? awaitExpression
                             : SyntaxFactory.ParenthesizedExpression( awaitExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation );
