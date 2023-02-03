@@ -44,7 +44,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
     private PipelineStep? _currentStep;
 
-    public CompilationModel LastCompilation { get; }
+    public CompilationModel LastCompilation { get; private set; }
 
     public CompilationModel FirstCompilation { get; }
 
