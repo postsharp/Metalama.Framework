@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("test")]
+[assembly: InternalsVisibleTo("Tests")]
 
 namespace Dependency;
 
