@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return this._assemblyIdentity.Equals( ((AssemblyIdentityModel) other)._assemblyIdentity );
         }
 
-        public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || ( obj is IAssemblyIdentity other && this.Equals( other ) );
+        public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || (obj is IAssemblyIdentity other && this.Equals( other ));
 
         public override int GetHashCode() => this._assemblyIdentity.GetHashCode();
     }

@@ -14,6 +14,7 @@ namespace Metalama.Framework.Engine.Services;
 public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
+
     private readonly ServiceProvider<IGlobalService>? _global;
 
     public GlobalServiceProvider Global => this._global ?? throw new InvalidOperationException();

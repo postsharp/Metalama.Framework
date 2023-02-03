@@ -59,7 +59,7 @@ public sealed record TestContextOptions
     /// Gets the list of references that will be added to compilations created in this context.
     /// </summary>
     public ImmutableArray<PortableExecutableReference> References { get; init; } =
-        TestCompilationFactory.GetMetadataReferences().ToImmutableArray<PortableExecutableReference>();
+        TestCompilationFactory.GetMetadataReferences().ToImmutableArray();
 
     /// <summary>
     /// Gets the test timeout period, after which the <see cref="TestContext.CancellationToken"/> of the <see cref="TestContext"/> is signalled.

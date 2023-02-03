@@ -44,9 +44,9 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
     private PipelineStep? _currentStep;
 
-    public CompilationModel LastCompilation { get; private set; }
+    public CompilationModel LastCompilation { get; }
 
-    public CompilationModel FirstCompilation { get; private set; }
+    public CompilationModel FirstCompilation { get; }
 
     public IReadOnlyCollection<ITransformation> Transformations => this._transformations;
 
