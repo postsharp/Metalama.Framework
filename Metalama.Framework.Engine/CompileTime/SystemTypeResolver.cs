@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Services;
 using System;
 using System.Reflection;
 
@@ -12,14 +13,14 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
     /// </summary>
-    internal class SystemTypeResolver : CurrentAppDomainTypeResolver
+    internal class SystemTypeResolver : CurrentAppDomainTypeResolver, IProjectService
     {
         // Avoid initializing from a static member because it is more difficult to debug.
         private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
 
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( serviceProvider, compilationContext )
+        public SystemTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
         }

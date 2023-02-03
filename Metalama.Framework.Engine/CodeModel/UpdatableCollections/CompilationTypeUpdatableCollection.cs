@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -28,17 +27,13 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
         }
 
         return this.Compilation.PartialCompilation.Types
-            .Where(
-                t => t.Name == name && this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
-                    != TemplatingScope.CompileTimeOnly );
+            .Where( t => t.Name == name && this.IsVisible( t ) );
     }
 
     protected override IEnumerable<ISymbol> GetSymbols()
     {
         var topLevelTypes = this.Compilation.PartialCompilation.Types
-            .Where(
-                t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
-                     != TemplatingScope.CompileTimeOnly );
+            .Where( this.IsVisible );
 
         if ( !this._includeNestedTypes )
         {

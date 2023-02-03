@@ -369,7 +369,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
         internal static FallibleResultWithDiagnostics<AspectPipelineConfiguration> GetConfiguration(
             ref PipelineState state,
-            PartialCompilation compilation,
+            Compilation compilation,
             bool ignoreStatus,
             TestableCancellationToken cancellationToken )
         {
@@ -379,15 +379,15 @@ internal sealed partial class DesignTimeAspectPipeline
             }
 
             state._pipeline.Logger.Trace?.Log(
-                $"DesignTimeAspectPipeline.TryGetConfiguration( '{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )})" );
+                $"DesignTimeAspectPipeline.TryGetConfiguration( '{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})" );
 
             if ( state.Configuration == null )
             {
                 // If we don't have any configuration, we will build one, because this is the first time we are called.
 
-                var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
+                var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation, cancellationToken );
 
-                state._pipeline._observer?.OnInitializePipeline( compilation.Compilation );
+                state._pipeline._observer?.OnInitializePipeline( compilation );
 
                 var diagnosticAdder = new DiagnosticBag();
 
@@ -409,16 +409,16 @@ internal sealed partial class DesignTimeAspectPipeline
                     // A failure here means an error or a cache miss.
 
                     state._pipeline.Logger.Warning?.Log(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: cannot initialize." );
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) failed: cannot initialize." );
 
                     return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( diagnosticAdder.ToImmutableArray() );
                 }
                 else
                 {
                     state._pipeline.Logger.Trace?.Log(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
                         +
-                        $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
+                        $"the compilation contained {compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
 
                     var result = FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Succeeded( configuration, diagnosticAdder.ToImmutableArray() );
                     state = new PipelineState( state, result, DesignTimeAspectPipelineStatus.Ready );
@@ -431,7 +431,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 // We have a cached configuration, but a failed one.
 
                 state._pipeline.Logger.Warning?.Log(
-                    $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: a previous initialization of the pipeline has failed and there is no change." );
+                    $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) failed: a previous initialization of the pipeline has failed and there is no change." );
 
                 return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( state.Configuration.Value.Diagnostics );
             }
@@ -442,7 +442,7 @@ internal sealed partial class DesignTimeAspectPipeline
                     // We have an outdated configuration because the pipeline is paused.
 
                     state._pipeline.Logger.Warning?.Log(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: the pipeline is paused." );
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) failed: the pipeline is paused." );
 
                     return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( ImmutableArray<Diagnostic>.Empty );
                 }
@@ -451,7 +451,7 @@ internal sealed partial class DesignTimeAspectPipeline
                     // We have a valid configuration and it is not outdated.
 
                     state._pipeline.Logger.Trace?.Log(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration.Value.Value )}." );
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration.Value.Value )}." );
 
                     return state.Configuration.Value;
                 }
@@ -474,7 +474,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 throw new InvalidOperationException();
             }
 
-            var getConfigurationResult = GetConfiguration( ref state, compilation, false, cancellationToken );
+            var getConfigurationResult = GetConfiguration( ref state, compilation.Compilation, false, cancellationToken );
 
             if ( !getConfigurationResult.IsSuccessful )
             {

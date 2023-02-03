@@ -30,7 +30,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private readonly CancellationToken _cancellationToken;
     private readonly UserCodeExecutionContext _userCodeExecutionContext;
     private readonly DisposeAction _disposeExecutionContext;
-    private readonly ISymbolClassifier _symbolClassifier;
+    private readonly ISymbolClassificationService _symbolClassifier;
     private SemanticModel? _semanticModel;
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
@@ -51,7 +51,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, default, compilationModel: compilation );
         this._cancellationToken = cancellationToken;
         this._disposeExecutionContext = UserCodeExecutionContext.WithContext( this._userCodeExecutionContext );
-        this._symbolClassifier = compilation.CompilationContext.SymbolClassifier;
+        this._symbolClassifier = serviceProvider.GetRequiredService<ISymbolClassificationService>();
     }
 
     internal void Visit( SyntaxTree syntaxTree )
@@ -154,7 +154,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         var symbol = this._semanticModel?.GetDeclaredSymbol( node );
 
-        if ( symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ) != TemplatingScope.RunTimeOnly )
+        if ( symbol != null && this._symbolClassifier.GetExecutionScope( symbol ) != ExecutionScope.RunTime )
         {
             // We only validate run-time code.
             return true;

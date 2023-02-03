@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -24,8 +25,12 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly (int Min, int Max) _referenceDepth;
         private readonly AssemblyIdentity _containingAssemblyIdentity;
 
-        public static ProjectFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
-            => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
+        public static ProjectFabricDriver Create(
+            FabricManager fabricManager,
+            CompileTimeProject compileTimeProject,
+            Fabric fabric,
+            Compilation runTimeCompilation )
+            => new( GetCreationData( fabricManager, compileTimeProject, fabric, runTimeCompilation ) );
 
         private ProjectFabricDriver( CreationData creationData ) :
             base( creationData )
@@ -104,7 +109,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var projectFabric = (ProjectFabric) this.Fabric;
 
             var executionContext = new UserCodeExecutionContext(
-                this.FabricManager.ServiceProvider,
+                this.FabricManager.ServiceProvider.Underlying,
                 diagnosticAdder,
                 UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( projectFabric.AmendProject ) ),
                 compilationModel: compilation );

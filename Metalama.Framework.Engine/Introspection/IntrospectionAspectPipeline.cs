@@ -41,7 +41,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
 
         var introspectionFactory = new IntrospectionFactory( compilation.Compilation );
 
-        if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
+        if ( !this.TryInitialize( diagnostics, compilation.RoslynCompilation, null, null, cancellationToken, out var configuration ) )
         {
             return Task.FromResult(
                 (IIntrospectionCompilationResult)

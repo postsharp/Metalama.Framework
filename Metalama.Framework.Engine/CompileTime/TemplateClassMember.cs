@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -12,8 +13,9 @@ namespace Metalama.Framework.Engine.CompileTime
         string Name,
         string Key,
         TemplateClass TemplateClass,
-        TemplateInfo TemplateInfo,
-        SymbolId SymbolId,
+        ITemplateInfo TemplateInfo,
+        IAdviceAttribute? Attribute,
+        SerializableDeclarationId DeclarationId,
         ImmutableArray<TemplateClassMemberParameter> Parameters,
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,
         ImmutableDictionary<MethodKind, TemplateClassMember> Accessors )

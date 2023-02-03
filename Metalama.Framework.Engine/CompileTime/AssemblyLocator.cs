@@ -20,10 +20,10 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private const string _unknownAssemblyName = "*";
 
-        private readonly ImmutableDictionaryOfArray<string, MetadataReference> _referencesByName;
+        private readonly ImmutableDictionaryOfArray<string, PortableExecutableReference> _referencesByName;
         private readonly ILogger _logger;
 
-        public AssemblyLocator( IServiceProvider serviceProvider, IEnumerable<MetadataReference> references )
+        public AssemblyLocator( IServiceProvider serviceProvider, IEnumerable<PortableExecutableReference> references )
         {
             this._referencesByName = references.ToMultiValueDictionary(
                 x => GetAssemblyShortName( x ) ?? _unknownAssemblyName,

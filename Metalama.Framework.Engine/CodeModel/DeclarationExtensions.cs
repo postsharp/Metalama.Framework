@@ -305,7 +305,8 @@ namespace Metalama.Framework.Engine.CodeModel
                         sr =>
                             sr.GetSyntax() is BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl
                             && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
-                { GetMethod: { } getMethod, SetMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
+                { GetMethod: { } getMethod } => getMethod.IsCompilerGenerated(),
+                { SetMethod: { } setMethod } => setMethod.IsCompilerGenerated(),
                 _ => null
             };
 

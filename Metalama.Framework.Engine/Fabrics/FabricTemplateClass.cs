@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -18,13 +19,13 @@ namespace Metalama.Framework.Engine.Fabrics
         public FabricTemplateClass(
             ProjectServiceProvider serviceProvider,
             FabricDriver fabricDriver,
-            CompilationContext compilationContext,
+            ITemplateReflectionContext templateReflectionContext,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass ) :
             base(
                 serviceProvider,
-                compilationContext,
-                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilationContext.Compilation ).AssertNotNull(),
+                templateReflectionContext,
+                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( templateReflectionContext.Compilation ).AssertNotNull(),
                 diagnosticAdder,
                 baseClass,
                 fabricDriver.FabricTypeShortName )

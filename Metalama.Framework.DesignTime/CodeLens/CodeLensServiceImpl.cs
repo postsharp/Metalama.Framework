@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -39,9 +40,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
     private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
-        DesignTimeAspectPipeline Pipeline,
-        CompilationPipelineResult PipelineResult,
-        Compilation Compilation );
+        CompilationPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,
@@ -73,7 +72,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        var nullableSymbol = symbolId.ResolveToSymbol( compilation );
+        var nullableSymbol = symbolId.ResolveToSymbolOrNull( compilation );
 
         if ( nullableSymbol == null )
         {
@@ -94,7 +93,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        return new CodePointData( filePath, symbol, pipeline, pipelineResult, compilation );
+        return new CodePointData( filePath, symbol, pipelineResult );
     }
 
     public async Task<CodeLensSummary> GetCodeLensSummaryAsync(
@@ -145,9 +144,14 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         CodePointData codePointData,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = codePointData.Pipeline.ServiceProvider.GetRequiredService<CompilationContextFactory>()
-            .GetInstance( codePointData.Compilation )
-            .SymbolClassificationService;
+        var symbolClassificationService = codePointData.PipelineResult.Configuration?.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
+
+        if ( symbolClassificationService == null )
+        {
+            summary = null;
+
+            return false;
+        }
 
         var symbol = codePointData.Symbol;
 

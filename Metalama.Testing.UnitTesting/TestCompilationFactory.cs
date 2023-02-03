@@ -57,7 +57,7 @@ namespace Metalama.Testing.UnitTesting
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
-            IEnumerable<Assembly> additionalAssemblies,
+            IEnumerable<Assembly>? additionalAssemblies = null,
             bool addMetalamaReferences = true,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
             ImmutableArray<string> implicitUsings = default,
@@ -132,7 +132,8 @@ namespace Metalama.Testing.UnitTesting
                 nullableContextOptions: nullableContextOptions,
                 usings: implicitUsings.IsDefault
                     ? ImmutableArray<string>.Empty
-                    : implicitUsings );
+                    : implicitUsings,
+                metadataImportOptions: MetadataImportOptions.All );
 
         public static CSharpCompilation CreateCSharpCompilation(
             string code,

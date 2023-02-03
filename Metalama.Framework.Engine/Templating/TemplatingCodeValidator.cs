@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -15,11 +16,12 @@ namespace Metalama.Framework.Engine.Templating
     {
         internal static async Task<bool> ValidateAsync(
             ProjectServiceProvider serviceProvider,
-            CompilationContext compilationContext,
+            ClassifyingCompilationContext compilationContext,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+
             var semanticModelProvider = compilationContext.SemanticModelProvider;
 
             var hasError = false;
@@ -34,7 +36,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            await taskScheduler.RunInParallelAsync( compilationContext.Compilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
+            await taskScheduler.RunInParallelAsync( compilationContext.SourceCompilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
 
             return !hasError;
         }
@@ -47,25 +49,46 @@ namespace Metalama.Framework.Engine.Templating
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
-            var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
+            var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( semanticModel.Compilation );
 
-            Validate(
+            ValidateCoreAndHandleExceptions(
                 serviceProvider,
-                compilationContext,
                 semanticModel,
                 reportDiagnostic,
                 reportCompileTimeTreeOutdatedError,
                 isDesignTime,
+                compilationContext,
                 cancellationToken );
         }
 
         public static void Validate(
             ProjectServiceProvider serviceProvider,
-            CompilationContext compilationContext,
+            Compilation compilation,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
+            CancellationToken cancellationToken )
+        {
+            var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation );
+
+            ValidateCoreAndHandleExceptions(
+                serviceProvider,
+                semanticModel,
+                reportDiagnostic,
+                reportCompileTimeTreeOutdatedError,
+                isDesignTime,
+                compilationContext,
+                cancellationToken );
+        }
+
+        private static void ValidateCoreAndHandleExceptions(
+            ProjectServiceProvider serviceProvider,
+            SemanticModel semanticModel,
+            Action<Diagnostic> reportDiagnostic,
+            bool reportCompileTimeTreeOutdatedError,
+            bool isDesignTime,
+            ClassifyingCompilationContext compilationContext,
             CancellationToken cancellationToken )
         {
             try
@@ -100,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating
         private static bool ValidateCore(
             ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,
-            CompilationContext compilationContext,
+            ClassifyingCompilationContext compilationContext,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,

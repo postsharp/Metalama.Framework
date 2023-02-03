@@ -162,6 +162,14 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, IMember TargetMember)>
+            ImplicitInterfaceImplementationHasToBePublic = new(
+                "LAMA0519",
+                "Cannot implement interface implicitly using non-public member.",
+                "The aspect '{0}' cannot implicitly implement interface '{1}' using member '{2}', because it is not public.",
+                _category,
+                Error );
+
         // Sub-range 520-549: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(

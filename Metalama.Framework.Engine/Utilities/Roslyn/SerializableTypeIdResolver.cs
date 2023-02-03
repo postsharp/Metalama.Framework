@@ -13,13 +13,13 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public sealed class SerializableTypeIdProvider
+public sealed class SerializableTypeIdResolver
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
     private readonly Compilation _compilation;
 
-    internal SerializableTypeIdProvider( Compilation compilation )
+    internal SerializableTypeIdResolver( Compilation compilation )
     {
 #if DEBUG
         if ( compilation.AssemblyName == "empty" )
@@ -29,11 +29,6 @@ public sealed class SerializableTypeIdProvider
 #endif
         this._compilation = compilation;
         this._resolver = new Resolver( compilation, null );
-    }
-
-    internal static SerializableTypeId GetId( ITypeSymbol symbol )
-    {
-        return new SerializableTypeId( OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol ).ToString() );
     }
 
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
@@ -182,6 +177,21 @@ public sealed class SerializableTypeIdProvider
             {
                 SyntaxKind.VoidKeyword => this._compilation.GetSpecialType( SpecialType.System_Void ),
                 SyntaxKind.BoolKeyword => this._compilation.GetSpecialType( SpecialType.System_Boolean ),
+                SyntaxKind.CharKeyword => this._compilation.GetSpecialType( SpecialType.System_Char ),
+                SyntaxKind.ObjectKeyword => this._compilation.GetSpecialType( SpecialType.System_Object ),
+                SyntaxKind.IntKeyword => this._compilation.GetSpecialType( SpecialType.System_Int32 ),
+                SyntaxKind.UIntKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt32 ),
+                SyntaxKind.ShortKeyword => this._compilation.GetSpecialType( SpecialType.System_Int16 ),
+                SyntaxKind.UShortKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt16 ),
+                SyntaxKind.ByteKeyword => this._compilation.GetSpecialType( SpecialType.System_Byte ),
+                SyntaxKind.SByteKeyword => this._compilation.GetSpecialType( SpecialType.System_SByte ),
+                SyntaxKind.LongKeyword => this._compilation.GetSpecialType( SpecialType.System_Int64 ),
+                SyntaxKind.ULongKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt64 ),
+                SyntaxKind.FloatKeyword => this._compilation.GetSpecialType( SpecialType.System_Single ),
+                SyntaxKind.DoubleKeyword => this._compilation.GetSpecialType( SpecialType.System_Double ),
+                SyntaxKind.DecimalKeyword => this._compilation.GetSpecialType( SpecialType.System_Decimal ),
+                SyntaxKind.StringKeyword => this._compilation.GetSpecialType( SpecialType.System_String ),
+
                 _ => throw new InvalidOperationException( $"Unexpected predefined type: {node.Keyword.Kind()}" )
             };
     }

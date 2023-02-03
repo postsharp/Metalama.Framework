@@ -224,10 +224,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         }
         else
         {
-            var compilation = returnType.GetCompilationModel().RoslynCompilation;
+            var compilation = returnType.GetCompilationModel();
 
-            if ( ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( returnExpression, compilation, out var expressionType ) &&
-                 compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
+            if ( ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( returnExpression, compilation.RoslynCompilation, out var expressionType ) &&
+                 compilation.RoslynCompilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
             {
                 // No need to emit a cast.
                 return

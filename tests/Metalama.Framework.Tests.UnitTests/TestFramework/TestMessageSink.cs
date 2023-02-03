@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-internal class TestMessageSink : IMessageSink
+internal sealed class TestMessageSink : IMessageSink
 {
     public List<IMessageSinkMessage> Messages { get; } = new();
 

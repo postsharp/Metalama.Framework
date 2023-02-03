@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
             if ( configuration == null )
             {
-                if ( !this.TryInitialize( diagnostics, partialCompilation, null, null, cancellationToken, out configuration ) )
+                if ( !this.TryInitialize( diagnostics, partialCompilation.Compilation, null, null, cancellationToken, out configuration ) )
                 {
                     return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Failed( diagnostics.ToImmutableArray() );
                 }
@@ -66,13 +66,13 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             }
 
             var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;
-            var finalCompilation = pipelineResult.Value.CompilationModels[^1];
+            var finalCompilation = pipelineResult.Value.LastCompilationModel.AssertNotNull();
 
             // Run the validators.
             if ( !pipelineResult.Value.ValidatorSources.IsDefaultOrEmpty )
             {
                 var validationRunner = new ValidationRunner( configuration, pipelineResult.Value.ValidatorSources, cancellationToken );
-                var initialCompilation = pipelineResult.Value.CompilationModels[0];
+                var initialCompilation = pipelineResult.Value.FirstCompilationModel.AssertNotNull();
                 var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
                 codeFixes = codeFixes.AddRange( validationResult.Diagnostics.CodeFixes );

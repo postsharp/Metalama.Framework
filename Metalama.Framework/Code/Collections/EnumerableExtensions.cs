@@ -63,6 +63,8 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
 #if DEBUG
+
+            // ReSharper disable once ConvertToConstant.Local
             var useDictionary = true;
 #else
             var useDictionary = deduplicate;
@@ -73,7 +75,7 @@ namespace Metalama.Framework.Code.Collections
                 // Create a dictionary for the results. The key is the item, the value is the order of insertion.
                 Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
 
-                if (includeThis)
+                if ( includeThis )
                 {
                     results.Add( item, 0 );
                 }
@@ -125,6 +127,8 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
 #if DEBUG
+
+            // ReSharper disable once ConvertToConstant.Local
             var useDictionary = true;
 #else
             var useDictionary = deduplicate;

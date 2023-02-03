@@ -55,10 +55,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidators { get; }
 
-        /// <summary>
-        /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
-        /// </summary>
-        public ImmutableArray<CompilationModel> CompilationModels { get; }
+        public CompilationModel? FirstCompilationModel { get; }
+
+        public CompilationModel? LastCompilationModel { get; }
 
         internal ImmutableArray<AspectInstanceResult> AspectInstanceResults { get; }
 
@@ -72,7 +71,8 @@ namespace Metalama.Framework.Engine.Pipeline
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
-            ImmutableArray<CompilationModel> compilationModels,
+            CompilationModel? firstCompilationModel,
+            CompilationModel? lastCompilationModel,
             ImmutableUserDiagnosticList? diagnostics = null,
             ImmutableArray<IAspectSource> aspectSources = default,
             ImmutableArray<IValidatorSource> validatorSources = default,
@@ -88,7 +88,8 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectSources = aspectSources.IsDefault ? ImmutableArray<IAspectSource>.Empty : aspectSources;
             this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<IValidatorSource>.Empty : validatorSources;
             this.AspectLayers = aspectLayers;
-            this.CompilationModels = compilationModels;
+            this.FirstCompilationModel = firstCompilationModel ?? lastCompilationModel;
+            this.LastCompilationModel = lastCompilationModel;
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
 
@@ -117,7 +118,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Compilation,
                 this.Project,
                 this.AspectLayers,
-                this.CompilationModels,
+                this.FirstCompilationModel,
+                this.LastCompilationModel,
                 this.Diagnostics.Concat( diagnostics ),
                 this.AspectSources,
                 this.ValidatorSources,

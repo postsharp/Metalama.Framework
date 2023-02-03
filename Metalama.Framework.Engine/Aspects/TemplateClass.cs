@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
@@ -31,25 +32,35 @@ namespace Metalama.Framework.Engine.Aspects
         protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+        private readonly ITemplateReflectionContext? _templateReflectionContext;
         private readonly TemplateClass? _baseClass;
+        private readonly ITemplateInfoService _symbolClassificationService;
+        private readonly TemplateAttributeFactory _templateAttributeFactory;
 
-        protected TemplateClass(
+        private protected TemplateClass(
             ProjectServiceProvider serviceProvider,
-            CompilationContext compilationContext,
+            ITemplateReflectionContext templateReflectionContext,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             string shortName )
         {
             this.ServiceProvider = serviceProvider;
+            this._symbolClassificationService = serviceProvider.GetRequiredService<ITemplateInfoService>();
+            this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
             this._baseClass = baseClass;
-            this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( typeSymbol, templateReflectionContext.Compilation, diagnosticAdder );
             this.ShortName = shortName;
+
+            if ( templateReflectionContext.IsCacheable )
+            {
+                this._templateReflectionContext = templateReflectionContext;
+            }
 
             // This condition is to work around fakes.
             if ( !typeSymbol.GetType().Assembly.IsDynamic )
             {
-                this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
+                this.TypeId = typeSymbol.GetSerializableTypeId();
             }
             else
             {
@@ -109,18 +120,17 @@ namespace Metalama.Framework.Engine.Aspects
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers(
-            CompilationContext compilationContext,
             INamedTypeSymbol type,
+            Compilation compilation,
             IDiagnosticAdder diagnosticAdder )
         {
-            var classifier = new TemplateMemberSymbolClassifier( compilationContext );
-
             var members = this._baseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateInfo = classifier.SymbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
+                var templateInfo = this._symbolClassificationService.GetTemplateInfo( memberSymbol );
+
                 var memberKey = memberSymbol.Name;
 
                 switch ( templateInfo.AttributeType )
@@ -135,6 +145,17 @@ namespace Metalama.Framework.Engine.Aspects
                         memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
 
                         break;
+                }
+
+                IAdviceAttribute? attribute = null;
+
+                if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute(
+                        templateInfo.Id,
+                        compilation,
+                        diagnosticAdder,
+                        out attribute ) )
+                {
+                    continue;
                 }
 
                 var templateParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
@@ -156,7 +177,8 @@ namespace Metalama.Framework.Engine.Aspects
                                 accessor.Name,
                                 this,
                                 templateInfo,
-                                accessor.GetSymbolId(),
+                                attribute,
+                                accessor.GetSerializableId(),
                                 accessorParameters,
                                 ImmutableArray<TemplateClassMemberParameter>.Empty,
                                 ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
@@ -182,7 +204,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                             foreach ( var parameter in method.Parameters )
                             {
-                                var isCompileTime = classifier.IsCompileTimeParameter( parameter );
+                                var isCompileTime = this._symbolClassificationService.IsCompileTimeParameter( parameter );
 
                                 parameterBuilder.Add(
                                     new TemplateClassMemberParameter(
@@ -202,7 +224,7 @@ namespace Metalama.Framework.Engine.Aspects
                             foreach ( var typeParameter in method.TypeParameters )
                             {
                                 var isCompileTime =
-                                    classifier.IsCompileTimeTemplateTypeParameter( typeParameter );
+                                    this._symbolClassificationService.IsCompileTimeTypeParameter( typeParameter );
 
                                 typeParameterBuilder.Add(
                                     new TemplateClassMemberParameter(
@@ -268,7 +290,8 @@ namespace Metalama.Framework.Engine.Aspects
                     memberKey,
                     this,
                     templateInfo,
-                    memberSymbol.GetSymbolId(),
+                    attribute,
+                    memberSymbol.GetSerializableId(),
                     templateParameters,
                     templateTypeParameters,
                     accessors );
@@ -308,18 +331,26 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( ProjectServiceProvider serviceProvider, CompilationModel compilation )
-            => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
+        {
+            var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
+
+            return this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
-                        (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
+                        (IMemberOrNamedType) compilationModelForTemplateReflection.Factory.GetDeclaration(
+                            x.Symbol.Translate( x.SymbolCompilation, compilationModelForTemplateReflection.RoslynCompilation ).AssertNotNull() ),
                         x.TemplateClassMember,
                         x.Attribute ) );
+        }
 
-        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
-            ProjectServiceProvider serviceProvider,
-            Compilation compilation )
+        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>
+            GetDeclarativeAdvice(
+                ProjectServiceProvider serviceProvider,
+                Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;
+
+            var templateReflectionCompilation = this._templateReflectionContext?.Compilation ?? compilation;
 
             // We are sorting the declarative advice by symbol name and not by source order because the source is not available
             // if the aspect library is a compiled assembly.
@@ -329,24 +360,31 @@ namespace Metalama.Framework.Engine.Aspects
                 .Select(
                     m =>
                     {
-                        var symbol = m.Value.SymbolId.Resolve( compilation ).AssertNotNull();
+                        var symbol = m.Value.DeclarationId.ResolveToSymbol( templateReflectionCompilation );
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )
                 .OrderBy( m => m.Symbol, DeclarativeAdviceSymbolComparer.Instance )
-                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
+                .Select( m => (m.Template, m.Symbol, templateReflectionCompilation, ResolveAttribute( m.Template.DeclarationId )) );
 
-            DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )
+            DeclarativeAdviceAttribute ResolveAttribute( SerializableDeclarationId declarationId )
             {
                 templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
-                if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
+                if ( !templateAttributeFactory.TryGetTemplateAttribute(
+                        declarationId,
+                        templateReflectionCompilation,
+                        ThrowingDiagnosticAdder.Instance,
+                        out var attribute ) )
                 {
-                    throw new AssertionFailedException( $"Cannot get a template for '{templateInfoSymbolId}'." );
+                    throw new AssertionFailedException( $"Cannot get a template for '{declarationId}'." );
                 }
 
                 return (DeclarativeAdviceAttribute) attribute;
             }
         }
+
+        internal ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
+            => this._templateReflectionContext ?? compilationContext;
     }
 }

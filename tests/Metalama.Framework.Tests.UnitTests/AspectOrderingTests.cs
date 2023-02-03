@@ -1,15 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
@@ -22,28 +23,32 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var serviceProvider = testContext.ServiceProvider;
+
             var compileTimeDomain = testContext.Domain;
-            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
-            Assert.True(
-                loader.TryGetCompileTimeProjectFromCompilation(
+            var compileTimeProjectRepository = CompileTimeProjectRepository.Create(
+                    compileTimeDomain,
+                    serviceProvider,
                     compilation.RoslynCompilation,
-                    null,
-                    null,
-                    new DiagnosticBag(),
-                    false,
-                    CancellationToken.None,
-                    out var compileTimeProject ) );
+                    NullDiagnosticAdder.Instance )
+                .AssertNotNull();
 
-            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+            Assert.NotNull( compileTimeProjectRepository );
+
+            var compileTimeProject = compileTimeProjectRepository.RootProject;
+
+            serviceProvider = serviceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
+
+            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, serviceProvider ) );
 
             var aspectNamedTypes = aspectNames.SelectAsImmutableArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
 
             var aspectTypes = aspectTypeFactory.GetClasses(
-                    testContext.ServiceProvider,
+                    serviceProvider,
                     compilation.CompilationContext,
                     aspectNamedTypes,
-                    compileTimeProject!,
+                    compileTimeProject,
                     diagnostics )
                 .ToImmutableArray();
 
@@ -51,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var dependencies = new IAspectOrderingSource[]
             {
-                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation.RoslynCompilation, loader )
+                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( serviceProvider, compilation.RoslynCompilation )
             };
 
             if ( AspectLayerSorter.TrySort(

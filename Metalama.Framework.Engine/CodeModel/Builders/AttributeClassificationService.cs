@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -15,9 +15,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 #pragma warning disable CA1822 // Mark members as static
 
-internal sealed class AttributeClassificationService : IProjectService
+internal sealed class AttributeClassificationService : IGlobalService, IDisposable
 {
-    private readonly ConcurrentDictionary<INamedTypeSymbol, bool> _cache = new( SymbolEqualityComparer.Default );
+    private readonly WeakCache<INamedTypeSymbol, bool> _cache = new();
 
     public bool MustMoveFromFieldToProperty( INamedTypeSymbol attributeType ) => this._cache.GetOrAdd( attributeType, MustMoveFromFieldToPropertyCore );
 
@@ -70,11 +70,12 @@ internal sealed class AttributeClassificationService : IProjectService
     private static bool IsCompilerOrMetalamaAttribute( string fullAttributeName )
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.IteratorStateMachineAttribute", StringComparison.Ordinal ) ||
-             fullAttributeName.Equals( "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute", StringComparison.Ordinal ) )
+             fullAttributeName is "System.Runtime.CompilerServices.NullableAttribute" or
+                 "System.Runtime.CompilerServices.CompilerGeneratedAttribute" or
+                 "System.Runtime.CompilerServices.AsyncStateMachineAttribute" or
+                 "System.Runtime.CompilerServices.IteratorStateMachineAttribute" or
+                 "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute" or
+                 "System.Diagnostics.DebuggerBrowsableAttribute" )
         {
             return true;
         }
@@ -93,4 +94,6 @@ internal sealed class AttributeClassificationService : IProjectService
 
         return false;
     }
+
+    public void Dispose() => this._cache.Dispose();
 }

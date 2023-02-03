@@ -25,13 +25,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
         private void EventHandler( object? sender, EventArgs a ) { }
 
         [InterfaceMember]
-        private void Method() { }
+        public void Method() { }
 
         [InterfaceMember]
-        private int Property { get; set; }
+        public int Property { get; set; }
 
         [InterfaceMember]
-        private event EventHandler? Event;
+        public event EventHandler? Event;
     }
 
     internal interface IInterface

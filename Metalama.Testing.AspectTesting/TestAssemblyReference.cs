@@ -19,7 +19,7 @@ namespace Metalama.Testing.AspectTesting
 
         public string? Name { get; set; }
 
-        internal MetadataReference? ToMetadataReference()
+        internal PortableExecutableReference? ToMetadataReference()
         {
             if ( this.Path != null )
             {

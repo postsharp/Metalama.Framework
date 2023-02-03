@@ -160,7 +160,7 @@ class User {
 
             this.TestExpression<Type>(
                 compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
-                testContext.Serialize( CompileTimeType.Create( type ) ).ToString(),
+                testContext.Serialize<Type>( CompileTimeType.Create( type ) ).ToString(),
                 withResult,
                 expectedCode );
         }

@@ -290,7 +290,7 @@ internal abstract partial class BaseTestRunner
 
             testResult.InputProject = mainProject;
             testResult.InputCompilation = initialCompilation;
-            testResult.TestContext = testContext.WithReferences( initialCompilation.References );
+            testResult.TestContext = testContext.WithReferences( initialCompilation.References.OfType<PortableExecutableReference>() );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {

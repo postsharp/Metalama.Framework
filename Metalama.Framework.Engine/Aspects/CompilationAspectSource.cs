@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -21,12 +22,12 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal sealed class CompilationAspectSource : IAspectSource
 {
-    private readonly CompileTimeProjectLoader _loader;
+    private readonly IAttributeDeserializer _attributeDeserializer;
     private ImmutableDictionaryOfArray<IType, Ref<IDeclaration>>? _exclusions;
 
-    public CompilationAspectSource( ImmutableArray<IAspectClass> aspectTypes, CompileTimeProjectLoader loader )
+    public CompilationAspectSource( ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
     {
-        this._loader = loader;
+        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
         this.AspectClasses = aspectTypes;
     }
 
@@ -70,7 +71,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
                     var attributeData = attribute.GetAttributeData();
 
-                    if ( this._loader.AttributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
+                    if ( this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
                     {
                         var targetDeclaration = attribute.ContainingDeclaration;
 

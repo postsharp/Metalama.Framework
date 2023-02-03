@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeInternal) type).TypeSymbol).GetFullMetadataName();
 
-        public SerializableTypeId GetSerializableId( IType type ) => SerializableTypeIdProvider.GetId( type.GetSymbol() );
+        public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
 
         public SerializableDeclarationId GetSerializableId( IDeclaration declaration )
         {

@@ -31,7 +31,6 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal sealed class AspectDriver : IAspectDriver
 {
-    private readonly CompilationContext _compilationContext;
     private readonly IAspectClassImpl _aspectClass;
     private readonly CodeFixAvailability _codeFixAvailability;
 
@@ -39,7 +38,6 @@ internal sealed class AspectDriver : IAspectDriver
 
     public AspectDriver( ProjectServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
     {
-        this._compilationContext = compilation.CompilationContext;
         this._aspectClass = aspectClass;
 
         // We don't store the GlobalServiceProvider because the AspectDriver is created during the pipeline initialization but used
@@ -144,7 +142,7 @@ internal sealed class AspectDriver : IAspectDriver
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
+                var interfaceType = initialCompilationRevision.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateRoslynDiagnostic(

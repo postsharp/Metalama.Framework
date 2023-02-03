@@ -68,7 +68,7 @@ class C<T>
             if ( symbol != null )
             {
                 var symbolDeclarationId = symbol.GetSerializableId();
-                var symbolRoundloop = symbolDeclarationId.ResolveToSymbol( compilation.GetRoslynCompilation() );
+                var symbolRoundloop = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
 
                 Assert.Same( symbol, symbolRoundloop );
 

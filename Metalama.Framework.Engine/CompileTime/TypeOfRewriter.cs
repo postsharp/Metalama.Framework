@@ -43,7 +43,7 @@ internal sealed class TypeOfRewriter
                 SeparatedList(
                     new[]
                     {
-                        Argument( SyntaxFactoryEx.LiteralExpression( SerializableTypeIdProvider.GetId( typeSymbol ).ToString() ) ),
+                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSerializableTypeId().ToString() ) ),
                         Argument( substitutions ?? SyntaxFactoryEx.Null )
                     } ) ) );
 

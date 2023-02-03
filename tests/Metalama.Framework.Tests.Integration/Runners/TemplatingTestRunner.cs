@@ -231,14 +231,15 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( serviceProvider, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance(
-                    new NullProject( serviceProvider ),
+                    new ProjectModel( testResult.InputCompilation, serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
                 var fakeTemplateClassMember = new TemplateClassMember(
                     "Template",
                     "Template",
                     null!,
-                    TemplateInfo.None,
+                    NullTemplateInfo.Instance,
+                    new TestTemplateAttribute(),
                     default,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
@@ -284,7 +285,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             BoundTemplateMethod template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
-            var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( roslynCompilation );
+            var compilationServices = serviceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( roslynCompilation );
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             var templateInstance = Activator.CreateInstance( templateType )!;

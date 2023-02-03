@@ -54,7 +54,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
 
     private ClassificationService CreateClassificationService( MSBuildProjectOptions options )
     {
-        return new ClassificationService( this._serviceProvider.WithProjectScopedServices( options, Array.Empty<MetadataReference>() ) );
+        return new ClassificationService( this._serviceProvider.WithProjectScopedServices( options, Array.Empty<PortableExecutableReference>() ) );
     }
 
     public void Dispose() => this._projectClassificationServices.Dispose();

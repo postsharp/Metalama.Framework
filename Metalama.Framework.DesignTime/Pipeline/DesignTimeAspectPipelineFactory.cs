@@ -106,7 +106,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         {
             var options = this._projectOptionsFactory.GetProjectOptions( project );
 
-            return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences, cancellationToken );
+            return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences.OfType<PortableExecutableReference>(), cancellationToken );
         }
     }
 
@@ -117,12 +117,16 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         IProjectOptions projectOptions,
         Compilation compilation,
         TestableCancellationToken cancellationToken = default )
-        => this.GetOrCreatePipeline( projectOptions, ProjectKeyFactory.FromCompilation( compilation ), compilation.References, cancellationToken );
+        => this.GetOrCreatePipeline(
+            projectOptions,
+            ProjectKeyFactory.FromCompilation( compilation ),
+            compilation.References.OfType<PortableExecutableReference>(),
+            cancellationToken );
 
     private DesignTimeAspectPipeline? GetOrCreatePipeline(
         IProjectOptions projectOptions,
         ProjectKey projectKey,
-        IEnumerable<MetadataReference> references,
+        IEnumerable<PortableExecutableReference> references,
         TestableCancellationToken cancellationToken = default )
     {
         if ( !projectOptions.IsFrameworkEnabled )

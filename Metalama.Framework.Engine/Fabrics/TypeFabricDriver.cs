@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -27,8 +28,8 @@ internal sealed class TypeFabricDriver : FabricDriver
         this._targetTypeFullName = creationData.FabricType.ContainingType.AssertNotNull().GetFullName().AssertNotNull();
     }
 
-    public static TypeFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
-        => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
+    public static TypeFabricDriver Create( FabricManager fabricManager, CompileTimeProject compileTimeProject, Fabric fabric, Compilation runTimeCompilation )
+        => new( GetCreationData( fabricManager, compileTimeProject, fabric, runTimeCompilation ) );
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {

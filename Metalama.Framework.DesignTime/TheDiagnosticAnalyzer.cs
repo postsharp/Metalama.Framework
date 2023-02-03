@@ -151,7 +151,7 @@ namespace Metalama.Framework.DesignTime
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    var symbol = suppression.DeclarationId.ResolveToSymbol( compilation );
+                    var symbol = suppression.DeclarationId.ResolveToSymbolOrNull( compilation );
 
                     if ( symbol != null )
                     {

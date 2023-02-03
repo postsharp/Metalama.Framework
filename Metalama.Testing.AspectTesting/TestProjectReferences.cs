@@ -5,4 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Testing.AspectTesting;
 
-internal sealed record TestProjectReferences( ImmutableArray<MetadataReference> MetadataReferences, ImmutableArray<object> PlugIns, string? GlobalUsingsFile );
+internal sealed record TestProjectReferences(
+    ImmutableArray<PortableExecutableReference> MetadataReferences,
+    ImmutableArray<object> PlugIns,
+    string? GlobalUsingsFile );

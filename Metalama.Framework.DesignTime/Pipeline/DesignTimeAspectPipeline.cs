@@ -78,13 +78,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
-        Compilation compilation ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References ) { }
+        Compilation compilation ) : this(
+        pipelineFactory,
+        projectOptions,
+        compilation.GetProjectKey(),
+        compilation.References.OfType<PortableExecutableReference>() ) { }
 
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
         ProjectKey projectKey,
-        IEnumerable<MetadataReference> metadataReferences )
+        IEnumerable<PortableExecutableReference> metadataReferences )
         : base(
             GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences ),
             pipelineFactory.Domain )
@@ -184,7 +188,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private static ServiceProvider<IProjectService> GetServiceProvider(
         ServiceProvider<IGlobalService> serviceProvider,
         IProjectOptions projectOptions,
-        IEnumerable<MetadataReference> metadataReferences )
+        IEnumerable<PortableExecutableReference> metadataReferences )
     {
         var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
 
@@ -335,7 +339,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             var getConfigurationResult = PipelineState.GetConfiguration(
                 ref state,
-                compilation,
+                compilation.Compilation,
                 ignoreStatus,
                 cancellationToken );
 
@@ -748,7 +752,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                         // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                        var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+                        var compilationContext = this.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
 
                         var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
 
@@ -813,7 +817,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             TemplatingCodeValidator.Validate(
                 serviceProvider,
-                compilationContext,
+                compilationContext.Compilation,
                 semanticModel,
                 diagnostics.Add,
                 pipelineMustReportPausedPipelineAsErrors,
@@ -905,7 +909,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         // We are not implementing this method as an enumerator for the ease of debugging.
         var result = new List<AspectClass>();
 
-        var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+        var compilationContext = this.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
 
         var currentAspectInstances = (IReadOnlyList<DesignTimeAspectInstance>?) this.GetAspectInstancesOnSymbol( symbol )
                                      ?? Array.Empty<DesignTimeAspectInstance>();
@@ -928,7 +932,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             // Check if the aspect class is accessible from the symbol.
 
-            var aspectClassSymbol = compilationContext.SerializableTypeIdProvider.ResolveId( aspectClass.TypeId );
+            var aspectClassSymbol = compilationContext.SerializableTypeIdResolver.ResolveId( aspectClass.TypeId );
 
             if ( !compilation.IsSymbolAccessibleWithin( aspectClassSymbol, (ISymbol?) symbol.GetClosestContainingType() ?? symbol.ContainingAssembly ) )
             {

@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var compilation = testContext.Compilation;
             IType single = compilation.Types.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
 
-            return testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
+            return testContext.Serialize<Type>( CompileTimeType.Create( single ) ).ToString();
         }
 
         public MetalamaNestedTests( ITestOutputHelper helper ) : base( helper ) { }

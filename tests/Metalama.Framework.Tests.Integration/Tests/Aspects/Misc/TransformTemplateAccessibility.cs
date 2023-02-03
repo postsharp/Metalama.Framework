@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTempl
 {
     /*
      
-    Tests that the visibility of all templates, including accessors, is set to 'public', and
+    Tests that the visibility of all templates, including accessors, is not changed, and
     that an [Accessibility] attribute is added.
 
      */

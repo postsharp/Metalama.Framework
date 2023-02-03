@@ -107,7 +107,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
     }
 
-    private TestContext( TestContext prototype, IEnumerable<MetadataReference> newReferences )
+    private TestContext( TestContext prototype, IEnumerable<PortableExecutableReference> newReferences )
     {
         this._domain = prototype._domain;
         this.ProjectOptions = prototype.ProjectOptions;
@@ -115,7 +115,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this.ServiceProvider = prototype.ServiceProvider.Global.Underlying.WithProjectScopedServices( this.ProjectOptions, newReferences );
     }
 
-    public TestContext WithReferences( IEnumerable<MetadataReference> newReferences ) => new( this, newReferences );
+    public TestContext WithReferences( IEnumerable<PortableExecutableReference> newReferences ) => new( this, newReferences );
 
     /// <summary>
     /// Creates an <see cref="ICompilation"/> made of a single source file.

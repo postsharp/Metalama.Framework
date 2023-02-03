@@ -33,15 +33,21 @@ namespace Metalama.Framework.Engine.CodeModel
             MetalamaEngineModuleInitializer.EnsureInitialized();
         }
 
-        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
-            => new( project, compilation, aspectRepository );
+        public static CompilationModel CreateInitialInstance( ProjectModel project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
+            => new( project, compilation, aspectRepository, CompilationModelOptions.Default );
 
         public static CompilationModel CreateInitialInstance(
-            IProject project,
+            ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository );
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default );
+
+        internal static CompilationModel CreateInitialInstance(
+            ProjectModel project,
+            Compilation compilation,
+            CompilationModelOptions options )
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -59,7 +65,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
-        public IProject Project { get; }
+        internal ProjectModel Project { get; }
+
+        IProject ICompilation.Project => this.Project;
 
         internal CompilationContext CompilationContext { get; }
 
@@ -67,11 +75,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
+        internal CompilationModelOptions Options { get; }
+
+        private CompilationModel(
+            ProjectModel project,
+            PartialCompilation partialCompilation,
+            AspectRepository? aspectRepository,
+            CompilationModelOptions? options )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
+
+            this.CompilationContext = project.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>()
+                .GetInstance( partialCompilation.Compilation );
+
             this._derivedTypes = partialCompilation.DerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
@@ -81,6 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
+            this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
             static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
@@ -170,6 +188,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
+            this.Options = prototype.Options;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -238,7 +257,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
+#pragma warning disable CS0809
+        [Obsolete( "This method call is redundant." )]
         public override CompilationModel Compilation => this;
+#pragma warning restore CS0809
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 

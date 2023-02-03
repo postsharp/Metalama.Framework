@@ -129,7 +129,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                 if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
                 {
-                    var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+                    var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
                     foreach ( var attribute in backingField.GetAttributes() )
                     {

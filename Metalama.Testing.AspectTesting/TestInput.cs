@@ -161,6 +161,7 @@ namespace Metalama.Testing.AspectTesting
             private readonly GlobalServiceProvider _serviceProvider;
             private readonly IFileSystem _fileSystem;
 
+            // Resharper disable once UnusedMember.Global
             public static Factory Default { get; } = new();
 
             public Factory() : this( ServiceProviderFactory.GetServiceProvider() ) { }
