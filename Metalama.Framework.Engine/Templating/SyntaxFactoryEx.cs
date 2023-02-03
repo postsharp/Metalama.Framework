@@ -44,6 +44,7 @@ internal static partial class SyntaxFactoryEx
     public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
         => obj switch
         {
+            null => Null,
             byte b => LiteralExpression( (int) b, options ),
             sbyte b => LiteralExpression( (int) b, options ),
             string s => LiteralExpression( s ),
@@ -56,7 +57,8 @@ internal static partial class SyntaxFactoryEx
             ushort s => LiteralExpression( (int) s, options ),
             double s => LiteralExpression( s, options ),
             float s => LiteralExpression( s, options ),
-            decimal s => LiteralExpression( s, options ),
+            // force type suffix for decimal, since code like "decimal d = 3.14;" is not valid
+            decimal s => LiteralExpression( s, options | ObjectDisplayOptions.IncludeTypeSuffix ),
             bool b => LiteralExpression( b ),
             _ => null
         };
