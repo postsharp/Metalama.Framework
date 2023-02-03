@@ -12,6 +12,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
         [TestTemplate]
         private dynamic? Template()
         {
+            var guid = meta.CompileTime(Guid.Parse("04cee639-acf2-46e3-be3e-916089c72a1e"));
+
             var expressionBuilder = new ExpressionBuilder();
             expressionBuilder.AppendVerbatim("Test( ");
             expressionBuilder.AppendLiteral(1, true);
@@ -35,11 +37,16 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral( (ushort) 1, true);
             expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendExpression(42);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendExpression(guid);
+            expressionBuilder.AppendVerbatim(", ");
 
             var arrayBuilder = new ArrayBuilder();
             arrayBuilder.Add( 1 );
             arrayBuilder.Add( 2 );
             arrayBuilder.Add( 3 );
+            arrayBuilder.Add( guid );
             
             
             expressionBuilder.AppendExpression( arrayBuilder );
