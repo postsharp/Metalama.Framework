@@ -107,7 +107,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             var testContextOptions =
-                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray<MetadataReference>() };
+                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray() };
 
             using var testContext = new TestContext( testContextOptions );
 
@@ -119,7 +119,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput,
                 serviceProvider,
                 new TestProjectReferences(
-                    metadataReferences.ToImmutableArray<MetadataReference>(),
+                    metadataReferences.ToImmutableArray(),
                     ImmutableArray<object>.Empty,
                     null ),
                 null );

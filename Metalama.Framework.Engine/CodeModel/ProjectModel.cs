@@ -21,7 +21,6 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
-        private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
 
         internal ProjectServiceProvider ServiceProvider { get; }
 
@@ -49,9 +48,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.ServiceProvider = serviceProvider.Underlying;
 
-            this._projectReferences =
-                new Lazy<ImmutableArray<IAssemblyIdentity>>(
-                    () => references.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>() );
+            // Do not evaluate this property lazily because this would keep a reference to the Compilation.
+            this.AssemblyReferences =
+                references.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>();
         }
 
         [Memo]
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string? Path => this._projectOptions.ProjectPath;
 
-        public ImmutableArray<IAssemblyIdentity> AssemblyReferences => this._projectReferences.Value;
+        public ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
 
         public ImmutableHashSet<string> PreprocessorSymbols { get; }
 

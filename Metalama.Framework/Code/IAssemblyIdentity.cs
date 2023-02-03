@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code
     /// </summary>
     [InternalImplement]
     [CompileTime]
-    public interface IAssemblyIdentity
+    public interface IAssemblyIdentity : IEquatable<IAssemblyIdentity>
     {
         /// <summary>
         /// Gets the assembly name.

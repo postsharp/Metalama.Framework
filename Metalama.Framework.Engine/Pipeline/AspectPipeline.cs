@@ -189,8 +189,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                         if ( constructor == null )
                         {
-                            diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
                             return null;
                         }
@@ -327,8 +326,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 fabricsConfiguration,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
-                this.FilterCodeFix,
-                compilation.ExternalReferences );
+                this.FilterCodeFix );
 
             return true;
 
@@ -489,7 +487,8 @@ namespace Metalama.Framework.Engine.Pipeline
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
-                    ImmutableArray<CompilationModel>.Empty );
+                    null,
+                    null );
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
@@ -500,7 +499,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
-                compilationModel == null ? ImmutableArray<CompilationModel>.Empty : ImmutableArray.Create( compilationModel ),
+                compilationModel,
+                compilationModel,
                 null,
                 aspectSources.AspectSources,
                 aspectSources.ValidatorSources,

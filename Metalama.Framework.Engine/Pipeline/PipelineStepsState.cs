@@ -46,7 +46,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
     public CompilationModel LastCompilation { get; private set; }
 
-    public ImmutableArray<CompilationModel> Compilations { get; private set; }
+    public CompilationModel FirstCompilation { get; private set; }
 
     public IReadOnlyCollection<ITransformation> Transformations => this._transformations;
 
@@ -74,9 +74,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         this._shouldDetectUnorderedAspects = pipelineConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>().RequireOrderedAspects;
 
         this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
-        this.LastCompilation = inputLastCompilation;
+        this.LastCompilation = this.FirstCompilation = inputLastCompilation;
         this.PipelineConfiguration = pipelineConfiguration;
-        this.Compilations = ImmutableArray.Create( inputLastCompilation );
 
         // Create an empty collection of steps.
         this._comparer = new PipelineStepIdComparer( aspectLayers );
@@ -119,11 +118,6 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             var compilation = this.LastCompilation;
 
             this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
-
-            if ( !ReferenceEquals( compilation, this.LastCompilation ) )
-            {
-                this.Compilations = this.Compilations.Add( this.LastCompilation );
-            }
 
             stepIndex++;
         }

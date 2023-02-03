@@ -78,13 +78,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
-        Compilation compilation ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References ) { }
+        Compilation compilation ) : this(
+        pipelineFactory,
+        projectOptions,
+        compilation.GetProjectKey(),
+        compilation.References.OfType<PortableExecutableReference>() ) { }
 
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
         ProjectKey projectKey,
-        IEnumerable<MetadataReference> metadataReferences )
+        IEnumerable<PortableExecutableReference> metadataReferences )
         : base(
             GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences ),
             pipelineFactory.Domain )
@@ -184,7 +188,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private static ServiceProvider<IProjectService> GetServiceProvider(
         ServiceProvider<IGlobalService> serviceProvider,
         IProjectOptions projectOptions,
-        IEnumerable<MetadataReference> metadataReferences )
+        IEnumerable<PortableExecutableReference> metadataReferences )
     {
         var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
 

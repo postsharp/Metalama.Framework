@@ -16,6 +16,7 @@ using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Services;
@@ -89,18 +90,19 @@ public static class ServiceProviderFactory
         this IServiceProvider<IGlobalService> serviceProvider,
         IProjectOptions projectOptions,
         Compilation compilation )
-        => serviceProvider.WithProjectScopedServices( projectOptions, compilation.References );
+        => serviceProvider.WithProjectScopedServices( projectOptions, compilation.References.OfType<PortableExecutableReference>() );
 
     /// <summary>
     /// Adds the services that have the same scope as the project processing itself.
     /// </summary>
     /// <param name="serviceProvider"></param>
     /// <param name="projectOptions"></param>
-    /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
+    /// <param name="metadataReferences">A list of resolved metadata references for the current project.
+    /// These can only be PortableExecutableReferences and not CompilationReferences, because a CompilationReference would keep a reference to a Compilation.</param>
     public static ServiceProvider<IProjectService> WithProjectScopedServices(
         this IServiceProvider<IGlobalService> serviceProvider,
         IProjectOptions projectOptions,
-        IEnumerable<MetadataReference> metadataReferences )
+        IEnumerable<PortableExecutableReference> metadataReferences )
     {
         var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
 
