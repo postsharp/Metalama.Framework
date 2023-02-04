@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -28,4 +29,8 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
     public abstract bool IsReturnParameter { get; }
 
     protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
+
+    bool IExpression.IsAssignable => true;
+
+    ref object? IExpression.Value => throw new NotSupportedException( "Must be implemented by the facade." );
 }

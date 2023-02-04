@@ -4,25 +4,25 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_FinalInvoker;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_FinalInvoker
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public int Field;
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advice.Override(
-                builder.Target.Fields.OfName(nameof(IntroductionAttribute.Field)).Single(),
-                nameof(PropertyTemplate));
+                builder.Target.Fields.OfName( nameof(IntroductionAttribute.Field) ).Single(),
+                nameof(PropertyTemplate) );
         }
 
         [Template]
@@ -30,14 +30,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
         {
             get
             {
-                Console.WriteLine("Override");
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue(meta.This);
+                Console.WriteLine( "Override" );
+
+                return meta.Target.FieldOrProperty.GetValue( meta.This );
             }
 
             set
             {
-                Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.Invokers.Final.SetValue(meta.This, value);
+                Console.WriteLine( "Override" );
+                meta.Target.FieldOrProperty.SetValue( meta.This, value );
             }
         }
     }

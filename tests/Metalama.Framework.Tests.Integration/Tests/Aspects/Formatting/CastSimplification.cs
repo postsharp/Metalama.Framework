@@ -9,30 +9,30 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.CastSimplification;
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic OverrideMethod()
     {
-        var clone = meta.Cast(meta.Target.Type, meta.Base.MemberwiseClone());
+        var clone = meta.Cast( meta.Target.Type, meta.Base.MemberwiseClone() );
 
         foreach (var field in meta.Target.Type.Fields)
         {
-            field.Invokers.Final.SetValue(
+            field.SetValue(
                 clone,
-                meta.Cast(field.Type, ((ICloneable)field.Invokers.Final.GetValue(meta.This)).Clone()));
+                meta.Cast( field.Type, ( (ICloneable)field.GetValue( meta.This ) ).Clone() ) );
         }
 
         return clone;
     }
 }
 
-class TargetCode : ICloneable
+internal class TargetCode : ICloneable
 {
-    string s;
-    TargetCode tc;
+    private string s;
+    private TargetCode tc;
 
     [Aspect]
-    TargetCode Method() => throw new NotImplementedException();
+    private TargetCode Method() => throw new NotImplementedException();
 
     object ICloneable.Clone() => new();
 }

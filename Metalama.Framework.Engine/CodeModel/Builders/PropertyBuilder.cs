@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -91,11 +92,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>(
-                ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ),
-                this.HasBaseInvoker );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         public IProperty? OverriddenProperty { get; set; }
 
@@ -119,6 +117,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this._initializerExpression = value;
             }
         }
+
+        object? IFieldOrProperty.GetValue( object? target ) => throw new NotSupportedException();
+
+        object? IFieldOrProperty.SetValue( object? target, object? value ) => throw new NotSupportedException();
 
         public TemplateMember<IProperty>? InitializerTemplate
         {
@@ -229,5 +231,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out initializerExpression,
                 out initializerMethod );
         }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
     }
 }

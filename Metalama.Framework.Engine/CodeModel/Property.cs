@@ -4,12 +4,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -30,11 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel
 #endif
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
-
-        [Memo]
-        private IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
@@ -67,6 +66,10 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
+        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+
+        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.SetValue( this, target, value );
+
         private IExpression? GetInitializerExpressionCore()
         {
             var initializer = ((PropertyDeclarationSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
@@ -80,5 +83,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 return new SourceUserExpression( initializer.Value, this.Type );
             }
         }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
     }
 }

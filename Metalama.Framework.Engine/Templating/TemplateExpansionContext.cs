@@ -5,6 +5,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
@@ -42,6 +43,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
+
+    internal static AspectLayerId? CurrentAspectLayerId => (CurrentOrNull as TemplateExpansionContext)?.AspectLayerId;
+
+    internal static RunTimeInvocationApi CurrentInvocationApi
+        => (CurrentOrNull as TemplateExpansionContext)?.MetaApi.RunTimeInvocationApi
+           ?? throw new InvalidOperationException( "RunTimeInvocationApi not available." );
 
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
@@ -514,7 +521,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         return new ProceedUserExpression( methodName, this );
     }
 
-    public static IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext ) => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
+    public static IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext )
+        => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 

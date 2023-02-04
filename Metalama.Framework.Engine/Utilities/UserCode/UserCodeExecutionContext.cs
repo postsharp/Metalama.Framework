@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;

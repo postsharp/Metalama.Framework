@@ -8,12 +8,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSou
         {
             get
             {
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue( meta.This );
+                return meta.Target.FieldOrProperty.GetValue( meta.This );
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Invokers.Final.SetValue( meta.This, value );
+                meta.Target.FieldOrProperty.SetValue( meta.This, value );
             }
         }
     }

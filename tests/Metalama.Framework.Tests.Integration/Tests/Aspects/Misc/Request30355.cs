@@ -144,7 +144,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
         {
             var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
 
-            return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues ).Value;
+            return optionalProperty.GetValue( meta.This.OptionalValues ).Value;
         }
 
         set
@@ -154,7 +154,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
             optionalValueBuilder.AppendVerbatim( "new " );
             optionalValueBuilder.AppendTypeName( optionalProperty.Type );
             optionalValueBuilder.AppendVerbatim( "( value )" );
-            optionalProperty.Invokers.Final.SetValue( meta.This.OptionalValues, optionalValueBuilder.ToValue() );
+            optionalProperty.SetValue( meta.This.OptionalValues, optionalValueBuilder.ToValue() );
         }
     }
 

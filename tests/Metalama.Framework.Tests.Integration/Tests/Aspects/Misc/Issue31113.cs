@@ -9,7 +9,7 @@ public class MyAspect : TypeAspect
     public void Method()
     {
         var method = meta.Target.Type.Methods.Single();
-        method.Invokers.Final.Invoke( meta.RunTime( method.IsStatic ? null : meta.This ) );
+        method.Invoke( meta.RunTime( method.IsStatic ? null : meta.This ) );
     }
 }
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -70,9 +71,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     [Memo]
     public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this._methodBuilder.OverriddenMethod );
@@ -80,6 +80,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
+
+    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
 
     public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

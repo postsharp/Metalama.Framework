@@ -18,7 +18,7 @@ internal sealed class FieldOrPropertyExpression : UserExpression
         this._instance = instance;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
     {
         if ( this._fieldOrProperty.IsStatic )
         {

@@ -11,12 +11,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
     {
         public override void OverrideAdd(dynamic value)
         {
-            meta.Target.Event.Invokers.Final!.Add(meta.This, meta.Target.Parameters[0].Value);
+            meta.Target.Event.Add(meta.This, meta.Target.Parameters[0].Value);
         }
 
         public override void OverrideRemove(dynamic value)
         {
-            meta.Target.Event.Invokers.Final!.Remove(meta.This, meta.Target.Parameters[0].Value);
+            meta.Target.Event.Remove(meta.This, meta.Target.Parameters[0].Value);
         }
     }
 

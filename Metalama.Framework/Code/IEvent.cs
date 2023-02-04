@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
+        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
@@ -56,5 +58,11 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
         EventInfo ToEventInfo();
+
+        dynamic Add( dynamic? target, dynamic? handler );
+
+        dynamic Remove( dynamic? target, dynamic? handler );
+
+        dynamic? Raise( dynamic? target, params dynamic?[] args );
     }
 }

@@ -6,7 +6,9 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -67,12 +69,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public bool IsCanonicalGenericInstance => true;
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>(
-            ( order, invokerOperator )
-                => new MethodInvoker( this, order, invokerOperator ),
-            false );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod
         => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
@@ -114,6 +112,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
+
+    object? IMethod.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
 
     public Accessibility Accessibility
     {

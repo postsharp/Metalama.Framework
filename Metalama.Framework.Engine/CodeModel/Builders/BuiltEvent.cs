@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -37,9 +39,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? RaiseMethod => null;
 
-        [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IEvent? OverriddenEvent => this.Compilation.Factory.GetDeclaration( this.EventBuilder.OverriddenEvent );
@@ -50,6 +51,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
+
+        public object Add( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Add( this, target, handler );
+
+        public object Remove( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Remove( this, target, handler );
+
+        public object? Raise( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Raise( this, target, args );
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

@@ -23,11 +23,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
 
             if (otherClassMethod.Parameters.Count == 0)
             {
-                return otherClassMethod.Invokers.ConditionalFinal!.Invoke(meta.Target.Method.Parameters[0]);
+                return otherClassMethod.Invoke( meta.NullConditional( meta.Target.Method.Parameters[0] ));
             }
             else
             {
-                return otherClassMethod.Invokers.ConditionalFinal!.Invoke(meta.Target.Method.Parameters[0], meta.Target.Method.Parameters[1].Value);
+                return otherClassMethod.Invoke( meta.NullConditional( meta.Target.Method.Parameters[0] ), meta.Target.Method.Parameters[1].Value);
             }
         }
     }

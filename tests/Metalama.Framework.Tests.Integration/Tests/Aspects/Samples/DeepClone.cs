@@ -76,14 +76,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                      fieldType.Enhancements().HasAspect<DeepCloneAttribute>())
                 {
                     // If yes, call the method without a cast.
-                    field.Invokers.Base!.SetValue(
+                    field.SetValue(
                         clone,
                         meta.Cast(fieldType, field.ToExpression().Value?.Clone()));
                 }
                 else
                 {
                     // If no, use the interface.
-                    field.Invokers.Base!.SetValue(
+                    field.SetValue(
                         clone,
                         meta.Cast(fieldType, ((ICloneable?)field.ToExpression().Value)?.Clone()));
                 }

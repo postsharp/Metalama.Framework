@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -34,6 +35,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     (MethodKind.PropertySet, "value") => this[this.Count - 1],
                     _ => this[this.Indexer.Parameters[name].Index]
                 };
+
+            object IParameterList.ToValuesArray() => throw new NotSupportedException();
 
             public IParameterBuilder this[ int index ]
             {

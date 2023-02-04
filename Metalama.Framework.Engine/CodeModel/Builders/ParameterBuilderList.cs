@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Templating;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         IParameterBuilder IReadOnlyList<IParameterBuilder>.this[ int index ] => this[index];
 
         public IParameterBuilder this[ string name ] => this.Single<IParameterBuilder>( p => p.Name == name );
+
+        public object ToValuesArray() => TemplateExpansionContext.CurrentInvocationApi.ToValuesArray( this );
 
         int IReadOnlyCollection<IParameter>.Count => this.Count;
 

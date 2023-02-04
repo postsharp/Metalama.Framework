@@ -15,9 +15,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
         {
             var field = meta.Target.Type.Fields.Single();
             object? clone = null;
-            field.Invokers.Base!.SetValue(
+            field.SetValue(
                 clone, 
-                meta.Cast(field.Type, ((ICloneable)field.Invokers.Base.GetValue(meta.This)).Clone()));
+                meta.Cast(field.Type, ((ICloneable)field.GetValue(meta.This)).Clone()));
             
             return default;
         }

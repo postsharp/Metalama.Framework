@@ -12,5 +12,7 @@ namespace Metalama.Framework.Code.Collections
     public interface IParameterList : IReadOnlyList<IParameter>
     {
         IParameter this[ string name ] { get; }
+
+        dynamic ToValuesArray();
     }
 }

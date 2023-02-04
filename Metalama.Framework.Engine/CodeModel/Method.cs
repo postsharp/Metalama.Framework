@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -56,6 +57,8 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 
+    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
+
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
@@ -65,9 +68,8 @@ internal sealed class Method : MethodBase, IMethodImpl
         return new Method( symbolWithGenericArguments, this.Compilation );
     }
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

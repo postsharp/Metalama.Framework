@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 return parameter;
             }
         }
+
+        public object ToValuesArray() => TemplateExpansionContext.CurrentInvocationApi.ToValuesArray( this );
 
         public IParameter this[ int index ] => this.GetItem( this.Source[index] );
     }

@@ -75,7 +75,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
 
             stringBuilder.Append(')');
 
-            string cacheKey = string.Format(stringBuilder.ToString(), meta.Target.Parameters.Values.ToArray());
+            string cacheKey = string.Format(stringBuilder.ToString(), meta.Target.Parameters.ToValuesArray());
 
             // Cache lookup.
             if (SampleCache.Cache.TryGetValue(cacheKey, out object? value))

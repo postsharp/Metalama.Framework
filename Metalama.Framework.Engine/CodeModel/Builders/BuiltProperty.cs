@@ -3,8 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -41,9 +44,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? SetMethod
             => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => throw new NotSupportedException();
 
         [Memo]
         public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
@@ -59,10 +61,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression => this.PropertyBuilder.InitializerExpression;
 
+        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+
+        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.PropertyBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
     }
 }

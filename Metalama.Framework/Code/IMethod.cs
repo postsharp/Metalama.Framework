@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -30,6 +31,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to invoke the current method.
         /// </summary>
+        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
         IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
@@ -74,5 +76,7 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the method has a non-managed implementation, i.e. has the <c>extern</c> modifier.
         /// </summary>
         bool IsExtern { get; }
+
+        dynamic? Invoke( dynamic? target, params dynamic?[] args );
     }
 }

@@ -3,13 +3,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.RunTime;
+using System;
 
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer
+    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer, IExpression
     {
         /// <summary>
         /// Gets a value indicating whether the declaration is an auto-property or a field, or <c>null</c> if the
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
+        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
         IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>
@@ -45,5 +47,9 @@ namespace Metalama.Framework.Code
         /// exposes a <see cref="TypedConstant"/> when possible.
         /// </summary>
         IExpression? InitializerExpression { get; }
+
+        dynamic? GetValue( dynamic? target );
+
+        dynamic? SetValue( dynamic? target, dynamic? value );
     }
 }

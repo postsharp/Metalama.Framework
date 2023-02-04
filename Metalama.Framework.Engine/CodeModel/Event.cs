@@ -5,8 +5,10 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,9 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         [Memo]
         public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -72,6 +73,12 @@ namespace Metalama.Framework.Engine.CodeModel
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
+
+        public object Add( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Add( this, target, handler );
+
+        public object Remove( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Remove( this, target, handler );
+
+        public object? Raise( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Raise( this, target, args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

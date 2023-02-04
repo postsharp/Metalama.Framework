@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -37,5 +39,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 
         public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
+
+        bool IExpression.IsAssignable => true;
+
+        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
     }
 }

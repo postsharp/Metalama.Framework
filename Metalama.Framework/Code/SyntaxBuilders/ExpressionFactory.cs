@@ -162,6 +162,7 @@ public static class ExpressionFactory
     /// </summary>
     /// <param name="fieldOrProperty">A field or property.</param>
     /// <param name="instance">An expression representing the instance. This argument is ignored for static members. Its default value is the <c>this</c> expression.</param>
+    [Obsolete( "Use the Value property or the GetValue or SetValue method of the IFieldOrProperty method." )]
     public static IExpression ToExpression( this IFieldOrProperty fieldOrProperty, IExpression? instance = null )
         => SyntaxBuilder.CurrentImplementation.ToExpression( fieldOrProperty, instance );
 
@@ -169,5 +170,6 @@ public static class ExpressionFactory
     /// Gets an <see cref="IExpression"/> that represents a given parameter.
     /// </summary>
     /// <param name="parameter">A parameter.</param>
+    [Obsolete( "An IParameter is already an IExpression." )]
     public static IExpression ToExpression( this IParameter parameter ) => SyntaxBuilder.CurrentImplementation.ToExpression( parameter );
 }

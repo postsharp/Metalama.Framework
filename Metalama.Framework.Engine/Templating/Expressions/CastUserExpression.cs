@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._value = value;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var valueSyntax = this._value switch
             {

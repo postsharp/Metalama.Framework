@@ -35,7 +35,7 @@ internal sealed partial class TemplateExpansionContext
             }
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var generatedExpression = this._expression.ToExpressionSyntax( syntaxGenerationContext );
 
@@ -45,8 +45,7 @@ internal sealed partial class TemplateExpansionContext
                         SyntaxKind.SimpleMemberAccessExpression,
                         generatedExpression,
                         IdentifierName( nameof(Task.ConfigureAwait) ) ) )
-                .AddArgumentListArguments(
-                    Argument( SyntaxFactoryEx.LiteralExpression( this._continueOnCapturedContext ) ) );
+                .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( this._continueOnCapturedContext ) ) );
         }
 
         protected override string ToStringCore() => $"{this._expression}.ConfigureAwait({this._continueOnCapturedContext})";

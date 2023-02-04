@@ -64,11 +64,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? RaiseMethod => null;
 
-        [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>(
-                ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ),
-                this.OverriddenEvent != null );
+        [Obsolete]
+        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         public IEvent? OverriddenEvent { get; set; }
 
@@ -111,6 +108,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
         public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
+
+        object IEvent.Add( object? target, object? handler ) => throw new NotSupportedException();
+
+        object IEvent.Remove( object? target, object? handler ) => throw new NotSupportedException();
+
+        object? IEvent.Raise( object? target, params object?[] args ) => throw new NotSupportedException();
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 

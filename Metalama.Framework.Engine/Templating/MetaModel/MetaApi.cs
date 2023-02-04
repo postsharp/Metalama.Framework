@@ -2,13 +2,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Advised;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -20,13 +22,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// </summary>
     internal sealed class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
     {
-        private readonly IAdvisedFieldOrPropertyOrIndexer? _fieldOrPropertyOrIndexer;
-        private readonly IAdvisedMethod? _method;
-        private readonly IAdvisedConstructor? _constructor;
-        private readonly IAdvisedEvent? _event;
+        private readonly IFieldOrPropertyOrIndexer? _fieldOrPropertyOrIndexer;
+        private readonly IMethod? _method;
+        private readonly IConstructor? _constructor;
+        private readonly IEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
-        private readonly IAdvisedParameter? _parameter;
+        private readonly IParameter? _parameter;
         private readonly ContractDirection? _contractDirection;
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
@@ -38,31 +40,29 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethodBase MethodBase => (IMethodBase?) this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IAdvisedField Field => this._fieldOrPropertyOrIndexer as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IAdvisedFieldOrProperty FieldOrProperty
-            => this._fieldOrPropertyOrIndexer as IAdvisedFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+        public IFieldOrProperty FieldOrProperty
+            => this._fieldOrPropertyOrIndexer as IFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
-        public IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer
+        public IFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer
             => this._fieldOrPropertyOrIndexer ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrPropertyOrIndexer) );
 
         public IDeclaration Declaration { get; }
 
         public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
-        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
+        public IMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IAdvisedProperty Property
-            => this._fieldOrPropertyOrIndexer as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IProperty Property => this._fieldOrPropertyOrIndexer as IProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
-        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
+        public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+        public IParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
-        public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
+        public IParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
-        public IAdvisedIndexer Indexer
-            => this._fieldOrPropertyOrIndexer as IAdvisedIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
+        public IIndexer Indexer => this._fieldOrPropertyOrIndexer as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
@@ -128,6 +128,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
+        public object NullConditional( object? value )
+            => new NullConditionalUserExpression( (UserExpression?) value ?? throw new ArgumentNullException( nameof(value) ) );
+
+        [Memo]
+        internal RunTimeInvocationApi RunTimeInvocationApi => new( this._common.SyntaxGenerationContext );
+
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
@@ -140,13 +146,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             (IDeclaration) method,
             common )
         {
-            this._method = new AdvisedMethod( method );
+            this._method = method;
             this._type = method.DeclaringType;
         }
 
         private MetaApi( IConstructor constructor, MetaApiProperties common ) : this( (IDeclaration) constructor, common )
         {
-            this._constructor = new AdvisedConstructor( constructor );
+            this._constructor = constructor;
             this._type = constructor.DeclaringType;
         }
 
@@ -155,46 +161,33 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             switch ( parameter.DeclaringMember )
             {
                 case IConstructor constructor:
-                    this._constructor = new AdvisedConstructor( constructor );
+                    this._constructor = constructor;
 
                     break;
 
                 case IMethod method:
-                    this._method = new AdvisedMethod( method );
+                    this._method = method;
 
                     break;
             }
 
             this._type = parameter.DeclaringMember.DeclaringType;
-            this._parameter = new AdvisedParameter( parameter );
+            this._parameter = parameter;
             this._contractDirection = contractDirection;
         }
 
         private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            this._method = new AdvisedMethod( accessor );
+            this._method = this._method;
 
-            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
-            {
-                IField field => new AdvisedField( field ),
-                IProperty property => new AdvisedProperty( property ),
-                IIndexer indexer => new AdvisedIndexer( indexer ),
-                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrPropertyOrIndexer.GetType()}." )
-            };
-
+            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer;
             this._type = fieldOrPropertyOrIndexer.DeclaringType;
         }
 
         private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection = null )
             : this( (IDeclaration) fieldOrPropertyOrIndexer, common )
         {
-            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
-            {
-                IField field => new AdvisedField( field ),
-                IProperty property => new AdvisedProperty( property ),
-                IIndexer indexer => new AdvisedIndexer( indexer ),
-                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrPropertyOrIndexer.GetType()}." )
-            };
+            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer;
 
             this._type = fieldOrPropertyOrIndexer.DeclaringType;
             this._contractDirection = contractDirection;
@@ -202,15 +195,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         private MetaApi( IEvent eventField, MetaApiProperties common ) : this( (IDeclaration) eventField, common )
         {
-            this._event = new AdvisedEvent( eventField );
+            this._event = eventField;
             this._type = eventField.DeclaringType;
         }
 
         private MetaApi( IEvent @event, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            this._event = new AdvisedEvent( @event );
+            this._event = @event;
             this._type = @event.DeclaringType;
-            this._method = new AdvisedMethod( accessor );
+            this._method = accessor;
         }
 
         private MetaApi( INamedType type, MetaApiProperties common ) : this( (IDeclaration) type, common )

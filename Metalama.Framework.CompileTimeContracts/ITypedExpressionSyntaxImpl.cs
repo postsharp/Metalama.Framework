@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.CompileTimeContracts;
 
-internal interface ITypedExpressionSyntax
+internal interface ITypedExpressionSyntaxImpl
 {
     ExpressionSyntax? Syntax { get; }
 

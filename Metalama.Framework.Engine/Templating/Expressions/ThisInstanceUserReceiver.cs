@@ -15,15 +15,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     internal sealed class ThisInstanceUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
-        private readonly AspectReferenceSpecification _linkerAnnotation;
 
-        public ThisInstanceUserReceiver( INamedType type, AspectReferenceSpecification linkerAnnotation )
+        public ThisInstanceUserReceiver( INamedType type, in AspectReferenceSpecification aspectReferenceSpecification ) : base( aspectReferenceSpecification )
         {
             this._type = type;
-            this._linkerAnnotation = linkerAnnotation;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            => ThisExpression().WithAspectReferenceAnnotation( this.AspectReferenceSpecification );
 
         public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
@@ -32,10 +31,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public override TypedExpressionSyntaxImpl CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
-                    .WithAspectReferenceAnnotation( this._linkerAnnotation ),
+                    .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 this._type,
                 TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-        // TODO: Add linker annotations.
+        public override bool CanBeNull => false;
     }
 }

@@ -81,17 +81,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        private bool HasBaseInvoker => this.OverriddenIndexer != null;
-
-        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => this.Invokers;
-
-        [Memo]
-        private IInvokerFactory<IIndexerInvoker> Invokers
-            => new InvokerFactory<IIndexerInvoker>(
-                ( order, _ ) => new IndexerInvoker( this, order ),
-                this.HasBaseInvoker );
+        [Obsolete]
+        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
 
         public IIndexer? OverriddenIndexer { get; set; }
+
+        object IIndexer.GetValue( object? target, params object?[] args ) => throw new NotSupportedException();
+
+        object? IIndexer.SetValue( object? target, object value, params object?[] args ) => throw new NotSupportedException();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

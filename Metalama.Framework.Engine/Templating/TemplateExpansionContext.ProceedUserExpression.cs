@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
                 this.Validate();
 

@@ -8,9 +8,9 @@ namespace Metalama.Framework.CompileTimeContracts;
 [PublicAPI]
 public readonly struct TypedExpressionSyntax
 {
-    internal ITypedExpressionSyntax Implementation { get; }
+    internal ITypedExpressionSyntaxImpl Implementation { get; }
 
-    internal TypedExpressionSyntax( ITypedExpressionSyntax impl )
+    internal TypedExpressionSyntax( ITypedExpressionSyntaxImpl impl )
     {
         this.Implementation = impl;
     }

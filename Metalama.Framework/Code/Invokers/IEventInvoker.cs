@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
+
 namespace Metalama.Framework.Code.Invokers
 {
     /// <summary>
     /// Allows adding/removing delegates to/from events.
     /// </summary>
+    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
     public interface IEventInvoker : IInvoker
     {
         /// <summary>

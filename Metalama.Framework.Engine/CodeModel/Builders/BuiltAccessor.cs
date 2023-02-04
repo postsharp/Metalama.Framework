@@ -5,7 +5,9 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -63,6 +65,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
+    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
+
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation );
 
@@ -80,9 +84,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._accessorBuilder.ConstructGenericInstance( typeArguments );
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod => this._accessorBuilder.OverriddenMethod;
 

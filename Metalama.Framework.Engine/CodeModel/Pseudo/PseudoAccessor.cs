@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
@@ -54,9 +55,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod => null;
 
@@ -108,6 +108,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
+
+    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
 
     public ICompilation Compilation => this.DeclaringMember.Compilation;
 

@@ -11,11 +11,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.Final!.Invoke(meta.This);
+                return meta.Target.Method.Invoke(meta.This);
             }
             else
             {
-                return meta.Target.Method.Invokers.Final!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
             }
         }
     }

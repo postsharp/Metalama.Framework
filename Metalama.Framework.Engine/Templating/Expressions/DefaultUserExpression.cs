@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var typeSymbol = this.Type.GetSymbol();
             var expression = syntaxGenerationContext.SyntaxGenerator.DefaultExpression( typeSymbol );

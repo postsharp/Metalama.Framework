@@ -50,15 +50,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         public Writeability Writeability { get; set; }
 
         public bool? IsAutoPropertyOrField => true;
 
         public IExpression? InitializerExpression { get; set; }
+
+        object? IFieldOrProperty.GetValue( object? target ) => throw new NotSupportedException();
+
+        object? IFieldOrProperty.SetValue( object? target, object? value ) => throw new NotSupportedException();
 
         public TemplateMember<IField>? InitializerTemplate { get; set; }
 
@@ -94,5 +97,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public bool IsRequired { get; set; }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        public ref object? Value => throw new NotSupportedException( "Should be implemented by the front-end object." );
     }
 }

@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -34,9 +35,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -82,6 +82,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
+
+        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+
+        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
 
         private IExpression? GetInitializerExpressionCore()
         {
@@ -135,5 +139,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
         }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
     }
 }

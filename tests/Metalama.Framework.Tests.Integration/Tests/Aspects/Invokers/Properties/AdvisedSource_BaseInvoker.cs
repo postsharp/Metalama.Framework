@@ -11,12 +11,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
         { 
             get
             {
-                return meta.Target.FieldOrProperty.Invokers.Base!.GetValue( meta.This );
+                return meta.Target.FieldOrProperty.GetValue( meta.Base );
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Invokers.Base!.SetValue( meta.This, value );
+                meta.Target.FieldOrProperty.SetValue( meta.Base, value );
             }
         }
     }

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
@@ -66,5 +67,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
+
+        bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+
+        public ref object? Value => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
     }
 }

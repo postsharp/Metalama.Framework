@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
@@ -19,10 +20,15 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters
     /// <summary>
     /// Gets an object that allows to invoke the current property.
     /// </summary>
+    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
     IInvokerFactory<IIndexerInvoker> Invokers { get; }
 
     /// <summary>
     /// Gets the base property that is overridden by the current property.
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
+
+    dynamic GetValue( dynamic? target, params dynamic?[] args );
+
+    dynamic? SetValue( dynamic? target, dynamic value, params dynamic?[] args );
 }

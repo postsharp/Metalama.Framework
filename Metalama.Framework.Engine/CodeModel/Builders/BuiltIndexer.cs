@@ -5,7 +5,9 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -46,11 +48,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? SetMethod
             => this._indexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.SetMethod ) : null;
 
-        [Memo]
-        public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
+        [Obsolete]
+        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
+
+        public object GetValue( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target, args );
+
+        public object? SetValue( object? target, object value, params object?[] args )
+            => TemplateExpansionContext.CurrentInvocationApi.SetValue( this, target, value, args );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
