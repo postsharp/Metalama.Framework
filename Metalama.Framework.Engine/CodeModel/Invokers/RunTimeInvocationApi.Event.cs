@@ -13,49 +13,48 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal partial class RunTimeInvocationApi
+    internal class EventInvoker : Invoker<IEvent>, IEventInvoker
     {
-        public object Add( IEvent @event, object? instance, object? value )
+        public EventInvoker( IEvent @event, InvokerOptions options = default ) : base( @event, options ) { }
+
+        public object Add( object? instance, object? value )
         {
             var eventAccess = this.CreateEventExpression(
-                @event,
                 instance,
                 AspectReferenceTargetKind.EventAddAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, @event.Compilation, this._generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Declaration.Compilation, this.GenerationContext ) );
 
-            return new SyntaxUserExpression( expression, @event.Type );
+            return new SyntaxUserExpression( expression, this.Declaration.Type );
         }
 
-        public object Remove( IEvent @event, object? instance, object? value )
+        public object Remove( object? instance, object? value )
         {
             var eventAccess = this.CreateEventExpression(
-                @event,
-                TypedExpressionSyntaxImpl.FromValue( instance, @event.Compilation, this._generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Declaration.Compilation, this.GenerationContext ),
                 AspectReferenceTargetKind.EventRemoveAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, @event.Compilation, this._generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Declaration.Compilation, this.GenerationContext ) );
 
-            return new SyntaxUserExpression( expression, @event.Type );
+            return new SyntaxUserExpression( expression, this.Declaration.Type );
         }
 
-        public object Raise( IEvent @event, object? instance, params object?[] args )
+        public object Raise( object? instance, params object?[] args )
         {
             var eventAccess = this.CreateEventExpression(
-                @event,
                 instance,
                 AspectReferenceTargetKind.EventRaiseAccessor );
 
-            var arguments = @event.GetArguments(
-                @event.Signature.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, @event.Compilation, this._generationContext ),
-                this._generationContext );
+            var arguments = this.Declaration.GetArguments(
+                this.Declaration.Signature.Parameters,
+                TypedExpressionSyntaxImpl.FromValues( args, this.Declaration.Compilation, this.GenerationContext ),
+                this.GenerationContext );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,
@@ -63,26 +62,25 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new SyntaxUserExpression(
                 expression,
-                @event.Signature.ReturnType );
+                this.Declaration.Signature.ReturnType );
         }
 
         private ExpressionSyntax CreateEventExpression(
-            IEvent @event,
             object? target,
             AspectReferenceTargetKind targetKind )
         {
-            var receiverInfo = this.GetReceiverInfo( @event, target );
-            var receiverSyntax = @event.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this._generationContext );
+            var receiverInfo = this.GetReceiverInfo( this.Declaration, target );
+            var receiverSyntax = this.Declaration.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
 
             var expression = receiverInfo.RequiresConditionalAccess
-                ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( IdentifierName( @event.Name ) ) )
+                ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( IdentifierName( this.Declaration.Name ) ) )
                 : MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     receiverSyntax,
-                    IdentifierName( @event.Name ) );
+                    IdentifierName( this.Declaration.Name ) );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), @event.DeclaringType.GetSymbol().OriginalDefinition ) )
+            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Declaration.DeclaringType.GetSymbol().OriginalDefinition ) )
             {
                 expression = expression.WithAspectReferenceAnnotation( receiverInfo.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }

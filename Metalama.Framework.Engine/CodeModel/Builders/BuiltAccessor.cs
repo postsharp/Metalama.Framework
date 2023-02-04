@@ -65,7 +65,9 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
-    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
+    public IMethodInvoker GetInvoker( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public object? Invoke( object? target, params object?[] args ) => new MethodInvoker( this ).Invoke( target, args );
 
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation );

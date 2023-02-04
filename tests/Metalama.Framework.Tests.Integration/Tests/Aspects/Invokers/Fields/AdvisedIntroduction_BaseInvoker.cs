@@ -37,7 +37,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
             set
             {
                 Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.Invokers.SetValue( meta.Base, value );
+                meta.Target.FieldOrProperty.SetValue( meta.Base, value );
             }
         }
     }

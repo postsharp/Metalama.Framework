@@ -2,6 +2,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker;
 using System;
+using Metalama.Framework.Code.Invokers;
 
 [assembly: AspectOrder( typeof(IntroductionAttribute), typeof(OverrideAttribute) )]
 
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         public void BaseClass_VoidMethod()
         {
             meta.InsertComment( "Introduced." );
-            meta.Target.Method.Invokers.Base!.Invoke( meta.This );
+            meta.Target.Method.GetInvoker( InvokerOptions.Before ).Invoke( meta.This );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             meta.InsertComment( "Introduced." );
 
-            return meta.Target.Method.Invokers.Base!.Invoke( meta.This );
+            return meta.Target.Method.GetInvoker( InvokerOptions.Before ).Invoke( meta.This );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             meta.InsertComment( "Introduced." );
 
-            return meta.Target.Method.Invokers.Base!.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+            return meta.Target.Method.GetInvoker( InvokerOptions.Before ).Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
         }
     }
 
@@ -50,11 +51,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.Base!.Invoke( meta.This );
+                return meta.Target.Method.GetInvoker( InvokerOptions.Before ).Invoke( meta.This );
             }
             else
             {
-                return meta.Target.Method.Invokers.Base!.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.GetInvoker( InvokerOptions.Before ).Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
             }
         }
     }

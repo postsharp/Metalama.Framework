@@ -128,12 +128,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public object NullConditional( object? value )
-            => new NullConditionalUserExpression( (UserExpression?) value ?? throw new ArgumentNullException( nameof(value) ) );
-
-        [Memo]
-        internal RunTimeInvocationApi RunTimeInvocationApi => new( this._common.SyntaxGenerationContext );
-
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )

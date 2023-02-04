@@ -52,11 +52,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-        public object Add( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Add( this, target, handler );
+        public IEventInvoker GetInvoker( InvokerOptions options ) => new EventInvoker( this, options );
 
-        public object Remove( object? target, object? handler ) => TemplateExpansionContext.CurrentInvocationApi.Remove( this, target, handler );
+        public object Add( object? target, object? handler ) => new EventInvoker( this ).Add( target, handler );
 
-        public object? Raise( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Raise( this, target, args );
+        public object Remove( object? target, object? handler ) => new EventInvoker( this ).Remove( target, handler );
+
+        public object? Raise( object? target, params object?[] args ) => new EventInvoker( this ).Raise( target, args );
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

@@ -21,5 +21,17 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         }
 
         public abstract TypedExpressionSyntaxImpl CreateMemberAccessExpression( string member );
+
+        protected abstract UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec );
+
+        public UserReceiver WithAspectReferenceOrder( AspectReferenceOrder order )
+        {
+            if ( order == this.AspectReferenceSpecification.Order )
+            {
+                return this;
+            }
+            
+            return this.WithAspectReferenceSpecification( this.AspectReferenceSpecification.WithOrder( order ) );
+        }
     }
 }

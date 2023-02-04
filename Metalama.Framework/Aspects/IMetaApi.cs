@@ -43,7 +43,5 @@ namespace Metalama.Framework.Aspects
         IDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
-
-        object NullConditional( object? value );
     }
 }

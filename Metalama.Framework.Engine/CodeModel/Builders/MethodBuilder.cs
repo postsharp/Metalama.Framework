@@ -148,7 +148,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
-    object? IMethod.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
+    IMethodInvoker IMethod.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
+
+    object? IMethodInvoker.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 

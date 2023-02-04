@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     _ => this[this.Indexer.Parameters[name].Index]
                 };
 
-            object IParameterList.ToValuesArray() => throw new NotSupportedException();
+            object IParameterList.ToValueArray() => throw new NotSupportedException();
 
             public IParameterBuilder this[ int index ]
             {

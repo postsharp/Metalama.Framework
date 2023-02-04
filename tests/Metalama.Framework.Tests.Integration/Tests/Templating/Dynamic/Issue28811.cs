@@ -19,9 +19,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
             
             dynamic? clone = meta.This;
             dynamic? clonedValue = meta.This;
-            field.Invokers.Base!.SetValue(clone, clonedValue);
+            field.SetValue(clone, clonedValue);
             
-            field.Invokers.Base!.SetValue(clone, field.Invokers.Base.GetValue(meta.This));
+            field.SetValue(clone, field.GetValue(meta.This));
         
             
             return default;

@@ -2,6 +2,7 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 
 #pragma warning disable CS0067
 
@@ -23,11 +24,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
 
             if (otherClassMethod.Parameters.Count == 0)
             {
-                return otherClassMethod.Invoke( meta.NullConditional( meta.Target.Method.Parameters[0]) );
+                return otherClassMethod.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.Target.Method.Parameters[0]);
             }
             else
             {
-                return otherClassMethod.Invoke( meta.NullConditional( meta.Target.Method.Parameters[0] ), meta.Target.Method.Parameters[1].Value);
+                return otherClassMethod.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.Target.Method.Parameters[0], meta.Target.Method.Parameters[1].Value);
             }
         }
     }

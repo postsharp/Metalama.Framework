@@ -50,9 +50,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
 
-        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+        public IFieldOrPropertyInvoker GetInvoker( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.SetValue( this, target, value );
+        public object? GetValue( object? target ) => new FieldOrPropertyInvoker( this ).GetValue( target );
+
+        public object? SetValue( object? target, object? value ) => new FieldOrPropertyInvoker( this ).SetValue( target, value );
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 

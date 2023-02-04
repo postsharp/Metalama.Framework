@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -66,9 +65,11 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
-        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+        public IFieldOrPropertyInvoker GetInvoker( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.SetValue( this, target, value );
+        public object? GetValue( object? target ) => new FieldOrPropertyInvoker( this ).GetValue( target );
+
+        public object? SetValue( object? target, object? value ) => new FieldOrPropertyInvoker( this ).SetValue( target, value );
 
         private IExpression? GetInitializerExpressionCore()
         {

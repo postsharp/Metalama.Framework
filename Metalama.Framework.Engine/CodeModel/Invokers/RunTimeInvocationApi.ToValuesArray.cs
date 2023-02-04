@@ -12,32 +12,27 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers;
 
-internal partial class RunTimeInvocationApi
+internal sealed class ValueArrayExpression : UserExpression
 {
-    public object ToValuesArray( IParameterList parameters ) => new ToArrayExpression( parameters );
+    private readonly ParameterList _parent;
 
-    private sealed class ToArrayExpression : UserExpression
+    public ValueArrayExpression( IParameterList parent )
     {
-        private readonly ParameterList _parent;
-
-        public ToArrayExpression( IParameterList parent )
-        {
-            this._parent = (ParameterList?) parent;
-        }
-
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-        {
-            var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
-
-            return syntaxGenerator.ArrayCreationExpression(
-                syntaxGenerator.Type( SpecialType.System_Object ),
-                this._parent.SelectAsEnumerable(
-                    p =>
-                        RefKindExtensions.IsReadable( p.RefKind )
-                            ? SyntaxFactory.IdentifierName( (string) p.Name )
-                            : (SyntaxNode) syntaxGenerator.DefaultExpression( SymbolExtensions.GetSymbol( (IType) p.Type ) ) ) );
-        }
-
-        public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
+        this._parent = (ParameterList) parent;
     }
+
+    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    {
+        var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
+
+        return syntaxGenerator.ArrayCreationExpression(
+            syntaxGenerator.Type( SpecialType.System_Object ),
+            this._parent.SelectAsEnumerable(
+                p =>
+                    RefKindExtensions.IsReadable( p.RefKind )
+                        ? SyntaxFactory.IdentifierName( p.Name )
+                        : (SyntaxNode) syntaxGenerator.DefaultExpression( p.Type.GetSymbol() ) ) );
+    }
+
+    public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
 }

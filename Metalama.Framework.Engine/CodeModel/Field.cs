@@ -83,9 +83,11 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
-        public object? GetValue( object? target ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+        public IFieldOrPropertyInvoker GetInvoker( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        public object? SetValue( object? target, object? value ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target );
+        public object? GetValue( object? target ) => new FieldOrPropertyInvoker( this ).GetValue( target );
+
+        public object? SetValue( object? target, object? value ) => new FieldOrPropertyInvoker( this ).SetValue( target, value );
 
         private IExpression? GetInitializerExpressionCore()
         {

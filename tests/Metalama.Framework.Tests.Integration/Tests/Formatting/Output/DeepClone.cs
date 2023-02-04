@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
             }
             else
             {
-                ExpressionFactory.Capture( meta.Target.Method.Invokers.Base.Invoke( meta.This ), out baseCall );
+                ExpressionFactory.Capture( meta.Target.Method.Invoke( meta.Base ), out baseCall );
             }
 
             var clone = meta.Cast( meta.Target.Type, baseCall );

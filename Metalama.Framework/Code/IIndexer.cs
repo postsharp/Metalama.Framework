@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code;
 /// Represents an indexer, i.e. a <c>this[*]</c> property.
 /// </summary>
 /// <seealso cref="IProperty"/>
-public interface IIndexer : IPropertyOrIndexer, IHasParameters
+public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
 {
     /// <summary>
     /// Gets a list of interface properties this property explicitly implements.
@@ -28,7 +28,5 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
 
-    dynamic GetValue( dynamic? target, params dynamic?[] args );
-
-    dynamic? SetValue( dynamic? target, dynamic value, params dynamic?[] args );
+    IIndexerInvoker GetInvoker( InvokerOptions options );
 }

@@ -10,12 +10,6 @@ namespace Metalama.Framework.Code.Invokers
     /// layer of overrides should be invoked.
     /// </summary>
     [CompileTime]
-    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
-    public interface IInvoker
-    {
-        /// <summary>
-        /// Gets a value indicating which layer of the semantic must be invoked relatively to the current layer.
-        /// </summary>
-        InvokerOrder Order { get; }
-    }
+    [Obsolete]
+    public interface IInvoker { }
 }

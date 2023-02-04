@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer, IExpression
+    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer, IExpression, IFieldOrPropertyInvoker
     {
         /// <summary>
         /// Gets a value indicating whether the declaration is an auto-property or a field, or <c>null</c> if the
@@ -48,8 +48,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         IExpression? InitializerExpression { get; }
 
-        dynamic? GetValue( dynamic? target );
-
-        dynamic? SetValue( dynamic? target, dynamic? value );
+        IFieldOrPropertyInvoker GetInvoker( InvokerOptions options );
     }
 }

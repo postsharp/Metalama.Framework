@@ -109,11 +109,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
-        object IEvent.Add( object? target, object? handler ) => throw new NotSupportedException();
+        IEventInvoker IEvent.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
 
-        object IEvent.Remove( object? target, object? handler ) => throw new NotSupportedException();
+        object IEventInvoker.Add( object? target, object? handler ) => throw new NotSupportedException();
 
-        object? IEvent.Raise( object? target, params object?[] args ) => throw new NotSupportedException();
+        object IEventInvoker.Remove( object? target, object? handler ) => throw new NotSupportedException();
+
+        object? IEventInvoker.Raise( object? target, params object?[] args ) => throw new NotSupportedException();
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 

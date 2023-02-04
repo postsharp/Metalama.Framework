@@ -14,44 +14,43 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal partial class RunTimeInvocationApi
+    internal partial class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
     {
-        public object GetValue( IFieldOrProperty fieldOrProperty, object? instance )
+        public FieldOrPropertyInvoker( IFieldOrProperty fieldOrProperty, InvokerOptions options = default) : base( fieldOrProperty, options ) { }
+
+        public object GetValue( object? instance )
         {
             return new SyntaxUserExpression(
                 this.CreatePropertyExpression(
-                    fieldOrProperty,
                     instance,
                     AspectReferenceTargetKind.PropertyGetAccessor ),
-                fieldOrProperty.Type,
-                isReferenceable: fieldOrProperty.DeclarationKind == DeclarationKind.Field,
-                isAssignable: fieldOrProperty.Writeability != Writeability.None );
+                this.Declaration.Type,
+                isReferenceable: this.Declaration.DeclarationKind == DeclarationKind.Field,
+                isAssignable: this.Declaration.Writeability != Writeability.None );
         }
 
-        public object SetValue( IFieldOrProperty fieldOrProperty, object? instance, object? value )
+        public object SetValue( object? instance, object? value )
         {
             var propertyAccess = this.CreatePropertyExpression(
-                fieldOrProperty,
                 instance,
                 AspectReferenceTargetKind.PropertySetAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, fieldOrProperty.Compilation, this._generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Declaration.Compilation, this.GenerationContext ) );
 
-            return new SyntaxUserExpression( expression, fieldOrProperty.Type );
+            return new SyntaxUserExpression( expression, this.Declaration.Type );
         }
 
         private ExpressionSyntax CreatePropertyExpression(
-            IFieldOrProperty fieldOrProperty,
             object? target,
             AspectReferenceTargetKind targetKind )
         {
-            var receiverInfo = this.GetReceiverInfo( fieldOrProperty, target );
-            var receiverSyntax = fieldOrProperty.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this._generationContext );
+            var receiverInfo = this.GetReceiverInfo( this.Declaration, target );
+            var receiverSyntax = this.Declaration.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
 
-            var name = IdentifierName( fieldOrProperty.Name );
+            var name = IdentifierName( this.Declaration.Name );
 
             ExpressionSyntax expression;
 
@@ -65,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
 
             // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), fieldOrProperty.DeclaringType.GetSymbol().OriginalDefinition ) )
+            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Declaration.DeclaringType.GetSymbol().OriginalDefinition ) )
             {
                 expression = expression.WithAspectReferenceAnnotation( receiverInfo.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }

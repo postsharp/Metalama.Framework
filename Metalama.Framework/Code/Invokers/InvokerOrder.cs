@@ -9,17 +9,31 @@ namespace Metalama.Framework.Code.Invokers
     /// Enumeration of orders for invokers.
     /// </summary>
     [CompileTime]
-    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+    [Obsolete("Use InvokerOptions", true)]
     public enum InvokerOrder
     {
         /// <summary>
-        /// Final (equivalent to <c>this</c> in C#, including resolution of <c>virtual</c> calls).
+        /// Equal to <see cref="Base"/>.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Base (equivalent to <c>base</c> in C#).
+        /// Accesses the implementation prior to the current aspect layer (equivalent to <c>base</c> in C#).
         /// </summary>
-        Base
+        Base = Default,
+        
+        /// <summary>
+        /// Accesses the final implementation of the member.
+        /// </summary>
+        Final 
+    }
+
+    [CompileTime]
+    [Flags]
+    public enum InvokerOptions
+    {
+        Default,
+        Before = 1,
+        NullConditional = 1024
     }
 }

@@ -113,7 +113,9 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     bool IMethod.IsExtern => false;
 
-    object? IMethod.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
+    IMethodInvoker IMethod.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
+
+    object? IMethodInvoker.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
 
     public Accessibility Accessibility
     {

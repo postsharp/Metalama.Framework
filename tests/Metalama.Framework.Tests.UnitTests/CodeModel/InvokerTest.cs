@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -64,9 +64,8 @@ class TargetCode
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.Invoke(
-                        new NullConditionalUserExpression(
-                            new SyntaxUserExpression( generator.IdentifierName( "a" ), compilation.Factory.GetSpecialType( SpecialType.Object ) ) ),
+                    toString.GetInvoker( InvokerOptions.NullConditional ).Invoke(
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ),
                         new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
@@ -313,7 +312,7 @@ class TargetCode
                 Assert.Equal( advisedParameterList[0], advisedParameterList["i"] );
                 Assert.Equal( advisedParameterList[1], advisedParameterList["j"] );
 
-                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is( typeof(int) ) ) )!.Name );
+                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is(  typeof(int) ) ) )!.Name );
             }
         }
 
@@ -345,14 +344,22 @@ class TargetCode
                 AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetValue(
-                        new NullConditionalUserExpression(
-                            new SyntaxUserExpression( SyntaxFactory.IdentifierName( "a" ), compilation.Factory.GetSpecialType( SpecialType.Object ) ) ) ),
+                    property.GetInvoker( InvokerOptions.NullConditional ).GetValue( SyntaxFactory.IdentifierName( "a" ) ),
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
                     property.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
+
+#if NET5_0_OR_GREATER
+                AssertEx.DynamicEquals(
+                    property.GetValue( property.GetValue( thisExpression ) ),
+                    @"((global::TargetCode)this).P.P" );
+#else
+                /*
+                 * There is a weird exception in .NET Framework because of the dynamic binder, but this should not affect any production scenario.
+                 */
+#endif
             }
         }
 
@@ -384,10 +391,12 @@ class TargetCode
                 AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetMethod!.Invoke(
-                        new NullConditionalUserExpression(
-                            new SyntaxUserExpression( SyntaxFactory.IdentifierName( "a" ), compilation.Factory.GetSpecialType( SpecialType.Object ) ) ) ),
+                    property.GetMethod!.GetInvoker( InvokerOptions.NullConditional ).Invoke( SyntaxFactory.IdentifierName( "a" ) ),
                     @"((global::TargetCode)a)?.P" );
+
+                AssertEx.DynamicEquals(
+                    property.GetMethod!.Invoke( property.GetValue( thisExpression ) ),
+                    @"((global::TargetCode)this).P.P" );
             }
         }
 
@@ -513,15 +522,15 @@ class TargetCode
                 var noParameterMethod = type.Methods.OfName( "C" ).Single();
 
                 AssertEx.DynamicEquals(
-                    method.Parameters.ToValuesArray(),
+                    method.Parameters.ToValueArray(),
                     @"new object[]{a, b, c, default(global::System.DateTime), e}" );
 
                 AssertEx.DynamicEquals(
-                    longMethod.Parameters.ToValuesArray(),
+                    longMethod.Parameters.ToValueArray(),
                     @"new object[]{a, b, c, d, e, f, g, h, i, j, k, l}" );
 
                 AssertEx.DynamicEquals(
-                    noParameterMethod.Parameters.ToValuesArray(),
+                    noParameterMethod.Parameters.ToValueArray(),
                     @"new object[]{}" );
             }
         }

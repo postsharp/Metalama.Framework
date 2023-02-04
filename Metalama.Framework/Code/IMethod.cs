@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a method, but not a constructor.
     /// </summary>
-    public interface IMethod : IMethodBase, IGeneric
+    public interface IMethod : IMethodBase, IGeneric, IMethodInvoker
     {
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
@@ -77,6 +77,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool IsExtern { get; }
 
-        dynamic? Invoke( dynamic? target, params dynamic?[] args );
+        IMethodInvoker GetInvoker( InvokerOptions options );
     }
 }

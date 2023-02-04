@@ -42,10 +42,12 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
         }
     }
 
-    public object GetValue( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.GetValue( this, target, args );
+    public IIndexerInvoker GetInvoker( InvokerOptions options ) => new IndexerInvoker( this, options );
+
+    public object GetValue( object? target, params object?[] args ) => new IndexerInvoker( this ).GetValue( target, args );
 
     public object? SetValue( object? target, object value, params object?[] args )
-        => TemplateExpansionContext.CurrentInvocationApi.SetValue( this, target, args );
+        => new IndexerInvoker( this ).SetValue( target, value, args );
 
     public IMember? OverriddenMember => this.OverriddenIndexer;
 

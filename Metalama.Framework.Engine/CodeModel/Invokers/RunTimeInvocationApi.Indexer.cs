@@ -11,44 +11,43 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal partial class RunTimeInvocationApi
+    internal partial class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
-        public object GetValue( IIndexer indexer, object? target, params object?[] args )
+        public IndexerInvoker( IIndexer indexer, InvokerOptions options = default ) : base( indexer, options ) { }
+
+        public object GetValue( object? target, params object?[] args )
         {
             return new SyntaxUserExpression(
                 this.CreateIndexerAccess(
-                    indexer,
                     target,
                     args ),
-                indexer.Type,
-                isAssignable: indexer.Writeability != Writeability.None );
+                this.Declaration.Type,
+                isAssignable: this.Declaration.Writeability != Writeability.None );
         }
 
-        public object SetValue( IIndexer indexer, object? target, object value, params object?[] args )
+        public object SetValue( object? target, object value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreateIndexerAccess(
-                indexer,
                 target,
                 args );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, indexer.Compilation, syntaxGenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Declaration.Compilation, syntaxGenerationContext ) );
 
-            return new SyntaxUserExpression( expression, indexer.Type, isAssignable: true );
+            return new SyntaxUserExpression( expression, this.Declaration.Type, isAssignable: true );
         }
 
         private ExpressionSyntax CreateIndexerAccess(
-            IIndexer indexer,
             object? target,
             object?[]? args )
         {
-            var receiverInfo = this.GetReceiverInfo( indexer, target );
-            var receiverSyntax = indexer.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this._generationContext );
-            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, indexer.Compilation, this._generationContext ).AssertNotNull();
+            var receiverInfo = this.GetReceiverInfo( this.Declaration, target );
+            var receiverSyntax = this.Declaration.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.Declaration.Compilation, this.GenerationContext ).AssertNotNull();
 
             var expression = ElementAccessExpression( receiverSyntax ).AddArgumentListArguments( argExpressions.SelectAsArray( e => Argument( e.Syntax ) ) );
 

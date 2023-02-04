@@ -78,14 +78,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                     // If yes, call the method without a cast.
                     field.SetValue(
                         clone,
-                        meta.Cast(fieldType, field.ToExpression().Value?.Clone()));
+                        meta.Cast(fieldType, field.Value?.Clone()));
                 }
                 else
                 {
                     // If no, use the interface.
                     field.SetValue(
                         clone,
-                        meta.Cast(fieldType, ((ICloneable?)field.ToExpression().Value)?.Clone()));
+                        meta.Cast(fieldType, ((ICloneable?)field.Value)?.Clone()));
                 }
             }
 

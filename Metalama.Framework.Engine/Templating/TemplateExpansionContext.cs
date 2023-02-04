@@ -44,11 +44,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
-    internal static AspectLayerId? CurrentAspectLayerId => (CurrentOrNull as TemplateExpansionContext)?.AspectLayerId;
+    internal static AspectLayerId? CurrentAspectLayerId => CurrentOrNull?.AspectLayerId;
 
-    internal static RunTimeInvocationApi CurrentInvocationApi
-        => (CurrentOrNull as TemplateExpansionContext)?.MetaApi.RunTimeInvocationApi
-           ?? throw new InvalidOperationException( "RunTimeInvocationApi not available." );
 
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
@@ -57,7 +54,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// </summary>
     internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
     {
-        var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, Aspects.AspectLayerId.Null ) );
+        var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
         _currentSyntaxGenerationContext.Value = generationContext;
 
         return new DisposeCookie(

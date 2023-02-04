@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourceMe
         [Template]
         private dynamic OverrideMethod()
         {
-            if (meta.Target.Method.Invoke() > 0)
+            if (meta.Target.Method.Invoke( meta.This ) > 0)
             {
                 var z = meta.Proceed();
 

@@ -57,7 +57,9 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 
-    public object? Invoke( object? target, params object?[] args ) => TemplateExpansionContext.CurrentInvocationApi.Invoke( this, target, args );
+    public IMethodInvoker GetInvoker( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public object? Invoke( object? target, params object?[] args ) => new MethodInvoker( this ).Invoke( target, args );
 
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 

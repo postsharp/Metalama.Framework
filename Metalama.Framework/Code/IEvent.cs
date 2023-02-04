@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represent an event.
     /// </summary>
-    public interface IEvent : IMemberWithAccessors
+    public interface IEvent : IMemberWithAccessors, IEventInvoker
     {
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
@@ -59,10 +59,6 @@ namespace Metalama.Framework.Code
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
         EventInfo ToEventInfo();
 
-        dynamic Add( dynamic? target, dynamic? handler );
-
-        dynamic Remove( dynamic? target, dynamic? handler );
-
-        dynamic? Raise( dynamic? target, params dynamic?[] args );
+        IEventInvoker GetInvoker( InvokerOptions options );
     }
 }

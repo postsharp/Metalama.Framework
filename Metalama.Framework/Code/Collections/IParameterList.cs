@@ -13,6 +13,6 @@ namespace Metalama.Framework.Code.Collections
     {
         IParameter this[ string name ] { get; }
 
-        dynamic ToValuesArray();
+        dynamic ToValueArray();
     }
 }

@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public bool IsReferenceable { get; }
 
         public ExpressionSyntax Syntax { get; }
+        
+        public bool CanBeNull { get; }
 
         public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
 
@@ -41,7 +43,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ExpressionSyntax syntax,
             ITypeSymbol? expressionType,
             SyntaxGenerationContext generationContext,
-            bool isReferenceable = false )
+            bool isReferenceable = false,
+            bool canBeNull = true )
         {
 #if DEBUG
             if ( generationContext.Compilation == CompilationContextFactory.EmptyCompilation )
@@ -49,6 +52,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 throw new AssertionFailedException( "The compilation is empty." );
             }
 #endif
+           
 
             if ( expressionType == null )
             {
@@ -63,6 +67,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
+            this.CanBeNull = canBeNull;
         }
 
         internal TypedExpressionSyntaxImpl(
@@ -76,8 +81,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ExpressionSyntax syntax,
             IType type,
             SyntaxGenerationContext generationContext,
-            bool isReferenceable = false )
-            : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
+            bool isReferenceable = false,
+            bool canBeNull = true )
+            : this( syntax, type.GetSymbol(), generationContext, isReferenceable, canBeNull ) { }
 
         internal TypedExpressionSyntaxImpl(
             ExpressionSyntax syntax,

@@ -18,13 +18,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
+                meta.Target.Event.Add(meta.Base, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
+                meta.Target.Event.Remove(meta.Base, value);
             }
         }
 
@@ -35,13 +35,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
+                meta.Target.Event.Add(meta.Base, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
+                meta.Target.Event.Remove(meta.Base, value);
             }
         }
 
@@ -51,13 +51,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
+                meta.Target.Event.Add(meta.Base, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
+                meta.Target.Event.Remove(meta.Base, value);
             }
         }
     }
@@ -80,13 +80,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         [Template]
         public void AddTemplate(dynamic value)
         {
-            meta.Target.Event.Invokers.Base!.Add(meta.This, value);
+            meta.Target.Event.Add(meta.Base, value);
         }
 
         [Template]
         public void RemoveTemplate(dynamic value)
         {
-            meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
+            meta.Target.Event.Remove(meta.Base, value);
         }
     }
 

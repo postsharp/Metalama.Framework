@@ -5,6 +5,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictOverride_ConditionalBaseInvoker;
 
 [assembly: AspectOrder( typeof(TestAttribute), typeof(TestIntroductionAttribute) )]
@@ -61,11 +62,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This );
+                return meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This );
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
             }
         }
     }

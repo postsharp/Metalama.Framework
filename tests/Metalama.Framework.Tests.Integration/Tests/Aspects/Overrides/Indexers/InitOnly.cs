@@ -47,14 +47,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             var indexer = meta.Target.Type.Indexers.First();
 
-            return indexer.Invokers.Base!.GetValue( meta.This, 42 );
+            return indexer.GetValue( meta.Base, 42 );
         }
 
         [Template]
         public void SetProperty()
         {
             var indexer = meta.Target.Type.Indexers.First();
-            indexer.Invokers.Base!.SetValue( meta.This, meta.Target.Parameters.Last(), 42 );
+            indexer.SetValue( meta.Base, meta.Target.Parameters.Last(), 42 );
         }
     }
 

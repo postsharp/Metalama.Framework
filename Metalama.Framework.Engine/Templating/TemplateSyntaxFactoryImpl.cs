@@ -373,7 +373,7 @@ namespace Metalama.Framework.Engine.Templating
                 ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ) )
                 : null;
 
-            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext, false );
+            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );
         }
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )

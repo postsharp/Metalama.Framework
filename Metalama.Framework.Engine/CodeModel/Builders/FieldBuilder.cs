@@ -59,9 +59,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        object? IFieldOrProperty.GetValue( object? target ) => throw new NotSupportedException();
+        IFieldOrPropertyInvoker IFieldOrProperty.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
 
-        object? IFieldOrProperty.SetValue( object? target, object? value ) => throw new NotSupportedException();
+        object? IFieldOrPropertyInvoker.GetValue( object? target ) => throw new NotSupportedException();
+
+        object? IFieldOrPropertyInvoker.SetValue( object? target, object? value ) => throw new NotSupportedException();
 
         public TemplateMember<IField>? InitializerTemplate { get; set; }
 

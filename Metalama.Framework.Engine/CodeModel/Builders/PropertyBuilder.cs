@@ -118,9 +118,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        object? IFieldOrProperty.GetValue( object? target ) => throw new NotSupportedException();
+        IFieldOrPropertyInvoker IFieldOrProperty.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
 
-        object? IFieldOrProperty.SetValue( object? target, object? value ) => throw new NotSupportedException();
+        object? IFieldOrPropertyInvoker.GetValue( object? target ) => throw new NotSupportedException();
+
+        object? IFieldOrPropertyInvoker.SetValue( object? target, object? value ) => throw new NotSupportedException();
 
         public TemplateMember<IProperty>? InitializerTemplate
         {

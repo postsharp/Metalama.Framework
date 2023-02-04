@@ -33,7 +33,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 this._type,
-                TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                TemplateExpansionContext.CurrentSyntaxGenerationContext,
+                canBeNull: false);
+
+        protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec ) => new ThisInstanceUserReceiver( this._type, spec );
 
         public override bool CanBeNull => false;
     }

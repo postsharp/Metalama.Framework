@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.FieldOrPropert
         {
             foreach (var field in meta.Target.Type.Fields)
             {
-                field.ToExpression().Value = field.ToExpression().Value;
+                field.Value = field.Value;
             }
         }
     }

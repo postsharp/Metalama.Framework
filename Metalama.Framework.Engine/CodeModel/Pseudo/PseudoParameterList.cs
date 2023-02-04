@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Templating;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,6 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
 
-        public object ToValuesArray() => TemplateExpansionContext.CurrentInvocationApi.ToValuesArray( this );
+        public object ToValueArray() => new ValueArrayExpression( this );
     }
 }
