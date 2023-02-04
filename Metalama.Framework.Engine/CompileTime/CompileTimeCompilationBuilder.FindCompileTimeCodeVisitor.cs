@@ -51,9 +51,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     return;
                 }
 
-                var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
+                var declaredSymbol = (INamedTypeSymbol?) this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( declaredSymbol != null && this._classifier.GetTemplatingScope( declaredSymbol ) != TemplatingScope.RunTimeOnly )
+                if ( declaredSymbol != null &&
+                     this._classifier.GetTemplatingScope( declaredSymbol ) != TemplatingScope.RunTimeOnly &&
+                     !SystemTypeDetector.IsSystemType( declaredSymbol ) )
                 {
                     this.HasCompileTimeCode = true;
                 }

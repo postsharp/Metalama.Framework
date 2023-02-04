@@ -26,16 +26,6 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// </summary>
         public string TransformedPath { get; init; }
 
-        /// <summary>
-        /// Gets the hash of the source.
-        /// </summary>
-        public ImmutableArray<byte> SourceHash { get; init; }
-
-        /// <summary>
-        /// Gets the algorithm used to produce <see cref="SourceHash"/>.
-        /// </summary>
-        public SourceHashAlgorithm SourceHashAlgorithm { get; init; }
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public CompileTimeFileManifest()
 #pragma warning restore CS8618 // Elements should appear in the correct order
@@ -47,8 +37,6 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         {
             this.SourcePath = textMapFile.SourcePath;
             this.TransformedPath = textMapFile.TargetPath;
-            this.SourceHash = ImmutableArray<byte>.Empty;
-            this.SourceHashAlgorithm = SourceHashAlgorithm.None;
         }
     }
 }
