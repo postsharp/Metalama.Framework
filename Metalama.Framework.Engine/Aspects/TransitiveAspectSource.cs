@@ -75,8 +75,14 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                 {
                     if ( !aspectClassesByName.TryGetValue( aspectClassName, out var aspectClass ) )
                     {
-                        // TODO: it seems to happen with inherited aspects at design time.
-                        throw new AssertionFailedException( $"Cannot find an aspect '{aspectClassName}'." );
+                        // It seems to happen with inherited aspects at design time when the aspect class could not be found.
+                        // In that case, an error should have been reported above. Anyway, this should not be the problem of the present
+                        // method but of the code upstream and we should cope with that situation/
+                        serviceProvider.GetLoggerFactory()
+                            .GetLogger( nameof(TransitiveAspectSource) )
+                            .Warning?.Log( $"Cannot find the aspect class '{aspectClassesByName}'." );
+
+                        continue;
                     }
 
                     var targets = manifest.GetInheritableAspects( aspectClassName )
