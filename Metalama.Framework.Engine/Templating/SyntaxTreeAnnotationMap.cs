@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Templating
             return this._annotationToSymbolMap[annotation];
         }
         
-        public IMethodSymbol? GetMethodSymbol( ExpressionSyntax node )
+        public ISymbol? GetInvocableSymbol( ExpressionSyntax node )
         {
             using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
 
@@ -158,16 +158,25 @@ namespace Metalama.Framework.Engine.Templating
                 return null;
             }
 
-            var annotation = enumerator.Current;
+            var firstAnnotation = enumerator.Current;
 
             if ( !enumerator.MoveNext() )
             {
                 // No ambiguity.
-                return (IMethodSymbol)this._annotationToSymbolMap[annotation];
+                return this._annotationToSymbolMap[firstAnnotation];
             }
 
-            // We have some ambiguity. Get all symbols.
-            var symbols = new List<IMethodSymbol> { (IMethodSymbol) this._annotationToSymbolMap[annotation], (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+            var firstSymbol = this._annotationToSymbolMap[firstAnnotation];
+
+            // We have some ambiguity.
+            // We never have ambiguities with anything else than methods, so let's end here if we don't have a method.
+            if ( firstSymbol is not IMethodSymbol firstMethod )
+            {
+                return null;
+            }
+            
+            // Get all symbols.
+            var symbols = new List<IMethodSymbol> { firstMethod , (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
 
             while ( enumerator.MoveNext() )
             {

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             {
                 var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
 
-                return optionalProperty.With( meta.This.OptionalValues ).Value.Value;
+                return optionalProperty.With( (IExpression) meta.This.OptionalValues ).Value.Value;
             }
 
             set
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                 optionalValueBuilder.AppendVerbatim( "new " );
                 optionalValueBuilder.AppendTypeName( optionalProperty.Type );
                 optionalValueBuilder.AppendVerbatim( "( value )" );
-                optionalProperty.With( meta.This.OptionalValues ).Value = optionalValueBuilder.ToValue();
+                optionalProperty.With( (IExpression) meta.This.OptionalValues ).Value = optionalValueBuilder.ToValue();
             }
         }
     }

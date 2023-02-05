@@ -34,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            meta.This.PropertyChanged?.Invoke( new PropertyChangedEventArgs( meta.Target.Parameters[0].Value ) );
+            meta.This.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( meta.Target.Parameters[0].Value ) );
         }
 
         [Template]

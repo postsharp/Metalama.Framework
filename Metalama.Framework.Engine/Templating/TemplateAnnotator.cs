@@ -957,21 +957,20 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         var expressionScope = this.GetNodeScope( transformedExpression );
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
 
         ImmutableArray<IParameterSymbol> parameters;
 
-        var symbol = this._syntaxTreeAnnotationMap.GetMethodSymbol( node.Expression );
+        var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
 
         switch ( symbol )
         {
-            case {} method:
+            case IMethodSymbol method:
                 parameters = method.Parameters;
 
                 break;
 
             default:
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-
                 switch ( expressionType )
                 {
                     case null when symbol == null:
@@ -1046,12 +1045,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     }
 
                     // Dynamic arguments passed to a a compile-time method returning a compile-time value are forbidden.
-                    // They must be explicitly cast to IExpression.
-                    if ( isDynamicParameter && expressionScope == TemplatingScope.CompileTimeOnly )
+                    // They must be explicitly cast to IExpression. It does not apply if the expression is used as a statement expression.
+                    if ( isDynamicParameter && expressionScope == TemplatingScope.CompileTimeOnly && !node.Parent.IsKind( SyntaxKind.ExpressionStatement ) )
                     {
-                        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
+                        var argumentType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
 
-                        if ( expressionType?.TypeKind is TypeKind.Dynamic )
+                        if ( argumentType?.TypeKind is TypeKind.Dynamic )
                         {
                             this.ReportDiagnostic(
                                 TemplatingDiagnosticDescriptors.DynamicArgumentMustBeCastToIExpression,
@@ -1740,13 +1739,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // The scope of a classical assignment is determined by the left side.
             var transformedLeft = this.Visit( node.Left );
 
-            var scope = this.GetAssignmentScope( transformedLeft );
+            var leftScope = this.GetAssignmentScope( transformedLeft );
             ExpressionSyntax? transformedRight;
 
             // If we are in a run-time-conditional block, we cannot assign compile-time variables.
             ScopeContext? context = null;
 
-            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+            if ( leftScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
                 if ( this._currentScopeContext.IsRuntimeConditionalBlock )
                 {
@@ -1756,8 +1755,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                         (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
 
-                // The right part must be compile-time.
-                context = this._currentScopeContext.CompileTimeOnly( "the assignment of a compile-time expression" );
+                if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.Left ) is INamedTypeSymbol { Name: nameof(IExpression) } )
+                {
+                    // Assigning a run-time expression to an IExpression is allowed but requires special processing.
+                    // It is similar to the case with a cast to IExpression, but the cast is not required.
+                }
+                else
+                {
+                    // The right part must be compile-time.
+                    context = this._currentScopeContext.CompileTimeOnly( "the assignment of a compile-time expression" );
+                }
             }
 
             using ( this.WithScopeContext( context ) )
@@ -1766,13 +1773,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
 
             // If we have a discard assignment, take the scope from the right.
-            if ( scope == TemplatingScope.RunTimeOrCompileTime
+            if ( leftScope == TemplatingScope.RunTimeOrCompileTime
                  && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
             {
-                scope = this.GetNodeScope( transformedRight );
+                leftScope = this.GetNodeScope( transformedRight );
             }
 
-            return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
+            return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( leftScope );
         }
     }
 
@@ -1808,7 +1815,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 annotatedType = this.Visit( node.Type );
             }
 
-            castScope = this.GetNodeScope( annotatedType ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            castScope = this.GetNodeScope( annotatedType ).GetExpressionValueScope(  ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
             if ( castScope == TemplatingScope.CompileTimeOnly )
             {
@@ -1816,7 +1823,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                 if ( type is not INamedTypeSymbol { Name: nameof(IExpression) } )
                 {
-
                     // We cannot cast a run-time expression to a compile-time type, except to IExpression.
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,

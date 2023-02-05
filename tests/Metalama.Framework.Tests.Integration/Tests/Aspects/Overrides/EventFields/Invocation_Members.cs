@@ -48,12 +48,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         [Introduce]
         public void Bar()
         {
-            meta.This.IntroducedEvent?.Invoke(new EventArgs());
+            meta.This.IntroducedEvent?.Invoke(meta.This, new EventArgs());
             var a = meta.This.IntroducedEvent?.GetInvocationList();
-            var b = meta.This.IntroducedEvent?.BeginInvoke(new EventArgs(), new AsyncCallback(Callback), meta.This);
+            var b = meta.This.IntroducedEvent?.BeginInvoke(meta.This, new EventArgs(), new AsyncCallback(Callback), meta.This);
             var c = meta.This.IntroducedEvent?.Method;
             var d = meta.This.IntroducedEvent?.Target;
-            meta.ThisType.IntroducedStaticEvent?.Invoke(new EventArgs());
+            meta.ThisType.IntroducedStaticEvent?.Invoke(meta.This, new EventArgs());
             var e = meta.ThisType.IntroducedStaticEvent?.GetInvocationList();
             var f = meta.ThisType.IntroducedStaticEvent?.BeginInvoke(null, new EventArgs(), new AsyncCallback(Callback), null);
             var g = meta.ThisType.IntroducedStaticEvent?.Method;

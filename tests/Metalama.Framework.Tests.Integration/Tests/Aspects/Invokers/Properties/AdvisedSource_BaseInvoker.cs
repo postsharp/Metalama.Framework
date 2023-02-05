@@ -17,7 +17,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
 
             set
             {
-                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value = ( value );
+                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value =  value ;
             }
         }
     }

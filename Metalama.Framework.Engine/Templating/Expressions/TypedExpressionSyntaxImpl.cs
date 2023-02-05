@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -34,6 +35,15 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public bool CanBeNull { get; }
 
         public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
+
+        public IUserExpression ToUserExpression( ICompilation compilation )
+        {
+            var factory = compilation.GetCompilationModel().Factory;
+
+            var type = this.ExpressionType != null ? factory.GetIType( this.ExpressionType ) : factory.GetSpecialType( SpecialType.Object );
+
+            return new SyntaxUserExpression( this.Syntax, type );
+        }
 
         public static implicit operator TypedExpressionSyntax( TypedExpressionSyntaxImpl impl ) => new( impl );
 

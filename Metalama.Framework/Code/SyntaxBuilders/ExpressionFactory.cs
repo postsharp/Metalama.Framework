@@ -133,8 +133,12 @@ public static class ExpressionFactory
     /// <param name="definedExpression">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
+    [Obsolete("For dynamic expressions, assign the run-time expression to a variable of type IExpression or cast to to IExpression. For dynamic expressions, use the other overload of this method.")]
     public static void Capture( dynamic? expression, out IExpression definedExpression )
         => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( expression );
+    
+    public static IExpression Capture( dynamic? expression )
+        => SyntaxBuilder.CurrentImplementation.Capture( expression );
 
     /// <summary>
     /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.

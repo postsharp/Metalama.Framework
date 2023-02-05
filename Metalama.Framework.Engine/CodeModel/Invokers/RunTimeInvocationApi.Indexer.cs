@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 isAssignable: this.Member.Writeability != Writeability.None );
         }
 
-        public object SetValue( object value, params object?[] args )
+        public object? SetValue( object? value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -39,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         private ExpressionSyntax CreateIndexerAccess( object?[]? args )
         {
+            args ??= Array.Empty<object>();
+
             var receiverInfo = this.GetReceiverInfo();
             var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
             var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.Member.Compilation, this.GenerationContext ).AssertNotNull();

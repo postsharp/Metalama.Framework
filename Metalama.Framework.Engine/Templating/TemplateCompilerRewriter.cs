@@ -547,11 +547,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // TODO: We need to transform null and default values though. How to do this right then?
             case SyntaxKind.NullLiteralExpression:
             case SyntaxKind.DefaultLiteralExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
             case SyntaxKind.DefaultExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( this.MetaSyntaxFactory.DefaultExpression( (ExpressionSyntax) this.Visit( ((DefaultExpressionSyntax) expression).Type )! ) ) );
 
@@ -652,7 +652,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     this.MetaSyntaxFactory.Literal( expression ) );
             }
 
-            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                 .AddArgumentListArguments(
                     Argument( literalExpression ),
                     Argument(
@@ -701,7 +701,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
             case nameof(Boolean):
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument(
                             InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(LiteralExpression) ) )
@@ -2102,7 +2102,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var transformedExpression = this.Transform( node.Expression );
                 var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( transformedExpression ),
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) )
@@ -2113,5 +2113,41 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // Fallback to the default implementation.
         return base.VisitCastExpression( node );
         
+    }
+
+    public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            return this.TransformAssignmentExpression( node );
+        }
+
+        // Special processing of assigning a run-time expression to IExpression.
+        if ( node.Right.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
+        {
+            var leftType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Left );
+
+            if ( leftType is INamedTypeSymbol { Name: nameof(IExpression) } )
+            {
+                var transformedRight = this.Transform( node.Right );
+                var rightType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Right ) ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                var runtimeExpressionInvocation = InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                    .AddArgumentListArguments(
+                        Argument( transformedRight ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( rightType.GetSerializableTypeId().Id ) ) ) );
+
+                var userExpressionInvocation = InvocationExpression(
+                    MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, runtimeExpressionInvocation, IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+                    ArgumentList( SingletonSeparatedList( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ));
+
+                var transformedLeft = (ExpressionSyntax) this.Visit( node.Left ).AssertNotNull(  );
+
+                return AssignmentExpression( node.Kind(), transformedLeft, userExpressionInvocation );  
+            }
+        }
+
+        // Fallback to the default implementation.
+        return base.VisitAssignmentExpression( node );
     }
 }

@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.Templating
             this._syntaxGenerationContext = templateExpansionContext.SyntaxGenerationContext;
         }
 
+        public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
+
         public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
@@ -365,7 +367,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = this._syntaxGenerationContext;
 

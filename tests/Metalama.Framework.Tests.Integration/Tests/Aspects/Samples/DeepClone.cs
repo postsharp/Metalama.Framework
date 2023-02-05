@@ -48,11 +48,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             if (meta.Target.Method.IsOverride)
             {
-                ExpressionFactory.Capture(meta.Base.Clone(), out baseCall);
+                baseCall = meta.Base.Clone();
             }
             else
             {
-                ExpressionFactory.Capture(meta.Base.MemberwiseClone(), out baseCall);
+                baseCall = meta.Base.MemberwiseClone();
             }
 
             // Define a local variable of the same type as the target type.
@@ -81,8 +81,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                 else
                 {
                     // If no, use the interface.
-                    field.With(
-                        clone ).Value = meta.Cast(fieldType, ((ICloneable?)field.Value)?.Clone());
+                    field.With( clone ).Value = meta.Cast(fieldType, ((ICloneable?)field.Value)?.Clone());
                 }
             }
 

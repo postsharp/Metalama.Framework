@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
 
             set
             {
-                meta.Target.FieldOrProperty.Value =( value);
+                meta.Target.FieldOrProperty.Value =  value;
             }
         }
 

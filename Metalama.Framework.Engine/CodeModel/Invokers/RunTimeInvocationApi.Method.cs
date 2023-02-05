@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public object? Invoke( params object?[] args )
         {
+            args ??= Array.Empty<object>();
+
             var parametersCount = this.Member.Parameters.Count;
 
             if ( parametersCount > 0 && this.Member.Parameters[parametersCount - 1].IsParams )

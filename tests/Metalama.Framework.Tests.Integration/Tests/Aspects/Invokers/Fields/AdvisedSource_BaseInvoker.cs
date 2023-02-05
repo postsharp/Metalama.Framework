@@ -14,7 +14,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSou
 
             set
             {
-                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value = ( value );
+                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value =  value ;
             }
         }
     }

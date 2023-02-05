@@ -48,7 +48,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             var indexer = meta.Target.Type.Indexers.First();
 
-            return indexer.GetValue( meta.Base, 42 );
+            return indexer.With( InvokerOptions.Base ).GetValue( 42 );
         }
 
         [Template]

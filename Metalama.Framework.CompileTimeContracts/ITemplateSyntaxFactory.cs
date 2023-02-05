@@ -11,6 +11,8 @@ namespace Metalama.Framework.CompileTimeContracts;
 
 public interface ITemplateSyntaxFactory
 {
+    ICompilation Compilation { get; }
+    
     void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement );
 
     void AddStatement( List<StatementOrTrivia> list, IStatement statement );
@@ -58,7 +60,7 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
-    TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null );
+    TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null );
 
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );
 
