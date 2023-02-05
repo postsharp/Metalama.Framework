@@ -3,6 +3,7 @@ using System.Linq;
 using Castle.DynamicProxy.Generators;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.FieldPromotion_FinalInvoker;
 
 [assembly: AspectOrder( typeof(After), typeof(Override), typeof(Before) )]
@@ -28,14 +29,14 @@ public class Override : TypeAspect
     [Introduce]
     public void Introduced()
     {
-        _ = meta.Target.Type.Fields.OfName( "Field" ).Single().Value;
-        meta.Target.Type.Fields.OfName( "Field" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value ;
-        meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value;
-        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value ;
-        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value =  42 ;
+        _ = meta.Target.Type.Fields.OfName( "Field" ).Single().With( InvokerOptions.Final ).Value;
+        meta.Target.Type.Fields.OfName( "Field" ).Single().With( InvokerOptions.Final ).Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_Static" ).Single().With( InvokerOptions.Final ).Value;
+        meta.Target.Type.Fields.OfName( "Field_Static" ).Single().With( InvokerOptions.Final ).Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().With( InvokerOptions.Final ).Value;
+        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().With( InvokerOptions.Final ).Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().With( InvokerOptions.Final ).Value;
+        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().With( InvokerOptions.Final ).Value = 42;
     }
 }
 
@@ -45,13 +46,13 @@ public class Before : TypeAspect
     public void IntroducedBefore()
     {
         _ = meta.Target.Type.Fields.OfName( "Field" ).Single().Value;
-        meta.Target.Type.Fields.OfName( "Field" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value ;
-        meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value =  42 ;
+        meta.Target.Type.Fields.OfName( "Field" ).Single().Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value;
+        meta.Target.Type.Fields.OfName( "Field_Static" ).Single().Value = 42;
         _ = meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value;
-        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value ;
-        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value =  42 ;
+        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value;
+        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value = 42;
     }
 }
 
@@ -61,13 +62,13 @@ public class After : TypeAspect
     public void IntroducedAfter()
     {
         _ = meta.Target.Type.Properties.OfName( "Field" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "Field" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Properties.OfName( "Field_Static" ).Single().Value ;
-        meta.Target.Type.Properties.OfName( "Field_Static" ).Single().Value =  42 ;
+        meta.Target.Type.Properties.OfName( "Field" ).Single().Value = 42;
+        _ = meta.Target.Type.Properties.OfName( "Field_Static" ).Single().Value;
+        meta.Target.Type.Properties.OfName( "Field_Static" ).Single().Value = 42;
         _ = meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value;
-        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value =  42 ;
-        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value ;
-        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value =  42 ;
+        meta.Target.Type.Fields.OfName( "Field_NoOverride" ).Single().Value = 42;
+        _ = meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value;
+        meta.Target.Type.Fields.OfName( "Field_Static_NoOverride" ).Single().Value = 42;
     }
 }
 

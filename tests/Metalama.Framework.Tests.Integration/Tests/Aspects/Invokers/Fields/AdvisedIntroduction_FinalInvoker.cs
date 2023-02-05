@@ -2,6 +2,7 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_FinalInvoker;
 
 [assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
@@ -32,13 +33,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
             {
                 Console.WriteLine( "Override" );
 
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
 
             set
             {
                 Console.WriteLine( "Override" );
-                meta.Target.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value = value;
             }
         }
     }

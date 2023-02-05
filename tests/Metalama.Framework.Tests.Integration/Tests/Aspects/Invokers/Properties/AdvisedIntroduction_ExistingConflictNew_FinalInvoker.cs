@@ -2,6 +2,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedIntroduction_ExistingConflictNew_FinalInvoker;
 using System;
+using Metalama.Framework.Code.Invokers;
 
 [assembly: AspectOrder( typeof(TestAttribute), typeof(IntroductionAttribute) )]
 
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
         }
 
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
         }
     }
@@ -49,13 +50,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "Override" );
 
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
 
             set
             {
                 Console.WriteLine( "Override" );
-                meta.Target.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value = value;
             }
         }
     }

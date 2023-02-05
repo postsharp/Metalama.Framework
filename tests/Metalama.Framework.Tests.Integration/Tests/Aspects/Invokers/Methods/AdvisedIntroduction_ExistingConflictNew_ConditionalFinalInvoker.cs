@@ -60,11 +60,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke();
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke();
             }
             else
             {
-                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }
