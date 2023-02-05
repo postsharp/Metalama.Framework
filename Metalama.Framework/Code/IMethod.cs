@@ -31,7 +31,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to invoke the current method.
         /// </summary>
-        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+        [Obsolete( "Use the methods of the IMethodInvoker interface that this object implements.", true )]
         IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>

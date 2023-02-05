@@ -138,6 +138,14 @@ public static class ExpressionFactory
     public static void Capture( dynamic? expression, out IExpression definedExpression )
         => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( expression );
 
+    /// <summary>
+    /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
+    /// itself. The returned <see cref="IExpression"/> can then be used in run-time C# code thanks to the <see cref="IExpression.Value"/> property.
+    /// This mechanism allows to generate expressions that depend on a compile-time control flow.
+    /// </summary>
+    /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions. The expression cannot be <c>dynamic</c>. If
+    /// you have a dynamic expression, do not call this method, but cast the dynamic expression to <see cref="IExpression"/>.</param>
+    /// <seealso href="@templates"/>
     public static IExpression Capture( dynamic? expression ) => SyntaxBuilder.CurrentImplementation.Capture( expression );
 
     /// <summary>

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
-        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+        [Obsolete( "Use the methods of the IEventInvoker interface that this object implements.", true )]
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>

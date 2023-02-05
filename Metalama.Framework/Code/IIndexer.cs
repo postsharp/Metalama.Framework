@@ -20,7 +20,7 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// <summary>
     /// Gets an object that allows to invoke the current property.
     /// </summary>
-    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+    [Obsolete( "Use the methods of the IIndexerInvoker interface that this object implements.", true )]
     IInvokerFactory<IIndexerInvoker> Invokers { get; }
 
     /// <summary>

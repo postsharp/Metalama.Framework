@@ -25,7 +25,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
-        [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+        [Obsolete( "Use the methods of the IFieldOrPropertyInvoker interface that this object implements.", true )]
         IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>

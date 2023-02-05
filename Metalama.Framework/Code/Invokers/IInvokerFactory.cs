@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code.Invokers
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [CompileTime]
-    [Obsolete( "Use the RunTimeInvocationExtensions extension class.", true )]
+    [Obsolete( "No replacement.", true )]
     public interface IInvokerFactory<out T>
         where T : IInvoker
     {
