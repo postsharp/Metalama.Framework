@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public object GetValue( params object?[] args ) => this._indexerBuilder.With( args );
 
-        public object? SetValue( object? value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
+        public object SetValue( object? value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]

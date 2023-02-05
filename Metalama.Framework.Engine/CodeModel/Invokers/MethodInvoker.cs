@@ -16,7 +16,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class MethodInvoker : Invoker<IMethod>, IMethodInvoker
+    internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
     {
         public MethodInvoker( IMethod method, InvokerOptions options = default, object? target = null ) : base( method, options, target ) { }
 

@@ -76,15 +76,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
+            this.CanBeNull = canBeNull;
         }
-
-        internal TypedExpressionSyntaxImpl(
-            ExpressionSyntax syntax,
-            IType type,
-            ISyntaxGenerationContext generationContext,
-            bool isReferenceable = false )
-            : this( syntax, type, (SyntaxGenerationContext) generationContext, isReferenceable ) { }
-
+        
         internal TypedExpressionSyntaxImpl(
             ExpressionSyntax syntax,
             IType type,
@@ -185,7 +179,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                 if ( compilation.HasImplicitConversion( this.ExpressionType, targetType.GetSymbol() ) )
                 {
-                    return new TypedExpressionSyntaxImpl( this.Syntax, targetType, generationContext );
+                    return new TypedExpressionSyntaxImpl( this.Syntax, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
                 }
             }
 
@@ -194,7 +188,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithAdditionalAnnotations( Simplifier.Annotation );
 
-            return new TypedExpressionSyntaxImpl( expression, targetType, generationContext );
+            return new TypedExpressionSyntaxImpl( expression, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
         }
 
         public override string ToString() => this.Syntax.ToString();
