@@ -19,14 +19,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         public void BaseClass_Method()
         {
             meta.InsertComment( "Introduced." );
-            meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This );
+            meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( );
         }
 
         [Introduce( WhenExists = OverrideStrategy.New )]
         public void TargetClass_Method()
         {
             meta.InsertComment( "Introduced." );
-            meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This );
+            meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( );
         }
     }
 
@@ -47,13 +47,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
 
             if (meta.Target.Method.ReturnType.Is( SpecialType.Void ))
             {
-                meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This );
+                meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( );
 
                 return default;
             }
             else
             {
-                return meta.Target.Method.GetInvoker( InvokerOptions.NullConditional ).Invoke( meta.This );
+                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( );
             }
         }
     }

@@ -54,12 +54,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
 
-        public IIndexerInvoker GetInvoker( InvokerOptions options ) => new IndexerInvoker( this, options );
+        public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 
-        public object GetValue( object? target, params object?[] args ) => new IndexerInvoker( this ).GetValue( target, args );
+        public IIndexerInvoker With( object target, InvokerOptions options = default ) => this._indexerBuilder.With( target, options );
 
-        public object? SetValue( object? target, object value, params object?[] args )
-            => new IndexerInvoker( this ).SetValue( target, value, args );
+        public object GetValue( params object?[] args ) => this._indexerBuilder.With( args );
+
+        public object? SetValue( object value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]

@@ -5,16 +5,5 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows accessing the the value of fields or properties.
     /// </summary>
-    public interface IFieldOrPropertyInvoker : IInvoker
-    {
-        /// <summary>
-        /// Get the value for a different instance.
-        /// </summary>
-        dynamic GetValue( dynamic? instance );
-
-        /// <summary>
-        /// Set the value for a different instance.
-        /// </summary>
-        dynamic SetValue( dynamic? instance, dynamic? value );
-    }
+    public interface IFieldOrPropertyInvoker : IInvoker, IExpression { }
 }

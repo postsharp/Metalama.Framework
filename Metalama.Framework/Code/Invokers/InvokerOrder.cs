@@ -33,7 +33,7 @@ namespace Metalama.Framework.Code.Invokers
     public enum InvokerOptions
     {
         Default,
-        Before = 1,
+        Base = 1,
         NullConditional = 1024
     }
 }

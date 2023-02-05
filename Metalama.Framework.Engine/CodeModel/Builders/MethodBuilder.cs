@@ -148,9 +148,11 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
-    IMethodInvoker IMethod.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
-    object? IMethodInvoker.Invoke( object? target, params object?[] args ) => throw new NotSupportedException();
+    public IMethodInvoker With( object target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
@@ -215,4 +217,6 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+
+ 
 }

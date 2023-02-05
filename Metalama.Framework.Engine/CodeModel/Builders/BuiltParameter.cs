@@ -42,6 +42,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         bool IExpression.IsAssignable => true;
 
-        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
+        public ref object? Value => ref this._parameterBuilder.Value;
     }
 }

@@ -59,11 +59,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        IFieldOrPropertyInvoker IFieldOrProperty.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        object? IFieldOrPropertyInvoker.GetValue( object? target ) => throw new NotSupportedException();
-
-        object? IFieldOrPropertyInvoker.SetValue( object? target, object? value ) => throw new NotSupportedException();
+        public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+        
+        public ref object? Value =>ref new FieldOrPropertyInvoker( this ).Value;
 
         public TemplateMember<IField>? InitializerTemplate { get; set; }
 
@@ -102,6 +102,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-        public ref object? Value => throw new NotSupportedException( "Should be implemented by the front-end object." );
     }
 }

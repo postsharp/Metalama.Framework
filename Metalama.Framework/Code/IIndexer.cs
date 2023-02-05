@@ -28,5 +28,7 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
 
-    IIndexerInvoker GetInvoker( InvokerOptions options );
+    IIndexerInvoker With( InvokerOptions options );
+
+    IIndexerInvoker With( dynamic target, InvokerOptions options = default );
 }

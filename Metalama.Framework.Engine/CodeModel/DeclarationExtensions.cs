@@ -195,11 +195,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
             }
 
-            if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )
-            {
-                throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
-            }
-
             return instance.Convert( declaration.DeclaringType, generationContext ).Syntax;
         }
 

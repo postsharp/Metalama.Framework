@@ -48,6 +48,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         IExpression? InitializerExpression { get; }
 
-        IFieldOrPropertyInvoker GetInvoker( InvokerOptions options );
+        IFieldOrPropertyInvoker With( InvokerOptions options );
+
+        IFieldOrPropertyInvoker With( dynamic target, InvokerOptions options = default );
     }
 }

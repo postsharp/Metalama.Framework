@@ -52,13 +52,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-        public IEventInvoker GetInvoker( InvokerOptions options ) => new EventInvoker( this, options );
+        public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 
-        public object Add( object? target, object? handler ) => new EventInvoker( this ).Add( target, handler );
+        public IEventInvoker With( object target, InvokerOptions options = default ) => this.EventBuilder.With( target, options );
 
-        public object Remove( object? target, object? handler ) => new EventInvoker( this ).Remove( target, handler );
+        public object Add( object? handler ) => this.EventBuilder.Add( handler );
 
-        public object? Raise( object? target, params object?[] args ) => new EventInvoker( this ).Raise( target, args );
+        public object Remove( object? handler ) => this.EventBuilder.Remove( handler );
+
+        public object? Raise( params object?[] args ) => this.EventBuilder.Raise( args );
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

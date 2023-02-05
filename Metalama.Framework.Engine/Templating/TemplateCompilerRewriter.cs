@@ -33,6 +33,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
 {
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
+    private static SyntaxAnnotation _userExpressionAnnotation = new SyntaxAnnotation( "Metalama.UserExpression" );
 
     private readonly TemplateCompilerSemantics _syntaxKind;
     private readonly Compilation _runTimeCompilation;
@@ -535,6 +536,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// </summary>
     private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
     {
+        if ( expression.HasAnnotation( _userExpressionAnnotation ) )
+        {
+            // The expression is already a compile-time user expression.
+            return expression;
+        }
+        
         switch ( expression.Kind() )
         {
             // TODO: We need to transform null and default values though. How to do this right then?
@@ -2077,4 +2084,34 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
+
+    public override SyntaxNode VisitCastExpression( CastExpressionSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            return this.TransformCastExpression( node );
+        }
+
+        // Special processing of casting a run-time expression to IExpression.
+        if ( node.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
+        {
+            var targetType = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+            if ( targetType is INamedTypeSymbol { Name: nameof(IExpression) } )
+            {
+                var transformedExpression = this.Transform( node.Expression );
+                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                    .AddArgumentListArguments(
+                        Argument( transformedExpression ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) )
+                    .WithAdditionalAnnotations( _userExpressionAnnotation );
+            }
+        }
+
+        // Fallback to the default implementation.
+        return base.VisitCastExpression( node );
+        
+    }
 }

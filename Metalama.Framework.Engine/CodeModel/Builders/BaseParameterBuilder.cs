@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
 
@@ -32,5 +34,5 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     bool IExpression.IsAssignable => true;
 
-    ref object? IExpression.Value => throw new NotSupportedException( "Must be implemented by the facade." );
+    public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
 }

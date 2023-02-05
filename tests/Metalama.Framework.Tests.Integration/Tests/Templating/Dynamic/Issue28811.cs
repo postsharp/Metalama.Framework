@@ -19,9 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
             
             dynamic? clone = meta.This;
             dynamic? clonedValue = meta.This;
-            field.SetValue(clone, clonedValue);
-            
-            field.SetValue(clone, field.GetValue(meta.This));
+            field.With(clone).Value = clonedValue;
         
             
             return default;

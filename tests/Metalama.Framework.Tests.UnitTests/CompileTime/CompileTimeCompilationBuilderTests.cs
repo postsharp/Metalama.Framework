@@ -300,7 +300,7 @@ class B
                 var valueFromB = project
                     .GetType( "B" )
                     .GetProperty( "Version" )!
-                    .GetValue( null );
+                    .GetValue( null ) ;
 
                 Assert.Equal( expectedVersion, valueFromB );
             }

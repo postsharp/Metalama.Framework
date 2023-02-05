@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -64,9 +65,10 @@ class TargetCode
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.GetInvoker( InvokerOptions.NullConditional ).Invoke(
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ),
-                        new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                    toString.With( InvokerOptions.NullConditional )
+                        .Invoke(
+                            new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ),
+                            new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
@@ -159,9 +161,9 @@ class TargetCode
 
                 AssertEx.DynamicEquals( staticNonGenericMethod.Invoke( null ), "global::TargetCode.Nested<T1>.StaticNonGenericMethod()" );
 
-                AssertEx.DynamicEquals( staticField.GetValue( null ), "global::TargetCode.Nested<T1>.StaticField" );
-                AssertEx.DynamicEquals( staticProperty.GetValue( null ), "global::TargetCode.Nested<T1>.StaticProperty" );
-                AssertEx.DynamicEquals( staticEvent.Add( null, null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
+                AssertEx.DynamicEquals( staticField.Value, "global::TargetCode.Nested<T1>.StaticField" );
+                AssertEx.DynamicEquals( staticProperty.Value, "global::TargetCode.Nested<T1>.StaticProperty" );
+                AssertEx.DynamicEquals( staticEvent.Add(  null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
                 var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
@@ -179,9 +181,9 @@ class TargetCode
                     instanceNonGenericMethod.Invoke( instance ),
                     "((global::TargetCode.Nested<T1>)abc).InstanceNonGenericMethod()" );
 
-                AssertEx.DynamicEquals( instanceField.GetValue( instance ), "((global::TargetCode.Nested<T1>)abc).InstanceField" );
-                AssertEx.DynamicEquals( instanceProperty.GetValue( instance ), "((global::TargetCode.Nested<T1>)abc).InstanceProperty" );
-                AssertEx.DynamicEquals( instanceEvent.Add( instance, null ), "((global::TargetCode.Nested<T1>)abc).InstanceEvent += null" );
+                AssertEx.DynamicEquals( instanceField.With( instance ).Value, "((global::TargetCode.Nested<T1>)abc).InstanceField" );
+                AssertEx.DynamicEquals( instanceProperty.With( instance ).Value, "((global::TargetCode.Nested<T1>)abc).InstanceProperty" );
+                AssertEx.DynamicEquals( instanceEvent.With( instance ).Add(  null ), "((global::TargetCode.Nested<T1>)abc).InstanceEvent += null" );
             }
         }
 
@@ -241,9 +243,9 @@ class TargetCode
                     staticNonGenericMethod.Invoke( null ),
                     @"global::TargetCode.Nested<global::System.String>.StaticNonGenericMethod()" );
 
-                AssertEx.DynamicEquals( staticField.GetValue( null ), "global::TargetCode.Nested<global::System.String>.StaticField" );
-                AssertEx.DynamicEquals( staticProperty.GetValue( null ), "global::TargetCode.Nested<global::System.String>.StaticProperty" );
-                AssertEx.DynamicEquals( staticEvent.Add( null, null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
+                AssertEx.DynamicEquals( staticField.Value, "global::TargetCode.Nested<global::System.String>.StaticField" );
+                AssertEx.DynamicEquals( staticProperty.Value, "global::TargetCode.Nested<global::System.String>.StaticProperty" );
+                AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
                 var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
@@ -266,15 +268,15 @@ class TargetCode
                     @"((global::TargetCode.Nested<global::System.String>)abc).InstanceNonGenericMethod()" );
 
                 AssertEx.DynamicEquals(
-                    instanceField.GetValue( instance ),
+                    instanceField.With( instance ).Value,
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceField" );
 
                 AssertEx.DynamicEquals(
-                    instanceProperty.GetValue( instance ),
+                    instanceProperty.With( instance ).Value,
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceProperty" );
 
                 AssertEx.DynamicEquals(
-                    instanceEvent.Add( instance, null ),
+                    instanceEvent.With( instance ).Add(null ),
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceEvent += null" );
             }
         }
@@ -312,7 +314,7 @@ class TargetCode
                 Assert.Equal( advisedParameterList[0], advisedParameterList["i"] );
                 Assert.Equal( advisedParameterList[1], advisedParameterList["j"] );
 
-                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is(  typeof(int) ) ) )!.Name );
+                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is( typeof(int) ) ) )!.Name );
             }
         }
 
@@ -339,21 +341,20 @@ class TargetCode
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                TypedExpressionSyntaxImpl thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
 
-                AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
+                AssertEx.DynamicEquals( property.Value, @"((global::TargetCode)this).P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetInvoker( InvokerOptions.NullConditional ).GetValue( SyntaxFactory.IdentifierName( "a" ) ),
+                    property.With( SyntaxFactory.IdentifierName( "a" ), InvokerOptions.NullConditional ),
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
-                    property.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
+                    ((FieldOrPropertyInvoker) property.With( SyntaxFactory.IdentifierName( "a" ) ) ).SetValue(  SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
 
 #if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
-                    property.GetValue( property.GetValue( thisExpression ) ),
+                    property.With( property.Value ),
                     @"((global::TargetCode)this).P.P" );
 #else
                 /*
@@ -386,16 +387,15 @@ class TargetCode
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                TypedExpressionSyntaxImpl thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
-
-                AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
+                
+                AssertEx.DynamicEquals( property.Value, @"((global::TargetCode)this).P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetMethod!.GetInvoker( InvokerOptions.NullConditional ).Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                    property.GetMethod!.With( InvokerOptions.NullConditional ).Invoke( SyntaxFactory.IdentifierName( "a" ) ),
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetMethod!.Invoke( property.GetValue( thisExpression ) ),
+                    property.GetMethod!.Invoke( property.Value ),
                     @"((global::TargetCode)this).P.P" );
             }
         }
@@ -423,19 +423,18 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
                 TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
-                AssertEx.DynamicEquals( @event.Add( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
-                AssertEx.DynamicEquals( @event.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
+                AssertEx.DynamicEquals( @event.Add(  parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
+                AssertEx.DynamicEquals( @event.Remove(  parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
 
 #if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
-                    @event.Raise( thisExpression, parameterExpression, parameterExpression ),
+                    @event.Raise(  parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
 #else
                 AssertEx.DynamicEquals(
-                    @event.Raise( thisExpression, parameterExpression, parameterExpression ),
+                    @event.Raise( parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
 #endif
             }

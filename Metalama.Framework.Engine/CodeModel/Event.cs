@@ -74,13 +74,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
-        public IEventInvoker GetInvoker( InvokerOptions options ) => new EventInvoker( this, options );
+        public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
-        public object Add( object? target, object? handler ) => new EventInvoker( this ).Add( target, handler );
+        public IEventInvoker With( object target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
 
-        public object Remove( object? target, object? handler ) => new EventInvoker( this ).Remove( target, handler );
+        public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 
-        public object? Raise( object? target, params object?[] args ) => new EventInvoker( this ).Raise( target, args );
+        public object Remove( object? handler ) => new EventInvoker( this ).Remove(  handler );
+
+        public object? Raise(  params object?[] args ) => new EventInvoker( this ).Raise(  args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

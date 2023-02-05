@@ -1,6 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_BaseInvoker
@@ -11,11 +12,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invoke(meta.Base);
+                return meta.Target.Method.With( InvokerOptions.Base  ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invoke(meta.Base, meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.With( InvokerOptions.Base  ).Invoke(meta.Target.Method.Parameters[0].Value);
             }
         }
     }

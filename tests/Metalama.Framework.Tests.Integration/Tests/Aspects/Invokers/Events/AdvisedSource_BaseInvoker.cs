@@ -1,6 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 #pragma warning disable CS0067
@@ -11,12 +12,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
     {
         public override void OverrideAdd(dynamic value)
         {
-            meta.Target.Event.Add(meta.Base, value);
+            meta.Target.Event.With( InvokerOptions.Base ).Add( value);
         }
 
         public override void OverrideRemove(dynamic value)
         {
-            meta.Target.Event.Remove(meta.Base, value);
+            meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
         }
     }
 

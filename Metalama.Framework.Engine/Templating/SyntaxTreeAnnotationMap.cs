@@ -148,6 +148,57 @@ namespace Metalama.Framework.Engine.Templating
 
             return this._annotationToSymbolMap[annotation];
         }
+        
+        public IMethodSymbol? GetMethodSymbol( ExpressionSyntax node )
+        {
+            using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
+
+            if ( !enumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var annotation = enumerator.Current;
+
+            if ( !enumerator.MoveNext() )
+            {
+                // No ambiguity.
+                return (IMethodSymbol)this._annotationToSymbolMap[annotation];
+            }
+
+            // We have some ambiguity. Get all symbols.
+            var symbols = new List<IMethodSymbol> { (IMethodSymbol) this._annotationToSymbolMap[annotation], (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+
+            while ( enumerator.MoveNext() )
+            {
+                symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current]  );
+            }
+            
+            // If we have an ambiguity, it is because one of the arguments is dynamic. 
+            // Take only signatures that have a dynamic argument.
+
+            var likelySymbols = symbols.Where( m => m.Parameters.Any( p => p.Type.TypeKind == TypeKind.Dynamic ) );
+
+
+            var likelyEnumerator = likelySymbols.GetEnumerator();
+
+            if ( !likelyEnumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var bestSymbol = likelyEnumerator.Current;
+
+            if ( likelyEnumerator.MoveNext())
+            {
+                // There is still some ambiguity.
+                return null;
+            }
+
+            return bestSymbol;
+
+
+        }
 
         public IEnumerable<ISymbol> GetCandidateSymbols( SyntaxNode node )
         {
@@ -311,5 +362,7 @@ namespace Metalama.Framework.Engine.Templating
                 return false;
             }
         }
+
+      
     }
 }

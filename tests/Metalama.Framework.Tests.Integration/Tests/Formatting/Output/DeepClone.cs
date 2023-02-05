@@ -57,9 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
 
             foreach (var field in clonableFields)
             {
-                field.SetValue(
-                    clone,
-                    meta.Cast( field.Type, ( (ICloneable)field.GetValue( meta.This ) ).Clone() ) );
+                field.With( clone ).Value =                     meta.Cast( field.Type, ( (ICloneable)field.Value ).Clone() );
             }
 
             return clone;

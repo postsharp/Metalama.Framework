@@ -77,6 +77,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool IsExtern { get; }
 
-        IMethodInvoker GetInvoker( InvokerOptions options );
+        IMethodInvoker With( InvokerOptions options );
+
+        IMethodInvoker With( dynamic target, InvokerOptions options = default );
     }
 }

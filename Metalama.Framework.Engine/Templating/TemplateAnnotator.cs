@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -19,6 +20,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 #pragma warning disable SA1124 // Don't use regions
 
@@ -956,11 +960,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         ImmutableArray<IParameterSymbol> parameters;
 
-        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
+        var symbol = this._syntaxTreeAnnotationMap.GetMethodSymbol( node.Expression );
 
         switch ( symbol )
         {
-            case IMethodSymbol method:
+            case {} method:
                 parameters = method.Parameters;
 
                 break;
@@ -997,7 +1001,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         InvocationExpressionSyntax updatedInvocation;
-
+        
+        
         if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
         {
             // If the scope of the expression on the left side is known (because of rules on the symbol),
@@ -1027,7 +1032,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 ExpressionSyntax transformedArgumentValue;
 
                 // Transform the argument value.
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType ) )
+                var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType );
+
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
                     // dynamic or dynamic[]
 
@@ -1036,6 +1043,22 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                    $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
+                    }
+
+                    // Dynamic arguments passed to a a compile-time method returning a compile-time value are forbidden.
+                    // They must be explicitly cast to IExpression.
+                    if ( isDynamicParameter && expressionScope == TemplatingScope.CompileTimeOnly )
+                    {
+                        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
+
+                        if ( expressionType?.TypeKind is TypeKind.Dynamic )
+                        {
+                            this.ReportDiagnostic(
+                                TemplatingDiagnosticDescriptors.DynamicArgumentMustBeCastToIExpression,
+                                argument.Expression,
+                                argument.Expression.ToString() );
+                        }
+
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
@@ -1785,7 +1808,22 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 annotatedType = this.Visit( node.Type );
             }
 
-            castScope = TemplatingScope.RunTimeOnly;
+            castScope = this.GetNodeScope( annotatedType ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+
+            if ( castScope == TemplatingScope.CompileTimeOnly )
+            {
+                var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+                if ( type is not INamedTypeSymbol { Name: nameof(IExpression) } )
+                {
+
+                    // We cannot cast a run-time expression to a compile-time type, except to IExpression.
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,
+                        node.Type,
+                        (node.Expression.ToString(), node.Type.ToString()) );
+                }
+            }
         }
         else
         {

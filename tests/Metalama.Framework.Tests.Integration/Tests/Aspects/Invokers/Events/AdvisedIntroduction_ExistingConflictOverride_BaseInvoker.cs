@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
@@ -18,13 +19,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
             }
         }
 
@@ -35,13 +36,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
             }
         }
 
@@ -51,13 +52,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
             }
         }
     }
@@ -80,13 +81,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         [Template]
         public void AddTemplate(dynamic value)
         {
-            meta.Target.Event.Add(meta.Base, value);
+            meta.Target.Event.With( InvokerOptions.Base ).Add( value);
         }
 
         [Template]
         public void RemoveTemplate(dynamic value)
         {
-            meta.Target.Event.Remove(meta.Base, value);
+            meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
         }
     }
 

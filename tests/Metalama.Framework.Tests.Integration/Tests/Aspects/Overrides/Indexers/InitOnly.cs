@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
 
 [assembly: AspectOrder( typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
@@ -54,7 +55,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         public void SetProperty()
         {
             var indexer = meta.Target.Type.Indexers.First();
-            indexer.SetValue( meta.Base, meta.Target.Parameters.Last(), 42 );
+            indexer.With( InvokerOptions.Base ).SetValue( meta.Target.Parameters.Last(), 42 );
         }
     }
 

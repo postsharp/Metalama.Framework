@@ -83,11 +83,11 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
-        public IFieldOrPropertyInvoker GetInvoker( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        public object? GetValue( object? target ) => new FieldOrPropertyInvoker( this ).GetValue( target );
-
-        public object? SetValue( object? target, object? value ) => new FieldOrPropertyInvoker( this ).SetValue( target, value );
+        public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+        
+        public ref object? Value =>ref new FieldOrPropertyInvoker( this ).Value;
 
         private IExpression? GetInitializerExpressionCore()
         {
@@ -143,7 +143,6 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-
-        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
+        
     }
 }

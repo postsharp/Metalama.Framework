@@ -9,7 +9,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         public void IntroduceVoid()
         {
             Console.WriteLine( "Introduced" );
-            meta.Target.Method.Invoke( meta.This );
+            meta.Target.Method.Invoke( );
         }
 
         [Introduce]

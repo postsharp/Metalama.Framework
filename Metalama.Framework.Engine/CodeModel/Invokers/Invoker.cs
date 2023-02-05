@@ -11,25 +11,26 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class Invoker<T> 
+    internal class Invoker<T>
         where T : IMember
     {
         protected readonly InvokerOptions _options;
+        protected object? _target;
         private readonly AspectReferenceOrder _order;
 
         protected SyntaxGenerationContext GenerationContext { get; }
 
-        
-        public Invoker( T declaration, InvokerOptions options )
+        public Invoker( T member, InvokerOptions options, object? target )
         {
             this._options = options;
-            this.Declaration = declaration;
+            this._target = target;
+            this.Member = member;
             this.GenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            this._order = (options & InvokerOptions.Before) != 0 ? AspectReferenceOrder.Base : AspectReferenceOrder.Final;
+            this._order = (options & InvokerOptions.Base) != 0 ? AspectReferenceOrder.Base : AspectReferenceOrder.Final;
         }
 
-        public T Declaration { get; }
+        public T Member { get; }
 
         protected record struct ReceiverTypedExpressionSyntax(
             TypedExpressionSyntaxImpl TypedExpressionSyntax,
@@ -53,9 +54,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
             => new( TemplateExpansionContext.CurrentAspectLayerId.AssertNotNull(), this._order );
 
-        protected ReceiverTypedExpressionSyntax GetReceiverInfo( IMember member, object? target )
+        protected ReceiverTypedExpressionSyntax GetReceiverInfo()
         {
-            if ( target is UserReceiver receiver )
+            if ( this._target is UserReceiver receiver )
             {
                 if ( this._order == AspectReferenceOrder.Base )
                 {
@@ -63,32 +64,37 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     receiver = receiver.WithAspectReferenceOrder( AspectReferenceOrder.Base );
                 }
 
-                return new ReceiverTypedExpressionSyntax( receiver.ToTypedExpressionSyntax( this.GenerationContext ), false,  receiver.AspectReferenceSpecification );
+                return new ReceiverTypedExpressionSyntax(
+                    receiver.ToTypedExpressionSyntax( this.GenerationContext ),
+                    false,
+                    receiver.AspectReferenceSpecification );
             }
             else
             {
                 var aspectReferenceSpecification = this.GetDefaultAspectReferenceSpecification();
 
-                if ( target != null )
+                if ( this._target != null )
                 {
-                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( target, member.Compilation, this.GenerationContext );
+                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this._target, this.Member.Compilation, this.GenerationContext );
 
                     return new ReceiverTypedExpressionSyntax(
                         typedExpressionSyntax,
                         (this._options & InvokerOptions.NullConditional) != 0,
                         aspectReferenceSpecification );
                 }
-                else if ( member.IsStatic )
+                else if ( this.Member.IsStatic )
                 {
                     return new ReceiverTypedExpressionSyntax(
-                        new ThisTypeUserReceiver( member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.GenerationContext ),
+                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.GenerationContext ),
                         false,
                         aspectReferenceSpecification );
                 }
                 else
                 {
-                       throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( this.Declaration );
-                 
+                    return new ReceiverTypedExpressionSyntax(
+                       new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.GenerationContext ),
+                       false,
+                       aspectReferenceSpecification );
                 }
             }
         }

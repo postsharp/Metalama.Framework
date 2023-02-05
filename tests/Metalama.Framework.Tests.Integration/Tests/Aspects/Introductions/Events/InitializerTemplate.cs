@@ -9,10 +9,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Initi
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public event EventHandler? IntroducedEventField = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().GetValue( null );
+        public event EventHandler? IntroducedEventField = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().Value;
 
         [Introduce]
-        public static event EventHandler? IntroducedEventField_Static = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().GetValue( null );
+        public static event EventHandler? IntroducedEventField_Static = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().Value;
     }
 
     // <target>

@@ -13,41 +13,35 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal partial class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
-        public IndexerInvoker( IIndexer indexer, InvokerOptions options = default ) : base( indexer, options ) { }
+        public IndexerInvoker( IIndexer indexer, InvokerOptions options = default, object? target = null ) : base( indexer, options, target ) { }
 
-        public object GetValue( object? target, params object?[] args )
+        public object GetValue( params object?[] args )
         {
             return new SyntaxUserExpression(
-                this.CreateIndexerAccess(
-                    target,
-                    args ),
-                this.Declaration.Type,
-                isAssignable: this.Declaration.Writeability != Writeability.None );
+                this.CreateIndexerAccess( args ),
+                this.Member.Type,
+                isAssignable: this.Member.Writeability != Writeability.None );
         }
 
-        public object SetValue( object? target, object value, params object?[] args )
+        public object SetValue( object value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            var propertyAccess = this.CreateIndexerAccess(
-                target,
-                args );
+            var propertyAccess = this.CreateIndexerAccess( args );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Declaration.Compilation, syntaxGenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, syntaxGenerationContext ) );
 
-            return new SyntaxUserExpression( expression, this.Declaration.Type, isAssignable: true );
+            return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
         }
 
-        private ExpressionSyntax CreateIndexerAccess(
-            object? target,
-            object?[]? args )
+        private ExpressionSyntax CreateIndexerAccess( object?[]? args )
         {
-            var receiverInfo = this.GetReceiverInfo( this.Declaration, target );
-            var receiverSyntax = this.Declaration.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
-            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.Declaration.Compilation, this.GenerationContext ).AssertNotNull();
+            var receiverInfo = this.GetReceiverInfo();
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.Member.Compilation, this.GenerationContext ).AssertNotNull();
 
             var expression = ElementAccessExpression( receiverSyntax ).AddArgumentListArguments( argExpressions.SelectAsArray( e => Argument( e.Syntax ) ) );
 

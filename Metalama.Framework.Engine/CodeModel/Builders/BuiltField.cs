@@ -50,11 +50,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
 
-        public IFieldOrPropertyInvoker GetInvoker( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.FieldBuilder.With( options );
 
-        public object? GetValue( object? target ) => new FieldOrPropertyInvoker( this ).GetValue( target );
+        public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => this.FieldBuilder.With( target, options );
 
-        public object? SetValue( object? target, object? value ) => new FieldOrPropertyInvoker( this ).SetValue( target, value );
+        public ref object? Value => ref this.FieldBuilder.Value;
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
@@ -66,6 +66,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-        public ref object? Value => ref RefHelper.Wrap( new FieldOrPropertyExpression( this, null ) );
+       
     }
 }

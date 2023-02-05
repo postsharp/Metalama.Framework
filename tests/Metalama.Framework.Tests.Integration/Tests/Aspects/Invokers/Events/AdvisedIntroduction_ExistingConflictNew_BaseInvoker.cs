@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictNew_BaseInvoker;
 using Newtonsoft.Json.Linq;
 
@@ -19,13 +20,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -35,13 +36,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -52,13 +53,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -68,13 +69,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -84,13 +85,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -102,13 +103,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
 
@@ -118,13 +119,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+                meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
             }
         }
     }
@@ -145,14 +146,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         public void OverrideAdd()
         {
             Console.WriteLine("Override.");
-            meta.Target.Event.Add(meta.Base, meta.Target.Parameters[0].Value);
+            meta.Target.Event.With( InvokerOptions.Base ).Add( meta.Target.Parameters[0].Value);
         }
 
         [Template]
         public void OverrideRemove()
         {
             Console.WriteLine("Override.");
-            meta.Target.Event.Remove(meta.Base, meta.Target.Parameters[0].Value);
+            meta.Target.Event.With( InvokerOptions.Base ).Remove( meta.Target.Parameters[0].Value);
         }
 
     }

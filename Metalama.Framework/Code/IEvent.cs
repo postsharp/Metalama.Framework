@@ -59,6 +59,8 @@ namespace Metalama.Framework.Code
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
         EventInfo ToEventInfo();
 
-        IEventInvoker GetInvoker( InvokerOptions options );
+        IEventInvoker With( InvokerOptions options );
+
+        IEventInvoker With( dynamic target, InvokerOptions options = default );
     }
 }

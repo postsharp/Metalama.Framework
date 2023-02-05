@@ -86,11 +86,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IIndexer? OverriddenIndexer { get; set; }
 
-        IIndexerInvoker IIndexer.GetInvoker( InvokerOptions options ) => throw new NotSupportedException();
+        public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 
-        object IIndexerInvoker.GetValue( object? target, params object?[] args ) => throw new NotSupportedException();
+        public IIndexerInvoker With( object target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
 
-        object? IIndexerInvoker.SetValue( object? target, object value, params object?[] args ) => throw new NotSupportedException();
+        public object GetValue(  params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
+        
+        public object? SetValue( object value, params object?[] args ) => new IndexerInvoker( this ).SetValue(  value, args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

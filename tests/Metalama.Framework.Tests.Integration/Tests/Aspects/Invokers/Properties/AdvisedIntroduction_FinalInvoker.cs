@@ -32,13 +32,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
             {
                 Console.WriteLine( "Override" );
 
-                return meta.Target.FieldOrProperty.GetValue( meta.This );
+                return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
                 Console.WriteLine( "Override" );
-                meta.Target.FieldOrProperty.SetValue( meta.This, value );
+                meta.Target.FieldOrProperty.Value = value;
             }
         }
     }

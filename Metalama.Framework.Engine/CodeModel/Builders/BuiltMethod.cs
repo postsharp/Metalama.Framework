@@ -81,9 +81,11 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
-    public IMethodInvoker GetInvoker( InvokerOptions options ) => new MethodInvoker( this, options );
+    public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
 
-    public object? Invoke( object? target, params object?[] args ) => new MethodInvoker( this ).Invoke( target, args );
+    public IMethodInvoker With( object target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+
+    public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
 
     public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

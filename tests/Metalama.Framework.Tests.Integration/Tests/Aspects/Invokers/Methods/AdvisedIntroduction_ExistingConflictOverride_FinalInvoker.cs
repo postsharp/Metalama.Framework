@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         public void BaseClass_VoidMethod()
         {
             meta.InsertComment( "Introduced." );
-            meta.Target.Method.Invoke( meta.This );
+            meta.Target.Method.Invoke( );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             meta.InsertComment( "Introduced." );
 
-            return meta.Target.Method.Invoke( meta.This );
+            return meta.Target.Method.Invoke( );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             meta.InsertComment( "Introduced." );
 
-            return meta.Target.Method.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+            return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
         }
     }
 
@@ -50,11 +50,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invoke( meta.This );
+                return meta.Target.Method.Invoke( );
             }
             else
             {
-                return meta.Target.Method.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

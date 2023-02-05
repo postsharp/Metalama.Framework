@@ -10,6 +10,6 @@ namespace Metalama.Framework.Code.Invokers
         /// <summary>
         /// Invokes the method.
         /// </summary>
-        dynamic? Invoke( dynamic? instance, params dynamic?[] args );
+        dynamic? Invoke( params dynamic?[] args );
     }
 }

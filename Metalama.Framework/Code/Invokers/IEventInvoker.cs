@@ -10,13 +10,13 @@ namespace Metalama.Framework.Code.Invokers
         /// <summary>
         /// Add a delegate to the event.
         /// </summary>
-        dynamic Add( dynamic? instance, dynamic? handler );
+        dynamic Add( dynamic? handler );
 
         /// <summary>
         /// Remove a delegate from the event.
         /// </summary>
-        dynamic Remove( dynamic? instance, dynamic? handler );
+        dynamic Remove( dynamic? handler );
 
-        dynamic? Raise( dynamic? instance, params dynamic?[] args );
+        dynamic? Raise( params dynamic?[] args );
     }
 }
