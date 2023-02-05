@@ -21,12 +21,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected SyntaxGenerationContext GenerationContext { get; }
 
-        protected Invoker( T member, InvokerOptions options, object? target )
+        protected Invoker( T member, InvokerOptions options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
         {
             this.Options = options;
             this.Target = target;
             this.Member = member;
-            this.GenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+            this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             this._order = (options & InvokerOptions.Base) != 0 ? AspectReferenceOrder.Base : AspectReferenceOrder.Final;
         }

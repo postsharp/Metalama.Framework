@@ -70,7 +70,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public object? Invoke( params object?[] args ) => this._accessorBuilder.Invoke( args );
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation );
 
     [Memo]
     public IType ReturnType => this.Compilation.Factory.GetIType( this._accessorBuilder.ReturnParameter.Type );

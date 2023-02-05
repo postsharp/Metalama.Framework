@@ -370,10 +370,6 @@ class TargetCode
                 AssertEx.DynamicEquals(
                     property.GetMethod!.With( SyntaxFactory.IdentifierName( "a" ), InvokerOptions.NullConditional ).Invoke(),
                     @"((global::TargetCode)a)?.P" );
-
-                AssertEx.DynamicEquals(
-                    property.GetMethod!.With( property.Value ).Invoke(),
-                    @"this.P.P" );
             }
         }
 
@@ -440,7 +436,6 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
                 TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals(

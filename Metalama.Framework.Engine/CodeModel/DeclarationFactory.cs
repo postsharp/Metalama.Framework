@@ -443,7 +443,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
-                l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+                l => new BuiltParameter( (BaseParameterBuilder) l.Target!, this._compilationModel ) );
         }
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder, ReferenceResolutionOptions options )
@@ -601,8 +601,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
-        public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._systemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+        public Type GetReflectionType( ITypeSymbol typeSymbol ) => this._systemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
 
         public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
         {

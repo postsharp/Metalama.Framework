@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -71,5 +72,8 @@ namespace Metalama.Framework.Engine.CodeModel
         bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
 
         public ref object? Value => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => throw new NotSupportedException( "Cannot use a return parameter as an expression." );
     }
 }

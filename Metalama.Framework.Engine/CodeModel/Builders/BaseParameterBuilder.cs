@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,4 +35,8 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
     bool IExpression.IsAssignable => true;
 
     public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
+
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => new(
+            new TypedExpressionSyntaxImpl( SyntaxFactory.IdentifierName( this.Name ), this.Type, (SyntaxGenerationContext) syntaxGenerationContext, true ) );
 }

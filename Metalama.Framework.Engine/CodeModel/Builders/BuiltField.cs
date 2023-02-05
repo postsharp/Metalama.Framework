@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System;
@@ -52,6 +53,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => this.FieldBuilder.With( target, options );
 
         public ref object? Value => ref this.FieldBuilder.Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => this.FieldBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
@@ -14,10 +15,15 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
     {
-        public FieldOrPropertyInvoker( IFieldOrProperty fieldOrProperty, InvokerOptions options = default, object? target = null ) : base(
+        public FieldOrPropertyInvoker(
+            IFieldOrProperty fieldOrProperty,
+            InvokerOptions options = default,
+            object? target = null,
+            SyntaxGenerationContext? syntaxGenerationContext = null ) : base(
             fieldOrProperty,
             options,
-            target ) { }
+            target,
+            syntaxGenerationContext ) { }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
@@ -76,5 +82,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
             => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );
+
+        public TypedExpressionSyntax GetTypedExpressionSyntax()
+            => new(
+                new TypedExpressionSyntaxImpl(
+                    this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
+                    this.Member.Type,
+                    this.GenerationContext,
+                    this.Member.DeclarationKind is DeclarationKind.Field ) );
     }
 }

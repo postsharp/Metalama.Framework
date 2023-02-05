@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -87,6 +88,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
 
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
 
         private IExpression? GetInitializerExpressionCore()
         {
