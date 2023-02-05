@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public object Remove( object? handler ) => this.EventBuilder.Remove( handler );
 
-        public object? Raise( params object?[] args ) => this.EventBuilder.Raise( args );
+        public object Raise( params object?[] args ) => this.EventBuilder.Raise( args );
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

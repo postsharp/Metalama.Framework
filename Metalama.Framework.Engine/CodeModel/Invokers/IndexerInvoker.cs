@@ -12,7 +12,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal partial class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
+    internal class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
         public IndexerInvoker( IIndexer indexer, InvokerOptions options = default, object? target = null ) : base( indexer, options, target ) { }
 
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 isAssignable: this.Member.Writeability != Writeability.None );
         }
 
-        public object? SetValue( object? value, params object?[] args )
+        public object SetValue( object? value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
