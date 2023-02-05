@@ -1,6 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_ConditionalBaseInvoker
@@ -9,13 +10,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
     {
         public override dynamic? OverrideMethod()
         {
+            TargetClass? local = null;
+
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invoke();
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With(local, InvokerOptions.NullConditional).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

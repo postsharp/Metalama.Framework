@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code.Invokers
     {
         /// <summary>
         /// Generates run-time code that adds a given handler to the event. By default, the target instance
-        /// of the event is <c>this</c> unless the method is static, and the <c>base</c> implementation of the event is invoked,
+        /// of the event is <c>this</c> unless the event is static, and the <c>base</c> implementation of the event is invoked,
         /// i.e. the implementation before the current aspect layer. To change the default values, or to use the <c>?.</c> null-conditional operator,
         /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
         /// </summary>
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Code.Invokers
 
         /// <summary>
         /// Generates run-time code that removes a given handler from the event. By default, the target instance
-        /// of the event is <c>this</c> unless the method is static, and the <c>base</c> implementation of the event is invoked,
+        /// of the event is <c>this</c> unless the event is static, and the <c>base</c> implementation of the event is invoked,
         /// i.e. the implementation before the current aspect layer. To change the default values, or to use the <c>?.</c> null-conditional operator,
         /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
         /// </summary>
@@ -27,14 +27,14 @@ namespace Metalama.Framework.Code.Invokers
 
         /// <summary>
         /// Generates run-time code that raises the current event with specified arguments. By default, the target instance
-        /// of the event is <c>this</c> unless the method is static, and the <c>base</c> implementation of the event is invoked,
+        /// of the event is <c>this</c> unless the event is static, and the <c>base</c> implementation of the event is invoked,
         /// i.e. the implementation before the current aspect layer. To change the default values, or to use the <c>?.</c> null-conditional operator,
         /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
         /// </summary>
         dynamic? Raise( params dynamic?[] args );
 
         /// <summary>
-        /// Gets an <see cref="IEventInvoker"/> for the same event and target with different options.
+        /// Gets an <see cref="IEventInvoker"/> for the same event and target but with different options.
         /// </summary>
         IEventInvoker With( InvokerOptions options );
 

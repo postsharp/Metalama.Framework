@@ -56,13 +56,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         [Template]
         public dynamic? MethodTemplate()
         {
+            BaseClass? local = null;
+
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke();
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke();
             }
             else
             {
-                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

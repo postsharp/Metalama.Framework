@@ -28,7 +28,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this.Member = member;
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            this._order = (options & InvokerOptions.Base) != 0 ? AspectReferenceOrder.Base : AspectReferenceOrder.Final;
+            this._order = (options & InvokerOptions.OrderMask) switch
+            {
+                InvokerOptions.Default => AspectReferenceOrder.Original,
+                InvokerOptions.Base => AspectReferenceOrder.Base,
+                InvokerOptions.Final => AspectReferenceOrder.Final,
+                _ => throw new AssertionFailedException( $"Invalid value: {options}." )
+            };
         }
 
         protected T Member { get; }

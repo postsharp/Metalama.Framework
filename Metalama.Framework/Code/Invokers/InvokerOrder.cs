@@ -27,13 +27,4 @@ namespace Metalama.Framework.Code.Invokers
         /// </summary>
         Final
     }
-
-    [CompileTime]
-    [Flags]
-    public enum InvokerOptions
-    {
-        Default,
-        Base = 1,
-        NullConditional = 1024
-    }
 }

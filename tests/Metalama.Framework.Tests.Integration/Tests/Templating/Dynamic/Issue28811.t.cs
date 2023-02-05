@@ -1,4 +1,4 @@
-void Method()
+private void Method()
 {
     var clone = this;
     var clonedValue = this;
