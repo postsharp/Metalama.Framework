@@ -12,7 +12,7 @@ namespace Metalama.Framework.CompileTimeContracts;
 public interface ITemplateSyntaxFactory
 {
     ICompilation Compilation { get; }
-    
+
     void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement );
 
     void AddStatement( List<StatementOrTrivia> list, IStatement statement );

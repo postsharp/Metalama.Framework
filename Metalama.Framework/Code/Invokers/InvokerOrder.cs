@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code.Invokers
     /// Enumeration of orders for invokers.
     /// </summary>
     [CompileTime]
-    [Obsolete("Use InvokerOptions", true)]
+    [Obsolete( "Use InvokerOptions", true )]
     public enum InvokerOrder
     {
         /// <summary>
@@ -21,11 +21,11 @@ namespace Metalama.Framework.Code.Invokers
         /// Accesses the implementation prior to the current aspect layer (equivalent to <c>base</c> in C#).
         /// </summary>
         Base = Default,
-        
+
         /// <summary>
         /// Accesses the final implementation of the member.
         /// </summary>
-        Final 
+        Final
     }
 
     [CompileTime]

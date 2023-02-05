@@ -217,7 +217,7 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, value );
-        
+
         /// <summary>
         /// Injects a comment to the target code.
         /// </summary>

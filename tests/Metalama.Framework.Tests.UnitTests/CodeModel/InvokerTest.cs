@@ -163,7 +163,7 @@ class TargetCode
 
                 AssertEx.DynamicEquals( staticField.Value, "global::TargetCode.Nested<T1>.StaticField" );
                 AssertEx.DynamicEquals( staticProperty.Value, "global::TargetCode.Nested<T1>.StaticProperty" );
-                AssertEx.DynamicEquals( staticEvent.Add(  null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
+                AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
                 var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
@@ -183,7 +183,7 @@ class TargetCode
 
                 AssertEx.DynamicEquals( instanceField.With( instance ).Value, "((global::TargetCode.Nested<T1>)abc).InstanceField" );
                 AssertEx.DynamicEquals( instanceProperty.With( instance ).Value, "((global::TargetCode.Nested<T1>)abc).InstanceProperty" );
-                AssertEx.DynamicEquals( instanceEvent.With( instance ).Add(  null ), "((global::TargetCode.Nested<T1>)abc).InstanceEvent += null" );
+                AssertEx.DynamicEquals( instanceEvent.With( instance ).Add( null ), "((global::TargetCode.Nested<T1>)abc).InstanceEvent += null" );
             }
         }
 
@@ -276,7 +276,7 @@ class TargetCode
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceProperty" );
 
                 AssertEx.DynamicEquals(
-                    instanceEvent.With( instance ).Add(null ),
+                    instanceEvent.With( instance ).Add( null ),
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceEvent += null" );
             }
         }
@@ -349,7 +349,7 @@ class TargetCode
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
-                    ((FieldOrPropertyInvoker) property.With( SyntaxFactory.IdentifierName( "a" ) ) ).SetValue(  SyntaxFactory.IdentifierName( "b" ) ),
+                    ((FieldOrPropertyInvoker) property.With( SyntaxFactory.IdentifierName( "a" ) )).SetValue( SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
 
 #if NET5_0_OR_GREATER
@@ -387,7 +387,7 @@ class TargetCode
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                
+
                 AssertEx.DynamicEquals( property.Value, @"((global::TargetCode)this).P" );
 
                 AssertEx.DynamicEquals(
@@ -425,12 +425,12 @@ class TargetCode
 
                 TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
-                AssertEx.DynamicEquals( @event.Add(  parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
-                AssertEx.DynamicEquals( @event.Remove(  parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
+                AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
+                AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
 
 #if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
-                    @event.Raise(  parameterExpression, parameterExpression ),
+                    @event.Raise( parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
 #else
                 AssertEx.DynamicEquals(
