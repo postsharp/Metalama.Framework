@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
 
-        public object? SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
+        public object SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

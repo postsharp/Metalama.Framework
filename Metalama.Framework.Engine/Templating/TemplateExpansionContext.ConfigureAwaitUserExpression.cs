@@ -35,7 +35,7 @@ internal sealed partial class TemplateExpansionContext
             }
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var generatedExpression = this._expression.ToExpressionSyntax( syntaxGenerationContext );
 

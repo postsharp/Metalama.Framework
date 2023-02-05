@@ -12,7 +12,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
+    internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
     {
         public FieldOrPropertyInvoker( IFieldOrProperty fieldOrProperty, InvokerOptions options = default, object? target = null ) : base(
             fieldOrProperty,
@@ -71,9 +71,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     this.Member.Type,
                     isReferenceable: this.Member.DeclarationKind == DeclarationKind.Field,
                     isAssignable: this.Member.Writeability != Writeability.None ) );
-        
-        public IFieldOrPropertyInvoker With( InvokerOptions options )
-            => this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options );
+
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options );
 
         public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
             => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );

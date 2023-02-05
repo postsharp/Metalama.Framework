@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class EventInvoker : Invoker<IEvent>, IEventInvoker
+    internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
     {
         public EventInvoker( IEvent @event, InvokerOptions options = default, object? target = null ) : base( @event, options, target ) { }
 
@@ -57,8 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 this.Member.Signature.ReturnType );
         }
 
-        public IEventInvoker With( InvokerOptions options )
-            => this.Options == options ? this : new EventInvoker( this.Member, options );
+        public IEventInvoker With( InvokerOptions options ) => this.Options == options ? this : new EventInvoker( this.Member, options );
 
         public IEventInvoker With( object? target, InvokerOptions options = default )
             => this.Target == target && this.Options == options ? this : new EventInvoker( this.Member, options, target );

@@ -58,11 +58,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         }
 
         [Template]
-        public dynamic MethodTemplate()
+        public dynamic? MethodTemplate()
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( );
+                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke();
             }
             else
             {

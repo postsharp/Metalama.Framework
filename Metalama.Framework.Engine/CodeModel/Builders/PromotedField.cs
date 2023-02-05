@@ -73,8 +73,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override SyntaxTree? PrimarySyntaxTree => this.Field.PrimarySyntaxTree;
 
-        protected override bool HasBaseInvoker => true;
-
         protected internal override bool GetPropertyInitializerExpressionOrMethod(
             Advice advice,
             in MemberInjectionContext context,

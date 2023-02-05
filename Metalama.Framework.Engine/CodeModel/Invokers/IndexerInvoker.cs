@@ -12,7 +12,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
+    internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
         public IndexerInvoker( IIndexer indexer, InvokerOptions options = default, object? target = null ) : base( indexer, options, target ) { }
 
@@ -50,9 +50,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return expression;
         }
-        
-        public IIndexerInvoker With( InvokerOptions options )
-            => this.Options == options ? this : new IndexerInvoker( this.Member, options );
+
+        public IIndexerInvoker With( InvokerOptions options ) => this.Options == options ? this : new IndexerInvoker( this.Member, options );
 
         public IIndexerInvoker With( object? target, InvokerOptions options = default )
             => this.Target == target && this.Options == options ? this : new IndexerInvoker( this.Member, options, target );

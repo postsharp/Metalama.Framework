@@ -76,7 +76,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
-            this.CanBeNull = canBeNull;
         }
 
         internal TypedExpressionSyntaxImpl(

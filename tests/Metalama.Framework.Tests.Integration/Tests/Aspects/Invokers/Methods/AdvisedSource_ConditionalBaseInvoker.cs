@@ -7,7 +7,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
 {
     public class TestAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
@@ -15,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
             }
             else
             {
-                return meta.Target.Method.Invoke(meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }
@@ -24,12 +24,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
     internal class TargetClass
     {
         [Test]
-        public void VoidMethod()
-        {
-        }
+        public void VoidMethod() { }
 
         [Test]
-        public int? Method(int? x)
+        public int? Method( int? x )
         {
             return x;
         }

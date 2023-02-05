@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class Invoker<T>
+    internal abstract class Invoker<T>
         where T : IMember
     {
         private readonly AspectReferenceOrder _order;
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected SyntaxGenerationContext GenerationContext { get; }
 
-        public Invoker( T member, InvokerOptions options, object? target )
+        protected Invoker( T member, InvokerOptions options, object? target )
         {
             this.Options = options;
             this.Target = target;
@@ -31,9 +31,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this._order = (options & InvokerOptions.Base) != 0 ? AspectReferenceOrder.Base : AspectReferenceOrder.Final;
         }
 
-        public T Member { get; }
+        protected T Member { get; }
 
-        protected record struct ReceiverTypedExpressionSyntax(
+        protected readonly record struct ReceiverTypedExpressionSyntax(
             TypedExpressionSyntaxImpl TypedExpressionSyntax,
             bool RequiresConditionalAccess,
             AspectReferenceSpecification AspectReferenceSpecification )
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 => new( this.Syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
         }
 
-        protected record struct ReceiverExpressionSyntax(
+        protected readonly record struct ReceiverExpressionSyntax(
             ExpressionSyntax Syntax,
             bool RequiresNullConditionalAccessMember,
             AspectReferenceSpecification AspectReferenceSpecification );
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
                     return new ReceiverTypedExpressionSyntax(
                         typedExpressionSyntax,
-                        (this.Options & InvokerOptions.NullConditional) != 0,
+                        (this.Options & InvokerOptions.NullConditional) != 0 && typedExpressionSyntax.CanBeNull,
                         aspectReferenceSpecification );
                 }
                 else if ( this.Member.IsStatic )

@@ -21,7 +21,7 @@ internal sealed class ValueArrayExpression : UserExpression
         this._parent = (ParameterList) parent;
     }
 
-    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
     {
         var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
@@ -29,7 +29,7 @@ internal sealed class ValueArrayExpression : UserExpression
             syntaxGenerator.Type( SpecialType.System_Object ),
             this._parent.SelectAsEnumerable(
                 p =>
-                    RefKindExtensions.IsReadable( p.RefKind )
+                    p.RefKind.IsReadable()
                         ? SyntaxFactory.IdentifierName( p.Name )
                         : (SyntaxNode) syntaxGenerator.DefaultExpression( p.Type.GetSymbol() ) ) );
     }

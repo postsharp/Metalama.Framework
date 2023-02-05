@@ -88,8 +88,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
-
         [Obsolete]
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 

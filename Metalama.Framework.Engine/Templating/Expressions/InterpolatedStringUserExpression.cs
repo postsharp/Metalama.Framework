@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
         }
 
-        public override bool CanBeNull => false;
+        protected override bool CanBeNull => false;
 
         public override IType Type { get; }
     }

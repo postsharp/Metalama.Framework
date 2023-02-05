@@ -21,7 +21,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._type = type;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
 
         public override IType Type => this._type;
 
@@ -36,6 +37,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec ) => new ThisTypeUserReceiver( this._type, spec );
 
-        public override bool CanBeNull => false;
+        protected override bool CanBeNull => false;
     }
 }

@@ -31,8 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 // The this.Declaration has a 'params' param.
                 if ( args.Length < parametersCount - 1 )
                 {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException(
-                        (this.Member, parametersCount - 1, args.Length) );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (this.Member, parametersCount - 1, args.Length) );
                 }
             }
             else if ( args.Length != parametersCount )
@@ -170,12 +169,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 returnType = this.Member.ReturnType.ToNullableType();
 
-                if ( receiverTypedExpressionSyntax == null )
-                {
-                    throw new AssertionFailedException(
-                        $"Cannot generate a conditional access expression '{name.GetLocation()}' because there is no instance expression." );
-                }
-
                 expression =
                     arguments != null
                         ? ConditionalAccessExpression(
@@ -197,9 +190,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new SyntaxUserExpression( expression, returnType );
         }
-        
-        public IMethodInvoker With( InvokerOptions options )
-            => this.Options == options ? this : new MethodInvoker( this.Member, options );
+
+        public IMethodInvoker With( InvokerOptions options ) => this.Options == options ? this : new MethodInvoker( this.Member, options );
 
         public IMethodInvoker With( object? target, InvokerOptions options = default )
             => this.Target == target && this.Options == options ? this : new MethodInvoker( this.Member, options, target );

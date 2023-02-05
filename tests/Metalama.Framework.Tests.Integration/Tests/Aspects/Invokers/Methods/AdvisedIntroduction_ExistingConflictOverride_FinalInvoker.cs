@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         public void BaseClass_VoidMethod()
         {
             meta.InsertComment( "Introduced." );
-            meta.Target.Method.Invoke( );
+            meta.Target.Method.Invoke();
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             meta.InsertComment( "Introduced." );
 
-            return meta.Target.Method.Invoke( );
+            return meta.Target.Method.Invoke();
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -44,13 +44,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         }
 
         [Template]
-        public dynamic MethodTemplate()
+        public dynamic? MethodTemplate()
         {
             Console.WriteLine( "Override" );
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invoke( );
+                return meta.Target.Method.Invoke();
             }
             else
             {

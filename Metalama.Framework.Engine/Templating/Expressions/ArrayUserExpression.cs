@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = this._itemType.MakeArrayType();
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var items = this._arrayBuilder.Items.SelectAsImmutableArray(
                 i => TypedExpressionSyntaxImpl.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax );
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 items );
         }
 
-        public override bool CanBeNull => false;
+        protected override bool CanBeNull => false;
 
         public override IType Type { get; }
     }
