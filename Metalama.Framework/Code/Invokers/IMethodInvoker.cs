@@ -13,5 +13,9 @@ namespace Metalama.Framework.Code.Invokers
         /// Invokes the method.
         /// </summary>
         dynamic? Invoke( params dynamic?[] args );
+
+        IMethodInvoker With( InvokerOptions options );
+
+        IMethodInvoker With( dynamic? target, InvokerOptions options = default );
     }
 }

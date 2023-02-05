@@ -81,7 +81,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
 
-    public IMethodInvoker With( object target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
 
     public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
 

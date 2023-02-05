@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     {
         public MethodInvoker( IMethod method, InvokerOptions options = default, object? target = null ) : base( method, options, target ) { }
 
-        public object? Invoke( params object?[] args )
+        public object? Invoke( params object?[]? args )
         {
             args ??= Array.Empty<object>();
 
@@ -32,12 +32,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 if ( args.Length < parametersCount - 1 )
                 {
                     throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException(
-                        (Declaration: this.Member, parametersCount - 1, args.Length) );
+                        (this.Member, parametersCount - 1, args.Length) );
                 }
             }
             else if ( args.Length != parametersCount )
             {
-                throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (Declaration: this.Member, parametersCount, args.Length) );
+                throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this.Member, parametersCount, args.Length) );
             }
 
             switch ( this.Member.MethodKind )
@@ -197,5 +197,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new SyntaxUserExpression( expression, returnType );
         }
+        
+        public IMethodInvoker With( InvokerOptions options )
+            => this.Options == options ? this : new MethodInvoker( this.Member, options );
+
+        public IMethodInvoker With( object? target, InvokerOptions options = default )
+            => this.Target == target && this.Options == options ? this : new MethodInvoker( this.Member, options, target );
     }
 }

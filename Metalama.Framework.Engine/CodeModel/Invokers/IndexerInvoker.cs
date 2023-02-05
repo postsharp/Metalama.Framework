@@ -50,5 +50,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return expression;
         }
+        
+        public IIndexerInvoker With( InvokerOptions options )
+            => this.Options == options ? this : new IndexerInvoker( this.Member, options );
+
+        public IIndexerInvoker With( object? target, InvokerOptions options = default )
+            => this.Target == target && this.Options == options ? this : new IndexerInvoker( this.Member, options, target );
     }
 }

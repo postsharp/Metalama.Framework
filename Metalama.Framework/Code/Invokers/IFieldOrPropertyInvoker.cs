@@ -6,6 +6,11 @@ namespace Metalama.Framework.Code.Invokers
     /// Allows accessing the the value of fields or properties.
     /// </summary>
 #pragma warning disable CS0612
-    public interface IFieldOrPropertyInvoker : IInvoker, IExpression { }
+    public interface IFieldOrPropertyInvoker : IInvoker, IExpression
+    {
+        IFieldOrPropertyInvoker With( InvokerOptions options );
+
+        IFieldOrPropertyInvoker With( dynamic? target, InvokerOptions options = default );
+    }
 #pragma warning restore CS0612
 }

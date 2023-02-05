@@ -57,6 +57,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 this.Member.Signature.ReturnType );
         }
 
+        public IEventInvoker With( InvokerOptions options )
+            => this.Options == options ? this : new EventInvoker( this.Member, options );
+
+        public IEventInvoker With( object? target, InvokerOptions options = default )
+            => this.Target == target && this.Options == options ? this : new EventInvoker( this.Member, options, target );
+
         private ExpressionSyntax CreateEventExpression( AspectReferenceTargetKind targetKind )
         {
             var receiverInfo = this.GetReceiverInfo();

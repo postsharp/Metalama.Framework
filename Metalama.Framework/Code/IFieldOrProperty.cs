@@ -47,9 +47,5 @@ namespace Metalama.Framework.Code
         /// exposes a <see cref="TypedConstant"/> when possible.
         /// </summary>
         IExpression? InitializerExpression { get; }
-
-        IFieldOrPropertyInvoker With( InvokerOptions options );
-
-        IFieldOrPropertyInvoker With( dynamic target, InvokerOptions options = default );
     }
 }

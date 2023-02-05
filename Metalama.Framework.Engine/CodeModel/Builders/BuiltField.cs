@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.FieldBuilder.With( options );
 
-        public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => this.FieldBuilder.With( target, options );
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => this.FieldBuilder.With( target, options );
 
         public ref object? Value => ref this.FieldBuilder.Value;
 

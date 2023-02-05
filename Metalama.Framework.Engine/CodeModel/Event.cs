@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
-        public IEventInvoker With( object target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
+        public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
 
         public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 

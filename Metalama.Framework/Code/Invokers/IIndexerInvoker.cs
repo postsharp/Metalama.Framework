@@ -25,5 +25,9 @@ namespace Metalama.Framework.Code.Invokers
         /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
         /// </remarks>
         dynamic? SetValue( dynamic? value, params dynamic?[] args );
+
+        IIndexerInvoker With( InvokerOptions options );
+
+        IIndexerInvoker With( dynamic? target, InvokerOptions options = default );
     }
 }

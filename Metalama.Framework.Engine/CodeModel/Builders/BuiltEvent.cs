@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 
-        public IEventInvoker With( object target, InvokerOptions options = default ) => this.EventBuilder.With( target, options );
+        public IEventInvoker With( object? target, InvokerOptions options = default ) => this.EventBuilder.With( target, options );
 
         public object Add( object? handler ) => this.EventBuilder.Add( handler );
 

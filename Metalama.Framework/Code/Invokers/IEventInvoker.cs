@@ -20,5 +20,9 @@ namespace Metalama.Framework.Code.Invokers
         dynamic Remove( dynamic? handler );
 
         dynamic? Raise( params dynamic?[] args );
+
+        IEventInvoker With( InvokerOptions options );
+
+        IEventInvoker With( dynamic? target, InvokerOptions options = default );
     }
 }

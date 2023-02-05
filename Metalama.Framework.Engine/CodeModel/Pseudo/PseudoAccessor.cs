@@ -110,7 +110,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
    
-    public IMethodInvoker With( object target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
    
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 

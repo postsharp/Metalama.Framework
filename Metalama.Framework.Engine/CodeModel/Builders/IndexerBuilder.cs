@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 
-        public IIndexerInvoker With( object target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
+        public IIndexerInvoker With( object? target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
 
         public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
 

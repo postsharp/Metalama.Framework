@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 
-        public IIndexerInvoker With( object target, InvokerOptions options = default ) => this._indexerBuilder.With( target, options );
+        public IIndexerInvoker With( object? target, InvokerOptions options = default ) => this._indexerBuilder.With( target, options );
 
         public object GetValue( params object?[] args ) => this._indexerBuilder.With( args );
 

@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
@@ -79,7 +78,7 @@ class TargetCode
 
                 // Test static call.
                 AssertEx.DynamicEquals(
-                    fooMethod.Invoke( null ),
+                    fooMethod.Invoke(),
                     @"global::TargetCode.Foo()" );
 
                 // Test exception related to the 'instance' parameter.
@@ -157,9 +156,9 @@ class TargetCode
                 var staticProperty = nestedType.Properties.OfName( "StaticProperty" ).Single();
                 var staticEvent = nestedType.Events.OfName( "StaticEvent" ).Single();
 
-                AssertEx.DynamicEquals( staticGenericMethod.Invoke( null ), "global::TargetCode.Nested<T1>.StaticGenericMethod<T2>()" );
+                AssertEx.DynamicEquals( staticGenericMethod.Invoke(), "global::TargetCode.Nested<T1>.StaticGenericMethod<T2>()" );
 
-                AssertEx.DynamicEquals( staticNonGenericMethod.Invoke( null ), "global::TargetCode.Nested<T1>.StaticNonGenericMethod()" );
+                AssertEx.DynamicEquals( staticNonGenericMethod.Invoke(), "global::TargetCode.Nested<T1>.StaticNonGenericMethod()" );
 
                 AssertEx.DynamicEquals( staticField.Value, "global::TargetCode.Nested<T1>.StaticField" );
                 AssertEx.DynamicEquals( staticProperty.Value, "global::TargetCode.Nested<T1>.StaticProperty" );
@@ -236,11 +235,11 @@ class TargetCode
                 var staticEvent = nestedType.Events.OfName( "StaticEvent" ).Single();
 
                 AssertEx.DynamicEquals(
-                    staticGenericMethod.Invoke( null ),
+                    staticGenericMethod.Invoke(),
                     @"global::TargetCode.Nested<global::System.String>.StaticGenericMethod<global::System.Int32>()" );
 
                 AssertEx.DynamicEquals(
-                    staticNonGenericMethod.Invoke( null ),
+                    staticNonGenericMethod.Invoke(),
                     @"global::TargetCode.Nested<global::System.String>.StaticNonGenericMethod()" );
 
                 AssertEx.DynamicEquals( staticField.Value, "global::TargetCode.Nested<global::System.String>.StaticField" );

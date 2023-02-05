@@ -27,8 +27,4 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// Gets the base property that is overridden by the current property.
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
-
-    IIndexerInvoker With( InvokerOptions options );
-
-    IIndexerInvoker With( dynamic target, InvokerOptions options = default );
 }

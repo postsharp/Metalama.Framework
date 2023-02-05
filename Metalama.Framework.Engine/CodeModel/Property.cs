@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-        public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
 
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
