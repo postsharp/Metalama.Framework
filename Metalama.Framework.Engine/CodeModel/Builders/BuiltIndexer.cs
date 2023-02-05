@@ -4,8 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -60,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public object GetValue( params object?[] args ) => this._indexerBuilder.With( args );
 
-        public object? SetValue( object value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
+        public object? SetValue( object? value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]

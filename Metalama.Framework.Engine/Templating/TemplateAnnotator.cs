@@ -1000,8 +1000,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         InvocationExpressionSyntax updatedInvocation;
-        
-        
+
         if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
         {
             // If the scope of the expression on the left side is known (because of rules on the symbol),
@@ -1057,7 +1056,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                 argument.Expression,
                                 argument.Expression.ToString() );
                         }
-
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
@@ -1815,7 +1813,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 annotatedType = this.Visit( node.Type );
             }
 
-            castScope = this.GetNodeScope( annotatedType ).GetExpressionValueScope(  ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            castScope = this.GetNodeScope( annotatedType ).GetExpressionValueScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
             if ( castScope == TemplatingScope.CompileTimeOnly )
             {

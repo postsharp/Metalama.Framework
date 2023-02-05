@@ -29,7 +29,9 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.RunTime( 0 ) );
             Assert.Throws<InvalidOperationException>( meta.DebugBreak );
             Assert.Throws<InvalidOperationException>( () => meta.InsertComment( "" ) );
+#pragma warning disable CS0618
             Assert.Throws<InvalidOperationException>( () => ExpressionFactory.Capture( "", out _ ) );
+#pragma warning restore CS0618
             Assert.Throws<InvalidOperationException>( () => ExpressionFactory.Parse( "" ) );
 
 #if NET5_0_OR_GREATER

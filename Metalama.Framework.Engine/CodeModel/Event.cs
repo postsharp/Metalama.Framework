@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -80,9 +79,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 
-        public object Remove( object? handler ) => new EventInvoker( this ).Remove(  handler );
+        public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
 
-        public object? Raise(  params object?[] args ) => new EventInvoker( this ).Raise(  args );
+        public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

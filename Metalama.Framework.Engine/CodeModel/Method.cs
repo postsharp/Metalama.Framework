@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -57,11 +56,11 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 
-     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
-   
-       public IMethodInvoker With( object target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
-   
-       public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public IMethodInvoker With( object target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 

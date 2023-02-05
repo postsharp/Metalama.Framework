@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -90,9 +89,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IIndexerInvoker With( object target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
 
-        public object GetValue(  params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
-        
-        public object? SetValue( object value, params object?[] args ) => new IndexerInvoker( this ).SetValue(  value, args );
+        public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
+
+        public object? SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

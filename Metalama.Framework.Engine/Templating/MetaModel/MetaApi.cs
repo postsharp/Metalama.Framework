@@ -6,11 +6,9 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -172,7 +170,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            this._method = this._method;
+            this._method = accessor;
 
             this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer;
             this._type = fieldOrPropertyOrIndexer.DeclaringType;

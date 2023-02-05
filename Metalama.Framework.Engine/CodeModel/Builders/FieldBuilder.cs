@@ -62,8 +62,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
         public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
-        
-        public ref object? Value =>ref new FieldOrPropertyInvoker( this ).Value;
+
+        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         public TemplateMember<IField>? InitializerTemplate { get; set; }
 
@@ -101,6 +101,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsRequired { get; set; }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-
     }
 }

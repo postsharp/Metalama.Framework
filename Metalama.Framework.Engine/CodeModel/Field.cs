@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -86,8 +85,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
         public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
-        
-        public ref object? Value =>ref new FieldOrPropertyInvoker( this ).Value;
+
+        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         private IExpression? GetInitializerExpressionCore()
         {
@@ -143,6 +142,5 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-        
     }
 }

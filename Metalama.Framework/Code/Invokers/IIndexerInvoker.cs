@@ -8,12 +8,14 @@ namespace Metalama.Framework.Code.Invokers
     /// Allows accessing the value of indexers.
     /// </summary>
     [CompileTime]
+#pragma warning disable CS0612
     public interface IIndexerInvoker : IInvoker
+#pragma warning restore CS0612
     {
         /// <summary>
         /// Get the value for an indexer.
         /// </summary>
-        dynamic GetValue( params dynamic?[] args );
+        dynamic? GetValue( params dynamic?[] args );
 
         /// <summary>
         /// Set the value for an indexer.
@@ -22,6 +24,6 @@ namespace Metalama.Framework.Code.Invokers
         /// Note: the order of parameters is different than in C# code:
         /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
         /// </remarks>
-        dynamic SetValue( dynamic? value, params dynamic?[] args );
+        dynamic? SetValue( dynamic? value, params dynamic?[] args );
     }
 }

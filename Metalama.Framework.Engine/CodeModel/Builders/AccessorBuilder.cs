@@ -6,9 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -117,7 +115,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public IMethodInvoker With( object? target, InvokerOptions options ) => new MethodInvoker( this, options, target );
 
-    public object? Invoke(  params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public Accessibility Accessibility
     {

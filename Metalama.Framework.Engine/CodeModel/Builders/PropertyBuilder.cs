@@ -7,9 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -121,8 +119,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
         public IFieldOrPropertyInvoker With( object target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
-        
-        public ref object? Value =>ref new FieldOrPropertyInvoker( this ).Value;
+
+        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         public TemplateMember<IProperty>? InitializerTemplate
         {
@@ -235,6 +233,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-
     }
 }

@@ -5,7 +5,9 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows invocation of the method.
     /// </summary>
+#pragma warning disable CS0612
     public interface IMethodInvoker : IInvoker
+#pragma warning restore CS0612
     {
         /// <summary>
         /// Invokes the method.

@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -217,6 +216,4 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
-
- 
 }

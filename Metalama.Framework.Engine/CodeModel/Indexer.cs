@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -46,9 +45,9 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
 
     public IIndexerInvoker With( object target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
 
-    public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue(  args );
+    public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
 
-    public object? SetValue( object value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
+    public object? SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
     public IMember? OverriddenMember => this.OverriddenIndexer;
 

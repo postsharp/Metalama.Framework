@@ -67,14 +67,14 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
-                
+
                 // TODO: Fix this. This is just to make the tests not fail but this is not correct.
-                ( { Symbol: { Kind: SymbolKind.Parameter}}, _ ) => false,
+                ({ Symbol.Kind: SymbolKind.Parameter }, _) => false,
                 _ => throw new AssertionFailedException( $"{this} is not expected." )
             };
-        
+
 #if DEBUG
-        
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
 
@@ -84,9 +84,9 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning disable IDE0052
         private SyntaxNode AnnotatedNode { get; }
 #pragma warning restore IDE0052
-        
+
 #endif
-        
+
         /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>

@@ -34,9 +34,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 this._type,
                 TemplateExpansionContext.CurrentSyntaxGenerationContext,
-                canBeNull: false);
+                canBeNull: false );
 
-        protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec ) => new ThisInstanceUserReceiver( this._type, spec );
+        protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec )
+            => new ThisInstanceUserReceiver( this._type, spec );
 
         public override bool CanBeNull => false;
     }

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -37,7 +36,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public sealed override string ToString() => this._toString ??= this.ToStringCore();
 
         public virtual bool CanBeNull => true;
-
 
         protected virtual string ToStringCore()
             => this.ToSyntax( SyntaxGenerationContext.Create( this.Type.GetCompilationModel().CompilationContext, false, false ) )

@@ -74,7 +74,7 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
             return false;
         }
 
-        var defaultWorkspaceManager = remoteWorkspaceManagerDefaultField.GetValue( null ) ;
+        var defaultWorkspaceManager = remoteWorkspaceManagerDefaultField.GetValue( null );
 
         if ( defaultWorkspaceManager == null )
         {

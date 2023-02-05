@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
 {
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
-    private static SyntaxAnnotation _userExpressionAnnotation = new SyntaxAnnotation( "Metalama.UserExpression" );
+    private static readonly SyntaxAnnotation _userExpressionAnnotation = new( "Metalama.UserExpression" );
 
     private readonly TemplateCompilerSemantics _syntaxKind;
     private readonly Compilation _runTimeCompilation;
@@ -541,7 +541,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // The expression is already a compile-time user expression.
             return expression;
         }
-        
+
         switch ( expression.Kind() )
         {
             // TODO: We need to transform null and default values though. How to do this right then?
@@ -2100,7 +2100,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( targetType is INamedTypeSymbol { Name: nameof(IExpression) } )
             {
                 var transformedExpression = this.Transform( node.Expression );
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression )
+                                     ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
@@ -2112,7 +2114,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Fallback to the default implementation.
         return base.VisitCastExpression( node );
-        
     }
 
     public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
@@ -2130,20 +2131,28 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( leftType is INamedTypeSymbol { Name: nameof(IExpression) } )
             {
                 var transformedRight = this.Transform( node.Right );
-                var rightType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Right ) ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
-                var runtimeExpressionInvocation = InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                var rightType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Right )
+                                ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                var runtimeExpressionInvocation = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( transformedRight ),
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( rightType.GetSerializableTypeId().Id ) ) ) );
 
                 var userExpressionInvocation = InvocationExpression(
-                    MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, runtimeExpressionInvocation, IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
-                    ArgumentList( SingletonSeparatedList( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ));
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        runtimeExpressionInvocation,
+                        IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+                    ArgumentList(
+                        SingletonSeparatedList(
+                            Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) );
 
-                var transformedLeft = (ExpressionSyntax) this.Visit( node.Left ).AssertNotNull(  );
+                var transformedLeft = (ExpressionSyntax) this.Visit( node.Left ).AssertNotNull();
 
-                return AssignmentExpression( node.Kind(), transformedLeft, userExpressionInvocation );  
+                return AssignmentExpression( node.Kind(), transformedLeft, userExpressionInvocation );
             }
         }
 

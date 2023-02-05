@@ -47,22 +47,22 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     return this.InvokeDefaultMethod( args );
 
                 case MethodKind.EventAdd:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this._target, this._options ).Add( args[0] );
+                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Add( args[0] );
 
                 case MethodKind.EventRaise:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this._target, this._options ).Raise( args );
+                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Raise( args );
 
                 case MethodKind.EventRemove:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this._target, this._options ).Remove( args[0] );
+                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Remove( args[0] );
 
                 case MethodKind.PropertyGet:
                     switch ( this.Member.DeclaringMember )
                     {
                         case IProperty property:
-                            return property.With( this._target, this._options ).Value;
+                            return property.With( this.Target, this.Options ).Value;
 
                         case IIndexer indexer:
-                            return indexer.With( this._target, this._options ).GetValue( args );
+                            return indexer.With( this.Target, this.Options ).GetValue( args );
 
                         default:
                             throw new AssertionFailedException( $"Unexpected declaration for a PropertyGet: '{this.Member.DeclaringMember}'." );
@@ -72,12 +72,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     switch ( this.Member.DeclaringMember )
                     {
                         case IProperty property:
-                            ((FieldOrPropertyInvoker) property.With( this._target, this._options )).SetValue( args[0] );
+                            ((FieldOrPropertyInvoker) property.With( this.Target, this.Options )).SetValue( args[0] );
 
                             return null;
 
                         case IIndexer indexer:
-                            indexer.With( this._options ).SetValue( this._target, args );
+                            indexer.With( this.Options ).SetValue( this.Target, args );
 
                             return null;
 

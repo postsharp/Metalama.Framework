@@ -2,9 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System;
@@ -65,7 +62,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IEnumerable<IMethod> Accessors => this.FieldBuilder.Accessors;
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-
-       
     }
 }

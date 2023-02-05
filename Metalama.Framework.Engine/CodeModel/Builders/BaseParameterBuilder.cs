@@ -5,7 +5,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;

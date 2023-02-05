@@ -113,11 +113,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IEventInvoker With( object target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
 
-        public object Add( object? handler ) => new EventInvoker( this ).Add(  handler );
+        public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 
-        public object Remove(  object? handler ) => new EventInvoker( this ).Remove( handler );
+        public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
 
-        public object? Raise(  params object?[] args ) => new EventInvoker( this ).Raise( args );
+        public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 

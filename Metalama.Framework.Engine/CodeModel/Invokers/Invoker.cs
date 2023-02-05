@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
@@ -14,16 +13,18 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     internal class Invoker<T>
         where T : IMember
     {
-        protected readonly InvokerOptions _options;
-        protected object? _target;
         private readonly AspectReferenceOrder _order;
+
+        protected InvokerOptions Options { get; }
+
+        protected object? Target { get; }
 
         protected SyntaxGenerationContext GenerationContext { get; }
 
         public Invoker( T member, InvokerOptions options, object? target )
         {
-            this._options = options;
-            this._target = target;
+            this.Options = options;
+            this.Target = target;
             this.Member = member;
             this.GenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -49,14 +50,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected record struct ReceiverExpressionSyntax(
             ExpressionSyntax Syntax,
             bool RequiresNullConditionalAccessMember,
-            AspectReferenceSpecification AspectReferenceSpecification ) { }
+            AspectReferenceSpecification AspectReferenceSpecification );
 
         private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
             => new( TemplateExpansionContext.CurrentAspectLayerId.AssertNotNull(), this._order );
 
         protected ReceiverTypedExpressionSyntax GetReceiverInfo()
         {
-            if ( this._target is UserReceiver receiver )
+            if ( this.Target is UserReceiver receiver )
             {
                 if ( this._order == AspectReferenceOrder.Base )
                 {
@@ -73,13 +74,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 var aspectReferenceSpecification = this.GetDefaultAspectReferenceSpecification();
 
-                if ( this._target != null )
+                if ( this.Target != null )
                 {
-                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this._target, this.Member.Compilation, this.GenerationContext );
+                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, this.Member.Compilation, this.GenerationContext );
 
                     return new ReceiverTypedExpressionSyntax(
                         typedExpressionSyntax,
-                        (this._options & InvokerOptions.NullConditional) != 0,
+                        (this.Options & InvokerOptions.NullConditional) != 0,
                         aspectReferenceSpecification );
                 }
                 else if ( this.Member.IsStatic )
@@ -92,9 +93,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 else
                 {
                     return new ReceiverTypedExpressionSyntax(
-                       new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.GenerationContext ),
-                       false,
-                       aspectReferenceSpecification );
+                        new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
+                            this.GenerationContext ),
+                        false,
+                        aspectReferenceSpecification );
                 }
             }
         }

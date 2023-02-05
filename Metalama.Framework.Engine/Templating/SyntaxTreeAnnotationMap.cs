@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return this._annotationToSymbolMap[annotation];
         }
-        
+
         public ISymbol? GetInvocableSymbol( ExpressionSyntax node )
         {
             using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
@@ -174,22 +174,21 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return null;
             }
-            
+
             // Get all symbols.
-            var symbols = new List<IMethodSymbol> { firstMethod , (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+            var symbols = new List<IMethodSymbol> { firstMethod, (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
 
             while ( enumerator.MoveNext() )
             {
-                symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current]  );
+                symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] );
             }
-            
+
             // If we have an ambiguity, it is because one of the arguments is dynamic. 
             // Take only signatures that have a dynamic argument.
 
             var likelySymbols = symbols.Where( m => m.Parameters.Any( p => p.Type.TypeKind == TypeKind.Dynamic ) );
 
-
-            var likelyEnumerator = likelySymbols.GetEnumerator();
+            using var likelyEnumerator = likelySymbols.GetEnumerator();
 
             if ( !likelyEnumerator.MoveNext() )
             {
@@ -198,15 +197,13 @@ namespace Metalama.Framework.Engine.Templating
 
             var bestSymbol = likelyEnumerator.Current;
 
-            if ( likelyEnumerator.MoveNext())
+            if ( likelyEnumerator.MoveNext() )
             {
                 // There is still some ambiguity.
                 return null;
             }
 
             return bestSymbol;
-
-
         }
 
         public IEnumerable<ISymbol> GetCandidateSymbols( SyntaxNode node )
@@ -371,7 +368,5 @@ namespace Metalama.Framework.Engine.Templating
                 return false;
             }
         }
-
-      
     }
 }

@@ -5,7 +5,9 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows adding/removing delegates to/from events.
     /// </summary>
+#pragma warning disable CS0612
     public interface IEventInvoker : IInvoker
+#pragma warning restore CS0612
     {
         /// <summary>
         /// Add a delegate to the event.

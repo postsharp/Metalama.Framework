@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public bool IsReferenceable { get; }
 
         public ExpressionSyntax Syntax { get; }
-        
+
         public bool CanBeNull { get; }
 
         public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
@@ -62,7 +62,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 throw new AssertionFailedException( "The compilation is empty." );
             }
 #endif
-           
 
             if ( expressionType == null )
             {

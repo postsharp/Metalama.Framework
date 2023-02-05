@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     NullDiagnosticAdder.Instance,
                     UserCodeMemberInfo.FromMemberInfo( f ) );
 
-                if ( !this._userCodeInvoker.TryInvoke( () => f.GetValue( null ) , executionContext, out var value ) )
+                if ( !this._userCodeInvoker.TryInvoke( () => f.GetValue( null ), executionContext, out var value ) )
                 {
                     return null;
                 }
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     NullDiagnosticAdder.Instance,
                     UserCodeMemberInfo.FromMemberInfo( p ) );
 
-                if ( !this._userCodeInvoker.TryInvoke( () => p.GetValue( null ) , executionContext, out var value ) )
+                if ( !this._userCodeInvoker.TryInvoke( () => p.GetValue( null ), executionContext, out var value ) )
                 {
                     return null;
                 }
