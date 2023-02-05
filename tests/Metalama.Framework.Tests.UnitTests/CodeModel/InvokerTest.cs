@@ -58,22 +58,18 @@ class TargetCode
 
                 // Test normal case.
                 AssertEx.DynamicEquals(
-                    toString.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.ThisExpression(), syntaxGenerationContext ),
-                        new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( generator.ThisExpression(), syntaxGenerationContext ) )
+                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.With( InvokerOptions.NullConditional )
-                        .Invoke(
-                            new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ),
-                            new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ), InvokerOptions.NullConditional )
+                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.LiteralExpression( 42 ), syntaxGenerationContext ),
-                        new TypedExpressionSyntaxImpl( generator.LiteralExpression( 43 ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( generator.LiteralExpression( 42 ), syntaxGenerationContext ) )
+                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( 43 ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)42).ToString((global::System.String)43)" );
 
                 // Test static call.
@@ -83,21 +79,14 @@ class TargetCode
 
                 // Test exception related to the 'instance' parameter.
                 AssertEx.DynamicEquals(
-                    fooMethod.Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.Null, syntaxGenerationContext ) ),
+                    fooMethod.Invoke(),
                     @"global::TargetCode.Foo()" );
-
-                AssertEx.ThrowsWithDiagnostic(
-                    GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
-                    () => toString.Invoke(
-                        null,
-                        new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ) );
 
                 // Test in/out.
                 var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
                 AssertEx.DynamicEquals(
                     byRefMethod.Invoke(
-                        null,
                         new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), intType, syntaxGenerationContext, true ),
                         new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), intType, syntaxGenerationContext, true ) ),
                     @"global::TargetCode.ByRef(out x, ref y)" );
@@ -105,7 +94,6 @@ class TargetCode
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                     () => byRefMethod.Invoke(
-                        null,
                         new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), syntaxGenerationContext ),
                         new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), syntaxGenerationContext ) ) );
             }
@@ -173,11 +161,11 @@ class TargetCode
                 var instanceEvent = nestedType.Events.OfName( "InstanceEvent" ).Single();
 
                 AssertEx.DynamicEquals(
-                    instanceGenericMethod.Invoke( instance ),
+                    instanceGenericMethod.With( instance ).Invoke(),
                     "((global::TargetCode.Nested<T1>)abc).InstanceGenericMethod<T2>()" );
 
                 AssertEx.DynamicEquals(
-                    instanceNonGenericMethod.Invoke( instance ),
+                    instanceNonGenericMethod.With( instance ).Invoke(),
                     "((global::TargetCode.Nested<T1>)abc).InstanceNonGenericMethod()" );
 
                 AssertEx.DynamicEquals( instanceField.With( instance ).Value, "((global::TargetCode.Nested<T1>)abc).InstanceField" );
@@ -259,11 +247,11 @@ class TargetCode
                 var instanceEvent = nestedType.Events.OfName( "InstanceEvent" ).Single();
 
                 AssertEx.DynamicEquals(
-                    instanceGenericMethod.Invoke( instance ),
+                    instanceGenericMethod.With( instance ).Invoke(),
                     @"((global::TargetCode.Nested<global::System.String>)abc).InstanceGenericMethod<global::System.Int32>()" );
 
                 AssertEx.DynamicEquals(
-                    instanceNonGenericMethod.Invoke( instance ),
+                    instanceNonGenericMethod.With( instance ).Invoke(),
                     @"((global::TargetCode.Nested<global::System.String>)abc).InstanceNonGenericMethod()" );
 
                 AssertEx.DynamicEquals(
@@ -341,25 +329,15 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
 
-                AssertEx.DynamicEquals( property.Value, @"((global::TargetCode)this).P" );
+                AssertEx.DynamicEquals( property.Value, @"this.P" );
 
                 AssertEx.DynamicEquals(
-                    property.With( SyntaxFactory.IdentifierName( "a" ), InvokerOptions.NullConditional ),
+                    property.With( SyntaxFactory.IdentifierName( "a" ), InvokerOptions.NullConditional ).Value,
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
                     ((FieldOrPropertyInvoker) property.With( SyntaxFactory.IdentifierName( "a" ) )).SetValue( SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
-
-#if NET5_0_OR_GREATER
-                AssertEx.DynamicEquals(
-                    property.With( property.Value ),
-                    @"((global::TargetCode)this).P.P" );
-#else
-                /*
-                 * There is a weird exception in .NET Framework because of the dynamic binder, but this should not affect any production scenario.
-                 */
-#endif
             }
         }
 
@@ -387,15 +365,15 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
 
-                AssertEx.DynamicEquals( property.Value, @"((global::TargetCode)this).P" );
+                AssertEx.DynamicEquals( property.Value, @"this.P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetMethod!.With( InvokerOptions.NullConditional ).Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                    property.GetMethod!.With( SyntaxFactory.IdentifierName( "a" ), InvokerOptions.NullConditional ).Invoke(),
                     @"((global::TargetCode)a)?.P" );
 
                 AssertEx.DynamicEquals(
-                    property.GetMethod!.Invoke( property.Value ),
-                    @"((global::TargetCode)this).P.P" );
+                    property.GetMethod!.With( property.Value ).Invoke(),
+                    @"this.P.P" );
             }
         }
 
@@ -424,17 +402,17 @@ class TargetCode
 
                 TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
-                AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
-                AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
+                AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"this.MyEvent += value" );
+                AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"this.MyEvent -= value" );
 
 #if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
                     @event.Raise( parameterExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
+                    @"this.MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
 #else
                 AssertEx.DynamicEquals(
                     @event.Raise( parameterExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
+                    @"this.MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
 #endif
             }
         }
@@ -466,21 +444,21 @@ class TargetCode
                 TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals(
-                    @event.AddMethod.Invoke( thisExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent += value" );
+                    @event.AddMethod.Invoke( parameterExpression ),
+                    @"this.MyEvent += value" );
 
                 AssertEx.DynamicEquals(
-                    @event.RemoveMethod.Invoke( thisExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent -= value" );
+                    @event.RemoveMethod.Invoke( parameterExpression ),
+                    @"this.MyEvent -= value" );
 
 #if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
-                    @event.RaiseMethod?.Invoke( thisExpression, parameterExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
+                    @event.RaiseMethod?.Invoke( parameterExpression, parameterExpression ),
+                    @"this.MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
 #else
                 AssertEx.DynamicEquals(
-                    @event.RaiseMethod?.Invoke( thisExpression, parameterExpression, parameterExpression ),
-                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
+                    @event.RaiseMethod?.Invoke( parameterExpression, parameterExpression ),
+                    @"this.MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
 #endif
             }
         }
