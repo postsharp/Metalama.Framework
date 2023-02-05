@@ -9,7 +9,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         public void IntroduceVoid()
         {
             Console.WriteLine( "Introduced" );
-            meta.Target.Method.Invoke( );
+            meta.Target.Method.Invoke();
         }
 
         [Introduce]
@@ -17,7 +17,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         {
             Console.WriteLine( "Introduced" );
 
-            return meta.Target.Method.Invoke(meta.This );
+            return meta.Target.Method.Invoke();
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -26,7 +26,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             Console.WriteLine( "Introduced" );
 
             // TODO: This produces an incorrect result.
-            return meta.Target.Method.Invoke(meta.This );
+            return meta.Target.Method.Invoke();
         }
 
         [Introduce( WhenExists = OverrideStrategy.Override )]
@@ -35,7 +35,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             Console.WriteLine( "Introduced" );
 
             // TODO: This produces an incorrect result.
-            meta.Target.Method.Invoke(meta.This );
+            meta.Target.Method.Invoke();
         }
     }
 
