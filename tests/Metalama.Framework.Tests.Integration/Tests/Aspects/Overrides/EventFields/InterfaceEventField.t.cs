@@ -3,35 +3,35 @@
 [Override]
 internal partial class TargetClass : global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface
 {
-    public static void Foo(global::System.Object? sender, global::System.EventArgs args)
+  public static void Foo(global::System.Object? sender, global::System.EventArgs args)
+  {
+  }
+  private event global::System.EventHandler? _eventField = (global::System.EventHandler? )Foo;
+  event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField
+  {
+    add
     {
+      global::System.Console.WriteLine("Overriden add.");
+      this._eventField += value;
     }
-    private event global::System.EventHandler? _eventField = (global::System.EventHandler?)Foo;
-    event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField
+    remove
     {
-        add
-        {
-            global::System.Console.WriteLine("Overriden add.");
-            this._eventField += value;
-        }
-        remove
-        {
-            global::System.Console.WriteLine("Overriden remove.");
-            this._eventField -= value;
-        }
+      global::System.Console.WriteLine("Overriden remove.");
+      this._eventField -= value;
     }
-    private event global::System.EventHandler? _eventField_Default = default;
-    event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField_Default
+  }
+  private event global::System.EventHandler? _eventField_Default = default;
+  event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField_Default
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine("Overriden add.");
-            this._eventField_Default += value;
-        }
-        remove
-        {
-            global::System.Console.WriteLine("Overriden remove.");
-            this._eventField_Default -= value;
-        }
+      global::System.Console.WriteLine("Overriden add.");
+      this._eventField_Default += value;
     }
+    remove
+    {
+      global::System.Console.WriteLine("Overriden remove.");
+      this._eventField_Default -= value;
+    }
+  }
 }

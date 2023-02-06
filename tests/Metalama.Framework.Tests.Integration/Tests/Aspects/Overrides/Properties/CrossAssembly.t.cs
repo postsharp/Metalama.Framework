@@ -2,172 +2,172 @@
 [Introduction]
 internal class TargetClass
 {
-    public int ExistingProperty
+  public int ExistingProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            Console.WriteLine("Original");
-            return 42;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            Console.WriteLine("Original");
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      Console.WriteLine("Original");
+      return 42;
     }
-    public int ExistingProperty_Expression
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return 42;
-        }
+      global::System.Console.WriteLine("Override");
+      Console.WriteLine("Original");
+      return;
     }
-    private int _existingProperty_Auto;
-    public int ExistingProperty_Auto
+  }
+  public int ExistingProperty_Expression
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this._existingProperty_Auto;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            this._existingProperty_Auto = value;
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      return 42;
     }
-    private int _existingProperty_AutoInitializer = 42;
-    public int ExistingProperty_AutoInitializer
+  }
+  private int _existingProperty_Auto;
+  public int ExistingProperty_Auto
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this._existingProperty_AutoInitializer;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            this._existingProperty_AutoInitializer = value;
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      return this._existingProperty_Auto;
     }
-    public int ExistingProperty_InitOnly
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            Console.WriteLine("Original");
-            return 42;
-        }
-        init
-        {
-            global::System.Console.WriteLine("Override");
-            Console.WriteLine("Original");
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      this._existingProperty_Auto = value;
+      return;
     }
-    public IEnumerable<int> ExistingProperty_Iterator
+  }
+  private int _existingProperty_AutoInitializer = 42;
+  public int ExistingProperty_AutoInitializer
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.ExistingProperty_Iterator_Source);
-        }
+      global::System.Console.WriteLine("Override");
+      return this._existingProperty_AutoInitializer;
     }
-    private IEnumerable<int> ExistingProperty_Iterator_Source
+    set
     {
-        get
-        {
-            Console.WriteLine("Original");
-            yield return 42;
-        }
+      global::System.Console.WriteLine("Override");
+      this._existingProperty_AutoInitializer = value;
+      return;
     }
-    public global::System.Int32 IntroducedProperty
+  }
+  public int ExistingProperty_InitOnly
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            global::System.Console.WriteLine("Original");
-            return (global::System.Int32)42;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            global::System.Console.WriteLine("Original");
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      Console.WriteLine("Original");
+      return 42;
     }
-    private global::System.Int32 _introducedProperty_Auto;
-    public global::System.Int32 IntroducedProperty_Auto
+    init
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this._introducedProperty_Auto;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            this._introducedProperty_Auto = value;
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      Console.WriteLine("Original");
+      return;
     }
-    private global::System.Int32 _introducedProperty_AutoInitializer = (global::System.Int32)42;
-    public global::System.Int32 IntroducedProperty_AutoInitializer
+  }
+  public IEnumerable<int> ExistingProperty_Iterator
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this._introducedProperty_AutoInitializer;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override");
-            this._introducedProperty_AutoInitializer = value;
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.ExistingProperty_Iterator_Source);
     }
-    public global::System.Int32 IntroducedProperty_Expression
+  }
+  private IEnumerable<int> ExistingProperty_Iterator_Source
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return (global::System.Int32)42;
-        }
+      Console.WriteLine("Original");
+      yield return 42;
     }
-    public global::System.Int32 IntroducedProperty_InitOnly
+  }
+  public global::System.Int32 IntroducedProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            global::System.Console.WriteLine("Original");
-            return (global::System.Int32)42;
-        }
-        init
-        {
-            global::System.Console.WriteLine("Override");
-            global::System.Console.WriteLine("Original");
-            return;
-        }
+      global::System.Console.WriteLine("Override");
+      global::System.Console.WriteLine("Original");
+      return (global::System.Int32)42;
     }
-    private global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedProperty_Iterator_Introduction
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Original");
-            yield return 42;
-        }
+      global::System.Console.WriteLine("Override");
+      global::System.Console.WriteLine("Original");
+      return;
     }
-    public global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedProperty_Iterator
+  }
+  private global::System.Int32 _introducedProperty_Auto;
+  public global::System.Int32 IntroducedProperty_Auto
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IntroducedProperty_Iterator_Introduction);
-        }
+      global::System.Console.WriteLine("Override");
+      return this._introducedProperty_Auto;
     }
+    set
+    {
+      global::System.Console.WriteLine("Override");
+      this._introducedProperty_Auto = value;
+      return;
+    }
+  }
+  private global::System.Int32 _introducedProperty_AutoInitializer = (global::System.Int32)42;
+  public global::System.Int32 IntroducedProperty_AutoInitializer
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override");
+      return this._introducedProperty_AutoInitializer;
+    }
+    set
+    {
+      global::System.Console.WriteLine("Override");
+      this._introducedProperty_AutoInitializer = value;
+      return;
+    }
+  }
+  public global::System.Int32 IntroducedProperty_Expression
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override");
+      return (global::System.Int32)42;
+    }
+  }
+  public global::System.Int32 IntroducedProperty_InitOnly
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override");
+      global::System.Console.WriteLine("Original");
+      return (global::System.Int32)42;
+    }
+    init
+    {
+      global::System.Console.WriteLine("Override");
+      global::System.Console.WriteLine("Original");
+      return;
+    }
+  }
+  private global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedProperty_Iterator_Introduction
+  {
+    get
+    {
+      global::System.Console.WriteLine("Original");
+      yield return 42;
+    }
+  }
+  public global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedProperty_Iterator
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override");
+      return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IntroducedProperty_Iterator_Introduction);
+    }
+  }
 }
