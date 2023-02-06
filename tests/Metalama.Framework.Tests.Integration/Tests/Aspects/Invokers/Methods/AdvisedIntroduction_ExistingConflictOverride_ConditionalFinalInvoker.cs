@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         [Template]
         public dynamic? MethodTemplate()
         {
-            BaseClass? local = null;
+            TargetClass? local = null;
 
             if (meta.Target.Method.Parameters.Count == 0)
             {

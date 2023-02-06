@@ -18,13 +18,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Add( value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Add( value );
             }
 
             remove
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Remove(  value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Remove(  value );
             }
         }
 
@@ -34,13 +34,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Add( value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Add( value );
             }
 
             remove
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Remove(  value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Remove(  value );
             }
         }
 
@@ -50,13 +50,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Add( value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Add( value );
             }
 
             remove
             {
                 Console.WriteLine( "This is introduced event." );
-                meta.Target.Event.Remove(  value );
+                meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Remove(  value );
             }
         }
     }
@@ -79,13 +79,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         [Template]
         public void AddTemplate( dynamic value )
         {
-            meta.Target.Event.Add( value );
+            meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Add( value );
         }
 
         [Template]
         public void RemoveTemplate( dynamic value )
         {
-            meta.Target.Event.Remove(  value );
+            meta.Target.Event.With(Code.Invokers.InvokerOptions.Final).Remove(  value );
         }
     }
 

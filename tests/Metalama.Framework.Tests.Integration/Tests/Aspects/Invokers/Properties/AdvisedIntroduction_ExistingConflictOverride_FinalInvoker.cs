@@ -48,12 +48,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
         {
             get
             {
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With(Code.Invokers.InvokerOptions.Final).Value;
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Value =  value;
+                meta.Target.FieldOrProperty.With(Code.Invokers.InvokerOptions.Final).Value =  value;
             }
         }
 
