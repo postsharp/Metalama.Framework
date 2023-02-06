@@ -19,9 +19,6 @@ public enum InvokerOptions
     /// </summary>
     Default,
 
-    Before = Default,
-
-    // TODO: implement 
     /// <summary>
     /// Causes the <i>current</i> implementation to be called, i.e. the implementation after all overrides by the current aspect layer. 
     /// </summary>

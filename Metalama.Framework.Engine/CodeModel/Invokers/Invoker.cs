@@ -31,6 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this._order = (options & InvokerOptions.OrderMask) switch
             {
                 InvokerOptions.Default => AspectReferenceOrder.Original,
+                InvokerOptions.Current => AspectReferenceOrder.Self,
                 InvokerOptions.Final => AspectReferenceOrder.Final,
                 _ => throw new AssertionFailedException( $"Invalid value: {options}." )
             };

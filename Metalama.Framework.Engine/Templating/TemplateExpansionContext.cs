@@ -20,6 +20,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -91,14 +92,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         metaApi.Target.Declaration,
         metaApi: metaApi )
     {
-        this._template = template.Template;
+        this._template = template?.Template;
         this.TemplateInstance = templateInstance;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
-        this.TemplateGenericArguments = template.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type );
+        this.TemplateGenericArguments = (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type ) ?? ImmutableDictionary<string, IType>.Empty;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
 
