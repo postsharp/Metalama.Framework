@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,7 +137,37 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                         return false;
                     }
 
-                    return arrayX.Rank == arrayY.Rank;
+                    if (arrayX.Rank != arrayY.Rank)
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (ITypeParameterSymbol typeParameterX, ITypeParameterSymbol typeParameterY ):
+                    if ( typeParameterX.Ordinal != typeParameterY.Ordinal )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (IPointerTypeSymbol pointerSymbolX, IPointerTypeSymbol pointerSymbolY ):
+                    if ( !TypeEquals( pointerSymbolX.PointedAtType, pointerSymbolY.PointedAtType ) )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY ):
+                    // TODO: Is this correct in all options?
+                    if ( localSymbolX.Name != localSymbolY.Name )
+                    {
+                        return false;
+                    }
+
+                    break;
 
                 default:
                     throw new NotImplementedException( $"{x.Kind}" );
@@ -406,8 +437,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 currentY = currentY.ContainingSymbol;
             }
 
-            // Check that the depth of the hierarchy is not the same. Should not be reachable.
-            return currentX != null || currentY != null;
+            // Both have to be null at the same time.
+            return currentX == null && currentY == null;
         }
 
         private static bool ContainingModuleEquals( IModuleSymbol moduleX, IModuleSymbol moduleY )
@@ -533,10 +564,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case ITypeParameterSymbol typeParameter:
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
-                    {
-                        h = HashCode.Combine( h, typeParameter.Name );
-                    }
+                    h = HashCode.Combine( h, typeParameter.Ordinal );
 
                     break;
 
@@ -558,6 +586,11 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case IFunctionPointerTypeSymbol functionPointerType:
                     return GetHashCode( functionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
+
+                case ILocalSymbol local:
+                    // TODO: Is this correct in all options?
+                    h = HashCode.Combine( h, local.Name );
+                    break;
 
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );
