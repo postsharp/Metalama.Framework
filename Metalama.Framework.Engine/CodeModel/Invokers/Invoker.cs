@@ -30,7 +30,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else if ( member is IDeclarationBuilder )
             {
-                this.Options = InvokerOptions.Current;
+                // Builders are always resolved to the base implementation so that calls from meta.Target,
+                // it must point to the base implementation.
+                this.Options = InvokerOptions.Default;
             }
             else
             {
@@ -43,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this._order = (this.Options & InvokerOptions.OrderMask) switch
             {
-                InvokerOptions.Default => AspectReferenceOrder.Original,
+                InvokerOptions.Default => AspectReferenceOrder.Base,
                 InvokerOptions.Current => AspectReferenceOrder.Self,
                 InvokerOptions.Final => AspectReferenceOrder.Final,
                 _ => throw new AssertionFailedException( $"Invalid value: {options}." )
