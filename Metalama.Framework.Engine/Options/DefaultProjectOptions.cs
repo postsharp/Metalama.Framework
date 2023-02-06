@@ -24,6 +24,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool FormatOutput => false;
 
+    public virtual bool WriteHtml => false;
+
     public virtual bool FormatCompileTimeCode => false;
 
     public virtual bool IsUserCodeTrusted => true;

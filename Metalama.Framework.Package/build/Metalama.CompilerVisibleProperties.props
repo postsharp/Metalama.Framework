@@ -19,6 +19,7 @@
         <CompilerVisibleProperty Include="MetalamaConcurrentBuildEnabled"/>
         <CompilerVisibleProperty Include="MetalamaCompileTimePackages"/>
         <CompilerVisibleProperty Include="MetalamaPlugInAssemblyPaths"/>
+        <CompilerVisibleProperty Include="MetalamaWriteHtml"/>
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
     </ItemGroup>

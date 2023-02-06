@@ -148,7 +148,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, this._compilation, this._syntaxGenerationContext ).NormalizeWhitespace().ToFullString() );
+                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, this._compilation, this._syntaxGenerationContext )
+                    .NormalizeWhitespace()
+                    .ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );

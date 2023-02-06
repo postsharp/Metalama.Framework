@@ -30,6 +30,7 @@ public static class MSBuildPropertyNames
     public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
     public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
     public const string MetalamaPlugInAssemblyPaths = nameof(MetalamaPlugInAssemblyPaths);
+    public const string MetalamaWriteHtml = nameof(MetalamaWriteHtml);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
@@ -52,5 +53,6 @@ public static class MSBuildPropertyNames
         MetalamaConcurrentBuildEnabled,
         MetalamaConcurrentBuildEnabled,
         MetalamaCompileTimePackages,
+        MetalamaWriteHtml,
         ProjectAssetsFile );
 }

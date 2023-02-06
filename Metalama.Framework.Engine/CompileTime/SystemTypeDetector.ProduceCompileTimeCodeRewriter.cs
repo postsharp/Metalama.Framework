@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -8,15 +10,13 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         public static bool IsSystemType( INamedTypeSymbol namedType )
         {
-            switch ( namedType.GetReflectionName() )
-            {
-                case "System.Index":
-                case "System.Range":
-                    return true;
-            }
+            var nsName = namedType.ContainingNamespace.GetFullName();
 
-            switch ( namedType.ContainingNamespace.ToDisplayString() )
+            switch ( nsName )
             {
+                case "System":
+                    return namedType.Name is nameof(Index) or nameof(Range);
+
                 case "System.Runtime.CompilerServices":
                 case "System.Diagnostics.CodeAnalysis":
                     return true;
