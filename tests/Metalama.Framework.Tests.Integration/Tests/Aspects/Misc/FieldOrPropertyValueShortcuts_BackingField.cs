@@ -16,6 +16,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.FieldOrPropert
         [Introduce]
         public void Method()
         {
+            // TODO: Throw an exception. Backing fields should not be accessible from invokers.
+            
             foreach (var field in meta.Target.Type.Fields)
             {
                 field.Value = field.Value;

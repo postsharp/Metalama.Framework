@@ -37,13 +37,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         [Template]
         public dynamic? OverrideMethod()
         {
+            TargetClass local = null!;
+            
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invoke();
+                return meta.Target.Method.With( local ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

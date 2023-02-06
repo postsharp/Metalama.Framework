@@ -11,6 +11,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 
             foreach (var property in builder.Target.Properties)
             {
+                // TODO: IAdviceResult.Declaration should not expose the Builder but the Built thing of the mutable model?
+                
                 var isSpecifiedProperty = builder.Advice.IntroduceProperty(
                         builder.Target,
                         nameof(IsSpecifiedTemplate),
