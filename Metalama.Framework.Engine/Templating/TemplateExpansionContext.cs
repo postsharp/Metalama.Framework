@@ -19,6 +19,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -66,6 +68,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     public TemplateLexicalScope LexicalScope { get; }
 
     public ITemplateSyntaxFactory SyntaxFactory { get; }
+    
+    public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
+
 
     public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
@@ -74,24 +79,26 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         TemplateLexicalScope lexicalScope,
         SyntaxSerializationService syntaxSerializationService,
         SyntaxGenerationContext syntaxGenerationContext,
-        TemplateMember<IMethod>? template,
+        BoundTemplateMethod? template,
         IUserExpression? proceedExpression,
-        AspectLayerId aspectLayerId ) : base(
+        AspectLayerId aspectLayerId
+        ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
+        UserCodeMemberInfo.FromSymbol( template?.Template.Declaration.GetSymbol() ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
         metaApi: metaApi )
     {
-        this._template = template;
+        this._template = template.Template;
         this.TemplateInstance = templateInstance;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
+        this.TemplateGenericArguments = template.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type );
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
 
@@ -105,6 +112,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.LexicalScope = prototype.LexicalScope;
         this.SyntaxFactory = prototype.SyntaxFactory;
         this._localFunctionInfo = localFunctionInfo;
+        this.TemplateGenericArguments = prototype.TemplateGenericArguments;
         this._proceedExpression = prototype._proceedExpression;
     }
 

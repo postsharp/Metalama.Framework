@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Advising
                     context.LexicalScopeProvider.GetLexicalScope( targetMember ),
                     context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
-                    boundTemplate.Template,
+                    boundTemplate,
                     null,
                     this.AspectLayerId );
 

@@ -792,6 +792,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         } ) ) );
         }
 
+        // TODO: do the same for ?.
+
         return base.VisitMemberAccessExpression( node );
     }
 

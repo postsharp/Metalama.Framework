@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
-
+        
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
@@ -372,7 +372,7 @@ namespace Metalama.Framework.Engine.Templating
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ) )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ), this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );

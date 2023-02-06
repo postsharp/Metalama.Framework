@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                this._boundTemplate.Template,
+                this._boundTemplate,
                 null,
                 this.ParentAdvice.AspectLayerId );
 
