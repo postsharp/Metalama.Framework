@@ -69,9 +69,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     public TemplateLexicalScope LexicalScope { get; }
 
     public ITemplateSyntaxFactory SyntaxFactory { get; }
-    
-    public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
 
+    public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
 
     public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
@@ -82,8 +81,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         SyntaxGenerationContext syntaxGenerationContext,
         BoundTemplateMethod? template,
         IUserExpression? proceedExpression,
-        AspectLayerId aspectLayerId
-        ) : base(
+        AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
         UserCodeMemberInfo.FromSymbol( template?.Template.Declaration.GetSymbol() ),
@@ -99,7 +97,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
-        this.TemplateGenericArguments = (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type ) ?? ImmutableDictionary<string, IType>.Empty;
+
+        this.TemplateGenericArguments =
+            (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
+            ?? ImmutableDictionary<string, IType>.Empty;
+
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
 

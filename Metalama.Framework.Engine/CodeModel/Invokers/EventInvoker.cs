@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
     {
-        public EventInvoker( IEvent @event, InvokerOptions options = default, object? target = null ) : base( @event, options, target ) { }
+        public EventInvoker( IEvent @event, InvokerOptions? options = default, object? target = null ) : base( @event, options, target ) { }
 
         public object Add( object? value )
         {

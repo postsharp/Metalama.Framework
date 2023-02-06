@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     {
         public FieldOrPropertyInvoker(
             IFieldOrProperty fieldOrProperty,
-            InvokerOptions options = default,
+            InvokerOptions? options = default,
             object? target = null,
             SyntaxGenerationContext? syntaxGenerationContext = null ) : base(
             fieldOrProperty,

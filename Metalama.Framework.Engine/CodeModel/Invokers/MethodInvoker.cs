@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
     {
-        public MethodInvoker( IMethod method, InvokerOptions options = default, object? target = null ) : base( method, options, target ) { }
+        public MethodInvoker( IMethod method, InvokerOptions? options = default, object? target = null ) : base( method, options, target ) { }
 
         public object? Invoke( params object?[]? args )
         {

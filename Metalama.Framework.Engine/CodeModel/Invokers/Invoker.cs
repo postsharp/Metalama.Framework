@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
@@ -21,14 +22,26 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected SyntaxGenerationContext GenerationContext { get; }
 
-        protected Invoker( T member, InvokerOptions options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
+        protected Invoker( T member, InvokerOptions? options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
         {
-            this.Options = options;
+            if ( options != null )
+            {
+                this.Options = options.Value;
+            }
+            else if ( member is IDeclarationBuilder )
+            {
+                this.Options = InvokerOptions.Current;
+            }
+            else
+            {
+                this.Options = member.GetCompilationModel().Options.InvokerOptions;
+            }
+
             this.Target = target;
             this.Member = member;
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            this._order = (options & InvokerOptions.OrderMask) switch
+            this._order = (this.Options & InvokerOptions.OrderMask) switch
             {
                 InvokerOptions.Default => AspectReferenceOrder.Original,
                 InvokerOptions.Current => AspectReferenceOrder.Self,

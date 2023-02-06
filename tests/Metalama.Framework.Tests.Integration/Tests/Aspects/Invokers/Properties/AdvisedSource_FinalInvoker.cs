@@ -1,6 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.AdvisedSource_FinalInvoker
@@ -11,12 +12,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
         {
             get
             {
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value = value;
             }
         }
     }

@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -75,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal MetricManager MetricManager { get; }
 
-        internal CompilationModelOptions Options { get; }
+        internal CompilationModelOptions Options { get; private set; }
 
         private CompilationModel(
             ProjectModel project,
@@ -182,13 +183,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable )
+        private CompilationModel( CompilationModel prototype, bool mutable, CompilationModelOptions? options = null )
         {
             this._isMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
-            this.Options = prototype.Options;
+            this.Options = options ?? prototype.Options;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -456,9 +457,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        internal CompilationModel CreateMutableClone() => new( this, true );
+        internal CompilationModel CreateMutableClone() => new( this, true, this.Options with { InvokerOptions = InvokerOptions.Current } );
 
-        internal void Freeze() => this._isMutable = false;
+        internal void Freeze()
+        {
+            this._isMutable = false;
+            this.Options = this.Options with { InvokerOptions = InvokerOptions.Default };
+        }
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

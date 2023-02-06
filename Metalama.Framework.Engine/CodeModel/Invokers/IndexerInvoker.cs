@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
-        public IndexerInvoker( IIndexer indexer, InvokerOptions options = default, object? target = null ) : base( indexer, options, target ) { }
+        public IndexerInvoker( IIndexer indexer, InvokerOptions? options = default, object? target = null ) : base( indexer, options, target ) { }
 
         public object GetValue( params object?[] args )
         {
