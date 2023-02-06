@@ -41,6 +41,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
             
             if (meta.Target.Method.Parameters.Count == 0)
             {
+                // TODO: Throw from With
                 return meta.Target.Method.With( local ).Invoke();
             }
             else
