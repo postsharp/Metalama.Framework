@@ -8,16 +8,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
+        public override dynamic? OverrideProperty
+        {
             get
             {
-                return meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value;
+                return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
-                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value =  value ;
+                meta.Target.FieldOrProperty.Value = value;
             }
         }
     }

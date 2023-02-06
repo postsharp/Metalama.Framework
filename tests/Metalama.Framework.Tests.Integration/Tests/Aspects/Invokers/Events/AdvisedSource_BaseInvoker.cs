@@ -10,14 +10,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
 {
     public class TestAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic value)
+        public override void OverrideAdd( dynamic value )
         {
-            meta.Target.Event.With( InvokerOptions.Base ).Add( value);
+            meta.Target.Event.Add( value );
         }
 
-        public override void OverrideRemove(dynamic value)
+        public override void OverrideRemove( dynamic value )
         {
-            meta.Target.Event.With( InvokerOptions.Base ).Remove( value);
+            meta.Target.Event.Remove( value );
         }
     }
 
@@ -29,8 +29,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
         [Test]
         public event EventHandler Event
         {
-            add => this._field += value;
-            remove => this._field -= value;
+            add => _field += value;
+            remove => _field -= value;
         }
 
         [Test]

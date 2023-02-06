@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value;
+                return meta.Target.FieldOrProperty.Value;
             }
         }
 
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value;
+                return meta.Target.FieldOrProperty.Value;
             }
         }
     }
@@ -50,13 +50,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine( "Override" );
 
-                return meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value;
+                return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
                 Console.WriteLine( "Override" );
-                meta.Target.FieldOrProperty.With( InvokerOptions.Base ).Value = value;
+                meta.Target.FieldOrProperty.Value = value;
             }
         }
     }

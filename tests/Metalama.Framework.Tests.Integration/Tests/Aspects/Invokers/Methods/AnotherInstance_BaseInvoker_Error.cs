@@ -39,11 +39,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.With( InvokerOptions.Base ).Invoke();
+                return meta.Target.Method.Invoke();
             }
             else
             {
-                return meta.Target.Method.With( InvokerOptions.Base ).Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

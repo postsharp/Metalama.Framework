@@ -18,25 +18,23 @@ public enum InvokerOptions
     /// and will use the dot (<c>.</c>) operator for member access.
     /// </summary>
     Default,
-    
-    Base = Default,
-    
+
     Before = Default,
-    
+
     // TODO: implement 
     /// <summary>
-    /// Causes the <i>current</i> implementation to be called, i.e. the implementation after all overrides by the current aspect. 
+    /// Causes the <i>current</i> implementation to be called, i.e. the implementation after all overrides by the current aspect layer. 
     /// </summary>
     Current = 1,
-    
+
     /// <summary>
     /// Causes the <i>final</i> implementation to be called, i.e. the implementation after all overrides by aspects
     /// and, if the member is <c>virtual</c>, by derived classes through the <c>override</c> keyword. 
     /// </summary>
     Final = 2,
-    
-    OrderMask = Base | Final,
-    
+
+    OrderMask = Current | Final,
+
     /// <summary>
     /// Specifies that the null-conditional access operator (<c>?.</c> aka Elvis) has to be used instead of the dot operator. 
     /// </summary>

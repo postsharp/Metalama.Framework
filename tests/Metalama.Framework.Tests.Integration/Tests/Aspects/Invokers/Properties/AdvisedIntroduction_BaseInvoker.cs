@@ -5,25 +5,25 @@ using Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.AdvisedInt
 using System;
 using System.Linq;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.AdvisedIntroduction_BaseInvoker
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public int Property { get; set; }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advice.Override(
-                builder.Target.Properties.OfName(nameof(IntroductionAttribute.Property)).Single(),
-                nameof(PropertyTemplate));
+                builder.Target.Properties.OfName( nameof(IntroductionAttribute.Property) ).Single(),
+                nameof(PropertyTemplate) );
         }
 
         [Template]
@@ -31,14 +31,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
         {
             get
             {
-                Console.WriteLine("Override");
-                return meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value;
+                Console.WriteLine( "Override" );
+
+                return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
-                Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value = value;
+                Console.WriteLine( "Override" );
+                meta.Target.FieldOrProperty.Value = value;
             }
         }
     }
