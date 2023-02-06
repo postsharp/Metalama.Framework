@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on ``: `'MyAspect.Method()' threw 'InvalidOperationException' when applied to 'C.Method()': Cannot convert 'C.<P>k__BackingField' to an IExpression because it is an implicitly declared field. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0041 on ``: `'MyAspect.Method()' threw 'ArgumentOutOfRangeException' when applied to 'C.Method()': Cannot access 'C.<P>k__BackingField' as an IExpression because it is an implicitly declared field. (Parameter 'fieldOrProperty'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

@@ -5,9 +5,11 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -23,7 +25,15 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             fieldOrProperty,
             options,
             target,
-            syntaxGenerationContext ) { }
+            syntaxGenerationContext )
+        {
+            if ( fieldOrProperty is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof( fieldOrProperty ),
+                    MetalamaStringFormatter.Format( $"Cannot access '{fieldOrProperty}' as an IExpression because it is an implicitly declared field." ) );
+            }
+        }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
@@ -73,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         public ref object? Value
             => ref RefHelper.Wrap(
                 new SyntaxUserExpression(
-                    this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
+                    this.CreatePropertyExpression( AspectReferenceTargetKind.Self ),
                     this.Member.Type,
                     isReferenceable: this.Member.DeclarationKind == DeclarationKind.Field,
                     isAssignable: this.Member.Writeability != Writeability.None ) );

@@ -145,10 +145,6 @@ namespace Metalama.Framework.Engine.Linking
                         case IFieldSymbol:
                             // Do nothing on method groups and fields as these do not have implicit references.
                             break;
-                        
-                        // TODO: Implement this. This is surely incorrect.
-                        case IParameterSymbol:
-                            break;
 
                         default:
                             throw new AssertionFailedException( $"Unexpected symbol: '{current.Symbol}'" );

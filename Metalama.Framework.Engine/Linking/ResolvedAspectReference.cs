@@ -67,9 +67,6 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
-
-                // TODO: Fix this. This is just to make the tests not fail but this is not correct.
-                ({ Symbol.Kind: SymbolKind.Parameter }, _) => false,
                 _ => throw new AssertionFailedException( $"{this} is not expected." )
             };
 

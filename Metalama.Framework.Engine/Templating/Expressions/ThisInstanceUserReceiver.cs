@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         }
 
         protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => ThisExpression().WithAspectReferenceAnnotation( this.AspectReferenceSpecification );
+            => ThisExpression();
 
         public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
