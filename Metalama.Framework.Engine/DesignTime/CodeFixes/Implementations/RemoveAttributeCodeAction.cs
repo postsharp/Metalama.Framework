@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -27,9 +26,7 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
-        var compilation = context.Compilation.Compilation;
-
-        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( compilation );
+        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext );
 
         if ( attributeTypeSymbol == null )
         {
@@ -37,7 +34,7 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
                 $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
         }
 
-        var targetSymbol = this.TargetDeclaration.GetSymbol( compilation );
+        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext );
 
         if ( targetSymbol == null )
         {
@@ -51,7 +48,7 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
             var originalTree = syntaxReferenceGroup.Key;
             var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-            var rewriter = new RemoveAttributeRewriter( compilation.GetCachedSemanticModel( originalTree ), attributeTypeSymbol );
+            var rewriter = new RemoveAttributeRewriter( context.CompilationContext.SemanticModelProvider.GetSemanticModel( originalTree ), attributeTypeSymbol );
 
             var transformedRoot = originalRoot;
             var syntaxNodes = new List<SyntaxNode>();

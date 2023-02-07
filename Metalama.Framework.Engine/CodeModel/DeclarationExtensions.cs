@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -80,14 +81,15 @@ namespace Metalama.Framework.Engine.CodeModel
                     _ => null
                 } );
 
-        internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
+        internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext )
+            => Ref.FromSymbol( symbol, compilationContext );
 
         internal static Ref<T> ToTypedRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
-        internal static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
-            => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation, compilation );
+        internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
+            => compilationContext.SymbolTranslator.Translate( declaration.GetSymbol().AssertNotNull(), declaration.GetCompilationModel().RoslynCompilation );
 
         internal static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType

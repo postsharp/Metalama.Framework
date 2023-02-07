@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Types;
 using System;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Linq;
 
 namespace Metalama.Framework.Code
 {
@@ -288,5 +289,28 @@ namespace Metalama.Framework.Code
 
         internal static TypedConstant UnwrapOrCreate( object? value, IType type )
             => value is TypedConstant typedConstant ? typedConstant : new TypedConstant( value, type );
+
+        public TypedConstant ForCompilation( ICompilation compilation )
+        {
+            if ( !this.IsInitialized )
+            {
+                return default;
+            }
+            else if ( this.Type.Compilation == compilation )
+            {
+                return this;
+            }
+            else
+            {
+                return this.Value switch
+                {
+                    IType type => Create( type.ForCompilation( compilation ), this.Type.ForCompilation( compilation ) ),
+                    ImmutableArray<TypedConstant> array => Create(
+                        array.Select( i => i.ForCompilation( compilation ) ),
+                        this.Type.ForCompilation( compilation ) ),
+                    _ => Create( this.Value, this.Type.ForCompilation( compilation ) )
+                };
+            }
+        }
     }
 }

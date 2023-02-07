@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Services;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -19,7 +19,11 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
         this.DeclaringType = declaringType;
     }
 
-    public INamedType DeclaringType { get; }
+    INamedType IMemberCollection<T>.DeclaringType => this.DeclaringType;
+
+    protected CompilationContext CompilationContext => this.DeclaringType.Compilation.CompilationContext;
+
+    internal NamedType DeclaringType { get; }
 
     public IEnumerable<T> OfName( string name ) => this.GetItemsCore( name ).Keys;
 
@@ -31,14 +35,16 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     public int Count => this.GetItems().Count;
 
+    protected abstract IEqualityComparer<T> Comparer { get; }
+
     private Dictionary<T, T> GetItemsCore( string? name )
     {
         // We don't assign the field directly so we don't get into concurrent updates of the collection.
-        var members = new Dictionary<T, T>( MemberComparer<T>.Instance );
+        var members = new Dictionary<T, T>( this.Comparer );
 
-        for ( var t = this.DeclaringType; t != null; t = t.BaseType )
+        for ( var t = (INamedType) this.DeclaringType; t != null; t = t.BaseType )
         {
-            var includePrivate = t == this.DeclaringType;
+            var includePrivate = ReferenceEquals( t, this.DeclaringType );
             var declaredMembers = name == null ? this.GetMembers( t ) : this.GetMembers( t ).OfName( name );
 
             foreach ( var member in declaredMembers )

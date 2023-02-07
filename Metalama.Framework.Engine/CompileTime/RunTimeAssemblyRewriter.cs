@@ -88,6 +88,7 @@ namespace Metalama.Compiler
     private readonly bool _removeCompileTimeOnlyCode;
     private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
     private readonly RewriterHelper _rewriterHelper;
+    private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
 
     private RunTimeAssemblyRewriter( ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
     {
@@ -95,6 +96,7 @@ namespace Metalama.Compiler
         this._aspectDriverSymbol = compilationContext.SourceCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
         this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
         this._syntaxGenerationContextFactory = compilationContext.CompilationContext.SyntaxGenerationContextFactory;
+        this._symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
     }
 
     private SemanticModelProvider SemanticModelProvider => this._rewriterHelper.SemanticModelProvider;
@@ -134,7 +136,7 @@ namespace Metalama.Compiler
         // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
         // This only happens if regular Metalama.Framework is referenced from the weaver project, which generally shouldn't happen.
         // But it is a pattern used by Metalama.Samples for try.postsharp.net.
-        if ( this._aspectDriverSymbol != null && symbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, this._aspectDriverSymbol ) ) )
+        if ( this._aspectDriverSymbol != null && symbol.AllInterfaces.Any( i => this._symbolEqualityComparer.Equals( i, this._aspectDriverSymbol ) ) )
         {
             return node;
         }

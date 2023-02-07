@@ -129,57 +129,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol namespaceSymbol )
             => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
 
-        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol ns )
-            => ns.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeThis: true ) );
-
-        internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
-        {
-            if ( member.ContainingType == null )
-            {
-                return false;
-            }
-
-            if ( SymbolEqualityComparer.Default.Equals( member.ContainingType, type ) )
-            {
-                return true;
-            }
-
-            if ( type.BaseType != null )
-            {
-                return member.IsMemberOf( type.BaseType );
-            }
-
-            return false;
-        }
-
-        internal static bool Is( this ITypeSymbol left, ITypeSymbol right )
-        {
-            if ( left is IErrorTypeSymbol )
-            {
-                return false;
-            }
-
-            if ( SymbolEqualityComparer.Default.Equals( left, right ) )
-            {
-                return true;
-            }
-            else if ( left.BaseType != null && left.BaseType.Is( right ) )
-            {
-                return true;
-            }
-            else
-            {
-                foreach ( var i in left.Interfaces )
-                {
-                    if ( i.Is( right ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol namespaceSymbol )
+            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeThis: true ) );
 
         internal static bool IsAccessor( this IMethodSymbol method )
             => method.MethodKind switch
@@ -263,22 +214,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
             => null;
-
-        internal static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
-        {
-            if ( symbol == null )
-            {
-                return null;
-            }
-            else if ( originalCompilation == compilation )
-            {
-                return symbol;
-            }
-            else
-            {
-                return SymbolTranslator.GetInstance( compilation ).Translate( symbol );
-            }
-        }
 
         internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 

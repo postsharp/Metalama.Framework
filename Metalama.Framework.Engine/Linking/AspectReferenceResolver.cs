@@ -5,7 +5,9 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -75,12 +77,13 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
         private readonly Compilation _intermediateCompilation;
+        private readonly SafeSymbolComparer _comparer;
 
         public AspectReferenceResolver(
             LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             CompilationModel finalCompilationModel,
-            Compilation intermediateCompilation )
+            CompilationContext intermediateCompilationContext )
         {
             this._injectionRegistry = injectionRegistry;
 
@@ -93,7 +96,8 @@ namespace Metalama.Framework.Engine.Linking
             this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
-            this._intermediateCompilation = intermediateCompilation;
+            this._intermediateCompilation = intermediateCompilationContext.Compilation;
+            this._comparer = intermediateCompilationContext.SymbolComparer;
         }
 
         public ResolvedAspectReference Resolve(
@@ -106,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             // Get the local symbol that is referenced and reference root.
             // E.g. explicit interface implementation must be referenced as interface member reference.
-            ResolveTarget(
+            this.ResolveTarget(
                 containingSemantic.Symbol,
                 referencedSymbol,
                 expression,
@@ -493,7 +497,7 @@ namespace Metalama.Framework.Engine.Linking
             var containedInTargetOverride =
                 this._injectionRegistry.IsOverrideTarget( referencedSymbol )
                 && referencedDeclarationOverrides.Any(
-                    x => SymbolEqualityComparer.Default.Equals(
+                    x => this._comparer.Equals(
                         this._injectionRegistry.GetSymbolForInjectedMember( x ),
                         GetPrimarySymbol( containingSymbol ) ) );
 
@@ -511,7 +515,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Select( ( x, i ) => (Symbol: x, Index: i + 1) )
                             .Single(
                                 x =>
-                                    SymbolEqualityComparer.Default.Equals(
+                                    this._comparer.Equals(
                                         this._injectionRegistry.GetSymbolForInjectedMember( x.Symbol ),
                                         GetPrimarySymbol( containingSymbol ) ) )
                             .Index )
@@ -532,7 +536,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="rootNode">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
         /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
         /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
-        private static void ResolveTarget(
+        private void ResolveTarget(
             ISymbol containingSymbol,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
@@ -542,7 +546,7 @@ namespace Metalama.Framework.Engine.Linking
             out ExpressionSyntax targetSymbolSource )
         {
             // Check whether we are referencing explicit interface implementation.
-            if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
+            if ( (!this._comparer.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
                  || referencedSymbol.IsInterfaceMemberImplementation() )
             {

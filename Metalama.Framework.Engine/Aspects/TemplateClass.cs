@@ -338,7 +338,8 @@ namespace Metalama.Framework.Engine.Aspects
                 .Select(
                     x => TemplateMemberFactory.Create(
                         (IMemberOrNamedType) compilationModelForTemplateReflection.Factory.GetDeclaration(
-                            x.Symbol.Translate( x.SymbolCompilation, compilationModelForTemplateReflection.RoslynCompilation ).AssertNotNull() ),
+                            compilationModelForTemplateReflection.CompilationContext.SymbolTranslator.Translate( x.Symbol, x.SymbolCompilation )
+                                .AssertNotNull() ),
                         x.TemplateClassMember,
                         x.Attribute ) );
         }

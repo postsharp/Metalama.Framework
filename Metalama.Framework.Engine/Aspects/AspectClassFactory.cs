@@ -19,17 +19,17 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        public AspectClassFactory( AspectDriverFactory aspectDriverFactory )
+        public AspectClassFactory( AspectDriverFactory aspectDriverFactory, CompilationContext compilationContext ) : base( compilationContext )
         {
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        protected override IEnumerable<TemplateClassData> GetFrameworkClasses( CompilationContext compilationContext )
+        protected override IEnumerable<TemplateClassData> GetFrameworkClasses()
         {
             var frameworkAssemblyName = typeof(IAspect).Assembly.GetName();
 
             var frameworkAssembly =
-                compilationContext.Compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( x => x.Name == frameworkAssemblyName.Name );
+                this.CompilationContext.Compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( x => x.Name == frameworkAssemblyName.Name );
 
             if ( frameworkAssembly == null )
             {
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             return new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
                 .SelectAsImmutableArray(
-                    t => new TemplateClassData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t, compilationContext ) );
+                    t => new TemplateClassData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t, this.CompilationContext ) );
         }
 
         protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.AspectTypes;

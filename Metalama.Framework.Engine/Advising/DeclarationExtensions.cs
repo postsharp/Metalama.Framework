@@ -14,8 +14,7 @@ namespace Metalama.Framework.Engine.Advising
         public static bool SignatureEquals( this IMethod method, IMethod other )
         {
             // TODO: Custom modifiers.
-            return method.Name == other.Name
-                   && method.TypeParameters.Count == other.TypeParameters.Count
+            return method.TypeParameters.Count == other.TypeParameters.Count
                    && method.Parameters.Count == other.Parameters.Count
                    && method.Parameters
                        .Select( ( p, i ) => (p, i) )

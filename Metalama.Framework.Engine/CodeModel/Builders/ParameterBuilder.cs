@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     throw new NotSupportedException( "Cannot set default value of a return parameter." );
                 }
 
-                this._defaultValue = value;
+                this._defaultValue = this.Translate( value );
             }
         }
 
@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.DeclaringMember = declaringMember;
             this.Index = index;
             this._name = name;
-            this._type = type;
+            this._type = this.Translate( type );
             this._refKind = refKind;
         }
 

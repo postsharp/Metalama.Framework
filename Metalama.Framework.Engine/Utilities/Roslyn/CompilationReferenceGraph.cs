@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -20,7 +21,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private CompilationReferenceGraph( Compilation compilation )
         {
-            this.Visit( compilation.Assembly, 0, ImmutableHashSet<IAssemblySymbol>.Empty.WithComparer( SymbolEqualityComparer.Default ) );
+            this.Visit(
+                compilation.Assembly,
+                0,
+                ImmutableHashSet<IAssemblySymbol>.Empty.WithComparer( CompilationContextFactory.GetInstance( compilation ).SymbolComparer ) );
         }
 
         public (int Min, int Max) GetDepth( IAssemblySymbol assembly ) => this._depth[assembly];

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -43,7 +43,7 @@ internal static class ExpressionTypeAnnotationHelper
         }
     }
 
-    public static bool TryFindTypeFromAnnotation( SyntaxNode node, Compilation compilation, out ITypeSymbol? type )
+    public static bool TryFindTypeFromAnnotation( SyntaxNode node, CompilationContext compilationContext, out ITypeSymbol? type )
     {
         // If we don't know the exact type, check if we have a type annotation on the syntax.
 
@@ -64,7 +64,7 @@ internal static class ExpressionTypeAnnotationHelper
             return false;
         }
 
-        type = (ITypeSymbol) type.Translate( null, compilation ).AssertNotNull( $"The symbol '{type}' could not be translated." );
+        type = compilationContext.SymbolTranslator.Translate( type ).AssertNotNull( $"The symbol '{type}' could not be translated." );
 
         return true;
     }

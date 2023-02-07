@@ -21,7 +21,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.PropertySymbol.Parameters.Select( p => new Ref<IParameter>( p, this.Compilation.RoslynCompilation ) ).ToList() );
+            this.PropertySymbol.Parameters.Select( p => new Ref<IParameter>( p, this.Compilation.CompilationContext ) ).ToList() );
 
     public IIndexer? OverriddenIndexer
     {

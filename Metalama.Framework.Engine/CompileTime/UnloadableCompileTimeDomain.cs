@@ -40,6 +40,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public event Action? Unloaded;
 
+        public event Action? UnloadTimeout;
+
         public override Assembly LoadAssembly( string path )
         {
             // When using LoadFromAssemblyPath, the file is locked and the lock is not disposed when the AssemblyLoadContext is unloaded.
@@ -68,13 +70,13 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         [ExcludeFromCodeCoverage]
-        public void WaitForDisposal()
+        private void WaitForDisposal()
         {
             this._taskRunner.RunSynchronously( this.WaitForDisposalAsync );
         }
 
         [ExcludeFromCodeCoverage]
-        public Task WaitForDisposalAsync()
+        private Task WaitForDisposalAsync()
         {
             if ( this._disposeStatus == 0 )
             {
@@ -129,6 +131,8 @@ namespace Metalama.Framework.Engine.CompileTime
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */
+                        
+                        this.UnloadTimeout?.Invoke();
 
                         var exception = new InvalidOperationException(
                             "The domain could not be unloaded. There are probably dangling references. " +

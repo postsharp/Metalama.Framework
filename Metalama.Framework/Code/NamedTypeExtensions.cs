@@ -82,4 +82,40 @@ public static class NamedTypeExtensions
             yield return m;
         }
     }
+
+    /// <summary>
+    /// Gets all members of the current type and members inherited from the base type, except nested types.
+    /// </summary>
+    public static IEnumerable<IMember> AllMembers( this INamedType type )
+    {
+        foreach ( var m in type.AllMethods )
+        {
+            yield return m;
+        }
+
+        foreach ( var m in type.AllProperties )
+        {
+            yield return m;
+        }
+
+        foreach ( var m in type.AllFields )
+        {
+            yield return m;
+        }
+
+        foreach ( var m in type.AllEvents )
+        {
+            yield return m;
+        }
+
+        foreach ( var m in type.AllIndexers )
+        {
+            yield return m;
+        }
+
+        foreach ( var m in type.Constructors )
+        {
+            yield return m;
+        }
+    }
 }

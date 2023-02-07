@@ -17,8 +17,19 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ContainingDeclaration |
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
+                StructuralSymbolComparerOptions.GenericArguments |
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers );
+
+        public static readonly StructuralSymbolComparer IncludeNullability =
+            new(
+                StructuralSymbolComparerOptions.ContainingDeclaration |
+                StructuralSymbolComparerOptions.Name |
+                StructuralSymbolComparerOptions.GenericParameterCount |
+                StructuralSymbolComparerOptions.GenericArguments |
+                StructuralSymbolComparerOptions.ParameterTypes |
+                StructuralSymbolComparerOptions.ParameterModifiers |
+                StructuralSymbolComparerOptions.Nullability );
 
         public static readonly StructuralSymbolComparer Signature =
             new(
@@ -118,6 +129,44 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 case (IAssemblySymbol assemblyX, IAssemblySymbol assemblyY):
                     return assemblyX.Identity.Equals( assemblyY.Identity );
 
+                case (IArrayTypeSymbol arrayX, IArrayTypeSymbol arrayY):
+                    if ( !TypeEquals( arrayX.ElementType, arrayY.ElementType ) )
+                    {
+                        return false;
+                    }
+
+                    if ( arrayX.Rank != arrayY.Rank )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (ITypeParameterSymbol typeParameterX, ITypeParameterSymbol typeParameterY):
+                    if ( typeParameterX.Ordinal != typeParameterY.Ordinal )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (IPointerTypeSymbol pointerSymbolX, IPointerTypeSymbol pointerSymbolY):
+                    if ( !TypeEquals( pointerSymbolX.PointedAtType, pointerSymbolY.PointedAtType ) )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY):
+                    // TODO: Is this correct in all options?
+                    if ( localSymbolX.Name != localSymbolY.Name )
+                    {
+                        return false;
+                    }
+
+                    break;
+
                 default:
                     throw new NotImplementedException( $"{x.Kind}" );
             }
@@ -163,6 +212,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                  (!StringComparer.Ordinal.Equals( namedTypeX.Name, namedTypeY.Name ) || !NamespaceEquals(
                      namedTypeX.ContainingNamespace,
                      namedTypeY.ContainingNamespace )) )
+            {
+                return false;
+            }
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability )
+                 && namedTypeX.NullableAnnotation != namedTypeY.NullableAnnotation )
             {
                 return false;
             }
@@ -380,8 +435,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 currentY = currentY.ContainingSymbol;
             }
 
-            // Check that the depth of the hierarchy is not the same. Should not be reachable.
-            return currentX != null || currentY != null;
+            // Both have to be null at the same time.
+            return currentX == null && currentY == null;
         }
 
         private static bool ContainingModuleEquals( IModuleSymbol moduleX, IModuleSymbol moduleY )
@@ -507,10 +562,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case ITypeParameterSymbol typeParameter:
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
-                    {
-                        h = HashCode.Combine( h, typeParameter.Name );
-                    }
+                    h = HashCode.Combine( h, typeParameter.Ordinal );
 
                     break;
 
@@ -527,8 +579,17 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 case IAssemblySymbol assembly:
                     return assembly.Identity.GetHashCode();
 
+                case IPointerTypeSymbol pointerType:
+                    return GetHashCode( pointerType.PointedAtType, StructuralSymbolComparerOptions.FunctionPointer );
+
                 case IFunctionPointerTypeSymbol functionPointerType:
                     return GetHashCode( functionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
+
+                case ILocalSymbol local:
+                    // TODO: Is this correct in all options?
+                    h = HashCode.Combine( h, local.Name );
+
+                    break;
 
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );
@@ -563,13 +624,24 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             break;
 
+                        case IPropertySymbol property:
+                            h = HashCode.Combine( h, property.Name, property.Parameters.Length );
+
+                            // This runs only if the original symbol was a local function.
+                            foreach ( var parameter in property.Parameters )
+                            {
+                                h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralSymbolComparerOptions.Type ) );
+                            }
+
+                            break;
+
                         case IAssemblySymbol _:
                         case IModuleSymbol _:
                             // These are included below if required.
                             break;
 
                         default:
-                            throw new NotImplementedException( $"{symbol.Kind}" );
+                            throw new NotImplementedException( $"{current.Kind}" );
                     }
 
                     current = current.ContainingSymbol;

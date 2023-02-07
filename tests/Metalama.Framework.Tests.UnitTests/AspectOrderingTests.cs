@@ -40,7 +40,9 @@ namespace Metalama.Framework.Tests.UnitTests
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
 
-            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, serviceProvider ) );
+            var aspectTypeFactory = new AspectClassFactory(
+                new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, serviceProvider ),
+                compilation.CompilationContext );
 
             var aspectNamedTypes = aspectNames.SelectAsImmutableArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
 

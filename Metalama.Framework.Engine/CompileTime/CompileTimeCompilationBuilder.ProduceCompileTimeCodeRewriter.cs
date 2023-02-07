@@ -94,21 +94,23 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
+                var symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
+
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
                         x => x.Type,
                         x => x,
-                        SymbolEqualityComparer.Default );
+                        symbolEqualityComparer );
 
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
-                        .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
+                        .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
-                    compilationContext.SourceCompilation,
+                    compilationContext.CompilationContext,
                     compileTimeCompilationContext.Compilation,
                     this._syntaxGenerationContext,
                     referencedProjects );

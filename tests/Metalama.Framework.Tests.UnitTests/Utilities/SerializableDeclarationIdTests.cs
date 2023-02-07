@@ -72,7 +72,9 @@ class C<T>
 
                 Assert.Same( symbol, symbolRoundloop );
 
-                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetRoslynCompilation() ).GetSymbol( compilation.GetRoslynCompilation() );
+                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+                    .GetSymbol( compilation.GetRoslynCompilation() );
+
                 Assert.Same( symbol, symbolRoundloopFromRef );
             }
         }

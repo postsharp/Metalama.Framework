@@ -3,6 +3,8 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -16,7 +18,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
     where T : class, IDeclaration
 {
     private readonly IRef<T> _declaration;
-    private readonly ICompilation _compilation;
+    private readonly CompilationModel _compilation;
 
     /// <summary>
     /// Gets the declaration created or transformed by the advice method. For introduction advice methods, this is the introduced declaration when a new
@@ -25,7 +27,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
     /// </summary>
     public T Declaration
         => this.Outcome != AdviceOutcome.Error
-            ? this._declaration.GetTarget( this._compilation, ReferenceResolutionOptions.CanBeMissing )
+            ? this._declaration.GetTarget( this._compilation, ReferenceResolutionOptions.CanBeMissing ).Assert( d => d is not IDeclarationBuilder )
             : throw new InvalidOperationException( "Cannot get the resulting declaration when the outcome is Error." );
 
     public AdviceKind AdviceKind { get; }
@@ -34,10 +36,10 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
 
     public IAspectBuilder AspectBuilder { get; }
 
-    internal AdviceResult( IRef<T> declaration, ICompilation compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind )
+    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind )
     {
         this._declaration = declaration;
-        this._compilation = compilation;
+        this._compilation = compilation.Assert( c => c.IsMutable );
         this.Outcome = outcome;
         this.AspectBuilder = aspectBuilder;
         this.AdviceKind = adviceKind;

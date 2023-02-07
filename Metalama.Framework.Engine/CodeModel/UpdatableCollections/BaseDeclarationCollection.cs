@@ -24,7 +24,7 @@ internal abstract class BaseDeclarationCollection
         // but are available in a CompilationReference (i.e. at design time, if both projects are in the same solution).
         if ( symbol.DeclaredAccessibility == Accessibility.Private
              && !this.Compilation.Options.ShowExternalPrivateMembers
-             && !SymbolEqualityComparer.Default.Equals( symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly ) )
+             && !this.Compilation.CompilationContext.SymbolComparer.Equals( symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly ) )
         {
             return true;
         }

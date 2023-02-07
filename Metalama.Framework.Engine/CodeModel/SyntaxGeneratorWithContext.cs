@@ -220,13 +220,13 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
         return syntax;
     }
 
-    public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
-        => SyntaxFactory.ParameterList( this.ParameterListParameters( method, compilation ) );
+    public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation, bool removeDefaultValues = false )
+        => SyntaxFactory.ParameterList( this.ParameterListParameters( method, compilation, removeDefaultValues ) );
 
-    public BracketedParameterListSyntax ParameterList( IIndexer indexer, CompilationModel compilation )
-        => BracketedParameterList( this.ParameterListParameters( indexer, compilation ) );
+    public BracketedParameterListSyntax ParameterList( IIndexer indexer, CompilationModel compilation, bool removeDefaultValues = false )
+        => BracketedParameterList( this.ParameterListParameters( indexer, compilation, removeDefaultValues ) );
 
-    private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation )
+    private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
         => SeparatedList(
             method.Parameters.SelectAsEnumerable(
                 p => Parameter(
@@ -234,7 +234,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
                     p.GetSyntaxModifierList(),
                     this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                     Identifier( p.Name ),
-                    p.DefaultValue == null ? null : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
+                    removeDefaultValues || p.DefaultValue == null ? null : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {

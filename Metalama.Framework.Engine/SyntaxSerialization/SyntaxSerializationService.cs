@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
@@ -131,16 +130,11 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// Returns the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This result can be used to
         /// determine the possibility to serialize a type when the template is compiled. It may return false positives.
         /// </summary>
-        private SerializableTypes GetSerializableTypes( ReflectionMapper reflectionMapper )
-        {
-            return new SerializableTypes(
-                this._supportedContractTypes.Keys.Distinct()
-                    .Select( reflectionMapper.GetTypeSymbol )
-                    .ToImmutableHashSet<ITypeSymbol>( SymbolEqualityComparer.Default ) );
-        }
-
         public SerializableTypes GetSerializableTypes( CompilationContext compilationContext )
-            => this.GetSerializableTypes( compilationContext.ReflectionMapper );
+            => new(
+                this._supportedContractTypes.Keys.Distinct()
+                    .Select( compilationContext.ReflectionMapper.GetTypeSymbol )
+                    .ToImmutableHashSet<ITypeSymbol>( compilationContext.SymbolComparer ) );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {

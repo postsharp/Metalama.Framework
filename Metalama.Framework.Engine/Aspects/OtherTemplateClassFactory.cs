@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal sealed class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
 {
-    protected override IEnumerable<TemplateClassData> GetFrameworkClasses( CompilationContext compilationContext ) => Enumerable.Empty<TemplateClassData>();
+    protected override IEnumerable<TemplateClassData> GetFrameworkClasses() => Enumerable.Empty<TemplateClassData>();
 
     protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.OtherTemplateTypes;
 
@@ -37,4 +37,6 @@ internal sealed class OtherTemplateClassFactory : TemplateClassFactory<OtherTemp
 
         return true;
     }
+
+    public OtherTemplateClassFactory( CompilationContext compilationContext ) : base( compilationContext ) { }
 }

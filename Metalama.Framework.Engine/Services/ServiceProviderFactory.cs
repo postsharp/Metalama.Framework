@@ -62,7 +62,6 @@ public static class ServiceProviderFactory
         }
 
         serviceProvider = serviceProvider
-            .WithServiceConditional( _ => new CompilationContextFactory() )
             .WithServiceConditional<ITaskRunner>( _ => new TaskRunner() )
             .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
             .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )

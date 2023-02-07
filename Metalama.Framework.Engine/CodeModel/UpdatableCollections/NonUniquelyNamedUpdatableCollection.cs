@@ -35,7 +35,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         }
         else if ( !this.IsComplete )
         {
-            var members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( name ), this.Compilation );
+            var members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( name ), this.Compilation, this.MemberRefComparer );
             this._dictionary = dictionary.SetItem( name, members );
 
             return members.Array;
@@ -67,14 +67,14 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             // that the collection was not built for that name, and we need to create it now.
             if ( !dictionary.ContainsKey( symbol.Name ) )
             {
-                var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
+                var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
 
                 action( memberRef.ToRef() );
 
                 if ( !dictionaryBuilder.TryGetValue( memberRef.Name, out var members ) )
                 {
                     // This is the first time this method processes a member of that name.
-                    members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( memberRef ), this.Compilation );
+                    members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( memberRef ), this.Compilation, this.MemberRefComparer );
                     dictionaryBuilder[memberRef.Name] = members;
                 }
                 else
@@ -97,12 +97,12 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             if ( !this.IsComplete )
             {
                 // The collection has not been populated yet, so do it now, and add the new member.
-                members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( member.Name ).Add( member ), this.Compilation );
+                members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( member.Name ).Add( member ), this.Compilation, this.MemberRefComparer );
             }
             else
             {
                 // The collection has been populated and there is no item of that name, so only add the member.
-                members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( member ), this.Compilation );
+                members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( member ), this.Compilation, this.MemberRefComparer );
             }
 
             this._dictionary = dictionary.SetItem( member.Name, members );
@@ -117,13 +117,15 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
-                members = new UpdatableMemberRefArray<T>( members.Array.Add( member ), this.Compilation );
+                members = new UpdatableMemberRefArray<T>( members.Array.Add( member ), this.Compilation, this.MemberRefComparer );
                 this._dictionary = dictionary.SetItem( member.Name, members );
             }
         }
 
         this.AddItem( member.ToRef() );
     }
+
+    protected abstract IEqualityComparer<MemberRef<T>> MemberRefComparer { get; }
 
     // TODO: Verify why Remove is never called.
     // Resharper disable UnusedMember.Global
@@ -139,14 +141,14 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 // The collection has not been populated yet, so do it now, and add the new member.
                 var sourceMembers = this.GetMemberRefs( member.Name );
 
-                var index = sourceMembers.IndexOf( member, MemberRefEqualityComparer<T>.Default );
+                var index = sourceMembers.IndexOf( member, this.MemberRefComparer );
 
                 if ( index < 0 )
                 {
                     throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
-                members = new UpdatableMemberRefArray<T>( sourceMembers.RemoveAt( index ), this.Compilation );
+                members = new UpdatableMemberRefArray<T>( sourceMembers.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
             }
             else
             {
@@ -165,14 +167,14 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
-                var index = members.Array.IndexOf( member, MemberRefEqualityComparer<T>.Default );
+                var index = members.Array.IndexOf( member, this.MemberRefComparer );
 
                 if ( index < 0 )
                 {
                     throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
-                members = new UpdatableMemberRefArray<T>( members.Array.RemoveAt( index ), this.Compilation );
+                members = new UpdatableMemberRefArray<T>( members.Array.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
                 this._dictionary = dictionary.SetItem( member.Name, members );
             }
         }
@@ -186,6 +188,6 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
     private ImmutableArray<MemberRef<T>> GetMemberRefs( string name )
         => this.GetSymbols( name )
-            .Select( x => new MemberRef<T>( x, this.Compilation.RoslynCompilation ) )
+            .Select( x => new MemberRef<T>( x, this.Compilation.CompilationContext ) )
             .ToImmutableArray();
 }

@@ -203,7 +203,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IMethod>? GetAspectInterfaceMethod( IMethod interfaceMethod )
         {
-            var method = aspectType.AllMethods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+            var method = aspectType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
 
             if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
             {
@@ -215,7 +215,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IProperty>? GetAspectInterfaceProperty( IProperty interfaceProperty )
         {
-            var property = aspectType.AllProperties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+            var property = aspectType.AllProperties.OfName( interfaceProperty.Name ).SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
 
             if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
             {
@@ -227,7 +227,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IEvent>? GetAspectInterfaceEvent( IEvent interfaceEvent )
         {
-            var @event = aspectType.AllEvents.SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
+            var @event = aspectType.AllEvents.OfName( interfaceEvent.Name ).SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
 
             if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
             {
@@ -289,7 +289,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 switch ( memberSpec.InterfaceMember )
                 {
                     case IMethod interfaceMethod:
-                        var existingMethod = targetType.Methods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+                        var existingMethod = targetType.Methods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
                         var templateMethod = memberSpec.Template?.Cast<IMethod>();
                         var redirectionTargetMethod = (IMethod?) memberSpec.TargetMember;
 

@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
@@ -38,5 +40,28 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 WellKnownMemberNames.UnaryPlusOperatorName => OperatorKind.UnaryPlus,
                 _ => OperatorKind.None
             };
+
+        internal static bool? BelongsToCompilation( this ISymbol symbol, CompilationContext compilationContext )
+        {
+            var assembly = symbol.ContainingAssembly;
+
+            if ( assembly == null )
+            {
+                return null;
+            }
+
+            return compilationContext.Assemblies.TryGetValue( assembly.Identity, out var thisCompilationAssembly )
+                   && assembly.Equals( thisCompilationAssembly );
+        }
+
+        [Conditional( "DEBUG" )]
+        internal static void VerifyPossiblyBelongsToSameCompilation( this ISymbol symbol, ISymbol otherSymbol )
+        {
+            if ( symbol.ContainingAssembly.Identity.Equals( otherSymbol.ContainingAssembly.Identity )
+                 && !symbol.ContainingAssembly.Equals( otherSymbol.ContainingAssembly ) )
+            {
+                throw new AssertionFailedException( $"The symbols '{symbol}' and '{otherSymbol}' do not belong to the same compilation." );
+            }
+        }
     }
 }

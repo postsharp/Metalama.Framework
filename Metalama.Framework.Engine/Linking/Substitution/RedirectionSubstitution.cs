@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly SyntaxNode _referencingNode;
         private readonly IntermediateSymbolSemantic _targetSemantic;
 
-        public RedirectionSubstitution( SyntaxNode referencingNode, IntermediateSymbolSemantic targetSemantic )
+        public RedirectionSubstitution( CompilationContext compilationContext, SyntaxNode referencingNode, IntermediateSymbolSemantic targetSemantic )
+            : base( compilationContext )
         {
             this._referencingNode = referencingNode;
             this._targetSemantic = targetSemantic;

@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
@@ -19,23 +18,20 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
+            private readonly ClassifyingCompilationContext _compilationContext;
             private readonly SemanticModel _semanticModel;
-            private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
-            private readonly ISymbolClassifier _symbolClassifier;
             private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
-
+            
             public CollectSerializableTypesVisitor(
+                ClassifyingCompilationContext compilationContext,
                 SemanticModel semanticModel,
-                ReflectionMapper reflectionMapper,
-                ISymbolClassifier symbolClassifier,
                 Action<SerializableTypeInfo> onSerializableTypeDiscovered,
                 CancellationToken cancellationToken )
             {
+                this._compilationContext = compilationContext;
                 this._semanticModel = semanticModel;
-                this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
-                this._symbolClassifier = symbolClassifier;
                 this._onSerializableTypeDiscovered = onSerializableTypeDiscovered;
             }
 
@@ -45,18 +41,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var declaredSymbol = (INamedTypeSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
+                var serializableInterface = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
-                if ( !declaredSymbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, serializableInterface ) ) )
+                if ( !declaredSymbol.AllInterfaces.Any( i => this._compilationContext.CompilationContext.SymbolComparer.Equals( i, serializableInterface ) ) )
                 {
                     return;
                 }
 
                 var innerVisitor = new CollectSerializableFieldsVisitor(
+                    this._compilationContext,
                     this._semanticModel,
                     node,
-                    this._reflectionMapper,
-                    this._symbolClassifier,
                     this._cancellationToken );
 
                 innerVisitor.Visit( node );

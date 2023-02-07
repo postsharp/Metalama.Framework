@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 this.CheckNotFrozen();
 
-                this._type = value;
+                this._type = this.Translate( value );
             }
         }
 
