@@ -78,6 +78,7 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.CheckMemoryLeaks == true )
         {
             collectibleExecutionContext = CollectibleExecutionContext.Open();
+            CollectibleExecutionContext.RegisterDisposeAction( () => this.Logger.WriteLine( "Disposing the CollectibleExecutionContext." ) );
         }
         else
         {
@@ -86,52 +87,54 @@ internal abstract partial class BaseTestRunner
 
         using ( collectibleExecutionContext )
         {
-            // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
-            using ( await TestThrottlingHelper.ThrottleAsync() )
+           
+            try
             {
-                try
-                {
-                    await this.RunAndAssertCoreAsync( testInput, testContextOptions );
-                }
-                finally
-                {
-                    // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                    // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                    // have references to the objects that are in the scope of the test.
-                    await Task.Yield();
-                }
+                await this.RunAndAssertCoreAsync( testInput, testContextOptions );
             }
+            finally
+            {
+                // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                // have references to the objects that are in the scope of the test.
+                await Task.Yield();
+            }
+        
         }
     }
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
-        var originalCulture = CultureInfo.CurrentCulture;
-
-        try
+        // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
+        using ( await TestThrottlingHelper.ThrottleAsync() )
         {
-            // Change the culture to invariant to get invariant diagnostic messages.
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            var originalCulture = CultureInfo.CurrentCulture;
 
-            testInput.ProjectProperties.License?.ThrowIfNotLicensed();
+            try
+            {
+                // Change the culture to invariant to get invariant diagnostic messages.
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            var transformedOptions = this.GetContextOptions( testContextOptions );
-            using var testContext = new TestContext( transformedOptions );
+                testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
-            Dictionary<string, object?> state = new( StringComparer.Ordinal );
-            using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, testContext, state );
-            this.SaveResults( testInput, testResult, state );
-            this.ExecuteAssertions( testInput, testResult, state );
-        }
-        catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
-        {
-            return;
-        }
-        finally
-        {
-            // Restore the culture.
-            CultureInfo.CurrentCulture = originalCulture;
+                var transformedOptions = this.GetContextOptions( testContextOptions );
+                using var testContext = new TestContext( transformedOptions );
+
+                Dictionary<string, object?> state = new( StringComparer.Ordinal );
+                using var testResult = new TestResult();
+                await this.RunAsync( testInput, testResult, testContext, state );
+                this.SaveResults( testInput, testResult, state );
+                this.ExecuteAssertions( testInput, testResult, state );
+            }
+            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+            {
+                return;
+            }
+            finally
+            {
+                // Restore the culture.
+                CultureInfo.CurrentCulture = originalCulture;
+            }
         }
 
         if ( testInput.Options.ExpectedException != null )

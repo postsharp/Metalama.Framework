@@ -102,7 +102,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                 indexWithinType,
                 cancellationToken );
 
-            mutableCompilationForThisAspect.Freeze();
+            currentCompilation = mutableCompilationForThisAspect.CreateImmutableClone();
 
             this.Parent.AddDiagnostics( aspectResult.Diagnostics );
 
@@ -115,8 +115,6 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 
                 default:
                     // Apply the changes done by the aspects.
-                    currentCompilation = mutableCompilationForThisAspect;
-
                     this.Parent.AddAspectSources( aspectResult.AspectSources, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
                     this.Parent.AddTransformations( aspectResult.Transformations );

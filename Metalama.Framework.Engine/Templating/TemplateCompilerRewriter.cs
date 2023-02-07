@@ -934,13 +934,16 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         case TemplatingScope.Dynamic:
                         case TemplatingScope.RunTimeOnly:
                             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( a.Expression );
+
                             if ( expressionType != null )
                             {
                                 var typedExpression = InvocationExpression(
-                                   this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.RunTimeExpression ) ) )
-                               .AddArgumentListArguments(
-                                   Argument( transformedExpression ),
-                                   Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                                    .AddArgumentListArguments(
+                                        Argument( transformedExpression ),
+                                        Argument(
+                                            LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
                                 return Argument( typedExpression );
                             }
                             else

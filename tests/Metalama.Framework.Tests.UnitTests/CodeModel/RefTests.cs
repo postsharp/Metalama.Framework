@@ -13,7 +13,7 @@ public sealed class RefTests : UnitTestClass
     [Fact]
     public void CompilationRef()
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "/* nothing */" );
 
         var compilationRef = compilation.ToRef();
@@ -25,7 +25,7 @@ public sealed class RefTests : UnitTestClass
     [Fact]
     public void CompilationSymbolId()
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "/* nothing */" );
         var symbolId = SymbolId.Create( compilation.Symbol );
         var resolvedSymbol = symbolId.Resolve( compilation.RoslynCompilation ).AssertNotNull();
@@ -37,7 +37,7 @@ public sealed class RefTests : UnitTestClass
     [Fact]
     public void ReferencedAssemblySymbol()
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "/* nothing */" );
 
         var assemblyRefSymbol = compilation.Factory.GetTypeByReflectionType( typeof(string) ).GetSymbol();

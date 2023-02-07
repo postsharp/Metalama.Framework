@@ -4,8 +4,8 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal MetricManager MetricManager { get; }
 
-        internal CompilationModelOptions Options { get; private set; }
+        internal CompilationModelOptions Options { get; }
 
         private CompilationModel(
             ProjectModel project,
@@ -464,11 +464,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel CreateMutableClone() => new( this, true, this.Options with { InvokerOptions = InvokerOptions.Current } );
 
-        internal void Freeze()
-        {
-            this.IsMutable = false;
-            this.Options = this.Options with { InvokerOptions = InvokerOptions.Default };
-        }
+        internal CompilationModel CreateImmutableClone() => new( this, false, this.Options with { InvokerOptions = InvokerOptions.Default } );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

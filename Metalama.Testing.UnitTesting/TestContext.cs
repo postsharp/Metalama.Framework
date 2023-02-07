@@ -32,6 +32,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private readonly bool _isRoot;
     private readonly Stopwatch? _stopwatch;
     private readonly IDisposable? _throttlingHandle;
+    private readonly StackTrace _stackTrace = new StackTrace();
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<CompileTimeDomain?> _domain;
@@ -289,10 +290,14 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
-    ~TestContext() 
+#pragma warning disable CA1821
+    ~TestContext()
     {
         this.Dispose( false );
+        
+        throw new InvalidOperationException( $"The TestContext allocated at the following call stack was not disposed:\n{this._stackTrace}\n------" );
     }
+#pragma warning restore CA1821
 
     public void Dispose() => this.Dispose( true );
 

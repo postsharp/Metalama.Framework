@@ -106,6 +106,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );
+
+            foreach ( var diagnostic in testResult.Diagnostics )
+            {
+                this.Logger.WriteLine( diagnostic.ToString() );
+            }
+            
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
             // Input

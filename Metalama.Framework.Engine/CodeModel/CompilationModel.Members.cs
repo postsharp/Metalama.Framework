@@ -29,7 +29,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
 
-    internal bool IsMutable { get; private set; }
+    internal bool IsMutable { get; }
 
     internal bool Contains( FieldBuilder fieldBuilder )
         => (this._fields.TryGetValue( fieldBuilder.DeclaringType.GetSymbol(), out var fields ) && fields.Contains( fieldBuilder.ToTypedRef<IField>() ))

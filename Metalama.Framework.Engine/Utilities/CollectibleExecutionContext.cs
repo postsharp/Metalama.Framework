@@ -15,10 +15,10 @@ namespace Metalama.Framework.Engine.Utilities
 
         private readonly ConcurrentQueue<Action> _disposeActions = new();
 
-        private CollectibleExecutionContext() { }
+        private CollectibleExecutionContext( ) { }
 
         // Resharper disable UnusedMember.Global
-        internal static void RegisterDisposeAction( Action action )
+        public static void RegisterDisposeAction( Action action )
         {
             _current.Value?._disposeActions.Enqueue( action );
         }
