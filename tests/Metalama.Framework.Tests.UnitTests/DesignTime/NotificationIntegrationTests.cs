@@ -22,6 +22,8 @@ public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
     {
         using var testContext = this.CreateDistributedDesignTimeTestContext( null, null, new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
 
+        await testContext.WhenFieldsInitialized;
+
         // Start the notification listener.
         var notificationListenerEndpoint = new NotificationListenerEndpoint(
             testContext.ServiceProvider.Underlying,
@@ -30,7 +32,7 @@ public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
         // We need to make sure that the notification listener listens before we run the pipeline,
         // otherwise the notification will be missed.
         await notificationListenerEndpoint.ConnectAsync();
-        await testContext.WhenInitialized;
+        await testContext.WhenFullyInitialized;
 
         BlockingCollection<CompilationResultChangedEventArgs> eventQueue = new();
 

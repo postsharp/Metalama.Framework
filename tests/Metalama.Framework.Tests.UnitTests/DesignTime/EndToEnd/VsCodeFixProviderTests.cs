@@ -29,7 +29,7 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         // Initialize the components.
         using var testContext = this.CreateDistributedDesignTimeTestContext( null, analysisProcessServices, null );
 
-        await testContext.WhenInitialized.WithCancellation( testContext.CancellationToken );
+        await testContext.WhenFullyInitialized.WithCancellation( testContext.CancellationToken );
 
         const string code = """
 using Metalama.Framework.Aspects;
