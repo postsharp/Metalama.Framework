@@ -226,7 +226,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var compilation = returnType.GetCompilationModel();
 
-            if ( ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( returnExpression, compilation.RoslynCompilation, out var expressionType ) &&
+            if ( ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( returnExpression, compilation.CompilationContext, out var expressionType ) &&
                  compilation.RoslynCompilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
             {
                 // No need to emit a cast.
@@ -514,7 +514,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         return new ProceedUserExpression( methodName, this );
     }
 
-    public static IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext ) => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
+    public static IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext )
+        => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 

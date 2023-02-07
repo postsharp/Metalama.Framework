@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -86,8 +87,12 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
 
-            this.CompilationContext = project.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>()
-                .GetInstance( partialCompilation.Compilation );
+            this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
+
+            this._staticConstructors =
+                ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+
+            this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
 
             this._derivedTypes = partialCompilation.DerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
@@ -101,9 +106,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
+            void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
                 => dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
-                    .WithComparers( SymbolEqualityComparer.Default );
+                    .WithComparers( this.CompilationContext.SymbolComparer );
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
@@ -123,7 +128,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Factory = new DeclarationFactory( this );
 
             // Discover custom attributes.
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.RoslynCompilation );
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
@@ -250,7 +255,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>() ) );
+                this.GetAttributeCollection( Ref.Compilation( this.CompilationContext ).As<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
@@ -418,7 +423,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
+        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

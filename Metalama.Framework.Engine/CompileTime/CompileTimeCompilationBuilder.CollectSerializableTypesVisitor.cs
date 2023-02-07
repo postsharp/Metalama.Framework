@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -19,23 +19,23 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
+            private readonly CompilationContext _compilationContext;
             private readonly SemanticModel _semanticModel;
-            private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
-            private readonly ISymbolClassifier _symbolClassifier;
             private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
+            private readonly ISymbolClassificationService _symbolClassificationService;
 
             public CollectSerializableTypesVisitor(
+                ProjectServiceProvider serviceProvider,
+                CompilationContext compilationContext,
                 SemanticModel semanticModel,
-                ReflectionMapper reflectionMapper,
-                ISymbolClassifier symbolClassifier,
                 Action<SerializableTypeInfo> onSerializableTypeDiscovered,
                 CancellationToken cancellationToken )
             {
+                this._symbolClassificationService = serviceProvider.GetRequiredService<ISymbolClassificationService>();
+                this._compilationContext = compilationContext;
                 this._semanticModel = semanticModel;
-                this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
-                this._symbolClassifier = symbolClassifier;
                 this._onSerializableTypeDiscovered = onSerializableTypeDiscovered;
             }
 
@@ -45,18 +45,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var declaredSymbol = (INamedTypeSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
+                var serializableInterface = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
-                if ( !declaredSymbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, serializableInterface ) ) )
+                if ( !declaredSymbol.AllInterfaces.Any( i => this._compilationContext.SymbolComparer.Equals( i, serializableInterface ) ) )
                 {
                     return;
                 }
 
                 var innerVisitor = new CollectSerializableFieldsVisitor(
+                    this._symbolClassificationService,
+                    this._compilationContext,
                     this._semanticModel,
                     node,
-                    this._reflectionMapper,
-                    this._symbolClassifier,
                     this._cancellationToken );
 
                 innerVisitor.Visit( node );

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,16 +16,16 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class SymbolReferenceFinder
         {
+            private readonly CompilationContext _compilationContext;
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
-            private readonly SemanticModelProvider _semanticModelProvider;
             private readonly ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>> _cache;
 
             public SymbolReferenceFinder(
                 ProjectServiceProvider serviceProvider,
-                Compilation intermediateCompilation )
+                CompilationContext compilationContext )
             {
+                this._compilationContext = compilationContext;
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-                this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._cache = new ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>>();
             }
 
@@ -36,14 +35,15 @@ namespace Metalama.Framework.Engine.Linking
                 where T : ISymbol
             {
                 // TODO: Caching.
-                var referencingTypes = new Dictionary<INamedTypeSymbol, HashSet<ISymbol>>( SymbolEqualityComparer.Default );
+                var referencingTypes = new Dictionary<INamedTypeSymbol, HashSet<ISymbol>>( this._compilationContext.SymbolComparer );
 
                 // Currently limit the search to specified referencing types (for general call site transformations we would need to specify reference in any type).
                 foreach ( var symbolReferenceSource in symbolReferenceSources )
                 {
                     if ( !referencingTypes.TryGetValue( symbolReferenceSource.ReferencingType, out var referencedSymbol ) )
                     {
-                        referencingTypes[symbolReferenceSource.ReferencingType] = referencedSymbol = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+                        referencingTypes[symbolReferenceSource.ReferencingType] =
+                            referencedSymbol = new HashSet<ISymbol>( this._compilationContext.SymbolComparer );
                     }
 
                     referencedSymbol.Add( symbolReferenceSource.ReferencedSymbol );
@@ -136,7 +136,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var walker =
                             new BodyWalker(
-                                this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
+                                this._compilationContext,
+                                this._compilationContext.SemanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
                                 analyzedMethod,
                                 symbolReferences );
 
@@ -149,15 +150,18 @@ namespace Metalama.Framework.Engine.Linking
 
             private sealed class BodyWalker : CSharpSyntaxWalker
             {
+                private readonly CompilationContext _compilationContext;
                 private readonly SemanticModel _semanticModel;
                 private readonly IMethodSymbol _contextSymbol;
                 private readonly List<IntermediateSymbolSemanticReference> _symbolReferences;
 
                 public BodyWalker(
+                    CompilationContext compilationContext,
                     SemanticModel semanticModel,
                     IMethodSymbol contextSymbol,
                     List<IntermediateSymbolSemanticReference> symbolReferences )
                 {
+                    this._compilationContext = compilationContext;
                     this._semanticModel = semanticModel;
                     this._contextSymbol = contextSymbol;
                     this._symbolReferences = symbolReferences;
@@ -172,7 +176,7 @@ namespace Metalama.Framework.Engine.Linking
                         // The search is limited to symbols declared in the type they are referenced from.
 
                         if ( symbolInfo.Symbol != null
-                             && SymbolEqualityComparer.Default.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType ) )
+                             && this._compilationContext.SymbolComparer.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType ) )
                         {
                             this._symbolReferences.Add(
                                 new IntermediateSymbolSemanticReference(

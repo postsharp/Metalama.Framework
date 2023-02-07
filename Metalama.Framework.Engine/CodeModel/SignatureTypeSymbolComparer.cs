@@ -87,6 +87,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( obj )
             {
+                case null:
+                    return 0;
+                
                 case IArrayTypeSymbol array:
                     return HashCode.Combine( this.GetHashCode( array ) );
 

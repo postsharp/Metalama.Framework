@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool HasDefaultConstructorConstraint { get; set; }
 
-        public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( type );
+        public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( this.Translate( type ) );
 
         public void AddTypeConstraint( Type type ) => this._typeConstraints.Add( this.Compilation.Factory.GetTypeByReflectionType( type ) );
 

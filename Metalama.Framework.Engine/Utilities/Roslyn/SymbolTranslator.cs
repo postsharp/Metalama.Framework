@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -13,23 +13,44 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal sealed class SymbolTranslator
 {
-    private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
-
-    private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache = new( SymbolEqualityComparer.Default );
-    private readonly Compilation _targetCompilation;
+    private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache;
+    private readonly CompilationContext _targetCompilationContext;
     private readonly Visitor _visitor;
 
-    public static SymbolTranslator GetInstance( Compilation targetCompilation ) => _instances.GetOrAdd( targetCompilation, t => new SymbolTranslator( t ) );
-
-    private SymbolTranslator( Compilation targetCompilation )
+    internal SymbolTranslator( CompilationContext targetCompilationContextContext )
     {
-        this._targetCompilation = targetCompilation;
+        this._targetCompilationContext = targetCompilationContextContext;
+        this._cache = new ConcurrentDictionary<ISymbol, ISymbol?>( targetCompilationContextContext.SymbolComparer );
         this._visitor = new Visitor( this );
     }
 
     public T? Translate<T>( T symbol )
         where T : ISymbol
-        => (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
+    {
+        if ( this._targetCompilationContext.Assemblies.TryGetValue( symbol.ContainingAssembly.Identity, out var assembly )
+             && assembly.Equals( symbol.ContainingAssembly ) )
+        {
+            // The symbol is guaranteed to be in the same assembly.
+            return symbol;
+        }
+        else
+        {
+            return (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
+        }
+    }
+
+    public T? Translate<T>( T symbol, Compilation? originalCompilation )
+        where T : ISymbol
+    {
+        if ( originalCompilation == this._targetCompilationContext.Compilation )
+        {
+            return symbol;
+        }
+        else
+        {
+            return (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
+        }
+    }
 
     private ISymbol? TranslateCore( ISymbol symbol ) => this._visitor.Visit( symbol );
 
@@ -53,10 +74,10 @@ internal sealed class SymbolTranslator
                 return null;
             }
 
-            return this._parent._targetCompilation.CreateArrayTypeSymbol( elementType, symbol.Rank );
+            return this._parent._targetCompilationContext.Compilation.CreateArrayTypeSymbol( elementType, symbol.Rank );
         }
 
-        public override ISymbol VisitDynamicType( IDynamicTypeSymbol symbol ) => this._parent._targetCompilation.DynamicType;
+        public override ISymbol VisitDynamicType( IDynamicTypeSymbol symbol ) => this._parent._targetCompilationContext.Compilation.DynamicType;
 
         private ISymbol? TranslateUniquelyNamedTypeMember( ISymbol symbol )
         {
@@ -230,7 +251,7 @@ internal sealed class SymbolTranslator
                         return module.GlobalNamespace;
 
                     case NamespaceKind.Compilation:
-                        return this._parent._targetCompilation.GlobalNamespace;
+                        return this._parent._targetCompilationContext.Compilation.GlobalNamespace;
 
                     default:
                         throw new AssertionFailedException( $"Unexpected NamespaceKind {symbol.NamespaceKind} for '{symbol}'." );
@@ -291,7 +312,7 @@ internal sealed class SymbolTranslator
                 return null;
             }
 
-            return this._parent._targetCompilation.CreatePointerTypeSymbol( pointedAtType );
+            return this._parent._targetCompilationContext.Compilation.CreatePointerTypeSymbol( pointedAtType );
         }
 
         public override ISymbol? VisitProperty( IPropertySymbol symbol ) => this.TranslateNonUniquelyNamedTypeMember( symbol );
@@ -331,7 +352,7 @@ internal sealed class SymbolTranslator
 
         public override ISymbol? VisitAssembly( IAssemblySymbol symbol )
         {
-            return this._parent._targetCompilation.GetAssembly( symbol.Identity );
+            return this._parent._targetCompilationContext.Compilation.GetAssembly( symbol.Identity );
         }
 
         public override ISymbol? VisitModule( IModuleSymbol symbol )

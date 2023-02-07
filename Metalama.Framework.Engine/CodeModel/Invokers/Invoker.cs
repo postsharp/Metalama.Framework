@@ -14,12 +14,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     {
         protected AspectReferenceSpecification AspectReference { get; }
 
-        protected ICompilation Compilation { get; }
+        protected CompilationModel Compilation { get; }
 
         protected Invoker( IMember declaration, InvokerOrder order )
         {
             this.Order = order;
-            this.Compilation = declaration.Compilation;
+            this.Compilation = declaration.GetCompilationModel();
 
             var linkingOrder = order switch
             {

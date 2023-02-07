@@ -182,12 +182,12 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
-            var intermediateCompilationContext = this._compilationContext.ForCompilation( intermediateCompilation.Compilation );
+            var intermediateCompilationContext = intermediateCompilation.CompilationContext;
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
                 input.CompilationModel,
-                intermediateCompilation.Compilation,
+                intermediateCompilationContext,
                 syntaxTreeMapping,
                 syntaxTransformationCollection.InjectedMembers );
 

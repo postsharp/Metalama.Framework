@@ -62,8 +62,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testInput.TestName,
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var preliminaryCompilationContext = serviceProvider.Global.GetRequiredService<CompilationContextFactory>()
-                .GetInstance( preliminaryCompilation );
+            var preliminaryCompilationContext = CompilationContextFactory.GetInstance( preliminaryCompilation );
 
             var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
 

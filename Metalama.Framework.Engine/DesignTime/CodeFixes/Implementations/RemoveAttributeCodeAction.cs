@@ -29,7 +29,7 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( compilation );
+        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext );
 
         if ( attributeTypeSymbol == null )
         {
@@ -37,7 +37,7 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
                 $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
         }
 
-        var targetSymbol = this.TargetDeclaration.GetSymbol( compilation );
+        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext );
 
         if ( targetSymbol == null )
         {

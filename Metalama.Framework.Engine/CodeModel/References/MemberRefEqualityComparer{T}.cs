@@ -15,11 +15,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal sealed class MemberRefEqualityComparer<T> : IEqualityComparer<MemberRef<T>>
         where T : class, IMemberOrNamedType
     {
-        public static readonly MemberRefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
+        private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
 
-        private readonly SymbolEqualityComparer _symbolEqualityComparer;
-
-        private MemberRefEqualityComparer( SymbolEqualityComparer symbolEqualityComparer )
+        internal MemberRefEqualityComparer( IEqualityComparer<ISymbol> symbolEqualityComparer )
         {
             this._symbolEqualityComparer = symbolEqualityComparer;
         }

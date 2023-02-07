@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,7 +15,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly IMethodSymbol _targetAccessor;
         private readonly string? _returnVariableIdentifier;
 
-        public RecordParameterSubstitution( ParameterSyntax rootNode, IMethodSymbol targetAccessor, string? returnVariableIdentifier )
+        public RecordParameterSubstitution(
+            CompilationContext compilationContext,
+            ParameterSyntax rootNode,
+            IMethodSymbol targetAccessor,
+            string? returnVariableIdentifier )
+            : base( compilationContext )
         {
             this._rootNode = rootNode;
             this._targetAccessor = targetAccessor;

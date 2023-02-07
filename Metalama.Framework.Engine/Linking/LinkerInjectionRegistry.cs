@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -29,8 +30,7 @@ namespace Metalama.Framework.Engine.Linking
         public const string InjectedNodeIdAnnotationId = "AspectLinker_InjectedNodeId";
 
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly Compilation _intermediateCompilation;
-        private readonly SemanticModelProvider _semanticModelProvider;
+        private readonly CompilationContext _intermediateCompilationContext;
         private readonly IReadOnlyDictionary<string, LinkerInjectedMember> _injectedMemberLookup;
         private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _overrideMap;
         private readonly IReadOnlyDictionary<LinkerInjectedMember, IDeclaration> _overrideTargetMap;
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Linking
         public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
-            Compilation intermediateCompilation,
+            CompilationContext intermediateCompilationContext,
             IReadOnlyDictionary<SyntaxTree, SyntaxTree> transformedSyntaxTreeMap,
             IReadOnlyCollection<LinkerInjectedMember> injectedMembers )
         {
@@ -51,8 +51,7 @@ namespace Metalama.Framework.Engine.Linking
             Dictionary<IDeclaration, LinkerInjectedMember> builderLookup;
 
             this._comparer = comparer;
-            this._intermediateCompilation = intermediateCompilation;
-            this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
+            this._intermediateCompilationContext = intermediateCompilationContext;
             this._injectedMemberLookup = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._transformedSyntaxTreeMap = transformedSyntaxTreeMap;
 
@@ -170,7 +169,7 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( overrideTarget is Declaration originalDeclaration )
             {
-                return SymbolTranslator.GetInstance( this._intermediateCompilation ).Translate( originalDeclaration.GetSymbol().AssertNotNull() );
+                return this._intermediateCompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull() );
             }
             else if ( overrideTarget is IDeclarationBuilder builder )
             {
@@ -191,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                 var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-                var intermediateSemanticModel = this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
+                var intermediateSemanticModel = this._intermediateCompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
 
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
@@ -261,7 +260,9 @@ namespace Metalama.Framework.Engine.Linking
                 _ => intermediateSyntax
             };
 
-            return this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
+            return this._intermediateCompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
+                .GetDeclaredSymbol( symbolSyntax )
+                .AssertNotNull();
         }
 
         /// <summary>
@@ -280,7 +281,7 @@ namespace Metalama.Framework.Engine.Linking
         public IEnumerable<ISymbol> GetOverriddenMembers()
         {
             // TODO: This is not efficient.
-            var returned = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+            var returned = new HashSet<ISymbol>( this._intermediateCompilationContext.SymbolComparer );
 
             foreach ( var injectedMember in this.GetInjectedMembers() )
             {
@@ -419,7 +420,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool IsLastOverride( ISymbol symbol )
         {
-            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals(
+            return this.IsOverride( symbol ) && this._intermediateCompilationContext.SymbolComparer.Equals(
                 symbol,
                 this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
@@ -452,7 +453,7 @@ namespace Metalama.Framework.Engine.Linking
                         return overrideSymbol;
                     }
 
-                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol ) )
+                    if ( this._intermediateCompilationContext.SymbolComparer.Equals( overrideSymbol, symbol ) )
                     {
                         matched = true;
                     }

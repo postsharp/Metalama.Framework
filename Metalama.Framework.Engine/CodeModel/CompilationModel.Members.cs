@@ -26,12 +26,8 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
     private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
-
-    private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors =
-        ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
-
-    private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers =
-        ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
+    private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
+    private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
 
     private bool _isMutable;
 

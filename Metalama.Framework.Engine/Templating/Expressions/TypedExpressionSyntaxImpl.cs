@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
-                ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( syntax, generationContext.Compilation, out expressionType );
+                ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( syntax, generationContext.CompilationContext, out expressionType );
             }
             else
             {

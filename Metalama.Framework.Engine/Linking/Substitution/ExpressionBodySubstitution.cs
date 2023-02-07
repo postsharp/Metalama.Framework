@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,11 +18,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly string? _returnVariableIdentifier;
 
         public ExpressionBodySubstitution(
+            CompilationContext compilationContext,
             ArrowExpressionClauseSyntax rootNode,
             IMethodSymbol referencingMethod,
             IMethodSymbol targetMethod,
             bool usingSimpleInlining,
-            string? returnVariableIdentifier = null )
+            string? returnVariableIdentifier = null ) : base( compilationContext )
         {
             Invariant.Implies( usingSimpleInlining, returnVariableIdentifier == null );
             Invariant.Implies( usingSimpleInlining, SymbolEqualityComparer.Default.Equals( referencingMethod.ReturnType, targetMethod.ReturnType ) );

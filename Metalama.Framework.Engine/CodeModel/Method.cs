@@ -40,7 +40,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+            this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
                 .ToList() );
 
     [Memo]

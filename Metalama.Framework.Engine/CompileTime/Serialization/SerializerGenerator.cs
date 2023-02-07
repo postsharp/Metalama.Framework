@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -22,23 +24,25 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     private readonly ReflectionMapper _runTimeReflectionMapper;
     private readonly ReflectionMapper _compileTimeReflectionMapper;
     private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _referencedProjects;
+    private readonly SafeSymbolComparer _symbolEqualityComparer;
 
     public SerializerGenerator(
-        Compilation runTimeCompilation,
+        CompilationContext runTimeCompilationContext,
         Compilation compileTimeCompilation,
         SyntaxGenerationContext context,
         IEnumerable<CompileTimeProject> compileTimeProjects )
     {
         this._context = context;
 
-        this._runTimeReflectionMapper = new ReflectionMapper( runTimeCompilation );
+        this._runTimeReflectionMapper = runTimeCompilationContext.ReflectionMapper;
+        this._symbolEqualityComparer = runTimeCompilationContext.SymbolComparer;
         this._compileTimeReflectionMapper = new ReflectionMapper( compileTimeCompilation );
         this._referencedProjects = compileTimeProjects.ToDictionary( x => x.RunTimeIdentity, x => x );
     }
 
     public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
     {
-        var serializableTypeMember = serializableType.SerializedMembers.Single( x => SymbolEqualityComparer.Default.Equals( x, memberSymbol ) );
+        var serializableTypeMember = serializableType.SerializedMembers.Single( x => this._symbolEqualityComparer.Equals( x, memberSymbol ) );
 
         return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
     }
@@ -47,7 +51,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     {
         var baseType = serializableType.Type.BaseType.AssertNotNull();
 
-        while ( SymbolEqualityComparer.Default.Equals(
+        while ( this._symbolEqualityComparer.Equals(
                    serializableType.Type.ContainingAssembly,
                    baseType.ContainingAssembly ) )
         {
@@ -64,7 +68,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 .Where(
                     x =>
                         x is { Name: WellKnownMemberNames.InstanceConstructorName, Parameters.Length: 1 }
-                        && SymbolEqualityComparer.Default.Equals(
+                        && this._symbolEqualityComparer.Equals(
                             x.Parameters[0].Type,
                             this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
                         && x.Parameters[0].CustomModifiers.Length == 0
@@ -143,10 +147,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, serializableTypeName, baseSerializerType ) );
         }
 
-        var baseType =
-            HasPendingBaseSerializer( serializableType.Type, baseSerializerType )
-                ? SimpleBaseType( CreatePendingSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
-                : SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) );
+        var baseType = this.HasPendingBaseSerializer( serializableType.Type, baseSerializerType )
+            ? SimpleBaseType( CreatePendingSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
+            : SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) );
 
         // TODO: CompilerGenerated attribute.
         return ClassDeclaration(
@@ -164,9 +167,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
     }
 
-    private static bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
-        => SymbolEqualityComparer.Default.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly )
-           && !SymbolEqualityComparer.Default.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType );
+    private bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
+        => this._symbolEqualityComparer.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly )
+           && !this._symbolEqualityComparer.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType );
 
     private INamedTypeSymbol GetBaseSerializer( ITypeSymbol targetType )
     {
@@ -180,7 +183,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         if ( targetType.BaseType.AllInterfaces.Contains(
                 this._runTimeReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
-                SymbolEqualityComparer.Default ) )
+                this._symbolEqualityComparer ) )
         {
             // The base type should have a serializer.
             var baseSerializer = targetType.BaseType.GetTypeMembers( _serializerTypeName ).FirstOrDefault();
@@ -191,7 +194,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             }
             else
             {
-                if ( SymbolEqualityComparer.Default.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
+                if ( this._symbolEqualityComparer.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
                 {
                     // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
                     return this.GetBaseSerializer( targetType.BaseType );
@@ -335,7 +338,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
             body = Block(
-                baseSerializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
+                baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                     ? EmptyStatement()
                     : ExpressionStatement(
                         InvocationExpression(
@@ -380,7 +383,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
             body = Block(
-                baseDeserializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
+                baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                     ? EmptyStatement()
                     : ExpressionStatement(
                         InvocationExpression(
@@ -572,7 +575,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
     private IEnumerable<ISymbol> SelectConstructorDefaultFields( SerializableTypeInfo serializableType )
     {
-        var constructorDeserializedMembers = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+        var constructorDeserializedMembers = new HashSet<ISymbol>( this._symbolEqualityComparer );
 
         foreach ( var serializedMember in serializableType.SerializedMembers )
         {
@@ -599,7 +602,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
 
         if ( fieldOrProperty.GetAttributes()
-            .Any( a => a.AttributeClass.AssertNotNull().Is( this._runTimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
+            .Any(
+                a => this._symbolEqualityComparer.Is(
+                    a.AttributeClass.AssertNotNull(),
+                    this._runTimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
         {
             // Skip all template symbols.
             return false;
@@ -681,7 +687,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             if ( member.GetAttributes()
                 .Any(
-                    a => SymbolEqualityComparer.Default.Equals(
+                    a => this._symbolEqualityComparer.Equals(
                         a.AttributeClass,
                         this._runTimeReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) ) ) ) )
             {
@@ -692,7 +698,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             {
                 // System.Int32 (and similar types) contains a private field of type Int32
                 // skip it to avoid stack overflow
-                if ( SymbolEqualityComparer.Default.Equals( field.Type, type ) )
+                if ( this._symbolEqualityComparer.Equals( field.Type, type ) )
                 {
                     continue;
                 }

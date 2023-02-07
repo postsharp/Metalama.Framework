@@ -11,9 +11,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
     internal sealed class MemberComparer<T> : IEqualityComparer<T>
         where T : class, IMember
     {
-        private MemberComparer() { }
+        public MemberComparer( IEqualityComparer<ISymbol> symbolComparer )
+        {
+            this._symbolComparer = symbolComparer;
+        }
 
-        public static MemberComparer<T> Instance { get; } = new();
+        private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
         public bool Equals( T? x, T? y )
         {
@@ -55,7 +58,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     var xParameter = xHasParameters.Parameters[i].Type;
                     var yParameter = yHasParameters.Parameters[i].Type;
 
-                    if ( !SymbolEqualityComparer.Default.Equals( xParameter.GetSymbol(), yParameter.GetSymbol() ) )
+                    if ( !this._symbolComparer.Equals( xParameter.GetSymbol(), yParameter.GetSymbol() ) )
                     {
                         return false;
                     }
@@ -74,7 +77,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 foreach ( var parameter in hasParameters.Parameters )
                 {
-                    hashCode.Add( parameter.Type.GetSymbol(), SymbolEqualityComparer.Default );
+                    hashCode.Add( parameter.Type.GetSymbol(), this._symbolComparer );
                 }
             }
 

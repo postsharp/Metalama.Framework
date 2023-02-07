@@ -2,21 +2,23 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Services;
 
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
-    private readonly CompilationContextFactory _compilationContextFactory;
-
-    internal CompilationContext( Compilation compilation, CompilationContextFactory factory )
+    internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
-        this._compilationContextFactory = factory;
     }
 
     [Memo]
@@ -52,8 +54,39 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
-    internal CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
+    [Memo]
+    public SafeSymbolComparer SymbolComparer => new( this );
 
+    public ImmutableDictionary<AssemblyIdentity, IAssemblySymbol> Assemblies
+        => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefEqualityComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IIndexer>> IndexerRefComparer => new MemberRefEqualityComparer<IIndexer>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IMember> MemberComparer => new MemberComparer<IMember>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
+
+    [Memo]
+    public IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
+    
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
         return SyntaxGenerationContext.Create( this, node );
@@ -68,4 +101,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }
+
+    [Memo]
+    internal SymbolTranslator SymbolTranslator => new( this );
 }

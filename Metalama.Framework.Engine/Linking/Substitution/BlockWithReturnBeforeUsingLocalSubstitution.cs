@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private BlockSyntax RootBlock { get; }
 
-        public BlockWithReturnBeforeUsingLocalSubstitution( BlockSyntax rootBlock )
+        public BlockWithReturnBeforeUsingLocalSubstitution( CompilationContext compilationContext, BlockSyntax rootBlock ) : base( compilationContext )
         {
             this.RootBlock = rootBlock;
         }

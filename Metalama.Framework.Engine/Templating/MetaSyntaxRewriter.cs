@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating
             this.TargetApiVersion = targetApiVersion;
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
-            this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( serviceProvider, compileTimeCompilation );
+            this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( compileTimeCompilation );
         }
 
         protected MetaSyntaxFactoryImpl MetaSyntaxFactory { get; }

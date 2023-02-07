@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +18,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly SyntaxNode _rootNode;
         private readonly ISymbol[] _symbolsToInitialize;
 
-        public ForcedInitializationSubstitution( SyntaxNode rootNode, ISymbol[] symbolsToInitialize )
+        public ForcedInitializationSubstitution( CompilationContext compilationContext, SyntaxNode rootNode, ISymbol[] symbolsToInitialize ) : base(
+            compilationContext )
         {
             this._rootNode = rootNode;
             this._symbolsToInitialize = symbolsToInitialize;

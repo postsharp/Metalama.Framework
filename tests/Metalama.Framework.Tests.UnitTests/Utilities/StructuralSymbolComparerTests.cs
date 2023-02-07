@@ -127,7 +127,7 @@ namespace D {}
             {
                 for ( var gi2 = 0; gi2 < groups1.Length; gi2++ )
                 {
-                    if (gi1 == gi2)
+                    if ( gi1 == gi2 )
                     {
                         continue;
                     }
@@ -143,11 +143,11 @@ namespace D {}
                 }
             }
 
-            static IReadOnlyList<ISymbol> GetAllSymbols(CompilationModel compilation)
+            static IReadOnlyList<ISymbol> GetAllSymbols( CompilationModel compilation )
             {
                 var symbols = new List<ISymbol>();
 
-                foreach (var syntaxTree in compilation.RoslynCompilation.SyntaxTrees)
+                foreach ( var syntaxTree in compilation.RoslynCompilation.SyntaxTrees )
                 {
                     var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
                     var symbolFinder = new SymbolFinder( semanticModel, symbols );
@@ -159,12 +159,12 @@ namespace D {}
             }
         }
 
-        private class SymbolFinder : CSharpSyntaxWalker
+        private sealed class SymbolFinder : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly List<ISymbol> _symbols;
 
-            public SymbolFinder(SemanticModel semanticModel, List<ISymbol> symbols)
+            public SymbolFinder( SemanticModel semanticModel, List<ISymbol> symbols )
             {
                 this._semanticModel = semanticModel;
                 this._symbols = symbols;

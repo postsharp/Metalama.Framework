@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -131,20 +129,20 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 case (IAssemblySymbol assemblyX, IAssemblySymbol assemblyY):
                     return assemblyX.Identity.Equals( assemblyY.Identity );
 
-                case (IArrayTypeSymbol arrayX, IArrayTypeSymbol arrayY ):
+                case (IArrayTypeSymbol arrayX, IArrayTypeSymbol arrayY):
                     if ( !TypeEquals( arrayX.ElementType, arrayY.ElementType ) )
                     {
                         return false;
                     }
 
-                    if (arrayX.Rank != arrayY.Rank)
+                    if ( arrayX.Rank != arrayY.Rank )
                     {
                         return false;
                     }
 
                     break;
 
-                case (ITypeParameterSymbol typeParameterX, ITypeParameterSymbol typeParameterY ):
+                case (ITypeParameterSymbol typeParameterX, ITypeParameterSymbol typeParameterY):
                     if ( typeParameterX.Ordinal != typeParameterY.Ordinal )
                     {
                         return false;
@@ -152,7 +150,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     break;
 
-                case (IPointerTypeSymbol pointerSymbolX, IPointerTypeSymbol pointerSymbolY ):
+                case (IPointerTypeSymbol pointerSymbolX, IPointerTypeSymbol pointerSymbolY):
                     if ( !TypeEquals( pointerSymbolX.PointedAtType, pointerSymbolY.PointedAtType ) )
                     {
                         return false;
@@ -160,7 +158,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     break;
 
-                case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY ):
+                case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY):
                     // TODO: Is this correct in all options?
                     if ( localSymbolX.Name != localSymbolY.Name )
                     {
@@ -218,8 +216,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return false;
             }
 
-            if (options.HasFlagFast( StructuralSymbolComparerOptions.Nullability ) 
-                && namedTypeX.NullableAnnotation != namedTypeY.NullableAnnotation )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability )
+                 && namedTypeX.NullableAnnotation != namedTypeY.NullableAnnotation )
             {
                 return false;
             }
@@ -590,6 +588,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 case ILocalSymbol local:
                     // TODO: Is this correct in all options?
                     h = HashCode.Combine( h, local.Name );
+
                     break;
 
                 default:

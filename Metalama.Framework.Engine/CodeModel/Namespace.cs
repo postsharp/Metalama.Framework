@@ -60,8 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private INamedTypeCollection TypesCore
-            => new NamedTypeCollection( this, new TypeUpdatableCollection( this.Compilation, this._symbol ) );
+        private INamedTypeCollection TypesCore => new NamedTypeCollection( this, new TypeUpdatableCollection( this.Compilation, this._symbol ) );
 
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this._symbol.GetNamespaceMembers()
                     .Where( n => this.IsExternal || this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
-                    .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) )
+                    .Select( n => new Ref<INamespace>( n, this.Compilation.CompilationContext ) )
                     .ToList() );
 
         public INamespace? GetDescendant( string ns )

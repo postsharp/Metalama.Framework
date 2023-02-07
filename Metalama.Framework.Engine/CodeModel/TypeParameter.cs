@@ -116,6 +116,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
+        public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
     }
 }
