@@ -41,7 +41,7 @@ namespace Metalama.Testing.AspectTesting;
 internal abstract partial class BaseTestRunner
 {
     // Never run more tests concurrently than we have cores.
-    private static SemaphoreSlim _globalSemaphore = new SemaphoreSlim( Environment.ProcessorCount );
+    private static readonly SemaphoreSlim _globalSemaphore = new SemaphoreSlim( Environment.ProcessorCount );
     
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 

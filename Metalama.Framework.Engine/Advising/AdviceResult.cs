@@ -39,7 +39,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
     internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind )
     {
         this._declaration = declaration;
-        this._compilation = compilation.Assert( c =>  c.IsMutable);
+        this._compilation = compilation.Assert( c => c.IsMutable );
         this.Outcome = outcome;
         this.AspectBuilder = aspectBuilder;
         this.AdviceKind = adviceKind;
