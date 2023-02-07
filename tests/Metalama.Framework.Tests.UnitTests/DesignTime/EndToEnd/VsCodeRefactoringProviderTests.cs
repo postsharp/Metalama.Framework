@@ -27,7 +27,7 @@ public sealed class VsCodeRefactoringProviderTests : DistributedDesignTimeTestBa
         // Initialize the components.
         using var testContext = this.CreateDistributedDesignTimeTestContext( null, analysisProcessServices, null );
 
-        await testContext.WhenFullyInitialized.WithCancellation( testContext.CancellationToken );
+        await testContext.WhenFullyInitialized;
 
         const string code = """
 using Metalama.Framework.Aspects;

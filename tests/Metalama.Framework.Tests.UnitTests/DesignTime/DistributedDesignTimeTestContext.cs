@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.VisualStudio.Threading;
 using System;
@@ -21,10 +20,9 @@ internal sealed class DistributedDesignTimeTestContext : TestContext
     private AnalysisProcessServiceHubEndpoint? _analysisProcessServiceHubEndpoint;
     private AnalysisProcessEndpoint? _analysisProcessEndpoint;
     private TestDesignTimeAspectPipelineFactory? _pipelineFactory;
-    private IDisposable? _exclusivity;
-
+    
     public DistributedDesignTimeTestContext( TestContextOptions contextOptions, IAdditionalServiceCollection additionalServices ) : base(
-        contextOptions,
+        contextOptions with { RequiresExclusivity = true },
         additionalServices )
     {
         this.WorkspaceProvider = this.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
@@ -36,8 +34,6 @@ internal sealed class DistributedDesignTimeTestContext : TestContext
     {
         try
         {
-            this._exclusivity = await TestThrottlingHelper.RequiresExclusivityAsync();
-
             var analysisProcessServiceProvider = this.ServiceProvider.Global;
 
             this._pipelineFactory = new TestDesignTimeAspectPipelineFactory( this, analysisProcessServiceProvider );
@@ -121,7 +117,6 @@ internal sealed class DistributedDesignTimeTestContext : TestContext
         this._userProcessServiceHubEndpoint?.Dispose();
         this._analysisProcessServiceHubEndpoint?.Dispose();
         this._analysisProcessEndpoint?.Dispose();
-        this._exclusivity?.Dispose();
         base.Dispose( disposing );
     }
 }
