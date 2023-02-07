@@ -30,7 +30,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
     private readonly bool _isRoot;
-    private readonly Stopwatch _stopwatch;
+    private readonly Stopwatch? _stopwatch;
     private readonly IDisposable? _throttlingHandle;
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
@@ -66,7 +66,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
                     this._timeoutAction = this._timeout.Token.Register(
                         () => this.ServiceProvider.GetLoggerFactory()
                             .GetLogger( "Test" )
-                            .Error?.Log( $"Test timeout. It has been running {this._stopwatch.Elapsed}. Cancelling." ) );
+                            .Error?.Log( $"Test timeout. It has been running {this._stopwatch?.Elapsed}. Cancelling." ) );
                 }
             }
 
