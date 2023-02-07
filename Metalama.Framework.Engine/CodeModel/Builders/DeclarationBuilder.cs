@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => compilationElement.ForCompilation( this.Compilation );
 
         // TODO: implement
-        protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant;
+        protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
         public Advice ParentAdvice { get; }
 

@@ -269,7 +269,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         return new AdviceResult<T>(
             result.NewDeclaration.As<T>(),
-            this._compilation,
+            this._state.CurrentCompilation,
             result.Outcome,
             this._state.AspectBuilder.AssertNotNull(),
             advice.AdviceKind );

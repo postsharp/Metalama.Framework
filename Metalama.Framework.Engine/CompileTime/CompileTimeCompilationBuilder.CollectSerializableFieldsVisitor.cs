@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -24,19 +23,16 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly List<ISymbol> _serializableFieldsOrProperties;
             private readonly ITypeSymbol _nonSerializedAttribute;
             private readonly ITypeSymbol _templateAttribute;
-            private readonly ISymbolClassificationService _classificationService;
-            private readonly CompilationContext _compilationContext;
+            private readonly ClassifyingCompilationContext _compilationContext;
 
             public IReadOnlyList<ISymbol> SerializableFieldsOrProperties => this._serializableFieldsOrProperties;
 
             public CollectSerializableFieldsVisitor(
-                ISymbolClassificationService classificationService,
-                CompilationContext compilationContext,
+                ClassifyingCompilationContext compilationContext,
                 SemanticModel semanticModel,
                 SyntaxNode typeDeclaration,
                 CancellationToken cancellationToken )
             {
-                this._classificationService = classificationService;
                 this._compilationContext = compilationContext;
                 this._semanticModel = semanticModel;
                 this._typeDeclaration = typeDeclaration;
@@ -60,7 +56,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                  a =>
                                      this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
                                      || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) ) &&
-                         !this._classificationService.IsTemplate( fieldSymbol ) )
+                         !this._compilationContext.SymbolClassifier.IsTemplate( fieldSymbol ) )
                     {
                         this._serializableFieldsOrProperties.Add( fieldSymbol );
                     }
@@ -86,7 +82,7 @@ namespace Metalama.Framework.Engine.CompileTime
                              a =>
                                  this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
                                  || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) )
-                     && !this._classificationService.IsTemplate( propertySymbol ) )
+                     && !this._compilationContext.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );
                 }

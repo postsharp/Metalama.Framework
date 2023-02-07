@@ -20,7 +20,7 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
         this._includeNestedTypes = includeNestedTypes;
     }
 
-    protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefEqualityComparer;
+    protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
     protected override IEnumerable<ISymbol> GetSymbols( string name )
     {

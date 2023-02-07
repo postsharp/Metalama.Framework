@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Profiler.SelfApi;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -809,14 +807,7 @@ class C
 
         if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
         {
-            DotMemory.EnsurePrerequisite();
-            var dotMemoryConfig = new DotMemory.Config();
-            var path = Path.Combine( Path.GetTempPath(), "Metalama", "MemoryDumps" );
-            dotMemoryConfig.SaveToDir( path );
-
-            DotMemory.GetSnapshotOnce( dotMemoryConfig );
-
-            throw new AssertionFailedException( $"There are still leaking compilation references. Inspect the dump file in '{path}'." );
+            MemoryLeakHelper.CaptureDumpAndThrow();
         }
     }
 

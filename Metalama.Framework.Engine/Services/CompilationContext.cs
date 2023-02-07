@@ -57,11 +57,28 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     public SafeSymbolComparer SymbolComparer => new( this );
 
-    public ImmutableDictionary<AssemblyIdentity, IAssemblySymbol> Assemblies
+    [Memo]
+    public IEqualityComparer<ISymbol> SymbolComparerIncludingNullability => new SafeSymbolComparer( this, SymbolEqualityComparer.IncludeNullability );
+
+    [Memo]
+
+    internal ImmutableDictionary<AssemblyIdentity, IAssemblySymbol> Assemblies
         => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
 
     [Memo]
-    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefEqualityComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IEvent>> EventRefComparer => new MemberRefEqualityComparer<IEvent>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IField>> FieldRefComparer => new MemberRefEqualityComparer<IField>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IProperty>> PropertyRefComparer => new MemberRefEqualityComparer<IProperty>( this.SymbolComparer );
 
     [Memo]
     internal IEqualityComparer<MemberRef<IIndexer>> IndexerRefComparer => new MemberRefEqualityComparer<IIndexer>( this.SymbolComparer );
@@ -70,23 +87,23 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IMember> MemberComparer => new MemberComparer<IMember>( this.SymbolComparer );
+    internal IEqualityComparer<IMember> MemberComparer => new MemberComparer<IMember>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
+    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
+    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
+    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
+    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
 
     [Memo]
-    public IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
-    
+    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
+
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
         return SyntaxGenerationContext.Create( this, node );

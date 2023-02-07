@@ -65,7 +65,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
         [Obsolete( "Use comparer.", true )]
         public bool Equals( MemberRef<T> other ) => throw new NotSupportedException( $"Must use {nameof(MemberRefEqualityComparer<T>)}." );
 
+#pragma warning disable CS0809
         [Obsolete( "Use comparer.", true )]
         public override int GetHashCode() => throw new NotSupportedException( $"Must use {nameof(MemberRefEqualityComparer<T>)}." );
+#pragma warning restore CS0809        
     }
 }

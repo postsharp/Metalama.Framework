@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Engine.Services;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -29,12 +31,12 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         }
 
 #if DEBUG
-        if ( !x.BelongsToCompilation( this._compilationContext ) )
+        if ( x.BelongsToCompilation( this._compilationContext ) == false )
         {
             throw new AssertionFailedException( $"The symbol '{x}' does not belong to the current compilation." );
         }
 
-        if ( !y.BelongsToCompilation( this._compilationContext ) )
+        if ( y.BelongsToCompilation( this._compilationContext ) == false )
         {
             throw new AssertionFailedException( $"The symbol '{y}' does not belong to the current compilation." );
         }

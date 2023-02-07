@@ -186,7 +186,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var runTimeCompilation = compilationContext.SourceCompilation;
 
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
-        var serializableTypes = GetSerializableTypes( this._serviceProvider, compilationContext, treesWithCompileTimeCode, cancellationToken );
+        var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
         var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 
@@ -632,7 +632,6 @@ internal sealed partial class CompileTimeCompilationBuilder
     }
 
     private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
-        ProjectServiceProvider serviceProvider,
         ClassifyingCompilationContext runTimeCompilationContext,
         IEnumerable<SyntaxTree> compileTimeSyntaxTrees,
         CancellationToken cancellationToken )
@@ -656,8 +655,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         foreach ( var tree in compileTimeSyntaxTrees )
         {
             var visitor = new CollectSerializableTypesVisitor(
-                serviceProvider,
-                runTimeCompilationContext.CompilationContext,
+                runTimeCompilationContext,
                 semanticModelProvider.GetSemanticModel( tree, true ),
                 OnSerializableTypeDiscovered,
                 cancellationToken );

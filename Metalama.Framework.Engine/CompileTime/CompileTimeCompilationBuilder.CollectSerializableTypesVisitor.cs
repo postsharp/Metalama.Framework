@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime.Serialization;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -19,20 +18,17 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
-            private readonly CompilationContext _compilationContext;
+            private readonly ClassifyingCompilationContext _compilationContext;
             private readonly SemanticModel _semanticModel;
             private readonly CancellationToken _cancellationToken;
             private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
-            private readonly ISymbolClassificationService _symbolClassificationService;
-
+            
             public CollectSerializableTypesVisitor(
-                ProjectServiceProvider serviceProvider,
-                CompilationContext compilationContext,
+                ClassifyingCompilationContext compilationContext,
                 SemanticModel semanticModel,
                 Action<SerializableTypeInfo> onSerializableTypeDiscovered,
                 CancellationToken cancellationToken )
             {
-                this._symbolClassificationService = serviceProvider.GetRequiredService<ISymbolClassificationService>();
                 this._compilationContext = compilationContext;
                 this._semanticModel = semanticModel;
                 this._cancellationToken = cancellationToken;
@@ -47,13 +43,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var serializableInterface = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
-                if ( !declaredSymbol.AllInterfaces.Any( i => this._compilationContext.SymbolComparer.Equals( i, serializableInterface ) ) )
+                if ( !declaredSymbol.AllInterfaces.Any( i => this._compilationContext.CompilationContext.SymbolComparer.Equals( i, serializableInterface ) ) )
                 {
                     return;
                 }
 
                 var innerVisitor = new CollectSerializableFieldsVisitor(
-                    this._symbolClassificationService,
                     this._compilationContext,
                     this._semanticModel,
                     node,

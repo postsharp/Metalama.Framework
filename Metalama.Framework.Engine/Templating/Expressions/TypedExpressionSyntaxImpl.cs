@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -43,13 +42,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             SyntaxGenerationContext generationContext,
             bool isReferenceable )
         {
-#if DEBUG
-            if ( generationContext.Compilation == CompilationContextFactory.EmptyCompilation )
-            {
-                throw new AssertionFailedException( "The compilation is empty." );
-            }
-#endif
-
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.

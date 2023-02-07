@@ -67,14 +67,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
-            var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
-
-            return hasMetalamaReference
-                ? new SymbolClassifier( serviceProvider, compilation )
-                : new SymbolClassifier( serviceProvider, null );
+            return new SymbolClassifier( serviceProvider, compilation );
         }
 
-        private readonly Compilation? _compilation;
+        private readonly Compilation _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
 
@@ -92,7 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        private SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation? compilation )
+        private SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
             : this(
                 serviceProvider,
                 compilation,
@@ -101,11 +97,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private SymbolClassifier(
             GlobalServiceProvider serviceProvider,
-            Compilation? compilation,
+            Compilation compilation,
             IAttributeDeserializer attributeDeserializer,
             ReferenceAssemblyLocator referenceAssemblyLocator )
         {
-            var compilationContext = CompilationContextFactory.GetInstance( compilation ?? CompilationContextFactory.EmptyCompilation );
+            var compilationContext = CompilationContextFactory.GetInstance( compilation );
 
             this._referenceAssemblyLocator = referenceAssemblyLocator;
             this._symbolEqualityComparer = compilationContext.SymbolComparer;
@@ -119,9 +115,11 @@ namespace Metalama.Framework.Engine.CompileTime
             this._attributeDeserializer = attributeDeserializer;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 
-            if ( compilation != null )
+            var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
+            this._compilation = compilation;
+
+            if ( hasMetalamaReference )
             {
-                this._compilation = compilation;
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
 
                 this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
@@ -140,6 +138,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( this._templateAttribute == null || this._declarativeAdviceAttribute == null )
             {
+                // The compilation does not have any reference to Metalama.
                 return TemplateInfo.None;
             }
 
@@ -185,7 +184,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
+        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
 
         private TemplateInfo GetTemplateInfo( ISymbol declaringSymbol, AttributeData attributeData )
         {
@@ -1009,5 +1008,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImplicitRuntimeOrCompileTimeAsNull = 2,
             Count = 1 + (TypeParametersAreNeutral | ImplicitRuntimeOrCompileTimeAsNull)
         }
+
+        public bool IsTemplate( ISymbol symbol ) => !this.GetTemplateInfo( symbol ).IsNone;
     }
 }

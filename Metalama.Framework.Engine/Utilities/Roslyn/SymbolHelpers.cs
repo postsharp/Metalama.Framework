@@ -41,9 +41,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => OperatorKind.None
             };
 
-        internal static bool BelongsToCompilation( this ISymbol symbol, CompilationContext compilationContext )
+        internal static bool? BelongsToCompilation( this ISymbol symbol, CompilationContext compilationContext )
         {
             var assembly = symbol.ContainingAssembly;
+
+            if ( assembly == null )
+            {
+                return null;
+            }
 
             return compilationContext.Assemblies.TryGetValue( assembly.Identity, out var thisCompilationAssembly )
                    && assembly.Equals( thisCompilationAssembly );

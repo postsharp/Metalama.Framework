@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -32,11 +31,10 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSyntaxRewriter"/> class.
         /// </summary>
-        /// <param name="serviceProvider"></param>
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
         /// <param name="targetApiVersion"></param>
-        public MetaSyntaxRewriter( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
+        public MetaSyntaxRewriter( Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
         {
             this.TargetApiVersion = targetApiVersion;
             this._indentTriviaStack.Push( "" );

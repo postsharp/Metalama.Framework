@@ -17,7 +17,6 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed class TemplateCompiler
     {
-        private readonly ProjectServiceProvider _serviceProvider;
         private readonly ClassifyingCompilationContext _compilationContext;
         private readonly TemplateProjectManifestBuilder? _templateManifestBuilder;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
@@ -30,7 +29,6 @@ namespace Metalama.Framework.Engine.Templating
             ClassifyingCompilationContext compilationContext,
             TemplateProjectManifestBuilder? templateManifestBuilder = null )
         {
-            this._serviceProvider = serviceProvider;
             this._compilationContext = compilationContext;
             this._templateManifestBuilder = templateManifestBuilder;
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap();
@@ -189,7 +187,6 @@ namespace Metalama.Framework.Engine.Templating
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
-                this._serviceProvider,
                 templateName,
                 templateSyntaxKind,
                 this._compilationContext,

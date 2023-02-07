@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal DeclarationFactory( CompilationModel compilation )
         {
             this._compilationModel = compilation;
-            this._typeCache = new ConcurrentDictionary<ITypeSymbol, object>( compilation.CompilationContext.SymbolComparer );
+            this._typeCache = new ConcurrentDictionary<ITypeSymbol, object>( compilation.CompilationContext.SymbolComparerIncludingNullability );
             this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>();
         }
 

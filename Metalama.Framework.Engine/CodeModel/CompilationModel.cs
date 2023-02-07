@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.AddTransformation( transformation );
                 }
 
-                this._isMutable = false;
+                this.IsMutable = false;
 
                 // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private CompilationModel( CompilationModel prototype, bool mutable )
         {
-            this._isMutable = mutable;
+            this.IsMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
@@ -463,7 +463,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel CreateMutableClone() => new( this, true );
 
-        internal void Freeze() => this._isMutable = false;
+        internal void Freeze() => this.IsMutable = false;
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
