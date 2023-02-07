@@ -357,7 +357,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         void ValidateOneTarget( IDeclaration target )
         {
             // Check that the compilation match.
-            if ( !ReferenceEquals( target.Compilation, this._compilation ) )
+            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.CurrentCompilation ) )
             {
                 throw new InvalidOperationException( MetalamaStringFormatter.Format( $"The target declaration is not in the current compilation." ) );
             }
