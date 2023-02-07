@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples;
@@ -38,15 +39,15 @@ public class CountChangesAttribute : TypeAspect
         {
             var property = (IProperty)meta.Tags["CounterProperty"]!;
 
-            // This should be ideally "Base".
+            // This is by default correctly "Base".
             var oldValue = meta.Target.Property.Value;
 
             meta.Proceed();
 
             if (oldValue != meta.Target.Property.Value)
             {
-                // This should be ideally "Current".
-                property.Value = property.Value + 1;
+                // This should be by default "Current".
+                property.With(InvokerOptions.Current).Value = property.With(InvokerOptions.Current).Value + 1;
             }
         }
     }
@@ -64,8 +65,8 @@ public class CountChangesAttribute : TypeAspect
 
             foreach(var property in properties)
             {
-                // This should be ideally "Current".
-                sum += property.Value;
+                // This should be by default "Current".
+                sum += property.With(InvokerOptions.Current).Value;
             }
 
             return sum;
