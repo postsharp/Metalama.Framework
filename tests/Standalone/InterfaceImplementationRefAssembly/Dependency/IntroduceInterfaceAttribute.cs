@@ -48,7 +48,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
     public int Method_ValueType() => 42;
 
     [InterfaceMember]
-    public object Method_NonNullable = new object();
+    public object Method_NonNullable() => new object();
 
     [InterfaceMember]
     public object? Method_Nullable() => null;

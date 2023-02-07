@@ -2,12 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
-
-[assembly: InternalsVisibleTo( "Tests" )]
 
 namespace Dependency;
 

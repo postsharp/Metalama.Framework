@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <SignAssembly>false</SignAssembly>
-    <PublicSign>false</PublicSign>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+	  <InternalsVisibleTo Include="Tests" />
   </ItemGroup>
 
 </Project>

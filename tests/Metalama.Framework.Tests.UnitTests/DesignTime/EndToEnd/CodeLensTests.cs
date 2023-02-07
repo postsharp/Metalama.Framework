@@ -6,7 +6,6 @@ using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
-using Microsoft.VisualStudio.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
