@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Microsoft.VisualStudio.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         // Initialize the components.
         using var testContext = this.CreateDistributedDesignTimeTestContext( null, analysisProcessServices, null );
 
-        await testContext.WhenInitialized.WithCancellation( testContext.CancellationToken );
+        await testContext.WhenFullyInitialized;
 
         const string code = """
 using Metalama.Framework.Aspects;

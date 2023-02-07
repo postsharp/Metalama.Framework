@@ -182,7 +182,7 @@ internal sealed partial class LinkerInjectionStep
             SyntaxGenerationContext? syntaxGenerationContext = null;
 
             this.RewriteAttributeLists(
-                Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ),
+                Ref.FromSymbol( symbol, this._compilation.CompilationContext ),
                 SyntaxKind.None,
                 originalDeclaringNode,
                 attributeLists,
@@ -195,7 +195,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 case IMethodSymbol method:
                     this.RewriteAttributeLists(
-                        Ref.ReturnParameter( method, this._compilation.RoslynCompilation ),
+                        Ref.ReturnParameter( method, this._compilation.CompilationContext ),
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,

@@ -188,8 +188,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
-        var compilationContextFactory = this._serviceProvider.Global.GetRequiredService<CompilationContextFactory>();
-        var compileTimeCompilationContext = compilationContextFactory.GetInstance( compileTimeCompilation );
+        var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 
         var templateSymbolManifestBuilder = new TemplateProjectManifestBuilder( compilationContext.SourceCompilation );
         var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext, templateSymbolManifestBuilder );
@@ -637,10 +636,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         IEnumerable<SyntaxTree> compileTimeSyntaxTrees,
         CancellationToken cancellationToken )
     {
-        var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
-        var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
-        var classifier = runTimeCompilationContext.SymbolClassifier;
-
+        var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( runTimeCompilationContext.CompilationContext.SymbolComparer );
+        
         void OnSerializableTypeDiscovered( SerializableTypeInfo type )
         {
             if ( allSerializableTypes.TryGetValue( type.Type, out var existingType ) )
@@ -658,9 +655,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         foreach ( var tree in compileTimeSyntaxTrees )
         {
             var visitor = new CollectSerializableTypesVisitor(
+                runTimeCompilationContext,
                 semanticModelProvider.GetSemanticModel( tree, true ),
-                reflectionMapper,
-                classifier,
                 OnSerializableTypeDiscovered,
                 cancellationToken );
 

@@ -21,11 +21,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
+        private IType _type;
+
         public IObjectReader InitializerTags { get; }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-        public IType Type { get; set; }
+        public IType Type
+        {
+            get => this._type;
+            set => this._type = this.Translate( value );
+        }
 
         public RefKind RefKind
         {
@@ -75,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             : base( targetType, name, advice )
         {
             this.InitializerTags = initializerTags;
-            this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
+            this._type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )

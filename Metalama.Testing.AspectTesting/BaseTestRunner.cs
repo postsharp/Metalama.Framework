@@ -86,16 +86,20 @@ internal abstract partial class BaseTestRunner
 
         using ( collectibleExecutionContext )
         {
-            try
+            // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
+            using ( await TestThrottlingHelper.ThrottleAsync() )
             {
-                await this.RunAndAssertCoreAsync( testInput, testContextOptions );
-            }
-            finally
-            {
-                // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                // have references to the objects that are in the scope of the test.
-                await Task.Yield();
+                try
+                {
+                    await this.RunAndAssertCoreAsync( testInput, testContextOptions );
+                }
+                finally
+                {
+                    // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                    // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                    // have references to the objects that are in the scope of the test.
+                    await Task.Yield();
+                }
             }
         }
     }

@@ -19,28 +19,27 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             private readonly SemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;
-            private readonly ISymbolClassifier _symbolClassifier;
             private readonly CancellationToken _cancellationToken;
             private readonly List<ISymbol> _serializableFieldsOrProperties;
             private readonly ITypeSymbol _nonSerializedAttribute;
             private readonly ITypeSymbol _templateAttribute;
+            private readonly ClassifyingCompilationContext _compilationContext;
 
             public IReadOnlyList<ISymbol> SerializableFieldsOrProperties => this._serializableFieldsOrProperties;
 
             public CollectSerializableFieldsVisitor(
+                ClassifyingCompilationContext compilationContext,
                 SemanticModel semanticModel,
                 SyntaxNode typeDeclaration,
-                ReflectionMapper reflectionMapper,
-                ISymbolClassifier symbolClassifier,
                 CancellationToken cancellationToken )
             {
+                this._compilationContext = compilationContext;
                 this._semanticModel = semanticModel;
                 this._typeDeclaration = typeDeclaration;
-                this._symbolClassifier = symbolClassifier;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
-                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) );
-                this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
+                this._nonSerializedAttribute = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) );
+                this._templateAttribute = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
@@ -55,9 +54,9 @@ namespace Metalama.Framework.Engine.CompileTime
                          !fieldSymbol.GetAttributes()
                              .Any(
                                  a =>
-                                     SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute )
-                                     || a.AttributeClass.AssertNotNull().Is( this._templateAttribute ) ) &&
-                         this._symbolClassifier.GetTemplateInfo( fieldSymbol ).IsNone )
+                                     this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
+                                     || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) ) &&
+                         !this._compilationContext.SymbolClassifier.IsTemplate( fieldSymbol ) )
                     {
                         this._serializableFieldsOrProperties.Add( fieldSymbol );
                     }
@@ -77,13 +76,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var backingField = propertySymbol.GetBackingField().AssertNotNull();
 
-                if ( !backingField.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) )
+                if ( !backingField.GetAttributes().Any( a => this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute ) )
                      && !propertySymbol.GetAttributes()
                          .Any(
                              a =>
-                                 SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute )
-                                 || a.AttributeClass.AssertNotNull().Is( this._templateAttribute ) )
-                     && this._symbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
+                                 this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
+                                 || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) )
+                     && !this._compilationContext.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );
                 }

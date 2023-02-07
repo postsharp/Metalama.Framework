@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public virtual bool IsReturnParameter => true;
 
         internal override Ref<IDeclaration> ToRef()
-            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().RoslynCompilation );
+            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().CompilationContext );
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 

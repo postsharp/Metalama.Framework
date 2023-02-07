@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
@@ -27,4 +28,6 @@ internal sealed class ClassifyingCompilationContext
     public ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
     public Compilation SourceCompilation => this.CompilationContext.Compilation;
+
+    public SafeSymbolComparer SymbolComparer => this.CompilationContext.SymbolComparer;
 }

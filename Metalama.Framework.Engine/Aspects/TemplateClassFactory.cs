@@ -19,7 +19,15 @@ namespace Metalama.Framework.Engine.Aspects;
 internal abstract class TemplateClassFactory<T>
     where T : TemplateClass
 {
-    private readonly Dictionary<INamedTypeSymbol, T> _classes = new( SymbolEqualityComparer.Default );
+    protected CompilationContext CompilationContext { get; }
+
+    private readonly Dictionary<INamedTypeSymbol, T> _classes;
+
+    protected TemplateClassFactory( CompilationContext compilationContext )
+    {
+        this.CompilationContext = compilationContext;
+        this._classes = new Dictionary<INamedTypeSymbol, T>( compilationContext.SymbolComparer );
+    }
 
     /// <summary>
     /// Gets the aspect classes in a given <see cref="Compilation"/> for the closure of all references <see cref="CompileTimeProject"/>
@@ -27,7 +35,6 @@ internal abstract class TemplateClassFactory<T>
     /// </summary>
     public IReadOnlyList<T> GetClasses(
         ProjectServiceProvider serviceProvider,
-        CompilationContext compilationContext,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder )
     {
@@ -41,7 +48,7 @@ internal abstract class TemplateClassFactory<T>
         // is used by AspectClass. It is easier to do it here than to do it at the level of CompileTimeProject.
         // We assume the compilation references a single version of Metalama.Framework.
 
-        var frameworkAspectClasses = this.GetFrameworkClasses( compilationContext );
+        var frameworkAspectClasses = this.GetFrameworkClasses();
 
         // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
         var aspectTypeDataDictionary =
@@ -50,7 +57,7 @@ internal abstract class TemplateClassFactory<T>
                 .Select(
                     item =>
                     {
-                        var templateDiscoveryContext = item.Project.TemplateReflectionContext ?? compilationContext;
+                        var templateDiscoveryContext = item.Project.TemplateReflectionContext ?? this.CompilationContext;
 
                         var typeSymbol = templateDiscoveryContext.Compilation.GetTypeByMetadataName( item.TypeName );
 
@@ -87,7 +94,7 @@ internal abstract class TemplateClassFactory<T>
         return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, serviceProvider );
     }
 
-    protected abstract IEnumerable<TemplateClassData> GetFrameworkClasses( CompilationContext compilationContext );
+    protected abstract IEnumerable<TemplateClassData> GetFrameworkClasses();
 
     protected abstract IEnumerable<string> GetTypeNames( CompileTimeProject project );
 

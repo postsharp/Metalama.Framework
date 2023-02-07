@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         private BracketedParameterListSyntax GetParameterList( MemberInjectionContext context )
         {
-            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation );
+            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true );
             var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration );
 
             return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, "__linker_param") );

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._specification.ReplacedRootNode;
 
-        public InliningSubstitution( InliningSpecification specification )
+        public InliningSubstitution( CompilationContext compilationContext, InliningSpecification specification ) : base( compilationContext )
         {
             this._specification = specification;
         }

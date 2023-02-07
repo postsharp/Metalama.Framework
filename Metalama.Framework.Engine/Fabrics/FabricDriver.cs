@@ -63,8 +63,7 @@ namespace Metalama.Framework.Engine.Fabrics
             }
             else
             {
-                symbol = (INamedTypeSymbol) fabricManager.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>()
-                    .GetInstance( runTimeCompilation )
+                symbol = (INamedTypeSymbol) CompilationContextFactory.GetInstance( runTimeCompilation )
                     .ReflectionMapper
                     .GetTypeSymbol( fabric.GetType() );
             }

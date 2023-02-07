@@ -29,13 +29,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool Equals( IDeclaration? other )
             => other is MethodReturnParameter methodReturnParameter &&
-               SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
+               this.Compilation.CompilationContext.SymbolComparer.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
         public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
 
         public override ISymbol? Symbol => null;
 
-        internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );
+        internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().CompilationContext );
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
             => this.DeclaringMember.GetContainedDeclarations().Select( d => ((IMethod) d).ReturnParameter );

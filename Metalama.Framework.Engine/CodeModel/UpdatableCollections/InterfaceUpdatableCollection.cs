@@ -32,7 +32,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
     {
         foreach ( var i in this._declaringType.Interfaces )
         {
-            action( new Ref<INamedType>( i, this.Compilation.RoslynCompilation ) );
+            action( new Ref<INamedType>( i, this.Compilation.CompilationContext ) );
         }
     }
 }

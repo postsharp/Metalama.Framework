@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
@@ -11,24 +12,24 @@ public partial class DerivedTypeIndex
 {
     internal sealed class Builder
     {
-        private readonly Compilation _compilation;
+        private readonly CompilationContext _compilationContext;
         private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder _relationships;
 
         private readonly ImmutableHashSet<INamedTypeSymbol>.Builder _processedTypes;
 
-        internal Builder( Compilation compilation )
+        internal Builder( CompilationContext compilationContext )
         {
-            this._compilation = compilation;
-            this._relationships = new ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder( SymbolEqualityComparer.Default );
-            this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            this._compilationContext = compilationContext;
+            this._relationships = new ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder( compilationContext.SymbolComparer );
+            this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( compilationContext.SymbolComparer );
         }
 
         internal Builder(
-            Compilation compilation,
+            CompilationContext compilationContext,
             ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
             ImmutableHashSet<INamedTypeSymbol>.Builder processedTypes )
         {
-            this._compilation = compilation;
+            this._compilationContext = compilationContext;
             this._relationships = relationships;
             this._processedTypes = processedTypes;
         }
@@ -64,11 +65,11 @@ public partial class DerivedTypeIndex
 
         public DerivedTypeIndex ToImmutable()
         {
-            var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilation.Assembly ) )
-                .ToImmutableHashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
+                .ToImmutableHashSet<INamedTypeSymbol>( this._compilationContext.SymbolComparer );
 
             return new DerivedTypeIndex(
-                this._compilation,
+                this._compilationContext,
                 this._relationships.ToImmutable(),
                 externalBaseTypes );
         }

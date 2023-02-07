@@ -24,7 +24,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
             case IMethodSymbol method:
                 foreach ( var p in method.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) );
+                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
                 }
 
                 break;
@@ -40,7 +40,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
             case IPropertySymbol { Parameters.IsEmpty: false } indexer:
                 foreach ( var p in indexer.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) );
+                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
                 }
 
                 break;

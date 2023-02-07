@@ -13,6 +13,8 @@ internal sealed class AllMethodsCollection : AllMembersCollection<IMethod>, IMet
 
     protected override IMemberCollection<IMethod> GetMembers( INamedType namedType ) => namedType.Methods;
 
+    protected override IEqualityComparer<IMethod> Comparer => this.CompilationContext.MethodComparer;
+
     public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
 
     public IEnumerable<IMethod> OfKind( OperatorKind kind ) => this.Where( m => m.OperatorKind == kind );

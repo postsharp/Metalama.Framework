@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         private readonly List<IAttributeData> _fieldAttributes;
+        private INamedType _type;
 
         public IObjectReader InitializerTags { get; }
 
@@ -37,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.InitializerTags = initializerTags;
             this.IsEventField = isEventField;
-            this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
+            this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
             this._fieldAttributes = new List<IAttributeData>();
         }
 
@@ -46,7 +47,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this._fieldAttributes.Add( attributeData );
         }
 
-        public INamedType Type { get; set; }
+        public INamedType Type
+        {
+            get => this._type;
+            set => this._type = this.Translate( value );
+        }
 
         public RefKind RefKind
         {
@@ -82,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 switch ( value )
                 {
                     case INamedType namedType:
-                        this.Type = namedType;
+                        this.Type = this.Translate( namedType );
 
                         break;
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 
 // ReSharper disable UnusedMemberInSuper.Global
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         bool IsDefault { get; }
 
-        ISymbol GetClosestSymbol( Compilation compilation );
+        ISymbol GetClosestSymbol( CompilationContext compilationContext );
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl

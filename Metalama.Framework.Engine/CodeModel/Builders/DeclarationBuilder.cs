@@ -16,6 +16,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -28,11 +29,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
     {
         private readonly AttributeBuilderCollection _attributes = new();
-        
+
         protected DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
+
+        protected T Translate<T>( T compilationElement )
+            where T : class, ICompilationElement
+            => compilationElement.ForCompilation( this.Compilation );
+
+        // TODO: implement
+        protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
         public Advice ParentAdvice { get; }
 

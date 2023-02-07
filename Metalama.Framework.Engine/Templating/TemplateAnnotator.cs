@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -45,14 +46,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     /// <summary>
     /// Scope of locally-defined symbols (local variables, anonymous types, ....).
     /// </summary>
-    private readonly Dictionary<ISymbol, TemplatingScope> _localScopes = new( SymbolEqualityComparer.Default );
+    private readonly Dictionary<ISymbol, TemplatingScope> _localScopes;
 
     private readonly ISymbolClassifier _symbolScopeClassifier;
+    private readonly SafeSymbolComparer _symbolComparer;
 
     private ScopeContext _currentScopeContext;
 
     private ISymbol? _currentTemplateMember;
-
+    
     public TemplateAnnotator(
         ClassifyingCompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
@@ -62,6 +64,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         CancellationToken cancellationToken )
     {
         this._symbolScopeClassifier = compilationContext.SymbolClassifier;
+        this._localScopes = new Dictionary<ISymbol, TemplatingScope>( compilationContext.CompilationContext.SymbolComparer );
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;
@@ -70,6 +73,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         this._templateMemberClassifier = new TemplateMemberClassifier( compilationContext, syntaxTreeAnnotationMap );
         this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
+        this._symbolComparer = compilationContext.CompilationContext.SymbolComparer;
 
         // add default values of scope
         this._currentScopeContext = ScopeContext.Default;
@@ -308,7 +312,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         => this._currentTemplateMember != null
            && symbol.ContainingType != null
            && symbol.ContainingType.SpecialType != SpecialType.System_Object
-           && symbol.IsMemberOf( this._currentTemplateMember.ContainingType );
+           && this._symbolComparer.IsMemberOf( symbol, this._currentTemplateMember.ContainingType );
 
     private TemplatingScope[] GetNodeScopes( IReadOnlyCollection<SyntaxNode?> nodes )
     {

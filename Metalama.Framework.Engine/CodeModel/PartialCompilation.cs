@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -31,7 +32,9 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
         /// </summary>
-        public Compilation Compilation { get; }
+        public Compilation Compilation => this.CompilationContext.Compilation;
+
+        public CompilationContext CompilationContext { get; }
 
         /// <summary>
         /// Gets the list of syntax trees in the current subset indexed by path.
@@ -76,9 +79,10 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         // Initial constructor.
-        private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
+        private PartialCompilation( CompilationContext compilationContext, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
-            this.Compilation = this.InitialCompilation = compilation;
+            this.CompilationContext = compilationContext;
+            this.InitialCompilation = compilationContext.Compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeTransformation>.Empty;
             this.Resources = resources.IsDefault ? ImmutableArray<ManagedResource>.Empty : resources;
             this.DerivedTypes = derivedTypeIndex;
@@ -179,7 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             this.ModifiedSyntaxTrees = modifiedTreeBuilder.ToImmutable();
-            this.Compilation = compilation;
+            this.CompilationContext = CompilationContextFactory.GetInstance( compilation );
             this.Resources = newResources.IsDefault ? ImmutableArray<ManagedResource>.Empty : newResources;
         }
 
@@ -187,7 +191,10 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
         public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
-            => new CompleteImpl( compilation, GetDerivedTypeIndex( compilation ), resources );
+            => CreateComplete( CompilationContextFactory.GetInstance( compilation ), resources );
+
+        public static PartialCompilation CreateComplete( CompilationContext compilationContext, ImmutableArray<ManagedResource> resources = default )
+            => new CompleteImpl( compilationContext, GetDerivedTypeIndex( compilationContext.Compilation ), resources );
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
@@ -197,11 +204,12 @@ namespace Metalama.Framework.Engine.CodeModel
             SyntaxTree syntaxTree,
             ImmutableArray<ManagedResource> resources = default )
         {
+            var compilationContext = CompilationContextFactory.GetInstance( compilation );
             var syntaxTrees = new[] { syntaxTree };
-            var closure = GetClosure( compilation, syntaxTrees );
+            var closure = GetClosure( compilationContext, syntaxTrees );
 
             return new PartialImpl(
-                compilation,
+                compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types,
                 closure.DerivedTypes,
@@ -216,10 +224,11 @@ namespace Metalama.Framework.Engine.CodeModel
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<ManagedResource> resources = default )
         {
-            var closure = GetClosure( compilation, syntaxTrees );
+            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+            var closure = GetClosure( compilationContext, syntaxTrees );
 
             return new PartialImpl(
-                compilation,
+                compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types.ToImmutableHashSet(),
                 closure.DerivedTypes,
@@ -245,14 +254,16 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
         private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypes)
-            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
+            GetClosure( CompilationContext compilationContext, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
-            var assembly = compilation.Assembly;
+            var assembly = compilationContext.Compilation.Assembly;
 
-            var types = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-            var topLevelTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var symbolEqualityComparer = compilationContext.SymbolComparer;
+
+            var types = new HashSet<INamedTypeSymbol>( symbolEqualityComparer );
+            var topLevelTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( symbolEqualityComparer );
             var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
-            var derivedTypesBuilder = new DerivedTypeIndex.Builder( compilation );
+            var derivedTypesBuilder = new DerivedTypeIndex.Builder( compilationContext );
 
             void AddTypeRecursive( INamedTypeSymbol type )
             {
@@ -261,7 +272,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return;
                 }
 
-                var isExternal = !SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, assembly );
+                var isExternal = !symbolEqualityComparer.Equals( type.ContainingAssembly, assembly );
 
                 if ( isExternal )
                 {
@@ -303,7 +314,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            var semanticModelProvider = compilation.GetSemanticModelProvider();
+            var semanticModelProvider = compilationContext.SemanticModelProvider;
 
             foreach ( var syntaxTree in syntaxTrees )
             {
@@ -331,7 +342,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
         {
-            DerivedTypeIndex.Builder builder = new( compilation );
+            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+            DerivedTypeIndex.Builder builder = new( compilationContext );
 
             foreach ( var type in compilation.Assembly.GetTypes() )
             {
@@ -348,7 +360,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         /// <summary>
         /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Metalama.Compiler.ManagedResource})"/>
+        /// Typically, this is the argument of the <see cref="CreateComplete(Microsoft.CodeAnalysis.Compilation,System.Collections.Immutable.ImmutableArray{Metalama.Compiler.ManagedResource})"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Metalama.Compiler.ManagedResource})"/>
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
         public Compilation InitialCompilation { get; }

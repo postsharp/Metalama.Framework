@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,11 +24,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public override SyntaxNode TargetNode { get; }
 
         public ReturnStatementSubstitution(
+            CompilationContext compilationContext,
             SyntaxNode returnNode,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
             string? returnLabelIdentifier,
-            bool replaceByBreakIfOmitted )
+            bool replaceByBreakIfOmitted ) : base( compilationContext )
         {
             this.TargetNode = returnNode;
             this._containingSymbol = containingSymbol;

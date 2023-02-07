@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private readonly MethodDeclarationSyntax _rootNode;
 
-        public EmptyVoidPartialMethodSubstitution( MethodDeclarationSyntax rootNode )
+        public EmptyVoidPartialMethodSubstitution( CompilationContext compilationContext, MethodDeclarationSyntax rootNode ) : base( compilationContext )
         {
             this._rootNode = rootNode;
         }

@@ -752,7 +752,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                         // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                        var compilationContext = this.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+                        var compilationContext = CompilationContextFactory.GetInstance( compilation );
 
                         var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
 
@@ -909,7 +909,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         // We are not implementing this method as an enumerator for the ease of debugging.
         var result = new List<AspectClass>();
 
-        var compilationContext = this.ServiceProvider.Global.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+        var compilationContext = CompilationContextFactory.GetInstance( compilation );
 
         var currentAspectInstances = (IReadOnlyList<DesignTimeAspectInstance>?) this.GetAspectInstancesOnSymbol( symbol )
                                      ?? Array.Empty<DesignTimeAspectInstance>();

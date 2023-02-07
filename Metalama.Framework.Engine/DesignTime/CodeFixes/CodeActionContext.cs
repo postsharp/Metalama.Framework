@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public PartialCompilation Compilation { get; private set; }
 
-        public CompilationContext CompilationContext { get; }
+        public CompilationContext CompilationContext => this.Compilation.CompilationContext;
 
         IPartialCompilation ISdkCodeActionContext.Compilation => this.Compilation;
 
@@ -42,13 +42,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
         public CodeActionContext(
             ProjectServiceProvider serviceProvider,
             PartialCompilation compilation,
-            CompilationContext compilationContext,
             AspectPipelineConfiguration pipelineConfiguration,
             bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
-            this.CompilationContext = compilationContext;
             this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.IsComputingPreview = isComputingPreview;
             this.CancellationToken = cancellationToken;

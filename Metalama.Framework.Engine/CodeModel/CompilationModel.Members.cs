@@ -26,14 +26,10 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
     private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
+    private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
+    private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
 
-    private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors =
-        ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
-
-    private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers =
-        ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
-
-    private bool _isMutable;
+    internal bool IsMutable { get; private set; }
 
     internal bool Contains( FieldBuilder fieldBuilder )
         => (this._fields.TryGetValue( fieldBuilder.DeclaringType.GetSymbol(), out var fields ) && fields.Contains( fieldBuilder.ToTypedRef<IField>() ))
@@ -129,7 +125,7 @@ public sealed partial class CompilationModel
         where TKey : notnull
         where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
     {
-        if ( requestMutableCollection && !this._isMutable )
+        if ( requestMutableCollection && !this.IsMutable )
         {
             // Cannot get a mutable collection when the model is immutable.
             throw new InvalidOperationException();
@@ -137,7 +133,7 @@ public sealed partial class CompilationModel
 
         // If the model is mutable, we need to return a mutable collection because it may be mutated after the
         // front-end collection is returned.
-        var returnMutableCollection = requestMutableCollection || this._isMutable;
+        var returnMutableCollection = requestMutableCollection || this.IsMutable;
 
         if ( dictionary.TryGetValue( declaration, out var collection ) )
         {
@@ -256,7 +252,7 @@ public sealed partial class CompilationModel
 
     internal void AddTransformation( ITransformation transformation )
     {
-        if ( !this._isMutable )
+        if ( !this.IsMutable )
         {
             throw new InvalidOperationException( "Cannot add transformation to an immutable compilation." );
         }

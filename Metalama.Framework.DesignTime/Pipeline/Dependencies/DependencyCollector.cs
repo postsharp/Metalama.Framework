@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,6 +26,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
 
     private readonly ConcurrentDictionary<(ISymbol, ISymbol), bool> _processedDependencies = new();
     private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = new();
+    private readonly SafeSymbolComparer _symbolEqualityComparer;
 
     public DependencyCollector( ProjectServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
         base( projectVersion, partialCompilation )
@@ -32,6 +34,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
         this._storeTypeName = serviceProvider.GetRequiredService<IProjectOptions>().IsTest;
 
+        this._symbolEqualityComparer = CompilationContextFactory.GetInstance( this.PartialCompilation.Compilation ).SymbolComparer;
         this.IndexReferencedProjects( projectVersion );
     }
 
@@ -71,7 +74,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
         }
 
         // No need to consider self-references because we always include all partial files for all types included in a partial compilation.
-        if ( SymbolEqualityComparer.Default.Equals( masterSymbol, dependentSymbol ) )
+        if ( this._symbolEqualityComparer.Equals( masterSymbol, dependentSymbol ) )
         {
             return;
         }
@@ -84,7 +87,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
 
         var currentCompilationAssembly = this.ProjectVersion.Compilation.Assembly;
 
-        if ( !SymbolEqualityComparer.Default.Equals( dependentSymbol.ContainingAssembly, currentCompilationAssembly ) )
+        if ( !this._symbolEqualityComparer.Equals( dependentSymbol.ContainingAssembly, currentCompilationAssembly ) )
         {
             // We only collect dependencies in the current assembly.
             return;
@@ -93,7 +96,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
         var masterIsPartial = masterSymbol.DeclaringSyntaxReferences[0].GetSyntax() is BaseTypeDeclarationSyntax type
                               && type.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
 
-        if ( SymbolEqualityComparer.Default.Equals( masterSymbol.ContainingAssembly, currentCompilationAssembly ) )
+        if ( this._symbolEqualityComparer.Equals( masterSymbol.ContainingAssembly, currentCompilationAssembly ) )
         {
             // We have a dependency within the current assembly.
             foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )

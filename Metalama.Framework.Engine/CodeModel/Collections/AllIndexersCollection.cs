@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
@@ -10,4 +11,6 @@ internal sealed class AllIndexersCollection : AllMembersCollection<IIndexer>, II
     public AllIndexersCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IIndexer> GetMembers( INamedType namedType ) => namedType.Indexers;
+
+    protected override IEqualityComparer<IIndexer> Comparer => this.CompilationContext.IndexerComparer;
 }

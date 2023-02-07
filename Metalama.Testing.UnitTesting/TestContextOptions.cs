@@ -15,6 +15,8 @@ namespace Metalama.Testing.UnitTesting;
 [PublicAPI]
 public sealed record TestContextOptions
 {
+    public bool RequiresExclusivity { get; init; }
+
     /// <summary>
     /// Gets the default <see cref="TestContextOptions"/> value.
     /// </summary>

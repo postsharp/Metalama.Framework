@@ -248,11 +248,10 @@ namespace Metalama.Framework.Engine.Pipeline
             // Create aspect types.
 
             var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, projectServiceProviderWithProject );
-            var aspectTypeFactory = new AspectClassFactory( driverFactory );
+            var aspectTypeFactory = new AspectClassFactory( driverFactory, compilationModel.CompilationContext );
 
             var aspectClasses = aspectTypeFactory.GetClasses(
                     projectServiceProviderWithProject,
-                    compilationModel.CompilationContext,
                     compileTimeProject,
                     diagnosticAdder )
                 .ToImmutableArray();
@@ -280,11 +279,10 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create other template classes.
-            var otherTemplateClassFactory = new OtherTemplateClassFactory();
+            var otherTemplateClassFactory = new OtherTemplateClassFactory( compilationModel.CompilationContext );
 
             var otherTemplateClasses = otherTemplateClassFactory.GetClasses(
                     projectServiceProviderWithProject,
-                    compilationModel.CompilationContext,
                     compileTimeProject,
                     diagnosticAdder )
                 .ToImmutableDictionary( x => x.FullName, x => x );

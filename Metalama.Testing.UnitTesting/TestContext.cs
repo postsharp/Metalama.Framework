@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -29,12 +30,14 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
     private readonly bool _isRoot;
+    private readonly Stopwatch? _stopwatch;
+    private readonly IDisposable? _throttlingHandle;
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<CompileTimeDomain?> _domain;
 
     private volatile CancellationTokenSource? _timeout;
-    private CancellationTokenRegistration? _timeoutAction;
+    private CancellationTokenRegistration? _timeoutAction;    
 
     internal TestProjectOptions ProjectOptions { get; }
 
@@ -61,7 +64,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
                 if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 120 ) ), null ) == null )
                 {
                     this._timeoutAction = this._timeout.Token.Register(
-                        () => this.ServiceProvider.GetLoggerFactory().GetLogger( "Test" ).Error?.Log( "Test timeout. Cancelling." ) );
+                        () => this.ServiceProvider.GetLoggerFactory()
+                            .GetLogger( "Test" )
+                            .Error?.Log( $"Test timeout. It has been running {this._stopwatch?.Elapsed}. Cancelling." ) );
                 }
             }
 
@@ -78,6 +83,11 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
+        this._throttlingHandle = contextOptions.RequiresExclusivity ? TestThrottlingHelper.RequireExclusivity() : TestThrottlingHelper.Throttle();
+
+        // Start the Stopwatch only after we get after the throttle wall.
+        this._stopwatch = Stopwatch.StartNew();
+
         this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
@@ -231,6 +241,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #if NET5_0_OR_GREATER
         var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
+        domain.UnloadTimeout += MemoryLeakHelper.CaptureDumpAndThrow;
 
         return domain;
 #else
@@ -261,7 +272,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     DateTime IDateTimeProvider.Now => DateTime.Now;
 
-    public virtual void Dispose()
+    protected virtual void Dispose( bool disposing )
     {
         if ( this._isRoot )
         {
@@ -269,8 +280,21 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             this._domain.Value?.Dispose();
             this._timeout?.Dispose();
             this._timeoutAction?.Dispose();
+            this._throttlingHandle?.Dispose();
+        }
+
+        if ( disposing )
+        {
+            GC.SuppressFinalize( this );
         }
     }
+
+    ~TestContext() 
+    {
+        this.Dispose( false );
+    }
+
+    public void Dispose() => this.Dispose( true );
 
     IApplicationInfo IApplicationInfoProvider.CurrentApplication => _applicationInfo;
 }

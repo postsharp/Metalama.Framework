@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        var remainingSymbols = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+                        var remainingSymbols = new HashSet<ISymbol>( this._compilationContext.SymbolComparer );
 
                         foreach ( var symbol in symbols )
                         {

@@ -17,7 +17,9 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     protected UniquelyNamedUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
     private ImmutableDictionary<string, MemberRef<T>> GetInitializedDictionary()
-        => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal );
+        => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
+    
+    protected abstract IEqualityComparer<MemberRef<T>> MemberRefComparer { get; }
 
     public void Add( MemberRef<T> member )
     {
@@ -117,7 +119,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         // Add items discovered from source code.
         foreach ( var symbol in this.GetMembers() )
         {
-            var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
+            var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
 
             if ( !dictionary.ContainsKey( memberRef.Name ) )
             {
@@ -160,7 +162,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             }
             else
             {
-                var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
+                var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
                 this._dictionary = dictionary.SetItem( name, memberRef );
 
                 return ImmutableArray.Create( memberRef );

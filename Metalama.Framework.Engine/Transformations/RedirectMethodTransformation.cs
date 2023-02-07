@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Transformations
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
                         context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
-                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
+                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true ),
                         context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),

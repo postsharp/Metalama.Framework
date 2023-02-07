@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private const string _category = "Metalama.Linker";
 
-        internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
+        internal static readonly DiagnosticDefinition<(string AspectType, ISymbol? TargetDeclaration)>
             CannotUseBaseInvokerWithNonInstanceExpression = new(
                 "LAMA0600",
                 "Cannot use Base invoker with non-this instance expression.",

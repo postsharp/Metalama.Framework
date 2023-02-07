@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.Transformations
                     {
                         statements.Add(
                             ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                 IdentifierName( returnValueName ),
                                 Token( SyntaxKind.SemicolonToken ) ) );
                     }
@@ -225,8 +225,12 @@ namespace Metalama.Framework.Engine.Transformations
                     {
                         statements.Add(
                             ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                proceedExpression,
+                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                this.OverriddenDeclaration.IsAsync
+                                    ? AwaitExpression(
+                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                        proceedExpression )
+                                    : proceedExpression,
                                 Token( SyntaxKind.SemicolonToken ) ) );
                     }
                 }

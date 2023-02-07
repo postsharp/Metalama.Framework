@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -297,7 +296,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this._facade,
-            this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+            this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
                 .ToList() );
 
     [Memo]
@@ -423,7 +422,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             {
                 var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
-                if ( MemberComparer<IMember>.Instance.Equals( candidateMember, typeMember ) )
+                if ( this.Compilation.CompilationContext.MemberComparer.Equals( candidateMember, typeMember ) )
                 {
                     return true;
                 }
@@ -578,7 +577,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
     {
-        var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+        var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( this.Compilation.CompilationContext.SymbolComparer );
         this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
 
         return builder.ToImmutable();
@@ -590,5 +589,5 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool Equals( INamedType? other ) => this.Equals( other, TypeComparison.Default );
 
-    public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode( this.TypeSymbol );
+    public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.TypeSymbol );
 }

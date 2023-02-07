@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -21,11 +22,11 @@ namespace Metalama.Framework.Engine.CodeModel
             private readonly ImmutableDictionaryOfArray<string, AttributeRef>.Builder _builder =
                 ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
 
-            private readonly Compilation _compilation;
+            private readonly CompilationContext _compilationContext;
 
-            public AttributeDiscoveryVisitor( Compilation compilation )
+            public AttributeDiscoveryVisitor( CompilationContext compilationContext )
             {
-                this._compilation = compilation;
+                this._compilationContext = compilationContext;
             }
 
             public override void VisitAttribute( AttributeSyntax node )
@@ -45,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     void Add( SyntaxNode? realDeclaration )
                     {
-                        this._builder.Add( name, new AttributeRef( node, realDeclaration, kind, this._compilation ) );
+                        this._builder.Add( name, new AttributeRef( node, realDeclaration, kind, this._compilationContext ) );
                     }
 
                     switch ( parentDeclaration )
@@ -85,12 +86,16 @@ namespace Metalama.Framework.Engine.CodeModel
                     switch ( targetKind )
                     {
                         case SyntaxKind.ModuleKeyword:
-                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.SourceModule, this._compilation ) ) );
+                            this._builder.Add(
+                                name,
+                                new AttributeRef( node, Ref.FromSymbol( this._compilationContext.Compilation.SourceModule, this._compilationContext ) ) );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
-                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.Assembly, this._compilation ) ) );
+                            this._builder.Add(
+                                name,
+                                new AttributeRef( node, Ref.FromSymbol( this._compilationContext.Compilation.Assembly, this._compilationContext ) ) );
 
                             break;
 
