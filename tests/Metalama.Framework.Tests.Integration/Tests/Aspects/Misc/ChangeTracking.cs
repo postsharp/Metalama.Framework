@@ -1,5 +1,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 {
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
             set
             {
                 var isSpecifiedProperty = (IProperty)meta.Tags["isSpecifiedProperty"]!;
-                isSpecifiedProperty.Value =  true ;
+                isSpecifiedProperty.With(InvokerOptions.Final).Value =  true ;
                 meta.Proceed();
             }
         }

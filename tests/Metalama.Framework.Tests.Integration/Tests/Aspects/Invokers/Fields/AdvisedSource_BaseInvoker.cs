@@ -9,12 +9,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSou
         {
             get
             {
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value;
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value = value;
             }
         }
     }

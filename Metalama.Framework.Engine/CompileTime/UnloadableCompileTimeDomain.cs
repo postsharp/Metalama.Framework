@@ -88,6 +88,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private async Task WaitForDisposalCoreAsync()
         {
+            this._unloadedTask.TrySetResult( true );
+            return;
+            
             try
             {
                 var stopwatch = Stopwatch.StartNew();

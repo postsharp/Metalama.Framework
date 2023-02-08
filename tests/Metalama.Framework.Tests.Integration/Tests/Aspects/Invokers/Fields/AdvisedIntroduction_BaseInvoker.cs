@@ -33,13 +33,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
             {
                 Console.WriteLine( "Override" );
 
-                return meta.Target.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value;
             }
 
             set
             {
                 Console.WriteLine( "Override" );
-                meta.Target.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value = value;
             }
         }
     }

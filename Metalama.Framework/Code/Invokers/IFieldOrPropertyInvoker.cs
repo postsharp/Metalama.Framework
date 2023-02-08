@@ -9,7 +9,6 @@ namespace Metalama.Framework.Code.Invokers
     /// i.e. the implementation before the current aspect layer. To change the default values, or to use the <c>?.</c> null-conditional operator,
     /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
     /// </summary>
-#pragma warning disable CS0612
     public interface IFieldOrPropertyInvoker : IExpression
     {
         /// <summary>
@@ -22,5 +21,4 @@ namespace Metalama.Framework.Code.Invokers
         /// </summary>
         IFieldOrPropertyInvoker With( dynamic? target, InvokerOptions options = default );
     }
-#pragma warning restore CS0612
 }

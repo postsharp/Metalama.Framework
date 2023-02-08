@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-        internal override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
+        internal override Ref<IDeclaration> ToRef() => this.Builder.ToRef();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

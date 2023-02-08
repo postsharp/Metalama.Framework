@@ -39,15 +39,13 @@ public class CountChangesAttribute : TypeAspect
         {
             var property = (IProperty)meta.Tags["CounterProperty"]!;
 
-            // This is by default correctly "Base".
             var oldValue = meta.Target.Property.Value;
 
             meta.Proceed();
 
             if (oldValue != meta.Target.Property.Value)
             {
-                // This should be by default "Current".
-                property.With(InvokerOptions.Current).Value = property.With(InvokerOptions.Current).Value + 1;
+                property.Value = property.Value + 1;
             }
         }
     }
@@ -65,8 +63,7 @@ public class CountChangesAttribute : TypeAspect
 
             foreach(var property in properties)
             {
-                // This should be by default "Current".
-                sum += property.With(InvokerOptions.Current).Value;
+                sum += property.Value;
             }
 
             return sum;
