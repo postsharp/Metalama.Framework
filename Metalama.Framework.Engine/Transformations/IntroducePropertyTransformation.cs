@@ -37,10 +37,10 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             initializerExpression = SyntaxFactoryEx.Default;
         }
 
+        // TODO: Creating the ref to get attributes is a temporary fix for promoted field until there is a correct injection context that has compilation that includes the builder.
+        //       now the reference to promoted field is resolved to the original field, which has incorrect attributes.
         var property =
             PropertyDeclaration(
-                // TODO: passing the ref is a temporary fix for promoted field until there is a correct injection context that has compilation that includes the builder.
-                //       now the reference to promoted field is resolved to the original field, which has incorrect attributes.
                 propertyBuilder.GetAttributeLists( context, Ref.FromBuilder( this.IntroducedDeclaration ) ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),

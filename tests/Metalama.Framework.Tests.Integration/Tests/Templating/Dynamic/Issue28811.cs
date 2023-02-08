@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
             var clone3 = meta.This;
             field.With((IExpression)clone1).Value = clone1;
             field.With((IExpression)clone2).Value = field.With((IExpression)meta.This).Value;
-            field.With((IExpression)clone3).Value = field.With((IExpression)meta.This).Value.Clone();
+            field.With((IExpression)clone3).Value = field.With((IExpression)meta.This).Value!.Clone();
 
             return default;
         }
