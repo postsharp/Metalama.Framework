@@ -282,14 +282,14 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var targetSemantic =
                         overrideIndices.Count > 0
-                        ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
-                        : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
 
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,

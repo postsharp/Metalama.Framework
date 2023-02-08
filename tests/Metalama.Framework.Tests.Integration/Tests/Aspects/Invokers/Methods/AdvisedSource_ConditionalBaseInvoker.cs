@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_HIGHER)
+#endif
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;

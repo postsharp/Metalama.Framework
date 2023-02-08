@@ -380,7 +380,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns><c>True</c> if the method is introduced, otherwise <c>false</c>.</returns>
-        public bool IsIntroduced(ISymbol symbol)
+        public bool IsIntroduced( ISymbol symbol )
         {
             if ( symbol is IMethodSymbol
                 {
