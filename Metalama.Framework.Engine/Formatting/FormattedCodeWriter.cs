@@ -66,6 +66,13 @@ namespace Metalama.Framework.Engine.Formatting
             return outputSyntaxRoot;
         }
 
+        public static void ProcessAnnotations( ClassifiedTextSpanCollection classifiedTextSpans, SyntaxNode syntaxRoot )
+        {
+            // Process the annotations by the aspect linker (on the output document).
+            FormattingVisitor formattingVisitor = new( classifiedTextSpans );
+            formattingVisitor.Visit( syntaxRoot );
+        }
+
         protected async Task<ClassifiedTextSpanCollection> GetClassifiedTextSpansAsync(
             Document document,
             bool areNodesAnnotated = false,
@@ -102,9 +109,7 @@ namespace Metalama.Framework.Engine.Formatting
                 classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, polish: false, CancellationToken.None );
             }
 
-            // Process the annotations by the aspect linker (on the output document).
-            FormattingVisitor formattingVisitor = new( classifiedTextSpans );
-            formattingVisitor.Visit( syntaxRoot );
+            ProcessAnnotations( classifiedTextSpans, syntaxRoot );
             classifiedTextSpans.Polish();
 
             var classifiedSpans = (await Classifier.GetClassifiedSpansAsync(

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        internal ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
         {
             this._sourceText = sourceText;
         }
@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
         /// </summary>
-        internal void Polish()
+        public void Polish()
         {
             if ( this._sourceText == null )
             {
