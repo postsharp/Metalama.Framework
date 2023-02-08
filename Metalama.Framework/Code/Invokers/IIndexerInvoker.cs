@@ -8,9 +8,7 @@ namespace Metalama.Framework.Code.Invokers
     /// Allows accessing the value of indexers.
     /// </summary>
     [CompileTime]
-#pragma warning disable CS0612
-    public interface IIndexerInvoker : IInvoker
-#pragma warning restore CS0612
+    public interface IIndexerInvoker
     {
         /// <summary>
         /// Generates run-time code that gets the value of the current indexer with specified arguments. By default, the target instance

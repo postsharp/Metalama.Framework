@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code.Invokers
     /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
     /// </summary>
 #pragma warning disable CS0612
-    public interface IFieldOrPropertyInvoker : IInvoker, IExpression
+    public interface IFieldOrPropertyInvoker : IExpression
     {
         /// <summary>
         /// Gets an <see cref="IFieldOrPropertyInvoker"/> for the same field or property and target but with different options.

@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                return InvokerOptions.Current;
+                return InvokerOptions.Final;
             }
         }
 

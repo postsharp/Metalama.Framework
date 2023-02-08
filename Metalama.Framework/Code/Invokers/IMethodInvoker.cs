@@ -5,9 +5,7 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows invocation of the method.
     /// </summary>
-#pragma warning disable CS0612
-    public interface IMethodInvoker : IInvoker
-#pragma warning restore CS0612
+    public interface IMethodInvoker 
     {
         /// <summary>
         /// Generates run-time code that invokes the current method with a given list of arguments. By default, the target instance
