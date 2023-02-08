@@ -242,7 +242,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #if NET5_0_OR_GREATER
         var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
-        domain.UnloadTimeout += MemoryLeakHelper.CaptureDumpAndThrow;
+        domain.UnloadTimeout += MemoryLeakHelper.CaptureMiniDump;
 
         return domain;
 #else

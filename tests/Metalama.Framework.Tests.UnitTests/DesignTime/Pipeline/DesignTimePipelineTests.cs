@@ -807,7 +807,7 @@ class C
 
         if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
         {
-            MemoryLeakHelper.CaptureDumpAndThrow();
+            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
         }
     }
 

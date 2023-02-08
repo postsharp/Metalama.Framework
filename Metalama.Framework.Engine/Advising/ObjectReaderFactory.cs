@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class ObjectReaderFactory : IProjectService
 {
-    private readonly ConcurrentDictionary<Type, ObjectReaderTypeAdapter> _types = new();
+    private readonly WeakCache<Type, ObjectReaderTypeAdapter> _types = new();
 
     private readonly ProjectServiceProvider _serviceProvider;
 

@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Code.Invokers
 {
     /// <summary>
@@ -10,6 +12,7 @@ namespace Metalama.Framework.Code.Invokers
     /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
     /// </summary>
 #pragma warning disable CS0612
+    [CompileTime]
     public interface IFieldOrPropertyInvoker : IExpression
     {
         /// <summary>
