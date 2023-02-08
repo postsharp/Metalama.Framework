@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
                 value = (T?)_serviceProvider.GetService( typeof(T) );
 
                 // Set the field/property to the new value.
-                meta.Target.Property.Value = value
+                meta.Target.FieldOrProperty.Value = value
                                              ?? throw new InvalidOperationException( $"Cannot get a service of type {typeof(T)}." );
             }
 
