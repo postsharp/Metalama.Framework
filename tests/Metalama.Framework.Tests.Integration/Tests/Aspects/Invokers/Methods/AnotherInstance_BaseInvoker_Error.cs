@@ -41,12 +41,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
             
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                // TODO: Throw from With
-                return meta.Target.Method.With( local ).Invoke();
+                return meta.Target.Method.With( local, InvokerOptions.Base ).Invoke();
             }
             else
             {
-                return meta.Target.Method.With( local ).Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.Base ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

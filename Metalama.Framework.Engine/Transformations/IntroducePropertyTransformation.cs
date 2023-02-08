@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -38,7 +39,9 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         var property =
             PropertyDeclaration(
-                propertyBuilder.GetAttributeLists( context ).AddRange( GetAdditionalAttributeLists() ),
+                // TODO: passing the ref is a temporary fix for promoted field until there is a correct injection context that has compilation that includes the builder.
+                //       now the reference to promoted field is resolved to the original field, which has incorrect attributes.
+                propertyBuilder.GetAttributeLists( context, Ref.FromBuilder( this.IntroducedDeclaration ) ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0

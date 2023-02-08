@@ -162,6 +162,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return attributes;
         }
 
+        // TODO: This is temporary override (see the callsite for reason).
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, Ref<IDeclaration> declarationRef )
+        {
+            var attributes = context.SyntaxGenerator.AttributesForDeclaration(
+                declarationRef,
+                context.Compilation,
+                this.AttributeTargetSyntaxKind );
+
+            return attributes;
+        }
+
         public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

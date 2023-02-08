@@ -14,11 +14,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.With( local, InvokerOptions.NullConditional ).Invoke();
+                return meta.Target.Method.With( local, InvokerOptions.Base | InvokerOptions.NullConditional ).Invoke();
             }
             else
             {
-                return meta.Target.Method.With(local, InvokerOptions.NullConditional).Invoke( meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.Base | InvokerOptions.NullConditional).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

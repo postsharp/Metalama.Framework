@@ -45,14 +45,14 @@ public class Before : TypeAspect
     [Introduce]
     public void IntroducedBefore()
     {
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().Value = 42;
+        _ = meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().With(InvokerOptions.Base).Value = 42;
     }
 }
 
@@ -61,14 +61,14 @@ public class After : TypeAspect
     [Introduce]
     public void IntroducedAfter()
     {
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_Static" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_NoOverride" ).Single().Value = 42;
-        _ = meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().Value;
-        meta.Target.Type.Properties.OfName( "AutoProperty_Static_NoOverride" ).Single().Value = 42;
+        _ = meta.Target.Type.Properties.OfName("AutoProperty").Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName("AutoProperty").Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName("AutoProperty_Static").Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName("AutoProperty_Static").Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName("AutoProperty_NoOverride").Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName("AutoProperty_NoOverride").Single().With(InvokerOptions.Base).Value = 42;
+        _ = meta.Target.Type.Properties.OfName("AutoProperty_Static_NoOverride").Single().With(InvokerOptions.Base).Value;
+        meta.Target.Type.Properties.OfName("AutoProperty_Static_NoOverride").Single().With(InvokerOptions.Base).Value = 42;
     }
 }
 
