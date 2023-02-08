@@ -1,6 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 #pragma warning disable CS0067
@@ -9,14 +10,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
 {
     public class TestAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic value)
+        public override void OverrideAdd( dynamic value )
         {
-            meta.Target.Event.Invokers.Final!.Add(meta.This, meta.Target.Parameters[0].Value);
+            meta.Target.Event.With( InvokerOptions.Final ).Add( meta.Target.Parameters[0].Value );
         }
 
-        public override void OverrideRemove(dynamic value)
+        public override void OverrideRemove( dynamic value )
         {
-            meta.Target.Event.Invokers.Final!.Remove(meta.This, meta.Target.Parameters[0].Value);
+            meta.Target.Event.With( InvokerOptions.Final ).Remove( meta.Target.Parameters[0].Value );
         }
     }
 
@@ -28,8 +29,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
         [Test]
         public event EventHandler Event
         {
-            add => this._field += value;
-            remove => this._field -= value;
+            add => _field += value;
+            remove => _field -= value;
         }
 
         [Test]

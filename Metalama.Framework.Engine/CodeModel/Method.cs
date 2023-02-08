@@ -56,6 +56,12 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
@@ -65,9 +71,8 @@ internal sealed class Method : MethodBase, IMethodImpl
         return new Method( symbolWithGenericArguments, this.Compilation );
     }
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

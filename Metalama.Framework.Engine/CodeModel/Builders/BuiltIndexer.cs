@@ -4,8 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -46,11 +46,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? SetMethod
             => this._indexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.SetMethod ) : null;
 
-        [Memo]
-        public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
+        [Obsolete]
+        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
+
+        public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
+
+        public IIndexerInvoker With( object? target, InvokerOptions options = default ) => this._indexerBuilder.With( target, options );
+
+        public object GetValue( params object?[] args ) => this._indexerBuilder.With( args );
+
+        public object SetValue( object? value, params object?[] args ) => this._indexerBuilder.SetValue( value, args );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]

@@ -8,22 +8,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Initi
 {
     public class IntroductionAttribute : TypeAspect
     {
+        [Introduce]
+        public event EventHandler? IntroducedEventField = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().Value;
 
         [Introduce]
-        public event EventHandler? IntroducedEventField = meta.Target.Event.DeclaringType.Fields.OfName("Foo").Single().Invokers.Final.GetValue(null);
-
-        [Introduce]
-        public static event EventHandler? IntroducedEventField_Static = meta.Target.Event.DeclaringType.Fields.OfName("Foo").Single().Invokers.Final.GetValue(null);
+        public static event EventHandler? IntroducedEventField_Static = meta.Target.Event.DeclaringType.Fields.OfName( "Foo" ).Single().Value;
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        public static EventHandler Foo = new EventHandler(Bar);
+        public static EventHandler Foo = new( Bar );
 
-        public static void Bar(object? sender, EventArgs eventArgs)
-        {
-        }
+        public static void Bar( object? sender, EventArgs eventArgs ) { }
     }
 }

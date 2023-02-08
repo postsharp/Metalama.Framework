@@ -149,6 +149,63 @@ namespace Metalama.Framework.Engine.Templating
             return this._annotationToSymbolMap[annotation];
         }
 
+        public ISymbol? GetInvocableSymbol( ExpressionSyntax node )
+        {
+            using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
+
+            if ( !enumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var firstAnnotation = enumerator.Current;
+
+            if ( !enumerator.MoveNext() )
+            {
+                // No ambiguity.
+                return this._annotationToSymbolMap[firstAnnotation];
+            }
+
+            var firstSymbol = this._annotationToSymbolMap[firstAnnotation];
+
+            // We have some ambiguity.
+            // We never have ambiguities with anything else than methods, so let's end here if we don't have a method.
+            if ( firstSymbol is not IMethodSymbol firstMethod )
+            {
+                return null;
+            }
+
+            // Get all symbols.
+            var symbols = new List<IMethodSymbol> { firstMethod, (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+
+            while ( enumerator.MoveNext() )
+            {
+                symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] );
+            }
+
+            // If we have an ambiguity, it is because one of the arguments is dynamic. 
+            // Take only signatures that have a dynamic argument.
+
+            var likelySymbols = symbols.Where( m => m.Parameters.Any( p => p.Type.TypeKind == TypeKind.Dynamic ) );
+
+            using var likelyEnumerator = likelySymbols.GetEnumerator();
+
+            if ( !likelyEnumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var bestSymbol = likelyEnumerator.Current;
+
+            if ( likelyEnumerator.MoveNext() )
+            {
+                // There is still some ambiguity.
+                return null;
+            }
+
+            return bestSymbol;
+        }
+
         public IEnumerable<ISymbol> GetCandidateSymbols( SyntaxNode node )
         {
             foreach ( var annotation in node.GetAnnotations( _symbolAnnotationKind ) )

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 
 namespace Metalama.Framework.Code.Invokers
 {
@@ -9,8 +10,8 @@ namespace Metalama.Framework.Code.Invokers
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [CompileTime]
+    [Obsolete( "No replacement. Use With method of invoker or member to change the behavior.", true )]
     public interface IInvokerFactory<out T>
-        where T : IInvoker
     {
         /// <summary>
         /// Gets the invoker for the base implementation of the declaration, i.e. <i>before</i> the application

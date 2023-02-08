@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
         }
 
         [Template]
-        public bool IsMemberTemplate => meta.This._value == ( (IField)meta.Tags["member"]! ).Invokers.Final.GetValue( null );
+        public bool IsMemberTemplate => meta.This._value == ( (IField)meta.Tags["member"]! ).Value;
     }
 
     internal enum Visibility

@@ -4,33 +4,40 @@ internal class TargetClass : BaseClass
 {
   public void VoidMethod()
   {
-    this?.VoidMethod();
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    local?.VoidMethod();
     return;
   }
   public int? ExistingMethod()
   {
-    return this?.ExistingMethod();
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    return local?.ExistingMethod();
   }
   public int? ExistingMethod_Parameterized(int? x)
   {
-    return this?.ExistingMethod_Parameterized(x);
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    return local?.ExistingMethod_Parameterized(x);
   }
   public new global::System.Int32? BaseClass_ExistingMethod()
   {
-    return this?.BaseClass_ExistingMethod();
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    return local?.BaseClass_ExistingMethod();
   }
   public new global::System.Int32? BaseClass_ExistingMethod_Parameterized(global::System.Int32? x)
   {
-    return this?.BaseClass_ExistingMethod_Parameterized(x);
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    return local?.BaseClass_ExistingMethod_Parameterized(x);
   }
   public new void BaseClass_VoidMethod()
   {
-    this?.BaseClass_VoidMethod();
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    local?.BaseClass_VoidMethod();
     return;
   }
   public void Print()
   {
-    this?.Print();
+    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_ConditionalFinalInvoker.TargetClass? local = null;
+    local?.Print();
     return;
   }
 }

@@ -1,9 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,5 +75,17 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToString() => this.DeclaringMember + "/" + this.Name;
 
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringMember).PrimarySyntaxTree;
+
+        bool IExpression.IsAssignable => true;
+
+        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new(
+                new TypedExpressionSyntaxImpl(
+                    SyntaxFactory.IdentifierName( this.Name ),
+                    this.Type,
+                    (SyntaxGenerationContext) syntaxGenerationContext,
+                    true ) );
     }
 }

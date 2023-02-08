@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -16,15 +15,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     internal sealed class ThisTypeUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
-        private readonly AspectReferenceSpecification _linkerAnnotation;
 
-        public ThisTypeUserReceiver( INamedType type, AspectReferenceSpecification linkerAnnotation )
+        public ThisTypeUserReceiver( INamedType type, in AspectReferenceSpecification linkerAnnotation ) : base( linkerAnnotation )
         {
             this._type = type;
-            this._linkerAnnotation = linkerAnnotation;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
 
         public override IType Type => this._type;
 
@@ -34,7 +32,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         SyntaxKind.SimpleMemberAccessExpression,
                         TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
-                    .WithAspectReferenceAnnotation( this._linkerAnnotation ),
+                    .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 TemplateExpansionContext.CurrentSyntaxGenerationContext );
+
+        protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec ) => new ThisTypeUserReceiver( this._type, spec );
+
+        protected override bool CanBeNull => false;
     }
 }

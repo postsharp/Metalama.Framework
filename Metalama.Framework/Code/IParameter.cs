@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a parameter of a method or property.
     /// </summary>
-    public interface IParameter : INamedDeclaration, IHasType
+    public interface IParameter : INamedDeclaration, IExpression
     {
         /// <summary>
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.

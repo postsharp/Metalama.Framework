@@ -25,12 +25,14 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
-
+        
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
             this._syntaxGenerationContext = templateExpansionContext.SyntaxGenerationContext;
         }
+
+        public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
 
         public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 
@@ -365,15 +367,15 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ) )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ), this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
-            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext, false );
+            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );
         }
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )

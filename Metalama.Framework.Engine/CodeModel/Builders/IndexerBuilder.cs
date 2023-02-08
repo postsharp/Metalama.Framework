@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -81,17 +80,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        private bool HasBaseInvoker => this.OverriddenIndexer != null;
-
-        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => this.Invokers;
-
-        [Memo]
-        private IInvokerFactory<IIndexerInvoker> Invokers
-            => new InvokerFactory<IIndexerInvoker>(
-                ( order, _ ) => new IndexerInvoker( this, order ),
-                this.HasBaseInvoker );
+        [Obsolete]
+        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
 
         public IIndexer? OverriddenIndexer { get; set; }
+
+        public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
+
+        public IIndexerInvoker With( object? target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
+
+        public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
+
+        public object SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

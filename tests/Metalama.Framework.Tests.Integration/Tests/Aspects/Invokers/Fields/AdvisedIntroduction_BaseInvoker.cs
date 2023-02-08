@@ -2,6 +2,7 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_BaseInvoker;
 
 [assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
@@ -30,14 +31,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
         {
             get
             {
-                Console.WriteLine("Override");
-                return meta.Target.FieldOrProperty.Invokers.Base!.GetValue( meta.This );
+                Console.WriteLine( "Override" );
+
+                return meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value;
             }
 
             set
             {
-                Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.Invokers.Base!.SetValue( meta.This, value );
+                Console.WriteLine( "Override" );
+                meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value = value;
             }
         }
     }

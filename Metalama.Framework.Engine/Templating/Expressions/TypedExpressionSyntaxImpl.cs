@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// Represents an <see cref="ExpressionSyntax"/> and its <see cref="IType"/>. Annotates the <see cref="ExpressionSyntax"/>
     /// with <see cref="ExpressionTypeAnnotationHelper"/>.
     /// </summary>
-    internal sealed class TypedExpressionSyntaxImpl : ITypedExpressionSyntax
+    internal sealed class TypedExpressionSyntaxImpl : ITypedExpressionSyntaxImpl
     {
         /// <summary>
         /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
@@ -30,7 +31,18 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public ExpressionSyntax Syntax { get; }
 
+        public bool CanBeNull { get; }
+
         public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
+
+        public IUserExpression ToUserExpression( ICompilation compilation )
+        {
+            var factory = compilation.GetCompilationModel().Factory;
+
+            var type = this.ExpressionType != null ? factory.GetIType( this.ExpressionType ) : factory.GetSpecialType( SpecialType.Object );
+
+            return new SyntaxUserExpression( this.Syntax, type );
+        }
 
         public static implicit operator TypedExpressionSyntax( TypedExpressionSyntaxImpl impl ) => new( impl );
 
@@ -40,7 +52,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ExpressionSyntax syntax,
             ITypeSymbol? expressionType,
             SyntaxGenerationContext generationContext,
-            bool isReferenceable )
+            bool isReferenceable = false,
+            bool canBeNull = true )
         {
             if ( expressionType == null )
             {
@@ -55,20 +68,26 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
+            this.CanBeNull = canBeNull;
         }
+        
+        internal TypedExpressionSyntaxImpl(
+            ExpressionSyntax syntax,
+            IType type,
+            SyntaxGenerationContext generationContext,
+            bool isReferenceable = false,
+            bool canBeNull = true )
+            : this( syntax, type.GetSymbol(), generationContext, isReferenceable, canBeNull ) { }
 
-        internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IType type, ISyntaxGenerationContext generationContext, bool isReferenceable = false )
-            : this( syntax, type, (SyntaxGenerationContext) generationContext, isReferenceable ) { }
-
-        internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
-            : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
-
-        internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, SyntaxGenerationContext syntaxGenerationContext )
+        internal TypedExpressionSyntaxImpl(
+            ExpressionSyntax syntax,
+            SyntaxGenerationContext syntaxGenerationContext,
+            bool isReferenceable = false )
             : this(
                 syntax,
                 (ITypeSymbol) null!,
                 syntaxGenerationContext,
-                false ) { }
+                isReferenceable ) { }
 
         internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
             => FromValue( value, compilation, generationContext ).Syntax;
@@ -111,7 +130,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             }
         }
 
-        internal static TypedExpressionSyntaxImpl[]? FromValue( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
+        internal static TypedExpressionSyntaxImpl[]? FromValues( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( array )
             {
@@ -152,7 +171,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                 if ( compilation.HasImplicitConversion( this.ExpressionType, targetType.GetSymbol() ) )
                 {
-                    return new TypedExpressionSyntaxImpl( this.Syntax, targetType, generationContext );
+                    return new TypedExpressionSyntaxImpl( this.Syntax, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
                 }
             }
 
@@ -161,7 +180,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithAdditionalAnnotations( Simplifier.Annotation );
 
-            return new TypedExpressionSyntaxImpl( expression, targetType, generationContext );
+            return new TypedExpressionSyntaxImpl( expression, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
         }
 
         public override string ToString() => this.Syntax.ToString();

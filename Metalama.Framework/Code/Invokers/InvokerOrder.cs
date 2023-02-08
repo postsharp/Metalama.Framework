@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 
 namespace Metalama.Framework.Code.Invokers
 {
@@ -8,16 +9,22 @@ namespace Metalama.Framework.Code.Invokers
     /// Enumeration of orders for invokers.
     /// </summary>
     [CompileTime]
+    [Obsolete( "Use InvokerOptions", true )]
     public enum InvokerOrder
     {
         /// <summary>
-        /// Final (equivalent to <c>this</c> in C#, including resolution of <c>virtual</c> calls).
+        /// Equal to <see cref="Base"/>.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Base (equivalent to <c>base</c> in C#).
+        /// Accesses the implementation prior to the current aspect layer (equivalent to <c>base</c> in C#).
         /// </summary>
-        Base
+        Base = Default,
+
+        /// <summary>
+        /// Accesses the final implementation of the member.
+        /// </summary>
+        Final
     }
 }

@@ -4,157 +4,153 @@ using System.IO;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictNew_BaseInvoker;
 using Newtonsoft.Json.Linq;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictNew_BaseInvoker
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassAbstractEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Add( meta.Target.Parameters[0].Value );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
-                meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+                Console.WriteLine( "This is introduced event." );
+                meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
             }
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class OverrideAttribute : TypeAspect
     {
-
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach ( var e in builder.Target.Events )
+            foreach (var e in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(e, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advice.OverrideAccessors( e, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
         [Template]
         public void OverrideAdd()
         {
-            Console.WriteLine("Override.");
-            meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+            Console.WriteLine( "Override." );
+            meta.Target.Event.Add( meta.Target.Parameters[0].Value );
         }
 
         [Template]
         public void OverrideRemove()
         {
-            Console.WriteLine("Override.");
-            meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
+            Console.WriteLine( "Override." );
+            meta.Target.Event.Remove( meta.Target.Parameters[0].Value );
         }
-
     }
 
     internal abstract class BaseClass
@@ -163,12 +159,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -176,12 +172,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -194,12 +190,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -207,12 +203,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -220,12 +216,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -233,12 +229,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
     }
@@ -252,12 +248,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
 
@@ -265,12 +261,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         {
             add
             {
-                Console.WriteLine("This is the original add.");
+                Console.WriteLine( "This is the original add." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original remove.");
+                Console.WriteLine( "This is the original remove." );
             }
         }
     }

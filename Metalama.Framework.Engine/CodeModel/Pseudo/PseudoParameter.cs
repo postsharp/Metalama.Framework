@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -88,5 +90,9 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => other is PseudoParameter pseudoParameter && this.DeclaringMember.Equals( pseudoParameter.DeclaringMember );
 
         protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 5;
+
+        bool IExpression.IsAssignable => true;
+
+        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
     }
 }

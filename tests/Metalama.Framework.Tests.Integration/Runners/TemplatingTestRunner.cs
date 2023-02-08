@@ -343,7 +343,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         lexicalScope,
                         serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
-                        template.Template,
+                        template,
                         proceedExpression,
                         default ),
                     roslynTargetMethod);

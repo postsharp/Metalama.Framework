@@ -8,27 +8,25 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var field = meta.Target.Type.Fields.Single();
             object? clone = null;
-            field.Invokers.Base!.SetValue(
-                clone, 
-                meta.Cast(field.Type, ((ICloneable)field.Invokers.Base.GetValue(meta.This)).Clone()));
-            
+            field.With( clone ).Value = meta.Cast( field.Type, ( (ICloneable)field.Value! ).Clone() );
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode : IDisposable
+    internal class TargetCode : IDisposable
     {
         private int field;
-        
-        int Method(int a)
+
+        private int Method( int a )
         {
             return a;
         }

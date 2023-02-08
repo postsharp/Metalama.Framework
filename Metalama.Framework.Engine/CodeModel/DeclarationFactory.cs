@@ -453,7 +453,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
-                l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+                l => new BuiltParameter( (BaseParameterBuilder) l.Target!, this._compilationModel ) );
         }
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder, ReferenceResolutionOptions options )
@@ -509,8 +509,25 @@ namespace Metalama.Framework.Engine.CodeModel
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
         }
 
-        internal IProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
+        internal IFieldOrProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
+            /*
+            if ( propertyBuilder is PromotedField promotedField )
+            {
+                // When getting a promoted field, we need to look at the current CompilationModel. Are we before or after 
+                // promotion? The result will be different
+                
+                
+                return promotedField.Field switch
+                {
+                    BuiltField builtField => this.GetField( builtField.FieldBuilder, options ),
+                    FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
+                    Field field => this.GetField( field.GetSymbol().AssertNotNull( ) ),
+                    _ => throw new AssertionFailedException()
+                };
+            }
+            */
+            
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
                 throw CreateBuilderNotExists( propertyBuilder );

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -34,9 +35,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -82,6 +82,45 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
+
+        private void CheckNotPropertyBackingField()
+        {
+            if ( this.IsImplicitlyDeclared )
+            {
+                throw new InvalidOperationException( $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
+            }
+        }
+
+        public IFieldOrPropertyInvoker With( InvokerOptions options )
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this, options );
+        }
+
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this, options, target );
+        }
+
+        public ref object? Value
+        {
+            get
+            {
+                this.CheckNotPropertyBackingField();
+                
+                return ref new FieldOrPropertyInvoker( this ).Value;
+            }
+        }
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
+        }
 
         private IExpression? GetInitializerExpressionCore()
         {
@@ -135,5 +174,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
         }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
     }
 }

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         protected IReadOnlyList<TRef> Source { get; }
 
-        protected CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
+        internal CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
         protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<TRef> source )
         {

@@ -1,21 +1,24 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_ConditionalFinalInvoker
 {
     public class TestAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
+            TargetClass? local = null;
+
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke(meta.This);
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }
@@ -24,12 +27,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
     internal class TargetClass
     {
         [Test]
-        public void VoidMethod()
-        {
-        }
+        public void VoidMethod() { }
 
         [Test]
-        public int? Method(int? x)
+        public int? Method( int? x )
         {
             return x;
         }

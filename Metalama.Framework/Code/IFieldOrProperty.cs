@@ -3,13 +3,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.RunTime;
+using System;
 
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer
+    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer, IFieldOrPropertyInvoker
     {
         /// <summary>
         /// Gets a value indicating whether the declaration is an auto-property or a field, or <c>null</c> if the
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
+        [Obsolete( "Use the methods of the IFieldOrPropertyInvoker interface that this object implements.", true )]
         IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>

@@ -45,8 +45,7 @@ internal sealed partial class TemplateExpansionContext
                         SyntaxKind.SimpleMemberAccessExpression,
                         generatedExpression,
                         IdentifierName( nameof(Task.ConfigureAwait) ) ) )
-                .AddArgumentListArguments(
-                    Argument( SyntaxFactoryEx.LiteralExpression( this._continueOnCapturedContext ) ) );
+                .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( this._continueOnCapturedContext ) ) );
         }
 
         protected override string ToStringCore() => $"{this._expression}.ConfigureAwait({this._continueOnCapturedContext})";

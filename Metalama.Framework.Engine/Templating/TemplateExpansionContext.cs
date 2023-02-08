@@ -19,6 +19,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -43,6 +46,34 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
+    internal static AspectLayerId? CurrentAspectLayerId => CurrentOrNull?.AspectLayerId;
+
+    internal static bool IsTransformingDeclaration( IDeclaration declaration )
+    {
+        var metaApi = (CurrentOrNull as TemplateExpansionContext)?.MetaApi;
+
+        if ( metaApi == null )
+        {
+            return false;
+        }
+
+        if ( metaApi.Declaration.Equals( declaration ) || metaApi.Declaration.ContainingDeclaration?.Equals( declaration ) == true )
+        {
+            return true;
+        }
+
+        switch ( metaApi.Declaration )
+        {
+            case IProperty property:
+                return declaration.Equals( property.GetMethod ) || declaration.Equals( property.SetMethod );
+
+            case IEvent @event:
+                return declaration.Equals( @event.AddMethod ) || declaration.Equals( @event.RemoveMethod ) || declaration.Equals( @event.RaiseMethod );
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
     /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
@@ -50,7 +81,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// </summary>
     internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
     {
-        var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, Aspects.AspectLayerId.Null ) );
+        var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
         _currentSyntaxGenerationContext.Value = generationContext;
 
         return new DisposeCookie(
@@ -65,6 +96,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public ITemplateSyntaxFactory SyntaxFactory { get; }
 
+    public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
+
     public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
@@ -72,24 +105,29 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         TemplateLexicalScope lexicalScope,
         SyntaxSerializationService syntaxSerializationService,
         SyntaxGenerationContext syntaxGenerationContext,
-        TemplateMember<IMethod>? template,
+        BoundTemplateMethod? template,
         IUserExpression? proceedExpression,
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
+        UserCodeMemberInfo.FromSymbol( template?.Template.Declaration.GetSymbol() ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
         metaApi: metaApi )
     {
-        this._template = template;
+        this._template = template?.Template;
         this.TemplateInstance = templateInstance;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
+
+        this.TemplateGenericArguments =
+            (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
+            ?? ImmutableDictionary<string, IType>.Empty;
+
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
 
@@ -103,6 +141,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.LexicalScope = prototype.LexicalScope;
         this.SyntaxFactory = prototype.SyntaxFactory;
         this._localFunctionInfo = localFunctionInfo;
+        this.TemplateGenericArguments = prototype.TemplateGenericArguments;
         this._proceedExpression = prototype._proceedExpression;
     }
 

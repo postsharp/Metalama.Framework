@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,14 +41,22 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
         }
     }
 
+    public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
+
+    public IIndexerInvoker With( object? target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );
+
+    public object GetValue( params object?[] args ) => new IndexerInvoker( this ).GetValue( args );
+
+    public object SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
+
     public IMember? OverriddenMember => this.OverriddenIndexer;
 
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
         => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetIndexer( p ) ).ToList();
 
-    [Memo]
-    public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
+    [Obsolete]
+    IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 }

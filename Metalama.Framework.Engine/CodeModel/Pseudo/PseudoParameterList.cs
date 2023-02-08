@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,5 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
         public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
+
+        public object ToValueArray() => new ValueArrayExpression( this );
     }
 }

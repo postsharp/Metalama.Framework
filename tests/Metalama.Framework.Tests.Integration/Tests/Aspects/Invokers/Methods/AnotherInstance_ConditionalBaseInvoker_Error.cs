@@ -5,6 +5,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 
 #pragma warning disable CS0067
 
@@ -44,11 +45,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke( x );
+                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( x );
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke( x, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( InvokerOptions.NullConditional ).Invoke( x, meta.Target.Method.Parameters[0].Value );
             }
         }
     }

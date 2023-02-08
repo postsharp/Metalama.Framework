@@ -108,8 +108,23 @@ namespace Metalama.Framework.Engine.Linking
             AspectReferenceSpecification referenceSpecification,
             SemanticModel semanticModel )
         {
-            // Get the local symbol that is referenced and reference root.
-            // E.g. explicit interface implementation must be referenced as interface member reference.
+            // Get the reference root node, the local symbol that is referenced, and the node that was the source for the symbol.
+            //   1) Normal reference:
+            //     this.Foo()
+            //     ^^^^^^^^ - aspect reference (symbol points directly to the member)
+            //     ^^^^^^^^ - symbol source
+            //     ^^^^^^^^ - resolved root node
+            //   2) Interface member references:
+            //     ((IInterface)this).Foo()
+            //                        ^^^ - aspect reference (symbol points to interface member)
+            //                        ^^^ - symbol source
+            //     ^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
+            //   3) Referencing a get-only property "setter":
+            //     __LinkerInjectionHelpers__.__Property(this.Foo) = 42;
+            //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - aspect reference (symbol points to the special linker helper)
+            //                                           ^^^^^^^^  - symbol source
+            //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
+
             this.ResolveTarget(
                 containingSemantic.Symbol,
                 referencedSymbol,
@@ -118,6 +133,9 @@ namespace Metalama.Framework.Engine.Linking
                 out var resolvedRootNode,
                 out var resolvedReferencedSymbol,
                 out var resolvedReferencedSymbolSourceNode );
+
+            // Root node is the node that will be replaced when rewriting the aspect reference.
+            // Symbol source node is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
@@ -227,6 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                                   .GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
+                        Invariant.Assert( overrideIndices.Count > 0 );
 
                         return new ResolvedAspectReference(
                             containingSemantic,
@@ -258,14 +277,19 @@ namespace Metalama.Framework.Engine.Linking
             else if ( resolvedIndex == targetIntroductionIndex )
             {
                 // We have resolved to the target member introduction.
-                // The only way to get here is using "Base" order in the first override.
+                // The only way to get here is using "Base" order in the first override or within the same aspect to a non-overridden method.
                 if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
+                    var targetSemantic =
+                        overrideIndices.Count > 0
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,
@@ -305,6 +329,7 @@ namespace Metalama.Framework.Engine.Linking
                     else
                     {
                         // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
+
                         return new ResolvedAspectReference(
                             containingSemantic,
                             containingLocalFunction,
@@ -674,6 +699,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
+                case IFieldSymbol:
                 case IPropertySymbol property when property.IsAutoProperty().GetValueOrDefault():
                 case IEventSymbol @event when @event.IsExplicitInterfaceEventField() || @event.IsEventField().GetValueOrDefault():
                     return true;

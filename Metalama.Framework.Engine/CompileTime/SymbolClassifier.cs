@@ -82,6 +82,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly IAttributeDeserializer _attributeDeserializer;
         private readonly ILogger _logger;
         private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
+        private readonly CompilationContext _compilationContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
@@ -102,6 +103,8 @@ namespace Metalama.Framework.Engine.CompileTime
             ReferenceAssemblyLocator referenceAssemblyLocator )
         {
             var compilationContext = CompilationContextFactory.GetInstance( compilation );
+
+            this._compilationContext = compilationContext;
 
             this._referenceAssemblyLocator = referenceAssemblyLocator;
             this._symbolEqualityComparer = compilationContext.SymbolComparer;
@@ -249,6 +252,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
+            if ( symbol.BelongsToCompilation( this._compilationContext ) == false )
+            {
+                throw new ArgumentOutOfRangeException( $"The symbol '{symbol}' does not belong to the expected compilation." );
+            }
+
             return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
                 .GetValueOrDefault( TemplatingScope.RunTimeOnly );
         }

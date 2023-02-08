@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue287
             {
                 if (!fieldOrProperty.IsImplicitlyDeclared && fieldOrProperty.IsAutoPropertyOrField.GetValueOrDefault())
                 {
-                    var value = fieldOrProperty.Invokers.Final.GetValue( fieldOrProperty.IsStatic ? null : meta.This );
+                    var value = fieldOrProperty.Value;
                     Console.WriteLine( $"{fieldOrProperty.Name}={value}" );
                 }
             }

@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( annotation == null )
             {
-                // Original code declaration - we should be able to get ICodeElement by symbol name.
+                // Original code declaration - we should be able to get IDeclaration by symbol name.
 
                 if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol, out var originalElement ) )
                 {
@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                // Introduced declaration - we should get ICodeElement from introduced member.
+                // Introduced declaration - we should get IDeclaration from introduced member.
                 var injectedMember = this._injectedMemberLookup[annotation.Data.AssertNotNull()];
 
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introductionTransformation )
@@ -373,6 +373,31 @@ namespace Metalama.Framework.Engine.Linking
         public IMethodSymbol GetLastOverride( IMethodSymbol symbol )
         {
             return (IMethodSymbol) this.GetLastOverride( (ISymbol) symbol );
+        }
+
+        /// <summary>
+        /// Determines whether the symbol was introduced.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns><c>True</c> if the method is introduced, otherwise <c>false</c>.</returns>
+        public bool IsIntroduced( ISymbol symbol )
+        {
+            if ( symbol is IMethodSymbol
+                {
+                    MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
+                } methodSymbol )
+            {
+                return this.IsIntroduced( methodSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
+            var injectedMember = this.GetInjectedMemberForSymbol( symbol );
+
+            if ( injectedMember == null )
+            {
+                return false;
+            }
+
+            return injectedMember.Semantic == InjectedMemberSemantic.Introduction;
         }
 
         /// <summary>

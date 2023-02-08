@@ -12,14 +12,16 @@ namespace Metalama.Framework.CompileTimeContracts
     [PublicAPI]
     public sealed class TemplateTypeArgument
     {
+        public string Name { get; }
         public TypeSyntax Syntax { get; }
 
         public TypeSyntax SyntaxWithoutNullabilityAnnotations { get; }
 
         public IType Type { get; }
 
-        internal TemplateTypeArgument( IType type, TypeSyntax syntax, TypeSyntax syntaxWithoutNullabilityAnnotations )
+        internal TemplateTypeArgument( string name, IType type, TypeSyntax syntax, TypeSyntax syntaxWithoutNullabilityAnnotations )
         {
+            this.Name = name;
             this.Syntax = syntax;
             this.Type = type;
             this.SyntaxWithoutNullabilityAnnotations = syntaxWithoutNullabilityAnnotations;

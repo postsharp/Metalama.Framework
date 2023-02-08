@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represent an event.
     /// </summary>
-    public interface IEvent : IMemberWithAccessors
+    public interface IEvent : IMemberWithAccessors, IEventInvoker
     {
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
+        [Obsolete( "Use the methods of the IEventInvoker interface that this object implements.", true )]
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>

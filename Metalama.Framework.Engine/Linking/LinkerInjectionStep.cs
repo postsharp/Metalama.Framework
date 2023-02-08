@@ -341,6 +341,9 @@ namespace Metalama.Framework.Engine.Linking
                             injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
+                        // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
+                        //       For introduction, this should be a compilation that INCLUDES the builder.
+
                         // Call GetInjectedMembers
                         var injectionContext = new MemberInjectionContext(
                             this._serviceProvider,

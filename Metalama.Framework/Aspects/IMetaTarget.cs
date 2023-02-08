@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Advised;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -22,19 +22,19 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets the target field, or throws an exception if the advice does not target a field.
         /// </summary>
-        IAdvisedField Field { get; }
+        IField Field { get; }
 
         /// <summary>
         /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
         /// <seealso href="@templates"/>
-        IAdvisedFieldOrProperty FieldOrProperty { get; }
+        IFieldOrProperty FieldOrProperty { get; }
 
         /// <summary>
         /// Gets the target field or property or indexer, or throws an exception if the advice does not target a field or a property or an indexer.
         /// </summary>
         /// <seealso href="@templates"/>
-        IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer { get; }
+        IFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer { get; }
 
         /// <summary>
         /// Gets the target declaration.
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Aspects
         /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
         /// e.g. <c>meta.Target.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        IAdvisedMethod Method { get; }
+        IMethod Method { get; }
 
         /// <summary>
         /// Gets the target constructor, or throws an exception if the advice does not target a constructor.
@@ -66,28 +66,28 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
-        IAdvisedProperty Property { get; }
+        IProperty Property { get; }
 
         /// <summary>
         /// Gets the target event, or throws an exception if the advice does not target an event.
         /// </summary>
-        IAdvisedEvent Event { get; }
+        IEvent Event { get; }
 
         /// <summary>
         /// Gets the list of parameters of the current <see cref="Method"/>, <see cref="Constructor"/>,  <see cref="Property"/> or <see cref="Indexer"/> or throws
         /// an exception if the advice does not target a method, constructor, property or indexer.
         /// </summary>
-        IAdvisedParameterList Parameters { get; }
+        IParameterList Parameters { get; }
 
         /// <summary>
         /// Gets the target parameter or throws an exception if the advice does not target a parameter.
         /// </summary>
-        IAdvisedParameter Parameter { get; }
+        IParameter Parameter { get; }
 
         /// <summary>
         /// Gets the target indexer, or throws an exception if the advice does not target an indexer.
         /// </summary>
-        IAdvisedIndexer Indexer { get; }
+        IIndexer Indexer { get; }
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.

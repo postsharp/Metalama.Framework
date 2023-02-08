@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache =
+        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirections =
             ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
@@ -187,13 +187,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable )
+        private CompilationModel( CompilationModel prototype, bool mutable, CompilationModelOptions? options = null )
         {
             this.IsMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
-            this.Options = prototype.Options;
+            this.Options = options ?? prototype.Options;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
-            this._redirectionCache = prototype._redirectionCache;
+            this._redirections = prototype._redirections;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this.AspectRepository = prototype.AspectRepository;
             this.MetricManager = prototype.MetricManager;
@@ -409,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             while ( true )
             {
-                if ( this._redirectionCache.TryGetValue( reference, out var target ) )
+                if ( this._redirections.TryGetValue( reference, out var target ) )
                 {
                     result = true;
                     reference = target;
@@ -461,9 +461,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        internal CompilationModel CreateMutableClone() => new( this, true );
+        internal CompilationModel CreateMutableClone() => new( this, true, this.Options );
 
-        internal void Freeze() => this.IsMutable = false;
+        internal CompilationModel CreateImmutableClone() => new( this, false, this.Options );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

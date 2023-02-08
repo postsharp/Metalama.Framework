@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,9 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         [Memo]
         public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -72,6 +72,16 @@ namespace Metalama.Framework.Engine.CodeModel
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
+
+        public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
+
+        public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
+
+        public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
+
+        public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
+
+        public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

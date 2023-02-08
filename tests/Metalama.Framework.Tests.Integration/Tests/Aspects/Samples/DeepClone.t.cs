@@ -11,8 +11,8 @@ internal partial class AutomaticallyCloneable : global::System.ICloneable
   public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable Clone()
   {
     var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)base.MemberwiseClone();
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone).B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.B?.Clone());
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone).C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)this.C?.Clone());
+    clone.B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.B?.Clone());
+    clone.C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)this.C?.Clone());
     return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.AutomaticallyCloneable)clone;
   }
   global::System.Object global::System.ICloneable.Clone()
@@ -39,7 +39,7 @@ internal partial class Derived : AutomaticallyCloneable
   public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived Clone()
   {
     var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)base.Clone();
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)clone).G = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.G?.Clone());
+    clone.G = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable)this.G?.Clone());
     return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Derived)clone;
   }
 }

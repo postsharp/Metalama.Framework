@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
@@ -16,6 +17,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal sealed class PromotedField : PropertyBuilder
     {
         internal IFieldImpl Field { get; }
+
+        public override Ref<IDeclaration> ToRef() => this.Field.ToRef();
 
         public override Writeability Writeability
             => this.Field.Writeability switch
@@ -73,8 +76,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override SyntaxTree? PrimarySyntaxTree => this.Field.PrimarySyntaxTree;
 
-        protected override bool HasBaseInvoker => true;
-
         protected internal override bool GetPropertyInitializerExpressionOrMethod(
             Advice advice,
             in MemberInjectionContext context,
@@ -121,5 +122,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this.Field, this );
+
+        public override bool Equals( IDeclaration? other )
+            => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField && otherPromotedField.Field.Equals( this.Field ));
     }
 }

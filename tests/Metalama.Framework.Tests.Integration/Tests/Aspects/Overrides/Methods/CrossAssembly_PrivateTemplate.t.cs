@@ -2,9 +2,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.C
 [MyAspect]
 internal class C
 {
-    private void M()
-    {
-        global::System.Console.WriteLine("Overridden");
-        return;
-    }
+  private void M()
+  {
+    global::System.Console.WriteLine("Overridden");
+    return;
+  }
 }

@@ -24,11 +24,12 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
-        private readonly AssemblyLoadContext _assemblyLoadContext;
         private readonly List<WeakReference> _loadedAssemblies = new();
         private readonly TaskCompletionSource<bool> _unloadedTask = new();
         private readonly ITaskRunner _taskRunner;
         private volatile int _disposeStatus;
+        private AssemblyLoadContext? _assemblyLoadContext;
+        private int _isWaitingForDisposal;
 
         public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider )
         {
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.CompileTime
             using var peStream = RetryHelper.Retry( () => File.OpenRead( path ) );
             var pdbPath = Path.ChangeExtension( path, ".pdb" );
             using var pdbStream = File.Exists( pdbPath ) ? RetryHelper.Retry( () => File.OpenRead( pdbPath ) ) : null;
-            var assembly = this._assemblyLoadContext.LoadFromStream( peStream, pdbStream );
+            var assembly = this._assemblyLoadContext.AssertNotNull().LoadFromStream( peStream, pdbStream );
 
             lock ( this._loadedAssemblies )
             {
@@ -83,11 +84,19 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new InvalidOperationException( "The Dispose method has not been called." );
             }
 
-            return this._unloadedTask.Task;
+            return this.WaitForDisposalCoreAsync();
         }
 
         private async Task WaitForDisposalCoreAsync()
         {
+            if ( Interlocked.CompareExchange( ref this._isWaitingForDisposal, 1, 0 ) != 0 )
+            {
+                // Another thread has won.
+                await this._unloadedTask.Task;
+
+                return;
+            }
+            
             try
             {
                 var stopwatch = Stopwatch.StartNew();
@@ -128,6 +137,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          * 
                          * Here are a few pointers:
                          *  - You need to use WinDbg and sos.dll
+                         *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */
@@ -146,7 +156,9 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             catch ( Exception e )
             {
-                this._unloadedTask.SetException( e );
+                this._unloadedTask.TrySetException( e );
+
+                throw;
             }
         }
 
@@ -156,7 +168,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( Interlocked.CompareExchange( ref this._disposeStatus, 1, 0 ) == 0 )
             {
-                this._assemblyLoadContext.Unload();
+                this._assemblyLoadContext?.Unload();
+                this._assemblyLoadContext = null;
                 _ = Task.Run( this.WaitForDisposalCoreAsync );
             }
 

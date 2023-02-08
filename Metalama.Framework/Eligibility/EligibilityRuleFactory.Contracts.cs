@@ -24,9 +24,10 @@ public static partial class EligibilityRuleFactory
             {
                 builder.MustSatisfy(
                     p => p.GetMethod?.GetIteratorInfo().EnumerableKind is EnumerableKind.None,
-                    member => $"{member} must not have get accessor that returns IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+                    member
+                        => $"{member} must not have get accessor that returns IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }
-            
+
             var propertyOrIndexerEligibilityInput =
                 CreateRule<IFieldOrPropertyOrIndexer>(
                     builder =>
@@ -84,8 +85,10 @@ public static partial class EligibilityRuleFactory
                     member => $"{member} must not have void awaitable result" );
 
                 parameter.MustSatisfy(
-                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetIteratorInfo().EnumerableKind is not EnumerableKind.None),
-                    member => $"{member} must not return IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method }
+                           && method.GetIteratorInfo().EnumerableKind is not EnumerableKind.None),
+                    member
+                        => $"{member} must not return IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }
 
             var parameterEligibilityInput =

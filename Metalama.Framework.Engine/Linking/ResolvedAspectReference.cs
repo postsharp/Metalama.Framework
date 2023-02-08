@@ -58,6 +58,7 @@ namespace Metalama.Framework.Engine.Linking
         public bool HasResolvedSemanticBody
             => (this.ResolvedSemantic, this.TargetKind) switch
             {
+                // TODO PERF: match Kind not symbol type 
                 ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self) => true,
                 ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => true,
                 ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor) => true,
@@ -68,9 +69,9 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
                 _ => throw new AssertionFailedException( $"{this} is not expected." )
             };
-        
+
 #if DEBUG
-        
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
 
@@ -80,9 +81,9 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning disable IDE0052
         private SyntaxNode AnnotatedNode { get; }
 #pragma warning restore IDE0052
-        
+
 #endif
-        
+
         /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>

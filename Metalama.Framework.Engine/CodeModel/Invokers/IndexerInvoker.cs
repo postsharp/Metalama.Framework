@@ -6,60 +6,54 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal sealed class IndexerInvoker : Invoker, IIndexerInvoker
+    internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     {
-        private readonly IIndexer _indexer;
+        public IndexerInvoker( IIndexer indexer, InvokerOptions? options = default, object? target = null ) : base( indexer, options, target ) { }
 
-        private ExpressionSyntax CreateIndexerAccess(
-            TypedExpressionSyntaxImpl instance,
-            TypedExpressionSyntaxImpl[]? args,
-            SyntaxGenerationContext generationContext )
+        public object GetValue( params object?[] args )
         {
-            var receiver = this._indexer.GetReceiverSyntax( instance, generationContext );
-            var arguments = this._indexer.GetArguments( this._indexer.Parameters, args, generationContext );
-
-            var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
-
-            return expression;
-        }
-
-        public object GetValue( object? instance, params object?[] args )
-        {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
             return new SyntaxUserExpression(
-                this.CreateIndexerAccess(
-                    TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                    TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
-                    syntaxGenerationContext ),
-                this._indexer.Type,
-                isReferenceable: this._indexer.Writeability != Writeability.None );
+                this.CreateIndexerAccess( args ),
+                this.Member.Type,
+                isAssignable: this.Member.Writeability != Writeability.None );
         }
 
-        public object SetValue( object? instance, object value, params object?[] args )
+        public object SetValue( object? value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            var propertyAccess = this.CreateIndexerAccess(
-                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
-                syntaxGenerationContext );
+            var propertyAccess = this.CreateIndexerAccess( args );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, syntaxGenerationContext ) );
 
-            return new SyntaxUserExpression( expression, this._indexer.Type );
+            return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
         }
 
-        public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )
+        private ExpressionSyntax CreateIndexerAccess( object?[]? args )
         {
-            this._indexer = indexer;
+            args ??= Array.Empty<object>();
+
+            var receiverInfo = this.GetReceiverInfo();
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.Member.Compilation, this.GenerationContext ).AssertNotNull();
+
+            var expression = ElementAccessExpression( receiverSyntax ).AddArgumentListArguments( argExpressions.SelectAsArray( e => Argument( e.Syntax ) ) );
+
+            return expression;
         }
+
+        public IIndexerInvoker With( InvokerOptions options ) => this.Options == options ? this : new IndexerInvoker( this.Member, options );
+
+        public IIndexerInvoker With( object? target, InvokerOptions options = default )
+            => this.Target == target && this.Options == options ? this : new IndexerInvoker( this.Member, options, target );
     }
 }

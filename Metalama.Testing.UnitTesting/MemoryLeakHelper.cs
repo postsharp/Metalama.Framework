@@ -3,6 +3,8 @@
 #if NET6_0_OR_GREATER || NETFRAMEWORK
 
 using JetBrains.Profiler.SelfApi;
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine;
 using System.IO;
 
@@ -10,7 +12,13 @@ namespace Metalama.Testing.UnitTesting;
 
 internal static class MemoryLeakHelper
 {
-    public static void CaptureDumpAndThrow()
+    public static void CaptureMiniDump()
+    {
+        var dumper = BackstageServiceFactory.ServiceProvider.GetBackstageService<IMiniDumper>();
+        dumper?.Write( new MiniDumpOptions( false ) );
+    }
+    
+    public static void CaptureDotMemoryDumpAndThrow()
     {
         DotMemory.EnsurePrerequisite();
         var dotMemoryConfig = new DotMemory.Config();
