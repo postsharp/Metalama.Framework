@@ -1,23 +1,3 @@
-internal class TargetClass
-{
-  [Test]
-  public void VoidMethod()
-  {
-    global::Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_ConditionalBaseInvoker.TargetClass? local = null;
-    local?.VoidMethod_Source();
-    return;
-  }
-  private void VoidMethod_Source()
-  {
-  }
-  [Test]
-  public int? Method(int? x)
-  {
-    global::Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_ConditionalBaseInvoker.TargetClass? local = null;
-    return local?.Method_Source(x);
-  }
-  private int? Method_Source(int? x)
-  {
-    return x;
-  }
-}
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0041 on `VoidMethod`: `'TestAttribute.OverrideMethod()' threw 'ArgumentOutOfRangeException' when applied to 'TargetClass.VoidMethod()': Cannot provide a target other than 'this', 'base' or the current type when specifying the InvokerOptions.Base option. (Parameter 'target'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0041 on `Method`: `'TestAttribute.OverrideMethod()' threw 'ArgumentOutOfRangeException' when applied to 'TargetClass.Method(int?)': Cannot provide a target other than 'this', 'base' or the current type when specifying the InvokerOptions.Base option. (Parameter 'target'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
