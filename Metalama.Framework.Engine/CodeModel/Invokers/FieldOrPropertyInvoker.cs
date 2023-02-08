@@ -26,14 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             options,
             target,
             syntaxGenerationContext )
-        {
-            if ( fieldOrProperty is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof( fieldOrProperty ),
-                    MetalamaStringFormatter.Format( $"Cannot access '{fieldOrProperty}' as an IExpression because it is an implicitly declared field." ) );
-            }
-        }
+        { }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {

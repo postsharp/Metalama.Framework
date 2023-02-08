@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private void CheckNotPropertyBackingField()
         {
-            if ( this._symbol is { AssociatedSymbol: { } } )
+            if ( this.IsImplicitlyDeclared )
             {
                 throw new InvalidOperationException( $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
             }
