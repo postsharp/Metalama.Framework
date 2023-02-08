@@ -29,6 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ITaskRunner _taskRunner;
         private volatile int _disposeStatus;
         private AssemblyLoadContext? _assemblyLoadContext;
+        private int _isWaitingForDisposal;
 
         public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider )
         {
@@ -88,8 +89,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private async Task WaitForDisposalCoreAsync()
         {
-            this._unloadedTask.TrySetResult( true );
-            return;
+            if ( Interlocked.CompareExchange( ref this._isWaitingForDisposal, 1, 0 ) != 0 )
+            {
+                // Another thread has won.
+                await this._unloadedTask.Task;
+
+                return;
+            }
             
             try
             {
@@ -131,6 +137,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          * 
                          * Here are a few pointers:
                          *  - You need to use WinDbg and sos.dll
+                         *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */
@@ -149,7 +156,9 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             catch ( Exception e )
             {
-                this._unloadedTask.SetException( e );
+                this._unloadedTask.TrySetException( e );
+
+                throw;
             }
         }
 

@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Code.Invokers
 {
     /// <summary>
@@ -9,6 +11,7 @@ namespace Metalama.Framework.Code.Invokers
     /// i.e. the implementation before the current aspect layer. To change the default values, or to use the <c>?.</c> null-conditional operator,
     /// use the <see cref="With(Metalama.Framework.Code.Invokers.InvokerOptions)"/> method.
     /// </summary>
+    [CompileTime]
     public interface IFieldOrPropertyInvoker : IExpression
     {
         /// <summary>
