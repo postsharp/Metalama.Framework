@@ -104,5 +104,20 @@ namespace Metalama.Framework.Code
                 return (T) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
             }
         }
+
+        public static IFieldOrProperty? ForCompilation(
+            this IFieldOrProperty? fieldOrProperty,
+            ICompilation compilation,
+            ReferenceResolutionOptions options = default )
+        {
+            if ( fieldOrProperty == null )
+            {
+                return null;
+            }
+            else
+            {
+                return (IFieldOrProperty) ((ICompilationInternal) compilation).Factory.Translate( fieldOrProperty, options );
+            }
+        }
     }
 }

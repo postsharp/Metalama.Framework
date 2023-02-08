@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual void Freeze() => this.IsFrozen = true;
 
-        public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
+        public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
         public SerializableDeclarationId ToSerializableId()
             => throw new NotImplementedException( "The method is not implemented for introduced declarations." );
@@ -162,6 +162,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return attributes;
         }
 
-        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
+        public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

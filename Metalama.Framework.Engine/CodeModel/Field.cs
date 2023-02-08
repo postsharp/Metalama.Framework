@@ -83,14 +83,44 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
-        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+        private void CheckNotPropertyBackingField()
+        {
+            if ( this._symbol is { AssociatedSymbol: { } } )
+            {
+                throw new InvalidOperationException( $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
+            }
+        }
 
-        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+        public IFieldOrPropertyInvoker With( InvokerOptions options )
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this, options );
+        }
 
-        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this, options, target );
+        }
+
+        public ref object? Value
+        {
+            get
+            {
+                this.CheckNotPropertyBackingField();
+                
+                return ref new FieldOrPropertyInvoker( this ).Value;
+            }
+        }
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
+        {
+            this.CheckNotPropertyBackingField();
+            
+            return new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
+        }
 
         private IExpression? GetInitializerExpressionCore()
         {

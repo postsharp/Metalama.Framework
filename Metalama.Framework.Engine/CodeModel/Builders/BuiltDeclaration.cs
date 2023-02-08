@@ -68,7 +68,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override bool IsImplicitlyDeclared => false;
 
-        public override bool Equals( IDeclaration? other ) => other is BuiltDeclaration builtDeclaration && this.Builder == builtDeclaration.Builder;
+        public override bool Equals( IDeclaration? other )
+        {
+            switch (other)
+            {
+                case BuiltDeclaration builtDeclaration when this.Builder.Equals( builtDeclaration.Builder ):
+                case DeclarationBuilder declarationBuilder when this.Builder.Equals( declarationBuilder ):
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
 
         protected override int GetHashCodeCore() => this.Builder.GetHashCode();
     }

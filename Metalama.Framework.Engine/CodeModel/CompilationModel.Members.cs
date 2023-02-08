@@ -331,7 +331,7 @@ public sealed partial class CompilationModel
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                this._redirectionCache = this._redirectionCache.Add(
+                this._redirections = this._redirections.Add(
                     replacedMember.ToRef().As<IDeclaration>(),
                     Ref.FromBuilder( introduceDeclarationTransformation.DeclarationBuilder ) );
             }

@@ -13,24 +13,33 @@ namespace Metalama.Framework.Code.Invokers;
 [Flags]
 public enum InvokerOptions
 {
+    
     /// <summary>
-    /// By default, the invoker will generate a call to the implementation <i>before</i> the current aspect layer is applied,
-    /// and will use the dot (<c>.</c>) operator for member access.
+    /// When the invoked member is the target of the current template (i.e. <c>meta.Target.Declaration</c>), equivalent to <see cref="Base"/>.
+    /// Otherwise, equivalent to <see cref="Current"/>.
     /// </summary>
     Default,
-
+    
+    
+    
     /// <summary>
-    /// Causes the <i>current</i> implementation to be called, i.e. the implementation after all overrides by the current aspect layer. 
+    /// Generates calls to the <i>current</i> implementation, i.e. after all override or introductions by the current aspect layer,
+    /// but before any next aspect layer or any derived type. 
     /// </summary>
     Current = 1,
+
+    /// <summary>
+    /// Generates calls to the <i>base</i> implementation, i.e. before any override or introduction by the current aspect layer. 
+    /// </summary>
+    Base = 2,
 
     /// <summary>
     /// Causes the <i>final</i> implementation to be called, i.e. the implementation after all overrides by aspects
     /// and, if the member is <c>virtual</c>, by derived classes through the <c>override</c> keyword. 
     /// </summary>
-    Final = 2,
+    Final = 3,
 
-    OrderMask = Current | Final,
+    OrderMask = Base | Final,
 
     /// <summary>
     /// Specifies that the null-conditional access operator (<c>?.</c> aka Elvis) has to be used instead of the dot operator. 

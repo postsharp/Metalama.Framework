@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
@@ -24,32 +25,54 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected Invoker( T member, InvokerOptions? options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
         {
-            if ( options != null )
+            options ??= InvokerOptions.Default;
+            
+            var orderOptions = GetOrderOptions( member, options.Value );
+
+            if ( orderOptions == InvokerOptions.Base && target != null && target is not ThisInstanceUserReceiver && target is not ThisTypeUserReceiver )
             {
-                this.Options = options.Value;
+                throw new ArgumentOutOfRangeException(
+                    nameof(target),
+                    "Cannot provide a target other than 'this', 'base' or the current type when specifying the InvokerOptions.Base option." );
             }
-            else if ( member is IDeclarationBuilder )
-            {
-                // Builders are always resolved to the base implementation so that calls from meta.Target,
-                // it must point to the base implementation.
-                this.Options = InvokerOptions.Default;
-            }
-            else
-            {
-                this.Options = member.GetCompilationModel().Options.InvokerOptions;
-            }
+            
+            var otherFlags = options.Value & ~InvokerOptions.OrderMask;
+
+
+            this.Options = orderOptions | otherFlags;
 
             this.Target = target;
             this.Member = member;
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            this._order = (this.Options & InvokerOptions.OrderMask) switch
+            this._order = orderOptions switch
             {
-                InvokerOptions.Default => AspectReferenceOrder.Base,
                 InvokerOptions.Current => AspectReferenceOrder.Self,
+                InvokerOptions.Base => AspectReferenceOrder.Base,
                 InvokerOptions.Final => AspectReferenceOrder.Final,
-                _ => throw new AssertionFailedException( $"Invalid value: {options}." )
+                _ => throw new AssertionFailedException( $"Invalid value: {this.Options}." )
             };
+        }
+
+        private static InvokerOptions GetOrderOptions( IMember member, InvokerOptions options )
+        {
+            options = options & InvokerOptions.OrderMask;
+            
+            if ( options != InvokerOptions.Default )
+            {
+                return options;
+            }
+            else if ( TemplateExpansionContext.IsTransformingDeclaration( member ) )
+            {
+                // When we expand a template, the default invoker for the declaration being overridden or introduced is
+                // always the base one. Otherwise, if we keep the Current default option, the default behavior would be
+                // to generate infinite recursions.
+                return InvokerOptions.Base;
+            }
+            else
+            {
+                return InvokerOptions.Current;
+            }
         }
 
         protected T Member { get; }

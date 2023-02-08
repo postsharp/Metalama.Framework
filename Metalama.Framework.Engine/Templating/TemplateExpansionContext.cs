@@ -48,6 +48,35 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     internal static AspectLayerId? CurrentAspectLayerId => CurrentOrNull?.AspectLayerId;
 
+    internal static bool IsTransformingDeclaration( IDeclaration declaration )
+    {
+        var metaApi = (CurrentOrNull as TemplateExpansionContext)?.MetaApi;
+
+        if ( metaApi == null )
+        {
+            return false;
+        }
+
+        if ( metaApi.Declaration.Equals( declaration ) || metaApi.Declaration.ContainingDeclaration?.Equals( declaration ) == true )
+        {
+            return true;
+        }
+
+        switch ( metaApi.Declaration )
+        {
+            case IProperty property:
+                return declaration.Equals( property.GetMethod ) || declaration.Equals( property.SetMethod );
+            
+            case IEvent @event:
+                return declaration.Equals( @event.AddMethod ) || declaration.Equals( @event.RemoveMethod ) || declaration.Equals( @event.RaiseMethod );
+                
+        }
+
+        return false;
+
+
+    }
+
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
     /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
