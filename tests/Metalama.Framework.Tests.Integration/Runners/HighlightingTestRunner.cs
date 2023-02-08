@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             foreach ( var diagnostic in testResult.Diagnostics )
             {
-                this.Logger.WriteLine( diagnostic.ToString() );
+                this.Logger?.WriteLine( diagnostic.ToString() );
             }
             
             Assert.True( testResult.Success, testResult.ErrorMessage );

@@ -5,11 +5,9 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -25,8 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             fieldOrProperty,
             options,
             target,
-            syntaxGenerationContext )
-        { }
+            syntaxGenerationContext ) { }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {

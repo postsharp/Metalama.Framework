@@ -66,15 +66,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             case IProperty property:
                 return declaration.Equals( property.GetMethod ) || declaration.Equals( property.SetMethod );
-            
+
             case IEvent @event:
                 return declaration.Equals( @event.AddMethod ) || declaration.Equals( @event.RemoveMethod ) || declaration.Equals( @event.RaiseMethod );
-                
         }
 
         return false;
-
-
     }
 
     /// <summary>

@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
@@ -27,17 +26,18 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             options ??= InvokerOptions.Default;
             
-            var orderOptions = GetOrderOptions( member, options.Value );
+            var isSelfTarget = target is null or ThisInstanceUserReceiver or ThisTypeUserReceiver;
 
-            if ( orderOptions == InvokerOptions.Base && target != null && target is not ThisInstanceUserReceiver && target is not ThisTypeUserReceiver )
+            var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
+
+            if ( orderOptions == InvokerOptions.Base && !isSelfTarget )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(target),
                     "Cannot provide a target other than 'this', 'base' or the current type when specifying the InvokerOptions.Base option." );
             }
-            
-            var otherFlags = options.Value & ~InvokerOptions.OrderMask;
 
+            var otherFlags = options.Value & ~InvokerOptions.OrderMask;
 
             this.Options = orderOptions | otherFlags;
 
@@ -54,19 +54,20 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             };
         }
 
-        private static InvokerOptions GetOrderOptions( IMember member, InvokerOptions options )
+        private static InvokerOptions GetOrderOptions( IMember member, InvokerOptions options, bool isSelfTarget )
         {
-            options = options & InvokerOptions.OrderMask;
-            
+            options &= InvokerOptions.OrderMask;
+
             if ( options != InvokerOptions.Default )
             {
                 return options;
             }
-            else if ( TemplateExpansionContext.IsTransformingDeclaration( member ) )
+            else if ( isSelfTarget && TemplateExpansionContext.IsTransformingDeclaration( member ) )
             {
                 // When we expand a template, the default invoker for the declaration being overridden or introduced is
                 // always the base one. Otherwise, if we keep the Current default option, the default behavior would be
                 // to generate infinite recursions.
+                
                 return InvokerOptions.Base;
             }
             else

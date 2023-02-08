@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool Equals( IDeclaration? other )
         {
-            switch (other)
+            switch ( other )
             {
                 case BuiltDeclaration builtDeclaration when this.Builder.Equals( builtDeclaration.Builder ):
                 case DeclarationBuilder declarationBuilder when this.Builder.Equals( declarationBuilder ):

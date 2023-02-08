@@ -13,15 +13,12 @@ namespace Metalama.Framework.Code.Invokers;
 [Flags]
 public enum InvokerOptions
 {
-    
     /// <summary>
-    /// When the invoked member is the target of the current template (i.e. <c>meta.Target.Declaration</c>), equivalent to <see cref="Base"/>.
-    /// Otherwise, equivalent to <see cref="Current"/>.
+    /// When the invoked member is the target member of the current template (i.e. <c>meta.Target.Declaration</c>), and when no target instance or type is explicitly specified,
+    /// for the invoker, equivalent to <see cref="Base"/>. Otherwise, equivalent to <see cref="Final"/>.
     /// </summary>
     Default,
-    
-    
-    
+
     /// <summary>
     /// Generates calls to the <i>current</i> implementation, i.e. after all override or introductions by the current aspect layer,
     /// but before any next aspect layer or any derived type. 

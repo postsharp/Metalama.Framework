@@ -12,7 +12,6 @@ namespace Metalama.Framework.Code.Invokers
     [CompileTime]
     [Obsolete( "No replacement.", true )]
     public interface IInvokerFactory<out T>
-        where T : IInvoker
     {
         /// <summary>
         /// Gets the invoker for the base implementation of the declaration, i.e. <i>before</i> the application

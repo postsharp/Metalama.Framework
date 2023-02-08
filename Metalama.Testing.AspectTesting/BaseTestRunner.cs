@@ -78,7 +78,8 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.CheckMemoryLeaks == true )
         {
             collectibleExecutionContext = CollectibleExecutionContext.Open();
-            CollectibleExecutionContext.RegisterDisposeAction( () => this.Logger.WriteLine( "Disposing the CollectibleExecutionContext." ) );
+
+            CollectibleExecutionContext.RegisterDisposeAction( () => this.Logger?.WriteLine( "Disposing the CollectibleExecutionContext." ) );
         }
         else
         {
@@ -87,7 +88,6 @@ internal abstract partial class BaseTestRunner
 
         using ( collectibleExecutionContext )
         {
-           
             try
             {
                 await this.RunAndAssertCoreAsync( testInput, testContextOptions );
@@ -99,7 +99,6 @@ internal abstract partial class BaseTestRunner
                 // have references to the objects that are in the scope of the test.
                 await Task.Yield();
             }
-        
         }
     }
 

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         private readonly ConcurrentQueue<Action> _disposeActions = new();
 
-        private CollectibleExecutionContext( ) { }
+        private CollectibleExecutionContext() { }
 
         // Resharper disable UnusedMember.Global
         public static void RegisterDisposeAction( Action action )
