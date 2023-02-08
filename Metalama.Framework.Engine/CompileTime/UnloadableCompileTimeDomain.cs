@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          * 
                          * Here are a few pointers:
                          *  - You need to use WinDbg and sos.dll
-                         *  - To install sos.dllm do `dotnet tool install --global dotnet-sos`
+                         *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */

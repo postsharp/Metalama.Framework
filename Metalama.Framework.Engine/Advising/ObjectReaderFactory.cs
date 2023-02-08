@@ -5,12 +5,11 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class ObjectReaderFactory : IProjectService
+internal sealed class ObjectReaderFactory : IProjectService, IDisposable
 {
     private readonly WeakCache<Type, ObjectReaderTypeAdapter> _types = new();
 
@@ -34,4 +33,6 @@ internal sealed class ObjectReaderFactory : IProjectService
     {
         this._serviceProvider = serviceProvider;
     }
+
+    public void Dispose() => this._types.Dispose();
 }

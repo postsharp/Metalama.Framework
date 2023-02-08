@@ -50,8 +50,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return null;
             }
 
-            return compilationContext.Assemblies.TryGetValue( assembly.Identity, out var thisCompilationAssembly )
-                   && assembly.Equals( thisCompilationAssembly );
+            if ( !compilationContext.Assemblies.TryGetValue( assembly.Identity, out var thisCompilationAssembly ) )
+            {
+                // If we cannot find the assembly, we cannot make any decision whether this is or not a legit symbol.
+                // It can happen that a referenced assembly has symbols to another referenced assembly that is not directly
+                // referenced by our compilation.
+                
+                return null;
+            }
+
+            return assembly.Equals( thisCompilationAssembly );
         }
 
         [Conditional( "DEBUG" )]
