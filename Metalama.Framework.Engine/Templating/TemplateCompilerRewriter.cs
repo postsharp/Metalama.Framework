@@ -1942,6 +1942,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         IdentifierName( nameof(TemplateTypeArgument.Syntax) ) );
                 }
             }
+            else
+            {
+                // This should qualify the identifier.
+                return this._compileTimeOnlyRewriter.Visit( node );
+            }
         }
 
         return base.VisitIdentifierName( node );

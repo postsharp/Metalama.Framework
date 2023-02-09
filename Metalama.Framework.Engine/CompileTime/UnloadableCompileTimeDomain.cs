@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 return;
             }
-            
+
             try
             {
                 var stopwatch = Stopwatch.StartNew();
@@ -139,18 +139,18 @@ namespace Metalama.Framework.Engine.CompileTime
                          *  - You need to use WinDbg and sos.dll
                          *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
-                         *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+                         *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability:
+                         *      - !dumpheap -type LoaderAllocator
+                         *      - !gcroot -all xxxxx
                          */
-                        
+
                         this.UnloadTimeout?.Invoke();
 
                         var exception = new InvalidOperationException(
                             "The domain could not be unloaded. There are probably dangling references. " +
                             "The following assemblies are still loaded: " + assemblies + "." );
 
-                        this._unloadedTask.SetException( exception );
-
-                        return;
+                        throw exception;
                     }
                 }
             }
