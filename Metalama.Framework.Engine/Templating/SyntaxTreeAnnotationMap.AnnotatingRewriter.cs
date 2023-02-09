@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,12 +22,10 @@ namespace Metalama.Framework.Engine.Templating
             private readonly SyntaxTreeAnnotationMap _map;
             private readonly bool _isTemplate;
             private readonly IDiagnosticAdder _diagnosticAdder;
-            private readonly SymbolAnnotationMapper _symbolAnnotationMapper;
 
             private HashSet<SyntaxNode>? _nodesWithErrorReports;
 
             public AnnotatingRewriter(
-                CompilationContext compilationContext,
                 SemanticModel? semanticModel,
                 SyntaxTreeAnnotationMap map,
                 bool isTemplate,
@@ -38,7 +35,6 @@ namespace Metalama.Framework.Engine.Templating
                 this._map = map;
                 this._isTemplate = isTemplate;
                 this._diagnosticAdder = diagnosticAdder;
-                this._symbolAnnotationMapper = compilationContext.SymbolAnnotationMapper;
             }
 
             public bool Success { get; private set; } = true;
@@ -134,7 +130,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                         {
-                            annotation = this._symbolAnnotationMapper.GetOrCreateAnnotation(
+                            annotation = SymbolAnnotationMapper.GetOrCreateAnnotation(
                                 SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
                                 typeInfo.Type );
 

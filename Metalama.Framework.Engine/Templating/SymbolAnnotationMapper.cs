@@ -12,23 +12,16 @@ namespace Metalama.Framework.Engine.Templating
 {
     // This class uses WeakReference<ISymbol> because it seems that Roslyn's ObjectPool may cache SyntaxAnnotation beyond the lifetime of a compilation.
 
-    internal sealed class SymbolAnnotationMapper
+    internal static class SymbolAnnotationMapper
     {
         public const string ExpressionTypeAnnotationKind = "Metalama.ExpressionType";
 
-        private readonly ConditionalWeakTable<SyntaxAnnotation, WeakReference<ISymbol>> _annotationToSymbolMap = new();
-        private readonly ConditionalWeakTable<ISymbol, List<SyntaxAnnotation>> _symbolToAnnotationsMap = new();
+        private static readonly ConditionalWeakTable<SyntaxAnnotation, WeakReference<ISymbol>> _annotationToSymbolMap = new();
+        private static readonly ConditionalWeakTable<ISymbol, List<SyntaxAnnotation>> _symbolToAnnotationsMap = new();
 
-        private readonly CompilationContext _compilationContext;
-
-        public SymbolAnnotationMapper( CompilationContext compilationContext )
+        public static SyntaxAnnotation GetOrCreateAnnotation( string kind, ISymbol symbol )
         {
-            this._compilationContext = compilationContext;
-        }
-
-        public SyntaxAnnotation GetOrCreateAnnotation( string kind, ISymbol symbol )
-        {
-            var list = this._symbolToAnnotationsMap.GetOrCreateValue( symbol );
+            var list = _symbolToAnnotationsMap.GetOrCreateValue( symbol );
 
             lock ( list )
             {
@@ -38,17 +31,17 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     annotation = new SyntaxAnnotation( kind );
                     list.Add( annotation );
-                    this._annotationToSymbolMap.Add( annotation, new WeakReference<ISymbol>( symbol ) );
+                    _annotationToSymbolMap.Add( annotation, new WeakReference<ISymbol>( symbol ) );
                 }
 
                 return annotation;
             }
         }
 
-        public ISymbol GetSymbolFromAnnotation( SyntaxAnnotation annotation )
+        public static ISymbol GetSymbolFromAnnotation( SyntaxAnnotation annotation )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._annotationToSymbolMap.TryGetValue( annotation, out var reference ) || !reference.TryGetTarget( out var symbol ) )
+            if ( !_annotationToSymbolMap.TryGetValue( annotation, out var reference ) || !reference.TryGetTarget( out var symbol ) )
             {
                 throw new KeyNotFoundException();
             }
@@ -56,11 +49,11 @@ namespace Metalama.Framework.Engine.Templating
             return symbol;
         }
 
-        public ExpressionSyntax AddExpressionTypeAnnotation( ExpressionSyntax node, ITypeSymbol? type )
+        public static ExpressionSyntax AddExpressionTypeAnnotation( ExpressionSyntax node, ITypeSymbol? type )
         {
             if ( type != null && !node.GetAnnotations( ExpressionTypeAnnotationKind ).Any() )
             {
-                var syntaxAnnotation = this.GetOrCreateAnnotation(
+                var syntaxAnnotation = GetOrCreateAnnotation(
                     ExpressionTypeAnnotationKind,
                     type );
 
@@ -85,7 +78,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public bool TryFindExpressionTypeFromAnnotation( SyntaxNode node, out ITypeSymbol? type )
+        public static bool TryFindExpressionTypeFromAnnotation( SyntaxNode node, CompilationContext compilationContext, out ITypeSymbol? type )
         {
             // If we don't know the exact type, check if we have a type annotation on the syntax.
 
@@ -93,7 +86,7 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( typeAnnotation != null! )
             {
-                type = (ITypeSymbol) this.GetSymbolFromAnnotation( typeAnnotation );
+                type = (ITypeSymbol) GetSymbolFromAnnotation( typeAnnotation );
             }
             else
             {
@@ -102,7 +95,7 @@ namespace Metalama.Framework.Engine.Templating
                 return false;
             }
 
-            type = this._compilationContext.SymbolTranslator.Translate( type ).AssertNotNull( $"The symbol '{type}' could not be translated." );
+            type = compilationContext.SymbolTranslator.Translate( type ).AssertNotNull( $"The symbol '{type}' could not be translated." );
 
             return true;
         }

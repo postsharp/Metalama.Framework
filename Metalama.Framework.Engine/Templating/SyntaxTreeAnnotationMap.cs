@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,8 +26,6 @@ namespace Metalama.Framework.Engine.Templating
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
 
-        private readonly CompilationContext _compilationContext;
-
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
             _declaredSymbolAnnotationKind,
@@ -43,17 +40,12 @@ namespace Metalama.Framework.Engine.Templating
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
-        public SyntaxTreeAnnotationMap( CompilationContext compilationContext )
-        {
-            this._compilationContext = compilationContext;
-        }
-
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
         /// </summary>
         public bool TryAnnotateTemplate( SyntaxNode root, SemanticModel semanticModel, IDiagnosticAdder diagnostics, out SyntaxNode annotatedRoot )
         {
-            var rewriter = new AnnotatingRewriter( this._compilationContext, semanticModel, this, true, diagnostics );
+            var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics );
 
             annotatedRoot = rewriter.Visit( root )!;
 
