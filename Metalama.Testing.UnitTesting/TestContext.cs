@@ -32,13 +32,13 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private readonly bool _isRoot;
     private readonly Stopwatch? _stopwatch;
     private readonly IDisposable? _throttlingHandle;
-    private readonly StackTrace _stackTrace = new StackTrace();
+    private readonly StackTrace _stackTrace = new();
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<CompileTimeDomain?> _domain;
 
     private volatile CancellationTokenSource? _timeout;
-    private CancellationTokenRegistration? _timeoutAction;    
+    private CancellationTokenRegistration? _timeoutAction;
 
     internal TestProjectOptions ProjectOptions { get; }
 
@@ -84,7 +84,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
-        this._throttlingHandle = contextOptions.RequiresExclusivity ? TestThrottlingHelper.RequireExclusivity() : TestThrottlingHelper.Throttle();
+        this._throttlingHandle = TestThrottlingHelper.StartTest( contextOptions.RequiresExclusivity );
 
         // Start the Stopwatch only after we get after the throttle wall.
         this._stopwatch = Stopwatch.StartNew();
@@ -294,7 +294,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     ~TestContext()
     {
         this.Dispose( false );
-        
+
         throw new InvalidOperationException( $"The TestContext allocated at the following call stack was not disposed:\n{this._stackTrace}\n------" );
     }
 #pragma warning restore CA1821

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
-        
+
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
@@ -315,7 +315,7 @@ namespace Metalama.Framework.Engine.Templating
             => this._templateExpansionContext.SyntaxSerializationService.Serialize(
                 o,
                 new SyntaxSerializationContext(
-                    this._templateExpansionContext.Compilation.AssertNotNull().GetCompilationModel(),
+                    this._templateExpansionContext.Compilation.AssertNotNull(),
                     this._syntaxGenerationContext ) );
 
         public T AddSimplifierAnnotations<T>( T node )
@@ -372,7 +372,9 @@ namespace Metalama.Framework.Engine.Templating
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( type ), this._templateExpansionContext.TemplateGenericArguments )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId(
+                    new SerializableTypeId( type ),
+                    this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );

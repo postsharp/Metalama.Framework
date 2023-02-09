@@ -1942,6 +1942,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         IdentifierName( nameof(TemplateTypeArgument.Syntax) ) );
                 }
             }
+            else
+            {
+                // This should qualify the identifier.
+                return this._compileTimeOnlyRewriter.Visit( node )!;
+            }
         }
 
         return base.VisitIdentifierName( node );
@@ -2121,11 +2126,25 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression )
                                      ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                var createRuntimeExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( transformedExpression ),
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) )
-                    .WithAdditionalAnnotations( _userExpressionAnnotation );
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
+                return
+                    InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                createRuntimeExpression,
+                                IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+                            ArgumentList(
+                                SingletonSeparatedList(
+                                    Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) )
+                        .WithAdditionalAnnotations( _userExpressionAnnotation );
             }
         }
 

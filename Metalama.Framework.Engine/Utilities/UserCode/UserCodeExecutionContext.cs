@@ -29,7 +29,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly bool _throwOnUnsupportedDependencies;
         private readonly IDependencyCollector? _dependencyCollector;
         private readonly INamedType? _targetType;
-        private readonly CompilationModel? _compilation;
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
         private readonly CompilationContext? _compilationServices;
         private bool _collectDependencyDisabled;
@@ -99,7 +98,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
-            this._compilation = compilationModel;
+            this.Compilation = compilationModel;
             this._compilationServices = compilationModel?.CompilationContext;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
@@ -126,7 +125,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
-            this._compilation = compilationModel;
+            this.Compilation = compilationModel;
             this._diagnosticAdder = diagnostics;
             this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
             this.InvokedMember = invokedMember;
@@ -144,7 +143,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             this.ServiceProvider = prototype.ServiceProvider;
             this.AspectLayerId = prototype.AspectLayerId;
-            this._compilation = prototype._compilation;
+            this.Compilation = prototype.Compilation;
             this._diagnosticAdder = prototype._diagnosticAdder;
             this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
             this._invokedMember = prototype._invokedMember;
@@ -184,7 +183,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal AspectLayerId? AspectLayerId { get; }
 
-        internal ICompilation? Compilation => this._compilation;
+        internal CompilationModel? Compilation { get; }
 
         ISyntaxBuilderImpl? IExecutionContextInternal.SyntaxBuilder => this._syntaxBuilder;
 
@@ -204,7 +203,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.Diagnostics,
                 invokedMember,
                 this.AspectLayerId,
-                this._compilation,
+                this.Compilation,
                 this.TargetDeclaration,
                 this._throwOnUnsupportedDependencies,
                 this._syntaxBuilder,
@@ -212,7 +211,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
         {
-            if ( ReferenceEquals( this._compilation, compilation ) && diagnostics == this.Diagnostics )
+            if ( ReferenceEquals( this.Compilation, compilation ) && diagnostics == this.Diagnostics )
             {
                 return this;
             }

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
     /// Represents an <see cref="ExpressionSyntax"/> and its <see cref="IType"/>. Annotates the <see cref="ExpressionSyntax"/>
-    /// with <see cref="ExpressionTypeAnnotationHelper"/>.
+    /// with <see cref="SymbolAnnotationMapper"/>.
     /// </summary>
     internal sealed class TypedExpressionSyntaxImpl : ITypedExpressionSyntaxImpl
     {
@@ -58,11 +58,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
-                ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( syntax, generationContext.CompilationContext, out expressionType );
+                generationContext.CompilationContext.SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( syntax, out expressionType );
             }
             else
             {
-                syntax = syntax.WithTypeAnnotation( expressionType, generationContext.Compilation );
+                syntax = generationContext.CompilationContext.SymbolAnnotationMapper.AddExpressionTypeAnnotation( syntax, expressionType );
             }
 
             this.Syntax = syntax;
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsReferenceable = isReferenceable;
             this.CanBeNull = canBeNull;
         }
-        
+
         internal TypedExpressionSyntaxImpl(
             ExpressionSyntax syntax,
             IType type,

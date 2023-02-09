@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -26,12 +26,13 @@ namespace Metalama.Framework.Engine.Templating
         private const string _locationAnnotationKind = "location";
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
-        private const string _expressionTypeAnnotationKind = "type";
+
+        private readonly CompilationContext _compilationContext;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
             _declaredSymbolAnnotationKind,
-            _expressionTypeAnnotationKind,
+            SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
             _locationAnnotationKind );
 
         private readonly List<(SyntaxTree Tree, TextSpan Span)> _indexToLocationMap = new();
@@ -42,12 +43,17 @@ namespace Metalama.Framework.Engine.Templating
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
+        public SyntaxTreeAnnotationMap( CompilationContext compilationContext )
+        {
+            this._compilationContext = compilationContext;
+        }
+
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
         /// </summary>
         public bool TryAnnotateTemplate( SyntaxNode root, SemanticModel semanticModel, IDiagnosticAdder diagnostics, out SyntaxNode annotatedRoot )
         {
-            var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics );
+            var rewriter = new AnnotatingRewriter( this._compilationContext, semanticModel, this, true, diagnostics );
 
             annotatedRoot = rewriter.Visit( root )!;
 
@@ -292,7 +298,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         public ITypeSymbol? GetExpressionType( ExpressionSyntax node )
         {
-            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
+            var annotation = node.GetAnnotations( SymbolAnnotationMapper.ExpressionTypeAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {
@@ -346,27 +352,6 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets a the expression type of a node when the compilation is known. 
-        /// </summary>
-        internal static bool TryGetExpressionType( SyntaxNode node, [NotNullWhen( true )] out ISymbol? symbol )
-        {
-            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
-
-            if ( annotation is not null )
-            {
-                symbol = SymbolAnnotationMapper.GetSymbolFromAnnotation( annotation );
-
-                return true;
-            }
-            else
-            {
-                symbol = null;
-
-                return false;
-            }
         }
     }
 }

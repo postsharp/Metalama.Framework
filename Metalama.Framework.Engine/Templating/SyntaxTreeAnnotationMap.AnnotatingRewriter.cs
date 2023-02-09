@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,14 +23,22 @@ namespace Metalama.Framework.Engine.Templating
             private readonly SyntaxTreeAnnotationMap _map;
             private readonly bool _isTemplate;
             private readonly IDiagnosticAdder _diagnosticAdder;
+            private readonly SymbolAnnotationMapper _symbolAnnotationMapper;
+
             private HashSet<SyntaxNode>? _nodesWithErrorReports;
 
-            public AnnotatingRewriter( SemanticModel? semanticModel, SyntaxTreeAnnotationMap map, bool isTemplate, IDiagnosticAdder diagnosticAdder )
+            public AnnotatingRewriter(
+                CompilationContext compilationContext,
+                SemanticModel? semanticModel,
+                SyntaxTreeAnnotationMap map,
+                bool isTemplate,
+                IDiagnosticAdder diagnosticAdder )
             {
                 this._semanticModel = semanticModel;
                 this._map = map;
                 this._isTemplate = isTemplate;
                 this._diagnosticAdder = diagnosticAdder;
+                this._symbolAnnotationMapper = compilationContext.SymbolAnnotationMapper;
             }
 
             public bool Success { get; private set; } = true;
@@ -48,12 +57,6 @@ namespace Metalama.Framework.Engine.Templating
 
                 var originalNode = node;
                 var transformedNode = base.VisitCore( node )!;
-
-                // Don't run twice.
-                if ( transformedNode.HasAnnotations( AnnotationKinds ) )
-                {
-                    throw new AssertionFailedException( $"The node {node.Kind()} at '{node.GetLocation()}' has already been processed." );
-                }
 
                 // Cache location.
                 var annotatedNode = this._map.AddLocationAnnotation( originalNode, transformedNode );
@@ -131,7 +134,10 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                         {
-                            annotation = SymbolAnnotationMapper.GetOrCreateAnnotation( _expressionTypeAnnotationKind, typeInfo.Type );
+                            annotation = this._symbolAnnotationMapper.GetOrCreateAnnotation(
+                                SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
+                                typeInfo.Type );
+
                             this._map._typeToAnnotationMap[typeInfo.Type] = annotation;
                             this._map._annotationToTypeMap[annotation] = typeInfo.Type;
                         }
