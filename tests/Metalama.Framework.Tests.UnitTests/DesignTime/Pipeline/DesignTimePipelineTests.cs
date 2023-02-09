@@ -583,7 +583,7 @@ partial class C
     [Fact]
     public void ProjectDependencyWithNoMetalamaReferenceButSystemCompileTimeType()
     {
-        var context = this.CreateTestContext();
+        using var context = this.CreateTestContext();
 
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( context );
 
