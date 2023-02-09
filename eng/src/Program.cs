@@ -61,6 +61,9 @@ var product = new Product( Dependencies.Metalama )
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
+
+                    // Do not upload uncompressed crash reports because they are too big.
+                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
                 }
             } )
 };
