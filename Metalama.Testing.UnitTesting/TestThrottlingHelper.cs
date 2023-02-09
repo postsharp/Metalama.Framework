@@ -9,15 +9,12 @@ namespace Metalama.Testing.UnitTesting;
 
 internal static class TestThrottlingHelper
 {
-    private static readonly SemaphoreSlim _concurrentSemaphore = new( Environment.ProcessorCount );
     private static readonly SemaphoreSlim _exclusiveSemaphore = new( 1 );
     private static int _runningTests;
 
-    public static async Task<IDisposable> ThrottleAsync()
+    public static async Task<IDisposable> StartTestAsync( bool requiresExclusivity = false )
     {
-        await _concurrentSemaphore.WaitAsync();
-
-        if ( Interlocked.Increment( ref _runningTests ) == 1 )
+        if ( requiresExclusivity || Interlocked.Increment( ref _runningTests ) == 1 )
         {
             await _exclusiveSemaphore.WaitAsync();
         }
@@ -25,20 +22,16 @@ internal static class TestThrottlingHelper
         return new DisposeAction(
             () =>
             {
-                _concurrentSemaphore.Release();
-
-                if ( Interlocked.Decrement( ref _runningTests ) == 0 )
+                if ( requiresExclusivity || Interlocked.Decrement( ref _runningTests ) == 0 )
                 {
                     _exclusiveSemaphore.Release();
                 }
             } );
     }
 
-    public static IDisposable Throttle()
+    public static IDisposable StartTest( bool requiresExclusivity = false )
     {
-        _concurrentSemaphore.Wait();
-
-        if ( Interlocked.Increment( ref _runningTests ) == 1 )
+        if ( requiresExclusivity || Interlocked.Increment( ref _runningTests ) == 1 )
         {
             _exclusiveSemaphore.Wait();
         }
@@ -46,26 +39,10 @@ internal static class TestThrottlingHelper
         return new DisposeAction(
             () =>
             {
-                _concurrentSemaphore.Release();
-
-                if ( Interlocked.Decrement( ref _runningTests ) == 0 )
+                if ( requiresExclusivity || Interlocked.Decrement( ref _runningTests ) == 0 )
                 {
                     _exclusiveSemaphore.Release();
                 }
             } );
-    }
-
-    public static async Task<IDisposable> RequireExclusivityAsync()
-    {
-        await _exclusiveSemaphore.WaitAsync();
-
-        return new DisposeAction( () => _exclusiveSemaphore.Release() );
-    }
-
-    public static IDisposable RequireExclusivity()
-    {
-        _exclusiveSemaphore.Wait();
-
-        return new DisposeAction( () => _exclusiveSemaphore.Release() );
     }
 }

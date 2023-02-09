@@ -133,16 +133,20 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
 
+                        // ReSharper disable CommentTypo
+
                         /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
                          * 
                          * Here are a few pointers:
-                         *  - You need to use WinDbg and sos.dll
-                         *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`
+                         *  - You need to use WinDbg and sos.dll.
+                         *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`.
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability:
                          *      - !dumpheap -type LoaderAllocator
                          *      - !gcroot -all xxxxx
                          */
+
+                        // ReSharper restore CommentTypo
 
                         this.UnloadTimeout?.Invoke();
 

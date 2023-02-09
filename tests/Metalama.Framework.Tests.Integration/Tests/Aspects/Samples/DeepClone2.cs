@@ -1,4 +1,11 @@
-﻿using Metalama.Framework.Aspects;
+#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_GREATER)
+#endif
+
+// In .NET Framework we get: Target runtime doesn't support covariant return types in overrides. Return type must be 'Targets.AutomaticallyCloneable'
+// to match overridden member 'Targets.AutomaticallyCloneable.Clone()'`
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
@@ -105,6 +112,7 @@ internal class ManuallyCloneable : ICloneable
     }
 }
 
+// <target>
 [DeepClone]
 internal class AutomaticallyCloneable
 {
@@ -113,6 +121,7 @@ internal class AutomaticallyCloneable
     private AutomaticallyCloneable? _c;
 }
 
+// <target>
 internal class DerivedCloneable : AutomaticallyCloneable
 {
     private string? _d;
