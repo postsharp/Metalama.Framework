@@ -1945,7 +1945,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             else
             {
                 // This should qualify the identifier.
-                return this._compileTimeOnlyRewriter.Visit( node );
+                return this._compileTimeOnlyRewriter.Visit( node )!;
             }
         }
 

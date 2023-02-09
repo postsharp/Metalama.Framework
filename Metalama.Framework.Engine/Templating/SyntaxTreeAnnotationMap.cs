@@ -23,10 +23,11 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     internal sealed partial class SyntaxTreeAnnotationMap : ILocationAnnotationMapBuilder
     {
-        private readonly CompilationContext _compilationContext;
         private const string _locationAnnotationKind = "location";
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
+
+        private readonly CompilationContext _compilationContext;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
