@@ -58,11 +58,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
-                generationContext.CompilationContext.SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( syntax, out expressionType );
+                SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( syntax, generationContext.CompilationContext, out expressionType );
             }
             else
             {
-                syntax = generationContext.CompilationContext.SymbolAnnotationMapper.AddExpressionTypeAnnotation( syntax, expressionType );
+                syntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( syntax, expressionType );
             }
 
             this.Syntax = syntax;

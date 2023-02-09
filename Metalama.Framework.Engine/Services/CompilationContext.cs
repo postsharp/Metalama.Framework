@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -122,7 +121,4 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );
-
-    [Memo]
-    internal SymbolAnnotationMapper SymbolAnnotationMapper => new( this );
 }
