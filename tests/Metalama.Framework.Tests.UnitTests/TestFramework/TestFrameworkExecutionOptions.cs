@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-internal class TestFrameworkExecutionOptions : ITestFrameworkExecutionOptions
+internal sealed class TestFrameworkExecutionOptions : ITestFrameworkExecutionOptions
 {
     public TValue GetValue<TValue>( string name )
         => name switch

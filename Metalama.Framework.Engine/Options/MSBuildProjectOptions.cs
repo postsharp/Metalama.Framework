@@ -113,6 +113,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override string? License => this.GetStringOption( "MetalamaLicense" );
 
+        [Memo]
+        public override bool WriteHtml => this.GetBooleanOption( "MetalamaWriteHtml" );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

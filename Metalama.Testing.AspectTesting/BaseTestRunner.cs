@@ -78,6 +78,8 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.CheckMemoryLeaks == true )
         {
             collectibleExecutionContext = CollectibleExecutionContext.Open();
+
+            CollectibleExecutionContext.RegisterDisposeAction( () => this.Logger?.WriteLine( "Disposing the CollectibleExecutionContext." ) );
         }
         else
         {
@@ -102,32 +104,36 @@ internal abstract partial class BaseTestRunner
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
-        var originalCulture = CultureInfo.CurrentCulture;
-
-        try
+        // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
+        using ( await TestThrottlingHelper.StartTestAsync() )
         {
-            // Change the culture to invariant to get invariant diagnostic messages.
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            var originalCulture = CultureInfo.CurrentCulture;
 
-            testInput.ProjectProperties.License?.ThrowIfNotLicensed();
+            try
+            {
+                // Change the culture to invariant to get invariant diagnostic messages.
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            var transformedOptions = this.GetContextOptions( testContextOptions );
-            using var testContext = new TestContext( transformedOptions );
+                testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
-            Dictionary<string, object?> state = new( StringComparer.Ordinal );
-            using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, testContext, state );
-            this.SaveResults( testInput, testResult, state );
-            this.ExecuteAssertions( testInput, testResult, state );
-        }
-        catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
-        {
-            return;
-        }
-        finally
-        {
-            // Restore the culture.
-            CultureInfo.CurrentCulture = originalCulture;
+                var transformedOptions = this.GetContextOptions( testContextOptions );
+                using var testContext = new TestContext( transformedOptions );
+
+                Dictionary<string, object?> state = new( StringComparer.Ordinal );
+                using var testResult = new TestResult();
+                await this.RunAsync( testInput, testResult, testContext, state );
+                this.SaveResults( testInput, testResult, state );
+                this.ExecuteAssertions( testInput, testResult, state );
+            }
+            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+            {
+                return;
+            }
+            finally
+            {
+                // Restore the culture.
+                CultureInfo.CurrentCulture = originalCulture;
+            }
         }
 
         if ( testInput.Options.ExpectedException != null )
@@ -290,7 +296,7 @@ internal abstract partial class BaseTestRunner
 
             testResult.InputProject = mainProject;
             testResult.InputCompilation = initialCompilation;
-            testResult.TestContext = testContext.WithReferences( initialCompilation.References );
+            testResult.TestContext = testContext.WithReferences( initialCompilation.References.OfType<PortableExecutableReference>() );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {

@@ -1,13 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
@@ -20,15 +24,16 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._aspectReference.RootNode;
 
-        public AspectReferenceRenamingSubstitution( ResolvedAspectReference aspectReference )
+        public AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+            compilationContext )
         {
             // Auto properties and event field default semantics should not get here.
             Invariant.AssertNot(
-                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
                 && property.IsAutoProperty() == true );
 
             Invariant.AssertNot(
-                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } 
+                aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
                 && @event.IsEventField() == true );
 
             this._aspectReference = aspectReference;
@@ -94,10 +99,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
             switch ( currentNode )
             {
-                case MemberAccessExpressionSyntax 
-                { 
+                case MemberAccessExpressionSyntax
+                {
                     Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
-                    Name.Identifier.Text : LinkerInjectionHelperProvider.FinalizeMemberName                            
+                    Name.Identifier.Text : LinkerInjectionHelperProvider.FinalizeMemberName
                 }:
                     // Finalizer invocation.
 
@@ -111,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
                     Name.Identifier.Text: var operatorName
-                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != Code.OperatorKind.None:
+                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
                     // Operator invocation.
 
                     return
@@ -180,11 +185,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         }
                         else
                         {
-                            if ( targetSymbol.ContainingType.Is( this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
+                            if ( this.CompilationContext.SymbolComparer.Is(
+                                    targetSymbol.ContainingType,
+                                    this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
                             {
                                 throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
                             }
-                            else if ( this._aspectReference.ContainingSemantic.Symbol.ContainingType.Is( targetSymbol.ContainingType ) )
+                            else if ( this.CompilationContext.SymbolComparer.Is(
+                                         this._aspectReference.ContainingSemantic.Symbol.ContainingType,
+                                         targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
                                 switch (targetSymbol, memberAccessExpression.Expression)
@@ -214,7 +223,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                                         context.RewritingDriver.DiagnosticSink.Report(
                                             AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(
-                                                targetDeclaration.GetDiagnosticLocation(),
+                                                targetDeclaration?.GetDiagnosticLocation(),
                                                 (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );
 
                                         return memberAccessExpression;

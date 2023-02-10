@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,34 +65,64 @@ namespace Metalama.Framework.Engine.CompileTime
                 // This system type is .NET-only but does not affect the scope.
                 .Add( "_Attribute", ("System.Runtime.InteropServices", null, false) );
 
-        private readonly Compilation? _compilation;
+        public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
+        {
+            return new SymbolClassifier( serviceProvider, compilation );
+        }
+
+        private readonly Compilation _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
 
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?>[] _caches = Enumerable.Range( 0, (int) GetTemplatingScopeOptions.Count )
-            .Select( _ => new ConcurrentDictionary<ISymbol, TemplatingScope?>( SymbolEqualityComparer.Default ) )
-            .ToArray();
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?>[] _caches;
 
-        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
-        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo;
+        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo;
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
-        private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly IAttributeDeserializer _attributeDeserializer;
         private readonly ILogger _logger;
+        private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
+        private readonly CompilationContext _compilationContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
+        private SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
+            : this(
+                serviceProvider,
+                compilation,
+                serviceProvider.GetRequiredService<ISystemAttributeDeserializer>(),
+                serviceProvider.GetReferenceAssemblyLocator() ) { }
+
+        private SymbolClassifier(
+            GlobalServiceProvider serviceProvider,
+            Compilation compilation,
+            IAttributeDeserializer attributeDeserializer,
+            ReferenceAssemblyLocator referenceAssemblyLocator )
         {
-            this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
+            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+
+            this._compilationContext = compilationContext;
+
+            this._referenceAssemblyLocator = referenceAssemblyLocator;
+            this._symbolEqualityComparer = compilationContext.SymbolComparer;
+            this._cacheNonInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
+            this._cacheInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
+
+            this._caches = Enumerable.Range( 0, (int) GetTemplatingScopeOptions.Count )
+                .Select( _ => new ConcurrentDictionary<ISymbol, TemplatingScope?>( this._symbolEqualityComparer ) )
+                .ToArray();
+
             this._attributeDeserializer = attributeDeserializer;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 
-            if ( compilation != null )
+            var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
+            this._compilation = compilation;
+
+            if ( hasMetalamaReference )
             {
-                this._compilation = compilation;
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
 
                 this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
@@ -110,6 +141,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( this._templateAttribute == null || this._declarativeAdviceAttribute == null )
             {
+                // The compilation does not have any reference to Metalama.
                 return TemplateInfo.None;
             }
 
@@ -155,7 +187,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
+        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
 
         private TemplateInfo GetTemplateInfo( ISymbol declaringSymbol, AttributeData attributeData )
         {
@@ -220,6 +252,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
+            if ( symbol.BelongsToCompilation( this._compilationContext ) == false )
+            {
+                throw new ArgumentOutOfRangeException( $"The symbol '{symbol}' does not belong to the expected compilation." );
+            }
+
             return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
                 .GetValueOrDefault( TemplatingScope.RunTimeOnly );
         }
@@ -275,7 +312,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableLinkedList<ISymbol> symbolsBeingProcessed,
             SymbolClassifierTracer? parentTracer )
         {
-            CheckRecursion( symbolsBeingProcessed );
+            this.CheckRecursion( symbolsBeingProcessed );
 
             if ( symbol.Kind == SymbolKind.Namespace )
             {
@@ -284,7 +321,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Recursion happens when are are classifying a type like `class C : IEquatable<C>`. The recursion in this example is on C.
             // We need to return the method before the result is cached.
-            if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
+            if ( symbolsBeingProcessed.Contains( symbol, this._symbolEqualityComparer ) )
             {
                 return null;
             }
@@ -469,14 +506,16 @@ namespace Metalama.Framework.Engine.CompileTime
                                         break;
 
                                     case TemplatingScope.Dynamic:
-                                        // Only a few well-known types can have dynamic generic arguments, other are unsupported.
+                                        // Only a few well-known types can have dynamic generic arguments, others are unsupported.
                                         switch ( namedType.Name )
                                         {
                                             case nameof(Task<object>):
+                                            case nameof(ConfiguredTaskAwaitable<object>):
                                             case nameof(ValueTask<object>):
                                             case nameof(IEnumerable<object>):
                                             case nameof(IEnumerator<object>):
                                             case nameof(IAsyncEnumerable<object>):
+                                            case nameof(ConfiguredCancelableAsyncEnumerable<object>):
                                             case nameof(IAsyncEnumerator<object>):
                                                 return TemplatingScope.Dynamic;
 
@@ -809,11 +848,11 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private static void CheckRecursion( ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        private void CheckRecursion( ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
             if ( symbolsBeingProcessed.Count > 32 )
             {
-                var symbols = string.Join( ", ", symbolsBeingProcessed.Distinct( SymbolEqualityComparer.Default ).Select( x => $"'{x}'" ) );
+                var symbols = string.Join( ", ", symbolsBeingProcessed.Distinct( this._symbolEqualityComparer ).Select( x => $"'{x}'" ) );
 
                 throw new AssertionFailedException( $"Infinite recursion detected involving the following symbols: {symbols}" );
             }
@@ -977,5 +1016,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImplicitRuntimeOrCompileTimeAsNull = 2,
             Count = 1 + (TypeParametersAreNeutral | ImplicitRuntimeOrCompileTimeAsNull)
         }
+
+        public bool IsTemplate( ISymbol symbol ) => !this.GetTemplateInfo( symbol ).IsNone;
     }
 }

@@ -28,7 +28,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         {
             TestingServices.Initialize();
         }
-        
+
         private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly IAssemblyInfo _assembly;
         private readonly IMessageSink? _messageSink;

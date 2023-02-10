@@ -16,7 +16,7 @@ internal sealed class OtherTemplateClass : TemplateClass
 {
     public OtherTemplateClass(
         ProjectServiceProvider serviceProvider,
-        CompilationContext compilationContext,
+        ITemplateReflectionContext compilationContext,
         INamedTypeSymbol typeSymbol,
         IDiagnosticAdder diagnosticAdder,
         OtherTemplateClass? baseClass,

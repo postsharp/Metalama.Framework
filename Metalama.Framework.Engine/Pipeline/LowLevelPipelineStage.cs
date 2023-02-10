@@ -88,7 +88,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             newCompilation,
             input.Project,
             input.AspectLayers,
-            input.CompilationModels,
+            input.FirstCompilationModel,
+            CompilationModel.CreateInitialInstance( input.FirstCompilationModel.AssertNotNull().Project, newCompilation ),
             input.Diagnostics,
             input.AspectSources );
     }

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     public enum Accessibility
     {
         // IMPORTANT: Don't change. Comparisons depend on the order.        
-        // Reserve 0 is we ever need something like undefined values (see Roslyn).
+        Undefined = 0,
         Private = 1,
         PrivateProtected = 2,
         Protected = 3,

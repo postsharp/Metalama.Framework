@@ -15,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
                 {
                     introduced.Name = "IntroducedMethod_Parameters";
                     introduced.AddParameter( "x", typeof(int) );
-                    introduced.AddParameter( "y", typeof(int) );
+                    introduced.AddParameter( "y", typeof(int), defaultValue: TypedConstant.Create(42) );
                 } );
 
             builder.Advice.IntroduceMethod(

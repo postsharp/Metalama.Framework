@@ -195,7 +195,7 @@ class ClassWithoutAspect {}
         [Fact]
         public void MustBeOfType()
         {
-            var testContext = this.CreateTestContext();
+            using var testContext = this.CreateTestContext();
 
             const string code = @"
 class C
@@ -215,7 +215,7 @@ class C
         [Fact]
         public void MustBeOfAnyType()
         {
-            var testContext = this.CreateTestContext();
+            using var testContext = this.CreateTestContext();
 
             const string code = @"
 class C
@@ -234,7 +234,7 @@ class C
         [Fact]
         public void MustBe()
         {
-            var testContext = this.CreateTestContext();
+            using var testContext = this.CreateTestContext();
 
             const string code = @"
 class C

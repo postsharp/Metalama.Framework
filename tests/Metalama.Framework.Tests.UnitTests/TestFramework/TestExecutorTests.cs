@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-public class TestExecutorTests : UnitTestClass
+public sealed class TestExecutorTests : UnitTestClass
 {
     [Theory]
     [InlineData(
@@ -30,7 +30,7 @@ public class TestExecutorTests : UnitTestClass
         "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
     public void EventSequence( string testInput, string expectedTestOutput, string expectedEventSequence )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var fileSystem = new TestFileSystem( testContext.ServiceProvider.Underlying );
         const string directory = "C:\\test";
         fileSystem.CreateDirectory( directory );

@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
 using System.Reflection;
 
@@ -9,14 +9,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     {
-        private readonly IParameterBuilder _parameterBuilder;
+        private readonly BaseParameterBuilder _parameterBuilder;
 
-        public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+        public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this._parameterBuilder = builder;
         }
 
-        public override DeclarationBuilder Builder => (DeclarationBuilder) this._parameterBuilder;
+        public override DeclarationBuilder Builder => this._parameterBuilder;
 
         public RefKind RefKind => this._parameterBuilder.RefKind;
 
@@ -37,5 +37,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 
         public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
+
+        bool IExpression.IsAssignable => true;
+
+        public ref object? Value => ref this._parameterBuilder.Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => this._parameterBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
     }
 }

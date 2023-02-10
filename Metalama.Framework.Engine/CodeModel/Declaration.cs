@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.OnUsingDeclaration();
 
-            return Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
+            return Ref.FromSymbol( this.Symbol, this.Compilation.CompilationContext );
         }
 
         [Memo]

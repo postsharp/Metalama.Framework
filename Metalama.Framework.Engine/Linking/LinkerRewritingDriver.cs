@@ -789,7 +789,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private SyntaxList<AttributeListSyntax> FilterAttributesOnSpecialImpl( ISymbol symbol )
         {
-            var classificationService = this.ServiceProvider.GetRequiredService<AttributeClassificationService>();
+            var classificationService = this.ServiceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
             var filteredAttributeLists = new List<AttributeListSyntax>();
 

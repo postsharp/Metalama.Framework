@@ -1,5 +1,5 @@
 [Aspect]
-public class RunTimeClass
+internal class RunTimeClass
 {
-    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Fields.RunTimeOnlyType.RunTimeClass? Event;
+  internal global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Fields.RunTimeOnlyType.RunTimeClass? Event;
 }

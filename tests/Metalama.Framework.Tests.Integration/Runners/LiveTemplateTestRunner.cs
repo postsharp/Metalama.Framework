@@ -37,7 +37,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
             await base.RunAsync( testInput, testResult, testContext, state );
 
             var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
-            var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
+
+            var compilation = CompilationModel.CreateInitialInstance(
+                new ProjectModel( TestCompilationFactory.CreateEmptyCSharpCompilation( "test" ), serviceProvider ),
+                testResult.InputCompilation! );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var targetMethod = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single();

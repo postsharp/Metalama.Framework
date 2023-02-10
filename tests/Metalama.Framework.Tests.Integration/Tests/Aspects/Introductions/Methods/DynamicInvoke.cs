@@ -25,7 +25,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         {
             Console.WriteLine( "Introduced" );
 
-            // TODO: This produces an incorrect result.
             return meta.Target.Method.Invoke();
         }
 
@@ -34,7 +33,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         {
             Console.WriteLine( "Introduced" );
 
-            // TODO: This produces an incorrect result.
             meta.Target.Method.Invoke();
         }
     }

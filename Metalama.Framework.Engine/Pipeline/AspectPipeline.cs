@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -77,6 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // we replace the execution scenario for future services in the current pipeline.
             this.ServiceProvider = this.ServiceProvider.WithService( executionScenario, true );
 
+            // Setup the domain.
             if ( domain != null )
             {
                 this.Domain = domain;
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
-            PartialCompilation compilation,
+            Compilation compilation,
             ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
@@ -102,12 +102,12 @@ namespace Metalama.Framework.Engine.Pipeline
             this.PipelineInitializationCount++;
 
             // Check that we have the system library.
-            var objectType = compilation.Compilation.GetSpecialType( SpecialType.System_Object );
+            var objectType = compilation.GetSpecialType( SpecialType.System_Object );
 
             if ( objectType.Kind == SymbolKind.ErrorType ) { }
 
             // Check that Metalama is enabled for the project.            
-            if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
+            if ( !this.IsMetalamaEnabled( compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
                 // Metalama not installed.
 
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Check the Metalama version.
-            var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation ).ToList();
 
             if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] > EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
@@ -136,19 +136,18 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
-            // Create dependencies.
-
-            var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
-
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProjectFromCompilation(
-                    compilation.Compilation,
-                    projectLicenseInfo,
-                    compileTimeTreesHint,
-                    diagnosticAdder,
-                    false,
-                    cancellationToken,
-                    out var compileTimeProject ) )
+            var compileTimeProjectRepository = CompileTimeProjectRepository.Create(
+                this.Domain,
+                this.ServiceProvider,
+                compilation,
+                diagnosticAdder,
+                false,
+                projectLicenseInfo,
+                compileTimeTreesHint,
+                cancellationToken );
+
+            if ( compileTimeProjectRepository == null )
             {
                 this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot get the compile-time compilation." );
 
@@ -157,75 +156,67 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
-            // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader );
+            var compileTimeProject = compileTimeProjectRepository.RootProject;
 
+            // Create a project-level service provider.
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithCompileTimeProjectServices( compileTimeProjectRepository );
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
-            ImmutableArray<object> allPlugIns;
 
-            if ( compileTimeProject != null )
-            {
-                projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
+            projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
 
-                // Find plug-ins from NuGet packages.
-                var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
+            // Find plug-ins from NuGet packages.
+            var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
 
-                // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
-                // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
-                // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
-                // if they are already provided by ProjectOptions.PlugIns.
+            // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
+            // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
+            // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
+            // if they are already provided by ProjectOptions.PlugIns.
 
-                var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
-                var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
+            var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
 
-                var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
-                    .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
-                    .Select(
-                        t =>
+            var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
+                .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
+                .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
+                .Select(
+                    t =>
+                    {
+                        var type = t.Project.GetType( t.TypeName );
+                        var constructor = type.GetConstructor( Type.EmptyTypes );
+
+                        if ( constructor == null )
                         {
-                            var type = t.Project.GetType( t.TypeName );
-                            var constructor = type.GetConstructor( Type.EmptyTypes );
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
-                            if ( constructor == null )
-                            {
-                                diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
+                            return null;
+                        }
 
-                                return null;
-                            }
+                        var executionContext = new UserCodeExecutionContext(
+                            projectServiceProviderWithoutPlugins,
+                            diagnosticAdder,
+                            UserCodeMemberInfo.FromMemberInfo( constructor ) );
 
-                            var executionContext = new UserCodeExecutionContext(
-                                projectServiceProviderWithoutPlugins,
-                                diagnosticAdder,
-                                UserCodeMemberInfo.FromMemberInfo( constructor ) );
+                        if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            return instance;
+                        }
+                    } )
+                .WhereNotNull()
+                .ToList();
 
-                            if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
-                            {
-                                return null;
-                            }
-                            else
-                            {
-                                return instance;
-                            }
-                        } )
-                    .WhereNotNull()
-                    .ToList();
+            var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
 
-                var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
+            projectServiceProviderWithProject = projectServiceProviderWithProject
+                .WithServices( newPlugIns.OfType<IProjectService>() );
 
-                projectServiceProviderWithProject = projectServiceProviderWithProject
-                    .WithServices( newPlugIns.OfType<IProjectService>() );
-
-                allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
-            }
-            else
-            {
-                allPlugIns = this.ProjectOptions.PlugIns;
-            }
+            var allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
 
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
@@ -233,7 +224,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( licenseConsumptionManager != null )
             {
-                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.Compilation.AssemblyName );
+                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.AssemblyName );
 
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {
@@ -249,23 +240,18 @@ namespace Metalama.Framework.Engine.Pipeline
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
 
             // Creates a project model that includes the final service provider.
-            var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
+            var projectModel = new ProjectModel( compilation, projectServiceProviderWithProject );
 
             // Create a compilation model for the aspect initialization.
             var compilationModel = CompilationModel.CreateInitialInstance( projectModel, compilation );
 
             // Create aspect types.
-            // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
-            // we don't want to leak the compilation for the design-time scenario.
-            var serviceProviderForAspectClassFactory =
-                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation.Compilation ) );
 
-            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, serviceProviderForAspectClassFactory );
-            var aspectTypeFactory = new AspectClassFactory( driverFactory );
+            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, projectServiceProviderWithProject );
+            var aspectTypeFactory = new AspectClassFactory( driverFactory, compilationModel.CompilationContext );
 
             var aspectClasses = aspectTypeFactory.GetClasses(
-                    serviceProviderForAspectClassFactory,
-                    compilationModel.CompilationContext,
+                    projectServiceProviderWithProject,
                     compileTimeProject,
                     diagnosticAdder )
                 .ToImmutableArray();
@@ -278,7 +264,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation, loader ),
+                new AttributeAspectOrderingSource( projectServiceProviderWithProject, compilation ),
                 new AspectLayerOrderingSource( aspectClasses ),
                 new FrameworkAspectOrderingSource( aspectClasses )
             };
@@ -293,40 +279,25 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create other template classes.
-            var otherTemplateClassFactory = new OtherTemplateClassFactory();
+            var otherTemplateClassFactory = new OtherTemplateClassFactory( compilationModel.CompilationContext );
 
             var otherTemplateClasses = otherTemplateClassFactory.GetClasses(
-                    serviceProviderForAspectClassFactory,
-                    compilationModel.CompilationContext,
+                    projectServiceProviderWithProject,
                     compileTimeProject,
                     diagnosticAdder )
                 .ToImmutableDictionary( x => x.FullName, x => x );
 
             // Add fabrics.
-            ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
-            BoundAspectClassCollection allAspectClasses;
 
-            FabricsConfiguration? fabricsConfiguration;
+            var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
+            var fabricAspectLayer = new OrderedAspectLayer( -1, -1, fabricTopLevelAspectClass.Layer );
 
-            if ( compileTimeProject != null )
-            {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
-                var fabricAspectLayer = new OrderedAspectLayer( -1, -1, fabricTopLevelAspectClass.Layer );
+            var allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
+            var allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
 
-                allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
-                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
-
-                // Execute fabrics.
-                var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
-                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
-            }
-            else
-            {
-                allOrderedAspectLayers = orderedAspectLayers;
-                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>() );
-
-                fabricsConfiguration = null;
-            }
+            // Execute fabrics.
+            var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
+            var fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
 
             // Freeze the project model to prevent any further modification of configuration.
             projectModel.Freeze();
@@ -349,12 +320,11 @@ namespace Metalama.Framework.Engine.Pipeline
                 otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
-                loader,
+                compileTimeProjectRepository,
                 fabricsConfiguration,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
-                this.FilterCodeFix,
-                compilation.Compilation.ExternalReferences );
+                this.FilterCodeFix );
 
             return true;
 
@@ -436,7 +406,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
-                new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
+                new CompilationAspectSource( configuration.ServiceProvider, aspectClasses ),
                 transitiveAspectSource );
 
             var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
@@ -498,19 +468,11 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             if ( pipelineConfiguration == null )
             {
-                if ( !this.TryInitialize( diagnosticAdder, compilation, null, null, cancellationToken, out pipelineConfiguration ) )
+                if ( !this.TryInitialize( diagnosticAdder, compilation.Compilation, null, null, cancellationToken, out pipelineConfiguration ) )
                 {
                     return default;
                 }
             }
-
-            // Add services that have a reference to the compilation.
-            pipelineConfiguration =
-                pipelineConfiguration.WithServiceProvider(
-                    pipelineConfiguration.ServiceProvider
-                        .Underlying
-                        .WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) )
-                        .WithService( new AttributeClassificationService() ) );
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.
@@ -523,7 +485,8 @@ namespace Metalama.Framework.Engine.Pipeline
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
-                    ImmutableArray<CompilationModel>.Empty );
+                    null,
+                    null );
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
@@ -534,7 +497,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
-                compilationModel == null ? ImmutableArray<CompilationModel>.Empty : ImmutableArray.Create( compilationModel ),
+                compilationModel,
+                compilationModel,
                 null,
                 aspectSources.AspectSources,
                 aspectSources.ValidatorSources,

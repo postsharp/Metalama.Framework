@@ -91,17 +91,32 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>
-        [return: NotNullIfNotNull( "declaration" )]
-        public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default )
-            where T : class, IDeclaration
+        [return: NotNullIfNotNull( "compilationElement" )]
+        public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation, ReferenceResolutionOptions options = default )
+            where T : class, ICompilationElement
         {
-            if ( declaration == null )
+            if ( compilationElement == null )
             {
                 return null;
             }
             else
             {
-                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration, options );
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+            }
+        }
+
+        public static IFieldOrProperty? ForCompilation(
+            this IFieldOrProperty? fieldOrProperty,
+            ICompilation compilation,
+            ReferenceResolutionOptions options = default )
+        {
+            if ( fieldOrProperty == null )
+            {
+                return null;
+            }
+            else
+            {
+                return (IFieldOrProperty) ((ICompilationInternal) compilation).Factory.Translate( fieldOrProperty, options );
             }
         }
     }

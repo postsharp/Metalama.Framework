@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
@@ -35,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public virtual bool IsReturnParameter => true;
 
         internal override Ref<IDeclaration> ToRef()
-            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().RoslynCompilation );
+            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().CompilationContext );
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
@@ -66,5 +68,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
+
+        bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+
+        public ref object? Value => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => throw new NotSupportedException( "Cannot use a return parameter as an expression." );
     }
 }

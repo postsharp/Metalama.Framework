@@ -2,12 +2,11 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
@@ -53,17 +52,17 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
-                    new DefaultProjectOptions(),
-                    TestCompilationFactory.GetMetadataReferences() )
-                .WithService( new AttributeClassificationService() );
+            var serviceProvider = (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
+                new DefaultProjectOptions(),
+                TestCompilationFactory.GetMetadataReferences() );
+
+            serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var preliminaryCompilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>()
-                .GetInstance( preliminaryCompilation );
+            var preliminaryCompilationContext = CompilationContextFactory.GetInstance( preliminaryCompilation );
 
             var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
 

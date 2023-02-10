@@ -22,9 +22,14 @@ namespace Metalama.Framework.Engine.Templating
             private readonly SyntaxTreeAnnotationMap _map;
             private readonly bool _isTemplate;
             private readonly IDiagnosticAdder _diagnosticAdder;
+
             private HashSet<SyntaxNode>? _nodesWithErrorReports;
 
-            public AnnotatingRewriter( SemanticModel? semanticModel, SyntaxTreeAnnotationMap map, bool isTemplate, IDiagnosticAdder diagnosticAdder )
+            public AnnotatingRewriter(
+                SemanticModel? semanticModel,
+                SyntaxTreeAnnotationMap map,
+                bool isTemplate,
+                IDiagnosticAdder diagnosticAdder )
             {
                 this._semanticModel = semanticModel;
                 this._map = map;
@@ -49,12 +54,6 @@ namespace Metalama.Framework.Engine.Templating
                 var originalNode = node;
                 var transformedNode = base.VisitCore( node )!;
 
-                // Don't run twice.
-                if ( transformedNode.HasAnnotations( AnnotationKinds ) )
-                {
-                    throw new AssertionFailedException( $"The node {node.Kind()} at '{node.GetLocation()}' has already been processed." );
-                }
-
                 // Cache location.
                 var annotatedNode = this._map.AddLocationAnnotation( originalNode, transformedNode );
 
@@ -74,7 +73,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._symbolToAnnotationMap.TryGetValue( s, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._map._symbolIdGenerator.GetId( s ) );
+                            annotation = new SyntaxAnnotation( _symbolAnnotationKind );
                             this._map._symbolToAnnotationMap[s] = annotation;
                             this._map._annotationToSymbolMap[annotation] = s;
                         }
@@ -118,7 +117,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._map._symbolIdGenerator.GetId( declaredSymbol ) );
+                            annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind );
                             this._map._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                             this._map._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                         }
@@ -131,7 +130,10 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                         {
-                            annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._map._symbolIdGenerator.GetId( typeInfo.Type ) );
+                            annotation = SymbolAnnotationMapper.GetOrCreateAnnotation(
+                                SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
+                                typeInfo.Type );
+
                             this._map._typeToAnnotationMap[typeInfo.Type] = annotation;
                             this._map._annotationToTypeMap[annotation] = typeInfo.Type;
                         }

@@ -30,14 +30,14 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the <see cref="TemplateAttribute"/> if it could be instantiated by the <see cref="SymbolClassifier"/>, i.e.
         /// only if it is a system attribute but not if it is defined in user code.
         /// </summary>
-        public IAdviceAttribute? Attribute { get; }
+        private IAdviceAttribute? Attribute { get; }
 
         public TemplateAttributeType AttributeType { get; }
 
         /// <summary>
         /// Gets the <see cref="SymbolId"/> of the template member.
         /// </summary>
-        public SymbolId SymbolId { get; }
+        private SymbolId SymbolId { get; }
 
         public TemplateInfo( SymbolId symbolId, TemplateAttributeType attributeType, IAdviceAttribute? attribute )
         {
@@ -57,6 +57,12 @@ namespace Metalama.Framework.Engine.CompileTime
             this.Attribute = prototype.Attribute;
             this.AttributeType = prototype.AttributeType;
             this.SymbolId = prototype.SymbolId;
+            this.IsAbstract = isAbstract;
+        }
+
+        public TemplateInfo( TemplateAttributeType attributeType, bool isAbstract )
+        {
+            this.AttributeType = attributeType;
             this.IsAbstract = isAbstract;
         }
 

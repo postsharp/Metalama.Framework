@@ -31,5 +31,24 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool HasPublicKey => this._assemblyIdentity.HasPublicKey;
 
         public override string ToString() => this._assemblyIdentity.ToString();
+
+        public bool Equals( IAssemblyIdentity? other )
+        {
+            if ( ReferenceEquals( null, other ) )
+            {
+                return false;
+            }
+
+            if ( ReferenceEquals( this, other ) )
+            {
+                return true;
+            }
+
+            return this._assemblyIdentity.Equals( ((AssemblyIdentityModel) other)._assemblyIdentity );
+        }
+
+        public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || (obj is IAssemblyIdentity other && this.Equals( other ));
+
+        public override int GetHashCode() => this._assemblyIdentity.GetHashCode();
     }
 }

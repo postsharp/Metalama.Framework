@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         private readonly List<IAttributeData> _fieldAttributes;
+        private INamedType _type;
 
         public IObjectReader InitializerTags { get; }
 
@@ -37,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.InitializerTags = initializerTags;
             this.IsEventField = isEventField;
-            this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
+            this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
             this._fieldAttributes = new List<IAttributeData>();
         }
 
@@ -46,7 +47,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this._fieldAttributes.Add( attributeData );
         }
 
-        public INamedType Type { get; set; }
+        public INamedType Type
+        {
+            get => this._type;
+            set => this._type = this.Translate( value );
+        }
 
         public RefKind RefKind
         {
@@ -64,11 +69,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? RaiseMethod => null;
 
-        [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>(
-                ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ),
-                this.OverriddenEvent != null );
+        [Obsolete]
+        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         public IEvent? OverriddenEvent { get; set; }
 
@@ -85,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 switch ( value )
                 {
                     case INamedType namedType:
-                        this.Type = namedType;
+                        this.Type = this.Translate( namedType );
 
                         break;
 
@@ -111,6 +113,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
         public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
+
+        public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
+
+        public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
+
+        public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
+
+        public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
+
+        public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 

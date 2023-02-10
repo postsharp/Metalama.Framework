@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a method, but not a constructor.
     /// </summary>
-    public interface IMethod : IMethodBase, IGeneric
+    public interface IMethod : IMethodBase, IGeneric, IMethodInvoker
     {
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
@@ -30,6 +31,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an object that allows to invoke the current method.
         /// </summary>
+        [Obsolete( "Use the methods of the IMethodInvoker interface that this object implements.", true )]
         IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>

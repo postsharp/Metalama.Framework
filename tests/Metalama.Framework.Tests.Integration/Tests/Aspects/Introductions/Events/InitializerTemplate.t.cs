@@ -1,7 +1,7 @@
 [Introduction]
 internal class TargetClass
 {
-  public static EventHandler Foo = new EventHandler(Bar);
+  public static EventHandler Foo = new(Bar);
   public static void Bar(object? sender, EventArgs eventArgs)
   {
   }

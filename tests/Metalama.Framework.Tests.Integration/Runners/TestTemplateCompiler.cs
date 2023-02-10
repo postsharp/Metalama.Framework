@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
-            var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
+            var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( semanticModel.Compilation );
             this._templateCompiler = new TemplateCompiler( serviceProvider, compilationContext );
         }
 

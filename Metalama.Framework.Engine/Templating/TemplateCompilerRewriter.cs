@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -34,6 +33,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
 {
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
+    private static readonly SyntaxAnnotation _userExpressionAnnotation = new( "Metalama.UserExpression" );
 
     private readonly TemplateCompilerSemantics _syntaxKind;
     private readonly Compilation _runTimeCompilation;
@@ -57,21 +57,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ISymbol? _rootTemplateSymbol;
 
     public TemplateCompilerRewriter(
-        ProjectServiceProvider serviceProvider,
         string templateName,
         TemplateCompilerSemantics syntaxKind,
-        CompilationContext runTimeCompilationContext,
+        ClassifyingCompilationContext runTimeCompilationContext,
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
         CompilationContext compileTimeCompilationContext,
         SerializableTypes serializableTypes,
         RoslynApiVersion targetApiVersion,
-        CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
+        CancellationToken cancellationToken ) : base( compileTimeCompilation, targetApiVersion )
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
-        this._runTimeCompilation = runTimeCompilationContext.Compilation;
+        this._runTimeCompilation = runTimeCompilationContext.SourceCompilation;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;
@@ -532,21 +531,26 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => this.CreateRunTimeExpression( expression );
 
     /// <summary>
-    /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntaxImpl"/>
-    /// that represents the input.
+    /// Transforms an <see cref="ExpressionSyntax"/> to an <see cref="ExpressionSyntax"/> that represents the input.
     /// </summary>
     private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
     {
+        if ( expression.HasAnnotation( _userExpressionAnnotation ) )
+        {
+            // The expression is already a compile-time user expression.
+            return expression;
+        }
+
         switch ( expression.Kind() )
         {
             // TODO: We need to transform null and default values though. How to do this right then?
             case SyntaxKind.NullLiteralExpression:
             case SyntaxKind.DefaultLiteralExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
             case SyntaxKind.DefaultExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( this.MetaSyntaxFactory.DefaultExpression( (ExpressionSyntax) this.Visit( ((DefaultExpressionSyntax) expression).Type )! ) ) );
 
@@ -600,7 +604,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case SyntaxKind.TypeOfExpression:
                 {
                     var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
-                    var typeId = SerializableTypeIdProvider.GetId( type ).Id;
+                    var typeId = type.GetSerializableTypeId().Id;
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
@@ -647,13 +651,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     this.MetaSyntaxFactory.Literal( expression ) );
             }
 
-            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                 .AddArgumentListArguments(
                     Argument( literalExpression ),
                     Argument(
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
-                            Literal( SerializableTypeIdProvider.GetId( expressionType ).Id ) ) ) );
+                            Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
         }
 
         if ( expressionType is IErrorTypeSymbol )
@@ -666,8 +670,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         switch ( expressionType.Name )
         {
             case "dynamic":
-            case "Task" when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
-                             expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+            case "Task" or "ConfiguredTaskAwaitable"
+                when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+                     expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
             case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
                 when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
@@ -695,7 +700,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
             case nameof(Boolean):
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument(
                             InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(LiteralExpression) ) )
@@ -786,6 +791,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         } ) ) );
         }
 
+        // TODO: do the same for ?.
+
         return base.VisitMemberAccessExpression( node );
     }
 
@@ -870,17 +877,26 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
             {
-                return this.MetaSyntaxFactory.InvocationExpression(
-                    this.MetaSyntaxFactory.IdentifierName(
-                        this.MetaSyntaxFactory.Identifier(
-                            SyntaxFactoryEx.Default,
-                            this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.LiteralExpression( "nameof" ),
-                            SyntaxFactoryEx.Default ) ),
-                    this.MetaSyntaxFactory.ArgumentList(
-                        this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                            this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                if ( transformationKind == TransformationKind.Transform )
+                {
+                    return this.MetaSyntaxFactory.InvocationExpression(
+                        this.MetaSyntaxFactory.IdentifierName(
+                            this.MetaSyntaxFactory.Identifier(
+                                SyntaxFactoryEx.Default,
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.Default ) ),
+                        this.MetaSyntaxFactory.ArgumentList(
+                            this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                }
+                else
+                {
+                    // since expression references a parameter, we can just call ToString() on it
+                    return InvocationExpression(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof(this.ToString) ) ) );
+                }
             }
 
             var symbolName = symbol?.Name ?? "<error>";
@@ -917,7 +933,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     {
                         case TemplatingScope.Dynamic:
                         case TemplatingScope.RunTimeOnly:
-                            return Argument( transformedExpression );
+                            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( a.Expression );
+
+                            if ( expressionType != null )
+                            {
+                                var typedExpression = InvocationExpression(
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                                    .AddArgumentListArguments(
+                                        Argument( transformedExpression ),
+                                        Argument(
+                                            LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
+                                return Argument( typedExpression );
+                            }
+                            else
+                            {
+                                return Argument( transformedExpression );
+                            }
 
                         default:
                             return Argument( this.CreateRunTimeExpression( transformedExpression ) );
@@ -1063,7 +1095,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {
-            var templateParameter = parameter;
+            var templateParameter = parameter.WithDefault( null );
             var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
             var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
 
@@ -1332,7 +1364,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // var localSyntaxFactory = syntaxFactory.ForLocalFunction( "typeof(X)", map );
                 var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction ).AssertNotNull();
 
-                var returnType = SerializableTypeIdProvider.GetId( localFunctionSymbol.ReturnType ).Id;
+                var returnType = localFunctionSymbol.ReturnType.GetSerializableTypeId().Id;
 
                 var map = this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType );
 
@@ -1779,7 +1811,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
                || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
                {
-                   Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
+                   Name: "Task" or "ConfiguredTaskAwaitable" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
                });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
@@ -1909,6 +1941,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         IdentifierName( node.Identifier ),
                         IdentifierName( nameof(TemplateTypeArgument.Syntax) ) );
                 }
+            }
+            else
+            {
+                // This should qualify the identifier.
+                return this._compileTimeOnlyRewriter.Visit( node )!;
             }
         }
 
@@ -2053,7 +2090,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol &&
                   this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
         {
-            var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
+            var typeId = typeSymbol.GetSerializableTypeId().Id;
 
             return this._typeOfRewriter.RewriteTypeOf(
                     typeSymbol,
@@ -2069,4 +2106,93 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
+
+    public override SyntaxNode VisitCastExpression( CastExpressionSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            return this.TransformCastExpression( node );
+        }
+
+        // Special processing of casting a run-time expression to IExpression.
+        if ( node.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
+        {
+            var targetType = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+            if ( targetType is INamedTypeSymbol { Name: nameof(IExpression) } )
+            {
+                var transformedExpression = this.Transform( node.Expression );
+
+                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression )
+                                     ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                var createRuntimeExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                    .AddArgumentListArguments(
+                        Argument( transformedExpression ),
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
+                return
+                    InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                createRuntimeExpression,
+                                IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+                            ArgumentList(
+                                SingletonSeparatedList(
+                                    Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) )
+                        .WithAdditionalAnnotations( _userExpressionAnnotation );
+            }
+        }
+
+        // Fallback to the default implementation.
+        return base.VisitCastExpression( node );
+    }
+
+    public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            return this.TransformAssignmentExpression( node );
+        }
+
+        // Special processing of assigning a run-time expression to IExpression.
+        if ( node.Right.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
+        {
+            var leftType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Left );
+
+            if ( leftType is INamedTypeSymbol { Name: nameof(IExpression) } )
+            {
+                var transformedRight = this.Transform( node.Right );
+
+                var rightType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Right )
+                                ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+                var runtimeExpressionInvocation = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                    .AddArgumentListArguments(
+                        Argument( transformedRight ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( rightType.GetSerializableTypeId().Id ) ) ) );
+
+                var userExpressionInvocation = InvocationExpression(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        runtimeExpressionInvocation,
+                        IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+                    ArgumentList(
+                        SingletonSeparatedList(
+                            Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) );
+
+                var transformedLeft = (ExpressionSyntax) this.Visit( node.Left ).AssertNotNull();
+
+                return AssignmentExpression( node.Kind(), transformedLeft, userExpressionInvocation );
+            }
+        }
+
+        // Fallback to the default implementation.
+        return base.VisitAssignmentExpression( node );
+    }
 }

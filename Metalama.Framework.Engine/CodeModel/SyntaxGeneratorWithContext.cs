@@ -220,27 +220,21 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
         return syntax;
     }
 
-    public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
-        => SyntaxFactory.ParameterList(
-            SeparatedList(
-                method.Parameters.SelectAsEnumerable(
-                    p => Parameter(
-                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                        p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
-                        Identifier( p.Name ),
-                        null ) ) ) );
+    public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation, bool removeDefaultValues = false )
+        => SyntaxFactory.ParameterList( this.ParameterListParameters( method, compilation, removeDefaultValues ) );
 
-    public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
-        => BracketedParameterList(
-            SeparatedList(
-                method.Parameters.SelectAsEnumerable(
-                    p => Parameter(
-                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                        p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
-                        Identifier( p.Name ),
-                        null ) ) ) );
+    public BracketedParameterListSyntax ParameterList( IIndexer indexer, CompilationModel compilation, bool removeDefaultValues = false )
+        => BracketedParameterList( this.ParameterListParameters( indexer, compilation, removeDefaultValues ) );
+
+    private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
+        => SeparatedList(
+            method.Parameters.SelectAsEnumerable(
+                p => Parameter(
+                    this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
+                    p.GetSyntaxModifierList(),
+                    this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                    Identifier( p.Name ),
+                    removeDefaultValues || p.DefaultValue == null ? null : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {

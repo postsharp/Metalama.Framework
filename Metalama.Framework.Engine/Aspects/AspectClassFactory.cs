@@ -19,23 +19,26 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        public AspectClassFactory( AspectDriverFactory aspectDriverFactory )
+        public AspectClassFactory( AspectDriverFactory aspectDriverFactory, CompilationContext compilationContext ) : base( compilationContext )
         {
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        protected override IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation )
+        protected override IEnumerable<TemplateClassData> GetFrameworkClasses()
         {
             var frameworkAssemblyName = typeof(IAspect).Assembly.GetName();
-            var frameworkAssembly = compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( x => x.Name == frameworkAssemblyName.Name );
+
+            var frameworkAssembly =
+                this.CompilationContext.Compilation.SourceModule.ReferencedAssemblySymbols.SingleOrDefault( x => x.Name == frameworkAssemblyName.Name );
 
             if ( frameworkAssembly == null )
             {
-                return Array.Empty<TemplateTypeData>();
+                return Array.Empty<TemplateClassData>();
             }
 
             return new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
-                .SelectAsImmutableArray( t => new TemplateTypeData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t ) );
+                .SelectAsImmutableArray(
+                    t => new TemplateClassData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t, this.CompilationContext ) );
         }
 
         protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.AspectTypes;
@@ -47,7 +50,7 @@ namespace Metalama.Framework.Engine.Aspects
             AspectClass? baseClass,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            CompilationContext compilationContext,
+            ITemplateReflectionContext templateReflectionContext,
             [NotNullWhen( true )] out AspectClass? templateClass )
             => AspectClass.TryCreate(
                 serviceProvider,
@@ -56,7 +59,7 @@ namespace Metalama.Framework.Engine.Aspects
                 baseClass,
                 compileTimeProject,
                 diagnosticAdder,
-                compilationContext,
+                templateReflectionContext,
                 this._aspectDriverFactory,
                 out templateClass );
     }

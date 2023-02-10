@@ -102,6 +102,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
         }
 
+        protected override bool CanBeNull => false;
+
         public override IType Type { get; }
     }
 }

@@ -7,6 +7,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -30,17 +32,19 @@ namespace Metalama.Framework.Engine.CodeModel
             new( RefEqualityComparer<ICompilationElement>.Default );
 
         // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
-        private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =
-            new( SymbolEqualityComparer.IncludeNullability );
+        private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache;
 
         private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
         private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
 
         private readonly CompilationModel _compilationModel;
+        private readonly SystemTypeResolver _systemTypeResolver;
 
         internal DeclarationFactory( CompilationModel compilation )
         {
             this._compilationModel = compilation;
+            this._typeCache = new ConcurrentDictionary<ITypeSymbol, object>( compilation.CompilationContext.SymbolComparerIncludingNullability );
+            this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>();
         }
 
         private Compilation RoslynCompilation => this._compilationModel.RoslynCompilation;
@@ -74,14 +78,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
             => (INamespace) this._defaultCache.GetOrAdd(
-                namespaceSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
+                namespaceSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._defaultCache.GetOrAdd(
-                assemblySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => !((IAssemblySymbol) l.GetSymbol( this.Compilation )).Identity.Equals( this._compilationModel.RoslynCompilation.Assembly.Identity )
-                    ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
+                assemblySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                l => !((IAssemblySymbol) l.GetSymbol( this.Compilation ).AssertNotNull()).Identity.Equals(
+                    this._compilationModel.RoslynCompilation.Assembly.Identity )
+                    ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel )
                     : this._compilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )
@@ -111,48 +116,48 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (TypeParameter) this._defaultCache.GetOrAdd(
-                typeParameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
+                typeParameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._defaultCache.GetOrAdd(
-                methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
             => (IProperty) this._defaultCache.GetOrAdd(
-                propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IIndexer GetIndexer( IPropertySymbol propertySymbol )
             => (IIndexer) this._defaultCache.GetOrAdd(
-                propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Indexer( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Indexer( (IPropertySymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
             => (IField) this._defaultCache.GetOrAdd(
-                fieldSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                fieldSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => (IConstructor) this._defaultCache.GetOrAdd(
-                methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
             => (IMethod) this._defaultCache.GetOrAdd(
-                finalizerSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                finalizerSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._defaultCache.GetOrAdd(
-                parameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                parameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._defaultCache.GetOrAdd(
-                @event.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                @event.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
         internal bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
         {
@@ -192,14 +197,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
 #if DEBUG
-            if ( !(symbol is IMethodSymbol { ContainingSymbol: IMethodSymbol }) )
-            {
-                var translatedSymbol = symbol.Translate( null, this.Compilation );
+            var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate( symbol );
 
-                if ( !SymbolEqualityComparer.Default.Equals( translatedSymbol, symbol ) )
-                {
-                    throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
-                }
+            if ( !this._compilationModel.CompilationContext.SymbolComparer.Equals( translatedSymbol, symbol ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
             }
 #endif
 
@@ -404,21 +406,32 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration;
         }
 
-        public IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default )
+        public ICompilationElement Translate( ICompilationElement compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
         {
-            if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) )
+            if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
             {
-                return declaration;
+                return compilationElement;
             }
             else
             {
-                return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
+                switch ( compilationElement )
+                {
+                    case IDeclaration declaration:
+                        return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
+
+                    case IType type:
+                        return this._compilationModel.Factory.GetIType(
+                            this._compilationModel.CompilationContext.SymbolTranslator.Translate( type.GetSymbol() ).AssertNotNull() );
+
+                    default:
+                        throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );
+                }
             }
         }
 
         public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         {
-            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdProvider.ResolveId( serializableTypeId, genericArguments );
+            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
             return this.GetIType( symbol );
         }
@@ -440,7 +453,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
-                l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+                l => new BuiltParameter( (BaseParameterBuilder) l.Target!, this._compilationModel ) );
         }
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder, ReferenceResolutionOptions options )
@@ -496,8 +509,25 @@ namespace Metalama.Framework.Engine.CodeModel
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
         }
 
-        internal IProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
+        internal IFieldOrProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
+            /*
+            if ( propertyBuilder is PromotedField promotedField )
+            {
+                // When getting a promoted field, we need to look at the current CompilationModel. Are we before or after 
+                // promotion? The result will be different
+                
+                
+                return promotedField.Field switch
+                {
+                    BuiltField builtField => this.GetField( builtField.FieldBuilder, options ),
+                    FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
+                    Field field => this.GetField( field.GetSymbol().AssertNotNull( ) ),
+                    _ => throw new AssertionFailedException()
+                };
+            }
+            */
+            
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
                 throw CreateBuilderNotExists( propertyBuilder );
@@ -598,8 +628,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
-        public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._compilationModel.CompilationContext.SystemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+        private CompilationContext CompilationContext => this._compilationModel.CompilationContext;
+
+        public Type GetReflectionType( ITypeSymbol typeSymbol ) => this._systemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
 
         public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
         {

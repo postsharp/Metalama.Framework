@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,7 +21,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._aspectReference.RootNode;
 
-        public AspectReferenceParameterSubstitution( ResolvedAspectReference aspectReference )
+        public AspectReferenceParameterSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+            compilationContext )
         {
             this._aspectReference = aspectReference;
         }
@@ -75,11 +76,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        if ( targetSymbol.ContainingType.Is( this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
+                        if ( this.CompilationContext.SymbolComparer.Is(
+                                targetSymbol.ContainingType,
+                                this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
                         {
                             throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
                         }
-                        else if ( this._aspectReference.ContainingSemantic.Symbol.ContainingType.Is( targetSymbol.ContainingType ) )
+                        else if ( this.CompilationContext.SymbolComparer.Is(
+                                     this._aspectReference.ContainingSemantic.Symbol.ContainingType,
+                                     targetSymbol.ContainingType ) )
                         {
                             // Resolved symbol is declared in a base class.
                             switch (targetSymbol, elementAccessExpression.Expression)
@@ -97,7 +102,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 default:
                                     var aspectInstance = this.ResolveAspectInstance( context );
 
-                                    var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( context.RewritingDriver.IntermediateCompilation );
+                                    var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( context.RewritingDriver.IntermediateCompilation )
+                                        .AssertNotNull();
 
                                     context.RewritingDriver.DiagnosticSink.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(

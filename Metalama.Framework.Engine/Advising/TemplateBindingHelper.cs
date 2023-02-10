@@ -471,7 +471,7 @@ namespace Metalama.Framework.Engine.Advising
                     var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
                     var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeModel.GetSymbol() ).Type;
 
-                    templateArguments.Add( new TemplateTypeArgument( typeModel, syntax, syntaxForTypeOf ) );
+                    templateArguments.Add( new TemplateTypeArgument( parameter.Name, typeModel, syntax, syntaxForTypeOf ) );
                 }
             }
         }

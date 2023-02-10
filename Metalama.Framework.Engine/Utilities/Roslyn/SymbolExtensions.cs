@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -115,72 +116,21 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return false;
         }
 
+        /// <summary>
+        /// Get top-level (non-nested) types in an assembly.
+        /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
-        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
-        {
-            foreach ( var type in ns.GetTypeMembers() )
-            {
-                yield return type;
-            }
+        /// <summary>
+        /// Get all types in an assembly, including nested types.
+        /// </summary>
+        internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
-            foreach ( var namespaceMember in ns.GetNamespaceMembers() )
-            {
-                foreach ( var type in namespaceMember.GetTypes() )
-                {
-                    yield return type;
-                }
-            }
-        }
+        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol namespaceSymbol )
+            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true ).SelectMany( ns => ns.GetTypeMembers() );
 
-        internal static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
-        {
-            if ( member.ContainingType == null )
-            {
-                return false;
-            }
-
-            if ( SymbolEqualityComparer.Default.Equals( member.ContainingType, type ) )
-            {
-                return true;
-            }
-
-            if ( type.BaseType != null )
-            {
-                return member.IsMemberOf( type.BaseType );
-            }
-
-            return false;
-        }
-
-        internal static bool Is( this ITypeSymbol left, ITypeSymbol right )
-        {
-            if ( left is IErrorTypeSymbol )
-            {
-                return false;
-            }
-
-            if ( SymbolEqualityComparer.Default.Equals( left, right ) )
-            {
-                return true;
-            }
-            else if ( left.BaseType != null && left.BaseType.Is( right ) )
-            {
-                return true;
-            }
-            else
-            {
-                foreach ( var i in left.Interfaces )
-                {
-                    if ( i.Is( right ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol namespaceSymbol )
+            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeThis: true ) );
 
         internal static bool IsAccessor( this IMethodSymbol method )
             => method.MethodKind switch
@@ -265,22 +215,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
             => null;
 
-        internal static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
-        {
-            if ( symbol == null )
-            {
-                return null;
-            }
-            else if ( originalCompilation == compilation )
-            {
-                return symbol;
-            }
-            else
-            {
-                return SymbolTranslator.GetInstance( compilation ).Translate( symbol );
-            }
-        }
-
         internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 
         internal static bool HasDefaultConstructor( this INamedTypeSymbol type )
@@ -337,5 +271,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 INamedTypeSymbol type => type,
                 _ => symbol.ContainingType
             };
+
+        internal static bool IsTaskConfigureAwait( this ISymbol? symbol )
+            => symbol is IMethodSymbol
+            {
+                Name: "ConfigureAwait",
+                ContainingType: var containingType
+            } && containingType.GetFullMetadataName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
     }
 }

@@ -2,99 +2,93 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal sealed class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
+    internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
     {
-        private readonly InvokerOperator _invokerOperator;
+        public FieldOrPropertyInvoker(
+            IFieldOrProperty fieldOrProperty,
+            InvokerOptions? options = default,
+            object? target = null,
+            SyntaxGenerationContext? syntaxGenerationContext = null ) : base(
+            fieldOrProperty,
+            options,
+            target,
+            syntaxGenerationContext ) { }
 
-        private IFieldOrProperty Member { get; }
-
-        public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
+        private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
-            if ( member is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(member),
-                    MetalamaStringFormatter.Format( $"Cannot create an invoker for '{member}' because it is an implicitly declared field." ) );
-            }
+            var receiverInfo = this.GetReceiverInfo();
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
 
-            this._invokerOperator = invokerOperator;
-            this.Member = member;
-        }
-
-        private ExpressionSyntax CreatePropertyExpression(
-            TypedExpressionSyntaxImpl instance,
-            AspectReferenceTargetKind targetKind,
-            SyntaxGenerationContext generationContext )
-        {
-            var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var name = IdentifierName( this.Member.Name );
 
             ExpressionSyntax expression;
 
-            if ( this._invokerOperator == InvokerOperator.Default )
+            if ( !receiverInfo.RequiresConditionalAccess )
             {
-                expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name );
+                expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverSyntax, name );
             }
             else
             {
-                expression = ConditionalAccessExpression( receiver, MemberBindingExpression( name ) );
+                expression = ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) );
             }
 
             // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
             if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )
             {
-                expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                expression = expression.WithAspectReferenceAnnotation( receiverInfo.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }
 
             return expression;
         }
 
-        public object GetValue( object? instance )
+        IType IHasType.Type => this.Member.Type;
+
+        RefKind IHasType.RefKind => this.Member.RefKind;
+
+        bool IExpression.IsAssignable => this.Member.IsAssignable;
+
+        public object SetValue( object? value )
         {
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
-            return new SyntaxUserExpression(
-                this.CreatePropertyExpression(
-                    TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
-                    AspectReferenceTargetKind.PropertyGetAccessor,
-                    generationContext ),
-                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ToNullableType(),
-                isReferenceable: this.Member is Field,
-                isAssignable: this.Member.Writeability != Writeability.None );
-        }
-
-        public object SetValue( object? instance, object? value )
-        {
-            if ( this._invokerOperator == InvokerOperator.Conditional )
-            {
-                throw new NotSupportedException( "Conditional access is not supported for SetValue." );
-            }
-
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
-            var propertyAccess = this.CreatePropertyExpression(
-                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
-                AspectReferenceTargetKind.PropertySetAccessor,
-                generationContext );
+            var propertyAccess = this.CreatePropertyExpression( AspectReferenceTargetKind.PropertySetAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, this.GenerationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
+
+        public ref object? Value
+            => ref RefHelper.Wrap(
+                new SyntaxUserExpression(
+                    this.CreatePropertyExpression( AspectReferenceTargetKind.Self ),
+                    this.Member.Type,
+                    isReferenceable: this.Member.DeclarationKind == DeclarationKind.Field,
+                    isAssignable: this.Member.Writeability != Writeability.None ) );
+
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options );
+
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
+            => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );
+
+        public TypedExpressionSyntax GetTypedExpressionSyntax()
+            => new(
+                new TypedExpressionSyntaxImpl(
+                    this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
+                    this.Member.Type,
+                    this.GenerationContext,
+                    this.Member.DeclarationKind is DeclarationKind.Field ) );
     }
 }

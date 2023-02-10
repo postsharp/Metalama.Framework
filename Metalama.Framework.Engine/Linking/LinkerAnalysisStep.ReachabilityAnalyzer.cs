@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class ReachabilityAnalyzer
         {
+            private readonly CompilationContext _compilationContext;
             private readonly LinkerInjectionRegistry _injectionRegistry;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
@@ -19,10 +21,12 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _additionalNonDiscardableSemantics;
 
             public ReachabilityAnalyzer(
+                CompilationContext compilationContext,
                 LinkerInjectionRegistry injectionRegistry,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic,
                 IReadOnlyList<IntermediateSymbolSemantic> additionalNonDiscardableSemantics )
             {
+                this._compilationContext = compilationContext;
                 this._injectionRegistry = injectionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;
                 this._additionalNonDiscardableSemantics = additionalNonDiscardableSemantics;
@@ -157,7 +161,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Edges representing resolved aspect references.
                         foreach ( var aspectReference in aspectReferences )
                         {
-                            if ( !SymbolEqualityComparer.Default.Equals(
+                            if ( !this._compilationContext.SymbolComparer.Equals(
                                     current.Symbol.ContainingType,
                                     aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
                             {

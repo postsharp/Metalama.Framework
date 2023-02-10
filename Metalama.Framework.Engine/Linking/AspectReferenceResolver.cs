@@ -5,7 +5,9 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -75,12 +77,13 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
         private readonly Compilation _intermediateCompilation;
+        private readonly SafeSymbolComparer _comparer;
 
         public AspectReferenceResolver(
             LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             CompilationModel finalCompilationModel,
-            Compilation intermediateCompilation )
+            CompilationContext intermediateCompilationContext )
         {
             this._injectionRegistry = injectionRegistry;
 
@@ -93,7 +96,8 @@ namespace Metalama.Framework.Engine.Linking
             this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
-            this._intermediateCompilation = intermediateCompilation;
+            this._intermediateCompilation = intermediateCompilationContext.Compilation;
+            this._comparer = intermediateCompilationContext.SymbolComparer;
         }
 
         public ResolvedAspectReference Resolve(
@@ -104,9 +108,24 @@ namespace Metalama.Framework.Engine.Linking
             AspectReferenceSpecification referenceSpecification,
             SemanticModel semanticModel )
         {
-            // Get the local symbol that is referenced and reference root.
-            // E.g. explicit interface implementation must be referenced as interface member reference.
-            ResolveTarget(
+            // Get the reference root node, the local symbol that is referenced, and the node that was the source for the symbol.
+            //   1) Normal reference:
+            //     this.Foo()
+            //     ^^^^^^^^ - aspect reference (symbol points directly to the member)
+            //     ^^^^^^^^ - symbol source
+            //     ^^^^^^^^ - resolved root node
+            //   2) Interface member references:
+            //     ((IInterface)this).Foo()
+            //                        ^^^ - aspect reference (symbol points to interface member)
+            //                        ^^^ - symbol source
+            //     ^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
+            //   3) Referencing a get-only property "setter":
+            //     __LinkerInjectionHelpers__.__Property(this.Foo) = 42;
+            //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - aspect reference (symbol points to the special linker helper)
+            //                                           ^^^^^^^^  - symbol source
+            //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
+
+            this.ResolveTarget(
                 containingSemantic.Symbol,
                 referencedSymbol,
                 expression,
@@ -114,6 +133,9 @@ namespace Metalama.Framework.Engine.Linking
                 out var resolvedRootNode,
                 out var resolvedReferencedSymbol,
                 out var resolvedReferencedSymbolSourceNode );
+
+            // Root node is the node that will be replaced when rewriting the aspect reference.
+            // Symbol source node is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
@@ -223,6 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                                   .GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
+                        Invariant.Assert( overrideIndices.Count > 0 );
 
                         return new ResolvedAspectReference(
                             containingSemantic,
@@ -254,14 +277,19 @@ namespace Metalama.Framework.Engine.Linking
             else if ( resolvedIndex == targetIntroductionIndex )
             {
                 // We have resolved to the target member introduction.
-                // The only way to get here is using "Base" order in the first override.
+                // The only way to get here is using "Base" order in the first override or within the same aspect to a non-overridden method.
                 if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
+                    var targetSemantic =
+                        overrideIndices.Count > 0
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,
@@ -301,6 +329,7 @@ namespace Metalama.Framework.Engine.Linking
                     else
                     {
                         // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
+
                         return new ResolvedAspectReference(
                             containingSemantic,
                             containingLocalFunction,
@@ -493,7 +522,7 @@ namespace Metalama.Framework.Engine.Linking
             var containedInTargetOverride =
                 this._injectionRegistry.IsOverrideTarget( referencedSymbol )
                 && referencedDeclarationOverrides.Any(
-                    x => SymbolEqualityComparer.Default.Equals(
+                    x => this._comparer.Equals(
                         this._injectionRegistry.GetSymbolForInjectedMember( x ),
                         GetPrimarySymbol( containingSymbol ) ) );
 
@@ -511,7 +540,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Select( ( x, i ) => (Symbol: x, Index: i + 1) )
                             .Single(
                                 x =>
-                                    SymbolEqualityComparer.Default.Equals(
+                                    this._comparer.Equals(
                                         this._injectionRegistry.GetSymbolForInjectedMember( x.Symbol ),
                                         GetPrimarySymbol( containingSymbol ) ) )
                             .Index )
@@ -532,7 +561,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="rootNode">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
         /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
         /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
-        private static void ResolveTarget(
+        private void ResolveTarget(
             ISymbol containingSymbol,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
@@ -542,7 +571,7 @@ namespace Metalama.Framework.Engine.Linking
             out ExpressionSyntax targetSymbolSource )
         {
             // Check whether we are referencing explicit interface implementation.
-            if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
+            if ( (!this._comparer.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
                  || referencedSymbol.IsInterfaceMemberImplementation() )
             {
@@ -670,6 +699,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
+                case IFieldSymbol:
                 case IPropertySymbol property when property.IsAutoProperty().GetValueOrDefault():
                 case IEventSymbol @event when @event.IsExplicitInterfaceEventField() || @event.IsEventField().GetValueOrDefault():
                     return true;

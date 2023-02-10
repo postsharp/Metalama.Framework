@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -15,24 +16,24 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed partial class DerivedTypeIndex
     {
-        private readonly Compilation _compilation;
+        private readonly CompilationContext _compilationContext;
 
         // Maps a base type to direct derived types.
         private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
         private readonly ImmutableHashSet<INamedTypeSymbol> _externalBaseTypes;
 
         private DerivedTypeIndex(
-            Compilation compilation,
+            CompilationContext compilationContext,
             ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
             ImmutableHashSet<INamedTypeSymbol> externalBaseTypes )
         {
             this._relationships = relationships;
             this._externalBaseTypes = externalBaseTypes;
-            this._compilation = compilation;
+            this._compilationContext = compilationContext;
         }
 
         private bool IsContainedInCurrentCompilation( INamedTypeSymbol type )
-            => SymbolEqualityComparer.Default.Equals( this._compilation.Assembly, type.ContainingAssembly );
+            => this._compilationContext.SymbolComparer.Equals( this._compilationContext.Compilation.Assembly, type.ContainingAssembly );
 
         internal IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
         {
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
             => this._relationships[baseType]
-                .SelectManyRecursiveInternal( t => this._relationships[t], throwOnDuplicate: false )
+                .SelectManyRecursiveInternal( t => this._relationships[t], deduplicate: true )
                 .Where( this.IsContainedInCurrentCompilation );
 
         private IEnumerable<INamedTypeSymbol> GetDirectlyDerivedTypesCore( INamedTypeSymbol baseType )
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IEnumerable<INamedTypeSymbol> GetFirstLevelDerivedTypesCore( INamedTypeSymbol baseType )
         {
-            var set = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var set = new HashSet<INamedTypeSymbol>( this._compilationContext.SymbolComparer );
             GetDerivedTypesRecursive( baseType );
 
             return set;
@@ -90,11 +91,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var introducedInterface in introducedInterfaces )
             {
-                builder ??= new Builder( this._compilation, this._relationships.ToBuilder(), this._externalBaseTypes.ToBuilder() );
+                builder ??= new Builder( this._compilationContext, this._relationships.ToBuilder(), this._externalBaseTypes.ToBuilder() );
 
                 var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
 
-                if ( !introducedInterfaceSymbol.ContainingAssembly.Equals( this._compilation.Assembly ) )
+                if ( !introducedInterfaceSymbol.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
                 {
                     // The type may not have been analyzed yet.
                     builder.AnalyzeType( introducedInterfaceSymbol );

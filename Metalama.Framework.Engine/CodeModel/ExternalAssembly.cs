@@ -38,10 +38,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this._assemblySymbol.Identity );
 
         [Memo]
-        public INamedTypeCollection Types => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, false );
+        public INamedTypeCollection Types => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, false );
 
         [Memo]
-        public INamedTypeCollection AllTypes => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, true );
+        public INamedTypeCollection AllTypes => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, true );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

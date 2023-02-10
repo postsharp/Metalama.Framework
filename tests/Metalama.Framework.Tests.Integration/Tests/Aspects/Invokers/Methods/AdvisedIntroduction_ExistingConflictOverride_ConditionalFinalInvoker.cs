@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictOverride_ConditionalFinalInvoker;
 
@@ -53,15 +54,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         }
 
         [Template]
-        public dynamic MethodTemplate()
+        public dynamic? MethodTemplate()
         {
+            TargetClass? local = null;
+
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke( meta.This );
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.NullConditional | InvokerOptions.Final ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

@@ -16,7 +16,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is introduced method.");
     return default(global::System.Object);
   }
-  public global::System.Object IntroducedMethod_Parameters(global::System.Int32 x, global::System.Int32 y)
+  public global::System.Object IntroducedMethod_Parameters(global::System.Int32 x, global::System.Int32 y = 42)
   {
     global::System.Console.WriteLine("This is introduced method.");
     return default(global::System.Object);

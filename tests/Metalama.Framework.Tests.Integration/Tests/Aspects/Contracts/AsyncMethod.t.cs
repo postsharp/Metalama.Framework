@@ -1,4 +1,4 @@
-[NotNullCheck]
+[Test]
 public class TestClass
 {
   public string DoSomething(string text)
@@ -16,20 +16,20 @@ public class TestClass
     }
     return returnValue;
   }
-  public async Task<string> DoSomethingAsync(string text)
+  public async Task<string> DoSomethingAsyncT(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    var returnValue = (await this.DoSomethingAsync_Source(text));
+    var returnValue = await this.DoSomethingAsyncT_Source(text);
     if (returnValue is null)
     {
       throw new global::System.InvalidOperationException("Method returned null");
     }
     return returnValue;
   }
-  private async Task<string> DoSomethingAsync_Source(string text)
+  private async Task<string> DoSomethingAsyncT_Source(string text)
   {
     await Task.Yield();
     Console.WriteLine("Hello");

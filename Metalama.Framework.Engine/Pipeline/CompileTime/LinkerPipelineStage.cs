@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -48,15 +47,15 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         {
             // Run the validators.
             var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
-            var initialCompilation = pipelineStepsResult.Compilations[0];
-            var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
+            var initialCompilation = pipelineStepsResult.FirstCompilation;
+            var finalCompilation = pipelineStepsResult.LastCompilation;
 
             // TODO: pass aspect repository to initialCompilation.
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.
             var linker = new AspectLinker(
-                this._serviceProvider.WithService( new AttributeClassificationService() ),
+                this._serviceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,
@@ -87,7 +86,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     linkerResult.Compilation,
                     input.Project,
                     input.AspectLayers,
-                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    input.FirstCompilationModel, 
+                    pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                     pipelineStepsResult.ExternalAspectSources,
                     input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),

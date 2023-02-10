@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal sealed class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
         where T : class, ICompilationElement
     {
-        public static readonly RefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
-        public static readonly RefEqualityComparer<T> IncludeNullability = new( SymbolEqualityComparer.IncludeNullability );
+        public static readonly RefEqualityComparer<T> Default = new( StructuralSymbolComparer.Default );
+        public static readonly RefEqualityComparer<T> IncludeNullability = new( StructuralSymbolComparer.IncludeNullability );
 
-        private RefEqualityComparer( SymbolEqualityComparer symbolEqualityComparer )
+        private RefEqualityComparer( StructuralSymbolComparer symbolEqualityComparer )
         {
-            this.SymbolEqualityComparer = symbolEqualityComparer;
+            this.StructuralSymbolComparer = symbolEqualityComparer;
         }
 
-        public SymbolEqualityComparer SymbolEqualityComparer { get; }
+        public StructuralSymbolComparer StructuralSymbolComparer { get; }
 
         private static ISymbol? GetSymbol( in Ref<T> reference ) => reference.Target as ISymbol;
 
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( xSymbol != null )
             {
-                return this.SymbolEqualityComparer.Equals( xSymbol, GetSymbol( y ) );
+                return this.StructuralSymbolComparer.Equals( xSymbol, GetSymbol( y ) );
             }
             else
             {
@@ -58,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 var xSymbol = GetSymbol( obj );
 
                 var targetHashCode = xSymbol != null
-                    ? this.SymbolEqualityComparer.GetHashCode( xSymbol )
+                    ? this.StructuralSymbolComparer.GetHashCode( xSymbol )
                     : RuntimeHelpers.GetHashCode( obj.Target );
 
                 return HashCode.Combine( targetHashCode, obj.TargetKind );

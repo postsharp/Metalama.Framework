@@ -67,12 +67,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public bool IsCanonicalGenericInstance => true;
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>(
-            ( order, invokerOperator )
-                => new MethodInvoker( this, order, invokerOperator ),
-            false );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod
         => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
@@ -114,6 +110,12 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
+
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public IMethodInvoker With( object? target, InvokerOptions options ) => new MethodInvoker( this, options, target );
+
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public Accessibility Accessibility
     {

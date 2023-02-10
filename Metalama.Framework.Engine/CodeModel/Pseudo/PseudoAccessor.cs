@@ -54,9 +54,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod => null;
 
@@ -109,9 +108,16 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     bool IMethod.IsExtern => false;
 
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
+   
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+   
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+
     public ICompilation Compilation => this.DeclaringMember.Compilation;
 
-    public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+    public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        => this.ContainingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind.ToString().ToLowerInvariant();
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 

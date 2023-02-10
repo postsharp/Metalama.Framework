@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ImmutableArray<ManagedResource> resources,
             TestableCancellationToken cancellationToken = default )
         {
-            var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+            var compilationContext = this.ServiceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation );
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
             // Skip if Metalama has been disabled for this project.
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
 
             // Initialize the pipeline and generate the compile-time project.
-            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
+            if ( !this.TryInitialize( diagnosticAdder, partialCompilation.Compilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
             {
                 return default;
             }
@@ -158,10 +158,17 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
 
                 // Format the output.
-                if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
+                if ( (this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml) && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
+                }
+                
+                // Write HTML (used only when building projects for documentation).
+                if ( this.ProjectOptions.WriteHtml )
+                {
+                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, compilation );
+                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, resultPartialCompilation, ".out" );
                 }
 
                 // Add managed resources.

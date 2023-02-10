@@ -1,6 +1,11 @@
-﻿using System;
+﻿#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_HIGHER)
+# endif
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 
 #pragma warning disable CS0067
 
@@ -36,15 +41,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         [Template]
         public dynamic? OverrideMethod()
         {
-            var x = meta.This;
-
+            TargetClass local = null!;
+            
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.Base!.Invoke( x );
+                return meta.Target.Method.With( local, InvokerOptions.Base ).Invoke();
             }
             else
             {
-                return meta.Target.Method.Invokers.Base!.Invoke( x, meta.Target.Method.Parameters[0].Value );
+                return meta.Target.Method.With( local, InvokerOptions.Base ).Invoke( meta.Target.Method.Parameters[0].Value );
             }
         }
     }

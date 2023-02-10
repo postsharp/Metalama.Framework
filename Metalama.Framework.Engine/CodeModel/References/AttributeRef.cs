@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -21,9 +22,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         bool IRefImpl.IsDefault => false;
 
-        public ISymbol GetClosestSymbol( Compilation compilation ) => this._declaringDeclaration.GetSymbol( compilation );
+        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._declaringDeclaration.GetSymbol( compilation );
 
-        private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
+        private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
             var resolved =
@@ -52,10 +53,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._declaringDeclaration = declaringDeclaration;
         }
 
-        public AttributeRef( AttributeSyntax attributeSyntax, SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
+        public AttributeRef(
+            AttributeSyntax attributeSyntax,
+            SyntaxNode? declaration,
+            DeclarationRefTargetKind targetKind,
+            CompilationContext compilationContext )
         {
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilation );
+            this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
         public AttributeRef( AttributeSyntax attributeSyntax, in Ref<IDeclaration> declaration )
@@ -120,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                 case AttributeSyntax attributeSyntax:
                     {
-                        var resolved = this.ResolveAttributeData( attributeSyntax, compilation.PartialCompilation.Compilation );
+                        var resolved = this.ResolveAttributeData( attributeSyntax, compilation.CompilationContext );
 
                         if ( resolved.Attribute == null || resolved.Parent == null )
                         {

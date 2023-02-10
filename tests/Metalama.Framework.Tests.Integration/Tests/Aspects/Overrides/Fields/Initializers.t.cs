@@ -1,3 +1,4 @@
+[Introduction]
 internal class TargetClass
 {
   private global::System.Int32 _field = 42;
@@ -38,4 +39,6 @@ internal class TargetClass
   {
     Field = 27;
   }
+  public global::System.Int32 IntroducedField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass.StaticField;
+  public static global::System.Int32 IntroducedStaticField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass.StaticField;
 }

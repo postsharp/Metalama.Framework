@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Services;
@@ -15,22 +17,25 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed class TemplateCompiler
     {
-        private readonly ProjectServiceProvider _serviceProvider;
-        private readonly CompilationContext _runTimeCompilationContext;
+        private readonly ClassifyingCompilationContext _compilationContext;
+        private readonly TemplateProjectManifestBuilder? _templateManifestBuilder;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
         private readonly ILogger _logger;
 
-        public TemplateCompiler( ProjectServiceProvider serviceProvider, CompilationContext runTimeCompilationContext )
+        public TemplateCompiler(
+            ProjectServiceProvider serviceProvider,
+            ClassifyingCompilationContext compilationContext,
+            TemplateProjectManifestBuilder? templateManifestBuilder = null )
         {
-            this._serviceProvider = serviceProvider;
-            this._runTimeCompilationContext = runTimeCompilationContext;
-            this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilationContext.Compilation );
+            this._compilationContext = compilationContext;
+            this._templateManifestBuilder = templateManifestBuilder;
+            this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap();
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
 
             var syntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( runTimeCompilationContext );
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( compilationContext.CompilationContext );
 
             this._observer = serviceProvider.GetService<ITemplateCompilerObserver>();
         }
@@ -79,10 +84,11 @@ namespace Metalama.Framework.Engine.Templating
 
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator(
-                this._runTimeCompilationContext,
+                this._compilationContext,
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serializableTypes,
+                this._templateManifestBuilder,
                 cancellationToken );
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
@@ -177,15 +183,13 @@ namespace Metalama.Framework.Engine.Templating
 
             // ReSharper restore PossibleMultipleEnumeration
 
-            var compileTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>()
-                .GetInstance( compileTimeCompilation );
+            var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
-                this._serviceProvider,
                 templateName,
                 templateSyntaxKind,
-                this._runTimeCompilationContext,
+                this._compilationContext,
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,
                 diagnostics,

@@ -2,45 +2,45 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedIntroduction_ExistingConflictNew_FinalInvoker;
 using System;
+using Metalama.Framework.Code.Invokers;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(TestAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedIntroduction_ExistingConflictNew_FinalInvoker
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue(meta.This);
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int TargetClassProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue(meta.This);
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
         }
     }
 
     public class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override(property, nameof(PropertyTemplate));
+                builder.Advice.Override( property, nameof(PropertyTemplate) );
             }
-
         }
 
         [Template]
@@ -48,17 +48,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
         {
             get
             {
-                Console.WriteLine("Override");
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue(meta.This);
+                Console.WriteLine( "Override" );
+
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
 
             set
             {
-                Console.WriteLine("Override");
-                meta.Target.FieldOrProperty.Invokers.Final.SetValue(meta.This, value);
+                Console.WriteLine( "Override" );
+                meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value = value;
             }
         }
-
     }
 
     internal class BaseClass

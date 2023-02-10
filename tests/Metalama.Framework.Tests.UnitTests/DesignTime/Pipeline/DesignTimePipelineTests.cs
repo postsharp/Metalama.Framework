@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
@@ -10,6 +12,7 @@ using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -580,7 +583,7 @@ partial class C
     [Fact]
     public void ProjectDependencyWithNoMetalamaReferenceButSystemCompileTimeType()
     {
-        var context = this.CreateTestContext();
+        using var context = this.CreateTestContext();
 
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( context );
 
@@ -784,5 +787,108 @@ class C
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: "Project" );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out _ ) );
+    }
+
+    [Fact]
+    public async Task PipelineConfigurationDoesNotKeepReferenceToCompilation()
+    {
+        var output = await Task.Run(
+            async () =>
+            {
+                var result = await
+                    this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
+
+                await Task.Yield();
+
+                return result;
+            } );
+
+        GC.Collect();
+
+        if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
+        {
+            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+        }
+    }
+
+    private async Task<( WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration
+            Configuration)>
+        PipelineConfigurationDoesNotKeepReferenceToCompilationCore()
+    {
+        using var testContext = this.CreateTestContext();
+        var observer = new TestDesignTimePipelineObserver();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+
+        var (masterCompilation, dependentCompilation) = CreateCompilations( 1 );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, dependentCompilation )!;
+
+        var configuration = await pipeline.GetConfigurationAsync(
+            PartialCompilation.CreateComplete( dependentCompilation ),
+            true,
+            AsyncExecutionContext.Get(),
+            default );
+
+        var (_, dependentCompilation2) = CreateCompilations( 2 );
+
+        // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
+        await pipeline.ExecuteAsync( dependentCompilation2, true, AsyncExecutionContext.Get() );
+
+        return (new WeakReference<Compilation>( masterCompilation ), new WeakReference<Compilation>( dependentCompilation ), configuration.Value);
+    }
+
+    private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
+    {
+        var masterCode = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = $@"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+using System.Linq;
+using System;
+
+public class MyAspect : OverrideMethodAspect
+{{
+   public override dynamic? OverrideMethod() 
+   {{
+      return meta.Proceed();
+    }}
+}}
+",
+            ["usage.cs"] = $@"
+
+class C{version} 
+{{
+   [MyAspect]
+   void M() {{}}
+}}
+"
+        };
+
+        var dependentCode = new Dictionary<string, string>()
+        {
+            ["dependent.cs"] = $@"
+class D{version} 
+{{
+   [MyAspect]
+   void M() {{}}
+}}
+
+"
+        };
+
+        var masterCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            masterCode,
+            name: "Master" );
+
+        var dependentCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            dependentCode,
+            name: "Dependent",
+            additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
+
+        return (masterCompilation, dependentCompilation);
     }
 }

@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -33,15 +34,21 @@ namespace Metalama.Framework.Engine.CodeModel
             MetalamaEngineModuleInitializer.EnsureInitialized();
         }
 
-        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
-            => new( project, compilation, aspectRepository );
+        public static CompilationModel CreateInitialInstance( ProjectModel project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
+            => new( project, compilation, aspectRepository, CompilationModelOptions.Default );
 
         public static CompilationModel CreateInitialInstance(
-            IProject project,
+            ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository );
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default );
+
+        internal static CompilationModel CreateInitialInstance(
+            ProjectModel project,
+            Compilation compilation,
+            CompilationModelOptions options )
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -50,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache =
+        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirections =
             ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
@@ -59,7 +66,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
-        public IProject Project { get; }
+        internal ProjectModel Project { get; }
+
+        IProject ICompilation.Project => this.Project;
 
         internal CompilationContext CompilationContext { get; }
 
@@ -67,11 +76,24 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository )
+        internal CompilationModelOptions Options { get; }
+
+        private CompilationModel(
+            ProjectModel project,
+            PartialCompilation partialCompilation,
+            AspectRepository? aspectRepository,
+            CompilationModelOptions? options )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
+
+            this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
+
+            this._staticConstructors =
+                ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+
+            this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+
             this._derivedTypes = partialCompilation.DerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
@@ -81,11 +103,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
+            this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
+            void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
                 => dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
-                    .WithComparers( SymbolEqualityComparer.Default );
+                    .WithComparers( this.CompilationContext.SymbolComparer );
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
@@ -105,7 +128,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Factory = new DeclarationFactory( this );
 
             // Discover custom attributes.
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.RoslynCompilation );
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
@@ -137,7 +160,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.AddTransformation( transformation );
                 }
 
-                this._isMutable = false;
+                this.IsMutable = false;
 
                 // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
@@ -164,12 +187,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable )
+        private CompilationModel( CompilationModel prototype, bool mutable, CompilationModelOptions? options = null )
         {
-            this._isMutable = mutable;
+            this.IsMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
+            this.Options = options ?? prototype.Options;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -189,7 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
-            this._redirectionCache = prototype._redirectionCache;
+            this._redirections = prototype._redirections;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this.AspectRepository = prototype.AspectRepository;
             this.MetricManager = prototype.MetricManager;
@@ -231,14 +255,17 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>() ) );
+                this.GetAttributeCollection( Ref.Compilation( this.CompilationContext ).As<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
+#pragma warning disable CS0809
+        [Obsolete( "This method call is redundant." )]
         public override CompilationModel Compilation => this;
+#pragma warning restore CS0809
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
@@ -382,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             while ( true )
             {
-                if ( this._redirectionCache.TryGetValue( reference, out var target ) )
+                if ( this._redirections.TryGetValue( reference, out var target ) )
                 {
                     result = true;
                     reference = target;
@@ -396,7 +423,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
+        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -434,9 +461,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        internal CompilationModel CreateMutableClone() => new( this, true );
+        internal CompilationModel CreateMutableClone() => new( this, true, this.Options );
 
-        internal void Freeze() => this._isMutable = false;
+        internal CompilationModel CreateImmutableClone() => new( this, false, this.Options );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

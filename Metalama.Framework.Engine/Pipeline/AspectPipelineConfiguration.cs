@@ -5,12 +5,11 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Services;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -39,15 +38,13 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public DiagnosticManifest? DiagnosticManifest => this.CompileTimeProject?.ClosureDiagnosticManifest;
 
-        internal CompileTimeProjectLoader CompileTimeProjectLoader { get; }
+        private CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
         internal FabricsConfiguration? FabricsConfiguration { get; }
 
         public ProjectModel ProjectModel { get; }
 
         public ProjectServiceProvider ServiceProvider { get; }
-
-        private ImmutableArray<MetadataReference> MetadataReferences { get; }
 
         internal CodeFixFilter CodeFixFilter { get; }
 
@@ -58,12 +55,11 @@ namespace Metalama.Framework.Engine.Pipeline
             IReadOnlyDictionary<string, OtherTemplateClass> otherTemplateClasses,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader,
+            CompileTimeProjectRepository compileTimeProjectRepository,
             FabricsConfiguration? fabricsConfiguration,
             ProjectModel projectModel,
-            ServiceProvider<IProjectService> serviceProvider,
-            CodeFixFilter codeFixFilter,
-            ImmutableArray<MetadataReference> metadataReferences )
+            ProjectServiceProvider serviceProvider,
+            CodeFixFilter codeFixFilter )
         {
             this.Domain = domain;
             this.Stages = stages;
@@ -71,15 +67,14 @@ namespace Metalama.Framework.Engine.Pipeline
             this.OtherTemplateClasses = otherTemplateClasses;
             this.AspectLayers = aspectLayers;
             this.CompileTimeProject = compileTimeProject;
-            this.CompileTimeProjectLoader = compileTimeProjectLoader;
+            this.CompileTimeProjectRepository = compileTimeProjectRepository;
             this.FabricsConfiguration = fabricsConfiguration;
             this.ProjectModel = projectModel;
             this.ServiceProvider = serviceProvider;
             this.CodeFixFilter = codeFixFilter;
-            this.MetadataReferences = metadataReferences;
         }
 
-        public AspectPipelineConfiguration WithServiceProvider( ServiceProvider<IProjectService> serviceProvider )
+        public AspectPipelineConfiguration WithServiceProvider( ProjectServiceProvider serviceProvider )
             => new(
                 this.Domain,
                 this.Stages,
@@ -87,12 +82,11 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.OtherTemplateClasses,
                 this.AspectLayers,
                 this.CompileTimeProject,
-                this.CompileTimeProjectLoader,
+                this.CompileTimeProjectRepository,
                 this.FabricsConfiguration,
                 this.ProjectModel,
                 serviceProvider,
-                this.CodeFixFilter,
-                this.MetadataReferences );
+                this.CodeFixFilter );
 
         internal AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
             => codeFixFilter == this.CodeFixFilter
@@ -104,12 +98,11 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.OtherTemplateClasses,
                     this.AspectLayers,
                     this.CompileTimeProject,
-                    this.CompileTimeProjectLoader,
+                    this.CompileTimeProjectRepository,
                     this.FabricsConfiguration,
                     this.ProjectModel,
                     this.ServiceProvider,
-                    codeFixFilter,
-                    this.MetadataReferences );
+                    codeFixFilter );
 
         internal UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
     }

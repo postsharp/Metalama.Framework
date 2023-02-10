@@ -2,7 +2,20 @@
 public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
 {
   public global::System.Int32 AutoProperty { get; set; }
+  public global::System.Int32 AutoProperty_PrivateSet { get; private set; }
   public global::System.Int32 Property
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is introduced interface member.");
+      return (global::System.Int32)42;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is introduced interface member.");
+    }
+  }
+  public global::System.Int32 Property_PrivateSet
   {
     get
     {

@@ -47,29 +47,57 @@ namespace Metalama.Framework.Code.Collections
         /// <param name="item">The initial item.</param>
         /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
         /// <param name="includeThis">A value indicating whether <paramref name="item"/> itself should be included in the result set.</param>
-        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
+        /// <param name="deduplicate">
+        ///     <c>true</c> if duplicates should be removed from the result.
+        ///     When <c>false</c>, duplicates throw in Debug build, and are not checked (causing infinite loops) in Release build.
+        /// </param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         internal static IReadOnlyCollection<T> SelectManyRecursive<T>(
             this T item,
             Func<T, IEnumerable<T>?> getItems,
             bool includeThis = false,
-            bool throwOnDuplicate = true )
+            bool deduplicate = false )
             where T : class
         {
             var recursionCheck = 0;
 
-            // Create a dictionary for the results. The key is the item, the value is the order of insertion.
-            Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
+#if DEBUG
 
-            if ( includeThis )
+            // ReSharper disable once ConvertToConstant.Local
+            var useDictionary = true;
+#else
+            var useDictionary = deduplicate;
+#endif
+
+            if ( useDictionary )
             {
-                results.Add( item, 0 );
+                // Create a dictionary for the results. The key is the item, the value is the order of insertion.
+                Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
+
+                if ( includeThis )
+                {
+                    results.Add( item, 0 );
+                }
+
+                VisitMany( getItems( item ), getItems, results, deduplicate, ref recursionCheck );
+
+                return results.Keys;
             }
+            else
+            {
+                // Create a list for the results.
+                List<T> results = new();
 
-            VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                if ( includeThis )
+                {
+                    results.Add( item );
+                }
 
-            return results.Keys;
+                VisitMany( getItems( item ), getItems, results, ref recursionCheck );
+
+                return results;
+            }
         }
 
         /// <summary>
@@ -77,37 +105,60 @@ namespace Metalama.Framework.Code.Collections
         /// </summary>
         /// <param name="collection">The initial collection of items.</param>
         /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
-        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
+        /// <param name="deduplicate">
+        ///     <c>true</c> if duplicates should be removed from the result.
+        ///     When <c>false</c>, duplicates throw in Debug build, and are not checked (causing infinite loops) in Release build.
+        /// </param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IReadOnlyCollection<T> SelectManyRecursive<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
-            bool throwOnDuplicate = true )
+            bool deduplicate = false )
             where T : class, ICompilationElement
-            => SelectManyRecursiveInternal( collection, getItems, throwOnDuplicate );
+            => SelectManyRecursiveInternal( collection, getItems, deduplicate );
 
         internal static IReadOnlyCollection<T> SelectManyRecursiveInternal<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
-            bool throwOnDuplicate = true )
+            bool deduplicate = false )
             where T : class
         {
             var recursionCheck = 0;
 
-            // Create a dictionary for the results. The key is the item, the value is the order of insertion.
-            Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
+#if DEBUG
 
-            VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
+            // ReSharper disable once ConvertToConstant.Local
+            var useDictionary = true;
+#else
+            var useDictionary = deduplicate;
+#endif
 
-            return results.Keys;
+            if ( useDictionary )
+            {
+                // Create a dictionary for the results. The key is the item, the value is the order of insertion.
+                Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
+
+                VisitMany( collection, getItems, results, deduplicate, ref recursionCheck );
+
+                return results.Keys;
+            }
+            else
+            {
+                // Create a list for the results.
+                List<T> results = new();
+
+                VisitMany( collection, getItems, results, ref recursionCheck );
+
+                return results;
+            }
         }
 
         private static void VisitMany<T>(
             IEnumerable<T>? collection,
             Func<T, IEnumerable<T>?> getItems,
             Dictionary<T, int> results,
-            bool throwOnDuplicate,
+            bool deduplicate,
             ref int recursionCheck )
             where T : class
         {
@@ -131,7 +182,7 @@ namespace Metalama.Framework.Code.Collections
                     {
                         // We are in a cycle.
 
-                        if ( throwOnDuplicate )
+                        if ( !deduplicate )
                         {
                             throw new InvalidOperationException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
                         }
@@ -145,7 +196,41 @@ namespace Metalama.Framework.Code.Collections
                         results.Add( item, results.Count );
                     }
 
-                    VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                    VisitMany( getItems( item ), getItems, results, deduplicate, ref recursionCheck );
+                }
+            }
+            finally
+            {
+                recursionCheck--;
+            }
+        }
+
+        private static void VisitMany<T>(
+            IEnumerable<T>? collection,
+            Func<T, IEnumerable<T>?> getItems,
+            List<T> results,
+            ref int recursionCheck )
+            where T : class
+        {
+            recursionCheck++;
+
+            try
+            {
+                if ( recursionCheck > 64 )
+                {
+                    throw new InvalidOperationException( "Too many levels of inheritance." );
+                }
+
+                if ( collection == null )
+                {
+                    return;
+                }
+
+                foreach ( var item in collection )
+                {
+                    results.Add( item );
+
+                    VisitMany( getItems( item ), getItems, results, ref recursionCheck );
                 }
             }
             finally

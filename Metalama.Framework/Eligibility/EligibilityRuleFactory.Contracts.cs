@@ -20,14 +20,22 @@ public static partial class EligibilityRuleFactory
             var declaringTypeRule = CreateRule<INamedType>( builder => builder.MustBeRunTimeOnly() );
 
             // Eligibility rules for fields, properties and indexers. Note that we always skip constant fields.
+            static void AddCommonGetterParameterRules( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
+            {
+                builder.MustSatisfy(
+                    p => p.GetMethod?.GetIteratorInfo().EnumerableKind is EnumerableKind.None,
+                    member
+                        => $"{member} must not have get accessor that returns IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+            }
+
             var propertyOrIndexerEligibilityInput =
                 CreateRule<IFieldOrPropertyOrIndexer>(
-                    p =>
+                    builder =>
                     {
-                        p.MustBeWritable();
-                        p.MustBeExplicitlyDeclared();
-                        p.DeclaringType().AddRule( declaringTypeRule );
-                        p.ExceptForInheritance().MustNotBeAbstract();
+                        builder.MustBeWritable();
+                        builder.MustBeExplicitlyDeclared();
+                        builder.DeclaringType().AddRule( declaringTypeRule );
+                        builder.ExceptForInheritance().MustNotBeAbstract();
                     } );
 
             var propertyOrIndexerEligibilityOutput =
@@ -36,12 +44,13 @@ public static partial class EligibilityRuleFactory
                         => fieldOrPropertyOrIndexer.Convert()
                             .When<IPropertyOrIndexer>()
                             .MustSatisfy(
-                                p =>
+                                builder =>
                                 {
-                                    p.MustBeReadable();
-                                    p.MustBeExplicitlyDeclared();
-                                    p.DeclaringType().AddRule( declaringTypeRule );
-                                    p.ExceptForInheritance().MustNotBeAbstract();
+                                    builder.MustBeReadable();
+                                    builder.MustBeExplicitlyDeclared();
+                                    AddCommonGetterParameterRules( builder );
+                                    builder.DeclaringType().AddRule( declaringTypeRule );
+                                    builder.ExceptForInheritance().MustNotBeAbstract();
                                 } ) );
 
             var propertyOrIndexerEligibilityBoth =
@@ -50,6 +59,7 @@ public static partial class EligibilityRuleFactory
                     {
                         builder.MustBeReadable();
                         builder.MustBeWritable();
+                        AddCommonGetterParameterRules( builder );
                         builder.DeclaringType().AddRule( declaringTypeRule );
                         builder.ExceptForInheritance().MustNotBeAbstract();
                     } );
@@ -59,23 +69,39 @@ public static partial class EligibilityRuleFactory
                     builder =>
                     {
                         builder.MustBeExplicitlyDeclared();
+                        AddCommonGetterParameterRules( builder );
                         builder.Convert().When<IField>().MustBeWritable();
                         builder.DeclaringType().AddRule( declaringTypeRule );
                         builder.ExceptForInheritance().MustNotBeAbstract();
                     } );
 
             // Eligibility rules for parameters.
+            static void AddCommonReturnParameterRules( IEligibilityBuilder<IParameter> parameter )
+            {
+                parameter.MustNotBeVoid();
+
+                parameter.MustSatisfy(
+                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
+                    member => $"{member} must not have void awaitable result" );
+
+                parameter.MustSatisfy(
+                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method }
+                           && method.GetIteratorInfo().EnumerableKind is not EnumerableKind.None),
+                    member
+                        => $"{member} must not return IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+            }
+
             var parameterEligibilityInput =
-                CreateRule<IParameter>(
-                    parameter =>
+                CreateRule(
+                    (Action<IEligibilityBuilder<IParameter>>) (parameter =>
                     {
                         parameter.MustNotBeReturnParameter();
                         parameter.MustBeReadable();
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
-                        parameter.MustNotBeVoid();
+                        AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
-                    } );
+                    }) );
 
             var parameterEligibilityOutput =
                 CreateRule<IParameter>(
@@ -85,7 +111,7 @@ public static partial class EligibilityRuleFactory
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
-                        parameter.MustNotBeVoid();
+                        AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
@@ -98,7 +124,7 @@ public static partial class EligibilityRuleFactory
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
-                        parameter.MustNotBeVoid();
+                        AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
@@ -113,7 +139,7 @@ public static partial class EligibilityRuleFactory
                             _ => $"output contracts on constructors are not supported" );
 
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
-                        parameter.MustNotBeVoid();
+                        AddCommonReturnParameterRules( parameter );
                     } );
 
             _contractEligibilityBoth = CreateRule<IDeclaration>(

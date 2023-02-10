@@ -56,34 +56,7 @@
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Introductions\Methods\NameConflict.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>NameConflict.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Introductions\Methods\NameConflict_Source - Copy.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>NameConflict_Source.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Introductions\Methods\NameConflict_Source.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>NameConflict_Source.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Introductions\Methods\ParameterMapping.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Methods\ParameterMapping.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
-      </None>
-      <None Include="Tests\Templating\LocalFunctions\NameConflict_GenericParameter.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>NameConflict_GenericParameter.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Validation\ClassBasedValidator_Func.t.cs" />
-    </ItemGroup>
-    
+
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
     
     <ItemGroup>

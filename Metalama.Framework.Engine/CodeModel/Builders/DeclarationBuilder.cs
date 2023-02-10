@@ -16,6 +16,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -28,11 +29,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
     {
         private readonly AttributeBuilderCollection _attributes = new();
-        
+
         protected DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
+
+        protected T Translate<T>( T compilationElement )
+            where T : class, ICompilationElement
+            => compilationElement.ForCompilation( this.Compilation );
+
+        // TODO: implement
+        protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
         public Advice ParentAdvice { get; }
 
@@ -89,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual void Freeze() => this.IsFrozen = true;
 
-        public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
+        public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
         public SerializableDeclarationId ToSerializableId()
             => throw new NotImplementedException( "The method is not implemented for introduced declarations." );
@@ -154,6 +162,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return attributes;
         }
 
-        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
+        // TODO: This is temporary override (see the callsite for reason).
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, Ref<IDeclaration> declarationRef )
+        {
+            var attributes = context.SyntaxGenerator.AttributesForDeclaration(
+                declarationRef,
+                context.Compilation,
+                this.AttributeTargetSyntaxKind );
+
+            return attributes;
+        }
+
+        public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

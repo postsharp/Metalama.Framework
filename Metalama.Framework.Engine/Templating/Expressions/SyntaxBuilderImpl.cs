@@ -2,9 +2,11 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -148,7 +150,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : ((TypedExpressionSyntax) expression).Syntax.NormalizeWhitespace().ToFullString() );
+                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, this._compilation, this._syntaxGenerationContext )
+                    .NormalizeWhitespace()
+                    .ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
@@ -166,7 +170,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                 MetalamaStringFormatter.Format( $"Cannot convert '{fieldOrProperty}' to an IExpression because it is an implicitly declared field." ) );
         }
 
-        return new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+        return new FieldOrPropertyInvoker( fieldOrProperty, InvokerOptions.Default, instance );
     }
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );

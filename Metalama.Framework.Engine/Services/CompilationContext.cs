@@ -1,38 +1,44 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationContext : ICompilationServices
+public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
-    private readonly CompilationContextFactory _compilationContextFactory;
-
-    // The service provider is intentionally private because the CompilationContext is not created with the latest version of
-    // the service provider. Additionally, the CompilationContext is cached in the CompilationContextFactory and CompilationContextFactory may
-    // return an old instance of CompilationContext, created with an old service provider, even when requested from a new service provider.
-    private readonly ProjectServiceProvider _serviceProvider;
-
-    internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider, CompilationContextFactory factory )
+    internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
-        this._serviceProvider = serviceProvider;
-        this._compilationContextFactory = factory;
     }
 
     [Memo]
-    internal CompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdProvider );
+    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
     internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
 
     public Compilation Compilation { get; }
+
+    CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
+    {
+        // When the current CompilationContext is used for reflecting the template code
+        // (because the template is defined in source code, so it does not have its own ITemplateReflectionContext),
+        // we use the source compilation.
+
+        return (CompilationModel) sourceCompilation;
+    }
+
+    public bool IsCacheable => false;
 
     IReflectionMapper ICompilationServices.ReflectionMapper => this.ReflectionMapper;
 
@@ -40,37 +46,63 @@ public sealed class CompilationContext : ICompilationServices
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
 
     [Memo]
-    internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
-
-    [Memo]
-    internal AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this._serviceProvider, this ) );
-
-    private ISymbolClassifier GetSymbolClassifierCore()
-    {
-        var hasMetalamaReference = this.Compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
-
-        return hasMetalamaReference
-            ? new SymbolClassifier( this._serviceProvider, this.Compilation, this.AttributeDeserializer )
-            : new SymbolClassifier( this._serviceProvider, null, this.AttributeDeserializer );
-    }
-
-    [Memo]
-    public SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
+    public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );
 
     [Memo]
-    public ISymbolClassificationService SymbolClassificationService => new SymbolClassificationService( this );
-
-    [Memo]
-    internal SystemTypeResolver SystemTypeResolver
-        => this._serviceProvider.Global.GetRequiredService<ISystemTypeResolverFactory>().Create( this._serviceProvider, this );
-
-    [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
-    internal CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
+    [Memo]
+    public SafeSymbolComparer SymbolComparer => new( this );
+
+    [Memo]
+    public IEqualityComparer<ISymbol> SymbolComparerIncludingNullability => new SafeSymbolComparer( this, SymbolEqualityComparer.IncludeNullability );
+
+    [Memo]
+
+    internal ImmutableDictionary<AssemblyIdentity, IAssemblySymbol> Assemblies
+        => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IEvent>> EventRefComparer => new MemberRefEqualityComparer<IEvent>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IField>> FieldRefComparer => new MemberRefEqualityComparer<IField>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IProperty>> PropertyRefComparer => new MemberRefEqualityComparer<IProperty>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IIndexer>> IndexerRefComparer => new MemberRefEqualityComparer<IIndexer>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IMember> MemberComparer => new MemberComparer<IMember>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
@@ -86,4 +118,7 @@ public sealed class CompilationContext : ICompilationServices
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }
+
+    [Memo]
+    internal SymbolTranslator SymbolTranslator => new( this );
 }

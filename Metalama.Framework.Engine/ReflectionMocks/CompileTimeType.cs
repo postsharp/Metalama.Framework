@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -33,16 +34,16 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
-        
-        internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
-            => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
+
+        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
+            => new( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
 
         // For test only.
-        internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
+        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().CompilationContext );
 
         // For test only.
-        private static Type Create( ITypeSymbol typeSymbol, Compilation compilation )
-            => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
+        private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilation )
+            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace
         {

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Fields;
 
-            var serialized = testContext.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
+            var serialized = testContext.Serialize<Type>( CompileTimeType.Create( allProperties.Single().Type ) )
                 .ToString();
 
             this.TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );

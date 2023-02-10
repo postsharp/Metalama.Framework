@@ -281,7 +281,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split inheritable aspects by syntax tree.
             foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
             {
-                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.CompilationContext );
 
                 if ( syntaxTree == null )
                 {
@@ -322,7 +322,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
 
-                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.CompilationContext );
 
                 if ( syntaxTree == null )
                 {

@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
                 {
-                    var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+                    var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
                     // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
                     foreach ( var attribute in backingField.GetAttributes() )

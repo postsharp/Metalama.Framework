@@ -11,6 +11,8 @@ namespace Metalama.Framework.CompileTimeContracts;
 
 public interface ITemplateSyntaxFactory
 {
+    ICompilation Compilation { get; }
+
     void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement );
 
     void AddStatement( List<StatementOrTrivia> list, IStatement statement );
@@ -52,11 +54,13 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse );
 
-    IUserExpression? Proceed( string methodName );
-    
+    IUserExpression Proceed( string methodName );
+
+    IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext );
+
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
-    TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null );
+    TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null );
 
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );
 

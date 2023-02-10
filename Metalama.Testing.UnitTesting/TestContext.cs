@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -29,6 +30,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
     private readonly bool _isRoot;
+    private readonly Stopwatch? _stopwatch;
+    private readonly IDisposable? _throttlingHandle;
+    private readonly StackTrace _stackTrace = new();
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<CompileTimeDomain?> _domain;
@@ -61,7 +65,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
                 if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 120 ) ), null ) == null )
                 {
                     this._timeoutAction = this._timeout.Token.Register(
-                        () => this.ServiceProvider.GetLoggerFactory().GetLogger( "Test" ).Error?.Log( "Test timeout. Cancelling." ) );
+                        () => this.ServiceProvider.GetLoggerFactory()
+                            .GetLogger( "Test" )
+                            .Error?.Log( $"Test timeout. It has been running {this._stopwatch?.Elapsed}. Cancelling." ) );
                 }
             }
 
@@ -78,6 +84,11 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
+        this._throttlingHandle = TestThrottlingHelper.StartTest( contextOptions.RequiresExclusivity );
+
+        // Start the Stopwatch only after we get after the throttle wall.
+        this._stopwatch = Stopwatch.StartNew();
+
         this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
@@ -89,7 +100,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         // We intentionally replace (override) backstage services by ours.
         var backstageServices = ServiceProvider<IBackstageService>.Empty
             .WithService( this )
-            .WithService( platformInfo );
+            .WithService( platformInfo )
+            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
@@ -106,7 +118,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
     }
 
-    private TestContext( TestContext prototype, IEnumerable<MetadataReference> newReferences )
+    private TestContext( TestContext prototype, IEnumerable<PortableExecutableReference> newReferences )
     {
         this._domain = prototype._domain;
         this.ProjectOptions = prototype.ProjectOptions;
@@ -114,7 +126,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this.ServiceProvider = prototype.ServiceProvider.Global.Underlying.WithProjectScopedServices( this.ProjectOptions, newReferences );
     }
 
-    public TestContext WithReferences( IEnumerable<MetadataReference> newReferences ) => new( this, newReferences );
+    public TestContext WithReferences( IEnumerable<PortableExecutableReference> newReferences ) => new( this, newReferences );
 
     /// <summary>
     /// Creates an <see cref="ICompilation"/> made of a single source file.
@@ -230,6 +242,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #if NET5_0_OR_GREATER
         var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
         domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
+        domain.UnloadTimeout += MemoryLeakHelper.CaptureMiniDump;
 
         return domain;
 #else
@@ -260,7 +273,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     DateTime IDateTimeProvider.Now => DateTime.Now;
 
-    public virtual void Dispose()
+    protected virtual void Dispose( bool disposing )
     {
         if ( this._isRoot )
         {
@@ -268,8 +281,25 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             this._domain.Value?.Dispose();
             this._timeout?.Dispose();
             this._timeoutAction?.Dispose();
+            this._throttlingHandle?.Dispose();
+        }
+
+        if ( disposing )
+        {
+            GC.SuppressFinalize( this );
         }
     }
+
+#pragma warning disable CA1821
+    ~TestContext()
+    {
+        this.Dispose( false );
+
+        throw new InvalidOperationException( $"The TestContext allocated at the following call stack was not disposed:\n{this._stackTrace}\n------" );
+    }
+#pragma warning restore CA1821
+
+    public void Dispose() => this.Dispose( true );
 
     IApplicationInfo IApplicationInfoProvider.CurrentApplication => _applicationInfo;
 }

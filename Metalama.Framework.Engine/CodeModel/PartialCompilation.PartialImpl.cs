@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,12 +20,12 @@ namespace Metalama.Framework.Engine.CodeModel
             private readonly ImmutableHashSet<INamedTypeSymbol>? _types;
 
             public PartialImpl(
-                Compilation compilation,
+                CompilationContext compilationContext,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 DerivedTypeIndex derivedTypeIndex,
                 ImmutableArray<ManagedResource> resources )
-                : base( compilation, derivedTypeIndex, resources )
+                : base( compilationContext, derivedTypeIndex, resources )
             {
                 this._types = types;
                 this.SyntaxTrees = syntaxTrees;

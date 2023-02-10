@@ -43,10 +43,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
             }
             else
             {
-                ExpressionFactory.Capture( meta.Target.Method.Invokers.Base.Invoke( meta.This ), out baseCall );
+                ExpressionFactory.Capture( meta.Target.Method.Invoke(), out baseCall );
             }
 
-            var clone = meta.Cast( meta.Target.Type, baseCall );
+            var clone = meta.Cast( meta.Target.Type, baseCall )!;
 
             // Select clonable fields.
             var clonableFields =
@@ -57,9 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
 
             foreach (var field in clonableFields)
             {
-                field.Invokers.Final.SetValue(
-                    clone,
-                    meta.Cast( field.Type, ( (ICloneable)field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
+                field.With( (IExpression) clone ).Value = meta.Cast( field.Type, ( (ICloneable)field.Value! ).Clone() );
             }
 
             return clone;

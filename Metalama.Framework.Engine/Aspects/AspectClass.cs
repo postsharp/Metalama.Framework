@@ -101,7 +101,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         Type aspectType,
         IAspect? prototype,
         IDiagnosticAdder diagnosticAdder,
-        CompilationContext compilationContext ) : base(
+        ITemplateReflectionContext compilationContext ) : base(
         serviceProvider,
         compilationContext,
         typeSymbol,
@@ -114,6 +114,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.IsAbstract = typeSymbol.IsAbstract;
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+        var attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
         this.DiagnosticLocation = typeSymbol.GetDiagnosticLocation();
         this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
@@ -160,7 +161,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                     break;
 
                 case nameof(EditorExperienceAttribute):
-                    if ( !compilationContext.AttributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
+                    if ( !attributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
                             attribute,
                             diagnosticAdder,
                             out var editorExperienceAttribute ) )
@@ -330,7 +331,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         AspectClass? baseAspectClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        CompilationContext compilationContext,
+        ITemplateReflectionContext templateReflectionContext,
         AspectDriverFactory aspectDriverFactory,
         [NotNullWhen( true )] out AspectClass? aspectClass )
     {
@@ -375,7 +376,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             aspectReflectionType,
             prototype,
             diagnosticAdder,
-            compilationContext );
+            templateReflectionContext );
 
         if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
         {
@@ -486,6 +487,9 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             return eligibility;
         }
     }
+
+    ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext )
+        => this.GetTemplateReflectionContext( compilationContext );
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
     {

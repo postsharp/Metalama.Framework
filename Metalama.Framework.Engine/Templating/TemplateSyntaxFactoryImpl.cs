@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.Templating
             this._syntaxGenerationContext = templateExpansionContext.SyntaxGenerationContext;
         }
 
+        public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
+
         public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
@@ -175,7 +177,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return SyntaxFactory.List( statementList );
         }
-        
+
         public SyntaxKind Boolean( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         // This method is called when the expression of 'return' is a non-dynamic expression.
@@ -234,7 +236,7 @@ namespace Metalama.Framework.Engine.Templating
             if ( value.Type.Equals( SpecialType.Void )
                  || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
             {
-                // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
+                // If the method is void, we invoke the method as a statement (so we don't lose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
                 TypeSyntax variableType;
                 ExpressionSyntax variableValue;
@@ -313,7 +315,7 @@ namespace Metalama.Framework.Engine.Templating
             => this._templateExpansionContext.SyntaxSerializationService.Serialize(
                 o,
                 new SyntaxSerializationContext(
-                    this._templateExpansionContext.Compilation.AssertNotNull().GetCompilationModel(),
+                    this._templateExpansionContext.Compilation.AssertNotNull(),
                     this._syntaxGenerationContext ) );
 
         public T AddSimplifierAnnotations<T>( T node )
@@ -342,6 +344,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public IUserExpression Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
 
+        public IUserExpression ConfigureAwait( IUserExpression expression, bool continueOnCapturedContext )
+            => TemplateExpansionContext.ConfigureAwait( expression, continueOnCapturedContext );
+
         public ExpressionSyntax GetDynamicSyntax( object? expression )
         {
             switch ( expression )
@@ -362,15 +367,17 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdProvider.ResolveId( new SerializableTypeId( type ) )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId(
+                    new SerializableTypeId( type ),
+                    this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
-            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext, false );
+            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );
         }
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )

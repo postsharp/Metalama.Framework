@@ -15,6 +15,8 @@ namespace Metalama.Testing.UnitTesting;
 [PublicAPI]
 public sealed record TestContextOptions
 {
+    public bool RequiresExclusivity { get; init; }
+
     /// <summary>
     /// Gets the default <see cref="TestContextOptions"/> value.
     /// </summary>
@@ -58,7 +60,8 @@ public sealed record TestContextOptions
     /// <summary>
     /// Gets the list of references that will be added to compilations created in this context.
     /// </summary>
-    public ImmutableArray<MetadataReference> References { get; init; } = TestCompilationFactory.GetMetadataReferences().ToImmutableArray<MetadataReference>();
+    public ImmutableArray<PortableExecutableReference> References { get; init; } =
+        TestCompilationFactory.GetMetadataReferences().ToImmutableArray();
 
     /// <summary>
     /// Gets the test timeout period, after which the <see cref="TestContext.CancellationToken"/> of the <see cref="TestContext"/> is signalled.

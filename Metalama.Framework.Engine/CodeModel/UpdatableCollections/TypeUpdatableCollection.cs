@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +12,33 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    // When the type is in the current assembly, we include only types that are in the partial compilation.
-    protected override bool IsSymbolIncluded( ISymbol t )
-        => base.IsSymbolIncluded( t )
-           && (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
-                                        || this.Compilation.PartialCompilation.Types.Contains( t ))
-           && this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+    {
+        if ( !base.IsSymbolIncluded( symbol ) )
+        {
+            return false;
+        }
+
+        if ( symbol.ContainingAssembly == this.Compilation.RoslynCompilation.Assembly )
+        {
+            // For types defined in the current assembly, we need to take partial compilations into account.
+
+            return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
+
+            bool IsIncludedInPartialCompilation( INamedTypeSymbol t )
+                => t switch
+                {
+                    { ContainingType: { } containingType } => IsIncludedInPartialCompilation( containingType ),
+                    _ => this.Compilation.PartialCompilation.Types.Contains( t.OriginalDefinition )
+                };
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )

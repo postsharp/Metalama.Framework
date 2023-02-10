@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Project;
 using System;
@@ -140,7 +141,7 @@ namespace Metalama.Framework.Aspects
         /// or can be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.This.MyMethod()</c>).
         /// The <see cref="This"/> property exposes the state of the target type as it is <i>after</i> the application
         /// of all aspects. If the member is <c>virtual</c>, a virtual call is performed, therefore the implementation on the child type
-        /// (possibly with all applied aspects) is performed.  To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
+        /// (possibly with all applied aspects) is performed.  It corresponds to <see cref="InvokerOptions"/>.<see cref="InvokerOptions.Final"/>.  To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
         /// To access static members, use <see cref="ThisType"/>.
         /// </summary>
         /// <seealso cref="Base"/>
@@ -152,7 +153,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.Base.MyMethod()</c>).
         /// The <see cref="Base"/> property exposes the state of the target type as it is <i>before</i> the application
-        /// of the current aspect layer. To access the final layer, use <see cref="This"/>.
+        /// of the current aspect layer. It corresponds to <see cref="InvokerOptions"/>.<see cref="InvokerOptions.Default"/>. To access the final layer, use <see cref="This"/>.
         /// To access static members, use <see cref="BaseType"/>.
         /// </summary>
         /// <seealso cref="This"/>
@@ -164,7 +165,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.ThisStatic.MyStaticMethod()</c>).
         /// The <see cref="ThisType"/> property exposes the state of the target type as it is <i>after</i> the application
-        /// of all aspects. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseType"/>.
+        /// of all aspects.  It corresponds to <see cref="InvokerOptions"/>.<see cref="InvokerOptions.Final"/>. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseType"/>.
         /// To access instance members, use <see cref="This"/>.
         /// </summary>
         /// <seealso cref="This"/>
@@ -181,7 +182,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
         /// The <see cref="BaseType"/> property exposes the state of the target type as it is <i>before</i> the application
-        /// of the current aspect layer. To access the final layer, use <see cref="ThisType"/>.
+        /// of the current aspect layer.  It corresponds to <see cref="InvokerOptions"/>.<see cref="InvokerOptions.Default"/>. To access the final layer, use <see cref="ThisType"/>.
         /// To access instance members, use <see cref="Base"/>.
         /// </summary>
         /// <seealso cref="Base"/>

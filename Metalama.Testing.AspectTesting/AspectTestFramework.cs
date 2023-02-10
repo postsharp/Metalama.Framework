@@ -1,33 +1,30 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.AspectTesting.XunitFramework;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting
 {
-    /// <summary>
-    /// Implementation of a Xunit test framework for Metalama. Falls back to the default XUnit framework in Resharper or Rider.
-    /// </summary>
     [ExcludeFromCodeCoverage]
-    [UsedImplicitly]
-    public class AspectTestFramework : ITestFramework
+    public sealed class AspectTestFramework : ITestFramework, ISourceInformationProvider
     {
         static AspectTestFramework()
         {
             TestingServices.Initialize();
         }
 
-        private readonly ITestFramework _implementation;
+        private readonly GlobalServiceProvider _serviceProvider;
+        private readonly IMessageSink? _messageSink;
 
+        // This is the constructor used by the test host process.
+        [UsedImplicitly]
         public AspectTestFramework( IMessageSink messageSink )
         {
             // We disable logging by default because it creates too many log records.
@@ -42,32 +39,26 @@ namespace Metalama.Testing.AspectTesting
                 messageSinkOrNull?.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
                 Debugger.Launch();
             }
+        }
 
-            if ( ProcessUtilities.ProcessKind == ProcessKind.ResharperTestRunner )
-            {
-                messageSinkOrNull?.Trace( $"Resharper test runner detected. Using the legacy test framework." );
-
-                this._implementation = new XunitTestFramework( messageSink );
-            }
-            else
-            {
-                messageSinkOrNull?.Trace( $"Resharper NOT detected. Using the customized test framework." );
-
-                this._implementation = new AspectTestFrameworkVsImpl(
-                    ServiceProviderFactory.GetServiceProvider().WithService( new TestAssemblyMetadataReader() ),
-                    messageSinkOrNull );
-            }
+        internal AspectTestFramework( GlobalServiceProvider serviceProvider, IMessageSink? messageSink )
+        {
+            this._serviceProvider = serviceProvider;
+            this._messageSink = messageSink;
         }
 
         void IDisposable.Dispose() { }
 
-        public ITestFrameworkDiscoverer GetDiscoverer( IAssemblyInfo assembly ) => this._implementation.GetDiscoverer( assembly );
+        ISourceInformation ISourceInformationProvider.GetSourceInformation( ITestCase testCase ) => (ISourceInformation) testCase;
 
-        public ITestFrameworkExecutor GetExecutor( AssemblyName assemblyName ) => this._implementation.GetExecutor( assemblyName );
+        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly )
+            => new TestDiscoverer( this._serviceProvider, assembly, this._messageSink );
+
+        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( this._serviceProvider, assemblyName );
 
         ISourceInformationProvider ITestFramework.SourceInformationProvider
         {
-            set => this._implementation.SourceInformationProvider = value;
+            set { }
         }
     }
 }

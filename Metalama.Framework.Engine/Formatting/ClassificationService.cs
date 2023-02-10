@@ -14,10 +14,12 @@ namespace Metalama.Framework.Engine.Formatting
     public sealed class ClassificationService
     {
         private readonly ProjectServiceProvider _serviceProvider;
+        private readonly ClassifyingCompilationContextFactory _classifyingCompilationContextFactory;
 
         public ClassificationService( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
+            this._classifyingCompilationContextFactory = this._serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>();
         }
 
         public static bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeFastDetector.HasCompileTimeCode( syntaxRoot );
@@ -32,7 +34,7 @@ namespace Metalama.Framework.Engine.Formatting
             var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticBag();
 
-            var compilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( model.Compilation );
+            var compilationContext = this._classifyingCompilationContextFactory.GetInstance( model.Compilation );
             var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext );
 
             _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot, out _ );

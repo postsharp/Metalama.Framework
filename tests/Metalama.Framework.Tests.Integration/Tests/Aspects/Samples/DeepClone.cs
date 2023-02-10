@@ -14,7 +14,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 #pragma warning disable CS0067
 #pragma warning disable CS0169, CS8618, CS8602, CS8603
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
 {
     [Inheritable]
     internal class DeepCloneAttribute : TypeAspect
@@ -23,19 +23,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         {
             builder.Advice.IntroduceMethod(
                 builder.Target,
-                nameof(this.CloneImpl),
+                nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override,
                 args: new { T = builder.Target },
                 buildMethod: m =>
                 {
                     m.Name = "Clone";
                     m.ReturnType = builder.Target;
-                });
+                } );
 
             builder.Advice.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
-                whenExists: OverrideStrategy.Ignore);
+                whenExists: OverrideStrategy.Ignore );
         }
 
         [Template( IsVirtual = true )]
@@ -48,11 +48,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             if (meta.Target.Method.IsOverride)
             {
-                ExpressionFactory.Capture(meta.Base.Clone(), out baseCall);
+                baseCall = meta.Base.Clone();
             }
             else
             {
-                ExpressionFactory.Capture(meta.Base.MemberwiseClone(), out baseCall);
+                baseCall = meta.Base.MemberwiseClone();
             }
 
             // Define a local variable of the same type as the target type.
@@ -63,36 +63,32 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                 meta.Target.Type.FieldsAndProperties.Where(
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          !f.IsImplicitlyDeclared &&
-                         ((f.Type.Is(typeof(ICloneable)) && f.Type.SpecialType != SpecialType.String) ||
-                          (f.Type is INamedType fieldNamedType && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>())));
+                         ( ( f.Type.Is( typeof(ICloneable) ) && f.Type.SpecialType != SpecialType.String ) ||
+                           ( f.Type is INamedType fieldNamedType && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
 
             foreach (var field in clonableFields)
             {
                 // Check if we have a public method 'Clone()' for the type of the field.
                 var fieldType = (INamedType)field.Type;
-                var cloneMethod = fieldType.Methods.OfExactSignature("Clone", Array.Empty<IType>());
+                var cloneMethod = fieldType.Methods.OfExactSignature( "Clone", Array.Empty<IType>() );
 
                 if (cloneMethod is { Accessibility: Accessibility.Public } ||
-                     fieldType.Enhancements().HasAspect<DeepCloneAttribute>())
+                    fieldType.Enhancements().HasAspect<DeepCloneAttribute>())
                 {
                     // If yes, call the method without a cast.
-                    field.Invokers.Base!.SetValue(
-                        clone,
-                        meta.Cast(fieldType, field.ToExpression().Value?.Clone()));
+                    field.With( clone ).Value = meta.Cast( fieldType, field.Value?.Clone() );
                 }
                 else
                 {
                     // If no, use the interface.
-                    field.Invokers.Base!.SetValue(
-                        clone,
-                        meta.Cast(fieldType, ((ICloneable?)field.ToExpression().Value)?.Clone()));
+                    field.With( clone ).Value = meta.Cast( fieldType, ( (ICloneable?)field.Value )?.Clone() );
                 }
             }
 
             return clone;
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private object Clone() => meta.This.Clone();
     }
 
@@ -116,7 +112,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
         public object Clone()
         {
-            return new ManuallyCloneable() { E = this.E };
+            return new ManuallyCloneable() { E = E };
         }
     }
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         private readonly Ref<T> _underlying;
 
-        public MemberRef( ISymbol symbol, Compilation compilation )
+        public MemberRef( ISymbol symbol, CompilationContext compilation )
         {
             symbol.AssertValidType<T>();
 
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
-        public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
+        public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation ).AssertNotNull();
 
         public Ref<T> ToRef() => this._underlying;
 
@@ -55,14 +56,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public bool IsDefault => this._underlying.IsDefault;
 
-        public ISymbol GetClosestSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
+        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._underlying.GetSymbol( compilation );
 
         public MemberRef<TCast> As<TCast>()
             where TCast : class, IMemberOrNamedType
             => new( this._underlying.As<IDeclaration>() );
 
-        public bool Equals( MemberRef<T> other ) => MemberRefEqualityComparer<T>.Default.Equals( this, other );
+        [Obsolete( "Use comparer.", true )]
+        public bool Equals( MemberRef<T> other ) => throw new NotSupportedException( $"Must use {nameof(MemberRefEqualityComparer<T>)}." );
 
-        public override int GetHashCode() => MemberRefEqualityComparer<T>.Default.GetHashCode( this );
+#pragma warning disable CS0809
+        [Obsolete( "Use comparer.", true )]
+        public override int GetHashCode() => throw new NotSupportedException( $"Must use {nameof(MemberRefEqualityComparer<T>)}." );
+#pragma warning restore CS0809        
     }
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -58,6 +59,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly ISerializerGenerator _serializerGenerator;
             private readonly TypeOfRewriter _typeOfRewriter;
             private readonly RewriterHelper _helper;
+            private readonly TemplateProjectManifestBuilder _compileTimeManifestBuilder;
 
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
@@ -71,17 +73,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public ProduceCompileTimeCodeRewriter(
                 CompileTimeCompilationBuilder parent,
-                CompilationContext runTimeCompilationContext,
+                ClassifyingCompilationContext compilationContext,
                 CompilationContext compileTimeCompilationContext,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                IReadOnlyCollection<CompileTimeProject> referencedProjects,
+                IEnumerable<CompileTimeProject> referencedProjects,
+                TemplateProjectManifestBuilder templateManifestBuilder,
                 CancellationToken cancellationToken )
             {
-                this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
-                this._runTimeCompilation = runTimeCompilationContext.Compilation;
+                this._compileTimeManifestBuilder = templateManifestBuilder;
+                this._helper = new RewriterHelper( compilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
+                this._runTimeCompilation = compilationContext.SourceCompilation;
                 this._compileTimeCompilation = compileTimeCompilationContext.Compilation;
                 this._parent = parent;
                 this._globalUsings = globalUsings;
@@ -90,21 +94,23 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
+                var symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
+
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
                         x => x.Type,
                         x => x,
-                        SymbolEqualityComparer.Default );
+                        symbolEqualityComparer );
 
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
-                        .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
+                        .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
-                    runTimeCompilationContext.Compilation,
+                    compilationContext.CompilationContext,
                     compileTimeCompilationContext.Compilation,
                     this._syntaxGenerationContext,
                     referencedProjects );
@@ -119,8 +125,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                this._fabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                this._fabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
@@ -262,9 +268,10 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( !this._runTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
-                                                        childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof(TypeFabric)) ) );
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
+                                                        .CreateRoslynDiagnostic(
+                                                            childSymbol.GetDiagnosticLocation(),
+                                                            (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }
@@ -341,6 +348,38 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            private void AddToManifestIfNecessary(
+                ISymbol symbol,
+                TemplateInfo? templateInfo,
+                TemplatingScope? scope = default,
+                params IMethodSymbol?[] accessors )
+            {
+                scope ??= this.SymbolClassifier.GetTemplatingScope( symbol );
+
+                if ( templateInfo is { IsNone: false } || scope != TemplatingScope.RunTimeOnly )
+                {
+                    var executionScope = scope.Value.GetExpressionExecutionScope();
+
+                    this._compileTimeManifestBuilder.AddOrUpdateSymbol( symbol, executionScope, templateInfo );
+
+                    // For properties and events, we also update the symbols of accessors. It makes the manifest longer, but reading the manifest
+                    // is then faster.
+                    foreach ( var accessor in accessors )
+                    {
+                        if ( accessor != null )
+                        {
+                            this._compileTimeManifestBuilder.AddOrUpdateSymbol( accessor, executionScope, templateInfo );
+
+                            // Mark all accessor parameters as run-time.
+                            foreach ( var parameter in accessor.Parameters )
+                            {
+                                this._compileTimeManifestBuilder.AddOrUpdateSymbol( parameter, TemplatingScope.RunTimeOnly );
+                            }
+                        }
+                    }
+                }
+            }
+
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
@@ -365,6 +404,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
+                    this.AddToManifestIfNecessary( symbol, null );
+
                     var transformedNode = this.TransformCompileTimeType( node, symbol, scope );
 
                     return new[] { transformedNode };
@@ -471,7 +512,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Add non-implemented members of IAspect, IEligible and IProjectData.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
-                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
+                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, deduplicate: true );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
@@ -644,9 +685,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     yield break;
                 }
 
-                TemplateInfo templateInfo;
+                var templateInfo = this.SymbolClassifier.GetTemplateInfo( methodSymbol );
 
-                if ( (templateInfo = this.SymbolClassifier.GetTemplateInfo( methodSymbol )).IsNone )
+                this.AddToManifestIfNecessary( methodSymbol, templateInfo );
+
+                if ( templateInfo.IsNone )
                 {
                     yield return (MethodDeclarationSyntax) this.VisitMethodDeclaration( node ).AssertNotNull();
 
@@ -701,7 +744,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     yield break;
                 }
 
-                var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
+                var templateInfo = this.SymbolClassifier.GetTemplateInfo( propertySymbol );
+
+                this.AddToManifestIfNecessary( propertySymbol, templateInfo, null, propertySymbol.GetMethod, propertySymbol.SetMethod );
+
+                var propertyIsTemplate = !templateInfo.IsNone;
                 var propertyOrAccessorsAreTemplate = propertyIsTemplate;
 
                 var success = true;
@@ -953,7 +1000,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     yield break;
                 }
 
-                var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+                var templateInfo = this.SymbolClassifier.GetTemplateInfo( symbol );
+
+                this.AddToManifestIfNecessary( symbol, templateInfo );
+
+                var isTemplate = !templateInfo.IsNone;
 
                 if ( isTemplate && variable.Initializer != null )
                 {
@@ -1003,7 +1054,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     yield break;
                 }
 
-                if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
+                var templateInfo = this.SymbolClassifier.GetTemplateInfo( eventSymbol );
+                this.AddToManifestIfNecessary( eventSymbol, templateInfo, null, eventSymbol.AddMethod, eventSymbol.RemoveMethod );
+
+                if ( templateInfo.IsNone )
                 {
                     yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
@@ -1381,6 +1435,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 return this._currentContext;
             }
+
+            public TemplateProjectManifest GetManifest() => this._compileTimeManifestBuilder.Build();
         }
     }
 }

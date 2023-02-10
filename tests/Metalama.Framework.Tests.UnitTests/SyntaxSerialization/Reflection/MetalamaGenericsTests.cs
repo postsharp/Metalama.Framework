@@ -74,13 +74,13 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var serialized = testContext
-                .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType! ) )
+                .Serialize<Type>( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
 
             this.TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
 
             var serialized2 = testContext
-                .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "Target" ) ) )
+                .Serialize<Type>( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "Target" ) ) )
                 .ToString();
 
             this.TestExpression<Type>( code, serialized2, info => Assert.Equal( "Target`1[T1]", info.ToString() ) );

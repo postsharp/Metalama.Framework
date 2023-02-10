@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -38,15 +39,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
         public bool IsRequired => this.FieldBuilder.IsRequired;
 
         public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
+
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.FieldBuilder.With( options );
+
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => this.FieldBuilder.With( target, options );
+
+        public ref object? Value => ref this.FieldBuilder.Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => this.FieldBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
@@ -55,5 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.FieldBuilder.Accessors;
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
     }
 }

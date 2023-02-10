@@ -269,7 +269,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         return new AdviceResult<T>(
             result.NewDeclaration.As<T>(),
-            this._compilation,
+            this._state.CurrentCompilation,
             result.Outcome,
             this._state.AspectBuilder.AssertNotNull(),
             advice.AdviceKind );
@@ -357,7 +357,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         void ValidateOneTarget( IDeclaration target )
         {
             // Check that the compilation match.
-            if ( !ReferenceEquals( target.Compilation, this._compilation ) )
+            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.CurrentCompilation ) )
             {
                 throw new InvalidOperationException( MetalamaStringFormatter.Format( $"The target declaration is not in the current compilation." ) );
             }

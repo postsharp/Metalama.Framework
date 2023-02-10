@@ -46,8 +46,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             if ( !validatorSources.IsEmpty )
             {
                 var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources, cancellationToken );
-                var initialCompilation = pipelineStepsResult.Compilations[0];
-                var finalCompilation = pipelineStepsResult.Compilations[^1];
+                var initialCompilation = pipelineStepsResult.FirstCompilation;
+                var finalCompilation = pipelineStepsResult.LastCompilation;
                 validatorRunner.RunDeclarationValidators( initialCompilation, finalCompilation, diagnosticSink );
                 referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
             }
@@ -71,7 +71,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     input.Compilation,
                     input.Project,
                     input.AspectLayers,
-                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    input.FirstCompilationModel ?? pipelineStepsResult.FirstCompilation,
+                    pipelineStepsResult.LastCompilation,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
                     input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                     validatorSources,

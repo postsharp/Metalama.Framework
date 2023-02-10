@@ -256,7 +256,7 @@ namespace Metalama.Framework.Engine.Templating
                 = new(
                     "LAMA0236",
                     "Cannot reference a run-time-only declaration in a compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is {2}.",
+                    "Cannot reference '{1}' in '{0}' (except for templates) because '{1}' is run-time-only but '{0}' is {2}.",
                     _category,
                     Error );
 
@@ -376,6 +376,30 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0253",
                 "Compile-time-only types cannot be used in invocations of run-time methods.",
                 "Compile-time-only type '{0}' cannot be used in the invocation of run-time method '{1}'.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<string> OnlyLiteralArgumentInConfigureAwaitAfterProceedAsync
+            = new(
+                "LAMA0254",
+                "ConfigureAwait after ProceedAsync has to have literal argument.",
+                "The argument of ConfigureAwait after ProceedAsync can only be 'true' or 'false', it can't be '{0}'.",
+                _category,
+                Error );
+        
+        internal static readonly DiagnosticDefinition<(string Expression, string Type)> CannotCastRunTimeExpressionToCompileTimeType
+            = new(
+                "LAMA0255",
+                "Cannot cast a run-time expression to a compile-time type.",
+                "Cannot cast the run-time expression '{0}' to the compile-time '{1}'.",
+                _category,
+                Error );
+        
+        internal static readonly DiagnosticDefinition<string> DynamicArgumentMustBeCastToIExpression
+            = new(
+                "LAMA0256",
+                "The dynamic argument must be explicitly cast to IExpression.",
+                "The dynamic expression '{0}' must be explicitly cast to 'IExpression' because it is a dynamic argument of a compile-time method that does not return a dynamic type.",
                 _category,
                 Error );
     }

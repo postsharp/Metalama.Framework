@@ -18,6 +18,10 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
 
+        // Resharper disable UnusedMember.Global
+        [Obsolete( "Redundant call" )]
+        public static CompilationModel GetCompilationModel( this CompilationModel compilation ) => compilation;
+
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )

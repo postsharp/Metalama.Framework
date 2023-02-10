@@ -2,24 +2,19 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using SymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SymbolExtensions;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal class TemplateMemberSymbolClassifier
+internal abstract class TemplateMemberSymbolClassifier
 {
-    protected ITypeSymbol MetaType { get; }
-
     public ISymbolClassifier SymbolClassifier { get; }
 
-    public TemplateMemberSymbolClassifier( CompilationContext runTimeCompilationContext )
+    protected TemplateMemberSymbolClassifier( ISymbolClassifier symbolClassifier )
     {
-        this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
-        var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
-        this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
+        this.SymbolClassifier = symbolClassifier;
     }
 
     public bool RequiresCompileTimeExecution( ISymbol? symbol )
@@ -60,10 +55,6 @@ internal class TemplateMemberSymbolClassifier
 
     public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
         => this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
-
-    public bool IsRunTimeMethod( IMethodSymbol symbol )
-        => symbol.Name == nameof(meta.RunTime) &&
-           symbol.ContainingType.GetDocumentationCommentId() == this.MetaType.GetDocumentationCommentId();
 
     public static bool HasTemplateKeywordAttribute( ISymbol symbol )
         => symbol.GetAttributes()

@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 items );
         }
 
+        protected override bool CanBeNull => false;
+
         public override IType Type { get; }
     }
 }

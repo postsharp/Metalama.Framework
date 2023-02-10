@@ -1,5 +1,5 @@
 void Method()
 {
-    global::System.Console.WriteLine("undefined");
-    return;
+  global::System.Console.WriteLine("undefined");
+  return;
 }

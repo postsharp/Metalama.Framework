@@ -68,11 +68,13 @@ class C<T>
             if ( symbol != null )
             {
                 var symbolDeclarationId = symbol.GetSerializableId();
-                var symbolRoundloop = symbolDeclarationId.ResolveToSymbol( compilation.GetRoslynCompilation() );
+                var symbolRoundloop = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
 
                 Assert.Same( symbol, symbolRoundloop );
 
-                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetRoslynCompilation() ).GetSymbol( compilation.GetRoslynCompilation() );
+                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+                    .GetSymbol( compilation.GetRoslynCompilation() );
+
                 Assert.Same( symbol, symbolRoundloopFromRef );
             }
         }

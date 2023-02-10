@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,6 +21,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 #pragma warning disable SA1124 // Don't use regions
 
@@ -36,33 +41,39 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private readonly CancellationToken _cancellationToken;
     private readonly TemplateMemberClassifier _templateMemberClassifier;
     private readonly TypeParameterDetectionVisitor _typeParameterDetectionVisitor;
+    private readonly TemplateProjectManifestBuilder? _templateProjectManifestBuilder;
 
     /// <summary>
     /// Scope of locally-defined symbols (local variables, anonymous types, ....).
     /// </summary>
-    private readonly Dictionary<ISymbol, TemplatingScope> _localScopes = new( SymbolEqualityComparer.Default );
+    private readonly Dictionary<ISymbol, TemplatingScope> _localScopes;
 
     private readonly ISymbolClassifier _symbolScopeClassifier;
+    private readonly SafeSymbolComparer _symbolComparer;
 
     private ScopeContext _currentScopeContext;
 
     private ISymbol? _currentTemplateMember;
-
+    
     public TemplateAnnotator(
-        CompilationContext compilationContext,
+        ClassifyingCompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
         SerializableTypes serializableTypes,
+        TemplateProjectManifestBuilder? templateProjectManifestBuilder,
         CancellationToken cancellationToken )
     {
         this._symbolScopeClassifier = compilationContext.SymbolClassifier;
+        this._localScopes = new Dictionary<ISymbol, TemplatingScope>( compilationContext.CompilationContext.SymbolComparer );
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;
         this._cancellationToken = cancellationToken;
+        this._templateProjectManifestBuilder = templateProjectManifestBuilder;
 
         this._templateMemberClassifier = new TemplateMemberClassifier( compilationContext, syntaxTreeAnnotationMap );
         this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
+        this._symbolComparer = compilationContext.CompilationContext.SymbolComparer;
 
         // add default values of scope
         this._currentScopeContext = ScopeContext.Default;
@@ -301,7 +312,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         => this._currentTemplateMember != null
            && symbol.ContainingType != null
            && symbol.ContainingType.SpecialType != SpecialType.System_Object
-           && symbol.IsMemberOf( this._currentTemplateMember.ContainingType );
+           && this._symbolComparer.IsMemberOf( symbol, this._currentTemplateMember.ContainingType );
 
     private TemplatingScope[] GetNodeScopes( IReadOnlyCollection<SyntaxNode?> nodes )
     {
@@ -341,6 +352,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         if ( this._templateMemberClassifier.IsNodeOfDynamicType( node ) )
         {
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
+
+            // this is to ensure that meta.ProceedAsync().ConfigureAwait(false) is classified as CompileTimeOnlyReturningRuntimeOnly,
+            // so that it's treated like a Proceed expression
+            if ( symbol.IsTaskConfigureAwait() && node is MemberAccessExpressionSyntax { Expression: var configuredExpression } )
+            {
+                symbol = this._syntaxTreeAnnotationMap.GetSymbol( configuredExpression );
+            }
 
             // Dynamic local variables are considered compile-time because they must be transformed. 
             if ( !forAssignment && this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) )
@@ -943,10 +961,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         var expressionScope = this.GetNodeScope( transformedExpression );
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
 
         ImmutableArray<IParameterSymbol> parameters;
 
-        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
+        var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
 
         switch ( symbol )
         {
@@ -956,8 +975,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 break;
 
             default:
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-
                 switch ( expressionType )
                 {
                     case null when symbol == null:
@@ -1017,7 +1034,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 ExpressionSyntax transformedArgumentValue;
 
                 // Transform the argument value.
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType ) )
+                var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType );
+
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
                     // dynamic or dynamic[]
 
@@ -1026,6 +1045,21 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                    $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
+                    }
+
+                    // Dynamic arguments passed to a a compile-time method returning a compile-time value are forbidden.
+                    // They must be explicitly cast to IExpression. It does not apply if the expression is used as a statement expression.
+                    if ( isDynamicParameter && expressionScope == TemplatingScope.CompileTimeOnly && !node.Parent.IsKind( SyntaxKind.ExpressionStatement ) )
+                    {
+                        var argumentType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
+
+                        if ( argumentType?.TypeKind is TypeKind.Dynamic )
+                        {
+                            this.ReportDiagnostic(
+                                TemplatingDiagnosticDescriptors.DynamicArgumentMustBeCastToIExpression,
+                                argument.Expression,
+                                argument.Expression.ToString() );
+                        }
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
@@ -1039,7 +1073,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                     if ( argumentType != null && this._symbolScopeClassifier.GetTemplatingScope( argumentType ) == TemplatingScope.CompileTimeOnly )
                     {
-                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod, argument.Expression, (argumentType, node.Expression.ToString()) );
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CompileTimeTypeInInvocationOfRuntimeMethod,
+                            argument.Expression,
+                            (argumentType, node.Expression.ToString()) );
                     }
                 }
                 else
@@ -1592,9 +1629,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
-            if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnly )
+            if ( symbol != null )
             {
-                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                var scope = this.GetSymbolScope( symbol );
+
+                if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+
+                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
             }
         }
 
@@ -1609,9 +1653,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
-            if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+            if ( symbol != null )
             {
-                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                var scope = this.GetSymbolScope( symbol );
+
+                if ( scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+
+                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
             }
         }
 
@@ -1690,13 +1741,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // The scope of a classical assignment is determined by the left side.
             var transformedLeft = this.Visit( node.Left );
 
-            var scope = this.GetAssignmentScope( transformedLeft );
+            var leftScope = this.GetAssignmentScope( transformedLeft );
             ExpressionSyntax? transformedRight;
 
             // If we are in a run-time-conditional block, we cannot assign compile-time variables.
             ScopeContext? context = null;
 
-            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+            if ( leftScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
                 if ( this._currentScopeContext.IsRuntimeConditionalBlock )
                 {
@@ -1706,8 +1757,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                         (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
 
-                // The right part must be compile-time.
-                context = this._currentScopeContext.CompileTimeOnly( "the assignment of a compile-time expression" );
+                if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.Left ) is INamedTypeSymbol { Name: nameof(IExpression) } )
+                {
+                    // Assigning a run-time expression to an IExpression is allowed but requires special processing.
+                    // It is similar to the case with a cast to IExpression, but the cast is not required.
+                }
+                else
+                {
+                    // The right part must be compile-time.
+                    context = this._currentScopeContext.CompileTimeOnly( "the assignment of a compile-time expression" );
+                }
             }
 
             using ( this.WithScopeContext( context ) )
@@ -1716,13 +1775,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
 
             // If we have a discard assignment, take the scope from the right.
-            if ( scope == TemplatingScope.RunTimeOrCompileTime
+            if ( leftScope == TemplatingScope.RunTimeOrCompileTime
                  && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
             {
-                scope = this.GetNodeScope( transformedRight );
+                leftScope = this.GetNodeScope( transformedRight );
             }
 
-            return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
+            return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( leftScope );
         }
     }
 
@@ -1758,7 +1817,21 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 annotatedType = this.Visit( node.Type );
             }
 
-            castScope = TemplatingScope.RunTimeOnly;
+            castScope = this.GetNodeScope( annotatedType ).GetExpressionValueScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+
+            if ( castScope == TemplatingScope.CompileTimeOnly )
+            {
+                var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+                if ( type is not INamedTypeSymbol { Name: nameof(IExpression) } )
+                {
+                    // We cannot cast a run-time expression to a compile-time type, except to IExpression.
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,
+                        node.Type,
+                        (node.Expression.ToString(), node.Type.ToString()) );
+                }
+            }
         }
         else
         {

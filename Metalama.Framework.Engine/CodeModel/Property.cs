@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -10,6 +11,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -30,11 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel
 #endif
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
-
-        [Memo]
-        private IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
@@ -67,6 +66,15 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
 
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+
+        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
+
         private IExpression? GetInitializerExpressionCore()
         {
             var initializer = ((PropertyDeclarationSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
@@ -80,5 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return new SourceUserExpression( initializer.Value, this.Type );
             }
         }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
     }
 }

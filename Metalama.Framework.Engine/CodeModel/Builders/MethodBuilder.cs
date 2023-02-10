@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -40,11 +39,8 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     // so we don't need an implementation of GenericArguments.
     public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
 
-    [Memo]
-    public IInvokerFactory<IMethodInvoker> Invokers
-        => new InvokerFactory<IMethodInvoker>(
-            ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ),
-            this.OverriddenMethod != null );
+    [Obsolete]
+    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod { get; set; }
 
@@ -85,9 +81,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
         this.CheckNotFrozen();
 
         var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
-        var typeConstant = defaultValue != null ? TypedConstant.Create( defaultValue, iType ) : default;
+        TypedConstant? typedConstant = defaultValue != null ? TypedConstant.Create( defaultValue.Value.Value, iType ) : null;
 
-        return this.AddParameter( name, iType, refKind, typeConstant );
+        return this.AddParameter( name, iType, refKind, typedConstant );
     }
 
     public ITypeParameterBuilder AddTypeParameter( string name )
@@ -150,6 +146,12 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     IMethod IMethod.MethodDefinition => this;
 
     bool IMethod.IsExtern => false;
+
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
+
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 

@@ -2,25 +2,32 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
-    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod"/>.
+    /// Provides methods that tests for classifications of template members.
     /// </summary>
     internal sealed class TemplateMemberClassifier : TemplateMemberSymbolClassifier
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
         public TemplateMemberClassifier(
-            CompilationContext runTimeCompilationContext,
-            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap ) : base( runTimeCompilationContext )
+            ClassifyingCompilationContext runTimeCompilationContext,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap ) : base( runTimeCompilationContext.SymbolClassifier )
         {
+            var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
+            this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         }
+
+        private ITypeSymbol MetaType { get; }
+
+        public bool IsRunTimeMethod( IMethodSymbol symbol )
+            => symbol.Name == nameof(meta.RunTime) &&
+               symbol.ContainingType.GetDocumentationCommentId() == this.MetaType.GetDocumentationCommentId();
 
         public bool IsDynamicParameter( ArgumentSyntax argument ) => IsDynamicParameter( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
 

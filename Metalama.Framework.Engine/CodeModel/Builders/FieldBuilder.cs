@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -20,11 +21,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
+        private IType _type;
+
         public IObjectReader InitializerTags { get; }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-        public IType Type { get; set; }
+        public IType Type
+        {
+            get => this._type;
+            set => this._type = this.Translate( value );
+        }
 
         public RefKind RefKind
         {
@@ -50,9 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
-        [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
+        [Obsolete]
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         public Writeability Writeability { get; set; }
 
@@ -60,13 +66,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
+        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+
+        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+
+        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
+
         public TemplateMember<IField>? InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice advice, INamedType targetType, string name, IObjectReader initializerTags )
             : base( targetType, name, advice )
         {
             this.InitializerTags = initializerTags;
-            this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
+            this._type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )
@@ -94,5 +109,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public bool IsRequired { get; set; }
+
+        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
     }
 }

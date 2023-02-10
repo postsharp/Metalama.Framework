@@ -182,12 +182,12 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
-            var intermediateCompilationContext = this._compilationContext.ForCompilation( intermediateCompilation.Compilation );
+            var intermediateCompilationContext = intermediateCompilation.CompilationContext;
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
                 input.CompilationModel,
-                intermediateCompilation.Compilation,
+                intermediateCompilationContext,
                 syntaxTreeMapping,
                 syntaxTransformationCollection.InjectedMembers );
 
@@ -340,6 +340,9 @@ namespace Metalama.Framework.Engine.Linking
                         var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                             injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
+
+                        // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
+                        //       For introduction, this should be a compilation that INCLUDES the builder.
 
                         // Call GetInjectedMembers
                         var injectionContext = new MemberInjectionContext(

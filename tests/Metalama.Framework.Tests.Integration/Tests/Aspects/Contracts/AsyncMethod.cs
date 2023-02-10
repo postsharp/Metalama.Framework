@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-public sealed class NotNullCheckAttribute : TypeAspect
+public sealed class TestAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
@@ -25,14 +25,10 @@ public sealed class NotNullCheckAttribute : TypeAspect
                     args: new { parameterName = parameter.Name } );
             }
 
-            if (method.ReturnType.IsReferenceType.GetValueOrDefault()
-                && !method.ReturnType.IsNullable.GetValueOrDefault())
-            {
-                builder.Advice.AddContract(
-                    method.ReturnParameter,
-                    nameof(ValidateMethodResult),
-                    args: new { methodName = method.Name } );
-            }
+            builder.Advice.AddContract(
+                method.ReturnParameter,
+                nameof(ValidateMethodResult),
+                args: new { methodName = method.Name });
         }
     }
 
@@ -56,21 +52,21 @@ public sealed class NotNullCheckAttribute : TypeAspect
 }
 
 // <target>
-[NotNullCheck]
+[Test]
 public class TestClass
 {
-    public string DoSomething( string text )
+    public string DoSomething(string text)
     {
-        Console.WriteLine( "Hello" );
+        Console.WriteLine("Hello");
 
         return null!;
     }
 
-    public async Task<string> DoSomethingAsync( string text )
+    public async Task<string> DoSomethingAsyncT(string text)
     {
         await Task.Yield();
 
-        Console.WriteLine( "Hello" );
+        Console.WriteLine("Hello");
 
         return null!;
     }

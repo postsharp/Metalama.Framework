@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -23,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
                 {
-                    var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
+                    var typeId = typeSymbol.GetSerializableTypeId().Id;
 
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
@@ -60,6 +63,39 @@ namespace Metalama.Framework.Engine.Templating
 
                     return true;
                 }
+
+                // meta.ProceedAsync().ConfigureAwait(false) is also treated like a Proceed() expression
+                else if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node ).IsTaskConfigureAwait()
+                          && node is
+                          {
+                              Expression: MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax innerInvocation },
+                              ArgumentList.Arguments: [{ Expression: var expression }]
+                          }
+                          && this.TryRewriteProceedInvocation( innerInvocation, out var transformedInner ) )
+                {
+                    if ( expression is not LiteralExpressionSyntax literal )
+                    {
+                        this._parent.Report(
+                            TemplatingDiagnosticDescriptors.OnlyLiteralArgumentInConfigureAwaitAfterProceedAsync.CreateRoslynDiagnostic(
+                                expression.GetLocation(),
+                                expression.ToString() ) );
+
+                        transformedNode = node;
+
+                        return false;
+                    }
+
+                    // *.ConfigureAwait( transformedInner, true/false )
+                    transformedNode =
+                        node.CopyAnnotationsTo(
+                            InvocationExpression(
+                                    this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConfigureAwait) ) )
+                                .AddArgumentListArguments(
+                                    Argument( transformedInner ),
+                                    Argument( literal ) ) );
+
+                    return true;
+                }
                 else
                 {
                     transformedNode = node;
@@ -85,6 +121,43 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 return base.VisitInvocationExpression( node );
+            }
+
+            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            {
+                var symbol = this._parent._syntaxTreeAnnotationMap.GetSymbol( node );
+
+                if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
+                     && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                     !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                       && node == memberAccessExpressionSyntax.Name) )
+                {
+                    // Fully qualifies simple identifiers.
+                    if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                    {
+                        return node.CopyAnnotationsTo( OurSyntaxGenerator.CompileTime.TypeOrNamespace( namespaceOrType ).WithTriviaFrom( node ) );
+                    }
+                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    {
+                        switch ( symbol.Kind )
+                        {
+                            case SymbolKind.Field:
+                            case SymbolKind.Property:
+                            case SymbolKind.Event:
+                            case SymbolKind.Method:
+                                // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                                return
+                                    node.CopyAnnotationsTo(
+                                        MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol.ContainingType ),
+                                                IdentifierName( node.Identifier.Text ) )
+                                            .WithTriviaFrom( node ) );
+                        }
+                    }
+                }
+
+                return node;
             }
         }
     }

@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -26,13 +25,11 @@ namespace Metalama.Framework.Engine.Templating
         private const string _locationAnnotationKind = "location";
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
-        private const string _expressionTypeAnnotationKind = "type";
-        private readonly SymbolIdGenerator _symbolIdGenerator;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
             _declaredSymbolAnnotationKind,
-            _expressionTypeAnnotationKind,
+            SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
             _locationAnnotationKind );
 
         private readonly List<(SyntaxTree Tree, TextSpan Span)> _indexToLocationMap = new();
@@ -42,11 +39,6 @@ namespace Metalama.Framework.Engine.Templating
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
-
-        public SyntaxTreeAnnotationMap( Compilation compilation )
-        {
-            this._symbolIdGenerator = SymbolIdGenerator.GetInstance( compilation );
-        }
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -155,6 +147,63 @@ namespace Metalama.Framework.Engine.Templating
             return this._annotationToSymbolMap[annotation];
         }
 
+        public ISymbol? GetInvocableSymbol( ExpressionSyntax node )
+        {
+            using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
+
+            if ( !enumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var firstAnnotation = enumerator.Current;
+
+            if ( !enumerator.MoveNext() )
+            {
+                // No ambiguity.
+                return this._annotationToSymbolMap[firstAnnotation];
+            }
+
+            var firstSymbol = this._annotationToSymbolMap[firstAnnotation];
+
+            // We have some ambiguity.
+            // We never have ambiguities with anything else than methods, so let's end here if we don't have a method.
+            if ( firstSymbol is not IMethodSymbol firstMethod )
+            {
+                return null;
+            }
+
+            // Get all symbols.
+            var symbols = new List<IMethodSymbol> { firstMethod, (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+
+            while ( enumerator.MoveNext() )
+            {
+                symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] );
+            }
+
+            // If we have an ambiguity, it is because one of the arguments is dynamic. 
+            // Take only signatures that have a dynamic argument.
+
+            var likelySymbols = symbols.Where( m => m.Parameters.Any( p => p.Type.TypeKind == TypeKind.Dynamic ) );
+
+            using var likelyEnumerator = likelySymbols.GetEnumerator();
+
+            if ( !likelyEnumerator.MoveNext() )
+            {
+                return null;
+            }
+
+            var bestSymbol = likelyEnumerator.Current;
+
+            if ( likelyEnumerator.MoveNext() )
+            {
+                // There is still some ambiguity.
+                return null;
+            }
+
+            return bestSymbol;
+        }
+
         public IEnumerable<ISymbol> GetCandidateSymbols( SyntaxNode node )
         {
             foreach ( var annotation in node.GetAnnotations( _symbolAnnotationKind ) )
@@ -241,7 +290,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         public ITypeSymbol? GetExpressionType( ExpressionSyntax node )
         {
-            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
+            var annotation = node.GetAnnotations( SymbolAnnotationMapper.ExpressionTypeAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {
@@ -295,27 +344,6 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets a the expression type of a node when the compilation is known. 
-        /// </summary>
-        internal static bool TryGetExpressionType( SyntaxNode node, Compilation compilation, [NotNullWhen( true )] out ISymbol? symbol )
-        {
-            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
-
-            if ( annotation is not null )
-            {
-                symbol = SymbolIdGenerator.GetInstance( compilation ).GetSymbol( annotation.Data! );
-
-                return true;
-            }
-            else
-            {
-                symbol = null;
-
-                return false;
-            }
         }
     }
 }

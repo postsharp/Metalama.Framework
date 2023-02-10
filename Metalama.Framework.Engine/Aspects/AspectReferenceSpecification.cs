@@ -50,6 +50,11 @@ namespace Metalama.Framework.Engine.Aspects
                 this.Flags );
         }
 
+        internal AspectReferenceSpecification WithOrder( AspectReferenceOrder order )
+        {
+            return new AspectReferenceSpecification( this.AspectLayerId, order, this.TargetKind, this.Flags );
+        }
+
         public static AspectReferenceSpecification FromString( string str )
         {
             var parts = str.Split( '$' );

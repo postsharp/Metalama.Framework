@@ -53,7 +53,9 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var isSource = SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
+                var isSource = this.Compilation.CompilationContext.SymbolComparer.Equals(
+                    this.Symbol.ContainingAssembly,
+                    this.Compilation.RoslynCompilation.Assembly );
 
                 if ( isSource )
                 {
@@ -93,8 +95,8 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public override bool Equals( IDeclaration? other )
-            => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );
+            => other is SymbolBasedDeclaration declaration && this.Compilation.CompilationContext.SymbolComparer.Equals( this.Symbol, declaration.Symbol );
 
-        protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
+        protected override int GetHashCodeCore() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
     }
 }
