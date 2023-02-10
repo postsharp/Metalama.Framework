@@ -19,7 +19,6 @@ namespace Metalama.Framework.Engine.Advising
     internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
         private readonly BoundTemplateMethod _template;
-        private readonly IObjectReader _arguments;
 
         private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 

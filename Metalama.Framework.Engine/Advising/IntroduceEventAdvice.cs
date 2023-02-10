@@ -23,11 +23,6 @@ namespace Metalama.Framework.Engine.Advising
         private readonly PartiallyBoundTemplateMethod? _addTemplate;
         private readonly PartiallyBoundTemplateMethod? _removeTemplate;
 
-        private BoundTemplateMethod? _boundAddTemplate;
-        private BoundTemplateMethod? _boundRemoveTemplate;
-
-        // ReSharper disable once MemberCanBePrivate.Global
-
         public IntroduceEventAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,

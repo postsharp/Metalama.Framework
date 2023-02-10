@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -34,14 +35,20 @@ namespace Metalama.Framework.Engine.Advising
             return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
         }
 
-        public static BoundTemplateMethod ForIntroductionFinal(
+        [return: NotNullIfNotNull( nameof( targetMethod ) )]
+        public static BoundTemplateMethod? ForIntroductionFinal(
             this PartiallyBoundTemplateMethod template,
-            IMethod targetMethod )
+            IMethod? targetMethod )
         {
+            if (targetMethod == null )
+            {
+                return null;
+            }
+
             var arguments = template.Arguments ?? ObjectReader.Empty;
 
             // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
-            var templateArguments = GetTemplateArguments( template.TemplateMember, arguments );
+            var templateArguments = GetTemplateArguments( template );
 
             // Verify that the template return type matches the target.
             if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template.TemplateMember, arguments ) )

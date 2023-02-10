@@ -196,8 +196,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 var overriddenProperty = new OverridePropertyTransformation(
                     this,
                     this.Builder,
-                    this._getTemplate,
-                    this._setTemplate,
+                    this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                    this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                     this.Tags );
 
                 addTransformation( this.Builder.ToTransformation() );
@@ -258,8 +258,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                            this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                             this.Tags );
 
                         addTransformation( overriddenProperty );
@@ -274,8 +274,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             this.Builder,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod),
+                            this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                             this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
@@ -290,8 +290,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod), 
+                            this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod),
                             this.Tags );
 
                         addTransformation( overriddenMethod );
@@ -318,8 +318,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             serviceProvider,
                             this,
                             this.Builder,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                            this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                             this.Tags,
                             addTransformation );
 
