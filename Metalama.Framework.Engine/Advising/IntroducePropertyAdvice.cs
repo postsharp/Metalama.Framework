@@ -258,8 +258,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
-                            this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
+                            this._getTemplate?.ForIntroductionFinal( existingProperty.GetMethod ),
+                            this._setTemplate?.ForIntroductionFinal( existingProperty.SetMethod ),
                             this.Tags );
 
                         addTransformation( overriddenProperty );
@@ -274,7 +274,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             this.Builder,
-                            this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod),
+                            this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
                             this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                             this.Tags );
 
@@ -290,8 +290,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod), 
-                            this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod),
+                            this._getTemplate?.ForIntroductionFinal( existingProperty.GetMethod ), 
+                            this._setTemplate?.ForIntroductionFinal( existingProperty.SetMethod ),
                             this.Tags );
 
                         addTransformation( overriddenMethod );

@@ -61,7 +61,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
         this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
 
-        var typeRewriter = TemplateTypeRewriter.Get( this._template.ForIntroductionFinal( this.Builder ) );
+        var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
         // Handle iterator info.
         this.Builder.SetIsIteratorMethod( this.Template.IsIteratorMethod );
@@ -205,7 +205,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( existingMethod ), this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -228,7 +228,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                 case OverrideStrategy.Override:
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( existingMethod ), this.Tags );
+
                         addTransformation( overriddenMethod );
 
                         return AdviceImplementationResult.Success( AdviceOutcome.Override );

@@ -143,8 +143,8 @@ namespace Metalama.Framework.Engine.Advising
                 var overrideIndexerTransformation = new OverrideIndexerTransformation(
                     this,
                     this.Builder,
-                    this.Builder.GetMethod != null ? this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod) : null,
-                    this.Builder.SetMethod != null ? this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ) : null,
+                    this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                    this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                     this.Tags );
 
                 addTransformation( this.Builder.ToTransformation() );
@@ -195,8 +195,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this.Builder.GetMethod != null ? this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ) : null,
-                                this.Builder.SetMethod != null ? this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ) : null,
+                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -211,8 +211,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 this.Builder,
-                                this.Builder.GetMethod != null ? this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ) : null,
-                                this.Builder.SetMethod != null ? this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ) : null,
+                                this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
@@ -227,8 +227,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this.Builder.GetMethod != null ? this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod) : null, 
-                                this.Builder.SetMethod != null ? this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod) : null,
+                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod), 
+                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -252,8 +252,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenIndexer = new OverrideIndexerTransformation( 
                                 this, 
                                 this.Builder, 
-                                this.Builder.GetMethod != null ? this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod) : null, 
-                                this.Builder.SetMethod != null ? this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod) : null,
+                                this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod), 
+                                this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );

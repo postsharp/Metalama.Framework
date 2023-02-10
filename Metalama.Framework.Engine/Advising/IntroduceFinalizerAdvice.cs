@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Advising
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this._template.ForIntroductionFinal( existingFinalizer ), this.Tags );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );

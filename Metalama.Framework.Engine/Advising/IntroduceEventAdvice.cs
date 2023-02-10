@@ -223,8 +223,8 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingEvent,
-                                    this._addTemplate?.ForIntroductionFinal( this.Builder.AddMethod ),
-                                    this._removeTemplate?.ForIntroductionFinal( this.Builder.RemoveMethod ),
+                                    this._addTemplate?.ForIntroductionFinal( existingEvent.AddMethod ),
+                                    this._removeTemplate?.ForIntroductionFinal( existingEvent.RemoveMethod ),
                                     this.Tags );
 
                                 addTransformation( overriddenMethod );
@@ -271,8 +271,8 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingEvent,
-                                    this._addTemplate?.ForIntroductionFinal( this.Builder.AddMethod ),
-                                    this._removeTemplate?.ForIntroductionFinal( this.Builder.RemoveMethod ),
+                                    this._addTemplate?.ForIntroductionFinal( existingEvent.AddMethod ),
+                                    this._removeTemplate?.ForIntroductionFinal( existingEvent.RemoveMethod ),
                                     this.Tags );
 
                                 addTransformation( overriddenMethod );

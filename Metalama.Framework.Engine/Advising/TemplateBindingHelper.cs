@@ -74,31 +74,39 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
 
-        public static BoundTemplateMethod ForOperatorIntroduction(
+        public static PartiallyBoundTemplateMethod ForOperatorIntroductionInitial(
             this TemplateMember<IMethod> template,
-            OperatorKind operatorKind,
             IObjectReader? arguments = null )
         {
-            var runTimeParameters = template.TemplateClassMember.RunTimeParameters;
+            var templateTypeArguments = GetTemplateTypeArguments( template, arguments );
 
-            var expectedParameterCount = operatorKind.GetCategory() switch
+            return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
+        }
+
+        public static BoundTemplateMethod ForOperatorIntroductionFinal(
+            this PartiallyBoundTemplateMethod template,
+            IMethod targetMethod )
+        {
+            var runTimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
+
+            var expectedParameterCount = targetMethod.OperatorKind.GetCategory() switch
             {
                 OperatorCategory.Binary => 2,
                 OperatorCategory.Conversion => 1,
                 OperatorCategory.Unary => 1,
-                _ => throw new AssertionFailedException( $"Invalid value for OperatorCategory: {operatorKind.GetCategory()}." )
+                _ => throw new AssertionFailedException( $"Invalid value for OperatorCategory: {targetMethod.OperatorKind.GetCategory()}." )
             };
 
             if ( runTimeParameters.Length != expectedParameterCount )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a template for the {operatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
+                        $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
             }
 
             // TODO: verify the types.
 
-            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.Arguments ) );
         }
 
         public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )

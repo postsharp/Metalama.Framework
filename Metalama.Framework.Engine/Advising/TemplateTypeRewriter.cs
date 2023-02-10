@@ -8,14 +8,14 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class TemplateTypeRewriter : TypeRewriter
     {
-        private readonly BoundTemplateMethod _template;
+        private readonly PartiallyBoundTemplateMethod _template;
 
-        private TemplateTypeRewriter( BoundTemplateMethod template )
+        private TemplateTypeRewriter( PartiallyBoundTemplateMethod template )
         {
             this._template = template;
         }
 
-        public static TypeRewriter Get( BoundTemplateMethod template )
+        public static TypeRewriter Get( PartiallyBoundTemplateMethod template )
             => template.TemplateMember.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
                 ? Null
                 : new TemplateTypeRewriter( template );
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( this._template.TemplateMember.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
                  && templateParameter.IsCompileTime )
             {
-                var value = (TemplateTypeArgument) this._template.TemplateArguments[templateParameter.TemplateIndex!.Value]!;
+                var value = (TemplateTypeArgument) this._template.TypeArguments[templateParameter.TemplateIndex!.Value]!;
 
                 return (ITypeInternal) value.Type;
             }
