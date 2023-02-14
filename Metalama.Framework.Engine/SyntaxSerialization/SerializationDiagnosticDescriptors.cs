@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     public static class SerializationDiagnosticDescriptors
     {
-        // Reserved range 200-299
+        // Reserved range 200-219
 
         private const string _category = "Metalama.Serialization";
 
