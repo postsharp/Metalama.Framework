@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -21,7 +22,8 @@ namespace Metalama.Framework.Engine.Formatting
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        internal ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        [PublicAPI( "Used from Try" )]
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
         {
             this._sourceText = sourceText;
         }
@@ -244,7 +246,8 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
         /// </summary>
-        internal void Polish()
+        [PublicAPI( "Used from Try" )]
+        public void Polish()
         {
             if ( this._sourceText == null )
             {
