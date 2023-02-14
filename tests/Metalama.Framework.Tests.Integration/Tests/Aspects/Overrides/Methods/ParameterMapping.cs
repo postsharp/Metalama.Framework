@@ -7,7 +7,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.ParameterMapping
 {
     /*
-     * Verifies that template parameters are correctly mapped.
+     * Verifies that template parameters are correctly mapped by name.
      */
 
     public class IntroductionAttribute : TypeAspect
@@ -17,13 +17,35 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Paramete
             builder.Advice.Override(
                 builder.Target.Methods.OfName("Method_InvertedParameters").Single(),
                 nameof(InvertedParameters) );
+
+            builder.Advice.Override(
+                builder.Target.Methods.OfName("Method_SelectFirstParameter").Single(),
+                nameof(SelectFirstParameter));
+
+            builder.Advice.Override(
+                builder.Target.Methods.OfName("Method_SelectSecondParameter").Single(),
+                nameof(SelectSecondParameter));
         }
 
         [Template]
-        public int InvertedParameters(int x, string y)
+        public int InvertedParameters(int y, string x)
         {
             var z = meta.Proceed();
-            return x + y.Length;
+            return x.Length + y;
+        }
+
+        [Template]
+        public int SelectFirstParameter(string x)
+        {
+            var z = meta.Proceed();
+            return x.Length;
+        }
+
+        [Template]
+        public int SelectSecondParameter(int y)
+        {
+            var z = meta.Proceed();
+            return y;
         }
     }
 
@@ -31,9 +53,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Paramete
     [Introduction]
     internal class TargetClass 
     {
-        public int Method_InvertedParameters(string y,int x)
+        public int Method_InvertedParameters(string x, int y)
         {
-            return x + y.Length;
+            return x.Length + y;
+        }
+        public int Method_SelectFirstParameter(string x, int y)
+        {
+            return x.Length + y;
+        }
+        public int Method_SelectSecondParameter(string x, int y)
+        {
+            return x.Length + y;
         }
     }
 }

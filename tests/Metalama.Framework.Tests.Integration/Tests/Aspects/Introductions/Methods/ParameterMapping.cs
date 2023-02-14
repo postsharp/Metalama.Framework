@@ -18,6 +18,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Para
                 nameof(InvertedParameterNames),
                 buildMethod: b =>
                 {
+                    b.Parameters[0].Name = "y";
+                    b.Parameters[1].Name = "x";
                     b.AddParameter("z", typeof(int));
                 } );
         }

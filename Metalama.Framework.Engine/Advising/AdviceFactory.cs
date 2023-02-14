@@ -780,8 +780,16 @@ internal sealed class AdviceFactory : IAdviceFactory
                 .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod.AssertNotNull() );
-            var setTemplate = accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod.AssertNotNull() );
+
+            var getTemplate =
+                targetFieldOrProperty.GetMethod != null
+                ? accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod )
+                : null;
+
+            var setTemplate =
+                targetFieldOrProperty.SetMethod != null
+                ? accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod )
+                : null;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._state.AspectInstance,
@@ -1279,7 +1287,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     public IIntroductionAdviceResult<IEvent> IntroduceEvent(
         INamedType targetType,
-        string eventTemplate,
+        string defaultTemplate,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IEventBuilder>? buildEvent = null,
@@ -1294,8 +1302,10 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
 
-            var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
+            var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
+
+            var accessorTemplates = eventTemplate.GetAccessorTemplates();
 
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
@@ -1303,9 +1313,9 @@ internal sealed class AdviceFactory : IAdviceFactory
                 targetType,
                 this._compilation,
                 null,
-                template,
-                default,
-                default,
+                eventTemplate,
+                accessorTemplates.Add?.ForIntroductionInitial(),
+                accessorTemplates.Remove?.ForIntroductionInitial(),
                 scope,
                 whenExists,
                 buildEvent,

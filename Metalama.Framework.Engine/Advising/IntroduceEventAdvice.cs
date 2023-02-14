@@ -76,23 +76,6 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( this.Template != null )
             {
-                CopyTemplateAttributes( this.Template.Declaration.AddMethod, this.Builder.AddMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this.Template.Declaration.AddMethod.Parameters[0],
-                    this.Builder.AddMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this.Template.Declaration.AddMethod.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
-                CopyTemplateAttributes( this.Template.Declaration.RemoveMethod, this.Builder.RemoveMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this.Template.Declaration.RemoveMethod.Parameters[0],
-                    this.Builder.RemoveMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this.Template.Declaration.RemoveMethod.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
-
                 if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
                 {
                     var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
@@ -110,29 +93,33 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( this._addTemplate != null )
             {
-                CopyTemplateAttributes( this._addTemplate.Declaration, this.Builder.AddMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this._addTemplate.Declaration.Parameters[0],
-                    this.Builder.AddMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this._addTemplate.Declaration.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
+                AddAttributeForAccessorTemplate( this._addTemplate.Declaration, this.Builder.AddMethod );
+            }
+            else if ( this.Template != null )
+            {
+                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().Declaration.AddMethod, this.Builder.AddMethod );
             }
 
             if ( this._removeTemplate != null )
             {
-                CopyTemplateAttributes( this._removeTemplate.Declaration, this.Builder.RemoveMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this._removeTemplate.Declaration.Parameters[0],
-                    this.Builder.RemoveMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this._removeTemplate.Declaration.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
+                AddAttributeForAccessorTemplate( this._removeTemplate.Declaration, this.Builder.RemoveMethod );
+            }
+            else if (this.Template != null)
+            {
+                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().Declaration.RemoveMethod, this.Builder.RemoveMethod );
             }
 
-            // IMPORTANT: Template binding is the last step.
+            void AddAttributeForAccessorTemplate( IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+            {
+                CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
+
+                CopyTemplateAttributes(
+                    accessorTemplate.Parameters[0],
+                    accessorBuilder.Parameters[0],
+                    serviceProvider );
+
+                CopyTemplateAttributes( accessorTemplate.ReturnParameter, accessorBuilder.ReturnParameter, serviceProvider );
+            }
         }
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceEvent;

@@ -20,9 +20,9 @@ internal class TargetClass
     {
       return (global::System.Int32)Method_NameConflict(p - 1);
     }
-    Method_NameConflict_1(p);
+    Method_NameConflict_1();
     return (global::System.Int32)p;
-    void Method_NameConflict_1(int x_1)
+    void Method_NameConflict_1()
     {
     }
   }

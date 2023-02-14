@@ -4,12 +4,14 @@ internal class TargetClass
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
   public event global::System.EventHandler? Event
   {
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     add
     {
       global::System.Console.WriteLine("Original add accessor.");
     }
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
     remove
@@ -18,5 +20,6 @@ internal class TargetClass
     }
   }
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
+  [method: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent.FooAttribute]
   public event global::System.EventHandler? FieldLikeEvent;
 }

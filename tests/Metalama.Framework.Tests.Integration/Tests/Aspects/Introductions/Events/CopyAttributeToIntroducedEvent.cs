@@ -13,6 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             [return: Foo]
             [param: Foo]
+            [Foo]
             add
             {
                 Console.WriteLine( "Original add accessor." );
@@ -20,6 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
             [return: Foo]
             [param: Foo]
+            [Foo]
             remove
             {
                 Console.WriteLine( "Original remove accessor." );
@@ -28,6 +30,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         [Introduce]
         [Foo]
+        [method: Foo]
         public event EventHandler? FieldLikeEvent;
     }
 

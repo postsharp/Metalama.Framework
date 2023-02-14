@@ -45,31 +45,15 @@ namespace Metalama.Framework.Engine.Advising
                 return null;
             }
 
-            var arguments = template.Arguments ?? ObjectReader.Empty;
-
-            // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
-            var templateArguments = GetTemplateArguments( template );
-
-            // Verify that the template return type matches the target.
-            if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template.TemplateMember, arguments ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
-            }
+            var mappingBuilder = ImmutableDictionary<string, ExpressionSyntax>.Empty.ToBuilder();
 
             for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
             {
-                var templateParameter = template.Declaration.Parameters[template.TemplateMember.TemplateClassMember.RunTimeParameters[i].SourceIndex];
-                var methodParameter = targetMethod.Parameters[i];
-
-                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template.TemplateMember, arguments ) )
-                {
-                    throw new InvalidTemplateSignatureException(
-                        MetalamaStringFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the operator '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target operator parameter '{methodParameter.Name}'." ) );
-                }
+                var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
+                mappingBuilder.Add( templateParameter.Name, IdentifierName( targetMethod.Parameters[i].Name ) );
             }
+
+            var templateArguments = GetTemplateArguments( template, mappingBuilder.ToImmutable() );
 
             return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
@@ -103,8 +87,6 @@ namespace Metalama.Framework.Engine.Advising
                     MetalamaStringFormatter.Format(
                         $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
             }
-
-            // TODO: verify the types.
 
             return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.Arguments ) );
         }

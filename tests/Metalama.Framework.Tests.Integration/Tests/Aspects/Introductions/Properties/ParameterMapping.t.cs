@@ -1,1 +1,15 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[Introduction]
+internal class TargetClass
+{
+  public global::System.Int32 Property_NameConflict
+  {
+    get
+    {
+      return (global::System.Int32)42;
+    }
+    set
+    {
+      var z = value;
+    }
+  }
+}

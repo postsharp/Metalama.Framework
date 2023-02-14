@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.Advising
             if ( this._template.TemplateMember.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
                  && templateParameter.IsCompileTime )
             {
-                var value = (TemplateTypeArgument) this._template.TypeArguments[templateParameter.TemplateIndex!.Value]!;
+                var index = templateParameter.TemplateIndex!.Value - this._template.TemplateMember.TemplateClassMember.Parameters.Length;
+                var value = (TemplateTypeArgument) this._template.TypeArguments[index]!;
 
                 return (ITypeInternal) value.Type;
             }

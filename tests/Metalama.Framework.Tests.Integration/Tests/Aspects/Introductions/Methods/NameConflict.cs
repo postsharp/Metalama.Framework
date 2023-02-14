@@ -66,11 +66,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
                 return ExpressionFactory.Parse( "Method_NameConflict(p - 1)" ).Value;
             }
 
-            Method_NameConflict(p);
+            Method_NameConflict();
 
             return p;
 
-            void Method_NameConflict(int x) { }
+            void Method_NameConflict() { }
         }
 
         [Template]

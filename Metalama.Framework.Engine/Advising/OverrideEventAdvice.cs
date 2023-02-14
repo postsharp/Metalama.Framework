@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            Invariant.Assert( addTemplate != null && removeTemplate != null );
+            Invariant.Assert( addTemplate != null || removeTemplate != null );
 
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
