@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -113,17 +114,16 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <param name="attribute"></param>
         /// <returns></returns>
         internal static Location? GetDiagnosticLocation( this AttributeData attribute )
+            => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
+
+        internal static Location? GetDiagnosticLocationForNamedArgument( this AttributeData attribute, string argumentName )
         {
-            var application = attribute.ApplicationSyntaxReference;
+            var attributeSyntax = attribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 
-            if ( application == null )
-            {
-                // Coverage: ignore
+            var argument = attributeSyntax?.ArgumentList.AssertNotNull().Arguments.FirstOrDefault(
+                a => a.NameEquals is { Name.Identifier.ValueText: var identifierName } && identifierName == argumentName );
 
-                return null;
-            }
-
-            return application.GetSyntax().GetLocation();
+            return argument?.NameEquals!.Name.GetLocation();
         }
     }
 }

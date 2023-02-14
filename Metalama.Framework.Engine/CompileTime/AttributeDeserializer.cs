@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -32,10 +34,10 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         // Coverage: ignore
-        public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
+        public bool TryCreateAttribute<T>( AttributeData attribute, Compilation compilation, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
         {
-            if ( this.TryCreateAttribute( attribute, diagnosticAdder, out var untypedAttribute ) )
+            if ( this.TryCreateAttribute( attribute, compilation, diagnosticAdder, out var untypedAttribute ) )
             {
                 attributeInstance = (T) untypedAttribute;
 
@@ -49,10 +51,10 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+        public bool TryCreateAttribute( IAttribute attribute, Compilation compilation, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
+            => this.TryCreateAttribute( attribute.GetAttributeData(), compilation, diagnosticAdder, out attributeInstance );
 
-        public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
+        public bool TryCreateAttribute( AttributeData attribute, Compilation compilation, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             var constructorSymbol = attribute.AttributeConstructor;
 
@@ -79,12 +81,13 @@ namespace Metalama.Framework.Engine.CompileTime
                 return false;
             }
 
-            return this.TryCreateAttribute( attribute, type, diagnosticAdder, out attributeInstance! );
+            return this.TryCreateAttribute( attribute, type, compilation, diagnosticAdder, out attributeInstance! );
         }
 
         private bool TryCreateAttribute(
             AttributeData attribute,
             Type type,
+            Compilation compilation,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out Attribute? attributeInstance )
         {
@@ -136,7 +139,6 @@ namespace Metalama.Framework.Engine.CompileTime
                         attribute,
                         constructorArgument,
                         parameterInfo.ParameterType,
-                        diagnosticAdder,
                         out var translatedArgument ) )
                 {
                     attributeInstance = null;
@@ -181,12 +183,21 @@ namespace Metalama.Framework.Engine.CompileTime
                     continue;
                 }
 
-                PropertyInfo? property;
-                FieldInfo? field;
-
-                if ( (property = type.GetProperty( arg.Key )) != null )
+                if ( type.GetProperty( arg.Key ) is { } property )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder, out var translatedValue ) )
+                    if ( property.GetCustomAttributesData().Any( a => a.AttributeType.IsAssignableTo( typeof( ITemplateAttribute ) ) ) )
+                    {
+                        diagnosticAdder.Report(
+                            AttributeDeserializerDiagnostics.CannotSetTemplateProperty.CreateRoslynDiagnostic(
+                                attribute.GetDiagnosticLocationForNamedArgument( property.Name ),
+                                property.Name ) );
+
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, property.PropertyType, out var translatedValue ) )
                     {
                         attributeInstance = null;
 
@@ -216,9 +227,21 @@ namespace Metalama.Framework.Engine.CompileTime
                         return false;
                     }
                 }
-                else if ( (field = type.GetField( arg.Key )) != null )
+                else if ( type.GetField( arg.Key ) is { } field )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder, out var translatedValue ) )
+                    if ( Attribute.IsDefined( field, typeof( IntroduceAttribute ) ) )
+                    {
+                        diagnosticAdder.Report(
+                            AttributeDeserializerDiagnostics.CannotSetIntroducedField.CreateRoslynDiagnostic(
+                                attribute.GetDiagnosticLocationForNamedArgument( field.Name ),
+                                field.Name ) );
+
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, field.FieldType, out var translatedValue ) )
                     {
                         attributeInstance = null;
 
@@ -236,7 +259,26 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
-                    // We should never get an invalid member because Roslyn would not add it to the collection.
+                    // Template properties (incl. introduced ones) may be removed from compile-time compilation,
+                    // so they are not found above.
+                    if ( attribute.AttributeClass?.GetMembers( arg.Key ).FirstOrDefault() is IPropertySymbol propertySymbol )
+                    {
+                        var templateAttribute = compilation.GetTypeByMetadataName( typeof( ITemplateAttribute ).FullName.AssertNotNull() );
+
+                        if ( propertySymbol.GetAttributes().Any( a => compilation.HasImplicitConversion( a.AttributeClass, templateAttribute ) ) )
+                        {
+                            diagnosticAdder.Report(
+                                AttributeDeserializerDiagnostics.CannotSetTemplateProperty.CreateRoslynDiagnostic(
+                                    attribute.GetDiagnosticLocationForNamedArgument( propertySymbol.Name ),
+                                    propertySymbol.Name ) );
+
+                            attributeInstance = null;
+
+                            return false;
+                        }
+                    }
+
+                    // We should not get an invalid member otherwise.
                     throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{arg.Key}'." );
                 }
             }
@@ -250,7 +292,6 @@ namespace Metalama.Framework.Engine.CompileTime
             AttributeData attribute,
             TypedConstant typedConstant,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
         {
             object? value;
@@ -282,7 +323,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 value,
                 typedConstant.Type,
                 targetType,
-                diagnosticAdder,
                 out translatedValue );
         }
 
@@ -291,7 +331,6 @@ namespace Metalama.Framework.Engine.CompileTime
             object? value,
             ITypeSymbol? sourceType,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
         {
             if ( value == null )
@@ -304,7 +343,7 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( value )
             {
                 case TypedConstant typedConstant:
-                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
+                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, out translatedValue );
 
                 case IErrorTypeSymbol:
                     translatedValue = null;
@@ -359,7 +398,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     foreach ( var item in list )
                     {
-                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder, out var translatedItem ) )
+                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, out var translatedItem ) )
                         {
                             translatedValue = null;
 

@@ -41,6 +41,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     {
                         if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
                                 attribute.attribute,
+                                roslynCompilation,
                                 diagnosticAdder,
                                 out var attributeInstance ) )
                         {
