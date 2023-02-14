@@ -666,15 +666,21 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
         }
 
+        bool ExpressionTypeIsGenericDynamic()
+            => expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+
         // ReSharper disable once ConstantConditionalAccessQualifier
         switch ( expressionType.Name )
         {
             case "dynamic":
-            case "Task" or "ConfiguredTaskAwaitable"
-                when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+            case "Task"
+                when ExpressionTypeIsGenericDynamic() &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+            case "ConfiguredTaskAwaitable"
+                when ExpressionTypeIsGenericDynamic() &&
+                     expressionType.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices":
             case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
-                when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
+                when ExpressionTypeIsGenericDynamic() &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetDynamicSyntax) ) )
