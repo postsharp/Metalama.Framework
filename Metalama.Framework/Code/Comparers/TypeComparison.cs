@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code.Comparers;
 public enum TypeComparison
 {
     /// <summary>
-    /// Does take nullability into account.
+    /// Does not take nullability into account.
     /// </summary>
     Default,
 

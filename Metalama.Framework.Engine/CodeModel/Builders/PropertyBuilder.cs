@@ -177,13 +177,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this._fieldAttributes.Add( attributeData );
         }
 
-        public IMethod? GetAccessor( MethodKind methodKind )
-            => methodKind switch
-            {
-                MethodKind.PropertyGet => this.GetMethod,
-                MethodKind.PropertySet => this.SetMethod,
-                _ => null
-            };
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors
         {

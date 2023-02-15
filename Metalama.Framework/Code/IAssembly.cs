@@ -25,14 +25,14 @@ namespace Metalama.Framework.Code
         IAssemblyIdentity Identity { get; }
 
         /// <summary>
-        /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
+        /// Gets the list of types declared in this assembly, in all namespaces, but not the nested types.
         /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
         /// partial compilation.
         /// </summary>
         INamedTypeCollection Types { get; }
 
         /// <summary>
-        /// Gets the list of types declared in the current compilation, in all namespaces, including recursively all nested types.
+        /// Gets the list of types declared in this assembly, in all namespaces, including recursively all nested types.
         /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
         /// partial compilation.
         /// </summary>

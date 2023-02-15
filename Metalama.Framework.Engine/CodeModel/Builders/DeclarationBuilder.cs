@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -99,8 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
-        public SerializableDeclarationId ToSerializableId()
-            => throw new NotImplementedException( "The method is not implemented for introduced declarations." );
+        public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 

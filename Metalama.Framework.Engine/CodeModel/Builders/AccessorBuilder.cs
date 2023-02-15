@@ -165,14 +165,20 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public string Name
     {
         get
-            => this.MethodKind switch
+        {
+            // The name of indexer is "this[]", but the names of its accessors should be e.g. "get_Item".
+            var parentName = this.ContainingMember is IndexerBuilder ? "Item" : this.ContainingMember.Name;
+
+            return this.MethodKind switch
             {
-                MethodKind.PropertyGet => $"get_{this.ContainingMember.Name}",
-                MethodKind.PropertySet => $"set_{this.ContainingMember.Name}",
-                MethodKind.EventAdd => $"add_{this.ContainingMember.Name}",
-                MethodKind.EventRemove => $"remove_{this.ContainingMember.Name}",
+                MethodKind.PropertyGet => $"get_{parentName}",
+                MethodKind.PropertySet => $"set_{parentName}",
+                MethodKind.EventAdd => $"add_{parentName}",
+                MethodKind.EventRemove => $"remove_{parentName}",
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
             };
+        }
+
         set => throw new NotSupportedException();
     }
 

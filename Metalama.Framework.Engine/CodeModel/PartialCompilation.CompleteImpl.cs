@@ -31,11 +31,11 @@ namespace Metalama.Framework.Engine.CodeModel
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this.Compilation.GetIndexedSyntaxTrees();
 
             [Memo]
-            public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.Assembly.GetTypes().ToImmutableHashSet();
+            public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.SourceModule.GetTypes().ToImmutableHashSet();
 
             [Memo]
             public override ImmutableHashSet<INamespaceSymbol> Namespaces
-                => this.Compilation.Assembly.GlobalNamespace.SelectManyRecursive( n => n.GetNamespaceMembers() ).ToImmutableHashSet();
+                => this.Compilation.SourceModule.GlobalNamespace.SelectManyRecursive( n => n.GetNamespaceMembers() ).ToImmutableHashSet();
 
             public override bool IsPartial => false;
 

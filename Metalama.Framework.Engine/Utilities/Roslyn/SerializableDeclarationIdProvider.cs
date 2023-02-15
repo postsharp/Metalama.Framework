@@ -8,7 +8,8 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Linq;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using MetalamaMethodKind = Metalama.Framework.Code.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -24,7 +25,7 @@ public static class SerializableDeclarationIdProvider
     {
         if ( !TryGetSerializableId( symbol, targetKind, out var id ) )
         {
-            throw new ArgumentOutOfRangeException( $"Cannot create a SerializableDeclarationId for '{symbol}'." );
+            throw new ArgumentException( $"Cannot create a SerializableDeclarationId for '{symbol}'.", nameof(symbol) );
         }
 
         return id;
@@ -41,7 +42,7 @@ public static class SerializableDeclarationIdProvider
             case ILocalSymbol:
             case IMethodSymbol
             {
-                MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction or MethodKind.DelegateInvoke
+                MethodKind: RoslynMethodKind.LocalFunction or RoslynMethodKind.AnonymousFunction
             }:
 
                 id = default;
@@ -75,6 +76,84 @@ public static class SerializableDeclarationIdProvider
 
             default:
                 var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
+
+                if ( targetKind == DeclarationRefTargetKind.Default )
+                {
+                    id = new SerializableDeclarationId( documentationId );
+                }
+                else
+                {
+                    id = new SerializableDeclarationId( $"{documentationId};{targetKind}" );
+                }
+
+                return true;
+        }
+    }
+
+    public static SerializableDeclarationId GetSerializableId( this IDeclaration declaration ) => declaration.GetSerializableId( DeclarationRefTargetKind.Default );
+
+    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration, DeclarationRefTargetKind targetKind )
+    {
+        if ( !TryGetSerializableId( declaration, targetKind, out var id ) )
+        {
+            throw new ArgumentException( $"Cannot create a SerializableDeclarationId for '{declaration}'.", nameof( declaration ) );
+        }
+
+        return id;
+    }
+
+    public static bool TryGetSerializableId( this IDeclaration? declaration, out SerializableDeclarationId id )
+        => TryGetSerializableId( declaration, DeclarationRefTargetKind.Default, out id );
+
+    private static bool TryGetSerializableId( this IDeclaration? declaration, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
+    {
+        switch ( declaration )
+        {
+            case null:
+
+                id = default;
+
+                return false;
+
+            case IParameter { IsReturnParameter: true } parameter:
+                return TryGetSerializableId( parameter.DeclaringMember, DeclarationRefTargetKind.Return, out id );
+
+            case IParameter { ContainingDeclaration.ContainingDeclaration: IField } parameter:
+                return TryGetSerializableId( parameter.ContainingDeclaration, DeclarationRefTargetKind.Parameter, out id );
+
+            case IParameter parameter:
+                {
+                    var parentId = DeclarationDocumentationCommentId.CreateDeclarationId( parameter.DeclaringMember ).AssertNotNull();
+
+                    id = new SerializableDeclarationId( $"{parentId};Parameter={parameter.Index}" );
+
+                    return true;
+                }
+
+            case ITypeParameter typeParameter:
+                {
+                    var parentId = DeclarationDocumentationCommentId.CreateDeclarationId( typeParameter.ContainingDeclaration! ).AssertNotNull();
+
+                    id = new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameter.Index}" );
+
+                    return true;
+                }
+
+            case IAssembly assembly:
+                {
+                    id = new SerializableDeclarationId( $"{_assemblyPrefix}{assembly.Identity}" );
+
+                    return true;
+                }
+
+            case IMethod { ContainingDeclaration: IField } fieldPseudoAccessor:
+                return TryGetSerializableId( fieldPseudoAccessor.DeclaringMember, fieldPseudoAccessor.MethodKind.ToDeclarationRefTargetKind( targetKind ), out id );
+
+            case IMethod { ContainingDeclaration: IEvent, MethodKind: MetalamaMethodKind.EventRaise } eventRaisePseudoAccessor:
+                return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, DeclarationRefTargetKind.EventRaise, out id );
+
+            default:
+                var documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
 
                 if ( targetKind == DeclarationRefTargetKind.Default )
                 {
@@ -166,28 +245,22 @@ public static class SerializableDeclarationIdProvider
             var kind = parts[1];
             var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
-            var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation.RoslynCompilation );
+            var parent = DeclarationDocumentationCommentId.GetFirstDeclarationForDeclarationId( parentId, compilation );
 
             return (parent, kind) switch
             {
                 (null, _) => null,
-                (IMethodSymbol method, "Parameter") => compilation.Factory.GetParameter( method.Parameters[ordinal] ),
-                (IPropertySymbol property, "Parameter") => compilation.Factory.GetIndexer( property ).Parameters[ordinal],
-                (IMethodSymbol method, "TypeParameter") => compilation.Factory.GetMethod( method ).TypeParameters[ordinal],
-                (INamedTypeSymbol type, "TypeParameter") => compilation.Factory.GetNamedType( type ).TypeParameters[ordinal],
-                (IMethodSymbol method, nameof(DeclarationRefTargetKind.Return)) => compilation.Factory.GetMethod( method ).ReturnParameter,
-                (IFieldSymbol field, nameof(DeclarationRefTargetKind.PropertyGet)) => compilation.Factory.GetField( field ).GetMethod,
-                (IFieldSymbol field, nameof(DeclarationRefTargetKind.PropertySet)) => compilation.Factory.GetField( field ).SetMethod,
-                (IFieldSymbol field, nameof(DeclarationRefTargetKind.PropertySetParameter)) => compilation.Factory.GetField( field ).SetMethod?.Parameters[0],
-                (IFieldSymbol field, nameof(DeclarationRefTargetKind.PropertyGetReturnParameter)) => compilation.Factory.GetField( field )
-                    .GetMethod?.ReturnParameter,
-                (IFieldSymbol field, nameof(DeclarationRefTargetKind.PropertySetReturnParameter)) => compilation.Factory.GetField( field )
-                    .SetMethod?.ReturnParameter,
-                (IEventSymbol eventSymbol, nameof(DeclarationRefTargetKind.EventRaise)) => compilation.Factory.GetEvent( eventSymbol ).RaiseMethod,
-                (IEventSymbol eventSymbol, nameof(DeclarationRefTargetKind.EventRaiseParameter)) => compilation.Factory.GetEvent( eventSymbol )
-                    .RaiseMethod?.Parameters[0],
-                (IEventSymbol eventSymbol, nameof(DeclarationRefTargetKind.EventRaiseReturnParameter)) => compilation.Factory.GetEvent( eventSymbol )
-                    .RaiseMethod?.ReturnParameter,
+                (IHasParameters method, "Parameter") => method.Parameters[ordinal],
+                (IGeneric generic, "TypeParameter") => generic.TypeParameters[ordinal],
+                (IMethod method, nameof(DeclarationRefTargetKind.Return)) => method.ReturnParameter,
+                (IField field, nameof(DeclarationRefTargetKind.PropertyGet)) => field.GetMethod,
+                (IField field, nameof(DeclarationRefTargetKind.PropertySet)) => field.SetMethod,
+                (IField field, nameof(DeclarationRefTargetKind.PropertySetParameter)) => field.SetMethod?.Parameters[0],
+                (IField field, nameof(DeclarationRefTargetKind.PropertyGetReturnParameter)) => field.GetMethod?.ReturnParameter,
+                (IField field, nameof(DeclarationRefTargetKind.PropertySetReturnParameter)) => field.SetMethod?.ReturnParameter,
+                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaise)) => @event.RaiseMethod,
+                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaiseParameter)) => @event.RaiseMethod?.Parameters[0],
+                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaiseReturnParameter)) => @event.RaiseMethod?.ReturnParameter,
                 _ => null
             };
         }
@@ -202,14 +275,7 @@ public static class SerializableDeclarationIdProvider
         }
         else
         {
-            var symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation.RoslynCompilation );
-
-            if ( symbol == null )
-            {
-                return null;
-            }
-
-            return compilation.Factory.GetDeclaration( symbol );
+            return DeclarationDocumentationCommentId.GetFirstDeclarationForDeclarationId( id.ToString(), compilation );
         }
     }
 }

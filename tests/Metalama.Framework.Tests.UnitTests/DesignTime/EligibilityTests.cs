@@ -35,7 +35,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var declarationList = compilation
                 .GetContainedDeclarations()
                 .OfType<INamedDeclaration>()
-                .Concat( compilation.GlobalNamespace.Namespaces )
                 .Where( d => d.Name != "BuildEligibility" && d.ContainingDeclaration is not INamedDeclaration { Name: "BuildEligibility" } )
                 .ToList();
 

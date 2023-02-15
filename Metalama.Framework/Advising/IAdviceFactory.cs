@@ -230,7 +230,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Introduces an automatic to the target type by specifying a property name and <see cref="Type"/>.
+        /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="Type"/>.
         /// </summary>
         /// <param name="targetType">The type into which the property must be introduced.</param>
         /// <param name="propertyName">Name of the introduced field.</param>
@@ -253,7 +253,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Introduces an automatic to the target type by specifying a property name and <see cref="IType"/>.
+        /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="IType"/>.
         /// </summary>
         /// <param name="targetType">The type into which the property must be introduced.</param>
         /// <param name="propertyName">Name of the introduced field.</param>

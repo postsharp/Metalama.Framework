@@ -63,7 +63,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors => this.FieldBuilder.Accessors;
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                yield return this.GetMethod;
+                yield return this.SetMethod;
+            }
+        }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
     }

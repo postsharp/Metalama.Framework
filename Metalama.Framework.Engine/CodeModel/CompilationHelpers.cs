@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -18,17 +17,5 @@ namespace Metalama.Framework.Engine.CodeModel
         public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeInternal) type).TypeSymbol).GetFullMetadataName();
 
         public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
-
-        public SerializableDeclarationId GetSerializableId( IDeclaration declaration )
-        {
-            var symbol = declaration.GetSymbol();
-
-            if ( symbol == null )
-            {
-                throw new NotImplementedException( $"Getting a {nameof(SerializableDeclarationId)} for an introduced declaration is not implemented." );
-            }
-
-            return symbol.GetSerializableId();
-        }
     }
 }

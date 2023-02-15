@@ -8,7 +8,6 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Services;
@@ -228,10 +227,10 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken );
 
         // Index aspects and transformations.
-        var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )
+        var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
             .ToDictionary( i => i, _ => new List<IIntrospectionTransformation>() );
 
-        var transformations = result.Transformations.Where( t => t.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId );
+        var transformations = result.Transformations.Where( t => t.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId );
 
         foreach ( var transformation in transformations )
         {
@@ -332,11 +331,11 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
 
         foreach ( var aspectInstance in aspectInstances.Where( a => a.Value.Count > 1 ) )
         {
-            if ( aspectInstance.Key.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )
+            if ( aspectInstance.Key.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
             {
                 var transformationsOnChildren = aspectInstance.Key.Advice.SelectMany( a => a.Transformations )
                     .Where(
-                        t => !(t.TargetDeclaration.GetSymbol().TryGetSerializableId( out var transformedDeclarationId )
+                        t => !(t.TargetDeclaration.TryGetSerializableId( out var transformedDeclarationId )
                                && transformedDeclarationId != symbolId) )
                     .Select( t => t.TargetDeclaration )
                     .Distinct()

@@ -122,6 +122,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         internal static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
 
         /// <summary>
+        /// Get top-level (non-nested) types in a module.
+        /// </summary>
+        internal static IEnumerable<INamedTypeSymbol> GetTypes( this IModuleSymbol module ) => module.GlobalNamespace.GetTypes();
+
+        /// <summary>
         /// Get all types in an assembly, including nested types.
         /// </summary>
         internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();

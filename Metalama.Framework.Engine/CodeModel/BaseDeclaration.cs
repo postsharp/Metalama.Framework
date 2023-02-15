@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
-        public SerializableDeclarationId ToSerializableId() => this.ToRef().ToSerializableId();
+        public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
         public abstract ImmutableArray<SyntaxReference> DeclaringSyntaxReferences { get; }
 

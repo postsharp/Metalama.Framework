@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Code;
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Code;
 /// contains several assemblies providing types of the same name) and that is safe to persist in a file.
 /// </summary>
 /// <seealso cref="SerializableTypeId"/>
+[CompileTime]
 public readonly struct SerializableDeclarationId : IEquatable<SerializableDeclarationId>
 {
     // Intentionally public because of serialization.

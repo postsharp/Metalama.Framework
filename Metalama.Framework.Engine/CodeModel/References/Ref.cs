@@ -175,7 +175,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilationContext = null;
         }
 
-        // ReSharper disable once UnusedParameter.Local
         public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
         {
             this.Target = declaration;
@@ -189,6 +188,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SerializableDeclarationId ToSerializableId()
         {
+            if ( this.Target is IDeclaration declaration )
+            {
+                return declaration.GetSerializableId( this.TargetKind );
+            }
+
             if ( this._compilationContext == null )
             {
                 throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );

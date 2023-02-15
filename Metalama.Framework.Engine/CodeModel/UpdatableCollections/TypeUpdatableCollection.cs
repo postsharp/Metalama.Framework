@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamedType>
+internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
@@ -40,11 +40,11 @@ internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection
 
     protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
-    protected override ISymbol? GetMember( string name )
+    protected override IEnumerable<ISymbol> GetSymbols( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
-            .FirstOrDefault( this.IsSymbolIncluded );
+            .Where( this.IsSymbolIncluded );
 
-    protected override IEnumerable<ISymbol> GetMembers()
+    protected override IEnumerable<ISymbol> GetSymbols()
         => this.DeclaringTypeOrNamespace.GetTypeMembers()
             .Where( this.IsSymbolIncluded );
 }

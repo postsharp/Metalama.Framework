@@ -95,13 +95,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         $"Setting the name of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
             }
 
-            public override IHasParameters DeclaringMember => this.Indexer;
+            public override IHasParameters DeclaringMember => this._accessor;
 
             public override bool IsReturnParameter => false;
 
-            public override IDeclaration ContainingDeclaration => this._accessor;
-
-            public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+            public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
             public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
