@@ -86,13 +86,12 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
         CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
 
-        foreach ( var templateParameter in this.Template.Declaration.Parameters )
-        {
-            if ( this.Template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
-            {
-                continue;
-            }
+        var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
+        for ( var i = 0; i < runtimeParameters.Length; i++ )
+        {
+            var runtimeParameter = runtimeParameters[i];
+            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
             var parameterBuilder = this.Builder.AddParameter(
                 templateParameter.Name,
                 typeRewriter.Visit( templateParameter.Type ),
@@ -102,24 +101,23 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
         }
 
-        foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
+        var runtimeTypeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeTypeParameters;
+
+        for ( var i = 0; i < runtimeTypeParameters.Length; i++ )
         {
-            if ( this.Template.TemplateClassMember.TypeParameters[templateGenericParameter.Index].IsCompileTime )
+            var runtimeTypeParameter = runtimeTypeParameters[i];
+            var templateTypeParameter = this.Template.AssertNotNull().Declaration.TypeParameters[runtimeTypeParameter.SourceIndex];
+            var typeParameterBuilder = this.Builder.AddTypeParameter( templateTypeParameter.Name );
+            typeParameterBuilder.Variance = templateTypeParameter.Variance;
+            typeParameterBuilder.HasDefaultConstructorConstraint = templateTypeParameter.HasDefaultConstructorConstraint;
+            typeParameterBuilder.TypeKindConstraint = templateTypeParameter.TypeKindConstraint;
+
+            foreach ( var templateGenericParameterConstraint in templateTypeParameter.TypeConstraints )
             {
-                continue;
+                typeParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
             }
 
-            var genericParameterBuilder = this.Builder.AddTypeParameter( templateGenericParameter.Name );
-            genericParameterBuilder.Variance = templateGenericParameter.Variance;
-            genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
-            genericParameterBuilder.TypeKindConstraint = templateGenericParameter.TypeKindConstraint;
-
-            foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
-            {
-                genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
-            }
-
-            CopyTemplateAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder, serviceProvider );
+            CopyTemplateAttributes( templateTypeParameter, typeParameterBuilder, serviceProvider );
         }
     }
 

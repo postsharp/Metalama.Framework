@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -102,6 +103,22 @@ namespace Metalama.Framework.Engine.Advising
                     serviceProvider );
 
                 CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            }
+
+            var accessorTemplateForAttributeCopy =
+                this._getTemplate != null
+                ? this._getTemplate.TemplateMember
+                : this._setTemplate!.TemplateMember;
+
+            var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
+
+            for ( var i = 0; i < runtimeParameters.Length; i++ )
+            {
+                var runtimeParameter = runtimeParameters[i];
+                var templateParameter = accessorTemplateForAttributeCopy.Declaration.Parameters[runtimeParameter.SourceIndex];
+                var parameterBuilder = this.Builder.Parameters[i];
+
+                CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
             }
 
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.

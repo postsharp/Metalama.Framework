@@ -109,8 +109,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
             var method =
                 MethodDeclaration(
-                    methodBuilder.GetAttributeLists( context )
-                        .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
+                    methodBuilder.GetAttributeLists( context ),
                     methodBuilder.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTrivia( Space ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0

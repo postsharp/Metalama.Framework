@@ -37,15 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Introductions\Methods\NameConflict_CrossIntroduction - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Methods\NameConflict_Source - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Methods\ParameterMapping.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Methods\Programmatic - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Methods\ParameterMapping.t.cs" />
-      <Compile Remove="Tests\Templating\LocalFunctions\NameConflict - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -58,12 +49,5 @@
 
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
-    
-    <ItemGroup>
-      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Properties\NameConflict.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>NameConflict.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
 </Project>
