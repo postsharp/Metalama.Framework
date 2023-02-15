@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
@@ -53,9 +51,9 @@ namespace Metalama.Framework.Engine.Linking
 
             var declaredTypeSymbol = (INamedTypeSymbol?) semanticModel.GetDeclaredSymbol( type );
 
-            if (declaredTypeSymbol == null 
-                || !this._compilationModel.TryGetDeclaration(declaredTypeSymbol, out var declaration) 
-                || declaration is not INamedType declaredType )
+            if ( declaredTypeSymbol == null
+                 || !this._compilationModel.TryGetDeclaration( declaredTypeSymbol, out var declaration )
+                 || declaration is not INamedType declaredType )
             {
                 throw new AssertionFailedException( $"Could not find declaration for {type.Identifier} in {type.SyntaxTree.FilePath}." );
             }
@@ -95,20 +93,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             var symbol = declaration.GetSymbol();
 
-            INamedType contextType;
-
-            if ( declaration is IMemberOrNamedType { DeclaringType: { } declaringType } )
+            var contextType = declaration switch
             {
-                contextType = declaringType;
-            }
-            else if (declaration is INamedType type)
-            {
-                contextType = type;
-            }
-            else
-            {
-                throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." );
-            }
+                IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
+                INamedType type => type,
+                _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
+            };
 
             if ( symbol == null )
             {
@@ -168,8 +158,6 @@ namespace Metalama.Framework.Engine.Linking
                             throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
                     }
                 }
-
-                var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
 
                 var builder = this.GetIdentifiersInTypeScope( syntaxReference.GetSyntax().GetDeclaringType().AssertNotNull() ).ToBuilder();
 

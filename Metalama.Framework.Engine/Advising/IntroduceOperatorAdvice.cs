@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -53,19 +54,37 @@ namespace Metalama.Framework.Engine.Advising
 
             this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
 
-            var parameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
+            var runtimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
 
             // Add predefined parameters of correct types.
-            var firstParameterName = !parameters.IsEmpty ? parameters[0].Name : "a";
+            var firstParameterName = !runtimeParameters.IsEmpty ? runtimeParameters[0].Name : "a";
             this.Builder.AddParameter( firstParameterName, leftOperandType );
 
             if ( rightOperandType != null )
             {
-                var secondParameterName = !parameters.IsEmpty ? parameters[1].Name : "a";
+                var secondParameterName = !runtimeParameters.IsEmpty ? runtimeParameters[1].Name : "a";
                 this.Builder.AddParameter( secondParameterName, rightOperandType );
             }
 
             this.Builder.ReturnType = resultType;
+        }
+
+        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder, TemplateAttributeProperties? templateAttributeProperties )
+        {
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+
+            var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
+
+            CopyTemplateAttributes( this.Template.AssertNotNull().Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
+
+            for (var i = 0; i < runtimeParameters.Length; i++ )
+            {
+                var runtimeParameter = runtimeParameters[i];
+                var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+                var parameterBuilder = this.Builder.Parameters[i];
+
+                CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
+            }
         }
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceOperator;

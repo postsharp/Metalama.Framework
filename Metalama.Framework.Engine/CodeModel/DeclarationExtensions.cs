@@ -417,7 +417,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private static bool IsCompilerGenerated( this IDeclaration declaration )
+        internal static bool IsCompilerGenerated( this IDeclaration declaration )
         {
             return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
                    == true;

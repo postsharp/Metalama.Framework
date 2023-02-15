@@ -27,7 +27,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
         {
             var syntax =
                 DestructorDeclaration(
-                    List<AttributeListSyntax>(),
+                    methodBuilder.GetAttributeLists( context ),
                     TokenList(),
                     ((TypeDeclarationSyntax) methodBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                     ParameterList(),
@@ -44,8 +44,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
                 var syntax =
                     ConversionOperatorDeclaration(
-                        methodBuilder.GetAttributeLists( context )
-                            .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
+                        methodBuilder.GetAttributeLists( context ),
                         TokenList(
                             Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
@@ -65,8 +64,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
                 var syntax =
                     OperatorDeclaration(
-                        methodBuilder.GetAttributeLists( context )
-                            .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
+                        methodBuilder.GetAttributeLists( context ),
                         TokenList(
                             Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),

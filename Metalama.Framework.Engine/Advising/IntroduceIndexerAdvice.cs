@@ -84,7 +84,11 @@ namespace Metalama.Framework.Engine.Advising
             if ( this._getTemplate != null )
             {
                 CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod!, serviceProvider );
-                CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+
+                CopyTemplateAttributes(
+                    this._getTemplate.TemplateMember.Declaration.ReturnParameter,
+                    this.Builder.GetMethod!.ReturnParameter,
+                    serviceProvider );
             }
 
             // TODO: There should be a selection of value parameter.
@@ -227,8 +231,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod), 
-                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod),
+                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -249,11 +253,12 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.IsNew = false;
                             this.Builder.OverriddenIndexer = existingIndexer;
-                            var overriddenIndexer = new OverrideIndexerTransformation( 
-                                this, 
-                                this.Builder, 
-                                this._getTemplate?.ForIntroductionFinal(this.Builder.GetMethod), 
-                                this._setTemplate?.ForIntroductionFinal(this.Builder.SetMethod),
+
+                            var overriddenIndexer = new OverrideIndexerTransformation(
+                                this,
+                                this.Builder,
+                                this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );

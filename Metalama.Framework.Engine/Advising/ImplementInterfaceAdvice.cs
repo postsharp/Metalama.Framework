@@ -572,8 +572,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     new OverrideEventTransformation(
                                         this,
                                         eventBuilder,
-                                        eventBuilder.AddMethod != null ? accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ) : null,
-                                        eventBuilder.RemoveMethod != null ? accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ) : null,
+                                        accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ),
+                                        accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ),
                                         mergedTags ) );
                             }
                             else

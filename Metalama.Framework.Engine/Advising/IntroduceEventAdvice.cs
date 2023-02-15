@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 AddAttributeForAccessorTemplate( this._removeTemplate.Declaration, this.Builder.RemoveMethod );
             }
-            else if (this.Template != null)
+            else if ( this.Template != null )
             {
                 AddAttributeForAccessorTemplate( this.Template.AssertNotNull().Declaration.RemoveMethod, this.Builder.RemoveMethod );
             }
@@ -150,9 +150,9 @@ namespace Metalama.Framework.Engine.Advising
                         new OverrideEventTransformation(
                             this,
                             this.Builder,
-                            this._addTemplate?.ForIntroductionFinal(this.Builder.AddMethod),
+                            this._addTemplate?.ForIntroductionFinal( this.Builder.AddMethod ),
                             this._removeTemplate?.ForIntroductionFinal( this.Builder.RemoveMethod ),
-                            this.Tags) );
+                            this.Tags ) );
                 }
 
                 return AdviceImplementationResult.Success( this.Builder );

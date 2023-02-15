@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Advising
         /// </summary>
         public object?[] TypeArguments { get; }
 
-        public PartiallyBoundTemplateMethod(TemplateMember<IMethod> template, object?[] typeArguments, IObjectReader? argumentReader ) 
+        public PartiallyBoundTemplateMethod( TemplateMember<IMethod> template, object?[] typeArguments, IObjectReader? argumentReader )
         {
             this.TemplateMember = template;
             this.Arguments = argumentReader;

@@ -142,22 +142,43 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             }
         }
 
-        if ( this._getTemplate != null )
+        if ( this.Builder.GetMethod != null )
         {
-            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod!, serviceProvider );
-            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+            if ( this._getTemplate != null )
+            {
+                AddAttributeForAccessorTemplate( this._getTemplate.Declaration, this.Builder.GetMethod );
+            }
+            else if ( this.Template?.Declaration.GetMethod != null )
+            {
+                AddAttributeForAccessorTemplate( this.Template.Declaration.GetMethod, this.Builder.GetMethod );
+            }
         }
 
-        if ( this._setTemplate != null && this._setTemplate.TemplateMember.Declaration.Parameters.Count > 0 )
+        if ( this.Builder.SetMethod != null )
         {
-            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, this.Builder.SetMethod!, serviceProvider );
+            if ( this._setTemplate != null )
+            {
+                AddAttributeForAccessorTemplate( this._setTemplate.Declaration, this.Builder.SetMethod );
+            }
+            else if ( this.Template?.Declaration.SetMethod != null )
+            {
+                AddAttributeForAccessorTemplate( this.Template.Declaration.SetMethod, this.Builder.SetMethod );
+            }
+        }
 
-            CopyTemplateAttributes(
-                this._setTemplate.TemplateMember.Declaration.Parameters[0],
-                this.Builder.SetMethod!.Parameters[0],
-                serviceProvider );
+        void AddAttributeForAccessorTemplate( IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+        {
+            CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
 
-            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            if ( accessorBuilder.Parameters.Count > 0 )
+            {
+                CopyTemplateAttributes(
+                    accessorTemplate.Parameters[0],
+                    accessorBuilder.Parameters[0],
+                    serviceProvider );
+            }
+
+            CopyTemplateAttributes( accessorTemplate.ReturnParameter, accessorBuilder.ReturnParameter, serviceProvider );
         }
 
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
