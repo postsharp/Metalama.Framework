@@ -60,6 +60,8 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax? GetDynamicSyntax( object? expression );
 
+    TypedExpressionSyntax GetTypedExpression( IExpression expression );
+
     TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null );
 
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );

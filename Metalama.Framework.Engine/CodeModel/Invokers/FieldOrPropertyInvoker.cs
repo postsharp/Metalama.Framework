@@ -8,12 +8,13 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker
+    internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IFieldOrPropertyInvoker, IUserExpression
     {
         public FieldOrPropertyInvoker(
             IFieldOrProperty fieldOrProperty,
@@ -75,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 new SyntaxUserExpression(
                     this.CreatePropertyExpression( AspectReferenceTargetKind.Self ),
                     this.Member.Type,
-                    isReferenceable: this.Member.DeclarationKind == DeclarationKind.Field,
+                    isReferenceable: this.IsRef(),
                     isAssignable: this.Member.Writeability != Writeability.None ) );
 
         public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options );
@@ -84,11 +85,21 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );
 
         public TypedExpressionSyntax GetTypedExpressionSyntax()
-            => new(
-                new TypedExpressionSyntaxImpl(
-                    this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
-                    this.Member.Type,
-                    this.GenerationContext,
-                    this.Member.DeclarationKind is DeclarationKind.Field ) );
+            => new TypedExpressionSyntaxImpl(
+                this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
+                this.Member.Type,
+                this.GenerationContext,
+                this.IsRef() );
+
+        private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        {
+            Debug.Assert(
+                this.GenerationContext.Equals( syntaxGenerationContext as SyntaxGenerationContext ),
+                "Provided generation context is not the same as the built-in one." );
+
+            return this.GetTypedExpressionSyntax();
+        }
     }
 }
