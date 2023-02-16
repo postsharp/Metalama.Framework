@@ -62,17 +62,23 @@ internal class TargetClass
     }
   }
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldOnlyAttribute]
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldAndPropertyAttribute]
   private global::System.Int32 _introducedAutoProperty;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.FieldAndPropertyAttribute]
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.PropertyOnlyAttribute]
   public global::System.Int32 IntroducedAutoProperty
   {
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.MethodOnlyAttribute]
+    [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.ReturnValueOnlyAttribute]
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
       _ = this._introducedAutoProperty;
       return this._introducedAutoProperty;
     }
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.MethodOnlyAttribute]
+    [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.ReturnValueOnlyAttribute]
+    [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable.ParamOnlyAttribute]
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");

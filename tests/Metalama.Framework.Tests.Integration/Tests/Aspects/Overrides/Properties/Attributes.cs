@@ -46,6 +46,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         [Introduce]
         [field: FieldOnly]
+        [field: FieldAndProperty]
         [FieldAndProperty]
         [PropertyOnly]
         public int IntroducedAutoProperty
@@ -53,6 +54,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             [MethodOnly]
             [return: ReturnValueOnly]
             get;
+
             [MethodOnly]
             [param: ParamOnly]
             [return: ReturnValueOnly]

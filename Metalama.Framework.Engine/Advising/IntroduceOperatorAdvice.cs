@@ -77,14 +77,19 @@ namespace Metalama.Framework.Engine.Advising
 
             CopyTemplateAttributes( this.Template.AssertNotNull().Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
 
-            for (var i = 0; i < runtimeParameters.Length; i++ )
+            if ( runtimeParameters.Length == this.Builder.Parameters.Count )
             {
-                var runtimeParameter = runtimeParameters[i];
-                var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
-                var parameterBuilder = this.Builder.Parameters[i];
+                for ( var i = 0; i < runtimeParameters.Length; i++ )
+                {
+                    var runtimeParameter = runtimeParameters[i];
+                    var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+                    var parameterBuilder = this.Builder.Parameters[i];
 
-                CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
+                    CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
+                }
             }
+
+            // Invalid signatures may have incorrect parameter number, but we validate template later than initializing the builder.
         }
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceOperator;

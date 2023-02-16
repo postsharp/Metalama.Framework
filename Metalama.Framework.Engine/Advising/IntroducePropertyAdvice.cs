@@ -7,12 +7,14 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -146,11 +148,11 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         {
             if ( this._getTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._getTemplate.Declaration, this.Builder.GetMethod );
+                AddAttributeForAccessorTemplate( this._getTemplate.TemplateMember.TemplateClassMember, this._getTemplate.Declaration, this.Builder.GetMethod );
             }
             else if ( this.Template?.Declaration.GetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.Declaration.GetMethod, this.Builder.GetMethod );
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.GetMethod, this.Builder.GetMethod );
             }
         }
 
@@ -158,22 +160,23 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         {
             if ( this._setTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._setTemplate.Declaration, this.Builder.SetMethod );
+                AddAttributeForAccessorTemplate( this._setTemplate.TemplateMember.TemplateClassMember, this._setTemplate.Declaration, this.Builder.SetMethod );
             }
             else if ( this.Template?.Declaration.SetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.Declaration.SetMethod, this.Builder.SetMethod );
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.SetMethod, this.Builder.SetMethod );
             }
         }
 
-        void AddAttributeForAccessorTemplate( IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+        void AddAttributeForAccessorTemplate( TemplateClassMember templateClassMember, IMethod accessorTemplate, IMethodBuilder accessorBuilder )
         {
             CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
 
-            if ( accessorBuilder.Parameters.Count > 0 )
+            if ( accessorBuilder.Parameters.Count > 0 && templateClassMember.RunTimeParameters.Length > 0 )
             {
+                // There may be an invalid template without runtime parameters, in which case attributes cannot be copied.
                 CopyTemplateAttributes(
-                    accessorTemplate.Parameters[0],
+                    accessorTemplate.Parameters[templateClassMember.RunTimeParameters[0].SourceIndex],
                     accessorBuilder.Parameters[0],
                     serviceProvider );
             }
