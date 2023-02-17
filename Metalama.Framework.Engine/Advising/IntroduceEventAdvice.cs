@@ -7,13 +7,13 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising
@@ -70,9 +70,32 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-            this.Builder.Type =
-                (this.Template?.Declaration.Type ?? (INamedType?) this._addTemplate?.Declaration.Parameters.FirstOrDefault().AssertNotNull().Type)
-                .AssertNotNull();
+            if ( this._addTemplate != null || this._removeTemplate != null )
+            {
+                var primaryTemplate = (this._addTemplate ?? this._removeTemplate).AssertNotNull();
+                var runtimeParameters = primaryTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
+
+                var typeRewriter = TemplateTypeRewriter.Get( primaryTemplate );
+
+                if ( runtimeParameters.Length > 0 )
+                {
+                    // There may be an invalid template without runtime parameters, in which case type cannot be determined.
+
+                    var rewrittenType = typeRewriter.Visit( primaryTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+
+                    if ( rewrittenType is not INamedType rewrittenNamedType )
+                    {
+                        throw new AssertionFailedException( $"'{rewrittenType}' is not allowed type of an event." );
+                    }
+
+                    this.Builder.Type = rewrittenNamedType;
+                }
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                this.Builder.Type = this.Template.Declaration.Type;
+            }
 
             if ( this.Template != null )
             {
@@ -93,30 +116,36 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( this._addTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._addTemplate.Declaration, this.Builder.AddMethod );
+                AddAttributeForAccessorTemplate( this._addTemplate.TemplateMember.TemplateClassMember, this._addTemplate.Declaration, this.Builder.AddMethod );
             }
             else if ( this.Template != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().Declaration.AddMethod, this.Builder.AddMethod );
+                // Case for event fields.
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.AssertNotNull().Declaration.AddMethod, this.Builder.AddMethod );
             }
 
             if ( this._removeTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._removeTemplate.Declaration, this.Builder.RemoveMethod );
+                AddAttributeForAccessorTemplate( this._removeTemplate.TemplateMember.TemplateClassMember, this._removeTemplate.Declaration, this.Builder.RemoveMethod );
             }
             else if ( this.Template != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().Declaration.RemoveMethod, this.Builder.RemoveMethod );
+                // Case for event fields.
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.AssertNotNull().Declaration.RemoveMethod, this.Builder.RemoveMethod );
             }
 
-            void AddAttributeForAccessorTemplate( IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+            void AddAttributeForAccessorTemplate( TemplateClassMember templateClassMember, IMethod accessorTemplate, IMethodBuilder accessorBuilder )
             {
                 CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
 
-                CopyTemplateAttributes(
-                    accessorTemplate.Parameters[0],
-                    accessorBuilder.Parameters[0],
-                    serviceProvider );
+                if ( accessorBuilder.Parameters.Count > 0 && templateClassMember.RunTimeParameters.Length > 0 )
+                {
+                    // There may be an invalid template without runtime parameters, in which case attributes cannot be copied.
+                    CopyTemplateAttributes(
+                        accessorTemplate.Parameters[templateClassMember.RunTimeParameters[0].SourceIndex],
+                        accessorBuilder.Parameters[0],
+                        serviceProvider );
+                }
 
                 CopyTemplateAttributes( accessorTemplate.ReturnParameter, accessorBuilder.ReturnParameter, serviceProvider );
             }

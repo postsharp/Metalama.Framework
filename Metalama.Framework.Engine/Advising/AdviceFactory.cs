@@ -783,13 +783,13 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             var getTemplate =
                 targetFieldOrProperty.GetMethod != null
-                ? accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod )
-                : null;
+                    ? accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod )
+                    : null;
 
             var setTemplate =
                 targetFieldOrProperty.SetMethod != null
-                ? accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod )
-                : null;
+                    ? accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod )
+                    : null;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._state.AspectInstance,
@@ -1362,8 +1362,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._compilation,
                 name,
                 default,
-                boundAddTemplate?.ForIntroductionInitial( parameterReaders ),
-                boundRemoveTemplate?.ForIntroductionInitial( parameterReaders ),
+                boundAddTemplate.ForIntroductionInitial( parameterReaders ),
+                boundRemoveTemplate.ForIntroductionInitial( parameterReaders ),
                 scope,
                 whenExists,
                 buildEvent,

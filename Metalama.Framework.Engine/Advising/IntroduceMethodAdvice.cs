@@ -88,10 +88,10 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
         var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
-        for ( var i = 0; i < runtimeParameters.Length; i++ )
+        foreach ( var runtimeParameter in runtimeParameters )
         {
-            var runtimeParameter = runtimeParameters[i];
             var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+
             var parameterBuilder = this.Builder.AddParameter(
                 templateParameter.Name,
                 typeRewriter.Visit( templateParameter.Type ),
@@ -103,9 +103,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
         var runtimeTypeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeTypeParameters;
 
-        for ( var i = 0; i < runtimeTypeParameters.Length; i++ )
+        foreach ( var runtimeTypeParameter in runtimeTypeParameters )
         {
-            var runtimeTypeParameter = runtimeTypeParameters[i];
             var templateTypeParameter = this.Template.AssertNotNull().Declaration.TypeParameters[runtimeTypeParameter.SourceIndex];
             var typeParameterBuilder = this.Builder.AddTypeParameter( templateTypeParameter.Name );
             typeParameterBuilder.Variance = templateTypeParameter.Variance;

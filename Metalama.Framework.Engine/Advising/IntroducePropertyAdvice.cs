@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -97,14 +96,30 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
         if ( !this._isProgrammaticAutoProperty )
         {
-            this.Builder.Type =
-                this switch
+            if ( this._getTemplate != null )
+            {
+                var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
+
+                this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            }
+            else if ( this._setTemplate != null )
+            {
+                var runtimeParameters = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
+
+                var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
+
+                if ( runtimeParameters.Length > 0 )
                 {
-                    { Template.Declaration.Type: { } propertyType } => propertyType,
-                    { _getTemplate.TemplateMember.Declaration.ReturnType: { } getterReturnType } => getterReturnType,
-                    { _setTemplate.TemplateMember.Declaration.Parameters: [{ Type: { } setterParameterType }] } => setterParameterType,
-                    _ => throw new AssertionFailedException( $"Could not determine type of {this.Builder} property." )
-                };
+                    // There may be an invalid template without runtime parameters, in which case type cannot be determined.
+
+                    this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+                }
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                this.Builder.Type = this.Template.Declaration.Type;
+            }            
 
             this.Builder.Accessibility =
                 this.Template?.Accessibility ?? (this._getTemplate != null

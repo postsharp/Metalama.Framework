@@ -62,7 +62,6 @@ internal class TargetClass
     }
     [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.MethodOnlyAttribute]
     [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.ReturnValueOnlyAttribute]
-    [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.ParamOnlyAttribute]
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
