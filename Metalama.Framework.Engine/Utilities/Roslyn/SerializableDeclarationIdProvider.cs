@@ -41,7 +41,7 @@ public static class SerializableDeclarationIdProvider
             case ILocalSymbol:
             case IMethodSymbol
             {
-                MethodKind: MethodKind.AnonymousFunction or MethodKind.DelegateInvoke
+                MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction or MethodKind.DelegateInvoke
             }:
 
                 id = default;
