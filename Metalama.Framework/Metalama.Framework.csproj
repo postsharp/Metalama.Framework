@@ -19,7 +19,6 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
         <InternalsVisibleTo Include="Metalama.Roslyn" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     </ItemGroup>
 
