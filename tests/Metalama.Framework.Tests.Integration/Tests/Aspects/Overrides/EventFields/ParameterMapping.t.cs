@@ -1,8 +1,8 @@
 [Introduction]
 internal class TargetClass
 {
-  private event EventHandler _event;
-  public event EventHandler Event
+  private event EventHandler? _event;
+  public event EventHandler? Event
   {
     add
     {

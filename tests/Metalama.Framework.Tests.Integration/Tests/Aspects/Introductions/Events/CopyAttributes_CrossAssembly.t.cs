@@ -29,14 +29,14 @@ internal class TargetClass
     [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributes_CrossAssembly.FooAttribute(3)]
     add
     {
-      value.Invoke(null, new global::System.EventArgs());
+      value?.Invoke(null, new global::System.EventArgs());
     }
     [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributes_CrossAssembly.FooAttribute(1)]
     [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributes_CrossAssembly.FooAttribute(2)]
     [param: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributes_CrossAssembly.FooAttribute(3)]
     remove
     {
-      value.Invoke(null, new global::System.EventArgs());
+      value?.Invoke(null, new global::System.EventArgs());
     }
   }
 }

@@ -59,5 +59,5 @@ internal class TemplateProvider : ITemplateProvider
 [MyAspect]
 public class C
 {
-    private string P { get; set; }
+    private string? P { get; set; }
 }

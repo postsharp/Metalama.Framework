@@ -1,8 +1,8 @@
 [MyAspect]
 public class C
 {
-  private string _p;
-  private string P
+  private string? _p;
+  private string? P
   {
     get
     {

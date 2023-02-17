@@ -19,7 +19,7 @@ public class Aspect : TypeAspect
     }
 
     [Template]
-    private T GetTemplate<[CompileTime] T>( [CompileTime] int x ) where T : class
+    private T? GetTemplate<[CompileTime] T>( [CompileTime] int x ) where T : class
     {
         return default;
     }

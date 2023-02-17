@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class PartiallyBoundTemplateMethod
+    internal sealed class PartiallyBoundTemplateMethod
     {
         public TemplateMember<IMethod> TemplateMember { get; }
 

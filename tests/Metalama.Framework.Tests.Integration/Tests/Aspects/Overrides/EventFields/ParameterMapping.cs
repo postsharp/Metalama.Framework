@@ -34,6 +34,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Para
     [Introduction]
     internal class TargetClass 
     {
-        public event EventHandler Event;
+        public event EventHandler? Event;
     }
 }

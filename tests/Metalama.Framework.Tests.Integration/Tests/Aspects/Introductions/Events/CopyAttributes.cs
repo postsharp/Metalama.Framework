@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Template]
         public void Template([CompileTime] int x, [Foo(3)] EventHandler? y)
         {
-            y.Invoke(null, new EventArgs());
+            y?.Invoke(null, new EventArgs());
         }
     }
 

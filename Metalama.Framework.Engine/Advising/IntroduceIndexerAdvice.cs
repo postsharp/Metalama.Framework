@@ -74,7 +74,25 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-            this.Builder.Type = (this._getTemplate?.TemplateMember.Declaration.ReturnType).AssertNotNull();
+            if ( this._getTemplate != null )
+            {
+                var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
+
+                this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            }
+            else if ( this._setTemplate != null )
+            {
+                var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
+
+                var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
+
+                if ( lastRuntimeParameter != null )
+                {
+                    // There may be an invalid template without runtime parameters.
+
+                    this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
+                }
+            }
 
             this.Builder.Accessibility =
                 this._getTemplate != null
@@ -83,7 +101,7 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( this._getTemplate != null )
             {
-                CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod!, serviceProvider );
+                CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod.AssertNotNull(), serviceProvider );
 
                 CopyTemplateAttributes(
                     this._getTemplate.TemplateMember.Declaration.ReturnParameter,
@@ -91,27 +109,33 @@ namespace Metalama.Framework.Engine.Advising
                     serviceProvider );
             }
 
-            // TODO: There should be a selection of value parameter.
-            if ( this._setTemplate != null && this._setTemplate.TemplateMember.Declaration.Parameters.Count > 0 )
+            if ( this._setTemplate != null )
             {
                 CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, this.Builder.SetMethod!, serviceProvider );
 
-                CopyTemplateAttributes(
-                    this._setTemplate.TemplateMember.Declaration.Parameters[0],
-                    this.Builder.SetMethod!.Parameters.Last(),
-                    serviceProvider );
+                var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
 
-                CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+                if ( lastRuntimeParameter != null )
+                {
+                    // There may be an invalid template without runtime parameters.
+
+                    CopyTemplateAttributes(
+                        this._setTemplate.TemplateMember.Declaration.Parameters[lastRuntimeParameter.SourceIndex],
+                        this.Builder.SetMethod.AssertNotNull().Parameters.Last(),
+                        serviceProvider );
+                }
+
+                CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.AssertNotNull().ReturnParameter, serviceProvider );
             }
 
-            var accessorTemplateForAttributeCopy =
+            var (accessorTemplateForAttributeCopy, skipLastParameter) =
                 this._getTemplate == null
-                    ? this._setTemplate!.TemplateMember
-                    : this._getTemplate.TemplateMember;
+                    ? (this._setTemplate!.TemplateMember, true)
+                    : (this._getTemplate.TemplateMember, false);
 
             var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
 
-            for ( var i = 0; i < runtimeParameters.Length; i++ )
+            for ( var i = 0; i < runtimeParameters.Length - (skipLastParameter ? 1 : 0); i++ )
             {
                 var runtimeParameter = runtimeParameters[i];
                 var templateParameter = accessorTemplateForAttributeCopy.Declaration.Parameters[runtimeParameter.SourceIndex];
