@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.Advising;
+
+internal static class TemplateBindingHelper
 {
-    internal static class TemplateBindingHelper
-    {
         /// <summary>
         /// Binds a template to a introduced target method with given arguments.
         /// </summary>
@@ -34,9 +35,9 @@ namespace Metalama.Framework.Engine.Advising
         /// Does partial validation.
         /// </summary>
         public static PartiallyBoundTemplateMethod PartialForIntroduction( 
-            this TemplateMember<IMethod> template,
-            IObjectReader? arguments = null )
-        {
+        this TemplateMember<IMethod> template,
+        IObjectReader? arguments = null )
+    {
             var templateTypeArguments = GetTemplateTypeArguments( template, arguments );
 
             return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
@@ -90,77 +91,78 @@ namespace Metalama.Framework.Engine.Advising
 
                 return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.TemplateArguments ) );
             }
-        }
+    }
 
         /// <summary>
         /// Binds a template to any initializer with given arguments.
         /// </summary>
-        public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
+    public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
+    {
+        // The template must be void.
+        if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
         {
-            // The template must be void.
-            if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as an initializer template: the method return type must be a void." ) );
-            }
-
-            // The template must not have run-time parameters.
-            if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
-            }
-
-            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as an initializer template: the method return type must be a void." ) );
         }
+
+        // The template must not have run-time parameters.
+        if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
+        }
+
+        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
+    }
 
         /// <summary>
         /// Binds a template to a contract for a given location name with given arguments.
         /// </summary>
-        public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
+    public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
+    {
+        // The template must be void.
+        if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
         {
-            // The template must be void.
-            if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a contract template: the method return type must be a void." ) );
-            }
-
-            // The template must not have run-time parameters.
-            if ( template.TemplateClassMember.RunTimeParameters.Any( p => p.Name != "value" ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a contract template: the method cannot have run-time parameters except 'value'." ) );
-            }
-
-            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter )
-                 || valueTemplateParameter.IsCompileTime )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a contract template: the method must have a run-time parameter named 'value'." ) );
-            }
-
-            var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty;
-
-            if ( parameterName != "value" )
-            {
-                parameterMapping = parameterMapping.Add( "value", IdentifierName( parameterName ) );
-            }
-
-            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as a contract template: the method return type must be a void." ) );
         }
+
+        // The template must not have run-time parameters.
+        if ( template.TemplateClassMember.RunTimeParameters.Any( p => p.Name != "value" ) )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as a contract template: the method cannot have run-time parameters except 'value'." ) );
+        }
+
+        if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter )
+             || valueTemplateParameter.IsCompileTime )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as a contract template: the method must have a run-time parameter named 'value'." ) );
+        }
+
+        var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty;
+
+        if ( parameterName != "value" )
+        {
+            parameterMapping = parameterMapping.Add( "value", IdentifierName( parameterName ) );
+        }
+
+        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
+    }
 
         /// <summary>
         /// Binds a template to a given overridden method with given template arguments.
         /// </summary>
-        public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IMethod targetMethod, IObjectReader? arguments = null )
-        {
-            arguments ??= ObjectReader.Empty;
+    public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IMethod targetMethod, IObjectReader? arguments = null )
+    {
+        template.Declaration.GetSymbol().ThrowIfBelongsToDifferentCompilationThan( targetMethod.GetSymbol() );
+        arguments ??= ObjectReader.Empty;
             ImmutableDictionary<string, ExpressionSyntax>.Builder? parameterMapping = null;
             
             // Check that template run-time parameters match the target.
@@ -273,7 +275,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 default:
                     throw new AssertionFailedException( $"Unsupported target: {targetMethod}" );
-            }
+        }
 
             // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
             var templateArguments = GetTemplateArguments( template, arguments, parameterMapping?.ToImmutable() );
@@ -284,88 +286,90 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
                         $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
-            }
-
-            return new BoundTemplateMethod( template, templateArguments );
         }
 
-        private static bool VerifyTemplateType(
-            IReadOnlyList<IType> fromTypes,
-            IReadOnlyList<IType> toTypes,
-            TemplateMember<IMethod> template,
-            IObjectReader arguments )
+        return new BoundTemplateMethod( template, templateArguments );
+    }
+
+    private static bool VerifyTemplateType(
+        IReadOnlyList<IType> fromTypes,
+        IReadOnlyList<IType> toTypes,
+        TemplateMember<IMethod> template,
+        IObjectReader arguments )
+    {
+        if ( fromTypes.Count != toTypes.Count )
         {
-            if ( fromTypes.Count != toTypes.Count )
+            return false;
+        }
+        else
+        {
+            for ( var i = 0; i < fromTypes.Count; i++ )
             {
-                return false;
-            }
-            else
-            {
-                for ( var i = 0; i < fromTypes.Count; i++ )
+                if ( !VerifyTemplateType( fromTypes[i], toTypes[i], template, arguments ) )
                 {
-                    if ( !VerifyTemplateType( fromTypes[i], toTypes[i], template, arguments ) )
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
+        }
+
+        return true;
+    }
+
+    private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments )
+    {
+        fromType = fromType.ForCompilation( toType.Compilation );
+
+        // Replace type parameters by arguments.
+        if ( fromType is ITypeParameter genericParameter && template.TemplateClassMember.TypeParameters[genericParameter.Index].IsCompileTime )
+        {
+            fromType = arguments[genericParameter.Name] switch
+            {
+                IType typeArg => typeArg,
+                Type type => TypeFactory.GetType( type ),
+                _ => throw new AssertionFailedException( $"Unexpected value of type '{arguments[genericParameter.Name]?.GetType()}'." )
+            };
+        }
+
+        if ( fromType is ITypeParameter fromGenericParameter && toType is ITypeParameter toGenericParameter
+                                                             && fromGenericParameter.Name == toGenericParameter.Name )
+        {
+            // If we are comparing two generic parameters, we only compare the name here. The caller will then check
+            // the compatibility of constraints, so we don't have to do it here.
 
             return true;
         }
-
-        private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments )
+        else if ( fromType.TypeKind == TypeKind.Dynamic )
         {
-            // Replace type parameters by arguments.
-            if ( fromType is ITypeParameter genericParameter && template.TemplateClassMember.TypeParameters[genericParameter.Index].IsCompileTime )
-            {
-                fromType = arguments[genericParameter.Name] switch
-                {
-                    IType typeArg => typeArg,
-                    Type type => TypeFactory.GetType( type ),
-                    _ => throw new AssertionFailedException( $"Unexpected value of type '{arguments[genericParameter.Name]?.GetType()}'." )
-                };
-            }
+            return true;
+        }
+        else if ( fromType.Is( toType ) )
+        {
+            return true;
+        }
+        else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
+        {
+            var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
 
-            if ( fromType is ITypeParameter fromGenericParameter && toType is ITypeParameter toGenericParameter
-                                                                 && fromGenericParameter.Name == toGenericParameter.Name )
+            if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
+                 && fromNamedType.TypeArguments[0].TypeKind == TypeKind.Dynamic )
             {
-                // If we are comparing two generic parameters, we only compare the name here. The caller will then check
-                // the compatibility of constraints, so we don't have to do it here.
+                // We accept Task<dynamic> for any awaitable.
 
-                return true;
-            }
-            else if ( fromType.TypeKind == TypeKind.Dynamic )
-            {
-                return true;
-            }
-            else if ( fromType.Is( toType ) )
-            {
-                return true;
-            }
-            else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
-            {
-                var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
-
-                if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
-                     && fromNamedType.TypeArguments[0].TypeKind == TypeKind.Dynamic )
-                {
-                    // We accept Task<dynamic> for any awaitable.
-
-                    if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
-                         toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
-                    {
-                        return true;
-                    }
-                }
-                else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
-                          VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
+                if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
+                     toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
                 {
                     return true;
                 }
             }
-
-            return false;
+            else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
+                      VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
+            {
+                return true;
+            }
         }
+
+        return false;
+    }
 
         private static object?[] GetTemplateTypeArguments(
             TemplateMember<IMethod>? template,
@@ -409,15 +413,15 @@ namespace Metalama.Framework.Engine.Advising
             return templateArguments.ToArray();
         }
 
-        private static object?[] GetTemplateArguments(
-            TemplateMember<IMethod>? template,
+    private static object?[] GetTemplateArguments(
+        TemplateMember<IMethod>? template,
             IObjectReader? compileTimeArguments,
-            ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
+        ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
+    {
+        if ( template == null )
         {
-            if ( template == null )
-            {
-                return Array.Empty<object?>();
-            }
+            return Array.Empty<object?>();
+        }
 
             compileTimeArguments ??= ObjectReader.Empty;
 
@@ -440,24 +444,24 @@ namespace Metalama.Framework.Engine.Advising
             ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping, 
             List<object?> templateArguments )
         {
-            foreach ( var parameter in template.TemplateClassMember.Parameters )
+        foreach ( var parameter in template.TemplateClassMember.Parameters )
+        {
+            if ( parameter.IsCompileTime )
             {
-                if ( parameter.IsCompileTime )
-                {
                     if ( !compileTimeArguments.TryGetValue( parameter.Name, out var parameterValue ) )
-                    {
-                        throw new InvalidAdviceParametersException(
-                            MetalamaStringFormatter.Format(
-                                $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
-                    }
+                {
+                    throw new InvalidAdviceParametersException(
+                        MetalamaStringFormatter.Format(
+                            $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
+                }
 
                     templateArguments.Add( parameterValue );
-                }
-                else
-                {
-                    var expression = runTimeParameterMapping != null && runTimeParameterMapping.TryGetValue( parameter.Name, out var mapped )
-                        ? mapped
-                        : IdentifierName( parameter.Name );
+            }
+            else
+            {
+                var expression = runTimeParameterMapping != null && runTimeParameterMapping.TryGetValue( parameter.Name, out var mapped )
+                    ? mapped
+                    : IdentifierName( parameter.Name );
 
                     templateArguments.Add( expression );
                 }
@@ -466,39 +470,39 @@ namespace Metalama.Framework.Engine.Advising
 
         private static void AddTemplateTypeParameters( TemplateMember<IMethod> template, IObjectReader compileTimeParameters, List<object?> templateArguments )
         {
-            foreach ( var parameter in template.TemplateClassMember.TypeParameters )
+        foreach ( var parameter in template.TemplateClassMember.TypeParameters )
+        {
+            if ( parameter.IsCompileTime )
             {
-                if ( parameter.IsCompileTime )
+                if ( !compileTimeParameters.TryGetValue( parameter.Name, out var parameterValue ) )
                 {
-                    if ( !compileTimeParameters.TryGetValue( parameter.Name, out var parameterValue ) )
-                    {
+                    throw new InvalidAdviceParametersException(
+                        MetalamaStringFormatter.Format(
+                            $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
+                }
+
+                IType typeModel;
+
+                switch ( parameterValue )
+                {
+                    case IType type:
+                        typeModel = type;
+
+                        break;
+
+                    case Type type:
+                        typeModel = TypeFactory.Implementation.GetTypeByReflectionType( type );
+
+                        break;
+
+                    default:
                         throw new InvalidAdviceParametersException(
                             MetalamaStringFormatter.Format(
-                                $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
-                    }
+                                $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
+                }
 
-                    IType typeModel;
-
-                    switch ( parameterValue )
-                    {
-                        case IType type:
-                            typeModel = type;
-
-                            break;
-
-                        case Type type:
-                            typeModel = TypeFactory.Implementation.GetTypeByReflectionType( type );
-
-                            break;
-
-                        default:
-                            throw new InvalidAdviceParametersException(
-                                MetalamaStringFormatter.Format(
-                                    $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
-                    }
-
-                    var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
-                    var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeModel.GetSymbol() ).Type;
+                var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
+                var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeModel.GetSymbol() ).Type;
 
                     templateArguments.Add( new TemplateTypeArgument( parameter.Name, typeModel, syntax, syntaxForTypeOf ) );
                 }
@@ -507,20 +511,19 @@ namespace Metalama.Framework.Engine.Advising
 
         private static void VerifyArguments( TemplateMember<IMethod> template, IObjectReader compileTimeArguments )
         {
-            // Check that all provided properties map to a compile-time parameter.
+        // Check that all provided properties map to a compile-time parameter.
             foreach ( var name in compileTimeArguments.Keys )
+        {
+            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
             {
-                if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
-                {
-                    throw new InvalidTemplateSignatureException(
-                        MetalamaStringFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
-                }
+                throw new InvalidTemplateSignatureException(
+                    MetalamaStringFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
+            }
 
-                if ( !parameter.IsCompileTime )
-                {
-                    throw new InvalidTemplateSignatureException(
-                        MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );
-                }
+            if ( !parameter.IsCompileTime )
+            {
+                throw new InvalidTemplateSignatureException(
+                    MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );
             }
         }
     }

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating
 
     public static class TemplatingDiagnosticDescriptors
     {
-        // Reserved range 100-199
+        // Reserved ranges 100-119, 220-299
 
         private const string _category = "Metalama.Template";
 

@@ -54,6 +54,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private ScopeContext _currentScopeContext;
 
     private ISymbol? _currentTemplateMember;
+    private bool _isInLocalFunction;
     
     public TemplateAnnotator(
         ClassifyingCompilationContext compilationContext,
@@ -1638,7 +1639,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
                 }
 
-                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
+                if ( !this._isInLocalFunction )
+                {
+                    this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
+                }
             }
         }
 
@@ -1662,7 +1666,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
                 }
 
-                this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
+                if ( !this._isInLocalFunction )
+                {
+                    this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
+                }
             }
         }
 
@@ -2067,26 +2074,37 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         var reason = $"local function '{node.Identifier.Text}'";
 
-        using ( this.WithScopeContext( this._currentScopeContext.ForbidDynamic( reason ) ) )
+        var oldIsInLocalFunction = this._isInLocalFunction;
+        this._isInLocalFunction = true;
+
+        try
         {
-            this.Visit( node.ReturnType );
-            this.Visit( node.ParameterList );
+            using ( this.WithScopeContext( this._currentScopeContext.ForbidDynamic( reason ) ) )
+            {
+                this.Visit( node.ReturnType );
+                this.Visit( node.ParameterList );
+            }
+
+            using ( this.WithScopeContext( this._currentScopeContext.RunTimeConditional( reason ) ) )
+            {
+                if ( node.ExpressionBody != null )
+                {
+                    var transformedExpression = this.Visit( node.ExpressionBody.Expression );
+
+                    return node.WithExpressionBody( node.ExpressionBody.WithExpression( transformedExpression ) )
+                        .AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+                }
+                else
+                {
+                    var transformedBody = this.Visit( node.Body );
+
+                    return node.WithBody( transformedBody ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+                }
+            }
         }
-
-        using ( this.WithScopeContext( this._currentScopeContext.RunTimeConditional( reason ) ) )
+        finally
         {
-            if ( node.ExpressionBody != null )
-            {
-                var transformedExpression = this.Visit( node.ExpressionBody.Expression );
-
-                return node.WithExpressionBody( node.ExpressionBody.WithExpression( transformedExpression ) ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-            }
-            else
-            {
-                var transformedBody = this.Visit( node.Body );
-
-                return node.WithBody( transformedBody ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-            }
+            this._isInLocalFunction = oldIsInLocalFunction;
         }
     }
 
