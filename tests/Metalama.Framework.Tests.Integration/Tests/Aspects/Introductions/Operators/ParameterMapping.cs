@@ -52,13 +52,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Pa
         [Template]
         public int InvertedParameterNames(dynamic? x, int y)
         {
-            return x.ToString().Length + y;
+            return x!.ToString().Length + y;
         }
 
         [Template]
         public int ParameterName(dynamic? x)
         {
-            return x.ToString().Length;
+            return x!.ToString().Length;
         }
     }
 
