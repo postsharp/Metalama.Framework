@@ -150,7 +150,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
             this.Builder.IsOverride = false;
             this.Builder.IsNew = false;
 
@@ -202,7 +202,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( existingMethod ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -214,7 +214,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = false;
                         this.Builder.OverriddenMethod = existingMethod;
 
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                         addTransformation( overriddenMethod );
                         addTransformation( this.Builder.ToTransformation() );
@@ -225,7 +225,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                 case OverrideStrategy.Override:
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroductionFinal( existingMethod ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -245,7 +245,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = true;
                         this.Builder.IsNew = false;
                         this.Builder.OverriddenMethod = existingMethod;
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroductionFinal( this.Builder ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
                         addTransformation( overriddenMethod );

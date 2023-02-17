@@ -187,8 +187,8 @@ namespace Metalama.Framework.Engine.Advising
                 var overrideIndexerTransformation = new OverrideIndexerTransformation(
                     this,
                     this.Builder,
-                    this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
-                    this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
+                    this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                    this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                     this.Tags );
 
                 addTransformation( this.Builder.ToTransformation() );
@@ -239,8 +239,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod ),
-                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod ),
+                                this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -255,8 +255,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 this.Builder,
-                                this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
-                                this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
+                                this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
@@ -271,8 +271,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this._getTemplate?.ForIntroductionFinal( existingIndexer.GetMethod ),
-                                this._setTemplate?.ForIntroductionFinal( existingIndexer.SetMethod ),
+                                this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -297,8 +297,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenIndexer = new OverrideIndexerTransformation(
                                 this,
                                 this.Builder,
-                                this._getTemplate?.ForIntroductionFinal( this.Builder.GetMethod ),
-                                this._setTemplate?.ForIntroductionFinal( this.Builder.SetMethod ),
+                                this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );

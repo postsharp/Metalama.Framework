@@ -5,8 +5,14 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Advising;
 
+/// <summary>
+/// Represents a template fully bound to a target methods and template arguments.
+/// </summary>
 internal sealed class BoundTemplateMethod
 {
+    /// <summary>
+    /// Gets the template member of the aspect.
+    /// </summary>
     public TemplateMember<IMethod> TemplateMember { get; }
 
     public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
@@ -22,6 +28,9 @@ internal sealed class BoundTemplateMethod
 #endif
     }
 
+    /// <summary>
+    /// Gets bound template arguments. This array consists of all parameters followed all type parameters.
+    /// </summary>
     public object?[] TemplateArguments { get; }
 
     public object?[] GetTemplateArgumentsForMethod( IHasParameters signature )

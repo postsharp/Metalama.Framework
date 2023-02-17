@@ -18,15 +18,22 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class TemplateBindingHelper
     {
+        /// <summary>
+        /// Binds a template to a introduced target method with given arguments.
+        /// </summary>
         public static BoundTemplateMethod ForIntroduction(
             this TemplateMember<IMethod> template,
             IMethod targetMethod,
             IObjectReader? arguments = null )
         {
-            return template.ForIntroductionInitial( arguments ).ForIntroductionFinal( targetMethod );
+            return template.PartialForIntroduction( arguments ).ForIntroduction( targetMethod );
         }
 
-        public static PartiallyBoundTemplateMethod ForIntroductionInitial( 
+        /// <summary>
+        /// Partially binds a template with given type arguments when the target declaration is not yet known.
+        /// Does partial validation.
+        /// </summary>
+        public static PartiallyBoundTemplateMethod PartialForIntroduction( 
             this TemplateMember<IMethod> template,
             IObjectReader? arguments = null )
         {
@@ -35,8 +42,11 @@ namespace Metalama.Framework.Engine.Advising
             return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
         }
 
+        /// <summary>
+        /// Binds a partially bound template to a target declaration and finished validation.
+        /// </summary>
         [return: NotNullIfNotNull( nameof(targetMethod) )]
-        public static BoundTemplateMethod? ForIntroductionFinal(
+        public static BoundTemplateMethod? ForIntroduction(
             this PartiallyBoundTemplateMethod template,
             IMethod? targetMethod )
         {
@@ -45,52 +55,46 @@ namespace Metalama.Framework.Engine.Advising
                 return null;
             }
 
-            var mappingBuilder = ImmutableDictionary<string, ExpressionSyntax>.Empty.ToBuilder();
-
-            for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
+            if ( targetMethod.OperatorKind.GetCategory() == OperatorCategory.None )
             {
-                var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
-                mappingBuilder.Add( templateParameter.Name, IdentifierName( targetMethod.Parameters[i].Name ) );
+                var mappingBuilder = ImmutableDictionary<string, ExpressionSyntax>.Empty.ToBuilder();
+
+                for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
+                {
+                    var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
+                    mappingBuilder.Add( templateParameter.Name, IdentifierName( targetMethod.Parameters[i].Name ) );
+                }
+
+                var templateArguments = GetTemplateArguments( template, mappingBuilder.ToImmutable() );
+
+                return new BoundTemplateMethod( template.TemplateMember, templateArguments );
             }
-
-            var templateArguments = GetTemplateArguments( template, mappingBuilder.ToImmutable() );
-
-            return new BoundTemplateMethod( template.TemplateMember, templateArguments );
-        }
-
-        public static PartiallyBoundTemplateMethod ForOperatorIntroductionInitial(
-            this TemplateMember<IMethod> template,
-            IObjectReader? arguments = null )
-        {
-            var templateTypeArguments = GetTemplateTypeArguments( template, arguments );
-
-            return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
-        }
-
-        public static BoundTemplateMethod ForOperatorIntroductionFinal(
-            this PartiallyBoundTemplateMethod template,
-            IMethod targetMethod )
-        {
-            var runTimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
-
-            var expectedParameterCount = targetMethod.OperatorKind.GetCategory() switch
+            else
             {
-                OperatorCategory.Binary => 2,
-                OperatorCategory.Conversion => 1,
-                OperatorCategory.Unary => 1,
-                _ => throw new AssertionFailedException( $"Invalid value for OperatorCategory: {targetMethod.OperatorKind.GetCategory()}." )
-            };
+                var runTimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
 
-            if ( runTimeParameters.Length != expectedParameterCount )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
+                var expectedParameterCount = targetMethod.OperatorKind.GetCategory() switch
+                {
+                    OperatorCategory.Binary => 2,
+                    OperatorCategory.Conversion => 1,
+                    OperatorCategory.Unary => 1,
+                    _ => throw new AssertionFailedException( $"Invalid value for OperatorCategory: {targetMethod.OperatorKind.GetCategory()}." )
+                };
+
+                if ( runTimeParameters.Length != expectedParameterCount )
+                {
+                    throw new InvalidTemplateSignatureException(
+                        MetalamaStringFormatter.Format(
+                            $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
+                }
+
+                return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.TemplateArguments ) );
             }
-
-            return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.Arguments ) );
         }
 
+        /// <summary>
+        /// Binds a template to any initializer with given arguments.
+        /// </summary>
         public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
             // The template must be void.
@@ -112,6 +116,9 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
         }
 
+        /// <summary>
+        /// Binds a template to a contract for a given location name with given arguments.
+        /// </summary>
         public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
         {
             // The template must be void.
@@ -148,6 +155,9 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
         }
 
+        /// <summary>
+        /// Binds a template to a given overridden method with given template arguments.
+        /// </summary>
         public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IMethod targetMethod, IObjectReader? arguments = null )
         {
             arguments ??= ObjectReader.Empty;
@@ -384,7 +394,7 @@ namespace Metalama.Framework.Engine.Advising
                 return Array.Empty<object?>();
             }
 
-            var compileTimeArguments = template.Arguments ?? ObjectReader.Empty;
+            var compileTimeArguments = template.TemplateArguments ?? ObjectReader.Empty;
 
             var templateArguments = new List<object?>();
 
