@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
@@ -58,12 +57,12 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override bool IsValidForContainingSymbol( ISymbol symbol )
         {
-            throw new NotSupportedException();
+            throw new AssertionFailedException( $"This method should not be called for '{symbol}'." );
         }
 
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {
-            throw new NotSupportedException();
+            throw new AssertionFailedException( $"This method should not be called for '{symbol}'." );
         }
     }
 }
