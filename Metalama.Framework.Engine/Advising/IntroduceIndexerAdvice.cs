@@ -18,8 +18,8 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, IndexerBuilder>
     {
-        private readonly BoundTemplateMethod? _getTemplate;
-        private readonly BoundTemplateMethod? _setTemplate;
+        private readonly PartiallyBoundTemplateMethod? _getTemplate;
+        private readonly PartiallyBoundTemplateMethod? _setTemplate;
 
         public IntroduceIndexerAdvice(
             IAspectInstanceInternal aspect,
@@ -27,8 +27,8 @@ namespace Metalama.Framework.Engine.Advising
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
             IReadOnlyList<(IType Type, string Name)> indices,
-            BoundTemplateMethod? getTemplate,
-            BoundTemplateMethod? setTemplate,
+            PartiallyBoundTemplateMethod? getTemplate,
+            PartiallyBoundTemplateMethod? setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IIndexerBuilder>? buildAction,
@@ -74,30 +74,74 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-            this.Builder.Type = (this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
+            if ( this._getTemplate != null )
+            {
+                var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
+
+                this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            }
+            else if ( this._setTemplate != null )
+            {
+                var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
+
+                var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
+
+                if ( lastRuntimeParameter != null )
+                {
+                    // There may be an invalid template without runtime parameters.
+
+                    this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
+                }
+            }
 
             this.Builder.Accessibility =
                 this._getTemplate != null
-                    ? this._getTemplate.Template.Accessibility
-                    : this._setTemplate.AssertNotNull().Template.Accessibility;
+                    ? this._getTemplate.TemplateMember.Accessibility
+                    : this._setTemplate.AssertNotNull().TemplateMember.Accessibility;
 
             if ( this._getTemplate != null )
             {
-                CopyTemplateAttributes( this._getTemplate.Template.Declaration, this.Builder.GetMethod!, serviceProvider );
-                CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
-            }
-
-            // TODO: There should be a selection of value parameter.
-            if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
-            {
-                CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
+                CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod.AssertNotNull(), serviceProvider );
 
                 CopyTemplateAttributes(
-                    this._setTemplate.Template.Declaration.Parameters[0],
-                    this.Builder.SetMethod!.Parameters.Last(),
+                    this._getTemplate.TemplateMember.Declaration.ReturnParameter,
+                    this.Builder.GetMethod!.ReturnParameter,
                     serviceProvider );
+            }
 
-                CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            if ( this._setTemplate != null )
+            {
+                CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, this.Builder.SetMethod!, serviceProvider );
+
+                var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
+
+                if ( lastRuntimeParameter != null )
+                {
+                    // There may be an invalid template without runtime parameters.
+
+                    CopyTemplateAttributes(
+                        this._setTemplate.TemplateMember.Declaration.Parameters[lastRuntimeParameter.SourceIndex],
+                        this.Builder.SetMethod.AssertNotNull().Parameters.Last(),
+                        serviceProvider );
+                }
+
+                CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.AssertNotNull().ReturnParameter, serviceProvider );
+            }
+
+            var (accessorTemplateForAttributeCopy, skipLastParameter) =
+                this._getTemplate == null
+                    ? (this._setTemplate!.TemplateMember, true)
+                    : (this._getTemplate.TemplateMember, false);
+
+            var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
+
+            for ( var i = 0; i < runtimeParameters.Length - (skipLastParameter ? 1 : 0); i++ )
+            {
+                var runtimeParameter = runtimeParameters[i];
+                var templateParameter = accessorTemplateForAttributeCopy.Declaration.Parameters[runtimeParameter.SourceIndex];
+                var parameterBuilder = this.Builder.Parameters[i];
+
+                CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
             }
 
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
@@ -143,8 +187,8 @@ namespace Metalama.Framework.Engine.Advising
                 var overrideIndexerTransformation = new OverrideIndexerTransformation(
                     this,
                     this.Builder,
-                    this._getTemplate,
-                    this._setTemplate,
+                    this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                    this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                     this.Tags );
 
                 addTransformation( this.Builder.ToTransformation() );
@@ -195,8 +239,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -211,8 +255,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 this.Builder,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                                 this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
@@ -227,8 +271,8 @@ namespace Metalama.Framework.Engine.Advising
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
                                 existingIndexer,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
+                                this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
                                 this.Tags );
 
                             addTransformation( overrideIndexerTransformation );
@@ -249,7 +293,13 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.IsNew = false;
                             this.Builder.OverriddenIndexer = existingIndexer;
-                            var overriddenIndexer = new OverrideIndexerTransformation( this, this.Builder, this._getTemplate, this._setTemplate, this.Tags );
+
+                            var overriddenIndexer = new OverrideIndexerTransformation(
+                                this,
+                                this.Builder,
+                                this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                                this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
+                                this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenIndexer );

@@ -26,14 +26,14 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
+            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.TemplateMember.SelectedKind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
                 new MetaApiProperties(
                     this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
-                    this.BoundTemplate.Template.Cast(),
+                    this.BoundTemplate.TemplateMember.Cast(),
                     this.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Transformations
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
-            return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() );
+            return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.TemplateMember.MustInterpretAsAsyncTemplate() );
         }
     }
 }

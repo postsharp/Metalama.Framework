@@ -334,7 +334,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 new OverrideMethodTransformation(
                                     this,
                                     (IMethod) memberBuilder,
-                                    templateMethod.ForIntroduction(),
+                                    templateMethod.ForIntroduction( (IMethod) memberBuilder ),
                                     mergedTags ) );
                         }
                         else
@@ -566,15 +566,15 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         {
                             if ( !isEventField )
                             {
+                                var accessorTemplates = templateEvent.GetAccessorTemplates();
+
                                 addTransformation(
                                     new OverrideEventTransformation(
                                         this,
                                         eventBuilder,
-                                        templateEvent,
-                                        default,
-                                        default,
-                                        mergedTags,
-                                        null ) );
+                                        accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ),
+                                        accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ),
+                                        mergedTags ) );
                             }
                             else
                             {

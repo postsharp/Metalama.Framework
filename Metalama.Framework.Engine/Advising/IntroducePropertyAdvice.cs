@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -19,8 +20,8 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
 {
-    private readonly BoundTemplateMethod? _getTemplate;
-    private readonly BoundTemplateMethod? _setTemplate;
+    private readonly PartiallyBoundTemplateMethod? _getTemplate;
+    private readonly PartiallyBoundTemplateMethod? _setTemplate;
     private readonly bool _isProgrammaticAutoProperty;
 
     public IntroducePropertyAdvice(
@@ -31,8 +32,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         string? explicitName,
         IType? explicitType,
         TemplateMember<IProperty>? propertyTemplate,
-        BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
+        PartiallyBoundTemplateMethod? getTemplate,
+        PartiallyBoundTemplateMethod? setTemplate,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IPropertyBuilder>? buildAction,
@@ -95,24 +96,40 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
         if ( !this._isProgrammaticAutoProperty )
         {
-            this.Builder.Type =
-                this switch
+            if ( this._getTemplate != null )
+            {
+                var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
+
+                this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            }
+            else if ( this._setTemplate != null )
+            {
+                var runtimeParameters = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
+
+                var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
+
+                if ( runtimeParameters.Length > 0 )
                 {
-                    { Template.Declaration.Type: { } propertyType } => propertyType,
-                    { _getTemplate.Template.Declaration.ReturnType: { } getterReturnType } => getterReturnType,
-                    { _setTemplate.Template.Declaration.Parameters: [{ Type: { } setterParameterType }] } => setterParameterType,
-                    _ => throw new AssertionFailedException( $"Could not determine type of {this.Builder} property." )
-                };
+                    // There may be an invalid template without runtime parameters, in which case type cannot be determined.
+
+                    this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+                }
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                this.Builder.Type = this.Template.Declaration.Type;
+            }            
 
             this.Builder.Accessibility =
                 this.Template?.Accessibility ?? (this._getTemplate != null
-                    ? this._getTemplate.Template.Accessibility
-                    : this._setTemplate?.Template.Accessibility).AssertNotNull();
+                    ? this._getTemplate.TemplateMember.Accessibility
+                    : this._setTemplate?.TemplateMember.Accessibility).AssertNotNull();
 
             if ( this.Builder.GetMethod != null )
             {
                 ((AccessorBuilder) this.Builder.GetMethod).SetIsIteratorMethod(
-                    this.Template?.IsIteratorMethod ?? this._getTemplate?.Template.IsIteratorMethod ?? false );
+                    this.Template?.IsIteratorMethod ?? this._getTemplate?.TemplateMember.IsIteratorMethod ?? false );
             }
 
             if ( this.Template != null )
@@ -142,22 +159,44 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             }
         }
 
-        if ( this._getTemplate != null )
+        if ( this.Builder.GetMethod != null )
         {
-            CopyTemplateAttributes( this._getTemplate.Template.Declaration, this.Builder.GetMethod!, serviceProvider );
-            CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+            if ( this._getTemplate != null )
+            {
+                AddAttributeForAccessorTemplate( this._getTemplate.TemplateMember.TemplateClassMember, this._getTemplate.Declaration, this.Builder.GetMethod );
+            }
+            else if ( this.Template?.Declaration.GetMethod != null )
+            {
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.GetMethod, this.Builder.GetMethod );
+            }
         }
 
-        if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
+        if ( this.Builder.SetMethod != null )
         {
-            CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
+            if ( this._setTemplate != null )
+            {
+                AddAttributeForAccessorTemplate( this._setTemplate.TemplateMember.TemplateClassMember, this._setTemplate.Declaration, this.Builder.SetMethod );
+            }
+            else if ( this.Template?.Declaration.SetMethod != null )
+            {
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.SetMethod, this.Builder.SetMethod );
+            }
+        }
 
-            CopyTemplateAttributes(
-                this._setTemplate.Template.Declaration.Parameters[0],
-                this.Builder.SetMethod!.Parameters[0],
-                serviceProvider );
+        void AddAttributeForAccessorTemplate( TemplateClassMember templateClassMember, IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+        {
+            CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
 
-            CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            if ( accessorBuilder.Parameters.Count > 0 && templateClassMember.RunTimeParameters.Length > 0 )
+            {
+                // There may be an invalid template without runtime parameters, in which case attributes cannot be copied.
+                CopyTemplateAttributes(
+                    accessorTemplate.Parameters[templateClassMember.RunTimeParameters[0].SourceIndex],
+                    accessorBuilder.Parameters[0],
+                    serviceProvider );
+            }
+
+            CopyTemplateAttributes( accessorTemplate.ReturnParameter, accessorBuilder.ReturnParameter, serviceProvider );
         }
 
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
@@ -196,8 +235,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 var overriddenProperty = new OverridePropertyTransformation(
                     this,
                     this.Builder,
-                    this._getTemplate,
-                    this._setTemplate,
+                    this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                    this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                     this.Tags );
 
                 addTransformation( this.Builder.ToTransformation() );
@@ -258,8 +297,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
+                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
                             this.Tags );
 
                         addTransformation( overriddenProperty );
@@ -274,8 +313,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
                             this.Builder,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                             this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
@@ -290,8 +329,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ), 
+                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
                             this.Tags );
 
                         addTransformation( overriddenMethod );
@@ -318,8 +357,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             serviceProvider,
                             this,
                             this.Builder,
-                            this._getTemplate,
-                            this._setTemplate,
+                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
                             this.Tags,
                             addTransformation );
 

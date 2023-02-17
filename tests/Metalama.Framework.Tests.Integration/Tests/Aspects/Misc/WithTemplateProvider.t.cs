@@ -1,8 +1,8 @@
 [MyAspect]
 public class C
 {
-  private int _p;
-  private int P
+  private string? _p;
+  private string? P
   {
     get
     {

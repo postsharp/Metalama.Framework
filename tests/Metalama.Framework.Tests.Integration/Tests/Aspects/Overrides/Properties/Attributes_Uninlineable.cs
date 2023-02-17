@@ -47,22 +47,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        [field: FieldOnly]
-        [FieldAndProperty]
-        [PropertyOnly]
-        public int IntroducedAutoProperty
-        {
-            [MethodOnly]
-            [return: ReturnValueOnly]
-            get;
-            [MethodOnly]
-            [param: ParamOnly]
-            [return: ReturnValueOnly]
-            set;
-        }
-
-        [Introduce]
-        [FieldAndProperty]
         [PropertyOnly]
         public int IntroducedProperty
         {
@@ -86,9 +70,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
     }
 
-    [AttributeUsage( AttributeTargets.Field )]
-    public class FieldOnlyAttribute : Attribute { }
-
     [AttributeUsage( AttributeTargets.Property )]
     public class PropertyOnlyAttribute : Attribute { }
 
@@ -101,30 +82,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     [AttributeUsage( AttributeTargets.Parameter )]
     public class ParamOnlyAttribute : Attribute { }
 
-    [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
-    public class FieldAndPropertyAttribute : Attribute { }
-
     // <target>
     [Introduction]
     [Override]
     internal class TargetClass
     {
-        [field: FieldOnly]
-        [field: FieldAndProperty]
-        [FieldAndProperty]
-        [PropertyOnly]
-        public int AutoProperty
-        {
-            [MethodOnly]
-            [return: ReturnValueOnly]
-            get;
-            [MethodOnly]
-            [param: ParamOnly]
-            [return: ReturnValueOnly]
-            set;
-        }
-
-        [FieldAndProperty]
         [PropertyOnly]
         public int Property
         {

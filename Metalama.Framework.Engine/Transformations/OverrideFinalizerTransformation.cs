@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
-                    this.BoundTemplate.Template.Cast(),
+                    this.BoundTemplate.TemplateMember.Cast(),
                     this.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Transformations
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {

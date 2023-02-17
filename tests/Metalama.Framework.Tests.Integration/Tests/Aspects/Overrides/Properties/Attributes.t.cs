@@ -47,16 +47,21 @@ internal class TargetClass
     }
   }
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.FieldOnlyAttribute]
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.FieldAndPropertyAttribute]
   private global::System.Int32 _introducedAutoProperty;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.FieldAndPropertyAttribute]
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.PropertyOnlyAttribute]
   public global::System.Int32 IntroducedAutoProperty
   {
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.MethodOnlyAttribute]
+    [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.ReturnValueOnlyAttribute]
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
       return this._introducedAutoProperty;
     }
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.MethodOnlyAttribute]
+    [return: global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes.ReturnValueOnlyAttribute]
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");

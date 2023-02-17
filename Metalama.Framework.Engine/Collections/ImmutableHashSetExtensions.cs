@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Collections;
 
-public static class ConcurrentHashSetExtensions
+public static class ImmutableHashSetExtensions
 {
     public static ImmutableHashSet<T> AddRange<T>( this ImmutableHashSet<T> hashSet, IEnumerable<T> items )
     {
@@ -15,5 +15,13 @@ public static class ConcurrentHashSetExtensions
         }
 
         return hashSet;
+    }
+
+    public static void AddRange<T>( this ImmutableHashSet<T>.Builder hashSetBuilder, IEnumerable<T> items )
+    {
+        foreach ( var item in items )
+        {
+            hashSetBuilder.Add( item );
+        }
     }
 }

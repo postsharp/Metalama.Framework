@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.Linking
                     return GetImplicitRemoverBody( symbol, generationContext );
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
             }
         }
 
@@ -479,7 +479,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
                         EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
-                        _ => throw new InvalidOperationException()
+                        _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax.Kind()}" ),
                     };
 
                 default:

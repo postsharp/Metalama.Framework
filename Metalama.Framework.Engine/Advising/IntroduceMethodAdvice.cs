@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
 {
-    private readonly BoundTemplateMethod _boundTemplate;
+    private readonly PartiallyBoundTemplateMethod _template;
 
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
@@ -28,7 +28,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
         TemplateClassInstance templateInstance,
         INamedType targetDeclaration,
         ICompilation sourceCompilation,
-        BoundTemplateMethod boundTemplate,
+        PartiallyBoundTemplateMethod template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IMethodBuilder>? buildAction,
@@ -40,14 +40,14 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             targetDeclaration,
             sourceCompilation,
             null,
-            boundTemplate.Template,
+            template.TemplateMember,
             scope,
             overrideStrategy,
             buildAction,
             layerName,
             tags )
     {
-        this._boundTemplate = boundTemplate;
+        this._template = template;
 
         this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
     }
@@ -60,7 +60,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
         base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
         this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
-        var typeRewriter = TemplateTypeRewriter.Get( this._boundTemplate );
+
+        var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
         // Handle iterator info.
         this.Builder.SetIsIteratorMethod( this.Template.IsIteratorMethod );
@@ -85,12 +86,11 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
         CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
 
-        foreach ( var templateParameter in this.Template.Declaration.Parameters )
+        var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
+
+        foreach ( var runtimeParameter in runtimeParameters )
         {
-            if ( this.Template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
-            {
-                continue;
-            }
+            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
 
             var parameterBuilder = this.Builder.AddParameter(
                 templateParameter.Name,
@@ -101,24 +101,22 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
         }
 
-        foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
+        var runtimeTypeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeTypeParameters;
+
+        foreach ( var runtimeTypeParameter in runtimeTypeParameters )
         {
-            if ( this.Template.TemplateClassMember.TypeParameters[templateGenericParameter.Index].IsCompileTime )
+            var templateTypeParameter = this.Template.AssertNotNull().Declaration.TypeParameters[runtimeTypeParameter.SourceIndex];
+            var typeParameterBuilder = this.Builder.AddTypeParameter( templateTypeParameter.Name );
+            typeParameterBuilder.Variance = templateTypeParameter.Variance;
+            typeParameterBuilder.HasDefaultConstructorConstraint = templateTypeParameter.HasDefaultConstructorConstraint;
+            typeParameterBuilder.TypeKindConstraint = templateTypeParameter.TypeKindConstraint;
+
+            foreach ( var templateGenericParameterConstraint in templateTypeParameter.TypeConstraints )
             {
-                continue;
+                typeParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
             }
 
-            var genericParameterBuilder = this.Builder.AddTypeParameter( templateGenericParameter.Name );
-            genericParameterBuilder.Variance = templateGenericParameter.Variance;
-            genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
-            genericParameterBuilder.TypeKindConstraint = templateGenericParameter.TypeKindConstraint;
-
-            foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
-            {
-                genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
-            }
-
-            CopyTemplateAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder, serviceProvider );
+            CopyTemplateAttributes( templateTypeParameter, typeParameterBuilder, serviceProvider );
         }
     }
 
@@ -131,7 +129,6 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-
         var existingMethod = targetDeclaration.FindClosestVisibleMethod( this.Builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
@@ -153,7 +150,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
+            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
             this.Builder.IsOverride = false;
             this.Builder.IsNew = false;
 
@@ -205,7 +202,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._boundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -217,7 +214,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = false;
                         this.Builder.OverriddenMethod = existingMethod;
 
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                         addTransformation( overriddenMethod );
                         addTransformation( this.Builder.ToTransformation() );
@@ -228,7 +225,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                 case OverrideStrategy.Override:
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._boundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
+
                         addTransformation( overriddenMethod );
 
                         return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -247,7 +245,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = true;
                         this.Builder.IsNew = false;
                         this.Builder.OverriddenMethod = existingMethod;
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
                         addTransformation( overriddenMethod );

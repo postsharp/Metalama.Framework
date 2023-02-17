@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributeToIntroducedField
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributes
 {
     public class IntroductionAttribute : TypeAspect
     {

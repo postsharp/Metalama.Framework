@@ -110,13 +110,13 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeMemberInfo.FromSymbol( template?.Template.Declaration.GetSymbol() ),
+        UserCodeMemberInfo.FromSymbol( template?.TemplateMember.Declaration.GetSymbol() ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
         metaApi: metaApi )
     {
-        this._template = template?.Template;
+        this._template = template?.TemplateMember;
         this.TemplateInstance = templateInstance;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );

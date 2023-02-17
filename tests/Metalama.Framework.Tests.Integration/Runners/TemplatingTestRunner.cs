@@ -245,13 +245,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
-                var template = TemplateMemberFactory.Create( compilationModel.Factory.GetMethod( templateMethod ), fakeTemplateClassMember );
+                var templateMethodDeclaration = compilationModel.Factory.GetMethod( templateMethod );
+                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
                     assembly,
                     compilationModel,
-                    template.ForIntroduction() );
+                    template.ForIntroduction( templateMethodDeclaration ) );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out var output );
 
@@ -328,7 +329,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     compilation,
                     diagnostics,
-                    template.Template.Cast(),
+                    template.TemplateMember.Cast(),
                     serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
