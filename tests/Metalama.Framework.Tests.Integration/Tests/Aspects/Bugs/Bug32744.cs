@@ -1,5 +1,7 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32744;
 
+#pragma warning disable CS8321
+
 using Metalama.Framework.Aspects;
 
 public class TestAttribute : OverrideMethodAspect
@@ -14,8 +16,6 @@ public class TestAttribute : OverrideMethodAspect
 
 internal class C
 {
- 
-
     // <target>
     [Test]
     private static int Bar()
