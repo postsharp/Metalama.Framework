@@ -13,6 +13,7 @@ namespace Metalama.Framework.CompileTimeContracts
     public sealed class TemplateTypeArgument
     {
         public string Name { get; }
+
         public TypeSyntax Syntax { get; }
 
         public TypeSyntax SyntaxWithoutNullabilityAnnotations { get; }
