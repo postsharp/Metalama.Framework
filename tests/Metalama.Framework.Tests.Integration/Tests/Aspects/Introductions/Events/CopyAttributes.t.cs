@@ -1,3 +1,4 @@
+[Introduction]
 internal class TargetClass
 {
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributes.FooAttribute(1)]
