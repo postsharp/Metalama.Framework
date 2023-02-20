@@ -101,6 +101,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                 case DelegateDeclarationSyntax @delegate:
                     return @delegate.Identifier.GetLocation();
 
+                case NameEqualsSyntax nameEquals:
+                    return nameEquals.Name.GetLocation();
+
                 default:
                     return node.GetLocation();
             }
@@ -113,17 +116,6 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <param name="attribute"></param>
         /// <returns></returns>
         internal static Location? GetDiagnosticLocation( this AttributeData attribute )
-        {
-            var application = attribute.ApplicationSyntaxReference;
-
-            if ( application == null )
-            {
-                // Coverage: ignore
-
-                return null;
-            }
-
-            return application.GetSyntax().GetLocation();
-        }
+            => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
 }

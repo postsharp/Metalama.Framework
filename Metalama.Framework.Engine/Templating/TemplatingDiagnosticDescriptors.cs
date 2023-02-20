@@ -402,5 +402,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The dynamic expression '{0}' must be explicitly cast to 'IExpression' because it is a dynamic argument of a compile-time method that does not return a dynamic type.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> CannotSetTemplateMemberFromAttribute
+            = new(
+                "LAMA0257",
+                "Cannot set a template member from an attribute.",
+                "Cannot set a template member {0} from an attribute.",
+                _category,
+                Error );
     }
 }
