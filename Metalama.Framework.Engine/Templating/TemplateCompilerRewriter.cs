@@ -50,6 +50,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
+    private readonly ITypeSymbol _iExpressionSymbol;
 
     private TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
     private MetaContext? _currentMetaContext;
@@ -97,6 +98,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         this._dictionaryOfITypeType =
             syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Dictionary<string, IType>) ) );
+
+        this._iExpressionSymbol = this._runTimeCompilation.GetTypeByMetadataName( typeof( IExpression ).FullName! ).AssertNotNull();
     }
 
     public bool Success { get; private set; } = true;
@@ -721,6 +724,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
             default:
+                // If it's an IExperssion, it can be returned as a TypedExpressionSyntax.
+                if ( this._runTimeCompilation.HasImplicitConversion( expressionType, this._iExpressionSymbol ) )
+                {
+                    return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.GetTypedExpression ) ) )
+                        .AddArgumentListArguments( Argument( expression ) );
+                }
+
                 // Try to find a serializer for this type. If the object type is simply 'object', we will resolve it at expansion time.
                 if ( expressionType.SpecialType == SpecialType.System_Object ||
                      this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )

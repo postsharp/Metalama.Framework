@@ -391,7 +391,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0255",
                 "Cannot cast a run-time expression to a compile-time type.",
-                "Cannot cast the run-time expression '{0}' to the compile-time '{1}'.",
+                "Cannot cast the run-time expression '{0}' to the compile-time type '{1}'.",
                 _category,
                 Error );
         

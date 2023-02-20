@@ -58,5 +58,14 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
+
+        // used for debug assert
+        public bool Equals( SyntaxGenerationContext? other )
+        {
+            return other != null &&
+                this.CompilationContext == other.CompilationContext &&
+                this.SyntaxGenerator.IsNullAware == other.SyntaxGenerator.IsNullAware &&
+                this.IsPartial == other.IsPartial;
+        }
     }
 }

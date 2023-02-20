@@ -134,7 +134,7 @@ public static class ExpressionFactory
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
     [Obsolete(
-        "For dynamic expressions, assign the run-time expression to a variable of type IExpression or cast to to IExpression. For dynamic expressions, use the other overload of this method." )]
+        "For dynamic expressions, assign the run-time expression to a variable of type IExpression or cast it to IExpression. For non-dynamic expressions, use the other overload of this method." )]
     public static void Capture( dynamic? expression, out IExpression definedExpression )
         => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( (object?) expression );
 

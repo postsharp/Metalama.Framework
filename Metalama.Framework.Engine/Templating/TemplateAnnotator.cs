@@ -1812,40 +1812,63 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         TypeSyntax annotatedType;
-        var annotatedExpression = this.Visit( node.Expression );
-        var expressionScope = this.GetNodeScope( annotatedExpression );
+        // The scope of the type shouldn't be influenced by parent scope.
+        using ( this.WithScopeContext( this._currentScopeContext.RunTimeOrCompileTime( "type to cast to" ) ) )
+        {
+            annotatedType = this.Visit( node.Type );
+        }
+        var typeScope = this.GetNodeScope( annotatedType );
+
+        ExpressionSyntax annotatedExpression;
         TemplatingScope castScope;
 
-        if ( expressionScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+        if ( typeScope == TemplatingScope.RunTimeOnly )
         {
             // The whole cast is run-time only.
-            using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"cast of the run-time-only expression '{node.Expression}'" ) ) )
+            using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"cast to the run-time-only type '{node.Type}'" ) ) )
             {
-                annotatedType = this.Visit( node.Type );
+                annotatedExpression = this.Visit( node.Expression );
             }
 
-            castScope = this.GetNodeScope( annotatedType ).GetExpressionValueScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            var expressionScope = this.GetNodeScope( annotatedExpression );
+            castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
+        }
+        else
+        {
+            var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+            var typeIsIExpression = type is INamedTypeSymbol { Name: nameof( IExpression ) };
 
-            if ( castScope == TemplatingScope.CompileTimeOnly )
+            if ( typeIsIExpression )
             {
-                var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+                using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"cast to IExpression" ) ) )
+                {
+                    annotatedExpression = this.Visit( node.Expression );
+                }
 
-                if ( type is not INamedTypeSymbol { Name: nameof(IExpression) } )
+                castScope = TemplatingScope.CompileTimeOnly;
+            }
+            else
+            {
+                annotatedExpression = this.Visit( node.Expression );
+
+                var expressionScope = this.GetNodeScope( annotatedExpression );
+
+                if ( typeScope == TemplatingScope.CompileTimeOnly && expressionScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
                 {
                     // We cannot cast a run-time expression to a compile-time type, except to IExpression.
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,
                         node.Type,
                         (node.Expression.ToString(), node.Type.ToString()) );
+
+                    // Act as if the cast worked, to suppress other errors.
+                    castScope = TemplatingScope.CompileTimeOnly;
+                }
+                else
+                {
+                    castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
                 }
             }
-        }
-        else
-        {
-            annotatedType = this.Visit( node.Type );
-            var typeScope = annotatedType.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime ).GetExpressionValueScope();
-
-            castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
         }
 
         return node.Update( node.OpenParenToken, annotatedType, node.CloseParenToken, annotatedExpression )
