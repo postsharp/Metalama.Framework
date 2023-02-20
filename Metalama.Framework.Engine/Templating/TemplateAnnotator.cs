@@ -1805,7 +1805,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         TypeSyntax annotatedType;
-        // the scope of the type shouldn't be influenced by parent scope
+        // The scope of the type shouldn't be influenced by parent scope.
         using ( this.WithScopeContext( this._currentScopeContext.RunTimeOrCompileTime( "type to cast to" ) ) )
         {
             annotatedType = this.Visit( node.Type );

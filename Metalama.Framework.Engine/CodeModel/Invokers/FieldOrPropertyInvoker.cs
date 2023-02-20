@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -95,9 +94,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
-            Debug.Assert(
-                this.GenerationContext.Equals( syntaxGenerationContext as SyntaxGenerationContext ),
-                "Provided generation context is not the same as the built-in one." );
+            Invariant.Assert(
+                this.GenerationContext.Equals( syntaxGenerationContext as SyntaxGenerationContext ) );
 
             return this.GetTypedExpressionSyntax();
         }
