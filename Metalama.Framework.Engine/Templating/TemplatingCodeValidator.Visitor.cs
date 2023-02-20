@@ -178,6 +178,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( argument.NameEquals != null )
                         {
+                            // Check that we are not setting a template property or introduced field.
                             var memberSymbol = this._semanticModel.GetSymbolInfo( argument.NameEquals.Name ).Symbol;
                             var templateAttribute = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof( ITemplateAttribute ) );
 
