@@ -163,7 +163,6 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                 case nameof(EditorExperienceAttribute):
                     if ( !attributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
                             attribute,
-                            compilationContext.Compilation,
                             diagnosticAdder,
                             out var editorExperienceAttribute ) )
                     {

@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplateInfo GetTemplateInfo( ISymbol declaringSymbol, AttributeData attributeData )
         {
-            if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, this._compilation, NullDiagnosticAdder.Instance, out var attributeInstance ) )
+            if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, NullDiagnosticAdder.Instance, out var attributeInstance ) )
             {
                 // This happens when the attribute class is defined in user code.
                 // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.

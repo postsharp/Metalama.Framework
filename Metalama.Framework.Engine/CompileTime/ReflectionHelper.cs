@@ -222,10 +222,5 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return typeName.ReplaceOrdinal( ",", "\\," ) + ", " + assemblyName;
         }
-
-#if !NET5_0_OR_GREATER
-        public static bool IsAssignableTo( this Type sourceType, Type? targetType )
-            => targetType?.IsAssignableFrom( sourceType ) ?? false;
-#endif
     }
 }

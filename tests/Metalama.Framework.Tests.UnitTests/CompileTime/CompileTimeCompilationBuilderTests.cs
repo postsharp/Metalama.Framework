@@ -97,7 +97,7 @@ class A : Attribute
             var loader = CompileTimeProjectRepository.Create( compileTimeDomain, testContext.ServiceProvider, compilation.RoslynCompilation ).AssertNotNull();
 
             if ( !loader.CreateAttributeDeserializer( testContext.ServiceProvider )
-                    .TryCreateAttribute( compilation.Attributes.First(), roslynCompilation, new DiagnosticBag(), out var attribute ) )
+                    .TryCreateAttribute( compilation.Attributes.First(), new DiagnosticBag(), out var attribute ) )
             {
                 throw new AssertionFailedException();
             }

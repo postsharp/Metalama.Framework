@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -102,6 +101,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                 case DelegateDeclarationSyntax @delegate:
                     return @delegate.Identifier.GetLocation();
 
+                case NameEqualsSyntax nameEquals:
+                    return nameEquals.Name.GetLocation();
+
                 default:
                     return node.GetLocation();
             }
@@ -115,15 +117,5 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <returns></returns>
         internal static Location? GetDiagnosticLocation( this AttributeData attribute )
             => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
-
-        internal static Location? GetDiagnosticLocationForNamedArgument( this AttributeData attribute, string argumentName )
-        {
-            var attributeSyntax = attribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-            var argument = attributeSyntax?.ArgumentList.AssertNotNull().Arguments.FirstOrDefault(
-                a => a.NameEquals is { Name.Identifier.ValueText: var identifierName } && identifierName == argumentName );
-
-            return argument?.NameEquals!.Name.GetLocation();
-        }
     }
 }

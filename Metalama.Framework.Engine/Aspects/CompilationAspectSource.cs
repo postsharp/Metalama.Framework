@@ -71,7 +71,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
                     var attributeData = attribute.GetAttributeData();
 
-                    if ( this._attributeDeserializer.TryCreateAttribute( attributeData, compilation.RoslynCompilation, diagnosticAdder, out var attributeInstance ) )
+                    if ( this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
                     {
                         var targetDeclaration = attribute.ContainingDeclaration;
 

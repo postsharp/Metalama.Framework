@@ -29,23 +29,5 @@ namespace Metalama.Framework.Engine.CompileTime
                     "Cannot instantiate a custom attribute: the property '{0}' has no setter.",
                     Error,
                     "Cannot instantiate a custom attribute: a property has no setter." );
-
-        internal static readonly DiagnosticDefinition<string>
-            CannotSetIntroducedField
-                = new(
-                    "LAMA0406",
-                    _category,
-                    "Cannot set an [Introduce] field {0} from an attribute.",
-                    Error,
-                    "Cannot set an [Introduce] field from an attribute." );
-
-        internal static readonly DiagnosticDefinition<string>
-            CannotSetTemplateProperty
-                = new(
-                    "LAMA0407",
-                    _category,
-                    "Cannot set a template property {0} from an attribute.",
-                    Error,
-                    "Cannot set a template property from an attribute." );
     }
 }

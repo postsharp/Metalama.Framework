@@ -63,7 +63,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             ThrowingDiagnosticAdder diagnosticBag = new();
 
             if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                    .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) )
+                    .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                    .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) )
+                    .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
             }
@@ -298,7 +298,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 var diagnosticBag = new DiagnosticBag();
 
                 if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                        .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) )
+                        .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
@@ -334,7 +334,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 var diagnosticBag = new DiagnosticBag();
 
                 if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                        .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) )
+                        .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
@@ -380,7 +380,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out _ ) );
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, diagnosticBag, out _ ) );
 
             Assert.Empty( diagnosticBag );
         }
@@ -417,7 +417,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             Assert.False(
                 compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                    .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) );
+                    .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
@@ -443,7 +443,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             Assert.False(
                 compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
-                    .TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out var deserializedAttribute ) );
+                    .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
@@ -467,7 +467,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.False(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, compilation.RoslynCompilation, diagnosticBag, out _ ) );
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, diagnosticBag, out _ ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }

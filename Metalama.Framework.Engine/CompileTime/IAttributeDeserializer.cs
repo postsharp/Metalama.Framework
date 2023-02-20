@@ -9,8 +9,8 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal interface IAttributeDeserializer
 {
-    bool TryCreateAttribute<T>( AttributeData attribute, Compilation compilation, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
+    bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
         where T : Attribute;
 
-    bool TryCreateAttribute( AttributeData attribute, Compilation compilation, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
+    bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance );
 }

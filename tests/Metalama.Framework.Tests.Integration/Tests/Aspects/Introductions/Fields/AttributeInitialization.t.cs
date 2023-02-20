@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0406 on `IntroducedField`: `Cannot set an [Introduce] field IntroducedField from an attribute.`
+// Error LAMA0257 on `IntroducedField`: `Cannot set a template member IntroducedField from an attribute.`

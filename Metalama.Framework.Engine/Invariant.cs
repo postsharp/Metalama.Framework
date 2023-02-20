@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine
         }
 
         /// <summary>
-        /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> in debug mode if it is not.
+        /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]

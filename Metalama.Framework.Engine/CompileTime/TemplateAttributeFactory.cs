@@ -71,7 +71,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
             member,
             m =>
             {
-                _ = this.TryGetTemplateAttributeBySymbol( m, compilation, diagnosticAdder, out var attribute );
+                _ = this.TryGetTemplateAttributeBySymbol( m, diagnosticAdder, out var attribute );
 
                 return attribute;
             } );
@@ -85,7 +85,6 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
     private bool TryGetTemplateAttributeBySymbol(
         ISymbol member,
-        Compilation compilation,
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
@@ -109,18 +108,18 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
                 if ( overriddenMember != null )
                 {
-                    return this.TryGetTemplateAttributeBySymbol( overriddenMember, compilation, diagnosticAdder, out adviceAttribute );
+                    return this.TryGetTemplateAttributeBySymbol( overriddenMember, diagnosticAdder, out adviceAttribute );
                 }
             }
             else if ( member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
             {
-                return this.TryGetTemplateAttributeBySymbol( associatedSymbol, compilation, diagnosticAdder, out adviceAttribute );
+                return this.TryGetTemplateAttributeBySymbol( associatedSymbol, diagnosticAdder, out adviceAttribute );
             }
 
             throw new AssertionFailedException( $"Cannot find the TemplateAttribute for '{member}'." );
         }
 
-        if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, compilation, diagnosticAdder, out var attribute ) )
+        if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )
         {
             adviceAttribute = null;
 
