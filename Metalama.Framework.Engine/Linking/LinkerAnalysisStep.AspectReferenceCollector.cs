@@ -191,10 +191,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new NotSupportedException();
-
-                        // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetCachedSemanticModel( declarationSyntax.SyntaxTree ) );
+                            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
                     }
                 }
 
@@ -229,7 +226,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new NotSupportedException();
+                            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
                     }
                 }
 

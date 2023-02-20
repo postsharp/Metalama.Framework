@@ -367,6 +367,9 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
+        public TypedExpressionSyntax GetTypedExpression( IExpression expression )
+            => ((IUserExpression) expression).ToTypedExpressionSyntax( this._syntaxGenerationContext );
+
         public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = this._syntaxGenerationContext;

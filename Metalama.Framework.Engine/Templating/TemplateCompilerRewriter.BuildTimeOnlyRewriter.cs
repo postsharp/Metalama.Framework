@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating
                 return base.VisitInvocationExpression( node );
             }
 
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
             {
                 var symbol = this._parent._syntaxTreeAnnotationMap.GetSymbol( node );
 

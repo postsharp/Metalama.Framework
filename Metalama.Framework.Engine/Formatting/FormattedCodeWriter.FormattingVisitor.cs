@@ -2,6 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Formatting
 {
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                 if ( !this._visitTrivia && !node.ContainsAnnotations )
                 {
+                    // Neither this node or any child node has any annotation.
                     return;
                 }
 
@@ -37,6 +39,13 @@ namespace Metalama.Framework.Engine.Formatting
                 else if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                 {
                     this.ClassifiedTextSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
+
+                    var annotation = node.GetAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ).FirstOrDefault();
+
+                    if ( annotation != null && annotation.Data != null )
+                    {
+                        this.ClassifiedTextSpans.SetTag( node.Span, GeneratingAspectTagName, annotation.Data );
+                    }
                 }
 
                 if ( setVisitTrivia )

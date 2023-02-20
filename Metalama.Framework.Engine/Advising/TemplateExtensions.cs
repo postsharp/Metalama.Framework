@@ -37,6 +37,34 @@ namespace Metalama.Framework.Engine.Advising
             return (default, default);
         }
 
+        public static (TemplateMember<IMethod>? Add, TemplateMember<IMethod>? Remove) GetAccessorTemplates( this TemplateMember<IEvent>? eventTemplate )
+        {
+            if ( eventTemplate != null )
+            {
+                if ( !eventTemplate.Declaration.IsEventField().GetValueOrDefault() )
+                {
+                    TemplateMember<IMethod>? GetAccessorTemplate( IMethod? accessor )
+                    {
+                        if ( accessor != null && eventTemplate.TemplateClassMember.Accessors.TryGetValue(
+                                accessor.GetSymbol()!.MethodKind,
+                                out var template ) )
+                        {
+                            return TemplateMemberFactory.Create( accessor, template );
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+
+                    return (GetAccessorTemplate( eventTemplate.Declaration.AddMethod ),
+                            GetAccessorTemplate( eventTemplate.Declaration.RemoveMethod ));
+                }
+            }
+
+            return (default, default);
+        }
+
         private static bool IsAsyncTemplate( this TemplateKind selectionKind )
             => selectionKind switch
             {

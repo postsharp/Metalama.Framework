@@ -23,11 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     {
-        private readonly IObjectReader? _parameters;
-
         private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
-
-        private TemplateMember<IEvent>? EventTemplate { get; }
 
         private BoundTemplateMethod? AddTemplate { get; }
 
@@ -36,75 +32,30 @@ namespace Metalama.Framework.Engine.Transformations
         public OverrideEventTransformation(
             Advice advice,
             IEvent overriddenDeclaration,
-            TemplateMember<IEvent>? eventTemplate,
-            TemplateMember<IMethod>? addTemplate,
-            TemplateMember<IMethod>? removeTemplate,
-            IObjectReader tags,
-            IObjectReader? parameters )
+            BoundTemplateMethod? addTemplate,
+            BoundTemplateMethod? removeTemplate,
+            IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
-            this._parameters = parameters;
-
-            // We need event template xor both accessor templates.
-            Invariant.Assert( eventTemplate != null || addTemplate != null || removeTemplate != null );
-            Invariant.Assert( !(eventTemplate != null && (addTemplate != null || removeTemplate != null)) );
-            Invariant.Assert( !(eventTemplate != null && eventTemplate.Declaration.IsEventField()) );
-
-            this.EventTemplate = eventTemplate;
-
-            this.AddTemplate = addTemplate?.ForOverride( overriddenDeclaration.AddMethod, parameters );
-            this.RemoveTemplate = removeTemplate?.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
+            this.AddTemplate = addTemplate;
+            this.RemoveTemplate = removeTemplate;
         }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            if ( this.EventTemplate?.Declaration.IsEventField() == true )
-            {
-                throw new AssertionFailedException( $"The event template {this.EventTemplate.Declaration} is an event field." );
-            }
-
             var eventName = context.InjectionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,
                 this.ParentAdvice.AspectLayerId,
                 this.OverriddenDeclaration );
 
-            BoundTemplateMethod? GetBoundTemplateMethod( IMethod? templateMethod, BoundTemplateMethod? sourceBoundTemplate )
-            {
-                if ( this.EventTemplate != null )
-                {
-                    // We have an event template.
-
-                    if ( templateMethod == null )
-                    {
-                        // No template.
-                        return default;
-                    }
-                    else
-                    {
-                        return TemplateMemberFactory.Create(
-                                templateMethod,
-                                this.EventTemplate.TemplateClassMember.Accessors[templateMethod.GetSymbol()!.MethodKind] )
-                            .ForIntroduction( this._parameters );
-                    }
-                }
-                else
-                {
-                    // We have accessor templates.
-                    return sourceBoundTemplate;
-                }
-            }
-
-            var addTemplateMethod = GetBoundTemplateMethod( this.EventTemplate?.Declaration.AddMethod, this.AddTemplate );
-            var removeTemplateMethod = GetBoundTemplateMethod( this.EventTemplate?.Declaration.RemoveMethod, this.RemoveTemplate );
-
             var templateExpansionError = false;
             BlockSyntax? addAccessorBody = null;
 
-            if ( addTemplateMethod != null )
+            if ( this.AddTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
-                    addTemplateMethod,
+                    this.AddTemplate,
                     this.OverriddenDeclaration.AddMethod,
                     context.SyntaxGenerationContext,
                     out addAccessorBody );
@@ -116,11 +67,11 @@ namespace Metalama.Framework.Engine.Transformations
 
             BlockSyntax? removeAccessorBody = null;
 
-            if ( removeTemplateMethod != null )
+            if ( this.RemoveTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
-                    removeTemplateMethod,
+                    this.RemoveTemplate,
                     this.OverriddenDeclaration.RemoveMethod,
                     context.SyntaxGenerationContext,
                     out removeAccessorBody );
@@ -197,7 +148,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
-                    accessorTemplate.Template.Cast(),
+                    accessorTemplate.TemplateMember.Cast(),
                     this.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -216,7 +167,7 @@ namespace Metalama.Framework.Engine.Transformations
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
 
             return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }

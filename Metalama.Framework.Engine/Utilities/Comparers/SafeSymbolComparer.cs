@@ -53,7 +53,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
             return false;
         }
 
-        member.VerifyPossiblyBelongsToSameCompilation( type );
+        member.ThrowIfBelongsToDifferentCompilationThan( type );
 
         if ( SymbolEqualityComparer.Default.Equals( member.ContainingType, type ) )
         {
@@ -75,7 +75,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
             return false;
         }
 
-        left.VerifyPossiblyBelongsToSameCompilation( right );
+        left.ThrowIfBelongsToDifferentCompilationThan( right );
 
         if ( SymbolEqualityComparer.Default.Equals( left, right ) )
         {

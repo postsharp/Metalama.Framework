@@ -7,24 +7,21 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {
-        private readonly TemplateMember<IMethod>? _addTemplate;
-        private readonly TemplateMember<IMethod>? _removeTemplate;
-        private readonly IObjectReader _parameters;
-
-        // ReSharper disable once MemberCanBePrivate.Global
+        private readonly PartiallyBoundTemplateMethod? _addTemplate;
+        private readonly PartiallyBoundTemplateMethod? _removeTemplate;
 
         public IntroduceEventAdvice(
             IAspectInstanceInternal aspect,
@@ -33,14 +30,13 @@ namespace Metalama.Framework.Engine.Advising
             ICompilation sourceCompilation,
             string? explicitName,
             TemplateMember<IEvent>? eventTemplate,
-            TemplateMember<IMethod>? addTemplate,
-            TemplateMember<IMethod>? removeTemplate,
+            PartiallyBoundTemplateMethod? addTemplate,
+            PartiallyBoundTemplateMethod? removeTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IEventBuilder>? buildAction,
             string? layerName,
-            IObjectReader tags,
-            IObjectReader parameters )
+            IObjectReader tags )
             : base(
                 aspect,
                 templateInstance,
@@ -56,13 +52,12 @@ namespace Metalama.Framework.Engine.Advising
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
-            this._parameters = parameters;
 
             this.Builder = new EventBuilder(
                 this,
                 targetDeclaration,
                 this.MemberName,
-                eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField(),
+                eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField() == true,
                 tags );
 
             this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
@@ -75,29 +70,35 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-            this.Builder.Type =
-                (this.Template?.Declaration.Type ?? (INamedType?) this._addTemplate?.Declaration.Parameters.FirstOrDefault().AssertNotNull().Type)
-                .AssertNotNull();
+            if ( this._addTemplate != null || this._removeTemplate != null )
+            {
+                var primaryTemplate = (this._addTemplate ?? this._removeTemplate).AssertNotNull();
+                var runtimeParameters = primaryTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
+
+                var typeRewriter = TemplateTypeRewriter.Get( primaryTemplate );
+
+                if ( runtimeParameters.Length > 0 )
+                {
+                    // There may be an invalid template without runtime parameters, in which case type cannot be determined.
+
+                    var rewrittenType = typeRewriter.Visit( primaryTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+
+                    if ( rewrittenType is not INamedType rewrittenNamedType )
+                    {
+                        throw new AssertionFailedException( $"'{rewrittenType}' is not allowed type of an event." );
+                    }
+
+                    this.Builder.Type = rewrittenNamedType;
+                }
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                this.Builder.Type = this.Template.Declaration.Type;
+            }
 
             if ( this.Template != null )
             {
-                CopyTemplateAttributes( this.Template.Declaration.AddMethod, this.Builder.AddMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this.Template.Declaration.AddMethod.Parameters[0],
-                    this.Builder.AddMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this.Template.Declaration.AddMethod.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
-                CopyTemplateAttributes( this.Template.Declaration.RemoveMethod, this.Builder.RemoveMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this.Template.Declaration.RemoveMethod.Parameters[0],
-                    this.Builder.RemoveMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this.Template.Declaration.RemoveMethod.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
-
                 if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
                 {
                     var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
@@ -115,26 +116,38 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( this._addTemplate != null )
             {
-                CopyTemplateAttributes( this._addTemplate.Declaration, this.Builder.AddMethod, serviceProvider );
-
-                CopyTemplateAttributes(
-                    this._addTemplate.Declaration.Parameters[0],
-                    this.Builder.AddMethod.Parameters[0],
-                    serviceProvider );
-
-                CopyTemplateAttributes( this._addTemplate.Declaration.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
+                AddAttributeForAccessorTemplate( this._addTemplate.TemplateMember.TemplateClassMember, this._addTemplate.Declaration, this.Builder.AddMethod );
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.AssertNotNull().Declaration.AddMethod, this.Builder.AddMethod );
             }
 
             if ( this._removeTemplate != null )
             {
-                CopyTemplateAttributes( this._removeTemplate.Declaration, this.Builder.RemoveMethod, serviceProvider );
+                AddAttributeForAccessorTemplate( this._removeTemplate.TemplateMember.TemplateClassMember, this._removeTemplate.Declaration, this.Builder.RemoveMethod );
+            }
+            else if ( this.Template != null )
+            {
+                // Case for event fields.
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.AssertNotNull().Declaration.RemoveMethod, this.Builder.RemoveMethod );
+            }
 
-                CopyTemplateAttributes(
-                    this._removeTemplate.Declaration.Parameters[0],
-                    this.Builder.RemoveMethod.Parameters[0],
-                    serviceProvider );
+            void AddAttributeForAccessorTemplate( TemplateClassMember templateClassMember, IMethod accessorTemplate, IMethodBuilder accessorBuilder )
+            {
+                CopyTemplateAttributes( accessorTemplate, accessorBuilder, serviceProvider );
 
-                CopyTemplateAttributes( this._removeTemplate.Declaration.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
+                if ( accessorBuilder.Parameters.Count > 0 && templateClassMember.RunTimeParameters.Length > 0 )
+                {
+                    // There may be an invalid template without runtime parameters, in which case attributes cannot be copied.
+                    CopyTemplateAttributes(
+                        accessorTemplate.Parameters[templateClassMember.RunTimeParameters[0].SourceIndex],
+                        accessorBuilder.Parameters[0],
+                        serviceProvider );
+                }
+
+                CopyTemplateAttributes( accessorTemplate.ReturnParameter, accessorBuilder.ReturnParameter, serviceProvider );
             }
         }
 
@@ -149,7 +162,7 @@ namespace Metalama.Framework.Engine.Advising
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
-            var hasNoOverrideSemantics = this.Template?.Declaration != null && this.Template.Declaration.IsEventField();
+            var hasNoOverrideSemantics = this.Template?.Declaration != null && this.Template.Declaration.IsEventField() == true;
 
             if ( existingDeclaration == null )
             {
@@ -166,11 +179,9 @@ namespace Metalama.Framework.Engine.Advising
                         new OverrideEventTransformation(
                             this,
                             this.Builder,
-                            this.Template,
-                            this._addTemplate,
-                            this._removeTemplate,
-                            this.Tags,
-                            this._parameters ) );
+                            this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
+                            this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                            this.Tags ) );
                 }
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -228,11 +239,9 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingEvent,
-                                    this.Template,
-                                    this._addTemplate,
-                                    this._removeTemplate,
-                                    this.Tags,
-                                    this._parameters );
+                                    this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
+                                    this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
+                                    this.Tags );
 
                                 addTransformation( overriddenMethod );
 
@@ -255,11 +264,9 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     this.Builder,
-                                    this.Template,
-                                    this._addTemplate,
-                                    this._removeTemplate,
-                                    this.Tags,
-                                    this._parameters );
+                                    this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
+                                    this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                                    this.Tags );
 
                                 addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenMethod );
@@ -280,11 +287,9 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingEvent,
-                                    this.Template,
-                                    this._addTemplate,
-                                    this._removeTemplate,
-                                    this.Tags,
-                                    this._parameters );
+                                    this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
+                                    this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
+                                    this.Tags );
 
                                 addTransformation( overriddenMethod );
 
@@ -316,11 +321,9 @@ namespace Metalama.Framework.Engine.Advising
                                 var overriddenEvent = new OverrideEventTransformation(
                                     this,
                                     this.Builder,
-                                    this.Template,
-                                    this._addTemplate,
-                                    this._removeTemplate,
-                                    this.Tags,
-                                    this._parameters );
+                                    this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
+                                    this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                                    this.Tags );
 
                                 addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenEvent );

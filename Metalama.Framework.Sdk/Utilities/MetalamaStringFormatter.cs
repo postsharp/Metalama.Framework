@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Utilities
 
             sb.Append( message.ToString( Instance ) );
 
-            foreach (var concatenatedMessage in concatenatedMessages)
+            foreach ( var concatenatedMessage in concatenatedMessages )
             {
                 sb.Append( concatenatedMessage.ToString( Instance ) );
             }

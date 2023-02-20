@@ -162,7 +162,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Appends an expression to the <see cref="StringBuilder"/>, where the expression is a C# expression.
         /// </summary>
-        public void AppendExpression( dynamic? expression ) => CurrentImplementation.AppendDynamic( expression, this.StringBuilder );
+        public void AppendExpression( dynamic? expression ) => CurrentImplementation.AppendDynamic( (object?) expression, this.StringBuilder );
 
         public override string ToString() => this.StringBuilder.ToString();
     }

@@ -132,8 +132,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IDeclaration? declaration = null )
         {
+            declaration ??= this;
+
             var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-                (declaration ?? this).ToTypedRef(),
+                declaration.ToTypedRef(),
                 context.Compilation,
                 this.AttributeTargetSyntaxKind );
 
@@ -162,7 +164,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return attributes;
         }
 
-        // TODO: This is temporary override (see the callsite for reason).
+        // TODO: This is temporary overload (see the callsite for reason).
         public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, Ref<IDeclaration> declarationRef )
         {
             var attributes = context.SyntaxGenerator.AttributesForDeclaration(

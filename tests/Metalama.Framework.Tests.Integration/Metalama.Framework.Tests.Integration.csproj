@@ -44,19 +44,9 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+		    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Async\AsyncIterators\AsyncIteratorTemplate.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\AsyncTemplate.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\AsyncTemplateOnNonAsync.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\Introduce.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\NormalTemplate.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\NormalTemplate_NoReturn.t.cs" />
-      <None Include="Tests\Aspects\Async\AsyncIterators\ProceedConfigureAwait.t.cs" />
-    </ItemGroup>
-    
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
-
+    
 </Project>

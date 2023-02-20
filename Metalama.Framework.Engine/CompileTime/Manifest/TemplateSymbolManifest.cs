@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CompileTime.Manifest;
 
@@ -51,7 +52,7 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
 
         public Builder( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null )
         {
-            this._symbol = symbol;
+            this._symbol = symbol.Assert( s => s is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } );
             this._scope = scope;
             this._templateInfo = templateInfo;
         }

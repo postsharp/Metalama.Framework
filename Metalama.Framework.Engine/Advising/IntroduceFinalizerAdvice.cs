@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
-        private readonly BoundTemplateMethod _boundTemplate;
+        private readonly PartiallyBoundTemplateMethod _template;
 
         private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
-            BoundTemplateMethod boundTemplate,
+            PartiallyBoundTemplateMethod template,
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags )
@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Advising
                 targetDeclaration,
                 sourceCompilation,
                 null,
-                boundTemplate.Template,
+                template.TemplateMember,
                 IntroductionScope.Instance,
                 overrideStrategy,
                 _ => { },
                 layerName,
                 tags )
         {
-            this._boundTemplate = boundTemplate;
+            this._template = template;
 
             this.Builder = new MethodBuilder( this, targetDeclaration, "Finalize", DeclarationKind.Finalizer );
         }
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
 
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
+                var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Advising
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this._boundTemplate, this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this._template.ForIntroduction( existingFinalizer ), this.Tags );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingFinalizer;
-                            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._boundTemplate, this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );

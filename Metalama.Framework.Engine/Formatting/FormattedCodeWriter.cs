@@ -18,6 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
     {
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
+        protected const string GeneratingAspectTagName = "aspect";
         private const string _diagnosticAnnotationName = "metalama-diagnostic";
         private readonly ProjectServiceProvider _serviceProvider;
 

@@ -5,13 +5,19 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Advising;
 
+/// <summary>
+/// Represents a template fully bound to a target methods and template arguments.
+/// </summary>
 internal sealed class BoundTemplateMethod
 {
-    public TemplateMember<IMethod> Template { get; }
+    /// <summary>
+    /// Gets the template member of the aspect.
+    /// </summary>
+    public TemplateMember<IMethod> TemplateMember { get; }
 
     public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
     {
-        this.Template = template;
+        this.TemplateMember = template;
         this.TemplateArguments = templateArguments;
 
 #if DEBUG
@@ -22,19 +28,22 @@ internal sealed class BoundTemplateMethod
 #endif
     }
 
+    /// <summary>
+    /// Gets bound template arguments. This array consists of all parameters followed all type parameters.
+    /// </summary>
     public object?[] TemplateArguments { get; }
 
     public object?[] GetTemplateArgumentsForMethod( IHasParameters signature )
     {
         Invariant.Assert(
-            this.Template.TemplateClassMember.RunTimeParameters.Length == 0 ||
-            this.Template.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
+            this.TemplateMember.TemplateClassMember.RunTimeParameters.Length == 0 ||
+            this.TemplateMember.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
 
         var newArguments = (object?[]) this.TemplateArguments.Clone();
 
-        for ( var index = 0; index < this.Template.TemplateClassMember.RunTimeParameters.Length; index++ )
+        for ( var index = 0; index < this.TemplateMember.TemplateClassMember.RunTimeParameters.Length; index++ )
         {
-            var runTimeParameter = this.Template.TemplateClassMember.RunTimeParameters[index];
+            var runTimeParameter = this.TemplateMember.TemplateClassMember.RunTimeParameters[index];
             newArguments[runTimeParameter.SourceIndex] = SyntaxFactory.IdentifierName( signature.Parameters[index].Name );
         }
 

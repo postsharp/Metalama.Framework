@@ -97,7 +97,7 @@ namespace Metalama.Framework.Advising
             IType resultType,
             OperatorKind kind,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IMethodBuilder>? buildAction = null,
+            Action<IMethodBuilder>? buildOperator = null,
             object? args = null,
             object? tags = null );
 
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Advising
             IType resultType,
             OperatorKind kind,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IMethodBuilder>? buildAction = null,
+            Action<IMethodBuilder>? buildOperator = null,
             object? args = null,
             object? tags = null );
 
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Advising
             IType toType,
             bool isImplicit = false,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IMethodBuilder>? buildAction = null,
+            Action<IMethodBuilder>? buildOperator = null,
             object? args = null,
             object? tags = null );
 

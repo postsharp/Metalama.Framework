@@ -2,7 +2,6 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -146,11 +145,5 @@ namespace Metalama.Framework.Engine.Formatting
 
             return (project, syntaxTreeMap);
         }
-
-        // HACK: We cannot format the output if the current AppDomain does not contain the workspace assemblies.
-        // Code formatting is used by TryMetalama only now. Somehow TryMetalama also builds through the command line for some
-        // initialization, which triggers an error because we don't ship all necessary assemblies.
-
-        internal static bool CanFormat => AppDomainUtility.HasAnyLoadedAssembly( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
     }
 }

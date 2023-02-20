@@ -402,19 +402,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                         var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
-                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
                         advice = new OverrideEventAdvice(
                             this._state.AspectInstance,
                             this._templateInstance,
                             @event,
                             this._compilation,
-                            default,
                             template,
                             null,
                             this._layerName,
-                            this.GetObjectReader( tags ),
-                            this.GetObjectReader( args ) );
+                            this.GetObjectReader( tags ) );
                     }
 
                     break;
@@ -424,19 +423,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                         var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
-                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
                         advice = new OverrideEventAdvice(
                             this._state.AspectInstance,
                             this._templateInstance,
                             @event,
                             this._compilation,
-                            default,
                             null,
                             template,
                             this._layerName,
-                            this.GetObjectReader( tags ),
-                            this.GetObjectReader( args ) );
+                            this.GetObjectReader( tags ) );
                     }
 
                     break;
@@ -578,7 +576,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                template.ForIntroduction( this.GetObjectReader( args ) ),
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 scope,
                 whenExists,
                 buildMethod,
@@ -613,7 +611,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                template.ForIntroduction( this.GetObjectReader( args ) ),
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 this._layerName,
                 this.GetObjectReader( tags ) );
@@ -660,7 +658,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 inputType,
                 null,
                 resultType,
-                template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,
@@ -709,7 +707,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 leftType,
                 rightType,
                 resultType,
-                template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,
@@ -753,7 +751,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 fromType,
                 null,
                 toType,
-                template.ForOperatorIntroduction( operatorKind, this.GetObjectReader( args ) ),
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,
@@ -782,8 +780,16 @@ internal sealed class AdviceFactory : IAdviceFactory
                 .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get?.ForIntroduction();
-            var setTemplate = accessorTemplates.Set?.ForIntroduction();
+
+            var getTemplate =
+                targetFieldOrProperty.GetMethod != null
+                    ? accessorTemplates.Get?.ForOverride( targetFieldOrProperty.GetMethod )
+                    : null;
+
+            var setTemplate =
+                targetFieldOrProperty.SetMethod != null
+                    ? accessorTemplates.Set?.ForOverride( targetFieldOrProperty.SetMethod )
+                    : null;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._state.AspectInstance,
@@ -816,19 +822,19 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.CheckEligibility( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
             // Set template represents both set and init accessors.
-            var getTemplateRef = targetFieldOrPropertyOrIndexer.GetMethod != null
+            var boundGetTemplate = targetFieldOrPropertyOrIndexer.GetMethod != null
                 ? this.SelectGetterTemplate( targetFieldOrPropertyOrIndexer, getTemplateSelector, setTemplate == null )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                     .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, this.GetObjectReader( args ) )
                 : null;
 
-            var setTemplateRef = targetFieldOrPropertyOrIndexer.SetMethod != null
+            var boundSetTemplate = targetFieldOrPropertyOrIndexer.SetMethod != null
                 ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                     .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, this.GetObjectReader( args ) )
                 : null;
 
-            if ( getTemplateRef == null && setTemplateRef == null )
+            if ( boundGetTemplate == null && boundSetTemplate == null )
             {
                 throw new InvalidOperationException( "There is no accessor to override." );
             }
@@ -842,8 +848,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._templateInstance,
                             targetFieldOrProperty,
                             this._compilation,
-                            getTemplateRef,
-                            setTemplateRef,
+                            boundGetTemplate,
+                            boundSetTemplate,
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
@@ -857,8 +863,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._templateInstance,
                             targetIndexer,
                             this._compilation,
-                            getTemplateRef,
-                            setTemplateRef,
+                            boundGetTemplate,
+                            boundSetTemplate,
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
@@ -1049,8 +1055,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 null,
                 null,
                 propertyTemplate,
-                accessorTemplates.Get?.ForIntroduction(),
-                accessorTemplates.Set?.ForIntroduction(),
+                accessorTemplates.Get?.PartialForIntroduction(),
+                accessorTemplates.Set?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildProperty,
@@ -1086,10 +1092,10 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
 
-            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
+            var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
+            var boundSetTemplate = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var parameterReaders = this.GetObjectReader( args );
@@ -1102,8 +1108,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 name,
                 null,
                 default,
-                getTemplateRef?.ForIntroduction( parameterReaders ),
-                setTemplateRef?.ForIntroduction( parameterReaders ),
+                boundGetTemplate?.PartialForIntroduction( parameterReaders ),
+                boundSetTemplate?.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildProperty,
@@ -1202,10 +1208,10 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );
 
-            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
+            var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
+            var boundSetTemplate = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var parameterReaders = this.GetObjectReader( args );
@@ -1216,8 +1222,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 targetType,
                 this._compilation,
                 indices,
-                getTemplateRef?.ForIntroduction( parameterReaders ),
-                setTemplateRef?.ForIntroduction( parameterReaders ),
+                boundGetTemplate?.PartialForIntroduction( parameterReaders ),
+                boundSetTemplate?.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildIndexer,
@@ -1255,23 +1261,25 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetEvent, AdviceKind.OverrideEvent );
 
-            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+            var boundAddTemplate =
+                this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .ForOverride( targetEvent.AddMethod, this.GetObjectReader( args ) );
 
-            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+            var boundRemoveTemplate = 
+                this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .ForOverride( targetEvent.RemoveMethod, this.GetObjectReader( args ) );
 
             var advice = new OverrideEventAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetEvent,
                 this._compilation,
-                default,
-                addTemplateRef,
-                removeTemplateRef,
+                boundAddTemplate,
+                boundRemoveTemplate,
                 this._layerName,
-                this.GetObjectReader( tags ),
-                this.GetObjectReader( args ) );
+                this.GetObjectReader( tags ) );
 
             return this.ExecuteAdvice<IEvent>( advice );
         }
@@ -1279,7 +1287,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     public IIntroductionAdviceResult<IEvent> IntroduceEvent(
         INamedType targetType,
-        string eventTemplate,
+        string defaultTemplate,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IEventBuilder>? buildEvent = null,
@@ -1294,8 +1302,10 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
 
-            var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
+            var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
+
+            var accessorTemplates = eventTemplate.GetAccessorTemplates();
 
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
@@ -1303,15 +1313,14 @@ internal sealed class AdviceFactory : IAdviceFactory
                 targetType,
                 this._compilation,
                 null,
-                template,
-                default,
-                default,
+                eventTemplate,
+                accessorTemplates.Add?.PartialForIntroduction(),
+                accessorTemplates.Remove?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildEvent,
                 this._layerName,
-                this.GetObjectReader( tags ),
-                ObjectReader.Empty );
+                this.GetObjectReader( tags ) );
 
             return this.ExecuteAdvice<IEvent>( advice );
         }
@@ -1338,11 +1347,13 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
 
-            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
+            var boundAddTemplate = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
+            var boundRemoveTemplate = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+            var parameterReaders = this.GetObjectReader( args );
 
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
@@ -1351,14 +1362,13 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._compilation,
                 name,
                 default,
-                addTemplateRef,
-                removeTemplateRef,
+                boundAddTemplate.PartialForIntroduction( parameterReaders ),
+                boundRemoveTemplate.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildEvent,
                 this._layerName,
-                this.GetObjectReader( tags ),
-                this.GetObjectReader( args ) );
+                this.GetObjectReader( tags ) );
 
             return this.ExecuteAdvice<IEvent>( advice );
         }
@@ -1420,7 +1430,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetType, AdviceKind.AddInitializer );
 
-            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+            var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
@@ -1428,7 +1438,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                templateRef.ForInitializer( this.GetObjectReader( args ) ),
+                boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 kind,
                 this._layerName,
                 this.GetObjectReader( tags ) );
@@ -1475,7 +1485,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetConstructor, AdviceKind.AddInitializer );
 
-            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+            var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
@@ -1483,7 +1493,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetConstructor,
                 this._compilation,
-                templateRef.ForInitializer( this.GetObjectReader( args ) ),
+                boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName,
                 this.GetObjectReader( tags ) );
@@ -1582,7 +1592,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         this.CheckContractEligibility( targetDeclaration, direction );
 
-        var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+        var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
         if ( !this._state.ContractAdvices.TryGetValue( targetMember, out var advice ) )
@@ -1607,7 +1617,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
 
         // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
-        advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, this.GetObjectReader( tags ), this.GetObjectReader( args ) ) );
+        advice.Contracts.Add( new Contract( targetDeclaration, boundTemplate, direction, this.GetObjectReader( tags ), this.GetObjectReader( args ) ) );
 
         return result;
     }

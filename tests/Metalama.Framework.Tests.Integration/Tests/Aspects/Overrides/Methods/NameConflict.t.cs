@@ -6,6 +6,7 @@ internal class TargetClass
   {
     int i_1 = 27;
     int i = 42;
+    int j = 42;
     return 42;
   }
   [InnerOverride]
@@ -14,6 +15,7 @@ internal class TargetClass
   {
     int i_2 = 27;
     int i_1 = 42;
+    int j = 42;
     return 42;
   }
   [InnerOverride]
@@ -22,6 +24,7 @@ internal class TargetClass
   {
     int i_2 = 27;
     int i_1 = 42;
+    int j = 42;
     int i = 0;
     return 42;
   }
@@ -31,7 +34,9 @@ internal class TargetClass
   {
     int i_2 = 27;
     int i_1 = 42;
+    int j_1 = 42;
     int i = 0;
+    int j = 0;
     return 42;
   }
 }

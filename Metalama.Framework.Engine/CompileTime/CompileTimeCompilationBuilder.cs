@@ -254,7 +254,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees );
         compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
-        if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
+        if ( this._projectOptions is { FormatCompileTimeCode: true } )
         {
             var compilation = compileTimeCompilation;
             var formattedCompilation = this._taskRunner.RunSynchronously( () => OutputCodeFormatter.FormatAllAsync( compilation, cancellationToken ) );
@@ -637,7 +637,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         CancellationToken cancellationToken )
     {
         var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( runTimeCompilationContext.CompilationContext.SymbolComparer );
-        
+
         void OnSerializableTypeDiscovered( SerializableTypeInfo type )
         {
             if ( allSerializableTypes.TryGetValue( type.Type, out var existingType ) )

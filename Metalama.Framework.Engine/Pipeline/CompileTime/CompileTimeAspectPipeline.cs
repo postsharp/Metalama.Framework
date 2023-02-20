@@ -158,12 +158,12 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
 
                 // Format the output.
-                if ( (this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml) && OutputCodeFormatter.CanFormat )
+                if ( this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml )
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
                 }
-                
+
                 // Write HTML (used only when building projects for documentation).
                 if ( this.ProjectOptions.WriteHtml )
                 {

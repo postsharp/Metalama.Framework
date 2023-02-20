@@ -13,31 +13,22 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
-        private readonly IObjectReader _parameters;
-        private readonly TemplateMember<IEvent>? _eventTemplate;
-        private readonly TemplateMember<IMethod>? _addTemplate;
-        private readonly TemplateMember<IMethod>? _removeTemplate;
+        private readonly BoundTemplateMethod? _addTemplate;
+        private readonly BoundTemplateMethod? _removeTemplate;
 
         public OverrideEventAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IEvent targetDeclaration,
             ICompilation sourceCompilation,
-            TemplateMember<IEvent>? eventTemplate,
-            TemplateMember<IMethod>? addTemplate,
-            TemplateMember<IMethod>? removeTemplate,
+            BoundTemplateMethod? addTemplate,
+            BoundTemplateMethod? removeTemplate,
             string? layerName,
-            IObjectReader tags,
-            IObjectReader parameters )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this._parameters = parameters;
+            Invariant.Assert( addTemplate != null || removeTemplate != null );
 
-            // We need either property template or both accessor templates, but never both.
-            Invariant.Assert( eventTemplate != null || addTemplate != null || removeTemplate != null );
-            Invariant.Assert( !(eventTemplate != null && (addTemplate != null || removeTemplate != null)) );
-
-            this._eventTemplate = eventTemplate;
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
         }
@@ -54,11 +45,9 @@ namespace Metalama.Framework.Engine.Advising
                 new OverrideEventTransformation(
                     this,
                     this.TargetDeclaration.GetTarget( compilation ),
-                    this._eventTemplate,
                     this._addTemplate,
                     this._removeTemplate,
-                    this.Tags,
-                    this._parameters ) );
+                    this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

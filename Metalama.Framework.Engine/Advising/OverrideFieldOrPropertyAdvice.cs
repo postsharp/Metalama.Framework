@@ -14,7 +14,6 @@ namespace Metalama.Framework.Engine.Advising
     internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
         private readonly BoundTemplateMethod? _getTemplate;
-
         private readonly BoundTemplateMethod? _setTemplate;
 
         public OverrideFieldOrPropertyAdvice(

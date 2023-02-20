@@ -134,9 +134,9 @@ public static class ExpressionFactory
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
     [Obsolete(
-        "For dynamic expressions, assign the run-time expression to a variable of type IExpression or cast to to IExpression. For dynamic expressions, use the other overload of this method." )]
+        "For dynamic expressions, assign the run-time expression to a variable of type IExpression or cast it to IExpression. For non-dynamic expressions, use the other overload of this method." )]
     public static void Capture( dynamic? expression, out IExpression definedExpression )
-        => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( expression );
+        => definedExpression = SyntaxBuilder.CurrentImplementation.Capture( (object?) expression );
 
     /// <summary>
     /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
@@ -146,7 +146,7 @@ public static class ExpressionFactory
     /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions. The expression cannot be <c>dynamic</c>. If
     /// you have a dynamic expression, do not call this method, but cast the dynamic expression to <see cref="IExpression"/>.</param>
     /// <seealso href="@templates"/>
-    public static IExpression Capture( dynamic? expression ) => SyntaxBuilder.CurrentImplementation.Capture( expression );
+    public static IExpression Capture( dynamic? expression ) => SyntaxBuilder.CurrentImplementation.Capture( (object?) expression );
 
     /// <summary>
     /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.
