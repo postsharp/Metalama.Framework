@@ -1836,7 +1836,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         if ( this.IsCompileTimeDynamic( node.Expression ) )
         {
-            // We have a dynamic parameter. We need to call the second overload of ReturnStatement, the one that accepts the IDynamicExpression
+            // We have a dynamic parameter. We need to call the second overload of ReturnStatement, the one that accepts the IUserExpression
             // itself and not the syntax.
             invocationExpression = CreateInvocationExpression( node.Expression.AssertNotNull(), false );
         }
@@ -1865,10 +1865,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return this.WithCallToAddSimplifierAnnotation( invocationExpression );
     }
 
-    private CastExpressionSyntax CastToDynamicExpression( ExpressionSyntax expression )
-        => SyntaxFactoryEx.SafeCastExpression(
-            this.MetaSyntaxFactory.Type( typeof(IUserExpression) ),
-            expression );
+    private InvocationExpressionSyntax CastToDynamicExpression( ExpressionSyntax expression )
+        => InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.GetUserExpression ) ) )
+            .AddArgumentListArguments( Argument( expression ) );
 
     public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
     {

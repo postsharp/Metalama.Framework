@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 case TypedExpressionSyntax runtimeExpression:
                     return runtimeExpression;
 
-                case IUserExpression dynamicMember:
+                case IExpression dynamicMember:
                     return dynamicMember.ToTypedExpressionSyntax( generationContext );
 
                 case ExpressionSyntax syntax:

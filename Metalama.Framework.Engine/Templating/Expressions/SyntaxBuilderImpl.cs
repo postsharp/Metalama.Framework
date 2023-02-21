@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
@@ -142,9 +141,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            ((IUserExpression) expression).ToExpressionSyntax( this._syntaxGenerationContext )
-            .NormalizeWhitespace()
-            .ToFullString() );
+            expression.ToExpressionSyntax( this._syntaxGenerationContext )
+                .NormalizeWhitespace()
+                .ToFullString() );
 
     public void AppendDynamic( object? expression, StringBuilder stringBuilder )
         => stringBuilder.Append(

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -161,7 +160,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
                     case PullActionKind.UseExpression:
                         parameterValue =
-                            ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToExpressionSyntax( chainedSyntaxGenerationContext );
+                            pullParameterAction.Expression.AssertNotNull().ToExpressionSyntax( chainedSyntaxGenerationContext );
 
                         break;
 
