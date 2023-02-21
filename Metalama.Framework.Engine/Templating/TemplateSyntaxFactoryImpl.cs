@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Templating
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
             var statement = SyntaxFactory.ExpressionStatement(
-                ((IUserExpression) expression).ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
+                expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
 
             list.Add(
                 new StatementOrTrivia(
@@ -351,7 +351,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             switch ( expression )
             {
-                case IUserExpression dynamicExpression:
+                case IExpression dynamicExpression:
                     return dynamicExpression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
 
                 default:
@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public TypedExpressionSyntax GetTypedExpression( IExpression expression )
-            => ((IUserExpression) expression).ToTypedExpressionSyntax( this._syntaxGenerationContext );
+            => expression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
 
         public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
@@ -382,6 +382,8 @@ namespace Metalama.Framework.Engine.Templating
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );
         }
+
+        public IUserExpression GetUserExpression( object expression ) => ((IExpression) expression).ToUserExpression();
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
         {

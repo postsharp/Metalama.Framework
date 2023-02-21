@@ -64,6 +64,8 @@ public interface ITemplateSyntaxFactory
 
     TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null );
 
+    IUserExpression GetUserExpression( object expression );
+
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );
 
     ExpressionSyntax StringLiteralExpression( string? value );

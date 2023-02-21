@@ -15,9 +15,9 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             TypedConstant c = default;
             Assert.False( c.IsInitialized );
-            Assert.Throws<ArgumentNullException>( () => c.Type );
-            Assert.Throws<ArgumentNullException>( () => c.Value );
-            Assert.Throws<ArgumentNullException>( () => c.IsNullOrDefault );
+            Assert.Throws<InvalidOperationException>( () => c.Type );
+            Assert.Throws<InvalidOperationException>( () => c.Value );
+            Assert.Throws<InvalidOperationException>( () => c.IsNullOrDefault );
         }
 
         [Fact]
