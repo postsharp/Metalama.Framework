@@ -45,6 +45,8 @@ namespace Metalama.Framework.Engine.Utilities
         public static void AppendLineInvariant( this StringBuilder stringBuilder, FormattableString s )
             => stringBuilder.AppendLine( FormattableString.Invariant( s ) );
 
+        public static void AppendInvariant( this StringBuilder stringBuilder, FormattableString s ) => stringBuilder.Append( FormattableString.Invariant( s ) );
+
         public static int GetHashCodeOrdinal( this string s )
 #if NET5_0_OR_GREATER
             => s.GetHashCode( StringComparison.Ordinal );
