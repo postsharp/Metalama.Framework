@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,18 +23,61 @@ namespace Metalama.Framework.Engine.Formatting
             this._options = options;
         }
 
-        public async Task WriteAsync( Document document, TextWriter textWriter )
+        public async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
 
-            var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles );
+            var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles, diagnostics: diagnostics );
+
+            var finalBuilder = new StringBuilder();      // Builds the whole file.
+            var codeLineBuilder = new StringBuilder();   // Builds the current line.
+            var diagnosticBuilder = new StringBuilder(); // Builds the diagnostics of the current line.
+
+            void FlushLine()
+            {
+                if ( diagnosticBuilder.Length > 0 )
+                {
+                    // Figure out the indentation of the next block.
+                    var indentation = "";
+
+                    foreach ( var c in codeLineBuilder.ToString() )
+                    {
+                        if ( c != ' ' )
+                        {
+                            break;
+                        }
+
+                        indentation += " ";
+                    }
+
+                    // Write any buffered diagnostic.
+                    var diagnosticLines = diagnosticBuilder.ToString().Split( '\n' );
+
+                    finalBuilder.Append( "<span class=\"diagLines\">" );
+
+                    foreach ( var diagnostic in diagnosticLines )
+                    {
+                        finalBuilder.Append( indentation );
+                        finalBuilder.Append( diagnostic );
+                        finalBuilder.Append( '\n' );
+                    }
+
+                    finalBuilder.Append( "</span>" );
+
+                    diagnosticBuilder.Clear();
+                }
+
+                // Then write the buffered code.
+                finalBuilder.Append( codeLineBuilder );
+                codeLineBuilder.Clear();
+            }
 
             if ( this._options.Prolog != null )
             {
-                await textWriter.WriteAsync( this._options.Prolog );
+                finalBuilder.Append( this._options.Prolog );
             }
 
-            await textWriter.WriteAsync( "<pre><code class=\"nohighlight\">" );
+            finalBuilder.Append( "<pre><code class=\"nohighlight\">" );
 
             var isTopOfTheFile = true;
 
@@ -89,9 +131,18 @@ namespace Metalama.Framework.Engine.Formatting
                         if ( classifiedSpan.Tags.TryGetValue( DiagnosticTagName, out var diagnosticJson ) )
                         {
                             var diagnostic = DiagnosticAnnotation.FromJson( diagnosticJson );
-                            titles.Add( diagnostic.ToString() );
 
-                            classes.Add( "diag-" + diagnostic.Severity );
+                            if ( diagnostic.Severity != DiagnosticSeverity.Hidden )
+                            {
+                                titles.Add( diagnostic.ToString() );
+
+                                classes.Add( "diag-" + diagnostic.Severity );
+
+                                diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
+
+                                HtmlEncode( diagnosticBuilder, diagnostic.Message );
+                                diagnosticBuilder.Append( "</span>\n" );
+                            }
                         }
 
                         string? docTitle = null;
@@ -120,42 +171,55 @@ namespace Metalama.Framework.Engine.Formatting
 
                     if ( classes.Count > 0 || titles.Count > 0 )
                     {
-                        await textWriter.WriteAsync( "<span" );
+                        codeLineBuilder.Append( "<span" );
 
                         if ( classes.Count > 0 )
                         {
-                            await textWriter.WriteAsync( $" class=\"{string.Join( " ", classes )}\"" );
+                            codeLineBuilder.AppendInvariant( $" class=\"{string.Join( " ", classes )}\"" );
                         }
 
                         if ( titles.Count > 0 )
                         {
-                            var joined = string.Join( "&#13;&#10;", titles.SelectAsEnumerable( t => HtmlEncode( t, true ) ) );
-                            await textWriter.WriteAsync( $" title=\"{joined}\"" );
+                            codeLineBuilder.Append( " title=\"" );
+
+                            for ( var i = 0; i < titles.Count; i++ )
+                            {
+                                if ( i > 0 )
+                                {
+                                    codeLineBuilder.Append( "&#13;&#10;" );
+                                }
+
+                                HtmlEncode( codeLineBuilder, titles[i], true );
+                            }
+
+                            codeLineBuilder.Append( "\"" );
                         }
 
-                        await textWriter.WriteAsync( ">" );
-                        await textWriter.WriteAsync( HtmlEncode( spanText ) );
-                        await textWriter.WriteAsync( "</span>" );
+                        codeLineBuilder.Append( ">" );
+                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
+                        codeLineBuilder.Append( "</span>" );
                     }
                     else
                     {
-                        await textWriter.WriteAsync( HtmlEncode( spanText ) );
+                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
                     }
                 }
             }
 
-            await textWriter.WriteLineAsync( "</code></pre>" );
+            FlushLine();
+
+            finalBuilder.AppendLine( "</code></pre>" );
 
             if ( this._options.Epilogue != null )
             {
-                await textWriter.WriteAsync( this._options.Epilogue );
+                finalBuilder.Append( this._options.Epilogue );
             }
+
+            await textWriter.WriteAsync( finalBuilder.ToString() );
         }
 
-        private static string HtmlEncode( string s, bool attributeEncode = false )
+        private static void HtmlEncode( StringBuilder stringBuilder, string s, bool attributeEncode = false, Action? onNewLine = null )
         {
-            var stringBuilder = new StringBuilder( s.Length );
-
             foreach ( var c in s )
             {
                 switch ( c )
@@ -188,14 +252,19 @@ namespace Metalama.Framework.Engine.Formatting
 
                         break;
 
+                    case '\n':
+                        stringBuilder.Append( c );
+
+                        onNewLine?.Invoke();
+
+                        break;
+
                     default:
                         stringBuilder.Append( c );
 
                         break;
                 }
             }
-
-            return stringBuilder.ToString();
         }
 
         internal static async Task WriteAllAsync(
