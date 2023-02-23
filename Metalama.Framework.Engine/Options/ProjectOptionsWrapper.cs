@@ -69,5 +69,7 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? License => this.Wrapped.License;
 
+    public virtual bool? WriteLicenseCreditData => this.Wrapped.WriteLicenseCreditData;
+
     public virtual bool IsTest => this.Wrapped.IsTest;
 }

@@ -67,8 +67,9 @@ namespace Metalama.Framework.Engine.Templating
                 // we can do it without a chance of being ever wrong. It allows meta.DefineExpression to work.
                 if ( originalNode is InvocationExpressionSyntax )
                 {
-                    var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( originalNode );
-                    if ( symbols.Any() && symbols.All( symbol => symbol is IMethodSymbol { ReturnsVoid: true } ) )
+                    var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( originalNode ).ToList();
+
+                    if ( symbols.Count > 0 && symbols.All( symbol => symbol is IMethodSymbol { ReturnsVoid: true } ) )
                     {
                         return false;
                     }

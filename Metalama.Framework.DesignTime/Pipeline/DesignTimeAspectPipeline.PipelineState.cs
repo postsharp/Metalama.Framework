@@ -391,7 +391,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 var diagnosticAdder = new DiagnosticBag();
 
-                var licenseConsumptionManager = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumptionManager>();
+                var licenseConsumptionManager = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumptionService>();
                 var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
                 var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )

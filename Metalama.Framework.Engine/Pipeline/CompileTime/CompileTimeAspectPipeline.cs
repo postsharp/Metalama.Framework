@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 return default;
             }
 
-            var licenseConsumptionManager = this.ServiceProvider.GetService<IProjectLicenseConsumptionManager>();
+            var licenseConsumptionManager = this.ServiceProvider.GetService<IProjectLicenseConsumptionService>();
             var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
             var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )

@@ -99,7 +99,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._dictionaryOfITypeType =
             syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Dictionary<string, IType>) ) );
 
-        this._iExpressionSymbol = this._runTimeCompilation.GetTypeByMetadataName( typeof( IExpression ).FullName! ).AssertNotNull();
+        this._iExpressionSymbol = this._runTimeCompilation.GetTypeByMetadataName( typeof(IExpression).FullName! ).AssertNotNull();
     }
 
     public bool Success { get; private set; } = true;
@@ -669,8 +669,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
         }
 
-        bool ExpressionTypeIsGenericDynamic()
-            => expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+        bool ExpressionTypeIsGenericDynamic() => expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
 
         // ReSharper disable once ConstantConditionalAccessQualifier
         switch ( expressionType.Name )
@@ -724,10 +723,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
             default:
-                // If it's an IExperssion, it can be returned as a TypedExpressionSyntax.
+                // If it's an IExpression, it can be returned as a TypedExpressionSyntax.
                 if ( this._runTimeCompilation.HasImplicitConversion( expressionType, this._iExpressionSymbol ) )
                 {
-                    return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.GetTypedExpression ) ) )
+                    return InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetTypedExpression) ) )
                         .AddArgumentListArguments( Argument( expression ) );
                 }
 
@@ -1866,7 +1866,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     private InvocationExpressionSyntax CastToDynamicExpression( ExpressionSyntax expression )
-        => InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.GetUserExpression ) ) )
+        => InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetUserExpression) ) )
             .AddArgumentListArguments( Argument( expression ) );
 
     public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )

@@ -151,6 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
+
                 using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
                 {
                     initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );

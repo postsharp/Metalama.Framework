@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -169,9 +168,10 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 var attributeSymbol = (this._semanticModel.GetSymbolInfo( node ).Symbol as IMethodSymbol)?.ContainingType;
-                var iAspectSymbol = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof( IAspect ) );
+                var iAspectSymbol = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect) );
 
                 var compilation = this._compilationContext.SourceCompilation;
+
                 if ( compilation.HasImplicitConversion( attributeSymbol, iAspectSymbol ) )
                 {
                     foreach ( var argument in node.ArgumentList.Arguments )
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Templating
                         {
                             // Check that we are not setting a template property or introduced field.
                             var memberSymbol = this._semanticModel.GetSymbolInfo( argument.NameEquals.Name ).Symbol;
-                            var templateAttribute = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof( ITemplateAttribute ) );
+                            var templateAttribute = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
 
                             if ( memberSymbol?.GetAttributes().Any( a => compilation.HasImplicitConversion( a.AttributeClass, templateAttribute ) ) == true )
                             {

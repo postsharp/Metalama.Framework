@@ -67,10 +67,12 @@ namespace Metalama.Framework.Engine.Templating
                 // meta.ProceedAsync().ConfigureAwait(false) is also treated like a Proceed() expression
                 else if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node ).IsTaskConfigureAwait()
                           && node is
-                          {
-                              Expression: MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax innerInvocation },
-                              ArgumentList.Arguments: [{ Expression: var expression }]
-                          }
+
+                              // ReSharper disable once MissingIndent
+                              {
+                                  Expression: MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax innerInvocation },
+                                  ArgumentList.Arguments: [{ Expression: var expression }]
+                              }
                           && this.TryRewriteProceedInvocation( innerInvocation, out var transformedInner ) )
                 {
                     if ( expression is not LiteralExpressionSyntax literal )
