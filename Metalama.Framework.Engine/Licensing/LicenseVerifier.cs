@@ -212,7 +212,7 @@ public sealed class LicenseVerifier : IProjectService
                 this._projectOptions.TargetFramework ?? "",
                 totalRequiredCredits,
                 consumptions,
-                EngineAssemblyMetadataReader.Instance.PackageVersion,
+                EngineAssemblyMetadataReader.Instance.PackageVersion ?? "",
                 EngineAssemblyMetadataReader.Instance.BuildDate );
 
             file.WriteToDirectory( directory );

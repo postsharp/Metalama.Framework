@@ -12,13 +12,24 @@ internal sealed class PackageVersionComparer : Comparer<string>
     {
         var indexOfDash = str.IndexOfOrdinal( '-' );
 
+        string versionString;
+
         if ( indexOfDash < 0 )
         {
-            return new Version( str );
+            versionString = str;
         }
         else
         {
-            return new Version( str.Substring( 0, indexOfDash ) );
+            versionString = str.Substring( 0, indexOfDash );
+        }
+
+        if ( Version.TryParse( versionString, out var version ) )
+        {
+            return version;
+        }
+        else
+        {
+            return new Version( 0, 0 );
         }
     }
 
