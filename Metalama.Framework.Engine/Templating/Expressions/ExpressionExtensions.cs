@@ -20,7 +20,7 @@ internal static class ExpressionExtensions
             null => null!,
             IUserExpression userExpression => userExpression,
             TypedConstant typedConstant => (IUserExpression) SyntaxBuilder.CurrentImplementation.TypedConstant( typedConstant ),
-            _ => throw new ArgumentException( $"Expression of type '{expression?.GetType().ToString() ?? "null"}' could not be converted to IUserExpression." )
+            _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
     public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )

@@ -4,7 +4,7 @@ using Metalama.Backstage.Commands;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Utilities;
 
-namespace Metalama.DotNetTools
+namespace Metalama.Tool
 {
     internal class ApplicationInfo : ApplicationInfoBase
     {
