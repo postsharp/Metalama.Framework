@@ -39,16 +39,40 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     // Figure out the indentation of the next block.
                     var indentation = "";
+                    var isTag = false;
 
                     foreach ( var c in codeLineBuilder.ToString() )
                     {
-                        if ( c != ' ' )
+                        switch ( c )
                         {
-                            break;
-                        }
+                            case '<':
+                                isTag = true;
 
-                        indentation += " ";
+                                break;
+
+                            case '>':
+                                isTag = false;
+
+                                break;
+
+                            case ' ' or '\t' when !isTag:
+                                indentation += c;
+
+                                break;
+
+                            default:
+                                if ( !isTag )
+                                {
+                                    goto parsingIndentationFinished;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                        }
                     }
+
+                parsingIndentationFinished:
 
                     // Write any buffered diagnostic.
                     var diagnosticLines = diagnosticBuilder.ToString().Split( '\n' );
