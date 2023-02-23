@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Aspects;
@@ -27,8 +28,8 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 public sealed class LicenseVerifier : IProjectService
 {
-    private const string LicenseCreditsSubdirectoryName = "LicenseCredits";
-    public const string LicenseCreditsFilePrefix = "credits-";
+    private const string _licenseCreditsSubdirectoryName = "LicenseCredits";
+    internal const string LicenseCreditsFilePrefix = "credits-";
 
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
     private readonly IProjectOptions _projectOptions;
@@ -40,9 +41,10 @@ public sealed class LicenseVerifier : IProjectService
 
     private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
     {
-        return tempFileManager.GetTempDirectory( LicenseCreditsSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
+        return tempFileManager.GetTempDirectory( _licenseCreditsSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
     }
 
+    [PublicAPI]
     public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
     {
         return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseCreditsFilePrefix}*.json" );
