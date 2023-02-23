@@ -252,7 +252,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 
-    string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
+    string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid, bool versionNeutral )
     {
         if ( subdirectory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
         {

@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( licenseConsumptionManager != null )
             {
-                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.AssemblyName );
+                var licenseVerifier = new LicenseVerifier( projectServiceProviderWithProject, compilation.AssemblyName );
 
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {

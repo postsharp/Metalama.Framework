@@ -242,7 +242,7 @@ namespace Metalama.Framework.CompilerExtensions
 
                         foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
-                            var prefix = "Metalama.Framework.CompilerExtensions.Resources.";
+                            const string prefix = "Metalama.Framework.CompilerExtensions.Resources.";
 
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
                                  resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )

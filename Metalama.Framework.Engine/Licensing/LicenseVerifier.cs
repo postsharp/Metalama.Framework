@@ -1,17 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Licensing;
+using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -22,15 +27,32 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 public sealed class LicenseVerifier : IProjectService
 {
-    private readonly IProjectLicenseConsumptionManager _licenseConsumptionManager;
+    private const string LicenseCreditsSubdirectoryName = "LicenseCredits";
+    public const string LicenseCreditsFilePrefix = "credits-";
+
+    private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
+    private readonly IProjectOptions _projectOptions;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
+    private readonly ITempFileManager _tempFileManager;
     private readonly string? _targetAssemblyName;
 
     private readonly struct RedistributionLicenseFeatures { }
 
-    internal LicenseVerifier( ProjectLicenseConsumptionManager licenseConsumptionManager, string? targetAssemblyName )
+    private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
     {
-        this._licenseConsumptionManager = licenseConsumptionManager;
+        return tempFileManager.GetTempDirectory( LicenseCreditsSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
+    }
+
+    public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
+    {
+        return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseCreditsFilePrefix}*.json" );
+    }
+
+    internal LicenseVerifier( ProjectServiceProvider serviceProvider, string? targetAssemblyName )
+    {
+        this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
+        this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
+        this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
         this._targetAssemblyName = targetAssemblyName;
     }
 
@@ -45,7 +67,7 @@ public sealed class LicenseVerifier : IProjectService
             : assemblyName;
     }
 
-    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionManager manager )
+    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionService service )
     {
         var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
 
@@ -56,7 +78,7 @@ public sealed class LicenseVerifier : IProjectService
             return false;
         }
 
-        if ( !manager.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
+        if ( !service.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
         {
             diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
 
@@ -76,7 +98,7 @@ public sealed class LicenseVerifier : IProjectService
 
         foreach ( var closureProject in project.ClosureProjects )
         {
-            if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionManager ) )
+            if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
             {
                 this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
             }
@@ -88,7 +110,7 @@ public sealed class LicenseVerifier : IProjectService
     private bool IsProjectWithValidRedistributionLicense( CompileTimeProject project ) => this._redistributionLicenseFeaturesByProject.ContainsKey( project );
 
     private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
-        => this._licenseConsumptionManager.CanConsume( requirement, this._targetAssemblyName );
+        => this._licenseConsumptionService.CanConsume( requirement, this._targetAssemblyName );
 
     internal void VerifyCanAddChildAspect( AspectPredecessor predecessor )
     {
@@ -131,7 +153,7 @@ public sealed class LicenseVerifier : IProjectService
 
     internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
-        var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
+        var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
 
         if ( manager == null )
         {
@@ -162,56 +184,55 @@ public sealed class LicenseVerifier : IProjectService
 
         nonRedistributionAspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
 
-        // One redistribution library counts as one aspect class.
-        var aspectClassesCount = projectsWithRedistributionLicense.Count + nonRedistributionAspectClasses.Count;
+        // Compute required credits.
+        var consumptions = new List<LicenseCreditConsumption>();
 
-        if ( aspectClassesCount == 0 )
+        consumptions.AddRange(
+            nonRedistributionAspectClasses.SelectAsEnumerable( x => x.FullName )
+                .OrderBy( x => x )
+                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.UserClass ) ) );
+
+        consumptions.AddRange(
+            projectsWithRedistributionLicense.SelectAsEnumerable( x => x.RunTimeIdentity.Name )
+                .OrderBy( x => x )
+                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.Library ) ) );
+
+        var totalRequiredCredits = (int) Math.Ceiling( consumptions.Sum( c => c.ConsumedCredits ) );
+
+        // Write consumption data to disk if required.
+        if ( this._projectOptions.WriteLicenseCreditData ?? this._licenseConsumptionService.IsTrialLicense )
         {
-            // There are no aspect classes applied.
-            return;
+            var directory = GetConsumptionDataDirectory( this._tempFileManager );
+
+            var file = new LicenseConsumptionFile(
+                this._projectOptions.ProjectPath ?? "Anonymous",
+                this._projectOptions.Configuration ?? "",
+                this._projectOptions.TargetFramework ?? "",
+                totalRequiredCredits,
+                consumptions,
+                EngineAssemblyMetadataReader.Instance.PackageVersion,
+                EngineAssemblyMetadataReader.Instance.BuildDate );
+
+            file.WriteToDirectory( directory );
         }
 
-        var maxAspectsCount = this switch
+        // Enforce the license.
+        var maxCredits = this switch
         {
-            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
-            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
-            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
-            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
             _ => 0
         };
 
-        if ( aspectClassesCount <= maxAspectsCount )
+        if ( totalRequiredCredits > maxCredits )
         {
-            // All aspect classes are covered by the available license.
-            return;
+            diagnostics.Report(
+                LicensingDiagnosticDescriptors.InsufficientCredits.CreateRoslynDiagnostic(
+                    null,
+                    (totalRequiredCredits, maxCredits, Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath ) ?? "Anonymous") ) );
         }
-
-        // The count of aspect classes is not covered by the available licenses. Report an error.
-        static string GetNames( IEnumerable<IAspectClass> aspectClasses )
-        {
-            var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();
-            aspectClassesList.Sort();
-
-            return string.Join( ", ", aspectClassesList );
-        }
-
-        var aspectClassNames = string.Join( ", ", GetNames( nonRedistributionAspectClasses ) );
-
-        if ( projectsWithRedistributionLicense.Count > 0 )
-        {
-            aspectClassNames += ", " + string.Join(
-                ", ",
-                aspectInstanceResults.Select( r => r.AspectInstance.AspectClass )
-                    .OfType<AspectClass>()
-                    .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
-                    .GroupBy( c => c.Project! )
-                    .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" ) );
-        }
-
-        diagnostics.Report(
-            LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
-                null,
-                (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
     }
 
     internal void VerifyCanBeInherited( AspectClass aspectClass, IDiagnosticAdder diagnostics )
@@ -228,9 +249,9 @@ public sealed class LicenseVerifier : IProjectService
         IEnumerable<IAspectInstance> aspectInstances,
         IDiagnosticAdder diagnostics )
     {
-        // ILicenseConsumptionManager is hacked: this is a project-scoped service because it is instantiate with the license key in the project file,
+        // ILicenseConsumptionService is hacked: this is a project-scoped service because it is instantiate with the license key in the project file,
         // but its interface is backstage because it is implemented in the backstage assembly.
-        var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
+        var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
 
         if ( manager == null )
         {

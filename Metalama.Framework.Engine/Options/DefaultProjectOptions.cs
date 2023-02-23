@@ -67,5 +67,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? License => null;
 
+    public virtual bool? WriteLicenseCreditData => null;
+
     public virtual bool IsTest => false;
 }

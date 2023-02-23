@@ -20,8 +20,11 @@
         <CompilerVisibleProperty Include="MetalamaCompileTimePackages"/>
         <CompilerVisibleProperty Include="MetalamaPlugInAssemblyPaths"/>
         <CompilerVisibleProperty Include="MetalamaWriteHtml"/>
+        <CompilerVisibleProperty Include="MetalamaWriteLicenseCreditData" /> 
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
+        <CompilerVisibleProperty Include="Configuration"/>
+        
     </ItemGroup>
 
     <!-- More properties are already exported by Metalama.Compiler and don't need to be exported a second time. -->

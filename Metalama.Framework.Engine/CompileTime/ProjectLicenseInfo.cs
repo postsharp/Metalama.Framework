@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Licensing.Consumption;
+
 namespace Metalama.Framework.Engine.CompileTime;
 
 /// <summary>
@@ -9,4 +11,9 @@ namespace Metalama.Framework.Engine.CompileTime;
 public sealed record ProjectLicenseInfo( string? RedistributionLicenseKey )
 {
     public static ProjectLicenseInfo Empty { get; } = new( default(string) );
+
+    public static ProjectLicenseInfo Get( ILicenseConsumptionService licenseConsumptionService )
+    {
+        return licenseConsumptionService?.IsRedistributionLicense == true ? new ProjectLicenseInfo( licenseConsumptionService.LicenseString ) : Empty;
+    }
 }
