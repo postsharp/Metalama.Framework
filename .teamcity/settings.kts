@@ -74,7 +74,7 @@ object DebugBuild : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_MetalamaBackstage_DebugBuild")) {
+        dependency(AbsoluteId("Metalama_MetalamaBackstage_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -95,7 +95,7 @@ object DebugBuild : BuildType({
 
             artifacts {
                 cleanDestination = true
-                artifactRules = "+:artifacts/packages/Debug/Shipping/**/*=>dependencies/Metalama.Compiler"
+                artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
             }
 
         }
