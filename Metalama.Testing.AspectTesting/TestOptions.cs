@@ -647,12 +647,12 @@ namespace Metalama.Testing.AspectTesting
                         break;
 
                     case "Deterministic":
-                        this.Deterministic = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg! );
+                        this.Deterministic = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg );
 
                         break;
 
                     case "RemoveAssemblyAttributes":
-                        this.RemoveAssemblyAttributes = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg! );
+                        this.RemoveAssemblyAttributes = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg );
 
                         break;
 

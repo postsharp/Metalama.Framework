@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -52,10 +51,11 @@ namespace Metalama.Framework.Engine.Linking
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
             this._injectedMemberLookup = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
+
             this._transformedSyntaxTreeMap =
                 this._intermediateCompilation.ModifiedSyntaxTrees
-                .Where( m => m.Value.Kind == Compiler.SyntaxTreeTransformationKind.Replace )
-                .ToDictionary( m => m.Value.OldTree.AssertNotNull(), m => m.Value.NewTree.AssertNotNull() );
+                    .Where( m => m.Value.Kind == Compiler.SyntaxTreeTransformationKind.Replace )
+                    .ToDictionary( m => m.Value.OldTree.AssertNotNull(), m => m.Value.NewTree.AssertNotNull() );
 
             this._overrideMap = overrideMap =
                 new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.Comparers.Default );

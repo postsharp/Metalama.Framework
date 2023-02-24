@@ -66,11 +66,12 @@ namespace Metalama.Framework.Engine.Linking
             var inlinerProvider = new InlinerProvider();
             var syntaxHandler = new LinkerSyntaxHandler( input.InjectionRegistry );
 
-            var referenceResolver = new AspectReferenceResolver(
-                input.InjectionRegistry,
-                input.OrderedAspectLayers,
-                input.FinalCompilationModel,
-                input.IntermediateCompilation.CompilationContext);
+            var referenceResolver =
+                new AspectReferenceResolver(
+                    input.InjectionRegistry,
+                    input.OrderedAspectLayers,
+                    input.FinalCompilationModel,
+                    input.IntermediateCompilation.CompilationContext );
 
             var symbolReferenceFinder = new SymbolReferenceFinder(
                 this._serviceProvider,

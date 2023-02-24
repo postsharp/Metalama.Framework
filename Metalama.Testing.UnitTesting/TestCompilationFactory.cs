@@ -62,14 +62,14 @@ namespace Metalama.Testing.UnitTesting
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
             ImmutableArray<string> implicitUsings = default,
             NullableContextOptions nullableContextOptions = NullableContextOptions.Enable,
-            bool deterministic = true)
+            bool deterministic = true )
             => CreateEmptyCSharpCompilation(
                 name,
                 GetMetadataReferences( additionalAssemblies, addMetalamaReferences ),
                 outputKind,
                 implicitUsings,
                 nullableContextOptions,
-                deterministic);
+                deterministic );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,

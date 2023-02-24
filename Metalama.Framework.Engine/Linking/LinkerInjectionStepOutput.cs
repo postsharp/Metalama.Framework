@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Services;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
