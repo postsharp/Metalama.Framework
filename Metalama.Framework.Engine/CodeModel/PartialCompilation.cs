@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            var assemblyVersionFix = GetFixAssemblyVersionAttributeTransformation( compilation );
+            var assemblyVersionFix = GetFixAssemblyVersionAttributeTransformation( compilation, baseCompilation.Compilation.Assembly.Identity.Version );
 
             if ( assemblyVersionFix != null )
             {
@@ -215,7 +215,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Resources = newResources.IsDefault ? ImmutableArray<ManagedResource>.Empty : newResources;
         }
 
-        private static (SyntaxTree OldSyntaxTree, SyntaxTree NewSyntaxTree)? GetFixAssemblyVersionAttributeTransformation( Compilation compilation )
+        private static (SyntaxTree OldSyntaxTree, SyntaxTree NewSyntaxTree)? GetFixAssemblyVersionAttributeTransformation( Compilation compilation, Version desiredVersion )
         {
             foreach ( var assemblyAttribute in compilation.Assembly.GetAttributes() )
             {
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     && syntaxReference.GetSyntax() is AttributeSyntax { ArgumentList.Arguments: [{ Expression: LiteralExpressionSyntax argumentExpression }] }
                     && argumentExpression.Token.ValueText.Contains( '*' ) )
                 {
-                    var newRoot = new WildcardAssemblyVersionRewriter( argumentExpression, compilation.Assembly.Identity.Version ).Visit( argumentExpression.SyntaxTree.GetRoot() );
+                    var newRoot = new WildcardAssemblyVersionRewriter( argumentExpression, desiredVersion ).Visit( argumentExpression.SyntaxTree.GetRoot() );
                     var newSyntaxTree = argumentExpression.SyntaxTree.WithRootAndOptions( newRoot, argumentExpression.SyntaxTree.Options );
 
                     return (argumentExpression.SyntaxTree, newSyntaxTree);

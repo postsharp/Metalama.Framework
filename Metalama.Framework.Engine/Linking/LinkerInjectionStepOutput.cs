@@ -15,7 +15,6 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnosticSink,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
-            CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IProjectOptions? projectOptions )
@@ -23,7 +22,6 @@ namespace Metalama.Framework.Engine.Linking
             this.DiagnosticSink = diagnosticSink;
             this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
-            this.IntermediateCompilationContext = intermediateCompilationContext;
             this.InjectionRegistry = injectionRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
             this.ProjectOptions = projectOptions;
@@ -43,8 +41,6 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the intermediate compilation.
         /// </summary>
         public PartialCompilation IntermediateCompilation { get; }
-
-        public CompilationContext IntermediateCompilationContext { get; }
 
         /// <summary>
         /// Gets the introduction registry.

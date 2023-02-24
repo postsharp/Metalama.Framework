@@ -269,10 +269,13 @@ internal sealed class TestResult : IDisposable
                     outputSyntaxTree.InputPath,
                     this.OutputCompilationDiagnostics.ToArray() );
 
-                // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
-                consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(
-                    consolidatedCompilationUnit.AttributeLists.AddRange(
-                        outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().ContainsOrdinal( "AspectOrder" ) ) ) );
+                if ( this.TestInput.Options.RemoveAssemblyAttributes != true )
+                {
+                    // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
+                    consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(
+                        consolidatedCompilationUnit.AttributeLists.AddRange(
+                            outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().ContainsOrdinal( "AspectOrder" ) ) ) );
+                }
 
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.

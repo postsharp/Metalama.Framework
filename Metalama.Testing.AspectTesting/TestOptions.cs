@@ -298,6 +298,8 @@ namespace Metalama.Testing.AspectTesting
 
         public bool? Deterministic { get; set; }
 
+        public bool? RemoveAssemblyAttributes { get; set; }
+
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
@@ -646,6 +648,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "Deterministic":
                         this.Deterministic = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg! );
+
+                        break;
+
+                    case "RemoveAssemblyAttributes":
+                        this.RemoveAssemblyAttributes = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg! );
 
                         break;
 

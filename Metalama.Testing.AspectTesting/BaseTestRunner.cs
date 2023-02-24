@@ -635,7 +635,7 @@ internal abstract partial class BaseTestRunner
                 _ => OutputKind.DynamicallyLinkedLibrary
             },
             nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable,
-            deterministic: options.Deterministic == true);
+            deterministic: options.Deterministic != false);
 
         const string projectName = "test";
 
