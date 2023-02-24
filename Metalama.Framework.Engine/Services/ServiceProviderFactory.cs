@@ -67,7 +67,7 @@ public static class ServiceProviderFactory
             .WithServiceConditional<ITaskRunner>( _ => new TaskRunner() )
             .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
             .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
-            .WithServiceConditional<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
+            .WithServiceConditional<ICompileTimeDomainFactory>( sp => new DefaultCompileTimeDomainFactory( sp ) )
             .WithServiceConditional<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
             .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
             .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )

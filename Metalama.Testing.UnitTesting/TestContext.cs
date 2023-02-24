@@ -8,6 +8,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -112,7 +113,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
-        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) );
+        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) ).WithService( this.ProjectOptions.DomainObserver );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
@@ -235,18 +236,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     private CompileTimeDomain CreateDomain()
     {
-        // Prevents the ProjectOptions from being disposed while the domain is in used, because the domain typically
-        // locks files in the directory created by ProjectOptions.
-        this.ProjectOptions.AddFileLocker();
-
 #if NET5_0_OR_GREATER
         var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
-        domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
-        domain.UnloadTimeout += MemoryLeakHelper.CaptureMiniDumpOnce;
 
         return domain;
 #else
-        return new CompileTimeDomain();
+        return new CompileTimeDomain( this.ServiceProvider.Global );
 #endif
     }
 
@@ -256,7 +251,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     {
         if ( subdirectory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
         {
-            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, this.GetType().Module.ModuleVersionId );
+            // For the AssemblyLocator, we use a single directory that is shared by all tests, for every build of the main engine assembly.
+            // The reason is performance: this step is too expensive to be performed at each test.
+            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, typeof(CompileTimeAspectPipeline).Module.ModuleVersionId );
         }
         else
         {

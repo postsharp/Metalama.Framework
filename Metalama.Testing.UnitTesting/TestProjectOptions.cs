@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using System;
 using System.Collections.Immutable;
@@ -48,7 +49,11 @@ namespace Metalama.Testing.UnitTesting
             {
                 this.BuildTouchFile = Path.Combine( baseDirectory, "BuildTouchFile.txt" );
             }
+
+            this.DomainObserver = new DomainObserverImpl( this );
         }
+
+        internal ICompileTimeDomainObserver DomainObserver { get; }
 
         private static Lazy<string> CreateDirectoryLazy( string path )
             => new(
@@ -107,6 +112,26 @@ namespace Metalama.Testing.UnitTesting
                     }
                     catch ( DirectoryNotFoundException ) { }
                 }
+            }
+        }
+
+        private class DomainObserverImpl : ICompileTimeDomainObserver
+        {
+            private TestProjectOptions _parent;
+
+            public DomainObserverImpl( TestProjectOptions parent )
+            {
+                this._parent = parent;
+            }
+
+            void ICompileTimeDomainObserver.OnDomainCreated( CompileTimeDomain domain )
+            {
+                this._parent.AddFileLocker();
+            }
+
+            void ICompileTimeDomainObserver.OnDomainUnloaded( CompileTimeDomain domain )
+            {
+                this._parent.RemoveFileLocker();
             }
         }
     }

@@ -411,7 +411,7 @@ internal abstract partial class BaseTestRunner
         var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
         var serviceProvider =
-            (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
+            (ProjectServiceProvider) testContext.ServiceProvider.Global.Underlying.WithProjectScopedServices(
                 testContext.ProjectOptions,
                 this._references.MetadataReferences );
 

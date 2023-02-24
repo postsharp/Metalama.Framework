@@ -37,7 +37,7 @@ internal sealed partial class CompileTimeProjectRepository
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint = null,
         CancellationToken cancellationToken = default )
     {
-        diagnostics ??= NullDiagnosticAdder.Instance;
+        diagnostics ??= ThrowingDiagnosticAdder.Instance;
 
         var builder = new Builder( domain, serviceProvider, compilation );
 

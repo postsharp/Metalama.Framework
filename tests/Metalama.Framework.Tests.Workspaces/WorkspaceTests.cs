@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection();
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection();
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Tests.Workspaces
                 testContext,
                 "using Metalama.Framework.Aspects; [CompileTime] class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
-            var workspaceCollection = new WorkspaceCollection();
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -151,7 +151,7 @@ class MyAspect : TypeAspect
 [MyAspect]
 class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection();
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 

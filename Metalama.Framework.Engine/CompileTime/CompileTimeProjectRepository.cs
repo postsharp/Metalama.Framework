@@ -32,7 +32,7 @@ internal sealed partial class CompileTimeProjectRepository : IProjectService
         if ( domain != null )
         {
             var referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
-            domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
+            domain.RegisterAssemblyPaths( referenceAssemblyLocator.AdditionalCompileTimeAssemblyPaths );
         }
     }
 }

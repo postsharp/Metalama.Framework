@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Extensibility;
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +19,11 @@ public class ServiceProviderBuilder<TService>
     private readonly List<Func<ServiceProvider<TService>, ServiceProvider<TService>>> _buildActions = new();
 
     public ServiceProviderBuilder() { }
+
+    public ServiceProviderBuilder( ServiceProviderBuilder<TService> prototype )
+    {
+        this._buildActions.AddRange( prototype._buildActions );
+    }
 
     public ServiceProviderBuilder( params TService[] services )
     {
