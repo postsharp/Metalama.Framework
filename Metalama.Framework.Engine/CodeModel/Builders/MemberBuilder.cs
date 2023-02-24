@@ -3,13 +3,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -151,7 +151,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToExpressionSyntax( context.SyntaxGenerationContext );
+
+                using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
+                {
+                    initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
+                }
 
                 return true;
             }

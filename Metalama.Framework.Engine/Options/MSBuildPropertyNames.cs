@@ -32,6 +32,8 @@ public static class MSBuildPropertyNames
     public const string MetalamaPlugInAssemblyPaths = nameof(MetalamaPlugInAssemblyPaths);
     public const string MetalamaWriteHtml = nameof(MetalamaWriteHtml);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
+    public const string MetalamaLicense = nameof(MetalamaLicense);
+    public const string MetalamaWriteLicenseCreditData = nameof(MetalamaWriteLicenseCreditData);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
         MetalamaBuildTouchFile,

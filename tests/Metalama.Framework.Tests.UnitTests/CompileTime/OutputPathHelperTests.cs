@@ -27,7 +27,7 @@ public sealed class OutputPathHelperTests
     private sealed class TestTempFileManager : ITempFileManager
     {
         // We hardcode a long directory so that it does not change according to test environments.
-        public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid = null )
+        public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid, bool versionNeutral )
             => Path.Combine( @"C:\Users\GaelFraiteur.AzureAD\AppData\Local\Temp\Metalama", subdirectory, "0.5.53.1189-local-GaelFraiteur-debug" );
     }
 }

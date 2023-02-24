@@ -55,7 +55,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     private ISymbol? _currentTemplateMember;
     private bool _isInLocalFunction;
-    
+
     public TemplateAnnotator(
         ClassifyingCompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
@@ -1812,11 +1812,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         TypeSyntax annotatedType;
+
         // The scope of the type shouldn't be influenced by parent scope.
         using ( this.WithScopeContext( this._currentScopeContext.RunTimeOrCompileTime( "type to cast to" ) ) )
         {
             annotatedType = this.Visit( node.Type );
         }
+
         var typeScope = this.GetNodeScope( annotatedType );
 
         ExpressionSyntax annotatedExpression;
@@ -1836,7 +1838,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         else
         {
             var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
-            var typeIsIExpression = type is INamedTypeSymbol { Name: nameof( IExpression ) };
+            var typeIsIExpression = type is INamedTypeSymbol { Name: nameof(IExpression) };
 
             if ( typeIsIExpression )
             {

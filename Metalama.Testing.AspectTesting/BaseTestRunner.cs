@@ -672,7 +672,7 @@ internal abstract partial class BaseTestRunner
         {
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                await this.WriteHtmlAsync( syntaxTree, htmlDirectory, htmlCodeWriter );
+                await this.WriteHtmlAsync( testResult, syntaxTree, htmlDirectory, htmlCodeWriter );
             }
         }
 
@@ -680,8 +680,8 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
             // Multi file tests are not supported for html output.
-            var output = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
-            var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
+            var outputSyntaxRoot = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
+            var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", outputSyntaxRoot );
 
             var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
             var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
@@ -703,24 +703,30 @@ internal abstract partial class BaseTestRunner
 
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );
 
-    private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
+    private async Task WriteHtmlAsync( TestResult testResult, TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
     {
         var inputHtmlPath = Path.Combine(
             htmlDirectory,
             Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.InputHtml );
+
+        var diagnostics = new List<Diagnostic>();
+        diagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
+        var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+        diagnostics.AddRange( semanticModel.GetDiagnostics() );
 
         testSyntaxTree.HtmlInputRunTimePath = inputHtmlPath;
 
         this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
         // Write the input document.
-        var inputTextWriter = new StreamWriter( this._fileSystem.OpenWrite( inputHtmlPath ) );
+        var inputTextWriter = new StreamWriter( this._fileSystem.Open( inputHtmlPath, FileMode.Create ) );
 
         using ( inputTextWriter.IgnoreAsyncDisposable() )
         {
             await htmlCodeWriter.WriteAsync(
                 testSyntaxTree.InputDocument,
-                inputTextWriter );
+                inputTextWriter,
+                diagnostics );
         }
 
         // We have no use case to write the output document because all cases use the consolidated output document instead.

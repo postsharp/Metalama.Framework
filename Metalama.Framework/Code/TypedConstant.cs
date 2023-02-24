@@ -26,7 +26,7 @@ namespace Metalama.Framework.Code
         {
             if ( this._type == null )
             {
-                throw new ArgumentNullException( $"The {nameof(TypedConstant)} is unassigned." );
+                throw new InvalidOperationException( $"The {nameof(TypedConstant)} is unassigned." );
             }
         }
 

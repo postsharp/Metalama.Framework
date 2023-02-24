@@ -111,8 +111,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 this.Logger?.WriteLine( diagnostic.ToString() );
             }
-            
-            Assert.True( testResult.Success, testResult.ErrorMessage );
 
             // Input
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() )

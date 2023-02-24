@@ -12,7 +12,7 @@ public static class ServiceProviderLicensingExtensions
         this ServiceProvider<IProjectService> serviceProvider,
         LicensingInitializationOptions options )
     {
-        return serviceProvider.WithService( new ProjectLicenseConsumptionManager( options ) );
+        return serviceProvider.WithService( new ProjectLicenseConsumptionService( options ) );
     }
 
     /// <summary>

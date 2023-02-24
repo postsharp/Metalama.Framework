@@ -63,9 +63,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool Equals( SyntaxGenerationContext? other )
         {
             return other != null &&
-                this.CompilationContext == other.CompilationContext &&
-                this.SyntaxGenerator.IsNullAware == other.SyntaxGenerator.IsNullAware &&
-                this.IsPartial == other.IsPartial;
+                   this.CompilationContext == other.CompilationContext &&
+                   this.SyntaxGenerator.IsNullAware == other.SyntaxGenerator.IsNullAware &&
+                   this.IsPartial == other.IsPartial;
         }
     }
 }

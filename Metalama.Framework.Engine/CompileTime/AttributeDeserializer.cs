@@ -136,7 +136,6 @@ namespace Metalama.Framework.Engine.CompileTime
                         attribute,
                         constructorArgument,
                         parameterInfo.ParameterType,
-                        diagnosticAdder,
                         out var translatedArgument ) )
                 {
                     attributeInstance = null;
@@ -181,12 +180,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     continue;
                 }
 
-                PropertyInfo? property;
-                FieldInfo? field;
-
-                if ( (property = type.GetProperty( arg.Key )) != null )
+                if ( type.GetProperty( arg.Key ) is { } property )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder, out var translatedValue ) )
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, property.PropertyType, out var translatedValue ) )
                     {
                         attributeInstance = null;
 
@@ -216,9 +212,9 @@ namespace Metalama.Framework.Engine.CompileTime
                         return false;
                     }
                 }
-                else if ( (field = type.GetField( arg.Key )) != null )
+                else if ( type.GetField( arg.Key ) is { } field )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder, out var translatedValue ) )
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, field.FieldType, out var translatedValue ) )
                     {
                         attributeInstance = null;
 
@@ -236,7 +232,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
-                    // We should never get an invalid member because Roslyn would not add it to the collection.
+                    // Template properties (incl. introduced ones) may be removed from compile-time compilation,
+                    // so they would not be found above, but are already reported as LAMA0257.
+                    // We should not get an invalid member otherwise.
                     throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{arg.Key}'." );
                 }
             }
@@ -250,7 +248,6 @@ namespace Metalama.Framework.Engine.CompileTime
             AttributeData attribute,
             TypedConstant typedConstant,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
         {
             object? value;
@@ -282,7 +279,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 value,
                 typedConstant.Type,
                 targetType,
-                diagnosticAdder,
                 out translatedValue );
         }
 
@@ -291,7 +287,6 @@ namespace Metalama.Framework.Engine.CompileTime
             object? value,
             ITypeSymbol? sourceType,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
         {
             if ( value == null )
@@ -304,7 +299,7 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( value )
             {
                 case TypedConstant typedConstant:
-                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
+                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, out translatedValue );
 
                 case IErrorTypeSymbol:
                     translatedValue = null;
@@ -359,7 +354,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     foreach ( var item in list )
                     {
-                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder, out var translatedItem ) )
+                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, out var translatedItem ) )
                         {
                             translatedValue = null;
 

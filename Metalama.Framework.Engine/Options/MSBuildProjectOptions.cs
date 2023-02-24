@@ -87,6 +87,7 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool RequireOrderedAspects => this.GetBooleanOption( MSBuildPropertyNames.MetalamaRequireOrderedAspects );
 
+        [Memo]
         public override bool IsConcurrentBuildEnabled => this.GetBooleanOption( MSBuildPropertyNames.MetalamaConcurrentBuildEnabled, true );
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
@@ -111,10 +112,13 @@ namespace Metalama.Framework.Engine.Options
         public override string? ProjectAssetsFile => this.GetStringOption( MSBuildPropertyNames.ProjectAssetsFile );
 
         [Memo]
-        public override string? License => this.GetStringOption( "MetalamaLicense" );
+        public override string? License => this.GetStringOption( MSBuildPropertyNames.MetalamaLicense );
 
         [Memo]
-        public override bool WriteHtml => this.GetBooleanOption( "MetalamaWriteHtml" );
+        public override bool WriteHtml => this.GetBooleanOption( MSBuildPropertyNames.MetalamaWriteHtml );
+
+        [Memo]
+        public override bool? WriteLicenseCreditData => this.GetNullableBooleanOption( MSBuildPropertyNames.MetalamaWriteLicenseCreditData );
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
@@ -131,6 +135,16 @@ namespace Metalama.Framework.Engine.Options
             }
 
             return defaultValue;
+        }
+
+        private bool? GetNullableBooleanOption( string name )
+        {
+            if ( this._source.TryGetValue( name, out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
+            {
+                return flagValue;
+            }
+
+            return null;
         }
 
         private string? GetStringOption( string name, string? defaultValue = null )

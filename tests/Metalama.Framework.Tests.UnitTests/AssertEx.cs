@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests
     {
         public static void DynamicEquals( object expression, string expected )
         {
-            var meta = (IUserExpression) expression;
+            var meta = (IExpression) expression;
             var actual = meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.UnitTests
         {
             try
             {
-                var runtimeExpression = (IUserExpression) testCode()!;
+                var runtimeExpression = (IExpression) testCode()!;
                 _ = runtimeExpression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
                 Assert.False( true, "Exception InvalidUserCodeException was not received." );

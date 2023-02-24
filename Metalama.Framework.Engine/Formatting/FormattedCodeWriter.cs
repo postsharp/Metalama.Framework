@@ -152,14 +152,12 @@ namespace Metalama.Framework.Engine.Formatting
 
             if ( diagnostics != null && document.FilePath != null )
             {
-                // Coverage: ignore (used by Aspect Workbench).
                 AddDiagnostics( document, diagnostics, classifiedTextSpans );
             }
 
             return classifiedTextSpans;
         }
 
-        // Coverage: ignore (used by Aspect Workbench).
         private static void AddDiagnostics( Document document, IEnumerable<Diagnostic> diagnostics, ClassifiedTextSpanCollection classifiedTextSpans )
         {
             foreach ( var diagnostic in diagnostics )

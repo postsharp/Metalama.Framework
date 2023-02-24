@@ -126,6 +126,12 @@ namespace Metalama.Framework.Engine.Options
         /// Metalama.Compiler, which already has the additional license set.
         /// </remarks>
         string? License { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the json file with license consumption data should be written. If the property
+        /// is null, it is considered <c>true</c> in trial mode and <c>false</c> otherwise.
+        /// </summary>
+        bool? WriteLicenseCreditData { get; }
 
         bool IsTest { get; }
     }

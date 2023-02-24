@@ -39,7 +39,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 .AddBackstageServices( options )
                 .ServiceProvider;
 
-            var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>();
+            var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
             this.IsLicensed = licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, testAssemblyName );
 

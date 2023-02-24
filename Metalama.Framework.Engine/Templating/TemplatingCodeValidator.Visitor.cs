@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -158,14 +159,49 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public override void VisitAttribute( AttributeSyntax node )
+            private void VerifyAttribute( AttributeSyntax node )
             {
-                // Do not validate custom attributes.
+                // Currently we're only checking attributes that set members, so do a quick syntactic check first.
+                if ( node.ArgumentList?.Arguments.Any( a => a.NameEquals != null ) != true )
+                {
+                    return;
+                }
+
+                var attributeSymbol = (this._semanticModel.GetSymbolInfo( node ).Symbol as IMethodSymbol)?.ContainingType;
+                var iAspectSymbol = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect) );
+
+                var compilation = this._compilationContext.SourceCompilation;
+
+                if ( compilation.HasImplicitConversion( attributeSymbol, iAspectSymbol ) )
+                {
+                    foreach ( var argument in node.ArgumentList.Arguments )
+                    {
+                        if ( argument.NameEquals != null )
+                        {
+                            // Check that we are not setting a template property or introduced field.
+                            var memberSymbol = this._semanticModel.GetSymbolInfo( argument.NameEquals.Name ).Symbol;
+                            var templateAttribute = this._compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
+
+                            if ( memberSymbol?.GetAttributes().Any( a => compilation.HasImplicitConversion( a.AttributeClass, templateAttribute ) ) == true )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.CannotSetTemplateMemberFromAttribute.CreateRoslynDiagnostic(
+                                        argument.NameEquals.GetDiagnosticLocation(),
+                                        memberSymbol.Name ) );
+                            }
+                        }
+                    }
+                }
             }
 
             public override void VisitAttributeList( AttributeListSyntax node )
             {
-                // Do not validate custom attributes.
+                // Do not perform regular validation on attributes, except for checks that are specifically for attributes.
+
+                foreach ( var attribute in node.Attributes )
+                {
+                    this.VerifyAttribute( attribute );
+                }
             }
 
             public override void VisitBaseList( BaseListSyntax node )
