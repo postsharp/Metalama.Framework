@@ -634,8 +634,7 @@ internal abstract partial class BaseTestRunner
                 "Exe" => OutputKind.ConsoleApplication,
                 _ => OutputKind.DynamicallyLinkedLibrary
             },
-            nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable,
-            deterministic: options.Deterministic != false );
+            nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
         const string projectName = "test";
 

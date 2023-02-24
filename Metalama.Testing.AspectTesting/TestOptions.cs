@@ -296,8 +296,6 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public bool? RemoveDiagnosticMessage { get; set; }
 
-        public bool? Deterministic { get; set; }
-
         public bool? RemoveAssemblyAttributes { get; set; }
 
         /// <summary>
@@ -643,11 +641,6 @@ namespace Metalama.Testing.AspectTesting
 
                     case "RemoveDiagnosticMessage":
                         this.RemoveDiagnosticMessage = true;
-
-                        break;
-
-                    case "Deterministic":
-                        this.Deterministic = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg );
 
                         break;
 
