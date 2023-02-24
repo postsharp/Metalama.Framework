@@ -39,6 +39,8 @@ namespace Metalama.Testing.AspectTesting
                 messageSinkOrNull?.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
                 Debugger.Launch();
             }
+
+            this._serviceProvider = TestFrameworkServiceFactoryProvider.GetServiceProvider();
         }
 
         internal AspectTestFramework( GlobalServiceProvider serviceProvider, IMessageSink? messageSink )

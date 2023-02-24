@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
-using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Diagnostics;
@@ -53,9 +52,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 messageSinkOrNull?.Trace( $"Resharper NOT detected. Using the customized test framework." );
 
-                this._implementation = new AspectTestFramework(
-                    ServiceProviderFactory.GetServiceProvider().WithService( new TestAssemblyMetadataReader() ),
-                    messageSinkOrNull );
+                this._implementation = new AspectTestFramework( TestFrameworkServiceFactoryProvider.GetServiceProvider(), messageSinkOrNull );
             }
         }
 
