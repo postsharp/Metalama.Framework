@@ -13,7 +13,17 @@ namespace Metalama.Framework.Engine.Utilities
     {
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16", CultureInfo.InvariantCulture );
 
-        public static void Update( this XXH64 hash, string value ) => hash.Update( Encoding.UTF8.GetBytes( value ) );
+        public static void Update( this XXH64 hash, string? value )
+        {
+            if ( value == null )
+            {
+                hash.Update( 0 );
+            }
+            else
+            {
+                hash.Update( Encoding.UTF8.GetBytes( value ) );
+            }
+        }
 
         public static unsafe void Update<T>( this XXH64 hash, T value )
             where T : unmanaged

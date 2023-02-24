@@ -1,0 +1,4 @@
+{
+    "IgnoreExitCode": true,
+    "ErrorRegexes": [ "LAMA0800"]
+}
