@@ -296,6 +296,8 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public bool? RemoveDiagnosticMessage { get; set; }
 
+        public bool? Deterministic { get; set; }
+
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
@@ -639,6 +641,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "RemoveDiagnosticMessage":
                         this.RemoveDiagnosticMessage = true;
+
+                        break;
+
+                    case "Deterministic":
+                        this.Deterministic = string.IsNullOrEmpty( optionArg ) || bool.Parse( optionArg! );
 
                         break;
 

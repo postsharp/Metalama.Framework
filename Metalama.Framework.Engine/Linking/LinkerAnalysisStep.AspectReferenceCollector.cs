@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
+                            throw new AssertionFailedException( $"Don't know how to process ' {symbol?.Kind.ToString() ?? "(null)"}'." );
                     }
                 }
 
@@ -226,7 +226,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
+                            throw new AssertionFailedException( $"Don't know how to process '{symbol?.Kind.ToString() ?? "(null)"}'." );
                     }
                 }
 

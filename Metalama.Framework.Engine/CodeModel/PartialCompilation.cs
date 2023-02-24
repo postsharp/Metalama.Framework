@@ -3,10 +3,13 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -182,9 +185,55 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
+            var assemblyVersionFix = GetFixAssemblyVersionAttributeTransformation( compilation );
+
+            if ( assemblyVersionFix != null )
+            {
+                var (initialTree, replacedTree) = assemblyVersionFix.Value;
+
+                compilation = compilation.ReplaceSyntaxTree( initialTree, replacedTree );
+
+                if (modifiedTreeBuilder.TryGetValue(initialTree.FilePath, out var existingTransformation ))
+                {
+                    if (existingTransformation.Kind == SyntaxTreeTransformationKind.Replace)
+                    {
+                        modifiedTreeBuilder[initialTree.FilePath] = SyntaxTreeTransformation.ReplaceTree( existingTransformation.OldTree.AssertNotNull(), replacedTree );
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException( $"Unexpected transformation kind: {existingTransformation.Kind}." );
+                    }
+                }
+                else
+                {
+                    modifiedTreeBuilder[initialTree.FilePath] = SyntaxTreeTransformation.ReplaceTree( initialTree, replacedTree );
+                }
+            }
+
             this.ModifiedSyntaxTrees = modifiedTreeBuilder.ToImmutable();
             this.CompilationContext = CompilationContextFactory.GetInstance( compilation );
             this.Resources = newResources.IsDefault ? ImmutableArray<ManagedResource>.Empty : newResources;
+        }
+
+        private static (SyntaxTree OldSyntaxTree, SyntaxTree NewSyntaxTree)? GetFixAssemblyVersionAttributeTransformation( Compilation compilation )
+        {
+            foreach ( var assemblyAttribute in compilation.Assembly.GetAttributes() )
+            {
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+                if ( assemblyAttribute.AttributeConstructor?.ContainingType.GetFullName() == "System.Reflection.AssemblyVersionAttribute"
+                    && assemblyAttribute.ApplicationSyntaxReference is { } syntaxReference
+                    && syntaxReference.GetSyntax() is AttributeSyntax { ArgumentList.Arguments: [{ Expression: LiteralExpressionSyntax argumentExpression }] }
+                    && argumentExpression.Token.ValueText.Contains( '*' ) )
+                {
+                    var newRoot = new WildcardAssemblyVersionRewriter( argumentExpression, compilation.Assembly.Identity.Version ).Visit( argumentExpression.SyntaxTree.GetRoot() );
+                    var newSyntaxTree = argumentExpression.SyntaxTree.WithRootAndOptions( newRoot, argumentExpression.SyntaxTree.Options );
+
+                    return (argumentExpression.SyntaxTree, newSyntaxTree);
+                }
+#pragma warning restore CA1307 // Specify StringComparison for clarity
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -418,6 +467,39 @@ namespace Metalama.Framework.Engine.CodeModel
                         $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
                 */
+            }
+        }
+
+        private class WildcardAssemblyVersionRewriter : CSharpSyntaxRewriter
+        {
+            private readonly LiteralExpressionSyntax _targetSyntax;
+            private readonly Version _assemblyVersion;
+
+            public WildcardAssemblyVersionRewriter( LiteralExpressionSyntax targetSyntax, Version assemblyVersion )
+            {
+                this._targetSyntax = targetSyntax;
+                this._assemblyVersion = assemblyVersion;
+            }
+
+            public override SyntaxNode? VisitLiteralExpression( LiteralExpressionSyntax node )
+            {
+                if ( node == this._targetSyntax )
+                {
+                    return
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            SyntaxFactory.Literal( this._assemblyVersion.ToString() ) );
+                }
+                else
+                {
+                    return base.VisitLiteralExpression( node );
+                }
+            }
+
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                // Do not visit the entire tree.
+                return node.WithAttributeLists( this.VisitList( node.AttributeLists ) );
             }
         }
     }

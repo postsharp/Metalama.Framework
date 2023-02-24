@@ -61,22 +61,25 @@ namespace Metalama.Testing.UnitTesting
             bool addMetalamaReferences = true,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
             ImmutableArray<string> implicitUsings = default,
-            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
+            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable,
+            bool deterministic = true)
             => CreateEmptyCSharpCompilation(
                 name,
                 GetMetadataReferences( additionalAssemblies, addMetalamaReferences ),
                 outputKind,
                 implicitUsings,
-                nullableContextOptions );
+                nullableContextOptions,
+                deterministic);
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
             IEnumerable<MetadataReference> metadataReferences,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
             ImmutableArray<string> implicitUsings = default,
-            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
+            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable, 
+            bool deterministic = true )
             => CSharpCompilation.Create( name ?? "test_" + RandomIdGenerator.GenerateId() )
-                .WithOptions( GetCompilationOptions( outputKind, implicitUsings, nullableContextOptions ) )
+                .WithOptions( GetCompilationOptions( outputKind, implicitUsings, nullableContextOptions ).WithDeterministic( deterministic ) )
                 .AddReferences( metadataReferences );
 
         public static IReadOnlyList<PortableExecutableReference> GetMetadataReferences(
