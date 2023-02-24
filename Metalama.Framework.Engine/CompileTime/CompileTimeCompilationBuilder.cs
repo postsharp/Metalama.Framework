@@ -140,7 +140,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         return digest;
     }
 
-    private ulong ComputeProjectHash( IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash )
+    private ulong ComputeProjectHash( IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash, string? redistributionLicenseKey )
     {
         XXH64 h = new();
         h.Update( _buildId );
@@ -154,6 +154,9 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         h.Update( sourceHash );
         this._logger.Trace?.Log( $"ProjectHash: Source={sourceHash:x}" );
+        
+        h.Update( redistributionLicenseKey );
+        this._logger.Trace?.Log( $"RedistributionLicenseKey: {redistributionLicenseKey ?? "null"}" );
 
         var digest = h.Digest();
 
@@ -731,7 +734,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         IReadOnlyList<CompileTimeProject> referencedProjects,
         OutputPaths outputPaths,
         ulong projectHash,
-        ProjectLicenseInfo? projectLicenseInfo,
         out CompileTimeProject? project,
         CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider )
     {
@@ -769,19 +771,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         // Deserialize the manifest.
         var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ), logger: this._logger ) );
 
-        if ( projectLicenseInfo != null )
-        {
-            if ( (manifest.RedistributionLicenseKey ?? "") != (projectLicenseInfo.RedistributionLicenseKey ?? "") )
-            {
-                this._logger.Trace?.Log(
-                    $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): the redistribution license key has changed." );
-
-                this._cache.Remove( projectHash );
-
-                return false;
-            }
-        }
-
         project = CompileTimeProject.Create(
             this._serviceProvider,
             this._domain,
@@ -814,14 +803,13 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         // Check the in-process cache.
         var (sourceHash, projectHash, outputPaths) =
-            this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
+            this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects, projectLicenseInfo );
 
         if ( !this.TryGetCompileTimeProjectFromCache(
                 runTimeCompilation,
                 referencedProjects,
                 outputPaths,
                 projectHash,
-                projectLicenseInfo,
                 out project,
                 null ) )
         {
@@ -841,7 +829,6 @@ internal sealed partial class CompileTimeCompilationBuilder
                         referencedProjects,
                         outputPaths,
                         projectHash,
-                        projectLicenseInfo,
                         out project,
                         null ) )
                 {
@@ -981,12 +968,13 @@ internal sealed partial class CompileTimeCompilationBuilder
     private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
         Compilation runTimeCompilation,
         IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
-        IEnumerable<CompileTimeProject> referencedProjects )
+        IEnumerable<CompileTimeProject> referencedProjects,
+        ProjectLicenseInfo? projectLicenseInfo )
     {
         var targetFramework = runTimeCompilation.GetTargetFramework();
 
         var sourceHash = this.ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode );
-        var projectHash = this.ComputeProjectHash( referencedProjects, sourceHash );
+        var projectHash = this.ComputeProjectHash( referencedProjects, sourceHash, projectLicenseInfo?.RedistributionLicenseKey );
 
         var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
@@ -1001,6 +989,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         FrameworkName? targetFramework,
         IReadOnlyList<SyntaxTree> syntaxTrees,
         ulong syntaxTreeHash,
+        string? redistributionLicenseKey,
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
@@ -1008,7 +997,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         out string? sourceDirectory )
     {
         this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-        var projectHash = this.ComputeProjectHash( referencedProjects, syntaxTreeHash );
+        var projectHash = this.ComputeProjectHash( referencedProjects, syntaxTreeHash, redistributionLicenseKey );
 
         var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
 

@@ -445,6 +445,7 @@ internal sealed partial class CompileTimeProjectRepository
                     string.IsNullOrEmpty( manifest.TargetFramework ) ? null : new FrameworkName( manifest.TargetFramework ),
                     syntaxTrees,
                     manifest.SourceHash,
+                    manifest.RedistributionLicenseKey,
                     referenceProjects,
                     diagnosticAdder,
                     cancellationToken,

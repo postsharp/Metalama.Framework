@@ -8,10 +8,10 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -114,32 +114,22 @@ public sealed class LicenseVerifier : IProjectService
     private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
         => this._licenseConsumptionService.CanConsume( requirement, this._targetAssemblyName );
 
-    internal void VerifyCanAddChildAspect( AspectPredecessor predecessor )
-    {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
-        {
-            switch ( predecessor.Instance )
-            {
-                case IFabricInstance fabricInstance:
-                    throw new DiagnosticException(
-                        LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
-                            null,
-                            (fabricInstance.Fabric.GetType().Name, "add an aspect") ) );
-            }
-        }
-    }
+    internal void VerifyCanAddChildAspect( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor );
 
-    internal void VerifyCanAddValidator( AspectPredecessor predecessor )
+    internal void VerifyCanAddValidator( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor );
+
+    private void VerifyFabric( in AspectPredecessor predecessor )
     {
         if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
-            switch ( predecessor.Instance )
+            if ( predecessor.Instance is FabricInstance fabricInstance
+                 && !(fabricInstance.Driver is ProjectFabricDriver { Kind: FabricKind.Transitive } fabricDriver
+                      && this.IsProjectWithValidRedistributionLicense( fabricDriver.CompileTimeProject )) )
             {
-                case IFabricInstance fabricInstance:
-                    throw new DiagnosticException(
-                        LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
-                            null,
-                            (fabricInstance.Fabric.GetType().Name, "add a validator") ) );
+                throw new DiagnosticException(
+                    LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
+                        null,
+                        (fabricInstance.Fabric.GetType().Name, "add an aspect") ) );
             }
         }
     }
@@ -201,8 +191,28 @@ public sealed class LicenseVerifier : IProjectService
 
         var totalRequiredCredits = (int) Math.Ceiling( consumptions.Sum( c => c.ConsumedCredits ) );
 
+        // Enforce the license.
+        var maxCredits = this switch
+        {
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
+            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
+            _ => 0
+        };
+
+        var hasLicenseError = totalRequiredCredits > maxCredits;
+
+        if ( hasLicenseError )
+        {
+            diagnostics.Report(
+                LicensingDiagnosticDescriptors.InsufficientCredits.CreateRoslynDiagnostic(
+                    null,
+                    (totalRequiredCredits, maxCredits, Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath ) ?? "Anonymous") ) );
+        }
+
         // Write consumption data to disk if required.
-        if ( this._projectOptions.WriteLicenseCreditData ?? this._licenseConsumptionService.IsTrialLicense )
+        if ( hasLicenseError || (this._projectOptions.WriteLicenseCreditData ?? this._licenseConsumptionService.IsTrialLicense) )
         {
             var directory = GetConsumptionDataDirectory( this._tempFileManager );
 
@@ -216,24 +226,6 @@ public sealed class LicenseVerifier : IProjectService
                 EngineAssemblyMetadataReader.Instance.BuildDate );
 
             file.WriteToDirectory( directory );
-        }
-
-        // Enforce the license.
-        var maxCredits = this switch
-        {
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
-            _ => 0
-        };
-
-        if ( totalRequiredCredits > maxCredits )
-        {
-            diagnostics.Report(
-                LicensingDiagnosticDescriptors.InsufficientCredits.CreateRoslynDiagnostic(
-                    null,
-                    (totalRequiredCredits, maxCredits, Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath ) ?? "Anonymous") ) );
         }
     }
 

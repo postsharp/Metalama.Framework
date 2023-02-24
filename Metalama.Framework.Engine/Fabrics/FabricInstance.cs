@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Fabrics
 {
     internal sealed class FabricInstance : IFabricInstance, IAspectPredecessorImpl
     {
-        private readonly FabricDriver _driver;
+        public FabricDriver Driver { get; }
 
         public ValidatorDriverFactory ValidatorDriverFactory { get; }
 
@@ -29,18 +29,18 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public FabricInstance( FabricDriver driver, IDeclaration targetDeclaration )
         {
-            this._driver = driver;
+            this.Driver = driver;
             this.TargetDeclaration = targetDeclaration.ToTypedRef();
             this.TargetDeclarationDepth = targetDeclaration.Depth;
 
             this.ValidatorDriverFactory = ValidatorDriverFactory.GetInstance( driver.Fabric.GetType() );
         }
 
-        public Fabric Fabric => this._driver.Fabric;
+        public Fabric Fabric => this.Driver.Fabric;
 
-        public FormattableString FormatPredecessor( ICompilation compilation ) => this._driver.FormatPredecessor();
+        public FormattableString FormatPredecessor( ICompilation compilation ) => this.Driver.FormatPredecessor();
 
-        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.DiagnosticLocation;
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.DiagnosticLocation;
 
         int IAspectPredecessor.PredecessorDegree => 0;
     }

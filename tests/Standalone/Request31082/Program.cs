@@ -83,7 +83,7 @@ public class LoggingAttribute : OverrideMethodAspect
 [CompileTime]
 public class NotToStringAttribute : Attribute { }
 
-[LiveTemplate]
+[EditorExperience( SuggestAsLiveTemplate = true )]
 public class ToStringAttribute : TypeAspect
 {
 	public override void BuildAspect(IAspectBuilder<INamedType> builder)
@@ -135,7 +135,7 @@ public class ToStringAttribute : TypeAspect
 
 			stringBuilder.AddText(field.Name);
 			stringBuilder.AddText(" : ");
-			stringBuilder.AddExpression(JsonSerializer.Serialize(field.Invokers.Final.GetValue(meta.This)));
+			stringBuilder.AddExpression(JsonSerializer.Serialize(field.Value));
 
 			i++;
 		}
