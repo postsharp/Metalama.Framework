@@ -115,9 +115,9 @@ namespace Metalama.Testing.UnitTesting
             }
         }
 
-        private class DomainObserverImpl : ICompileTimeDomainObserver
+        private sealed class DomainObserverImpl : ICompileTimeDomainObserver
         {
-            private TestProjectOptions _parent;
+            private readonly TestProjectOptions _parent;
 
             public DomainObserverImpl( TestProjectOptions parent )
             {

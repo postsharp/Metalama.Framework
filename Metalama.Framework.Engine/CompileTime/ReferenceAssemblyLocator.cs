@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -290,7 +289,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
 
                 var projectText =
-                    """
+                    $"""
                         <Project Sdk="Microsoft.NET.Sdk">
                           <PropertyGroup>
                             <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
@@ -300,7 +299,7 @@ namespace Metalama.Framework.Engine.CompileTime
                           <ItemGroup>
                             <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
                             <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-
+                            {additionalPackageReferences}
                           </ItemGroup>
                           <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
                             <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CompileTime
     [ExcludeFromCodeCoverage] // Not used in tests.
     internal sealed class DefaultCompileTimeDomainFactory : ICompileTimeDomainFactory
     {
-        private GlobalServiceProvider _serviceProvider;
+        private readonly GlobalServiceProvider _serviceProvider;
 
         public DefaultCompileTimeDomainFactory( GlobalServiceProvider serviceProvider )
         {
