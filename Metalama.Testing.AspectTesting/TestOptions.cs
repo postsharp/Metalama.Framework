@@ -297,7 +297,7 @@ namespace Metalama.Testing.AspectTesting
         public bool? RemoveDiagnosticMessage { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating that the test output should not add assembly-wide attributes to the output.
+        /// Gets or sets a value indicating that assembly-wide attributes should not be added to the test output.
         /// The default value is <c>false</c>. To enable this option in a test, add this comment to your test file: <c>// @ExcludeAssemblyAttributes</c>.
         /// </summary>
         public bool? ExcludeAssemblyAttributes { get; set; }
@@ -380,6 +380,8 @@ namespace Metalama.Testing.AspectTesting
             this.RemoveOutputCode ??= baseOptions.RemoveOutputCode;
 
             this.RemoveDiagnosticMessage ??= baseOptions.RemoveDiagnosticMessage;
+
+            this.ExcludeAssemblyAttributes ??= baseOptions.ExcludeAssemblyAttributes;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
