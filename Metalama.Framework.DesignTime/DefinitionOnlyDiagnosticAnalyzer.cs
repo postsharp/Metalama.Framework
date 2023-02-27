@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.DesignTime;
 
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
+#pragma warning disable RS1022 // Remove access to our implementation types 
 
 public class DefinitionOnlyDiagnosticAnalyzer : DiagnosticAnalyzer
 {
