@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CompileTime;
-using System;
 using System.IO;
 using System.Runtime.Versioning;
 using Xunit;
@@ -27,7 +26,7 @@ public sealed class OutputPathHelperTests
     private sealed class TestTempFileManager : ITempFileManager
     {
         // We hardcode a long directory so that it does not change according to test environments.
-        public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid, bool versionNeutral )
+        public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, string? subsubirectory, bool versionNeutral )
             => Path.Combine( @"C:\Users\GaelFraiteur.AzureAD\AppData\Local\Temp\Metalama", subdirectory, "0.5.53.1189-local-GaelFraiteur-debug" );
     }
 }

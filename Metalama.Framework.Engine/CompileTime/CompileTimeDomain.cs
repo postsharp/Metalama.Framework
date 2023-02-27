@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -34,8 +35,13 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
         private ImmutableDictionaryOfArray<string, string> _assemblyPathsByName = ImmutableDictionaryOfArray<string, string>.Empty;
 
-        public CompileTimeDomain()
+        protected ICompileTimeDomainObserver? Observer { get; }
+
+        public CompileTimeDomain( GlobalServiceProvider serviceProvider )
         {
+            this.Observer = serviceProvider.GetService<ICompileTimeDomainObserver>();
+            this.Observer?.OnDomainCreated( this );
+
             AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
             this._logger = Logger.Domain;
         }

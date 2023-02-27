@@ -145,7 +145,7 @@ namespace Metalama.Framework.Workspaces
             bool restore,
             CancellationToken cancellationToken )
         {
-            var domain = new CompileTimeDomain();
+            var domain = new UnloadableCompileTimeDomain( serviceProvider );
 
             var introspectionOptions = new IntrospectionOptionsBox();
             var projectSet = await LoadProjectSetAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
@@ -244,13 +244,16 @@ namespace Metalama.Framework.Workspaces
                 // Gets a Roslyn compilation.
                 var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
 
+                // Merge service injection.
+                var existingAdditionalServiceCollection = collection.ServiceProvider.GetService<AdditionalServiceCollection>();
+
+                var additionalServiceCollection = new AdditionalServiceCollection( existingAdditionalServiceCollection );
+                additionalServiceCollection.ProjectServices.Add( collection.ServiceBuilder.Build );
+
                 // Create a compilation model.
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
-                var additionalServiceCollection = new AdditionalServiceCollection();
-                additionalServiceCollection.ProjectServices.Add( collection.ServiceBuilder.Build );
-
-                var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection )
+                var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection, true )
                     .WithProjectScopedServices( projectOptions, compilation );
 
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
@@ -277,6 +280,8 @@ namespace Metalama.Framework.Workspaces
         /// <inheritdoc />
         public void Dispose()
         {
+            this._domain.Dispose();
+
             this.Disposed?.Invoke( this, EventArgs.Empty );
         }
 

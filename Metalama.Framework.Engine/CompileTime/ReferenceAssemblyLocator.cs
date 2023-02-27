@@ -48,9 +48,14 @@ namespace Metalama.Framework.Engine.CompileTime
         public ImmutableHashSet<string> StandardAssemblyNames { get; }
 
         /// <summary>
-        /// Gets the full path of system assemblies (.NET Standard and Roslyn). 
+        /// Gets the full path of reference system assemblies (.NET Standard and Roslyn). 
         /// </summary>
-        public ImmutableArray<string> SystemAssemblyPaths { get; }
+        public ImmutableArray<string> SystemReferenceAssemblyPaths { get; }
+
+        /// <summary>
+        /// Gets the full path of executable system assemblies for the current platform.
+        /// </summary>
+        public ImmutableArray<string> AdditionalCompileTimeAssemblyPaths { get; }
 
         public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
 
@@ -106,7 +111,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
+                .GetTempDirectory( TempDirectories.AssemblyLocator,  CleanUpStrategy.WhenUnused, additionalPackagesHash );
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
@@ -150,12 +155,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Get system assemblies.
             this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
-            this.SystemAssemblyPaths = this._referenceAssembliesManifest.Assemblies;
+            this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
             this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
                 .Concat( new[] { _compileTimeFrameworkAssemblyName } )
-                .Concat( this.SystemAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
+                .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Also provide our embedded assemblies.
@@ -168,11 +173,11 @@ namespace Metalama.Framework.Engine.CompileTime
                             ?? throw new InvalidOperationException( $"{name}.dll not found in assembly manifest resources." ),
                             filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
 
-            this._logger.Trace?.Log( "System assemblies: " + string.Join( ", ", this.SystemAssemblyPaths ) );
+            this._logger.Trace?.Log( "System assemblies: " + string.Join( ", ", this.SystemReferenceAssemblyPaths ) );
             this._logger.Trace?.Log( "Metalama assemblies: " + string.Join( ", ", metalamaImplementationPaths ) );
 
             this.StandardCompileTimeMetadataReferences =
-                this.SystemAssemblyPaths
+                this.SystemReferenceAssemblyPaths
                     .Concat( metalamaImplementationPaths )
                     .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
@@ -180,6 +185,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
             this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols.ToImmutableDictionary( s => s.Identity.Name, s => s.Identity );
+
+            var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
+            var binDirectory = Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
+            var files = Directory.GetFiles( binDirectory, "*.dll" );
+
+            this.AdditionalCompileTimeAssemblyPaths =
+                files.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
         }
 
         private static string GetAdditionalPackageReferences( IProjectOptions options )
@@ -242,7 +254,7 @@ namespace Metalama.Framework.Engine.CompileTime
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
                 var referencesJsonPath = Path.Combine( this._cacheDirectory, "references.json" );
-                var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies.txt" );
+                var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies-netstandard2.0.txt" );
 
                 // See if the file is present in cache.
                 if ( File.Exists( referencesJsonPath ) )
@@ -253,7 +265,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
 
-                    var missingFiles = manifest.Assemblies.Where( f => !File.Exists( f ) ).ToList();
+                    var missingFiles = manifest.ReferenceAssemblies.Where( f => !File.Exists( f ) ).ToList();
 
                     if ( missingFiles.Count == 0 )
                     {
@@ -277,35 +289,48 @@ namespace Metalama.Framework.Engine.CompileTime
                 // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
 
                 var projectText =
-                    $@"
-<Project Sdk='Microsoft.NET.Sdk'>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='4.0.1' />
-    <PackageReference Include='System.Collections.Immutable' Version='5.0.0' />
-{additionalPackageReferences}
-  </ItemGroup>
-  <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
-    <WriteLinesToFile File='{assembliesListPath}' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
-  </Target>
-</Project>";
+                    $"""
+                        <Project Sdk="Microsoft.NET.Sdk">
+                          <PropertyGroup>
+                            <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
+                            <OutputType>Exe</OutputType>
+                            <LangVersion>latest</LangVersion>
+                          </PropertyGroup>
+                          <ItemGroup>
+                            <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+                            <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+                            {additionalPackageReferences}
+                          </ItemGroup>
+                          <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
+                            <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
+                          </Target>
+                        </Project>
+                        """;
 
                 var projectFilePath = Path.Combine( this._cacheDirectory, "TempProject.csproj" );
                 this._logger.Trace?.Log( $"Writing '{projectFilePath}':" + Environment.NewLine + projectText );
 
                 File.WriteAllText( projectFilePath, projectText );
 
+                var programFilePath = Path.Combine( this._cacheDirectory, "Program.cs" );
+                this._logger.Trace?.Log( $"Writing '{programFilePath}':" + Environment.NewLine + projectText );
+
+                File.WriteAllText( programFilePath, "System.Console.WriteLine(\"Hello, world.\");" );
+
                 // Try to find the `dotnet` executable.
 
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-                var arguments = $"build -t:WriteReferenceAssemblies -bl:msbuild_{Guid.NewGuid().ToString().ReplaceOrdinal( "-", "" )}.binlog";
+                var arguments = $"build -bl:msbuild_{Guid.NewGuid().ToString().ReplaceOrdinal( "-", "" )}.binlog";
 
                 this._dotNetTool.Execute( arguments, this._cacheDirectory );
 
                 var assemblies = File.ReadAllLines( assembliesListPath );
+
+                if ( assemblies.Length == 0 )
+                {
+                    throw new AssertionFailedException( $"The file '{assembliesListPath}' is empty." );
+                }
 
                 // Build the list of exported files.
                 List<MetadataInfo> assemblyMetadatas = new();

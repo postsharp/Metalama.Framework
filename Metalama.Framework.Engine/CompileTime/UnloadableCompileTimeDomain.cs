@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private AssemblyLoadContext? _assemblyLoadContext;
         private int _isWaitingForDisposal;
 
-        public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider )
+        public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             CollectibleExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
             this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), true );
@@ -120,6 +120,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._unloadedTask.SetResult( true );
 
                         this.Unloaded?.Invoke();
+                        this.Observer?.OnDomainUnloaded( this );
 
                         return;
                     }

@@ -4,4 +4,4 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal sealed record ReferenceAssembliesManifest( ImmutableArray<string> Assemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );
+internal sealed record ReferenceAssembliesManifest( ImmutableArray<string> ReferenceAssemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );

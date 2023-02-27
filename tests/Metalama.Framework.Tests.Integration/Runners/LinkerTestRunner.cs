@@ -40,19 +40,19 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
-        /// <param name="projectOptions"></param>
+        /// <param name="testContext"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContext projectOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var serviceProvider = (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
+            var serviceProvider = (ProjectServiceProvider) testContext.ServiceProvider.Global.Underlying.WithProjectScopedServices(
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             state["builder"] = builder;
 
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
             if ( !testResult.Success )
             {
