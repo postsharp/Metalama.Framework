@@ -6,6 +6,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Contracts.Pipeline;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
@@ -15,6 +16,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
@@ -55,6 +57,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ITaskRunner _taskRunner;
     private readonly ProjectVersionProvider _projectVersionProvider;
+    private readonly UserDiagnosticRegistrationService? _userDiagnosticsRegistrationService;
 
     private bool _mustProcessQueue;
 
@@ -102,6 +105,12 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
         this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
+        this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<UserDiagnosticRegistrationService>();
+
+        if ( this._userDiagnosticsRegistrationService == null )
+        {
+            this.Logger.Warning?.Log( "Cannot get a UserDiagnosticRegistrationService." );
+        }
 
         this._currentState = new PipelineState( this );
 
@@ -1179,6 +1188,32 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
     public CompilationPipelineResult CompilationPipelineResult => this._currentState.PipelineResult;
+
+    protected override bool TryInitialize(
+        IDiagnosticAdder diagnosticAdder,
+        Compilation compilation,
+        ProjectLicenseInfo? projectLicenseInfo,
+        IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+        CancellationToken cancellationToken,
+        [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+    {
+        if ( base.TryInitialize( diagnosticAdder, compilation, projectLicenseInfo, compileTimeTreesHint, cancellationToken, out configuration ) )
+        {
+            // Register user diagnostics.
+            // If we have a new compile-time project, we need to register user diagnostics.
+            if ( configuration.DiagnosticManifest != null && (!configuration.DiagnosticManifest.DiagnosticDefinitions.IsEmpty
+                                                              || !configuration.DiagnosticManifest.SuppressionDefinitions.IsEmpty) )
+            {
+                this._userDiagnosticsRegistrationService?.RegisterDescriptors( configuration.DiagnosticManifest );
+            }
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
 }

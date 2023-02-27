@@ -24,13 +24,13 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
             }
         }
 
-        private static int GetObjectIdImpl( object o ) => _objectIds.GetOrCreateValue( o ).Id;
+        private static int GetObjectIdImpl( object? o ) => o == null ? 0 : _objectIds.GetOrCreateValue( o ).Id;
 
         // The argument type must be specified explicitly to make sure we are not creating ids for unwanted objects.
         // This avoids e.g. confusion between PartialCompilation and Compilation.
         public static int GetObjectId( Compilation o ) => GetObjectIdImpl( o );
 
-        public static int GetObjectId( AspectPipelineConfiguration o ) => GetObjectIdImpl( o );
+        public static int GetObjectId( AspectPipelineConfiguration? o ) => GetObjectIdImpl( o );
 
         // ReSharper disable once ClassNeverInstantiated.Local
         private sealed class ObjectId

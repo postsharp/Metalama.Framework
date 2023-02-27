@@ -3,11 +3,12 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
@@ -15,26 +16,16 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.
     /// </summary>
-    internal sealed class UserDiagnosticRegistrationService
+    internal sealed class UserDiagnosticRegistrationService : IGlobalService
     {
         // Multiple instances are needed for testing.
-        private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
         private readonly UserDiagnosticsConfiguration _registrationFile;
         private readonly IConfigurationManager _configurationManager;
 
-        public static UserDiagnosticRegistrationService GetInstance( GlobalServiceProvider serviceProvider )
+        public UserDiagnosticRegistrationService( GlobalServiceProvider serviceProvider )
         {
-            var configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
-
-            return _instances.GetOrAdd(
-                configurationManager,
-                cm => new UserDiagnosticRegistrationService( cm ) );
-        }
-
-        private UserDiagnosticRegistrationService( IConfigurationManager configurationManager )
-        {
-            this._configurationManager = configurationManager;
-            this._registrationFile = configurationManager.Get<UserDiagnosticsConfiguration>();
+            this._configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
+            this._registrationFile = this._configurationManager.Get<UserDiagnosticsConfiguration>();
         }
 
         /// <summary>
@@ -49,20 +40,20 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
         /// and suppressions from the user profile. If some items are not supported in the user profile, add them to the user profile. 
         /// </summary>
-        public void RegisterDescriptors( DesignTimePipelineExecutionResult pipelineResult )
+        public void RegisterDescriptors( DiagnosticManifest diagnosticManifest )
         {
             try
             {
                 this._configurationManager.UpdateIf<UserDiagnosticsConfiguration>(
                     f =>
                     {
-                        var missing = GetMissingDiagnostics( f, pipelineResult );
+                        var missing = GetMissingDiagnostics( f, diagnosticManifest );
 
                         return missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0;
                     },
                     f =>
                     {
-                        var missing = GetMissingDiagnostics( f, pipelineResult );
+                        var missing = GetMissingDiagnostics( f, diagnosticManifest );
 
                         return f with
                         {
@@ -81,14 +72,14 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             }
         }
 
-        private static (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics(
+        private static (List<string> Suppressions, List<IDiagnosticDefinition> Diagnostics) GetMissingDiagnostics(
             UserDiagnosticsConfiguration file,
-            DesignTimePipelineExecutionResult pipelineResult )
+            DiagnosticManifest diagnosticManifest )
         {
             List<string> missingSuppressions = new();
-            List<DiagnosticDescriptor> missingDiagnostics = new();
+            List<IDiagnosticDefinition> missingDiagnostics = new();
 
-            foreach ( var suppression in pipelineResult.Diagnostics.DiagnosticSuppressions.Select( s => s.Definition.SuppressedDiagnosticId )
+            foreach ( var suppression in diagnosticManifest.SuppressionDefinitions.Select( s => s.SuppressedDiagnosticId )
                          .Distinct() )
             {
                 if ( !file.Suppressions.Contains( suppression ) )
@@ -97,8 +88,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                 }
             }
 
-            foreach ( var diagnostic in pipelineResult.Diagnostics.ReportedDiagnostics.Select( d => d.Descriptor )
-                         .Distinct( DiagnosticDescriptorComparer.Instance ) )
+            foreach ( var diagnostic in diagnosticManifest.DiagnosticDefinitions )
             {
                 if ( !DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.ContainsKey( diagnostic.Id )
                      && !file.Diagnostics.ContainsKey( diagnostic.Id ) )
@@ -108,27 +98,6 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             }
 
             return (missingSuppressions, missingDiagnostics);
-        }
-
-        private sealed class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
-        {
-            public static readonly DiagnosticDescriptorComparer Instance = new();
-
-            public bool Equals( DiagnosticDescriptor? x, DiagnosticDescriptor? y )
-            {
-                if ( ReferenceEquals( x, y ) )
-                {
-                    return true;
-                }
-                else if ( x == null || y == null )
-                {
-                    return false;
-                }
-
-                return x.Id == y.Id;
-            }
-
-            public int GetHashCode( DiagnosticDescriptor obj ) => obj.Id.GetHashCodeOrdinal();
         }
     }
 }

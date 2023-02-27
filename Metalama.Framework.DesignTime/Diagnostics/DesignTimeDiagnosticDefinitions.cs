@@ -1,11 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -47,7 +48,9 @@ namespace Metalama.Framework.DesignTime.Diagnostics
 
         private DesignTimeDiagnosticDefinitions()
         {
-            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( ServiceProviderFactory.GetServiceProvider() ).GetSupportedDescriptors();
+            var userDefinedDescriptors = DesignTimeServiceProviderFactory.GetSharedServiceProvider()
+                .GetRequiredService<UserDiagnosticRegistrationService>()
+                .GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 
