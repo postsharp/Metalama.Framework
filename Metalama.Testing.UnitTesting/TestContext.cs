@@ -257,7 +257,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
         else
         {
-            var directoryPath = Path.Combine( this.ProjectOptions.BaseDirectory, directory, subdirectory );
+            var directoryPath = Path.Combine( this.ProjectOptions.BaseDirectory, directory, subdirectory ?? "" );
 
             if ( !Directory.Exists( directoryPath ) )
             {

@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CompileTime;
-using System;
 using System.IO;
 using System.Runtime.Versioning;
 using Xunit;
