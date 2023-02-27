@@ -22,6 +22,16 @@ public sealed class AdditionalServiceCollection : IAdditionalServiceCollection
 
     public AdditionalServiceCollection() { }
 
+    public AdditionalServiceCollection( AdditionalServiceCollection? prototype )
+    {
+        if ( prototype != null )
+        {
+            this.GlobalServices = new ServiceProviderBuilder<IGlobalService>( prototype.GlobalServices );
+            this.ProjectServices = new ServiceProviderBuilder<IProjectService>( prototype.ProjectServices );
+            this.BackstageServices = new ServiceProviderBuilder<IBackstageService>( prototype.BackstageServices );
+        }
+    }
+
     public AdditionalServiceCollection( params IService[] additionalServices ) : this()
     {
         foreach ( var service in additionalServices )

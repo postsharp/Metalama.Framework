@@ -19,6 +19,11 @@ public class ServiceProviderBuilder<TService>
 
     public ServiceProviderBuilder() { }
 
+    public ServiceProviderBuilder( ServiceProviderBuilder<TService> prototype )
+    {
+        this._buildActions.AddRange( prototype._buildActions );
+    }
+
     public ServiceProviderBuilder( params TService[] services )
     {
         foreach ( var service in services )
