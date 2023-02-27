@@ -315,7 +315,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
             var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
-            var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilationServices.DefaultSyntaxGenerationContext;
 
             var proceedExpression =
                 new SyntaxUserExpression(

@@ -45,7 +45,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -128,7 +128,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -203,7 +203,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -285,7 +285,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       compilation.CompilationContext.GetSyntaxGenerationContext(),
+                       compilation.CompilationContext.DefaultSyntaxGenerationContext,
                        serviceProvider ) )
             {
                 var method = compilation.Types.Single().Methods.Single();
@@ -320,7 +320,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -356,7 +356,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -387,7 +387,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -427,7 +427,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext();
+            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxGenerationContext,
@@ -484,7 +484,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       compilation.CompilationContext.GetSyntaxGenerationContext(),
+                       compilation.CompilationContext.DefaultSyntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();

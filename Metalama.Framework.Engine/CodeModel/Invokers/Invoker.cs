@@ -43,7 +43,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this.Target = target;
             this.Member = member;
-            this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContext;
+            
+            // Get the SyntaxGenerationContext. We fall back to the DefaultSyntaxGenerationContext because it is easy and because invokers can be called from
+            // a non-template context e.g. a unit test or LinqPad.
+            this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull ?? member.GetCompilationModel().CompilationContext.DefaultSyntaxGenerationContext;
 
             this._order = orderOptions switch
             {
@@ -98,7 +101,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             AspectReferenceSpecification AspectReferenceSpecification );
 
         private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
-            => new( TemplateExpansionContext.CurrentAspectLayerId.AssertNotNull(), this._order );
+        // CurrentAspectLayerId may be null when we are not executing in a template execution context.
+            => new( TemplateExpansionContext.CurrentAspectLayerId ?? default, this._order );
 
         protected ReceiverTypedExpressionSyntax GetReceiverInfo()
         {

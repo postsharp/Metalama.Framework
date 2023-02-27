@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         [Memo]
-        public TypedConstant? ConstantValue => TypedConstant.Create( this._symbol.ConstantValue, this.Type );
+        public TypedConstant? ConstantValue => this._symbol.ConstantValue != null ? TypedConstant.Create( this._symbol.ConstantValue, this.Type ) : null;
 
         public override bool IsExplicitInterfaceImplementation => false;
 
