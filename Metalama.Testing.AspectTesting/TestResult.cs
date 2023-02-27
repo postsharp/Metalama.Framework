@@ -269,7 +269,7 @@ internal sealed class TestResult : IDisposable
                     outputSyntaxTree.InputPath,
                     this.OutputCompilationDiagnostics.ToArray() );
 
-                if ( this.TestInput.Options.RemoveAssemblyAttributes != true )
+                if ( this.TestInput.Options.ExcludeAssemblyAttributes != true )
                 {
                     // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
                     consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(

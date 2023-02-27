@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @RemoveAssemblyAttributes(true)
+// @ExcludeAssemblyAttributes(true)
 # endif 
 
 using Metalama.Framework.Aspects;
