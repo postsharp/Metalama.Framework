@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    internal static class SeverityExtensions
+    public static class SeverityExtensions
     {
         public static DiagnosticSeverity ToRoslynSeverity( this Severity severity )
             => severity switch

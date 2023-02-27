@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         internal int PipelineInitializationCount { get; private set; }
 
-        protected bool TryInitialize(
+        protected virtual bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ProjectLicenseInfo? projectLicenseInfo,
@@ -313,6 +313,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var eligibilityService = new EligibilityService( allAspectClasses );
 
+            // Return.
             configuration = new AspectPipelineConfiguration(
                 this.Domain,
                 stages,

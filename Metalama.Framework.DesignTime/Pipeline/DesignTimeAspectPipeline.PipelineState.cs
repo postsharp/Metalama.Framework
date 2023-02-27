@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
@@ -545,8 +544,6 @@ internal sealed partial class DesignTimeAspectPipeline
                 aspectInstances,
                 transformations );
 
-            UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
-
             // Update the dependency graph with results of the pipeline.
             DependencyGraph newDependencies;
 
@@ -611,7 +608,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
 
-            var userDiagnosticSink = new UserDiagnosticSink( configuration.DiagnosticManifest );
+            var userDiagnosticSink = new UserDiagnosticSink( configuration.ClosureDiagnosticManifest );
 
             // TODO: this can be parallelized.
 

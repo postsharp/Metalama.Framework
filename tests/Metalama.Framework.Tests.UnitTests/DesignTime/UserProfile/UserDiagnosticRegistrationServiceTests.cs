@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
@@ -9,8 +10,14 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.UserProfile
 {
-    public sealed class UserDiagnosticRegistrationServiceTests : UnitTestClass
+    public sealed class UserDiagnosticRegistrationServiceTests : DesignTimeTestBase
     {
+        protected override void ConfigureServices( IAdditionalServiceCollection services )
+        {
+            base.ConfigureServices( services );
+            ((AdditionalServiceCollection) services).BackstageServices.Add<IConfigurationManager>( sp => new InMemoryConfigurationManager( sp ), true );
+        }
+
         [Fact]
         public void TestUserErrorReporting()
         {
@@ -113,7 +120,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             // Create a service provider with our own configuration manager.
-            var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider.Underlying );
+            var configurationManager = testContext.ServiceProvider.Global.GetRequiredBackstageService<IConfigurationManager>();
+            Assert.IsType<InMemoryConfigurationManager>( configurationManager );
             var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof(IConfigurationManager), configurationManager );
 
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );

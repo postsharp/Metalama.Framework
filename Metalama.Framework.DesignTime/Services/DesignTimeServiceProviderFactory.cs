@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VersionNeutral;
@@ -45,7 +46,9 @@ public abstract class DesignTimeServiceProviderFactory
     }
 
     protected virtual ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
-        => serviceProvider.WithServiceConditional<IProjectOptionsFactory>( _ => MSBuildProjectOptionsFactory.Default );
+        => serviceProvider
+            .WithServiceConditional<IProjectOptionsFactory>( _ => MSBuildProjectOptionsFactory.Default )
+            .WithServiceConditional<UserDiagnosticRegistrationService>( sp => new UserDiagnosticRegistrationService( sp ) );
 
     protected virtual CompilerServiceProvider CreateCompilerServiceProvider() => new();
 
