@@ -48,12 +48,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             var rewritingDriver = new LinkerRewritingDriver(
                 this._serviceProvider,
-                input.IntermediateCompilationContext,
+                input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
                 input.AnalysisRegistry,
                 input.DiagnosticSink );
 
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilationContext, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();

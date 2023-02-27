@@ -66,15 +66,16 @@ namespace Metalama.Framework.Engine.Linking
             var inlinerProvider = new InlinerProvider();
             var syntaxHandler = new LinkerSyntaxHandler( input.InjectionRegistry );
 
-            var referenceResolver = new AspectReferenceResolver(
-                input.InjectionRegistry,
-                input.OrderedAspectLayers,
-                input.FinalCompilationModel,
-                input.IntermediateCompilationContext );
+            var referenceResolver =
+                new AspectReferenceResolver(
+                    input.InjectionRegistry,
+                    input.OrderedAspectLayers,
+                    input.FinalCompilationModel,
+                    input.IntermediateCompilation.CompilationContext );
 
             var symbolReferenceFinder = new SymbolReferenceFinder(
                 this._serviceProvider,
-                input.IntermediateCompilationContext );
+                input.IntermediateCompilation.CompilationContext );
 
             // TODO: This is temporary to keep event field storage alive even when not referenced. May be removed after event raise transformations are implemented.
             var overriddenEventFields = input.InjectionRegistry.GetOverriddenMembers()
@@ -93,7 +94,7 @@ namespace Metalama.Framework.Engine.Linking
             var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
-                input.IntermediateCompilationContext,
+                input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
                 resolvedReferencesBySource,
                 eventFieldRaiseReferences.SelectAsList( x => x.TargetSemantic ) );
@@ -107,7 +108,7 @@ namespace Metalama.Framework.Engine.Linking
                 out var reachableReferencesByTarget );
 
             var inlineabilityAnalyzer = new InlineabilityAnalyzer(
-                input.IntermediateCompilationContext,
+                input.IntermediateCompilation.CompilationContext,
                 reachableSemantics,
                 inlinerProvider,
                 reachableReferencesByTarget );
@@ -161,7 +162,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,
-                input.IntermediateCompilationContext,
+                input.IntermediateCompilation.CompilationContext,
                 syntaxHandler,
                 inlinedSemantics,
                 nonInlinedSemantics,
@@ -185,7 +186,6 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
-                    input.IntermediateCompilationContext,
                     input.InjectionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );

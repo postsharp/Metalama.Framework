@@ -155,9 +155,9 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTreeForGlobalAttributes,
                 typeLevelTransformations );
 
-            var syntaxTreeMapping = new ConcurrentDictionary<SyntaxTree, SyntaxTree>();
-
             var intermediateCompilation = input.InitialCompilation;
+
+            var transformations = new List<SyntaxTreeTransformation>();
 
             async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
             {
@@ -168,27 +168,21 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                    if ( !syntaxTreeMapping.TryAdd( initialSyntaxTree, intermediateSyntaxTree ) )
-                    {
-                        throw new AssertionFailedException( $"The syntax tree '{initialSyntaxTree.FilePath}' has already been added." );
-                    }
+                    transformations.Add( SyntaxTreeTransformation.ReplaceTree( initialSyntaxTree, intermediateSyntaxTree ) );
                 }
             }
 
             await this._concurrentTaskRunner.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
             var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
-            var transformations = syntaxTreeMapping.SelectAsList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
-            var intermediateCompilationContext = intermediateCompilation.CompilationContext;
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
                 input.CompilationModel,
-                intermediateCompilationContext,
-                syntaxTreeMapping,
+                intermediateCompilation,
                 syntaxTransformationCollection.InjectedMembers );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
@@ -198,7 +192,6 @@ namespace Metalama.Framework.Engine.Linking
                     diagnostics,
                     input.CompilationModel,
                     intermediateCompilation,
-                    intermediateCompilationContext,
                     injectionRegistry,
                     input.OrderedAspectLayers,
                     projectOptions );

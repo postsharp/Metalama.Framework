@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <Target Name="Build">
+        <Exec Command="msbuild Issue32772.sln /t:Restore,Build /v:m" />
+    </Target>
+</Project>

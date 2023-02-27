@@ -483,7 +483,8 @@ namespace Metalama.Framework.Engine.Linking
                     };
 
                 default:
-                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol.Kind}" );
+                    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
             }
         }
 
@@ -519,7 +520,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException( $"{semantic.Kind} is not expected." );
+                        throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
                 }
             }
             else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
@@ -548,7 +549,7 @@ namespace Metalama.Framework.Engine.Linking
                                                                                      ?? conversionOperatorDeclaration.ExpressionBody,
                 OperatorDeclarationSyntax operatorDeclaration => (SyntaxNode?) operatorDeclaration.Body ?? operatorDeclaration.ExpressionBody,
                 ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
-                _ => throw new AssertionFailedException( $"{symbol} is not expected primary declaration." )
+                var declaration => throw new AssertionFailedException( $"{declaration.Kind()} is not expected primary declaration." )
             };
         }
 
@@ -619,7 +620,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                 default:
-                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
+                    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
             }
 
             static string CreateName( ISymbol symbol, string name, string suffix )
@@ -665,7 +667,8 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
+                    // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
             }
 
             var firstPropertyLetter = name.Substring( 0, 1 );
