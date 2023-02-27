@@ -247,24 +247,24 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 
-    string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid, bool versionNeutral )
+    string ITempFileManager.GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, bool versionNeutral )
     {
-        if ( subdirectory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
+        if ( directory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
         {
             // For the AssemblyLocator, we use a single directory that is shared by all tests, for every build of the main engine assembly.
             // The reason is performance: this step is too expensive to be performed at each test.
-            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, typeof(CompileTimeAspectPipeline).Module.ModuleVersionId );
+            return this._backstageTempFileManager.GetTempDirectory( directory, cleanUpStrategy, typeof(CompileTimeAspectPipeline).Module.ModuleVersionId.ToString() );
         }
         else
         {
-            var directory = Path.Combine( this.ProjectOptions.BaseDirectory, subdirectory, guid?.ToString() ?? "" );
+            var directoryPath = Path.Combine( this.ProjectOptions.BaseDirectory, directory, subdirectory );
 
-            if ( !Directory.Exists( directory ) )
+            if ( !Directory.Exists( directoryPath ) )
             {
-                Directory.CreateDirectory( directory );
+                Directory.CreateDirectory( directoryPath );
             }
 
-            return directory;
+            return directoryPath;
         }
     }
 

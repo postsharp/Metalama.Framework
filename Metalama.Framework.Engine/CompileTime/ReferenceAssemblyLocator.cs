@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
+                .GetTempDirectory( TempDirectories.AssemblyLocator,  CleanUpStrategy.WhenUnused, additionalPackagesHash );
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
