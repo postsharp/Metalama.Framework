@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Utilities
         /// </remarks>
         public static void WriteCurrentVersion( string targetDirectory, IPlatformInfo platformInfo )
         {
-            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) && !string.IsNullOrWhiteSpace( platformInfo.DotNetSdkVersion ))
+            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) && !string.IsNullOrWhiteSpace( platformInfo.DotNetSdkVersion ) )
             {
                 var globalJsonText =
                     $@"{{
