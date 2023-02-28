@@ -110,6 +110,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return name;
         }
 
+        // Get the merged global namespace, i.e. one that contains both declared and referenced types.
+        private static INamespace GetMergedGlobalNamespace( this CompilationModel compilation )
+            => compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
+
         private class DeclarationGenerator
         {
             private readonly StringBuilder _builder;
@@ -534,7 +538,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     index++;
                 }
 
-                var containers = new List<IDeclaration> { compilation.GlobalNamespace };
+                var containers = new List<IDeclaration> { compilation.GetMergedGlobalNamespace() };
 
                 string name;
                 int arity;
@@ -763,12 +767,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private static void ParseNamedTypeSymbol( string id, ref int index, CompilationModel compilation, IDeclaration? typeParameterContext, List<INamedType> results )
             {
-                var containers = new List<IDeclaration>();
-
-                // Get the merged global namespace, i.e. one that contains both declared and referenced types.
-                var globalNamespace = compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
-
-                containers.Add( globalNamespace );
+                var containers = new List<IDeclaration> { compilation.GetMergedGlobalNamespace() };
 
                 // loop for dotted names
                 while ( true )
