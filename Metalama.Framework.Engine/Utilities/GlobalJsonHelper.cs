@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Utilities
                 var globalJsonText =
                     $@"{{
   ""sdk"": {{
-    ""version"": ""{platformInfo.DotNetSdkVersion}"",
+    ""version"": ""{platformInfo.DotNetSdkVersion ?? "6.0.100"}"",
     ""rollForward"": ""disable""
   }}
 }}";

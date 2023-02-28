@@ -50,7 +50,22 @@ public sealed class DotNetTool
         process.Start();
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
-        process.WaitForExit();
+
+        if ( !process.WaitForExit( 30_000 ) )
+        {
+            // The process did not complete in 30s.
+
+            try
+            {
+                process.Kill();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            throw new AssertionFailedException( $"The process '{startInfo.FileName} {startInfo.Arguments}' did not complete in 30 s." );
+        }
 
         if ( process.ExitCode != 0 )
         {
