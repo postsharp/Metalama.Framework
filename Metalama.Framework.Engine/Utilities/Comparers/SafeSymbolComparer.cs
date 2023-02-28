@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Utilities.Comparers;
 
@@ -30,21 +31,18 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
             return false;
         }
 
-#if DEBUG
-        if ( x.BelongsToCompilation( this._compilationContext ) == false )
-        {
-            throw new AssertionFailedException( $"The symbol '{x}' does not belong to the current compilation." );
-        }
+        this.ValidateCompilation( x );
+        this.ValidateCompilation( y );
 
-        if ( y.BelongsToCompilation( this._compilationContext ) == false )
-        {
-            throw new AssertionFailedException( $"The symbol '{y}' does not belong to the current compilation." );
-        }
-#endif
         return this._underlying.Equals( x, y );
     }
 
-    public int GetHashCode( ISymbol obj ) => this._underlying.GetHashCode( obj );
+    public int GetHashCode( ISymbol obj )
+    {
+        this.ValidateCompilation( obj );
+
+        return this._underlying.GetHashCode( obj );
+    }
 
     internal bool IsMemberOf( ISymbol member, INamedTypeSymbol type )
     {
@@ -52,6 +50,9 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         {
             return false;
         }
+
+        this.ValidateCompilation( member );
+        this.ValidateCompilation( type );
 
         member.ThrowIfBelongsToDifferentCompilationThan( type );
 
@@ -75,6 +76,9 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
             return false;
         }
 
+        this.ValidateCompilation( left );
+        this.ValidateCompilation( right );
+
         left.ThrowIfBelongsToDifferentCompilationThan( right );
 
         if ( SymbolEqualityComparer.Default.Equals( left, right ) )
@@ -97,5 +101,16 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
 
             return false;
         }
+    }
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    private void ValidateCompilation( ISymbol symbol )
+    {
+#if DEBUG
+        if ( symbol.BelongsToCompilation( this._compilationContext ) == false )
+        {
+            throw new AssertionFailedException( $"The symbol '{symbol}' does not belong to the current compilation." );
+        }
+#endif
     }
 }

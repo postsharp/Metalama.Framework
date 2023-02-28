@@ -295,6 +295,8 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( returned.Add( overrideTarget ) )
                     {
+                        Invariant.Assert( overrideTarget.BelongsToCompilation( this._intermediateCompilation.CompilationContext ) != false );
+
                         yield return overrideTarget;
                     }
                 }

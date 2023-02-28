@@ -110,7 +110,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 
-    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options )
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
     {
         if ( !this.CanBeInherited )
         {

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options )
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         {
             if ( !this.CanBeInherited )
             {
