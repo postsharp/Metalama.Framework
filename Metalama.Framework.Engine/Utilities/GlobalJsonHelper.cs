@@ -20,12 +20,12 @@ namespace Metalama.Framework.Engine.Utilities
         /// </remarks>
         public static void WriteCurrentVersion( string targetDirectory, IPlatformInfo platformInfo )
         {
-            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) )
+            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) && !string.IsNullOrWhiteSpace( platformInfo.DotNetSdkVersion ))
             {
                 var globalJsonText =
                     $@"{{
   ""sdk"": {{
-    ""version"": ""{platformInfo.DotNetSdkVersion ?? "6.0.100"}"",
+    ""version"": ""{platformInfo.DotNetSdkVersion}"",
     ""rollForward"": ""disable""
   }}
 }}";
