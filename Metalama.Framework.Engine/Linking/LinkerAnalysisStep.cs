@@ -507,6 +507,7 @@ namespace Metalama.Framework.Engine.Linking
             var methodsToAnalyze =
                 injectionRegistry
                     .GetOverriddenMembers()
+                    .AssertEach( x => x.BelongsToCompilation( this._compilationContext ) != false )
                     .Select( x => x.ContainingType )
                     .Distinct<INamedTypeSymbol>( this._compilationContext.SymbolComparer )
                     .SelectMany(
