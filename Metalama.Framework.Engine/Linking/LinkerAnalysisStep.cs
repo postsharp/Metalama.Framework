@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,12 +26,10 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
         private readonly ProjectServiceProvider _serviceProvider;
-        private readonly CompilationContext _compilationContext;
 
-        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._compilationContext = compilationContext;
         }
 
         public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerInjectionStepOutput input, CancellationToken cancellationToken )
@@ -129,7 +128,7 @@ namespace Metalama.Framework.Engine.Linking
                 nonInlinedSemantics );
 
             var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, reachableSemantics );
-            var forcefullyInitializedTypes = this.GetForcefullyInitializedTypes( forcefullyInitializedSymbols );
+            var forcefullyInitializedTypes = this.GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
 
             var bodyAnalyzer = new BodyAnalyzer(
                 this._serviceProvider,
@@ -385,9 +384,9 @@ namespace Metalama.Framework.Engine.Linking
             return forcefullyInitializedSymbols;
         }
 
-        private IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
+        private IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( PartialCompilation intermediateCompilation, IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
         {
-            var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( this._compilationContext.SymbolComparer );
+            var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
             foreach ( var symbol in forcefullyInitializedSymbols )
             {
@@ -401,7 +400,7 @@ namespace Metalama.Framework.Engine.Linking
                 list.Add( symbol );
             }
 
-            var constructors = new Dictionary<INamedTypeSymbol, List<IntermediateSymbolSemantic<IMethodSymbol>>>( this._compilationContext.SymbolComparer );
+            var constructors = new Dictionary<INamedTypeSymbol, List<IntermediateSymbolSemantic<IMethodSymbol>>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
             foreach ( var type in byDeclaringType.Keys )
             {
@@ -507,9 +506,9 @@ namespace Metalama.Framework.Engine.Linking
             var methodsToAnalyze =
                 injectionRegistry
                     .GetOverriddenMembers()
-                    .AssertEach( x => x.BelongsToCompilation( this._compilationContext ) != false )
+                    .AssertEach( x => x.BelongsToCompilation( intermediateCompilation.CompilationContext ) != false )
                     .Select( x => x.ContainingType )
-                    .Distinct<INamedTypeSymbol>( this._compilationContext.SymbolComparer )
+                    .Distinct<INamedTypeSymbol>( intermediateCompilation.CompilationContext.SymbolComparer )
                     .SelectMany(
                         x =>
                             x.GetMembers()
