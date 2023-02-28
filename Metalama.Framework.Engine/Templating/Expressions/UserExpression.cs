@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -39,6 +41,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected virtual string ToStringCore()
             => this.ToSyntax( SyntaxGenerationContext.Create( this.Type.GetCompilationModel().CompilationContext, false, false ) )
+                .NormalizeWhitespace()
                 .ToString();
     }
 }

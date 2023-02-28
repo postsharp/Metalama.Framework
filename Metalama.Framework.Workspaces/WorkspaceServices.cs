@@ -18,7 +18,5 @@ internal static class WorkspaceServices
             BackstageServiceFactoryInitializer.Initialize(
                 new BackstageInitializationOptions( new WorkspaceApplicationInfo() ) { AddSupportServices = true, OpenWelcomePage = true } );
         }
-        
-        
     }
 }

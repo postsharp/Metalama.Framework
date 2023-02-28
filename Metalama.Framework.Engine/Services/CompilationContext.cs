@@ -117,7 +117,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal SyntaxGenerationContext DefaultSyntaxGenerationContext => this.GetSyntaxGenerationContext( false );
 
-    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial  )
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial )
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }

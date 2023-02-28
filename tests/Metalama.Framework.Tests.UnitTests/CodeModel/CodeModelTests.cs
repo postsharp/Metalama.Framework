@@ -410,9 +410,6 @@ class C
             var fieldNames = type.Fields.Where( f => !f.IsImplicitlyDeclared ).Select( p => p.Name );
 
             Assert.Equal( new[] { "a", "b", "c" }, fieldNames );
-
-        
-            
         }
 
         [Fact]

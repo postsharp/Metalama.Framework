@@ -117,7 +117,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public ICompilation Compilation => this.DeclaringMember.Compilation;
 
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.ContainingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind.ToString().ToLowerInvariant();
+        => this.ContainingDeclaration.GetClosestNamedType().AssertNotNull().ToDisplayString( format, context ) + "." + this.Name;
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
