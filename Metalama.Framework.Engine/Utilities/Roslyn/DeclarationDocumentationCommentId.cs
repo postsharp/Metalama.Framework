@@ -1,4 +1,7 @@
-﻿#pragma warning disable IDE0073 // The file header does not match the required text
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+#pragma warning disable IDE0073 // The file header does not match the required text
+
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -10,7 +13,6 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis;
-using Roslyn.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,12 +37,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( declaration == null )
             {
-                throw new ArgumentNullException( nameof( declaration ) );
+                throw new ArgumentNullException( nameof(declaration) );
             }
 
             var builder = new StringBuilder();
             var generator = new DeclarationGenerator( builder );
             generator.Visit( declaration );
+
             return builder.ToString();
         }
 
@@ -51,23 +54,25 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( id == null )
             {
-                throw new ArgumentNullException( nameof( id ) );
+                throw new ArgumentNullException( nameof(id) );
             }
 
             if ( compilation == null )
             {
-                throw new ArgumentNullException( nameof( compilation ) );
+                throw new ArgumentNullException( nameof(compilation) );
             }
 
             var results = new List<IDeclaration>();
 
             Parser.ParseDeclaredSymbolId( id, compilation, results );
+
             return results.Count == 0 ? null : results[0];
         }
 
         private static int GetTotalTypeParameterCount( INamedType? namedType )
         {
             var n = 0;
+
             while ( namedType != null )
             {
                 n += namedType.TypeParameters.Count;
@@ -116,7 +121,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         private static INamespace GetMergedGlobalNamespace( this CompilationModel compilation )
             => compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
 
-        private class DeclarationGenerator
+        private sealed class DeclarationGenerator
         {
             private readonly StringBuilder _builder;
             private readonly Generator _generator;
@@ -134,31 +139,37 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     case IEvent @event:
                         this._builder.Append( "E:" );
                         this._generator.Visit( @event );
+
                         break;
 
                     case IField field:
                         this._builder.Append( "F:" );
                         this._generator.Visit( field );
+
                         break;
 
                     case IPropertyOrIndexer property:
                         this._builder.Append( "P:" );
                         this._generator.Visit( property );
+
                         break;
 
                     case IMethodBase method:
                         this._builder.Append( "M:" );
                         this._generator.Visit( method );
+
                         break;
 
                     case INamespace ns:
                         this._builder.Append( "N:" );
                         this._generator.Visit( ns );
+
                         break;
 
                     case INamedType namedType:
                         this._builder.Append( "T:" );
                         this._generator.Visit( namedType );
+
                         break;
 
                     default:
@@ -166,7 +177,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
             }
 
-            private class Generator
+            private sealed class Generator
             {
                 private readonly StringBuilder _builder;
                 private ReferenceGenerator? _referenceGenerator;
@@ -178,7 +189,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 private ReferenceGenerator GetReferenceGenerator( IDeclaration typeParameterContext )
                 {
-                    if ( this._referenceGenerator == null || this._referenceGenerator.TypeParameterContext != typeParameterContext )
+                    if ( this._referenceGenerator == null || !ReferenceEquals( this._referenceGenerator.TypeParameterContext, typeParameterContext ) )
                     {
                         this._referenceGenerator = new ReferenceGenerator( this._builder, typeParameterContext );
                     }
@@ -186,7 +197,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     return this._referenceGenerator;
                 }
 
-                public bool Visit( IEvent @event )
+                public void Visit( IEvent @event )
                 {
                     if ( this.Visit( @event.DeclaringType ) )
                     {
@@ -194,10 +205,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     }
 
                     this._builder.Append( EncodeName( @event.Name ) );
-                    return true;
                 }
 
-                public bool Visit( IField field )
+                public void Visit( IField field )
                 {
                     if ( this.Visit( field.DeclaringType ) )
                     {
@@ -205,10 +215,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     }
 
                     this._builder.Append( EncodeName( field.Name ) );
-                    return true;
                 }
 
-                public bool Visit( IPropertyOrIndexer propertyOrIndexer )
+                public void Visit( IPropertyOrIndexer propertyOrIndexer )
                 {
                     if ( this.Visit( propertyOrIndexer.DeclaringType ) )
                     {
@@ -222,11 +231,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     {
                         this.AppendParameters( indexer.Parameters );
                     }
-
-                    return true;
                 }
 
-                public bool Visit( IMethodBase methodBase )
+                public void Visit( IMethodBase methodBase )
                 {
                     if ( this.Visit( methodBase.DeclaringType ) )
                     {
@@ -235,7 +242,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                     this._builder.Append( EncodeName( methodBase.Name ) );
 
-                    if ( methodBase is IMethod method && method.TypeParameters.Count > 0 )
+                    if ( methodBase is IMethod { TypeParameters.Count: > 0 } method )
                     {
                         this._builder.Append( "``" );
                         this._builder.Append( method.TypeParameters.Count );
@@ -248,8 +255,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         this._builder.Append( '~' );
                         this.GetReferenceGenerator( method2 ).Visit( method2.ReturnType );
                     }
-
-                    return true;
                 }
 
                 private void AppendParameters( IParameterList parameters )
@@ -267,6 +272,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                             var p = parameters[i];
                             this.GetReferenceGenerator( p.DeclaringMember ).Visit( p.Type );
+
                             if ( p.RefKind != RefKind.None )
                             {
                                 this._builder.Append( '@' );
@@ -290,6 +296,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     }
 
                     this._builder.Append( EncodeName( ns.Name ) );
+
                     return true;
                 }
 
@@ -317,7 +324,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-        private class ReferenceGenerator
+        private sealed class ReferenceGenerator
         {
             private readonly StringBuilder _builder;
 
@@ -353,7 +360,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 this._builder.Append( EncodeName( ns.Name ) );
             }
 
-            public bool Visit( INamespace ns )
+            private bool Visit( INamespace ns )
             {
                 if ( ns.IsGlobalNamespace )
                 {
@@ -361,21 +368,45 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
 
                 this.BuildDottedName( ns );
+
                 return true;
             }
 
-            public bool Visit( IType type )
-                => type switch
+            public void Visit( IType type )
+            {
+                switch ( type )
                 {
-                    INamedType namedType => this.Visit( namedType ),
-                    IDynamicType dynamicType => this.Visit( dynamicType ),
-                    IArrayType arrayType => this.Visit( arrayType ),
-                    IPointerType pointerType => this.Visit( pointerType ),
-                    ITypeParameter parameter => this.Visit( parameter ),
-                    _ => throw new NotSupportedException( $"The type '{type}' is not supported" )
-                };
+                    case INamedType namedType:
+                        this.Visit( namedType );
 
-            public bool Visit( INamedType namedType )
+                        return;
+
+                    case IDynamicType dynamicType:
+                        this.Visit( dynamicType );
+
+                        return;
+
+                    case IArrayType arrayType:
+                        this.Visit( arrayType );
+
+                        return;
+
+                    case IPointerType pointerType:
+                        this.Visit( pointerType );
+
+                        return;
+
+                    case ITypeParameter parameter:
+                        this.Visit( parameter );
+
+                        return;
+
+                    default:
+                        throw new NotSupportedException( $"The type '{type}' is not supported" );
+                }
+            }
+
+            private bool Visit( INamedType namedType )
             {
                 this.BuildDottedName( namedType );
 
@@ -407,14 +438,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return true;
             }
 
-            public bool Visit( IDynamicType dynamicType )
+            private void Visit( IDynamicType dynamicType )
             {
-                this._builder.Append( "System.Object" );
+                _ = dynamicType;
 
-                return true;
+                this._builder.Append( "System.Object" );
             }
 
-            public bool Visit( IArrayType arrayType )
+            private void Visit( IArrayType arrayType )
             {
                 this.Visit( arrayType.ElementType );
 
@@ -429,18 +460,15 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
 
                 this._builder.Append( ']' );
-
-                return true;
             }
 
-            public bool Visit( IPointerType pointerType )
+            private void Visit( IPointerType pointerType )
             {
                 this.Visit( pointerType.PointedAtType );
                 this._builder.Append( '*' );
-                return true;
             }
 
-            public bool Visit( ITypeParameter typeParameter )
+            private void Visit( ITypeParameter typeParameter )
             {
                 if ( !this.IsInScope( typeParameter ) )
                 {
@@ -463,8 +491,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     this._builder.Append( '`' );
                     this._builder.Append( b + typeParameter.Index );
                 }
-
-                return true;
             }
 
             private bool IsInScope( ITypeParameter typeParameter )
@@ -474,7 +500,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 for ( var scope = this.TypeParameterContext; scope != null; scope = scope.ContainingDeclaration )
                 {
-                    if ( scope == typeParameterDeclarer )
+                    if ( scope.Equals( typeParameterDeclarer ) )
                     {
                         return true;
                     }
@@ -486,22 +512,21 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private static class Parser
         {
-            public static bool ParseDeclaredSymbolId( string id, CompilationModel compilation, List<IDeclaration> results )
+            public static void ParseDeclaredSymbolId( string? id, CompilationModel compilation, List<IDeclaration> results )
             {
                 if ( id == null )
                 {
-                    return false;
+                    return;
                 }
 
                 if ( id.Length < 2 )
                 {
-                    return false;
+                    return;
                 }
 
                 var index = 0;
                 results.Clear();
                 ParseDeclaredId( id, ref index, compilation, results );
-                return results.Count > 0;
             }
 
             private static void ParseDeclaredId( string id, ref int index, CompilationModel compilation, List<IDeclaration> results )
@@ -513,28 +538,41 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     case 'E':
                         kind = SymbolKind.Event;
+
                         break;
+
                     case 'F':
                         kind = SymbolKind.Field;
+
                         break;
+
                     case 'M':
                         kind = SymbolKind.Method;
+
                         break;
+
                     case 'N':
                         kind = SymbolKind.Namespace;
+
                         break;
+
                     case 'P':
                         kind = SymbolKind.Property;
+
                         break;
+
                     case 'T':
                         kind = SymbolKind.NamedType;
+
                         break;
+
                     default:
                         // Documentation comment id must start with E, F, M, N, P or T
                         return;
                 }
 
                 index++;
+
                 if ( PeekNextChar( id, index ) == ':' )
                 {
                     index++;
@@ -610,23 +648,34 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     case SymbolKind.Method:
                         GetMatchingMethods( id, ref index, containers, name, arity, compilation, results );
+
                         break;
+
                     case SymbolKind.NamedType:
                         var resultTypes = new List<INamedType>();
                         GetMatchingTypes( containers, name, arity, resultTypes );
                         results.AddRange( resultTypes );
+
                         break;
+
                     case SymbolKind.Property:
                         GetMatchingProperties( id, ref index, containers, name, compilation, results );
+
                         break;
+
                     case SymbolKind.Event:
                         GetMatchingEvents( containers, name, results );
+
                         break;
+
                     case SymbolKind.Field:
                         GetMatchingFields( containers, name, results );
+
                         break;
+
                     case SymbolKind.Namespace:
                         GetMatchingNamespaces( containers, name, results );
+
                         break;
                 }
             }
@@ -636,6 +685,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 var results = new List<IType>();
 
                 ParseTypeSymbol( id, ref index, compilation, typeParameterContext, results );
+
                 if ( results.Count == 0 )
                 {
                     return null;
@@ -646,17 +696,23 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
             }
 
-            private static void ParseTypeSymbol( string id, ref int index, CompilationModel compilation, IDeclaration? typeParameterContext, List<IType> results )
+            private static void ParseTypeSymbol(
+                string id,
+                ref int index,
+                CompilationModel compilation,
+                IDeclaration? typeParameterContext,
+                List<IType> results )
             {
                 var ch = PeekNextChar( id, index );
 
                 // context expression embedded in reference => <context-definition>:<type-parameter>
                 // note: this is a deviation from the language spec
-                if ( (ch == 'M' || ch == 'T') && PeekNextChar( id, index + 1 ) == ':' )
+                if ( ch is 'M' or 'T' && PeekNextChar( id, index + 1 ) == ':' )
                 {
                     var contexts = new List<IDeclaration>();
 
                     ParseDeclaredId( id, ref index, compilation, contexts );
+
                     if ( contexts.Count == 0 )
                     {
                         // context cannot be bound, so abort
@@ -669,6 +725,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                         // try parsing following in all contexts
                         var startIndex = index;
+
                         foreach ( var context in contexts )
                         {
                             index = startIndex;
@@ -709,6 +766,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             {
                                 var bounds = ParseArrayBounds( id, ref index );
                                 type = type.MakeArrayType( bounds );
+
                                 continue;
                             }
 
@@ -716,6 +774,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             {
                                 index++;
                                 type = type.MakePointerType();
+
                                 continue;
                             }
 
@@ -742,10 +801,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     index++;
                     var methodTypeParameterIndex = ReadNextInteger( id, ref index );
 
-                    var methodContext = typeParameterContext as IMethod;
-                    if ( methodContext != null )
+                    if ( typeParameterContext is IMethod methodContext )
                     {
                         var count = methodContext.TypeParameters.Count;
+
                         if ( count > 0 && methodTypeParameterIndex < count )
                         {
                             results.Add( methodContext.TypeParameters[methodTypeParameterIndex] );
@@ -757,8 +816,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     // regular type parameter
                     var typeParameterIndex = ReadNextInteger( id, ref index );
 
-                    var methodContext = typeParameterContext as IMethod;
-                    var typeContext = methodContext != null ? methodContext.DeclaringType : typeParameterContext as INamedType;
+                    var typeContext = typeParameterContext is IMethod methodContext ? methodContext.DeclaringType : typeParameterContext as INamedType;
 
                     if ( typeContext != null && GetNthTypeParameter( typeContext, typeParameterIndex ) is { } typeParameter )
                     {
@@ -767,7 +825,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
             }
 
-            private static void ParseNamedTypeSymbol( string id, ref int index, CompilationModel compilation, IDeclaration? typeParameterContext, List<INamedType> results )
+            private static void ParseNamedTypeSymbol(
+                string id,
+                ref int index,
+                CompilationModel compilation,
+                IDeclaration? typeParameterContext,
+                List<INamedType> results )
             {
                 var containers = new List<IDeclaration> { compilation.GetMergedGlobalNamespace() };
 
@@ -783,6 +846,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     if ( PeekNextChar( id, index ) == '{' )
                     {
                         typeArguments = new List<IType>();
+
                         if ( !ParseTypeArguments( id, ref index, compilation, typeParameterContext, typeArguments ) )
                         {
                             // if no type arguments are found then the type cannot be identified
@@ -804,6 +868,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         if ( arity != 0 && typeArguments != null && typeArguments.Count != 0 )
                         {
                             var typeArgs = typeArguments.ToArray();
+
                             for ( var i = 0; i < results.Count; i++ )
                             {
                                 results[i] = results[i].WithTypeArguments( typeArgs );
@@ -816,6 +881,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             containers.Clear();
                             CopyTo( results, containers );
                             results.Clear();
+
                             continue;
                         }
                     }
@@ -827,6 +893,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         Invariant.Assert( PeekNextChar( id, index ) == '.' );
                         index++;
                         containers = newContainers;
+
                         continue;
                     }
 
@@ -836,7 +903,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private static int ParseArrayBounds( string id, ref int index )
             {
-                index++;  // skip '['
+                index++; // skip '['
 
                 var bounds = 0;
 
@@ -862,6 +929,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     if ( PeekNextChar( id, index ) == ',' )
                     {
                         index++;
+
                         continue;
                     }
 
@@ -876,7 +944,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return bounds;
             }
 
-            private static bool ParseTypeArguments( string id, ref int index, CompilationModel compilation, IDeclaration? typeParameterContext, List<IType> typeArguments )
+            private static bool ParseTypeArguments(
+                string id,
+                ref int index,
+                CompilationModel compilation,
+                IDeclaration? typeParameterContext,
+                List<IType> typeArguments )
             {
                 index++; // skip over {
 
@@ -896,6 +969,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     if ( PeekNextChar( id, index ) == ',' )
                     {
                         index++;
+
                         continue;
                     }
 
@@ -956,7 +1030,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 foreach ( var member in members )
                 {
-                    if ( member.DeclarationKind == DeclarationKind.Namespace || (member.DeclarationKind == DeclarationKind.NamedType && ((INamedType) member).TypeParameters.Count == 0) )
+                    if ( member.DeclarationKind == DeclarationKind.Namespace
+                         || (member.DeclarationKind == DeclarationKind.NamedType && ((INamedType) member).TypeParameters.Count == 0) )
                     {
                         results.Add( member );
                     }
@@ -973,7 +1048,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private static void GetMatchingNamespaces( IDeclaration container, string memberName, List<IDeclaration> results )
             {
-                if (container is not INamespace ns)
+                if ( container is not INamespace ns )
                 {
                     return;
                 }
@@ -982,6 +1057,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     Invariant.Assert( ns.IsGlobalNamespace );
                     results.Add( ns );
+
                     return;
                 }
 
@@ -993,16 +1069,23 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
             }
 
-            private static void GetMatchingMethods( string id, ref int index, List<IDeclaration> containers, string memberName, int arity, CompilationModel compilation, List<IDeclaration> results )
+            private static void GetMatchingMethods(
+                string id,
+                ref int index,
+                List<IDeclaration> containers,
+                string memberName,
+                int arity,
+                CompilationModel compilation,
+                List<IDeclaration> results )
             {
                 var parameters = new List<ParameterInfo>();
 
                 var startIndex = index;
                 var endIndex = index;
 
-                foreach (var container in containers)
+                foreach ( var container in containers )
                 {
-                    if (container is not INamedType type)
+                    if ( container is not INamedType type )
                     {
                         continue;
                     }
@@ -1020,13 +1103,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     else
                     {
                         var methods = type.Methods.OfName( memberName );
+
                         var accessors = EnumerableExtensions.Concat<IMemberWithAccessors>( type.Properties, type.Indexers, type.Events )
                             .SelectMany( p => p.Accessors )
                             .Where( a => a.Name == memberName );
 
                         members = methods.Concat( accessors );
 
-                        if ( memberName == nameof( Finalize ) )
+                        if ( memberName == "Finalize" )
                         {
                             members = members.ConcatNotNull( type.Finalizer );
                         }
@@ -1085,7 +1169,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 index = endIndex;
             }
 
-            private static void GetMatchingProperties( string id, ref int index, List<IDeclaration> containers, string memberName, CompilationModel compilation, List<IDeclaration> results )
+            private static void GetMatchingProperties(
+                string id,
+                ref int index,
+                List<IDeclaration> containers,
+                string memberName,
+                CompilationModel compilation,
+                List<IDeclaration> results )
             {
                 var startIndex = index;
                 var endIndex = index;
@@ -1106,7 +1196,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     {
                         index = startIndex;
 
-                        var memberParameters = member is IIndexer indexer ? (IReadOnlyList<IParameter>)indexer.Parameters : Array.Empty<IParameter>();
+                        var memberParameters = member is IIndexer indexer ? (IReadOnlyList<IParameter>) indexer.Parameters : Array.Empty<IParameter>();
 
                         if ( PeekNextChar( id, index ) == '(' )
                         {
@@ -1120,7 +1210,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             }
 
                             if ( ParseParameterList( id, ref index, compilation, member.DeclaringType, parameters )
-                                && AllParametersMatch( memberParameters, parameters ) )
+                                 && AllParametersMatch( memberParameters, parameters ) )
                             {
                                 results.Add( member );
                                 endIndex = index;
@@ -1154,7 +1244,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private static void GetMatchingEvents( List<IDeclaration> containers, string memberName, List<IDeclaration> results )
             {
-                foreach (var container in containers)
+                foreach ( var container in containers )
                 {
                     if ( container is not INamedType type )
                     {
@@ -1189,7 +1279,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             {
                 // same ref'ness?
 #pragma warning disable IDE0047 // Remove unnecessary parentheses
-                if ( (parameter.RefKind == RefKind.None) == parameterInfo.IsRefOrOut )
+                if ( parameter.RefKind == RefKind.None == parameterInfo.IsRefOrOut )
                 {
                     return false;
                 }
@@ -1201,6 +1291,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             private static ITypeParameter? GetNthTypeParameter( INamedType type, int n )
             {
                 var containingTypeParameterCount = GetTypeParameterCount( type.DeclaringType );
+
                 if ( n < containingTypeParameterCount )
                 {
                     return GetNthTypeParameter( type.DeclaringType!, n );
@@ -1208,6 +1299,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 var index = n - containingTypeParameterCount;
                 var typeParameters = type.TypeParameters;
+
                 if ( index < typeParameters.Count )
                 {
                     return typeParameters[index];
@@ -1239,17 +1331,24 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
             }
 
-            private static bool ParseParameterList( string id, ref int index, CompilationModel compilation, IDeclaration typeParameterContext, List<ParameterInfo> parameters )
+            private static bool ParseParameterList(
+                string id,
+                ref int index,
+                CompilationModel compilation,
+                IDeclaration typeParameterContext,
+                List<ParameterInfo> parameters )
             {
                 index++; // skip over '('
 
                 if ( PeekNextChar( id, index ) == ')' )
                 {
                     index++;
+
                     return true;
                 }
 
                 var parameter = ParseParameter( id, ref index, compilation, typeParameterContext );
+
                 if ( parameter == null )
                 {
                     return false;
@@ -1262,6 +1361,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     index++;
 
                     parameter = ParseParameter( id, ref index, compilation, typeParameterContext );
+
                     if ( parameter == null )
                     {
                         return false;
@@ -1311,6 +1411,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 string name;
 
                 var delimiterOffset = id.IndexOfAny( _nameDelimiters, index );
+
                 if ( delimiterOffset >= 0 )
                 {
                     name = id.Substring( index, delimiterOffset - index );

@@ -159,13 +159,6 @@ After:
                 cancellationToken );
 
             var callerAttributeReferences =
-
-/* Unmerged change from project 'Metalama.Framework.Engine (netstandard2.0)'
-Before:
-                await this.GetCallerAttributeReferencesAsync(
-After:
-                await LinkerAnalysisStep.GetCallerAttributeReferencesAsync(
-*/
                 await GetCallerAttributeReferencesAsync(
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
@@ -397,7 +390,9 @@ After:
             return forcefullyInitializedSymbols;
         }
 
-        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( PartialCompilation intermediateCompilation, IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
+        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes(
+            PartialCompilation intermediateCompilation,
+            IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
         {
             var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -413,7 +408,8 @@ After:
                 list.Add( symbol );
             }
 
-            var constructors = new Dictionary<INamedTypeSymbol, List<IntermediateSymbolSemantic<IMethodSymbol>>>( intermediateCompilation.CompilationContext.SymbolComparer );
+            var constructors =
+                new Dictionary<INamedTypeSymbol, List<IntermediateSymbolSemantic<IMethodSymbol>>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
             foreach ( var type in byDeclaringType.Keys )
             {

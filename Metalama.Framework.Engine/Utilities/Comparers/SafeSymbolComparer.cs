@@ -103,8 +103,8 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void ValidateCompilation(ISymbol symbol)
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    private void ValidateCompilation( ISymbol symbol )
     {
 #if DEBUG
         if ( symbol.BelongsToCompilation( this._compilationContext ) == false )

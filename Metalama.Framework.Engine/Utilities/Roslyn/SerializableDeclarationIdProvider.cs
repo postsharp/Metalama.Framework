@@ -90,13 +90,14 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    public static SerializableDeclarationId GetSerializableId( this IDeclaration declaration ) => declaration.GetSerializableId( DeclarationRefTargetKind.Default );
+    public static SerializableDeclarationId GetSerializableId( this IDeclaration declaration )
+        => declaration.GetSerializableId( DeclarationRefTargetKind.Default );
 
     internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration, DeclarationRefTargetKind targetKind )
     {
         if ( !TryGetSerializableId( declaration, targetKind, out var id ) )
         {
-            throw new ArgumentException( $"Cannot create a SerializableDeclarationId for '{declaration}'.", nameof( declaration ) );
+            throw new ArgumentException( $"Cannot create a SerializableDeclarationId for '{declaration}'.", nameof(declaration) );
         }
 
         return id;
@@ -147,7 +148,10 @@ public static class SerializableDeclarationIdProvider
                 }
 
             case IMethod { ContainingDeclaration: IField } fieldPseudoAccessor:
-                return TryGetSerializableId( fieldPseudoAccessor.DeclaringMember, fieldPseudoAccessor.MethodKind.ToDeclarationRefTargetKind( targetKind ), out id );
+                return TryGetSerializableId(
+                    fieldPseudoAccessor.DeclaringMember,
+                    fieldPseudoAccessor.MethodKind.ToDeclarationRefTargetKind( targetKind ),
+                    out id );
 
             case IMethod { ContainingDeclaration: IEvent, MethodKind: MetalamaMethodKind.EventRaise } eventRaisePseudoAccessor:
                 return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, DeclarationRefTargetKind.EventRaise, out id );

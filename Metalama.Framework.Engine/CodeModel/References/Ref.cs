@@ -389,14 +389,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         if ( IsSerializableId( id ) )
                         {
                             var declaration = new SerializableDeclarationId( id ).ResolveToDeclaration( compilation )
-                                ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
+                                              ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
 
                             return Convert( declaration );
                         }
                         else
                         {
                             var symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation )
-                                ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
+                                         ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
 
                             return Convert( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull() );
                         }

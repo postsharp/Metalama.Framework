@@ -118,7 +118,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public IMember? OverriddenMember => this.OverriddenMethod;
 
-    public bool IsCanonicalGenericInstance => this.Symbol.OriginalDefinition == this.Symbol;
+    public bool IsCanonicalGenericInstance => ReferenceEquals( this.Symbol.OriginalDefinition, this.Symbol );
 
     public bool? IsIteratorMethod => IteratorHelper.IsIteratorMethod( this.MethodSymbol );
 }

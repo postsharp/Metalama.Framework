@@ -30,7 +30,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract bool IsReturnParameter { get; }
 
-    public sealed override IDeclaration? ContainingDeclaration => this.DeclaringMember;
+    public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
     protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 

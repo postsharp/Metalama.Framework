@@ -114,11 +114,6 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
         {
             var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
 
-            if ( baseDeclaration == null )
-            {
-                continue;
-            }
-
             // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
             foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( DerivedTypesOptions.DirectOnly ) )
