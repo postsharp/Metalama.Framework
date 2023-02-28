@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -21,12 +22,12 @@ internal abstract class TemplateClassFactory<T>
 {
     protected CompilationContext CompilationContext { get; }
 
-    private readonly Dictionary<INamedTypeSymbol, T> _classes;
+    private readonly Dictionary<string, T> _classes;
 
     protected TemplateClassFactory( CompilationContext compilationContext )
     {
         this.CompilationContext = compilationContext;
-        this._classes = new Dictionary<INamedTypeSymbol, T>( compilationContext.SymbolComparer );
+        this._classes = new Dictionary<string, T>( StringComparer.Ordinal );
     }
 
     /// <summary>
@@ -135,7 +136,7 @@ internal abstract class TemplateClassFactory<T>
             ITemplateReflectionContext templateDiscoveryContext,
             [NotNullWhen( true )] out T? metadata )
         {
-            if ( this._classes.TryGetValue( templateTypeSymbol, out var existingValue ) )
+            if ( this._classes.TryGetValue( templateTypeSymbol.GetFullName().AssertNotNull(), out var existingValue ) )
             {
                 metadata = existingValue;
 
@@ -181,7 +182,7 @@ internal abstract class TemplateClassFactory<T>
                 return false;
             }
 
-            this._classes.Add( templateTypeSymbol, metadata );
+            this._classes.Add( templateTypeSymbol.GetFullName().AssertNotNull(), metadata );
 
             return true;
         }
