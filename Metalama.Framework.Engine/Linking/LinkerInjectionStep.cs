@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var intermediateCompilation = input.InitialCompilation;
 
-            var transformations = new ConcurrentLinkedList<SyntaxTreeTransformation>();
+            var transformations = new ConcurrentBag<SyntaxTreeTransformation>();
 
             async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
             {
