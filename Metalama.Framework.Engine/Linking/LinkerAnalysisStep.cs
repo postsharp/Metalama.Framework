@@ -127,13 +127,6 @@ namespace Metalama.Framework.Engine.Linking
                 nonInlinedSemantics );
 
             var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, reachableSemantics );
-
-/* Unmerged change from project 'Metalama.Framework.Engine (netstandard2.0)'
-Before:
-            var forcefullyInitializedTypes = this.GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
-After:
-            var forcefullyInitializedTypes = LinkerAnalysisStep.GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
-*/
             var forcefullyInitializedTypes = GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
 
             var bodyAnalyzer = new BodyAnalyzer(
