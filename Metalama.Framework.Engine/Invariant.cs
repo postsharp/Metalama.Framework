@@ -103,6 +103,31 @@ namespace Metalama.Framework.Engine
 
             return obj;
         }
+        
+        
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static IEnumerable<T> AssertEach<T>( this IEnumerable<T> obj, Predicate<T> predicate )
+            where T : class
+        {
+#if DEBUG
+            foreach ( var item in obj )
+            {
+                if ( !predicate( item ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                yield return item;
+            }
+#else
+       return obj;
+#endif
+
+     
+        }
 
         /// <summary>
         /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
