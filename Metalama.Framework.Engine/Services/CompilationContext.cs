@@ -114,7 +114,10 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         return SyntaxGenerationContext.Create( this, tree, nodeSpanStart );
     }
 
-    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial = false )
+    [Memo]
+    internal SyntaxGenerationContext DefaultSyntaxGenerationContext => this.GetSyntaxGenerationContext( false );
+
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial )
     {
         return SyntaxGenerationContext.Create( this, isPartial );
     }

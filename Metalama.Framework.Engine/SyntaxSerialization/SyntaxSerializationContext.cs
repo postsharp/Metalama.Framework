@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public SyntaxSerializationContext( CompilationModel compilation ) : this(
             compilation,
-            compilation.CompilationContext.GetSyntaxGenerationContext() ) { }
+            compilation.CompilationContext.DefaultSyntaxGenerationContext ) { }
 
         public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
         {

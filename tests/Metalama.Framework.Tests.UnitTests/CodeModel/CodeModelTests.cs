@@ -395,7 +395,7 @@ public sealed class C
             const string code = @"
 class C
 {
-    int a = 0, b;
+    int a = 1, b;
     int c;    
     int AutoProperty { get; set; }
     event Handler EventField;
@@ -1491,16 +1491,19 @@ class C {}
         public class C
         {
             const int _f = 5;
+            int _a = 5;
+
         }
 """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.Single();
-            var field = type.Fields.Single();
+            var field = type.Fields.OfName( "_f" ).Single();
             Assert.True( field.Writeability == Writeability.None );
             Assert.NotNull( field.ConstantValue );
             Assert.Equal( 5, field.ConstantValue!.Value.Value );
+            Assert.Null( type.Fields.OfName( "_a" ).Single().ConstantValue );
         }
 
         [Fact]

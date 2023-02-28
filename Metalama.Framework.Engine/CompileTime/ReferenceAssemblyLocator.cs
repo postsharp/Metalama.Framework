@@ -184,7 +184,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     .ToImmutableArray();
 
             var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
-            this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols.ToImmutableDictionary( s => s.Identity.Name, s => s.Identity );
+
+            this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols
+                .GroupBy( s => s.Identity.Name )
+                .ToImmutableDictionary( s => s.Key, s => s.OrderByDescending( x => x.Identity.Version ).First().Identity );
 
             var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
             var binDirectory = Path.Combine( this._cacheDirectory, "bin", "Debug", platform );

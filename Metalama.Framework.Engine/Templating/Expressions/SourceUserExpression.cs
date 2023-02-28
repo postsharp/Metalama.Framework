@@ -22,7 +22,7 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
     public object AsSyntaxNode => this.Expression;
 
     [Memo]
-    public string AsString => this.Expression.ToString();
+    public string AsString => this.Expression.NormalizeWhitespace().ToString();
 
     [Memo]
     public string AsFullString => this.Expression.ToFullString();
@@ -69,4 +69,6 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
                 return null;
         }
     }
+
+    protected override string ToStringCore() => this.AsString;
 }
