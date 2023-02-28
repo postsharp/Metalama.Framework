@@ -23,9 +23,9 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     /// <summary>
-    /// APIs for constructing documentation comment id's, and finding symbols that match ids.
+    /// APIs for constructing documentation comment ids, and finding declarations that match ids.
     /// </summary>
-    public static class DeclarationDocumentationCommentId
+    internal static class DeclarationDocumentationCommentId
     {
         /// <summary>
         /// Creates an id string used by external documentation comment files to identify declarations
@@ -110,7 +110,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return name;
         }
 
-        // Get the merged global namespace, i.e. one that contains both declared and referenced types.
+        /// <summary>
+        /// Get the merged global namespace, i.e. one that contains both declared and referenced types.
+        /// </summary>
         private static INamespace GetMergedGlobalNamespace( this CompilationModel compilation )
             => compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
 
@@ -160,7 +162,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         break;
 
                     default:
-                        throw new InvalidOperationException( "Cannot generated a documentation comment id for symbol." );
+                        throw new InvalidOperationException( $"Cannot generate a documentation comment id for symbol '{declaration}'." );
                 }
             }
 

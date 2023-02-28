@@ -6,8 +6,10 @@ using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
@@ -19,6 +21,7 @@ public sealed class SerializableDeclarationIdTests : UnitTestClass
     public void TestAllDeclarations()
     {
         const string code = @"
+namespace Metalama;
 
 delegate void D();
 
@@ -35,8 +38,8 @@ class C<T>
 
   static C() {}
 
+  class N<T2> {}
 }
-
 ";
 
         using var testContext = this.CreateTestContext();
@@ -66,7 +69,18 @@ class C<T>
         var declarationId = declaration.ToSerializableId();
         testOutput.WriteLine( declarationId.Id );
         var roundtripFromDeclarationId = declarationId.Resolve( compilation );
-        Assert.Same( declaration, roundtripFromDeclarationId );
+
+        if ( declaration is INamespace ns )
+        {
+            // compilation.GetContainedDeclarations() contains compilation-specific namespaces,
+            // but Resolve() returns a merged namespace (which includes types from references),
+            // so Assert.Same would fail here.
+            Assert.Equal( ns.FullName, ((INamespace) roundtripFromDeclarationId).FullName );
+        }
+        else
+        {
+            Assert.Same( declaration, roundtripFromDeclarationId );
+        }
 
         if ( declaration is INamespace { IsGlobalNamespace: true } )
         {
@@ -83,7 +97,14 @@ class C<T>
             var symbolDeclarationId = symbol.GetSerializableId();
             var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
 
-            Assert.Same( symbol, symbolRoundtrip );
+            if ( symbol is INamespaceSymbol nss )
+            {
+                Assert.Equal( nss.GetFullName(), (symbolRoundtrip as INamespaceSymbol)?.GetFullName() );
+            }
+            else
+            {
+                Assert.Same( symbol, symbolRoundtrip );
+            }
 
             var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
                 .GetSymbol( compilation.GetRoslynCompilation() );
