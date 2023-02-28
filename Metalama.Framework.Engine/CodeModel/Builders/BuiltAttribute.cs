@@ -47,5 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IRef<IDeclaration> TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
     }
 }

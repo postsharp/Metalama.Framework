@@ -90,7 +90,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
     public SerializableDeclarationId ToSerializableId()
-        => this.DeclaringMember.GetSymbol().AssertNotNull().GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
+        => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
     public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 

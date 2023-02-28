@@ -32,11 +32,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override bool IsParams => false;
 
-            public override IDeclaration ContainingDeclaration => this.Accessor;
-
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public override IHasParameters DeclaringMember => (IHasParameters) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public override IHasParameters DeclaringMember => this.Accessor;
 
             public override ParameterInfo ToParameterInfo()
             {

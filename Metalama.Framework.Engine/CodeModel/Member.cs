@@ -29,15 +29,15 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return this.GetDerivedDeclarationsCore( options );
+                return GetDerivedDeclarationsCore( this, options );
             }
         }
 
-        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore( DerivedTypesOptions options )
+        internal static IEnumerable<IDeclaration> GetDerivedDeclarationsCore( IMember self, DerivedTypesOptions options )
         {
-            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, options ) )
+            foreach ( var derivedType in self.Compilation.GetDerivedTypes( self.DeclaringType, options ) )
             {
-                foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( this ) )
+                foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( self ) )
                 {
                     yield return member;
                 }

@@ -75,20 +75,16 @@ namespace Metalama.Framework.Engine.Collections
             }
             else
             {
-                return ConcatNotNullCore( a, b );
-            }
-        }
-
-        public static IEnumerable<T> ConcatNotNullCore<T>( this IEnumerable<T> a, T? b )
-            where T : class
-        {
-            foreach ( var item in a )
-            {
-                yield return item;
+                return Core();
             }
 
-            if ( b != null )
+            IEnumerable<T> Core()
             {
+                foreach ( var item in a )
+                {
+                    yield return item;
+                }
+
                 yield return b;
             }
         }

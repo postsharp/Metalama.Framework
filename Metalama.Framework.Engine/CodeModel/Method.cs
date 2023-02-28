@@ -118,21 +118,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public IMember? OverriddenMember => this.OverriddenMethod;
 
-    public bool IsCanonicalGenericInstance
-    {
-        get
-        {
-            for ( var i = 0; i < this.MethodSymbol.TypeParameters.Length; i++ )
-            {
-                if ( !this.MethodSymbol.TypeArguments[i].Equals( this.MethodSymbol.TypeParameters[0] ) )
-                {
-                    return false;
-                }
-            }
-
-            return this.DeclaringType.IsCanonicalGenericInstance;
-        }
-    }
+    public bool IsCanonicalGenericInstance => this.Symbol.OriginalDefinition == this.Symbol;
 
     public bool? IsIteratorMethod => IteratorHelper.IsIteratorMethod( this.MethodSymbol );
 }

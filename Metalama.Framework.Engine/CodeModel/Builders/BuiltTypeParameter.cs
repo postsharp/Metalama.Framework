@@ -52,5 +52,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
         public override int GetHashCode() => this._typeParameterBuilder.GetHashCode();
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options )
+            => throw new NotImplementedException();
     }
 }

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Code
         bool IsParams { get; }
 
         /// <summary>
-        /// Gets the parent <see cref="IMethod"/>, <see cref="IConstructor"/> or <see cref="IProperty"/>.
+        /// Gets the parent <see cref="IMethod"/>, <see cref="IConstructor"/> or <see cref="IIndexer"/>.
         /// </summary>
         IHasParameters DeclaringMember { get; }
 

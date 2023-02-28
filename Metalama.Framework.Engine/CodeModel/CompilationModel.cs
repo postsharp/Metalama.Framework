@@ -244,12 +244,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.GlobalNamespace, false ) );
+                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, false ) );
 
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.GlobalNamespace, true ) );
+                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, true ) );
 
         [Memo]
         public override IAttributeCollection Attributes

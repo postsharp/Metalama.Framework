@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -25,5 +27,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options )
+        {
+            if ( !this.CanBeInherited )
+            {
+                return Enumerable.Empty<IDeclaration>();
+            }
+            else
+            {
+                return Member.GetDerivedDeclarationsCore( this, options );
+            }
+        }
     }
 }

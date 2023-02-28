@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -44,5 +46,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => this._parameterBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
+            => ((IMemberImpl) this.DeclaringMember).GetDerivedDeclarations( options )
+                .Select( d => ((IHasParameters) d).Parameters[this.Index] );
     }
 }

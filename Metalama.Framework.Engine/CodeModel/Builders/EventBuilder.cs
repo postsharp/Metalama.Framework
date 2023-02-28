@@ -132,14 +132,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
-        public IMethod? GetAccessor( MethodKind methodKind )
-            => methodKind switch
-            {
-                MethodKind.EventAdd => this.AddMethod,
-                MethodKind.EventRaise => this.RaiseMethod,
-                MethodKind.EventRemove => this.RemoveMethod,
-                _ => null
-            };
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors
         {

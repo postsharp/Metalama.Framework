@@ -80,8 +80,6 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public override bool IsParams => false;
 
-    public override IDeclaration ContainingDeclaration => this.DeclaringMember;
-
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
     public override IHasParameters DeclaringMember { get; }
@@ -101,6 +99,9 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     // TODO: How to implement this?
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
+
+    public override SerializableDeclarationId ToSerializableId()
+        => throw new NotSupportedException( "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 

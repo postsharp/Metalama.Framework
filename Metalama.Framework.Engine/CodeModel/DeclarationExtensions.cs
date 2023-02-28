@@ -55,15 +55,14 @@ namespace Metalama.Framework.Engine.CodeModel
             };
 
         /// <summary>
-        /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
+        /// Select all declarations recursively contained in a given declaration (i.e. all descendants of the tree).
         /// </summary>
-        /// <param name="declaration"></param>
-        /// <returns></returns>
         internal static IEnumerable<IDeclaration> GetContainedDeclarations( this IDeclaration declaration )
             => declaration.SelectManyRecursive(
                 child => child switch
                 {
-                    ICompilation compilation => compilation.Types,
+                    ICompilation compilation => new[] { compilation.GlobalNamespace },
+                    INamespace ns => EnumerableExtensions.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
                     INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
                             namedType.NestedTypes,
                             namedType.Methods,
@@ -73,12 +72,15 @@ namespace Metalama.Framework.Engine.CodeModel
                             namedType.Indexers,
                             namedType.Events,
                             namedType.TypeParameters )
-                        .ConcatNotNull( namedType.StaticConstructor ),
+                        .ConcatNotNull( namedType.StaticConstructor )
+                        .ConcatNotNull( namedType.Finalizer ),
                     IMethod method => method.Parameters
                         .Concat<IDeclaration>( method.TypeParameters )
                         .ConcatNotNull( method.ReturnParameter ),
+                    IIndexer indexer => indexer.Parameters.Concat<IDeclaration>( indexer.Accessors ),
+                    IConstructor constructor => constructor.Parameters,
                     IMemberWithAccessors member => member.Accessors,
-                    _ => null
+                    _ => Enumerable.Empty<IDeclaration>()
                 } );
 
         internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext )

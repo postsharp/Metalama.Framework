@@ -6,8 +6,10 @@ using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
@@ -19,19 +21,25 @@ public sealed class SerializableDeclarationIdTests : UnitTestClass
     public void TestAllDeclarations()
     {
         const string code = @"
+namespace Metalama;
+
+delegate void D();
 
 class C<T> 
 {
   void M<T2>(int p) {}
   int this[int i] => 0;
   int _field;
+  int Property { get; set; }
   event System.EventHandler Event;
 
   C() {}
   ~C() {}
 
-}
+  static C() {}
 
+  class N<T2> {}
+}
 ";
 
         using var testContext = this.CreateTestContext();
@@ -39,44 +47,69 @@ class C<T>
 
         foreach ( var declaration in compilation.GetContainedDeclarations() )
         {
-            Roundloop( declaration );
+            Roundtrip( declaration, compilation, this.TestOutput );
         }
 
-        Roundloop( compilation );
+        Roundtrip( compilation, compilation, this.TestOutput );
+    }
 
-        void Roundloop( IDeclaration declaration )
+    internal static void Roundtrip( IDeclaration declaration, ICompilation compilation, ITestOutputHelper testOutput )
+    {
+        if ( declaration is PseudoParameter && declaration.ContainingDeclaration is IMethod { MethodKind: MethodKind.EventRaise } )
         {
-            if ( declaration is PseudoParameter && declaration.ContainingDeclaration is IMethod { MethodKind: MethodKind.EventRaise } )
+            // Not yet implemented.
+            return;
+        }
+
+        // Test declaration roundtrip from reference
+        var roundtripFromReference = declaration.ToRef().GetTarget( compilation );
+        Assert.Same( declaration, roundtripFromReference );
+
+        // Test declaration roundtrip from serialization.
+        var declarationId = declaration.ToSerializableId();
+        testOutput.WriteLine( declarationId.Id );
+        var roundtripFromDeclarationId = declarationId.Resolve( compilation );
+
+        if ( declaration is INamespace ns )
+        {
+            // compilation.GetContainedDeclarations() contains compilation-specific namespaces,
+            // but Resolve() returns a merged namespace (which includes types from references),
+            // so Assert.Same would fail here.
+            Assert.Equal( ns.FullName, ((INamespace) roundtripFromDeclarationId).FullName );
+        }
+        else
+        {
+            Assert.Same( declaration, roundtripFromDeclarationId );
+        }
+
+        if ( declaration is INamespace { IsGlobalNamespace: true } )
+        {
+            // Roslyn does not support this, see https://github.com/dotnet/roslyn/issues/66976,
+            // so skip testing symbols.
+            return;
+        }
+
+        // Test symbol roundtrip.
+        var symbol = declaration.GetSymbol();
+
+        if ( symbol != null )
+        {
+            var symbolDeclarationId = symbol.GetSerializableId();
+            var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
+
+            if ( symbol is INamespaceSymbol nss )
             {
-                // Not yet implemented.
-                return;
+                Assert.Equal( nss.GetFullName(), (symbolRoundtrip as INamespaceSymbol)?.GetFullName() );
+            }
+            else
+            {
+                Assert.Same( symbol, symbolRoundtrip );
             }
 
-            // Test declaration roundloop from reference
-            var roundloopFromReference = declaration.ToRef().GetTarget( compilation );
-            Assert.Same( declaration, roundloopFromReference );
+            var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+                .GetSymbol( compilation.GetRoslynCompilation() );
 
-            // Test declaration roundloop from serialization.
-            var declarationId = declaration.ToSerializableId();
-            this.TestOutput.WriteLine( declarationId.Id );
-            var roundloopFromDeclarationId = declarationId.Resolve( compilation );
-            Assert.Same( declaration, roundloopFromDeclarationId );
-
-            // Test symbol roundloop.
-            var symbol = declaration.GetSymbol();
-
-            if ( symbol != null )
-            {
-                var symbolDeclarationId = symbol.GetSerializableId();
-                var symbolRoundloop = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
-
-                Assert.Same( symbol, symbolRoundloop );
-
-                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
-                    .GetSymbol( compilation.GetRoslynCompilation() );
-
-                Assert.Same( symbol, symbolRoundloopFromRef );
-            }
+            Assert.Same( symbol, symbolRoundtripFromRef );
         }
     }
 }

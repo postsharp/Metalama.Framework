@@ -62,7 +62,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors => this.EventBuilder.Accessors.Select( x => this.Compilation.Factory.GetDeclaration( x ) );
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                yield return this.AddMethod;
+                yield return this.RemoveMethod;
+
+                if ( this.RaiseMethod != null )
+                {
+                    yield return this.RaiseMethod;
+                }
+            }
+        }
 
         IType IHasType.Type => this.Type;
 

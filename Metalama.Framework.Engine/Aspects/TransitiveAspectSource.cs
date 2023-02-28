@@ -112,14 +112,12 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
         foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
         {
-            var targetSymbol = inheritedAspectInstance.TargetDeclaration.GetSymbol( compilation.RoslynCompilation );
+            var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
 
-            if ( targetSymbol == null )
+            if ( baseDeclaration == null )
             {
                 continue;
             }
-
-            var baseDeclaration = compilation.Factory.GetDeclaration( targetSymbol );
 
             // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 

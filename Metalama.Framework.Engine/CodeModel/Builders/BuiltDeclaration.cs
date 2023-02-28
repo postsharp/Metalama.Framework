@@ -7,8 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -56,8 +54,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 
         public override bool CanBeInherited => this.Builder.CanBeInherited;
-
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
         public override string ToString() => this.Builder.ToString();
 
