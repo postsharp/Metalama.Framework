@@ -55,6 +55,8 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         this.ValidateCompilation( member );
         this.ValidateCompilation( type );
 
+        member.ThrowIfBelongsToDifferentCompilationThan( type );
+
         if ( SymbolEqualityComparer.Default.Equals( member.ContainingType, type ) )
         {
             return true;
@@ -77,6 +79,8 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
 
         this.ValidateCompilation( left );
         this.ValidateCompilation( right );
+
+        left.ThrowIfBelongsToDifferentCompilationThan( right );
 
         if ( SymbolEqualityComparer.Default.Equals( left, right ) )
         {

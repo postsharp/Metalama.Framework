@@ -103,8 +103,7 @@ namespace Metalama.Framework.Engine
 
             return obj;
         }
-        
-        
+
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
@@ -124,9 +123,7 @@ namespace Metalama.Framework.Engine
             }
 #else
        return obj;
-#endif
-
-     
+#endif     
         }
 
         /// <summary>

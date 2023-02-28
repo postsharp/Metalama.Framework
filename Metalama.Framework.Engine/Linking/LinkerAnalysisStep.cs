@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -128,7 +127,14 @@ namespace Metalama.Framework.Engine.Linking
                 nonInlinedSemantics );
 
             var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, reachableSemantics );
+
+/* Unmerged change from project 'Metalama.Framework.Engine (netstandard2.0)'
+Before:
             var forcefullyInitializedTypes = this.GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
+After:
+            var forcefullyInitializedTypes = LinkerAnalysisStep.GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
+*/
+            var forcefullyInitializedTypes = GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
 
             var bodyAnalyzer = new BodyAnalyzer(
                 this._serviceProvider,
@@ -153,7 +159,14 @@ namespace Metalama.Framework.Engine.Linking
                 cancellationToken );
 
             var callerAttributeReferences =
+
+/* Unmerged change from project 'Metalama.Framework.Engine (netstandard2.0)'
+Before:
                 await this.GetCallerAttributeReferencesAsync(
+After:
+                await LinkerAnalysisStep.GetCallerAttributeReferencesAsync(
+*/
+                await GetCallerAttributeReferencesAsync(
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
                     symbolReferenceFinder,
@@ -384,7 +397,7 @@ namespace Metalama.Framework.Engine.Linking
             return forcefullyInitializedSymbols;
         }
 
-        private IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( PartialCompilation intermediateCompilation, IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
+        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( PartialCompilation intermediateCompilation, IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
         {
             var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -492,7 +505,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Finds all references to overridden methods that have caller attributes and need to be fixed.
         /// </summary>
-        private async Task<IReadOnlyList<CallerAttributeReference>> GetCallerAttributeReferencesAsync(
+        private static async Task<IReadOnlyList<CallerAttributeReference>> GetCallerAttributeReferencesAsync(
             PartialCompilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
             SymbolReferenceFinder symbolReferenceFinder,
