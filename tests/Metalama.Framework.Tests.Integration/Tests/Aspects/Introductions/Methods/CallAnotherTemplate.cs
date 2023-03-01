@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Skipped #29730
-#endif
-
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.CallAnotherTemplate
