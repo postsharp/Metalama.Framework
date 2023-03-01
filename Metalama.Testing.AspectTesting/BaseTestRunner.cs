@@ -686,7 +686,7 @@ internal abstract partial class BaseTestRunner
             var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
             var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
 
-            var outputHtml = new StreamWriter( this._fileSystem.OpenWrite( outputHtmlPath ) );
+            var outputHtml = new StreamWriter( this._fileSystem.Open( outputHtmlPath, FileMode.Create ) );
 
             using ( outputHtml.IgnoreAsyncDisposable() )
             {
@@ -760,7 +760,7 @@ internal abstract partial class BaseTestRunner
 
                 var diagnosticFile = Path.Combine( directory, RandomIdGenerator.GenerateId() + ".dll" );
 
-                using ( var diagnosticStream = this._fileSystem.OpenWrite( diagnosticFile ) )
+                using ( var diagnosticStream = this._fileSystem.Open( diagnosticFile, FileMode.Create ) )
                 {
                     stream.Seek( 0, SeekOrigin.Begin );
                     stream.CopyTo( diagnosticStream );

@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     var fullPath = GetFileFullPath( file );
                     Directory.CreateDirectory( Path.GetDirectoryName( fullPath )! );
-                    using var stream = File.OpenWrite( fullPath );
+                    using var stream = File.Open( fullPath, FileMode.Create );
                     file.WriteToStream( stream );
                 }
 
