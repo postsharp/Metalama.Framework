@@ -15,26 +15,35 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         [Fact]
         public void TestInt()
         {
-            this.AssertSerialization( "42", 42 );
+            this.AssertSerialization( 42, "42" );
         }
 
         [Fact]
         public void TestNullable()
         {
             int? i = 42;
-            this.AssertSerialization( "42", i );
+            this.AssertSerialization( i, "42" );
         }
 
         [Fact]
         public void TestListInt()
         {
-            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Int32>{4, 6, 8}", new List<int> { 4, 6, 8 } );
+            this.AssertSerialization(
+                new List<int> { 4, 6, 8 },
+                """
+                new global::System.Collections.Generic.List<global::System.Int32>
+                {
+                    4,
+                    6,
+                    8
+                }
+                """ );
         }
 
         [Fact]
         public void TestString()
         {
-            this.AssertSerialization( "\"hello\"", "hello" );
+            this.AssertSerialization( "hello", "\"hello\"" );
         }
 
         [Fact]
@@ -61,10 +70,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         [Fact]
         public void TestNull()
         {
-            this.AssertSerialization( "null", (object?) null );
+            this.AssertSerialization( (object?) null, "null" );
         }
 
-        private void AssertSerialization<T>( string expected, T? o )
+        private void AssertSerialization<T>( T? o, string expected )
         {
             using var testContext = this.CreateSerializationTestContext( "" );
 
@@ -75,54 +84,62 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         [Fact]
         public void TestEnumsBasic()
         {
-            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.World.Venus", World.Venus );
-            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Mars.Moon.Phobos", Mars.Moon.Phobos );
+            this.AssertSerialization( World.Venus, "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.World.Venus" );
+            this.AssertSerialization( Mars.Moon.Phobos, "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Mars.Moon.Phobos" );
         }
 
         [Fact]
         public void TestNegativeEnum()
         {
-            this.AssertSerialization( "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.LongEnum)(-1L)", (LongEnum) (-1) );
+            this.AssertSerialization( (LongEnum) (-1), "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.LongEnum)(-1L)" );
         }
 
         [Fact]
         public void TestEnumsFlags()
         {
             this.AssertSerialization(
-                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.WorldFeatures)(9UL)",
-                WorldFeatures.Icy | WorldFeatures.Volcanic );
+                WorldFeatures.Icy | WorldFeatures.Volcanic,
+                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.WorldFeatures)(9UL)" );
 
             this.AssertSerialization(
-                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.HumanFeatures)(9UL)",
-                HumanFeatures.Tall | HumanFeatures.Wise );
+                HumanFeatures.Tall | HumanFeatures.Wise,
+                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.HumanFeatures)(9UL)" );
 
-            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.WorldFeatures.Icy", WorldFeatures.Icy );
+            this.AssertSerialization( WorldFeatures.Icy, "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.WorldFeatures.Icy" );
         }
 
         [Fact]
         public void TestEnumsNestedInGenerics()
         {
             this.AssertSerialization(
-                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.Color)(12L)",
-                Box<int>.Color.Blue | Box<int>.Color.Red );
+                Box<int>.Color.Blue | Box<int>.Color.Red,
+                "(global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.Color)(12L)" );
 
             this.AssertSerialization(
-                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.Color.Blue",
-                Box<int>.Color.Blue );
+                Box<int>.Color.Blue,
+                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.Color.Blue" );
         }
 
         [Fact]
         public void TestEnumsTwiceNestedInGenerics()
         {
             this.AssertSerialization(
-                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.InnerBox.Shiny.Yes",
-                Box<int>.InnerBox.Shiny.Yes );
+                Box<int>.InnerBox.Shiny.Yes,
+                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Int32>.InnerBox.Shiny.Yes" );
         }
 
         [Fact]
         public void TestArray()
         {
-            this.AssertSerialization( "new global::System.Int32[]{1, 2}", new[] { 1, 2 } );
+            this.AssertSerialization(
+                new[] { 1, 2 },
+                """
+                new global::System.Int32[]
+                {
+                    1,
+                    2
+                }
+                """ );
         }
 
         [Fact]
@@ -134,8 +151,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         private void GenericMethod<TK>()
         {
             this.AssertSerialization(
-                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Single>.Color.Blue",
-                Box<TK>.Color.Blue );
+                Box<TK>.Color.Blue,
+                "global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Box<global::System.Single>.Color.Blue" );
         }
     }
 }
