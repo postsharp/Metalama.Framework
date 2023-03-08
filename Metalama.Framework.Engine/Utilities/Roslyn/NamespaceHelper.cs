@@ -8,18 +8,28 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class NamespaceHelper
     {
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _nameCache = new();
         private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullNameCache = new();
-        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullMetadataCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _metadataNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullMetadataNameCache = new();
+
+        public static string? GetName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _nameCache.GetOrAdd( symbol, s => GetName( s, '.', false, false ) );
 
         public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
-            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetFullName( s, '.', false ) );
+            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetName( s, '.', false, true ) );
+
+        public static string GetMetadataName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetMetadataName()!;
 
         public static string GetFullMetadataName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetFullMetadataName()!;
 
-        private static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
-            => symbol == null ? null : _fullMetadataCache.GetOrAdd( symbol, s => GetFullName( s, '+', true ) );
+        private static string? GetMetadataName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _metadataNameCache.GetOrAdd( symbol, s => GetName( s, '+', true, false ) );
 
-        private static string? GetFullName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
+        private static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _fullMetadataNameCache.GetOrAdd( symbol, s => GetName( s, '+', true, true ) );
+
+        private static string? GetName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName, bool fullName )
         {
             if ( symbol is null or INamespaceSymbol { IsGlobalNamespace: true } )
             {
@@ -38,7 +48,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     _ => (s.ContainingSymbol, '.', 0)
                 };
 
-                if ( parent != null )
+                if ( fullName && parent != null )
                 {
                     AppendNameRecursive( parent );
                 }

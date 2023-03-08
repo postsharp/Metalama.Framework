@@ -165,8 +165,8 @@ namespace Metalama.Framework.Code
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
 
         /// <summary>
-        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance ,
-        /// returns the current <see cref="IMethod"/>.
+        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance,
+        /// returns the current <see cref="INamedType"/>.
         /// </summary>
         INamedType TypeDefinition { get; }
 
