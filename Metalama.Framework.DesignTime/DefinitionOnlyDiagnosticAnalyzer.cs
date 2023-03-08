@@ -12,7 +12,14 @@ namespace Metalama.Framework.DesignTime;
 
 public class DefinitionOnlyDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-    private protected DesignTimeDiagnosticDefinitions DiagnosticDefinitions { get; } = DesignTimeDiagnosticDefinitions.GetInstance();
+    private protected DesignTimeDiagnosticDefinitions DiagnosticDefinitions { get; }
+
+    public DefinitionOnlyDiagnosticAnalyzer( DesignTimeDiagnosticDefinitions diagnosticDefinitions )
+    {
+        this.DiagnosticDefinitions = diagnosticDefinitions;
+    }
+
+    public DefinitionOnlyDiagnosticAnalyzer() : this( DesignTimeDiagnosticDefinitions.GetInstance() ) { }
 
     static DefinitionOnlyDiagnosticAnalyzer()
     {
