@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     _ => (s.ContainingSymbol, '.', 0)
                 };
 
-                if ( fullName && parent != null )
+                if ( parent != null && (fullName || parent is INamedTypeSymbol) )
                 {
                     AppendNameRecursive( parent );
                 }
