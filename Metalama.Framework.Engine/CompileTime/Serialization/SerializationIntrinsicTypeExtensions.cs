@@ -1,12 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal static class SerializationIntrinsicTypeExtensions
     {
-        public static bool IsPrimitiveIntrinsic( SerializationIntrinsicType intrinsicType )
+        public static bool IsPrimitiveIntrinsic( this SerializationIntrinsicType intrinsicType )
         {
             switch ( intrinsicType )
             {
@@ -40,7 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public static SerializationIntrinsicType GetIntrinsicType( Type? type, bool useObjRef = false )
+        public static SerializationIntrinsicType GetIntrinsicType( this Type? type, bool useObjRef = false )
         {
             if ( type == null )
             {
@@ -150,6 +151,107 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 default:
                     throw new ArgumentOutOfRangeException( nameof(type) );
+            }
+        }
+
+        public static SerializationIntrinsicType GetIntrinsicType( this ITypeSymbol? typeSymbol, bool useObjRef = false )
+        {
+            if ( typeSymbol == null )
+            {
+                return SerializationIntrinsicType.None;
+            }
+            else if ( typeSymbol.TypeKind == TypeKind.Enum )
+            {
+                return SerializationIntrinsicType.Enum;
+            }
+
+            switch ( typeSymbol.SpecialType )
+            {
+                case SpecialType.System_Boolean:
+                    return SerializationIntrinsicType.Boolean;
+
+                case SpecialType.System_Char:
+                    return SerializationIntrinsicType.Char;
+
+                case SpecialType.System_SByte:
+                    return SerializationIntrinsicType.SByte;
+
+                case SpecialType.System_Byte:
+                    return SerializationIntrinsicType.Byte;
+
+                case SpecialType.System_Int16:
+                    return SerializationIntrinsicType.Int16;
+
+                case SpecialType.System_UInt16:
+                    return SerializationIntrinsicType.UInt16;
+
+                case SpecialType.System_Int32:
+                    return SerializationIntrinsicType.Int32;
+
+                case SpecialType.System_UInt32:
+                    return SerializationIntrinsicType.UInt32;
+
+                case SpecialType.System_Int64:
+                    return SerializationIntrinsicType.Int64;
+
+                case SpecialType.System_UInt64:
+                    return SerializationIntrinsicType.UInt64;
+
+                case SpecialType.System_Single:
+                    return SerializationIntrinsicType.Single;
+
+                case SpecialType.System_Double:
+                    return SerializationIntrinsicType.Double;
+
+                case SpecialType.System_String:
+                    return SerializationIntrinsicType.String;
+
+                default:
+                    if ( typeSymbol.TypeKind == TypeKind.TypeParameter )
+                    {
+                        if ( typeSymbol.ContainingSymbol is IMethodSymbol )
+                        {
+                            // Not supported.
+                            throw new AssertionFailedException( $"Cannot map {typeSymbol} because it is a generic parameter of a method ({typeSymbol.ContainingSymbol})." );
+                        }
+                        else
+                        {
+                            return SerializationIntrinsicType.GenericTypeParameter;
+                        }
+                    }
+                    else if ( typeSymbol.IsValueType )
+                    {
+                        if ( typeSymbol.GetReflectionName() == typeof(DottedString).FullName )
+                        {
+                            return SerializationIntrinsicType.DottedString;
+                        }
+                        else
+                        {
+                            return SerializationIntrinsicType.Struct;
+                        }
+                    }
+                    else
+                    {
+                        if ( typeSymbol.GetReflectionName() == typeof(Type).FullName )
+                        {
+                            return SerializationIntrinsicType.Type;
+                        }
+                        else
+                        {
+                            if ( useObjRef )
+                            {
+                                return SerializationIntrinsicType.ObjRef;
+                            }
+                            else if ( typeSymbol.TypeKind == TypeKind.Array )
+                            {
+                                return SerializationIntrinsicType.Array;
+                            }
+                            else
+                            {
+                                return SerializationIntrinsicType.Class;
+                            }
+                        }
+                    }
             }
         }
     }

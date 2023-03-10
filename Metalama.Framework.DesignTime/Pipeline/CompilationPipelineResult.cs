@@ -401,7 +401,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // (and cross-project design-time validators are not implemented)
         ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.Validators => ImmutableArray<TransitiveValidatorInstance>.Empty;
 
-        public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider )
+        public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             if ( this._serializedTransitiveAspectManifest == null )
             {
@@ -409,7 +409,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
                     this.Validators.ToTransitiveValidatorInstances() );
 
-                this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider );
+                this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilation );
             }
 
             return this._serializedTransitiveAspectManifest;

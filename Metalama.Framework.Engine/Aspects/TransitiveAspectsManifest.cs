@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Serialization;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -47,26 +48,26 @@ namespace Metalama.Framework.Engine.Aspects
                         StringComparer.Ordinal ),
                 validators );
 
-        private void Serialize( Stream stream, ProjectServiceProvider serviceProvider )
+        private void Serialize( Stream stream, ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
-            var formatter = CompileTimeSerializer.CreateSerializingInstance( serviceProvider );
+            var formatter = CompileTimeSerializer.CreateSerializingInstance( serviceProvider, compilation );
             formatter.Serialize( this, deflate );
             deflate.Flush();
             stream.Flush();
         }
 
-        public byte[] ToBytes( ProjectServiceProvider serviceProvider )
+        public byte[] ToBytes( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             var stream = new MemoryStream();
-            this.Serialize( stream, serviceProvider );
+            this.Serialize( stream, serviceProvider, compilation );
 
             return stream.ToArray();
         }
 
-        internal ManagedResource ToResource( ProjectServiceProvider serviceProvider )
+        internal ManagedResource ToResource( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
-            var bytes = this.ToBytes( serviceProvider );
+            var bytes = this.ToBytes( serviceProvider, compilation );
 
             return new ManagedResource(
                 CompileTimeConstants.InheritableAspectManifestResourceName,
@@ -74,11 +75,11 @@ namespace Metalama.Framework.Engine.Aspects
                 true );
         }
 
-        public static TransitiveAspectsManifest Deserialize( Stream stream, ProjectServiceProvider serviceProvider )
+        public static TransitiveAspectsManifest Deserialize( Stream stream, ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 
-            var formatter = CompileTimeSerializer.CreateDeserializingInstance( serviceProvider );
+            var formatter = CompileTimeSerializer.CreateDeserializingInstance( serviceProvider, compilation );
 
             return (TransitiveAspectsManifest) formatter.Deserialize( deflate ).AssertNotNull();
         }

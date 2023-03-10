@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                             .ToImmutableArray(),
                         referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
 
-                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
+                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
                     additionalResources = additionalResources.Add( resource );
                 }
 

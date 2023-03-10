@@ -52,7 +52,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                     {
                         if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                         {
-                            manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider );
+                            manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider, compilation );
                         }
                     }
 

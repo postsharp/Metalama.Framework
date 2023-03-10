@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <param name="typeName">The type name.</param>
         /// <param name="assemblyName">The assembly name.</param>
         /// <returns>The required <see cref="Type"/>.</returns>
-        public virtual Type BindToType( string typeName, string assemblyName )
+        public virtual Type? BindToType( string typeName, string assemblyName )
         {
             if ( !_ourAssemblyVersions.TryGetValue( assemblyName, out var ourAssemblyVersion ) )
             {
@@ -52,26 +53,19 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 ourAssemblyVersion = assemblyName;
             }
 
-            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, ourAssemblyVersion ) );
-
-            if ( type == null )
-            {
-                throw new CompileTimeSerializationException( $"Cannot find the 'type {typeName}, {assemblyName}'." );
-            }
-
-            return type;
+            return Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, ourAssemblyVersion ) );
         }
 
 #pragma warning disable CA1822 // Can be static
 
         // ReSharper disable once MemberCanBeMadeStatic.Global
-        
+
         /// <summary>
         /// Gets the name and the assembly name of a given <see cref="Type"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/>.</param>
         /// <param name="typeName">At output, the name of <paramref name="type"/>.</param>
-        /// <param name="assemblyName">At output, the name of <paramref name="assemblyName"/>.</param>
+        /// <param name="assemblyName">At output, the name of the assembly containing the <paramref name="type"/>.</param>
         public void BindToName( Type type, out string typeName, out string assemblyName )
         {
             typeName = type.FullName!;
@@ -83,6 +77,21 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             // When deserializing, we will assume that a compatible assembly version has been loaded in the AppDomain.
 
             assemblyName = type.Assembly.GetName().Name.AssertNotNull();
+        }
+
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+
+        /// <summary>
+        /// Gets the name and the assembly name of a given <see cref="ITypeSymbol"/>.
+        /// </summary>
+        /// <param name="typeSymbol">The <see cref="ITypeSymbol"/>.</param>
+        /// <param name="typeName">At output, the name of <paramref name="typeSymbol"/>.</param>
+        /// <param name="assemblyName">At output, the name of the assembly containing the <paramref name="typeSymbol"/>.</param>
+        public void BindToName( ITypeSymbol typeSymbol, out string typeName, out string assemblyName )
+        {
+            typeName = typeSymbol.GetReflectionName().AssertNotNull();
+
+            assemblyName = typeSymbol.ContainingAssembly.Name;
         }
     }
 
