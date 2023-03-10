@@ -12,7 +12,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
-    internal sealed class DesignTimeDiagnosticDefinitions
+    public sealed class DesignTimeDiagnosticDefinitions
     {
         private static DesignTimeDiagnosticDefinitions? _instance;
 

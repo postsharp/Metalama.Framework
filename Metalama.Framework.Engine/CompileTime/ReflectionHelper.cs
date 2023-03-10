@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -70,9 +71,9 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         /// <summary>
-        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
+        /// Gets a string that would be equal to <see cref="Type.FullName"/>/<see cref="MemberInfo.Name"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
-        public static string? GetReflectionName( this ITypeSymbol s )
+        public static string? GetReflectionName( this ITypeSymbol s, bool fullName = true )
         {
             if ( s is ITypeParameterSymbol typeParameter )
             {
@@ -80,16 +81,21 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             var sb = new StringBuilder();
+            var typeArguments = new List<ITypeSymbol>();
 
             if ( !TryAppend( s ) )
             {
                 return null;
             }
 
-            bool TryAppend( INamespaceOrTypeSymbol symbol )
+            return sb.ToString();
+
+            bool TryAppend( INamespaceOrTypeSymbol symbol, List<ITypeSymbol>? typeArguments = null )
             {
+                var currentTypeArguments = typeArguments ?? new();
+
                 // Append the containing namespace or type.
-                if ( symbol is not ITypeParameterSymbol )
+                if ( fullName && symbol is not ITypeParameterSymbol )
                 {
                     switch ( symbol.ContainingSymbol )
                     {
@@ -97,7 +103,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             break;
 
                         case ITypeSymbol type:
-                            if ( !TryAppend( type ) )
+                            if ( !TryAppend( type, currentTypeArguments ) )
                             {
                                 return false;
                             }
@@ -127,26 +133,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 switch ( symbol )
                 {
-                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition():
+                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition() && fullName:
                         sb.Append( unboundGenericType.MetadataName );
-                        sb.Append( "[" );
 
-                        for ( var i = 0; i < unboundGenericType.TypeArguments.Length; i++ )
-                        {
-                            if ( i > 0 )
-                            {
-                                sb.Append( ", " );
-                            }
-
-                            var arg = unboundGenericType.TypeArguments[i];
-
-                            if ( !TryAppend( arg ) )
-                            {
-                                return false;
-                            }
-                        }
-
-                        sb.Append( "]" );
+                        currentTypeArguments.AddRange( unboundGenericType.TypeArguments );
 
                         break;
 
@@ -194,10 +184,30 @@ namespace Metalama.Framework.Engine.CompileTime
                         throw new AssertionFailedException( $"Don't know how to process a {symbol!.Kind}." );
                 }
 
+                if ( typeArguments == null && currentTypeArguments.Any() )
+                {
+                    sb.Append( '[' );
+
+                    for ( var i = 0; i < currentTypeArguments.Count; i++ )
+                    {
+                        if ( i > 0 )
+                        {
+                            sb.Append( ',' );
+                        }
+
+                        var arg = currentTypeArguments[i];
+
+                        if ( !TryAppend( arg ) )
+                        {
+                            return false;
+                        }
+                    }
+
+                    sb.Append( ']' );
+                }
+
                 return true;
             }
-
-            return sb.ToString();
         }
 
 #pragma warning disable SA1629 // Documentation text should end with a period

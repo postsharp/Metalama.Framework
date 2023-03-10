@@ -16,7 +16,11 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestEmptyDictionary()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32>{}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32>
+                {
+                }
+                """,
                 new Dictionary<int, int>() );
         }
 
@@ -24,7 +28,15 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestBasicDictionary()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32>{{4, 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32>
+                {
+                    {
+                        4,
+                        8
+                    }
+                }
+                """,
                 new Dictionary<int, int> { { 4, 8 } } );
         }
 
@@ -32,7 +44,19 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestNestedDictionary()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32?>{{4, 8}, {6, null}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32?>
+                {
+                    {
+                        4,
+                        8
+                    },
+                    {
+                        6,
+                        null
+                    }
+                }
+                """,
                 new Dictionary<int, int?> { { 4, 8 }, { 6, null } } );
         }
 
@@ -60,7 +84,19 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestStringDictionary()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32?>{{\"A\", 8}, {\"B\", null}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32?>
+                {
+                    {
+                        "A",
+                        8
+                    },
+                    {
+                        "B",
+                        null
+                    }
+                }
+                """,
                 new Dictionary<string, int?> { { "A", 8 }, { "B", null } } );
         }
 
@@ -68,32 +104,88 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestStringDictionaryWithComparer()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.Ordinal)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.Ordinal)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.Ordinal ) { { "A", 8 } } );
 
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.OrdinalIgnoreCase)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.OrdinalIgnoreCase)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.OrdinalIgnoreCase ) { { "A", 8 } } );
 
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.InvariantCulture)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.InvariantCulture)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.InvariantCulture ) { { "A", 8 } } );
 
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.InvariantCultureIgnoreCase)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.InvariantCultureIgnoreCase)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.InvariantCultureIgnoreCase ) { { "A", 8 } } );
 
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.CurrentCulture)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.CurrentCulture)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.CurrentCulture ) { { "A", 8 } } );
 
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.CurrentCultureIgnoreCase)\r\n{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>(global::System.StringComparer.CurrentCultureIgnoreCase)
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int>( StringComparer.CurrentCultureIgnoreCase ) { { "A", 8 } } );
 
             // default comparer:
             this.AssertSerialization(
-                "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>{{\"A\", 8}}",
+                """
+                new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>
+                {
+                    {
+                        "A",
+                        8
+                    }
+                }
+                """,
                 new Dictionary<string, int> { { "A", 8 } } );
         }
 
