@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -23,7 +24,7 @@ internal sealed class OtherTemplateClass : TemplateClass
         CompileTimeProject project )
         : base( serviceProvider, compilationContext, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
-        this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );
+        this.Type = project.GetType( typeSymbol.GetReflectionFullName().AssertNotNull() );
     }
 
     internal override Type Type { get; }

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

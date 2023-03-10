@@ -109,7 +109,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         baseClass,
         AttributeHelper.GetShortName( typeSymbol.Name ) )
     {
-        this.FullName = typeSymbol.GetReflectionName().AssertNotNull();
+        this.FullName = typeSymbol.GetReflectionFullName().AssertNotNull();
         this.DisplayName = this.ShortName;
         this.IsAbstract = typeSymbol.IsAbstract;
         this.Project = project;
