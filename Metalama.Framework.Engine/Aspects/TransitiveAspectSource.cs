@@ -116,10 +116,10 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
             try
             {
-                // TODO: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
+                // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
                 baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
             }
-            catch 
+            catch ( SymbolNotFoundException )
             {
                 continue;
             }
@@ -155,10 +155,10 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
                     try
                     {
-                        // TODO: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
+                        // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
                         validationTarget = v.ValidatedDeclaration.GetTarget( compilation );
                     }
-                    catch
+                    catch ( SymbolNotFoundException )
                     {
                         return null;
                     }
