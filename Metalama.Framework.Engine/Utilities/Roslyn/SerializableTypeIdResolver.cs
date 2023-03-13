@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -47,7 +48,7 @@ public sealed class SerializableTypeIdResolver
     {
         try
         {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( id.ToString() );
+            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
 
             var symbol = this._resolver.Visit( expression.Type );
 
@@ -68,7 +69,7 @@ public sealed class SerializableTypeIdResolver
     {
         try
         {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( id.ToString() );
+            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
 
             var resolver = new Resolver( this._compilation, genericArguments );
             var symbol = resolver.Visit( expression.Type );

@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
@@ -184,4 +186,30 @@ internal static partial class SyntaxFactoryEx
                         ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
                         : s ) ),
             SyntaxFactory.Token( SyntaxKind.CloseBraceToken ).WithLeadingTrivia( SyntaxFactory.ElasticLineFeed ) );
+
+    public static ExpressionSyntax ParseExpressionSafe( string text )
+    {
+        var expression = SyntaxFactory.ParseExpression( text );
+
+        var diagnostics = expression.GetDiagnostics();
+        if ( diagnostics.HasError() )
+        {
+            throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), inSourceCode: false );
+        }
+
+        return expression;
+    }
+
+    public static StatementSyntax ParseStatementSafe( string text )
+    {
+        var statement = SyntaxFactory.ParseStatement( text );
+
+        var diagnostics = statement.GetDiagnostics();
+        if ( diagnostics.HasError() )
+        {
+            throw new DiagnosticException( $"Code could not be parsed as a statement.", diagnostics.ToImmutableArray(), inSourceCode: false );
+        }
+
+        return statement;
+    }
 }

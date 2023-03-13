@@ -2,10 +2,7 @@
 
 using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
 
 namespace Metalama.Framework.CompileTimeContracts
 {
@@ -17,28 +14,8 @@ namespace Metalama.Framework.CompileTimeContracts
     {
         public object? Content { get; }
 
-        public StatementOrTrivia( StatementSyntax? statement, bool validateCode )
+        public StatementOrTrivia( StatementSyntax? statement )
         {
-            if ( statement != null && validateCode )
-            {
-                if ( statement.GetLeadingTrivia().Any( t => t.IsKind( SyntaxKind.SkippedTokensTrivia ) ) ||
-                     statement.GetTrailingTrivia().Any( t => t.IsKind( SyntaxKind.SkippedTokensTrivia ) ) )
-                {
-                    throw new ArgumentOutOfRangeException( nameof(statement), "The code can contain a single statement." );
-                }
-
-                var missingTokens = statement.DescendantNodesAndTokens().Where( n => n.IsMissing ).ToList();
-
-                if ( missingTokens.Any() )
-                {
-                    var missingToken = missingTokens.First();
-
-                    throw new ArgumentOutOfRangeException(
-                        nameof(statement),
-                        $"The code is missing a {missingToken.Kind()} at position {missingToken.SpanStart + 1}." );
-                }
-            }
-
             this.Content = statement;
         }
 

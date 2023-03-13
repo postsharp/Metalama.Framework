@@ -17,15 +17,22 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
-        internal DiagnosticException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
+        /// <summary>
+        /// Gets a value indicating whether the diagnostics should be attributed to source code.
+        /// </summary>
+        public bool InSourceCode { get; }
+
+        internal DiagnosticException( string message, ImmutableArray<Diagnostic> diagnostics, bool inSourceCode = true ) : base( GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;
+            this.InSourceCode = inSourceCode;
         }
 
         internal DiagnosticException( Diagnostic diagnostic )
             : base( diagnostic.ToString() )
         {
             this.Diagnostics = ImmutableArray.Create( diagnostic );
+            this.InSourceCode = true;
         }
 
         private static string GetMessage( string message, IReadOnlyList<Diagnostic> diagnostics )
