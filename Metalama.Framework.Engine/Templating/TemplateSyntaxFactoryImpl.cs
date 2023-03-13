@@ -34,10 +34,10 @@ namespace Metalama.Framework.Engine.Templating
 
         public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
 
-        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
+        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
-            => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax, true ) );
+            => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
@@ -46,12 +46,11 @@ namespace Metalama.Framework.Engine.Templating
 
             list.Add(
                 new StatementOrTrivia(
-                    statement,
-                    true ) );
+                    statement ) );
         }
 
         public void AddStatement( List<StatementOrTrivia> list, string statement )
-            => list.Add( new StatementOrTrivia( SyntaxFactory.ParseStatement( statement ), true ) );
+            => list.Add( new StatementOrTrivia( SyntaxFactoryEx.ParseStatementSafe( statement ) ) );
 
         public void AddComments( List<StatementOrTrivia> list, params string?[]? comments )
         {
@@ -401,7 +400,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax>? substitutions )
         {
-            var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( typeId );
+            var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( typeId );
 
             if ( substitutions is { Count: > 0 } )
             {

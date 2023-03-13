@@ -55,14 +55,14 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression ParseExpression( string code )
     {
-        var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
+        var expression = SyntaxFactoryEx.ParseExpressionSafe( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
         return new SyntaxUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
     }
 
     public IStatement ParseStatement( string code )
     {
-        var statement = SyntaxFactory.ParseStatement( code );
+        var statement = SyntaxFactoryEx.ParseStatementSafe( code );
 
         return new UserStatement( statement );
     }

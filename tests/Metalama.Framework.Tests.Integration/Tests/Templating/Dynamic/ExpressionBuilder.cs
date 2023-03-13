@@ -23,6 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
             expressionBuilder.AppendLiteral(1F, true);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral("s\"\n");
+            expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral(1M, true);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral(1L, true);

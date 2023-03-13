@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                                      ?? Location.None;
             }
 
-            if ( userException is DiagnosticException invalidUserCodeException )
+            if ( userException is DiagnosticException { InSourceCode: true } invalidUserCodeException )
             {
                 foreach ( var diagnostic in invalidUserCodeException.Diagnostics )
                 {

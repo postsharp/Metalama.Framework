@@ -59,7 +59,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 return !this._hasError;
             }
-            catch ( DiagnosticException e )
+            catch ( DiagnosticException e ) when ( e.InSourceCode )
             {
                 this._diagnosticAdder.Report( e.Diagnostics );
                 annotatedNode = null;

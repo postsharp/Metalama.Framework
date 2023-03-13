@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     resultingCompilation,
                     result.Value.AdditionalCompilationOutputFiles );
             }
-            catch ( DiagnosticException exception )
+            catch ( DiagnosticException exception ) when ( exception.InSourceCode )
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {
