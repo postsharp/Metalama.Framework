@@ -9,7 +9,7 @@ using System.Reflection;
 [assembly: AssemblyVersion("0.0.*")]
 #endif
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32772;
 
 /* 
  * Tests that having a wildcarded assembly version in a (deterministic) compilation does pass through the pipeline.
