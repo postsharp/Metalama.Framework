@@ -55,7 +55,7 @@ internal sealed class AddAspectAttributeCodeActionModel : CodeActionModel
         bool isComputingPreview,
         TestableCancellationToken cancellationToken )
     {
-        AttributeHelper.Parse( this.AspectTypeName, out var ns, out _, out var shortName );
+        AttributeHelper.Parse( this.AspectTypeName, out var ns, out var shortName );
 
         var attributeDescription = new AttributeDescription( shortName, imports: ImmutableList.Create( ns ) );
 

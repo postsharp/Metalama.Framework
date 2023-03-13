@@ -149,7 +149,5 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public override Type[] GetInterfaces() => throw CreateNotSupportedException();
 
         public override string ToString() => this._toStringName;
-
-        public override int GetHashCode() => this.Target.GetHashCode();
     }
 }

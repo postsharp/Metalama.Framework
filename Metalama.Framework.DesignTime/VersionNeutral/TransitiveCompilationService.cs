@@ -47,7 +47,7 @@ internal sealed class TransitiveCompilationService : ITransitiveCompilationServi
 
             result[0] = TransitiveCompilationResult.Success(
                 pipelineResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused,
-                pipelineResult.Value.TransformationResult.GetSerializedTransitiveAspectManifest( projectServiceProvider ) );
+                pipelineResult.Value.TransformationResult.GetSerializedTransitiveAspectManifest( projectServiceProvider, compilation ) );
         }
     }
 }

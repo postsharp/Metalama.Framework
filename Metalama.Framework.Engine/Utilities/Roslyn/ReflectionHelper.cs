@@ -68,16 +68,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
             else
             {
-                var referencedAssembly = compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Identity.Equals( assemblyName ) );
+                return compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Identity.Equals( assemblyName ) );
+            }
+        }
 
-                if ( referencedAssembly != null )
-                {
-                    return referencedAssembly;
-                }
-                else
-                {
-                    return null;
-                }
+        public static IAssemblySymbol? GetAssembly( this Compilation compilation, string assemblyName )
+        {
+            if ( compilation.Assembly.Name == assemblyName )
+            {
+                return compilation.Assembly;
+            }
+            else
+            {
+                return compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Name == assemblyName );
             }
         }
 
@@ -125,7 +128,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
 
             var sb = new StringBuilder();
-            var typeArguments = new List<ITypeSymbol>();
 
             if ( !TryAppend( s ) )
             {

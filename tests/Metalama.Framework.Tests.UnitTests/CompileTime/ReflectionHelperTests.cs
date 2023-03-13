@@ -14,19 +14,19 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 public sealed class ReflectionHelperTests
 {
     [Theory]
-    [InlineData( typeof( int ) )]
-    [InlineData( typeof( List<> ) )]
-    [InlineData( typeof( List<int> ) )]
-    [InlineData( typeof( List<List<int>> ) )]
-    [InlineData( typeof( List<>.Enumerator ) )]
-    [InlineData( typeof( List<int>.Enumerator ) )]
-    [InlineData( typeof( List<List<int>>.Enumerator ) )]
-    [InlineData( typeof( Outer<int, object>.Inner<string> ) )]
-    [InlineData( typeof( int[] ) )]
-    [InlineData( typeof( List<int>[] ) )]
-    [InlineData( typeof( List<int>.Enumerator[] ) )]
-    [InlineData( typeof( int[,] ) )]
-    [InlineData( typeof( int* ) )]
+    [InlineData( typeof(int) )]
+    [InlineData( typeof(List<>) )]
+    [InlineData( typeof(List<int>) )]
+    [InlineData( typeof(List<List<int>>) )]
+    [InlineData( typeof(List<>.Enumerator) )]
+    [InlineData( typeof(List<int>.Enumerator) )]
+    [InlineData( typeof(List<List<int>>.Enumerator) )]
+    [InlineData( typeof(Outer<int, object>.Inner<string>) )]
+    [InlineData( typeof(int[]) )]
+    [InlineData( typeof(List<int>[]) )]
+    [InlineData( typeof(List<int>.Enumerator[]) )]
+    [InlineData( typeof(int[,]) )]
+    [InlineData( typeof(int*) )]
     public void GetReflectionNameTest( Type type )
     {
         static string RemoveAssemblyQualification( string typeName )
@@ -42,7 +42,7 @@ public sealed class ReflectionHelperTests
         }
 
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null )
-            .AddReferences( MetadataReference.CreateFromFile( typeof( ReflectionHelperTests ).Assembly.Location ) );
+            .AddReferences( MetadataReference.CreateFromFile( typeof(ReflectionHelperTests).Assembly.Location ) );
 
         var reflectionMapper = new ReflectionMapper( compilation );
 

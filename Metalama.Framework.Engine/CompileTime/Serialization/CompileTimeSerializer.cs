@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis;
 using System.IO;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
@@ -19,34 +20,38 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         internal CompileTimeSerializationBinder Binder { get; }
 
+        internal Compilation? Compilation { get; }
+
         internal SerializerProvider SerializerProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
         /// </summary>
-        /// <param name="serviceProvider"></param>
-        private CompileTimeSerializer( ProjectServiceProvider serviceProvider ) : this( serviceProvider, new CompileTimeSerializationBinder( serviceProvider ) ) { }
+        private CompileTimeSerializer( ProjectServiceProvider serviceProvider, Compilation? compilation = null )
+            : this( serviceProvider, new CompileTimeSerializationBinder( serviceProvider ), compilation ) { }
 
-        private CompileTimeSerializer( CompileTimeProject project, ProjectServiceProvider serviceProvider ) : this(
+        private CompileTimeSerializer( CompileTimeProject project, ProjectServiceProvider serviceProvider, Compilation compilation ) : this(
             serviceProvider,
-            new CompileTimeCompileTimeSerializationBinder( serviceProvider, project ) ) { }
+            new CompileTimeCompileTimeSerializationBinder( serviceProvider, project ),
+            compilation ) { }
 
         public static CompileTimeSerializer CreateTestInstance( ProjectServiceProvider serviceProvider ) => new( serviceProvider );
 
-        public static CompileTimeSerializer CreateSerializingInstance( ProjectServiceProvider serviceProvider ) => new( serviceProvider );
+        public static CompileTimeSerializer CreateSerializingInstance( ProjectServiceProvider serviceProvider, Compilation compilation ) => new( serviceProvider, compilation );
 
-        public static CompileTimeSerializer CreateDeserializingInstance( ProjectServiceProvider serviceProvider )
-            => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider );
+        public static CompileTimeSerializer CreateDeserializingInstance( ProjectServiceProvider serviceProvider, Compilation compilation )
+            => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider, compilation );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="binder">A <see cref="CompileTimeSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-        private CompileTimeSerializer( ProjectServiceProvider serviceProvider, CompileTimeSerializationBinder binder )
+        private CompileTimeSerializer( ProjectServiceProvider serviceProvider, CompileTimeSerializationBinder binder, Compilation? compilation )
         {
             this._serviceProvider = serviceProvider;
             this.Binder = binder;
+            this.Compilation = compilation;
             this.SerializerProvider = new SerializerProvider( serviceProvider.GetRequiredService<ISerializerFactoryProvider>() );
         }
 
@@ -78,14 +83,15 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             try
             {
-                var serializationReader = new SerializationReader( stream, this, shouldReportExceptionCause: false );
+                var serializationReader = new SerializationReader( this._serviceProvider, stream, this, shouldReportExceptionCause: false );
 
                 return serializationReader.Deserialize();
             }
             catch ( CompileTimeSerializationException ) when ( stream.CanSeek )
             {
                 stream.Seek( 0, SeekOrigin.Begin );
-                var serializationReader = new SerializationReader( stream, this, shouldReportExceptionCause: true );
+
+                var serializationReader = new SerializationReader( this._serviceProvider, stream, this, shouldReportExceptionCause: true );
 
                 return serializationReader.Deserialize();
             }

@@ -1,5 +1,4 @@
 using System;
-using System.Reflection.Emit;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
