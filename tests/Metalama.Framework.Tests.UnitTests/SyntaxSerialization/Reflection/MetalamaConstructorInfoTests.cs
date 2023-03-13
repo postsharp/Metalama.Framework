@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[] { typeof(global::System.Int32) }, null))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(

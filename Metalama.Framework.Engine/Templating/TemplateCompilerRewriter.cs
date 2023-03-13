@@ -1472,13 +1472,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// This method is guaranteed to return a single <see cref="StatementSyntax"/>. If the source statement results in several compiled statements,
     /// they will be wrapped into a block.
     /// </summary>
-    /// <param name="statement"></param>
-    /// <returns></returns>
     private StatementSyntax ToMetaStatement( StatementSyntax statement )
     {
         var statements = this.ToMetaStatements( statement );
 
-        return statements.Count == 1 ? statements[0] : Block( statements );
+        // Declaration statements (for local variable or function) and labeled statements cannot be embedded in e.g. an if statement directly,
+        // so enclose them in a block here, in case they're used that way.
+        return statements is [not (LocalDeclarationStatementSyntax or LabeledStatementSyntax or LocalFunctionStatementSyntax)] ? statements[0] : Block( statements );
     }
 
     /// <summary>

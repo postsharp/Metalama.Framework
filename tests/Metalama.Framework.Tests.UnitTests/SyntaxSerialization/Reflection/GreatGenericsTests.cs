@@ -92,7 +92,7 @@ class User {
                     Assert.Equal( typeof(float), m.ReturnType );
                     Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.String)}, null))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[] { typeof(global::System.String) }, null))" );
 
             this.TestSerializable(
                 instantiatedNested.Constructors.Single(),
@@ -107,7 +107,7 @@ class User {
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.String)}, null))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[] { typeof(global::System.String) }, null))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),

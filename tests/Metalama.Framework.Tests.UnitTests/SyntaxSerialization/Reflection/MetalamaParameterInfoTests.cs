@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[]{typeof(global::System.Int32)}, null).GetParameters()[0]",
+                @"typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[] { typeof(global::System.Int32) }, null).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[]{typeof(global::System.Single), typeof(global::System.Int32)}, null).GetParameters()[1]",
+                @"typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[] { typeof(global::System.Single), typeof(global::System.Int32) }, null).GetParameters()[1]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeReturnParameter( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[]{typeof(global::System.Single), typeof(global::System.Int32)}, null)).ReturnParameter",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[] { typeof(global::System.Single), typeof(global::System.Int32) }, null)).ReturnParameter",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeIndexerParameter( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetMethod(""get_Item"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null).GetParameters()[0]",
+                @"typeof(global::Target).GetMethod(""get_Item"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[] { typeof(global::System.Int32) }, null).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
