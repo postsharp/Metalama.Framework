@@ -110,9 +110,18 @@ public sealed class DeclarationFactory : IDeclarationFactory
             s => new PointerType( (IPointerTypeSymbol) s, this._compilationModel ) );
 
     public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-        => (INamedType) this._typeCache.GetOrAdd(
-            typeSymbol,
-            s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
+    {
+        // Roslyn considers the type in e.g. typeof(List<>) to be different from e.g. List<T>.
+        // That distinction makes things more complicated for us (e.g. it's not representable using Type), so get rid of it.
+        if ( typeSymbol.IsUnboundGenericType )
+        {
+            typeSymbol = typeSymbol.ConstructedFrom;
+        }
+
+        return (INamedType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
+    }
 
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
         => (TypeParameter) this._defaultCache.GetOrAdd(
