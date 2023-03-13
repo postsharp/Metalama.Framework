@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
@@ -48,8 +48,9 @@ public sealed class ReflectionHelperTests
 
         var typeSymbol = reflectionMapper.GetTypeSymbol( type );
 
-        Assert.Equal( RemoveAssemblyQualification( type.FullName! ), typeSymbol.GetReflectionName() );
-        Assert.Equal( type.Name, typeSymbol.GetReflectionName( fullName: false ) );
+        Assert.Equal( RemoveAssemblyQualification( type.FullName! ), typeSymbol.GetReflectionFullName() );
+        Assert.Equal( type.Name, typeSymbol.GetReflectionName() );
+        Assert.Equal( type.ToString(), typeSymbol.GetReflectionToStringName() );
     }
 
     public class Outer<T1, T2>

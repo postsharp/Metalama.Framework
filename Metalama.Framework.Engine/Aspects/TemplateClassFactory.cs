@@ -72,7 +72,7 @@ internal abstract class TemplateClassFactory<T>
                             return null;
                         }
 
-                        var typeName = typeSymbol.GetReflectionName();
+                        var typeName = typeSymbol.GetReflectionFullName();
 
                         if ( typeName == null )
                         {
@@ -110,7 +110,7 @@ internal abstract class TemplateClassFactory<T>
         IDiagnosticAdder diagnosticAdder )
     {
         var aspectTypesDiagnostics = types
-            .SelectAsImmutableArray( t => (Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull()) )
+            .SelectAsImmutableArray( t => (Symbol: t, ReflectionName: t.GetReflectionFullName().AssertNotNull()) )
             .ToDictionary(
                 t => t.ReflectionName,
                 t => new TemplateClassData(
@@ -149,7 +149,7 @@ internal abstract class TemplateClassFactory<T>
             {
                 // Process the base type.
 
-                if ( templateTypeDataDictionary.TryGetValue( templateTypeSymbol.BaseType.GetReflectionName().AssertNotNull(), out var baseData ) )
+                if ( templateTypeDataDictionary.TryGetValue( templateTypeSymbol.BaseType.GetReflectionFullName().AssertNotNull(), out var baseData ) )
                 {
                     if ( !TryProcessType(
                             templateTypeSymbol.BaseType,

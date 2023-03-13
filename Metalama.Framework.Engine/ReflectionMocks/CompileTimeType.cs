@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -27,8 +26,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         private CompileTimeType( ISdkRef<IType> targetRef, ITypeSymbol symbolForMetadata )
         {
             this.Namespace = symbolForMetadata.ContainingNamespace.GetFullName();
-            this.Name = symbolForMetadata.GetReflectionName( fullName: false ).AssertNotNull();
-            this.FullName = symbolForMetadata.GetReflectionName().AssertNotNull();
+            this.Name = symbolForMetadata.GetReflectionName().AssertNotNull();
+            this.FullName = symbolForMetadata.GetReflectionFullName().AssertNotNull();
+            this._toStringName = symbolForMetadata.GetReflectionToStringName().AssertNotNull();
 
             this.Target = targetRef;
         }
@@ -48,6 +48,8 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public override string Name { get; }
 
         public override string FullName { get; }
+
+        private readonly string _toStringName;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
@@ -146,6 +148,6 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type[] GetInterfaces() => throw CreateNotSupportedException();
 
-        public override string ToString() => this.FullName;
+        public override string ToString() => this._toStringName;
     }
 }

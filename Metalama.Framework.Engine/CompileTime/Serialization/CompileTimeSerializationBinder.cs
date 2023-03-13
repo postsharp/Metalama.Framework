@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -89,7 +90,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <param name="assemblyName">At output, the name of the assembly containing the <paramref name="typeSymbol"/>.</param>
         public void BindToName( ITypeSymbol typeSymbol, out string typeName, out string assemblyName )
         {
-            typeName = typeSymbol.GetReflectionName().AssertNotNull();
+            typeName = typeSymbol.GetReflectionFullName().AssertNotNull();
 
             assemblyName = typeSymbol.ContainingAssembly.Name;
         }

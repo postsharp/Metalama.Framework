@@ -12,6 +12,11 @@ namespace Metalama.Framework.Code;
 public static class NamedTypeExtensions
 {
     /// <summary>
+    /// Gets the name of a named type in metadata format, i.e. the <c>`1</c>, <c>`2</c>, ... suffixes for generic types.
+    /// </summary>
+    public static string GetMetadataName( this INamedType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetMetadataName( type );
+
+    /// <summary>
     /// Gets the full name of a named type in metadata format, i.e. with <c>+</c> as the nested type separator and the <c>`1</c>, <c>`2</c>, ... suffixes
     /// for generic types.
     /// </summary>

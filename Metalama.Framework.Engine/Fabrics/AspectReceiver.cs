@@ -75,6 +75,46 @@ namespace Metalama.Framework.Engine.Fabrics
             this._parent.AddValidatorSource( validatorSource );
         }
 
+        private static IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
+            IDeclaration validatedDeclaration,
+            ValidatorDriver driver,
+            ValidatorImplementation implementation,
+            ReferenceKinds referenceKinds )
+        {
+            yield return new ReferenceValidatorInstance(
+                validatedDeclaration,
+                driver,
+                implementation,
+                referenceKinds );
+
+            if ( validatedDeclaration is Method validatedMethod )
+            {
+                switch ( validatedMethod.MethodKind )
+                {
+                    case MethodKind.PropertyGet:
+                        yield return new ReferenceValidatorInstance(
+                            validatedMethod.DeclaringMember!,
+                            driver,
+                            implementation,
+                            referenceKinds & ~ReferenceKinds.Assignment );
+
+                        break;
+
+                    // TODO: The validator doesn't distinguish event add and event remove.
+                    case MethodKind.PropertySet:
+                    case MethodKind.EventAdd:
+                    case MethodKind.EventRemove:
+                        yield return new ReferenceValidatorInstance(
+                            validatedMethod.DeclaringMember!,
+                            driver,
+                            implementation,
+                            ReferenceKinds.Assignment );
+
+                        break;
+                }
+            }
+        }
+
         public void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
         {
             var methodInfo = validateMethod.Method;
@@ -107,7 +147,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => new ReferenceValidatorInstance(
+                        item => SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
@@ -130,7 +170,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => new ReferenceValidatorInstance(
+                        item => SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( validator ),
@@ -158,7 +198,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
 
-                            return new ReferenceValidatorInstance(
+                            return SelectReferenceValidatorInstances(
                                 item,
                                 source.Driver,
                                 ValidatorImplementation.Create( validator ),
@@ -183,10 +223,10 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => new DeclarationValidatorInstance(
+                        item => new[] { new DeclarationValidatorInstance(
                             item,
                             (ValidatorDriver<DeclarationValidationContext>) source.Driver,
-                            ValidatorImplementation.Create( source.Predecessor.Instance ) ) ) ) );
+                            ValidatorImplementation.Create( source.Predecessor.Instance ) ) } ) ) );
         }
 
         public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
@@ -433,7 +473,7 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
             IDiagnosticSink diagnosticSink,
-            Func<T, ValidatorInstance?> createResult )
+            Func<T, IEnumerable<ValidatorInstance>> createResult )
         {
             var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
 
@@ -471,9 +511,9 @@ namespace Metalama.Framework.Engine.Fabrics
                     continue;
                 }
 
-                var validatorInstance = createResult( targetDeclaration );
+                var validatorInstances = createResult( targetDeclaration );
 
-                if ( validatorInstance != null )
+                foreach ( var validatorInstance in validatorInstances )
                 {
                     yield return validatorInstance;
                 }

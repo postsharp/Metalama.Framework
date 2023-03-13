@@ -112,7 +112,17 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
         foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
         {
-            var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
+            IDeclaration baseDeclaration;
+
+            try
+            {
+                // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
+                baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
+            }
+            catch ( SymbolNotFoundException )
+            {
+                continue;
+            }
 
             // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
@@ -139,11 +149,27 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
         if ( kind == ValidatorKind.Reference )
         {
             return this._referenceValidators.Select(
-                v => new ReferenceValidatorInstance(
-                    v.ValidatedDeclaration.GetTarget( compilation ),
-                    v.GetReferenceValidatorDriver(),
-                    ValidatorImplementation.Create( v.Object, v.State ),
-                    v.ReferenceKinds ) );
+                v =>
+                {
+                    IDeclaration validationTarget;
+
+                    try
+                    {
+                        // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
+                        validationTarget = v.ValidatedDeclaration.GetTarget( compilation );
+                    }
+                    catch ( SymbolNotFoundException )
+                    {
+                        return null;
+                    }
+
+                    return new ReferenceValidatorInstance(
+                        validationTarget,
+                        v.GetReferenceValidatorDriver(),
+                        ValidatorImplementation.Create( v.Object, v.State ),
+                        v.ReferenceKinds );
+                } )
+                .WhereNotNull();
         }
         else
         {

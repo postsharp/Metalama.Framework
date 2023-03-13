@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Represents a class, struct, enum, or delegate.
+    /// Represents a class, struct, interface, enum, or delegate.
     /// </summary>
     public interface INamedType : IType, IGeneric, IEquatable<INamedType>
     {
@@ -165,8 +165,8 @@ namespace Metalama.Framework.Code
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
 
         /// <summary>
-        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance ,
-        /// returns the current <see cref="IMethod"/>.
+        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance,
+        /// returns the current <see cref="INamedType"/>.
         /// </summary>
         INamedType TypeDefinition { get; }
 

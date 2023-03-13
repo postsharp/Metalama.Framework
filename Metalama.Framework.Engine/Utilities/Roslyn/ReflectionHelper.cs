@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -10,10 +9,22 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class ReflectionHelper
     {
+        // From internal System.TypeNameKind in System.Private.CoreLib
+        private enum TypeNameKind
+        {
+            Name,
+            ToString,
+            FullName,
+        }
+
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionFullNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionToStringNameCache = new();
+
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
         {
             ImmutableArray<byte> publicKeyOrToken = default;
@@ -74,9 +85,42 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         /// <summary>
-        /// Gets a string that would be equal to <see cref="Type.FullName"/>/<see cref="MemberInfo.Name"/>, except that we do not qualify type names with the assembly name.
+        /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
         /// </summary>
-        public static string? GetReflectionName( this ITypeSymbol s, bool fullName = true )
+        public static string GetReflectionName( this INamedTypeSymbol symbol )
+            => ((INamespaceOrTypeSymbol) symbol).GetReflectionName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
+        /// </summary>
+        public static string? GetReflectionName( this INamespaceOrTypeSymbol s )
+            => _reflectionNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.Name ) );
+
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
+        /// </summary>
+        public static string GetReflectionFullName( this INamedTypeSymbol s )
+            => ((INamespaceOrTypeSymbol) s).GetReflectionFullName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
+        /// </summary>
+        public static string? GetReflectionFullName( this INamespaceOrTypeSymbol s )
+            => _reflectionFullNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.FullName ) );
+
+        /// <summary>
+        /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
+        /// </summary>
+        public static string GetReflectionToStringName( this INamedTypeSymbol s )
+            => ((INamespaceOrTypeSymbol) s).GetReflectionToStringName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
+        /// </summary>
+        public static string? GetReflectionToStringName( this INamespaceOrTypeSymbol s )
+            => _reflectionToStringNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.ToString ) );
+
+        private static string? GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
         {
             if ( s is ITypeParameterSymbol typeParameter )
             {
@@ -97,7 +141,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 var currentTypeArguments = typeArguments ?? new();
 
                 // Append the containing namespace or type.
-                if ( fullName && symbol is not ITypeParameterSymbol )
+                if ( kind != TypeNameKind.Name && symbol is not ITypeParameterSymbol )
                 {
                     switch ( symbol.ContainingSymbol )
                     {
@@ -135,7 +179,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 switch ( symbol )
                 {
-                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition() && fullName:
+                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType
+                        when (!unboundGenericType.IsGenericTypeDefinition() && kind != TypeNameKind.Name)
+                             || kind == TypeNameKind.ToString:
                         sb.Append( unboundGenericType.MetadataName );
 
                         currentTypeArguments.AddRange( unboundGenericType.TypeArguments );
