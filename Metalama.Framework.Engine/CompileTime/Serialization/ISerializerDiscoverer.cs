@@ -16,8 +16,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal interface ISerializerDiscoverer
     {
         /// <summary>
-        /// Invoked by <seealso cref="CompileTimeSerializer"/> once for every type that needs to be serialized,
-        /// before <seealso cref="ISerializerFactoryProvider.GetSurrogateType"/> is invoked.
+        /// Invoked by <seealso cref="CompileTimeSerializer"/> once for every type that needs to be serialized.
         /// </summary>
         /// <param name="objectType">Type being serialized.</param>
         void DiscoverSerializers( Type objectType );

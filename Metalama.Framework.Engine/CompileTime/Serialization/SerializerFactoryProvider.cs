@@ -77,12 +77,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         /// <inheritdoc />
-        public virtual Type? GetSurrogateType( Type objectType )
-        {
-            return null;
-        }
-
-        /// <inheritdoc />
         public virtual ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             if ( this._serializerTypes.TryGetValue( objectType, out var serializerType ) )

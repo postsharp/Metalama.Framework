@@ -26,7 +26,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new();
         private readonly Dictionary<ITypeSymbol, AssemblyTypeName> _typeSymbolNameCache = new();
-        private readonly Dictionary<Type, Type> _surrogateTypesCache = new();
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
         private readonly UserCodeInvoker _userCodeInvoker;
@@ -306,9 +305,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             if ( !this._typeNameCache.TryGetValue( type, out var assemblyTypeName ) )
             {
-                var surrogateType = this.GetSurrogateType( type );
 
-                this._formatter.Binder.BindToName( surrogateType, out var typeName, out var assemblyName );
+                this._formatter.Binder.BindToName( type, out var typeName, out var assemblyName );
                 assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
 
                 this._typeNameCache.Add( type, assemblyTypeName );
@@ -326,27 +324,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             if ( !this._typeSymbolNameCache.TryGetValue( typeSymbol, out var assemblyTypeName ) )
             {
-                // TODO: surrogateType?
-                var surrogateTypeSymbol = typeSymbol;
-
-                this._formatter.Binder.BindToName( surrogateTypeSymbol, out var typeName, out var assemblyName );
+                this._formatter.Binder.BindToName( typeSymbol, out var typeName, out var assemblyName );
                 assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
 
                 this._typeSymbolNameCache.Add( typeSymbol, assemblyTypeName );
             }
 
             this.WriteTypeName( assemblyTypeName );
-        }
-
-        private Type GetSurrogateType( Type type )
-        {
-            if ( !this._surrogateTypesCache.TryGetValue( type, out var surrogateType ) )
-            {
-                surrogateType = this._formatter.SerializerProvider.GetSurrogateType( type );
-                this._surrogateTypesCache.Add( type, surrogateType );
-            }
-
-            return surrogateType;
         }
 
         private void WriteTypeName( AssemblyTypeName type )
