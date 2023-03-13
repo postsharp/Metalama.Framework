@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private CompileTimeType Get( SymbolId symbolKey, ITypeSymbol symbolForMetadata )
         {
-            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), symbolForMetadata, this ) );
+            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), symbolForMetadata ) );
         }
     }
 }

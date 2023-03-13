@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Represents a class, struct, enum, or delegate.
+    /// Represents a class, struct, interface, enum, or delegate.
     /// </summary>
     public interface INamedType : IType, IGeneric, IEquatable<INamedType>
     {

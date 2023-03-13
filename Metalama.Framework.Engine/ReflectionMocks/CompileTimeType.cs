@@ -23,42 +23,25 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "Type" );
 
-        private CompileTimeType(
-            ISdkRef<IType> targetRef,
-            ITypeSymbol symbolForMetadata,
-            CompileTimeTypeFactory? factory, // Null for tests only.
-            CompilationContext? compilation) // For tests only.
+        private CompileTimeType( ISdkRef<IType> targetRef, ITypeSymbol symbolForMetadata )
         {
             this.Namespace = symbolForMetadata.ContainingNamespace.GetFullName();
             this.Name = symbolForMetadata.GetReflectionName().AssertNotNull();
             this.FullName = symbolForMetadata.GetReflectionFullName().AssertNotNull();
             this._toStringName = symbolForMetadata.GetReflectionToStringName().AssertNotNull();
 
-            var namedTypeSymbolForMetadata = symbolForMetadata as INamedTypeSymbol;
-            this.IsGenericType = namedTypeSymbolForMetadata?.IsGenericType ?? false;
-            this.IsGenericTypeDefinition =
-                this.IsGenericType
-                && (namedTypeSymbolForMetadata?.IsGenericTypeDefinition() ?? false);
-
-            if ( symbolForMetadata.ContainingType != null )
-            {
-                this.DeclaringType = factory == null
-                    ? Create( symbolForMetadata.ContainingType, compilation! )
-                    : factory.Get( symbolForMetadata.ContainingType );
-            }
-
             this.Target = targetRef;
         }
 
-        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata, CompileTimeTypeFactory factory )
-            => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata, factory, null );
+        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata )
+            => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata );
 
         // For test only.
         internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().CompilationContext );
 
         // For test only.
         private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilation )
-            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol, null, compilation );
+            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol );
 
         public override string? Namespace { get; }
 
@@ -67,8 +50,6 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public override string FullName { get; }
 
         private readonly string _toStringName;
-
-        public override Type? DeclaringType { get; }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
@@ -128,9 +109,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type UnderlyingSystemType => throw CreateNotSupportedException();
 
-        public override bool IsGenericType { get; }
-
-        public override bool IsGenericTypeDefinition { get; }
+        public override bool IsGenericType => throw CreateNotSupportedException();
 
         protected override bool IsArrayImpl() => throw CreateNotSupportedException();
 

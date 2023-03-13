@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
-                nameof( name ),
+                nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
         public static IAssemblySymbol? GetAssembly( this Compilation compilation, AssemblyIdentity assemblyName )
@@ -178,8 +178,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 switch ( symbol )
                 {
                     case INamedTypeSymbol { IsGenericType: true } unboundGenericType
-                    when (!unboundGenericType.IsGenericTypeDefinition() && kind != TypeNameKind.Name)
-                    || (unboundGenericType.IsGenericTypeDefinition() && kind == TypeNameKind.ToString):
+                        when (!unboundGenericType.IsGenericTypeDefinition() && kind != TypeNameKind.Name)
+                             || kind == TypeNameKind.ToString:
                         sb.Append( unboundGenericType.MetadataName );
 
                         currentTypeArguments.AddRange( unboundGenericType.TypeArguments );
@@ -268,12 +268,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( typeName == null )
             {
-                throw new ArgumentNullException( nameof( typeName ) );
+                throw new ArgumentNullException( nameof(typeName) );
             }
 
             if ( assemblyName == null )
             {
-                throw new ArgumentNullException( nameof( assemblyName ) );
+                throw new ArgumentNullException( nameof(assemblyName) );
             }
 
             return typeName.ReplaceOrdinal( ",", "\\," ) + ", " + assemblyName;
