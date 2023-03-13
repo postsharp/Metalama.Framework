@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -48,7 +49,7 @@ internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeRe
             return null;
         }
 
-        var reflectionName = typeSymbol.GetReflectionName();
+        var reflectionName = typeSymbol.GetReflectionFullName();
 
         if ( reflectionName == null )
         {

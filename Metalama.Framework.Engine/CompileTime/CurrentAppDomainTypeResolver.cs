@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -34,7 +35,7 @@ internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 
     private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken )
     {
-        var typeName = typeSymbol.GetReflectionName();
+        var typeName = typeSymbol.GetReflectionFullName();
 
         if ( typeName == null )
         {
