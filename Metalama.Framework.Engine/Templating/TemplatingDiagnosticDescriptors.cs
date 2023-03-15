@@ -410,5 +410,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Cannot set a template member {0} from an attribute.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> CannotMarkDeclarationAsTemplate
+            = new(
+                "LAMA0258",
+                "Declaration is an invalid declaration to be marked as a template.",
+                "'{0}' is an invalid declaration to be marked as a template.",
+                _category,
+                Error );
     }
 }
