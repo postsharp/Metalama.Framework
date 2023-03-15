@@ -509,7 +509,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 if ( templateInfo.AttributeType != TemplateAttributeType.None
-                    && !IsSupportedTemplateDeclaration( node, declaredSymbol ) )
+                    && !IsSupportedTemplateDeclaration( declaredSymbol ) )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
@@ -565,19 +565,8 @@ namespace Metalama.Framework.Engine.Templating
                 return context;
             }
 
-            private static bool IsSupportedTemplateDeclaration( SyntaxNode node, ISymbol declaredSymbol )
-            {
-                switch ( declaredSymbol )
-                {
-                    case IMethodSymbol { MethodKind: MethodKind.Constructor }:
-                    case IMethodSymbol { MethodKind: MethodKind.Destructor }:
-                    case IMethodSymbol { MethodKind: MethodKind.Conversion }:
-                    case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator }:
-                        return false;
-                    default:
-                        return true;
-                }
-            }
+            private static bool IsSupportedTemplateDeclaration( ISymbol declaredSymbol )
+                => declaredSymbol is not IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator };
 
             private readonly struct Context : IDisposable
             {
