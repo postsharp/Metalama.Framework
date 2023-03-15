@@ -30,9 +30,20 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         private readonly ContractDirection? _contractDirection;
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
-            => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
-                 description ?? "I" + memberName) );
+        {
+            string? alternativeSuggestion = null;
+
+            if ( memberName is nameof( this.Property ) or nameof( this.Field ) or nameof( this.FieldOrProperty ) && this._fieldOrPropertyOrIndexer != null )
+            {
+                var alternativeMemberName = this._fieldOrPropertyOrIndexer is IFieldOrProperty ? nameof( this.FieldOrProperty ) : nameof( this.FieldOrPropertyOrIndexer );
+
+                alternativeSuggestion = $" Consider using meta.{alternativeMemberName} instead.";
+            }
+
+            return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
+                        (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                         description ?? "I" + memberName, alternativeSuggestion) );
+        }
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
