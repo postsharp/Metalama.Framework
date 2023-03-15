@@ -3,25 +3,25 @@
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal sealed partial class SymbolTranslator
 {
-    private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache;
+    private readonly ConcurrentDictionary<(ISymbol, bool), ISymbol?> _cache;
     private readonly CompilationContext _targetCompilationContext;
-    private readonly Visitor _visitor;
 
     internal SymbolTranslator( CompilationContext targetCompilationContextContext )
     {
-        this._cache = new ConcurrentDictionary<ISymbol, ISymbol?>( ReferenceEqualityComparer<ISymbol>.Instance );
+        this._cache = new ConcurrentDictionary<(ISymbol, bool), ISymbol?>( KeyComparer.Instance );
 
         this._targetCompilationContext = targetCompilationContextContext;
-        this._visitor = new Visitor( this );
     }
 
-    public T? Translate<T>( T symbol )
+    public T? Translate<T>( T symbol, bool allowMultiple = false )
         where T : ISymbol
     {
         var containingAssembly = symbol.ContainingAssembly;
@@ -34,11 +34,11 @@ internal sealed partial class SymbolTranslator
         }
         else
         {
-            return (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
+            return (T?) this._cache.GetOrAdd( (symbol, allowMultiple), this.TranslateCore );
         }
     }
 
-    public T? Translate<T>( T symbol, Compilation? originalCompilation )
+    public T? Translate<T>( T symbol, Compilation? originalCompilation, bool allowMultiple = false )
         where T : ISymbol
     {
         if ( originalCompilation == this._targetCompilationContext.Compilation )
@@ -47,9 +47,26 @@ internal sealed partial class SymbolTranslator
         }
         else
         {
-            return (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
+            return (T?) this._cache.GetOrAdd( (symbol, allowMultiple), this.TranslateCore );
         }
     }
 
-    private ISymbol? TranslateCore( ISymbol symbol ) => this._visitor.Visit( symbol );
+    private ISymbol? TranslateCore( (ISymbol Symbol, bool AllowMultipleCandidates) value ) => new Visitor( this, value.AllowMultipleCandidates ).Visit( value.Symbol );
+
+    private class KeyComparer : IEqualityComparer<(ISymbol Symbol, bool AllowMultipleCandidates)>
+    {
+        public static readonly KeyComparer Instance = new KeyComparer();
+
+        public bool Equals( (ISymbol Symbol, bool AllowMultipleCandidates) x, (ISymbol Symbol, bool AllowMultipleCandidates) y )
+        {
+            return
+                ReferenceEqualityComparer<ISymbol>.Instance.Equals(x.Symbol, y.Symbol)
+                && x.AllowMultipleCandidates == y.AllowMultipleCandidates;
+        }
+
+        public int GetHashCode( (ISymbol Symbol, bool AllowMultipleCandidates) value )
+        {
+            return HashCode.Combine( ReferenceEqualityComparer<ISymbol>.Instance.GetHashCode( value.Symbol ), value.AllowMultipleCandidates.GetHashCode() );
+        }
+    }
 }
