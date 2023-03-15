@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug29235
 {
     internal class Aspect : OverrideFieldOrPropertyAspect
     {
-        public override dynamic OverrideProperty 
+        public override dynamic? OverrideProperty 
         {
             get
             {
