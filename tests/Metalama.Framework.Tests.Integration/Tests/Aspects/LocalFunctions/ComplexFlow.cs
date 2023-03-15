@@ -13,18 +13,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
  */
 
 public class OuterAspect : OverrideMethodAspect
-{    
+{
     public override dynamic? OverrideMethod()
     {
-        if (meta.Target.Parameters[0].Value == 27)
+        int OuterLocalFunction()
         {
-            meta.InsertComment("The outer method is inlining into the middle of the method.");
-            meta.Proceed();
+            if (meta.Target.Parameters[0].Value == 27)
+            {
+                meta.InsertComment("The outer method is inlining into the middle of the method.");
+                meta.Proceed();
+            }
+
+            Console.WriteLine("Outer");
+
+            return 27;
         }
 
-        Console.WriteLine("Outer");
-
-        return 27;
+        return OuterLocalFunction();
     }
 }
 
