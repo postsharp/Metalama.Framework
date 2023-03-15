@@ -1698,29 +1698,31 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     public override SyntaxNode VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
     {
-        var transformedOperand = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
+        var (transformedOperand, scope) = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
-        return node.Update( transformedOperand, node.OperatorToken ).WithSymbolAnnotationsFrom( node ).WithScopeAnnotationFrom( transformedOperand );
+        return node.Update( transformedOperand, node.OperatorToken ).WithSymbolAnnotationsFrom( node ).AddScopeAnnotation( scope );
     }
 
     public override SyntaxNode VisitPrefixUnaryExpression( PrefixUnaryExpressionSyntax node )
     {
-        var transformedOperand = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
+        var (transformedOperand, scope) = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
-        return node.Update( node.OperatorToken, transformedOperand ).WithSymbolAnnotationsFrom( node ).WithScopeAnnotationFrom( transformedOperand );
+        return node.Update( node.OperatorToken, transformedOperand ).WithSymbolAnnotationsFrom( node ).AddScopeAnnotation( scope );
     }
 
-    private ExpressionSyntax VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
+    private (ExpressionSyntax TransformedOperand, TemplatingScope Scope) VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
     {
         var transformedOperand = this.Visit( operand );
 
         var scope = this.GetNodeScope( transformedOperand );
 
-        // We cannot mutate a compile-time expression in a run-time-condition block.
-        if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && IsMutatingUnaryOperator( @operator ) )
+        if ( IsMutatingUnaryOperator( @operator ) )
         {
-            if ( this._currentScopeContext.IsRuntimeConditionalBlock )
+            scope = this.GetAssignmentScope( transformedOperand );
+
+            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
             {
+                // We cannot mutate a compile-time expression in a run-time-condition block.
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
                     operand,
@@ -1728,7 +1730,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
         }
 
-        return transformedOperand;
+        return (transformedOperand, scope);
     }
 
     public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
