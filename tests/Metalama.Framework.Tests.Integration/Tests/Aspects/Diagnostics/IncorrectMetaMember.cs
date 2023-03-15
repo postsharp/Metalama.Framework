@@ -1,10 +1,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Tests.Integration.Aspects.Diagnostics.IncorrectMetaMember;
 using System;
 using System.Linq;
 
 #pragma warning disable CS0169
+
+[assembly: AspectOrder(typeof(FieldAspectTest), typeof(FieldOrPropertyAspectTest), typeof(IndexerAspectTest), typeof(PropertyAspectTest))]
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.IncorrectMetaMember;
 
@@ -28,25 +31,25 @@ abstract class AspectBase : Aspect, IAspect<IFieldOrPropertyOrIndexer>
     }
 }
 
-class FieldAspect : AspectBase
+class FieldAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Field.Name;
 }
 
-class PropertyAspect : AspectBase
+class PropertyAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Property.Name;
 }
 
-class FieldOrPropertyAspect : AspectBase
+class FieldOrPropertyAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.FieldOrProperty.Name;
 }
 
-class IndexerAspect : AspectBase
+class IndexerAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Indexer.Name;
@@ -54,12 +57,12 @@ class IndexerAspect : AspectBase
 
 class TargetCode
 {
-    [FieldAspect, PropertyAspect, FieldOrPropertyAspect, IndexerAspect]
+    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
     int field;
 
-    [FieldAspect, PropertyAspect, FieldOrPropertyAspect, IndexerAspect]
+    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
     int property { get; set; }
 
-    [FieldAspect, PropertyAspect, FieldOrPropertyAspect, IndexerAspect]
+    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
     int this[int i] => 42;
 }
