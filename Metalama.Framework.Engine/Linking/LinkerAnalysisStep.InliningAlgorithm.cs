@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -147,8 +148,9 @@ namespace Metalama.Framework.Engine.Linking
                             if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax
                                                                  || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final) )
                             {
-                                // This is inlining of a return statement while we can do simple inlining - no rewriting of returns is required.
-                                // Or it is inlining of in the final semantic, which is a special case.
+                                // Possible cases:
+                                // * Inlining of a return statement while we can do simple inlining - no rewriting of returns is required.
+                                // * Inlining of in the final semantic, which is a special case.
                                 Invariant.Assert( info.ReturnVariableIdentifier == null );
 
                                 inliningSpecifications.Add(
@@ -166,6 +168,26 @@ namespace Metalama.Framework.Engine.Linking
                                         targetSemantic ) );
 
                                 VisitSemanticBody( destinationSemantic, targetSemantic, context.Recurse() );
+                            }
+                            else if ( !SymbolEqualityComparer.Default.Equals( currentSemantic.Symbol, aspectReference.ContainingBody )
+                                && info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax )
+                            {
+                                // If inlining into a local function, revert to simple inlining.
+                                inliningSpecifications.Add(
+                                    new InliningSpecification(
+                                        destinationSemantic,
+                                        context.Ordinal,
+                                        context.ParentOrdinal,
+                                        aspectReference,
+                                        inliner,
+                                        info.ReplacedRootNode,
+                                        true,
+                                        false,
+                                        null,
+                                        null,
+                                        targetSemantic ) );
+
+                                VisitSemanticBody( destinationSemantic, targetSemantic, context.RecurseWithSimpleInlining() );
                             }
                             else
                             {

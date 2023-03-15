@@ -1,5 +1,3 @@
-// @Skipped(#32438)
-
 using System;
 using System.Threading;
 using Metalama.Framework.Aspects;
@@ -18,20 +16,15 @@ public class OuterAspect : OverrideMethodAspect
 {    
     public override dynamic? OverrideMethod()
     {
-        int OuterLocalFunction()
+        if (meta.Target.Parameters[0].Value == 27)
         {
-            if (meta.Target.Parameters[0].Value == 27)
-            {
-                meta.InsertComment("The outer method is inlining into the middle of the method.");
-                meta.Proceed();
-            }
-
-            Console.WriteLine("Outer");
-
-            return 27;
+            meta.InsertComment("The outer method is inlining into the middle of the method.");
+            meta.Proceed();
         }
 
-        return OuterLocalFunction();
+        Console.WriteLine("Outer");
+
+        return 27;
     }
 }
 
