@@ -509,7 +509,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 if ( templateInfo.AttributeType != TemplateAttributeType.None
-                    && !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                     && !IsSupportedTemplateDeclaration( declaredSymbol ) )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(

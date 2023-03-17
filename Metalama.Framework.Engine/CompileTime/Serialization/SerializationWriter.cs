@@ -305,7 +305,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             if ( !this._typeNameCache.TryGetValue( type, out var assemblyTypeName ) )
             {
-
                 this._formatter.Binder.BindToName( type, out var typeName, out var assemblyName );
                 assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
 

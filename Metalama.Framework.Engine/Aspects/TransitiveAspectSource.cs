@@ -149,26 +149,26 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
         if ( kind == ValidatorKind.Reference )
         {
             return this._referenceValidators.Select(
-                v =>
-                {
-                    IDeclaration validationTarget;
-
-                    try
+                    v =>
                     {
-                        // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
-                        validationTarget = v.ValidatedDeclaration.GetTarget( compilation );
-                    }
-                    catch ( SymbolNotFoundException )
-                    {
-                        return null;
-                    }
+                        IDeclaration validationTarget;
 
-                    return new ReferenceValidatorInstance(
-                        validationTarget,
-                        v.GetReferenceValidatorDriver(),
-                        ValidatorImplementation.Create( v.Object, v.State ),
-                        v.ReferenceKinds );
-                } )
+                        try
+                        {
+                            // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
+                            validationTarget = v.ValidatedDeclaration.GetTarget( compilation );
+                        }
+                        catch ( SymbolNotFoundException )
+                        {
+                            return null;
+                        }
+
+                        return new ReferenceValidatorInstance(
+                            validationTarget,
+                            v.GetReferenceValidatorDriver(),
+                            ValidatorImplementation.Create( v.Object, v.State ),
+                            v.ReferenceKinds );
+                    } )
                 .WhereNotNull();
         }
         else

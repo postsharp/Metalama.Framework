@@ -1,5 +1,3 @@
-// @Skipped(#32438)
-
 using System;
 using System.Threading;
 using Metalama.Framework.Aspects;
@@ -15,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
  */
 
 public class OuterAspect : OverrideMethodAspect
-{    
+{
     public override dynamic? OverrideMethod()
     {
         int OuterLocalFunction()
