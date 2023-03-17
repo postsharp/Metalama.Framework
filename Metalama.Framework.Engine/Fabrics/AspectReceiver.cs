@@ -223,10 +223,13 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => new[] { new DeclarationValidatorInstance(
-                            item,
-                            (ValidatorDriver<DeclarationValidationContext>) source.Driver,
-                            ValidatorImplementation.Create( source.Predecessor.Instance ) ) } ) ) );
+                        item => new[]
+                        {
+                            new DeclarationValidatorInstance(
+                                item,
+                                (ValidatorDriver<DeclarationValidationContext>) source.Driver,
+                                ValidatorImplementation.Create( source.Predecessor.Instance ) )
+                        } ) ) );
         }
 
         public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )

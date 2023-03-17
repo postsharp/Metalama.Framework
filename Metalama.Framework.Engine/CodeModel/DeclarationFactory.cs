@@ -119,8 +119,8 @@ public sealed class DeclarationFactory : IDeclarationFactory
         }
 
         return (INamedType) this._typeCache.GetOrAdd(
-                typeSymbol,
-                s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
+            typeSymbol,
+            s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
     }
 
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )

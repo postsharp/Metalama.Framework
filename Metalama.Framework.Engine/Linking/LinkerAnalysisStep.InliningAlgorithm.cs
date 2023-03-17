@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -170,7 +169,7 @@ namespace Metalama.Framework.Engine.Linking
                                 VisitSemanticBody( destinationSemantic, targetSemantic, context.Recurse() );
                             }
                             else if ( !SymbolEqualityComparer.Default.Equals( currentSemantic.Symbol, aspectReference.ContainingBody )
-                                && info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax )
+                                      && info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax )
                             {
                                 // If inlining into a local function, revert to simple inlining.
                                 inliningSpecifications.Add(

@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
@@ -191,7 +190,8 @@ internal static partial class SyntaxFactoryEx
     {
         var expression = SyntaxFactory.ParseExpression( text );
 
-        var diagnostics = expression.GetDiagnostics();
+        var diagnostics = expression.GetDiagnostics().ToArray();
+
         if ( diagnostics.HasError() )
         {
             throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), inSourceCode: false );
@@ -205,9 +205,11 @@ internal static partial class SyntaxFactoryEx
         var statement = SyntaxFactory.ParseStatement( text );
 
         var diagnostics = statement.GetDiagnostics();
-        if ( diagnostics.HasError() )
+        var enumerable = diagnostics as Diagnostic[] ?? diagnostics.ToArray();
+
+        if ( enumerable.HasError() )
         {
-            throw new DiagnosticException( $"Code could not be parsed as a statement.", diagnostics.ToImmutableArray(), inSourceCode: false );
+            throw new DiagnosticException( $"Code could not be parsed as a statement.", enumerable.ToImmutableArray(), inSourceCode: false );
         }
 
         return statement;
