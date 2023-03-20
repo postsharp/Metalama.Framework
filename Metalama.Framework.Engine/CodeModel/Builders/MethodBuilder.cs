@@ -46,7 +46,7 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
-    IMemberWithAccessors? IMethod.DeclaringMember => null;
+    IHasAccessors? IMethod.DeclaringMember => null;
 
     public override void Freeze()
     {

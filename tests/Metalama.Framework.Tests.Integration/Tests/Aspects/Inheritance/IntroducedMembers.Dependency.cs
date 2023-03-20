@@ -65,7 +65,7 @@ class IntroduceMembersAttribute : TypeAspect
             {
                 builder.WithTarget(hasParameters).Outbound.SelectMany(m => m.Parameters).AddAspect<NopAspect>();
             }
-            if (result.Declaration is IMemberWithAccessors member)
+            if (result.Declaration is IHasAccessors member)
             {
                 builder.WithTarget(member).Outbound.SelectMany(m => m.Accessors).AddAspect<NopAspect>();
             }

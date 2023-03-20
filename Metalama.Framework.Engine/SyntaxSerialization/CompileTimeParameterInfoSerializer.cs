@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             if ( method == null )
             {
-                if ( declaringMember is IMemberWithAccessors property )
+                if ( declaringMember is IHasAccessors property )
                 {
                     method = (property.GetAccessor( MethodKind.PropertyGet ) ?? property.GetAccessor( MethodKind.PropertySet ))!;
                 }

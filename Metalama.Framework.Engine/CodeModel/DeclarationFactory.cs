@@ -485,7 +485,7 @@ public sealed class DeclarationFactory : IDeclarationFactory
             {
                 var builder = (AccessorBuilder) l.Target!;
 
-                return ((IMemberWithAccessors) this.GetDeclaration<IMember>( builder.ContainingMember, options )).GetAccessor( builder.MethodKind )!;
+                return ((IHasAccessors) this.GetDeclaration<IMember>( builder.ContainingMember, options )).GetAccessor( builder.MethodKind )!;
             } );
 
     internal IConstructor GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options )

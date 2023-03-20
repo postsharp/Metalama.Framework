@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             Invariant.Assert( accessor.IsImplicitlyDeclared );
 
-            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
                 throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             Invariant.Assert( accessor.IsImplicitlyDeclared );
 
-            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
                 throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }

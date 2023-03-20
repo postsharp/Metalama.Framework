@@ -264,7 +264,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-    IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
+    IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this.ContainingMember;
 
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
