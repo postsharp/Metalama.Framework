@@ -15,13 +15,15 @@ public static class AttributeHelper
             return null;
         }
 
-        Parse( name, out _, out _, out var shortName );
+        Parse( name, out _, out var shortName );
 
         return shortName;
     }
 
-    public static void Parse( string fullName, out string ns, out string typeName, out string shortName )
+    public static void Parse( string fullName, out string ns, out string shortName )
     {
+        string typeName;
+        
         var lastDot = fullName.LastIndexOf( '.' );
 
         if ( lastDot >= 0 )

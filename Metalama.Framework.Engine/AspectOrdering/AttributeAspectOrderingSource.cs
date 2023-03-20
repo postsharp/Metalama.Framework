@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     .SelectMany( m => m.ReferencedAssemblySymbols )
                     .Concat( new[] { roslynCompilation.Assembly } )
                     .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                    .Where( a => a.attribute.AttributeClass?.GetReflectionName() == orderAttributeName );
+                    .Where( a => a.attribute.AttributeClass?.GetReflectionFullName() == orderAttributeName );
 
             return attributes.Select(
                     attribute =>

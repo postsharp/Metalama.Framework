@@ -22,7 +22,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 namespace Metalama.Framework.Engine.CodeModel.Pseudo;
 
 internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
-    where T : IMemberWithAccessorsImpl
+    where T : IHasAccessorsImpl
 {
     protected T DeclaringMember { get; }
 
@@ -129,7 +129,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-    IMemberWithAccessors IMethod.DeclaringMember => this.DeclaringMember;
+    IHasAccessors IMethod.DeclaringMember => this.DeclaringMember;
 
     public ISymbol? Symbol => null;
 
@@ -154,7 +154,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
             _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
         };
 
-    public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
+    public IMember? OverriddenMember => ((IHasAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
     public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 

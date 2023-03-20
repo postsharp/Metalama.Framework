@@ -396,12 +396,30 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
+            public override void VisitDestructorDeclaration( DestructorDeclarationSyntax node )
+            {
+                using ( this.WithDeclaration( node ) )
+                {
+                    this.VerifyModifiers( node.Modifiers );
+                    base.VisitDestructorDeclaration( node );
+                }
+            }
+
             public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             {
                 using ( this.WithDeclaration( node ) )
                 {
                     this.VerifyModifiers( node.Modifiers );
                     base.VisitOperatorDeclaration( node );
+                }
+            }
+
+            public override void VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+            {
+                using ( this.WithDeclaration( node ) )
+                {
+                    this.VerifyModifiers( node.Modifiers );
+                    base.VisitConversionOperatorDeclaration( node );
                 }
             }
 
@@ -490,6 +508,17 @@ namespace Metalama.Framework.Engine.Templating
                     templateInfo = this._classifier.GetTemplateInfo( declaredSymbol );
                 }
 
+                if ( templateInfo.AttributeType != TemplateAttributeType.None
+                     && !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol ) );
+
+                    return default;
+                }
+
                 // Report error on conflict scope.
                 if ( scope == TemplatingScope.Conflict )
                 {
@@ -535,6 +564,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 return context;
             }
+
+            private static bool IsSupportedTemplateDeclaration( ISymbol declaredSymbol )
+                => declaredSymbol is not IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator };
 
             private readonly struct Context : IDisposable
             {

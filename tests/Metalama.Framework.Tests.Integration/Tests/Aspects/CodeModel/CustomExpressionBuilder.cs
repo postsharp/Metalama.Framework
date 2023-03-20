@@ -4,7 +4,6 @@ using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using IExpressionBuilder = Metalama.Framework.Code.SyntaxBuilders.IExpressionBuilder;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.CodeModel.CustomExpressionBuilder
 {

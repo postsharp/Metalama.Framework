@@ -54,7 +54,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the parent property or event when the current <see cref="IMethod"/> represents a property or event accessor, otherwise <c>null</c>.
         /// </summary>
-        IMemberWithAccessors? DeclaringMember { get; }
+        IHasAccessors? DeclaringMember { get; }
 
         /// <summary>
         /// Gets a value indicating whether the method is <c>readonly</c>.

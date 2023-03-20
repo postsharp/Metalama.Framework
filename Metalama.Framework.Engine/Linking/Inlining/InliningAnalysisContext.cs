@@ -35,6 +35,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisContext( this.Ordinal, this._persistentContext, this.UsingSimpleInlining, null );
         }
 
+        internal InliningAnalysisContext RecurseWithSimpleInlining()
+        {
+            return new InliningAnalysisContext( this.Ordinal, this._persistentContext, true, null );
+        }
+
         internal InliningAnalysisContext RecurseWithComplexInlining( string? returnVariableIdentifier )
         {
             return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );

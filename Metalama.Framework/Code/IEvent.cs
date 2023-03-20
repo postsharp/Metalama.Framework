@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represent an event.
     /// </summary>
-    public interface IEvent : IMemberWithAccessors, IEventInvoker
+    public interface IEvent : IHasAccessors, IEventInvoker
     {
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.

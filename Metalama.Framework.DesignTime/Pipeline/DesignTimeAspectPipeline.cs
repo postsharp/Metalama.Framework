@@ -560,7 +560,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 $"Cannot get configuration: {configuration.DebugReason}" );
                         }
 
-                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider );
+                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider, compilation );
 
                         compilationReferences.Add(
                             new DesignTimeProjectReference(

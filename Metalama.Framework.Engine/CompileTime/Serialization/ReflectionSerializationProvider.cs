@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             this._serviceProvider = serviceProvider;
         }
 
-        public Type GetSurrogateType( Type objectType ) => objectType;
-
         public ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             // If we have a generic type instance, we return null and wait to be called a second time with the generic type definition.

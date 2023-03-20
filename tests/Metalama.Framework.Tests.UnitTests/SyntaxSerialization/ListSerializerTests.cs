@@ -13,21 +13,44 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         [Fact]
         public void TestEmptyList()
         {
-            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Single>{}", new List<float>() );
+            this.AssertSerialization(
+                new List<float>(),
+                """
+                new global::System.Collections.Generic.List<global::System.Single>
+                {
+                }
+                """ );
         }
 
         [Fact]
         public void TestBasicList()
         {
-            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Single>{1F, 2F, 3F}", new List<float> { 1, 2, 3 } );
+            this.AssertSerialization(
+                new List<float> { 1, 2, 3 },
+                """
+                new global::System.Collections.Generic.List<global::System.Single>
+                {
+                    1F,
+                    2F,
+                    3F
+                }
+                """ );
         }
 
         [Fact]
         public void TestListInList()
         {
             this.AssertSerialization(
-                "new global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.Int32>>{new global::System.Collections.Generic.List<global::System.Int32>{1}}",
-                new List<List<int>> { new() { 1 } } );
+                new List<List<int>> { new() { 1 } },
+                """
+                new global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.Int32>>
+                {
+                    new global::System.Collections.Generic.List<global::System.Int32>
+                    {
+                        1
+                    }
+                }
+                """ );
         }
 
         [Fact]
@@ -41,7 +64,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             Assert.Throws<DiagnosticException>( () => testContext.Serialize( l ) );
         }
 
-        private void AssertSerialization<T>( string expected, List<T> o )
+        private void AssertSerialization<T>( List<T> o, string expected )
         {
             using var testContext = this.CreateSerializationTestContext( "" );
             var creationExpression = testContext.Serialize( o ).NormalizeWhitespace().ToString();

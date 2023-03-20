@@ -24,21 +24,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public Type GetSurrogateType( Type objectType )
-        {
-            for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
-            {
-                var surrogateType = currentProvider.GetSurrogateType( objectType );
-
-                if ( surrogateType != null )
-                {
-                    return surrogateType;
-                }
-            }
-
-            return objectType;
-        }
-
         private void DiscoverSerializers( Type objectType )
         {
             for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )

@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             Invariant.Assert( accessor.IsImplicitlyDeclared );
 
-            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
                 throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             Invariant.Assert( accessor.IsImplicitlyDeclared );
 
-            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
                 throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }
@@ -205,7 +205,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';
 
-        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
+        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, true )!;
+
+        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
+            => this.GetTargetImpl( compilation, options, false );
+
+        private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing )
         {
             var compilationModel = (CompilationModel) compilation;
 
@@ -214,11 +219,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     out var redirected ) )
             {
                 // Referencing redirected declaration.
-                return this.Resolve( redirected.Target, compilationModel, options, this.TargetKind );
+                return this.Resolve( redirected.Target, compilationModel, options, throwIfMissing );
             }
             else
             {
-                return this.Resolve( this.Target, compilationModel, options, this.TargetKind );
+                return this.Resolve( this.Target, compilationModel, options, throwIfMissing );
             }
         }
 
@@ -342,11 +347,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol;
         }
 
-        private T Resolve(
+        private T? Resolve(
             object? reference,
             CompilationModel compilation,
-            ReferenceResolutionOptions options = default,
-            DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+            ReferenceResolutionOptions options,
+            bool throwIfMissing )
         {
             T Convert( ICompilationElement compilationElement )
             {
@@ -363,7 +368,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             switch ( reference )
             {
                 case null:
-                    return kind is DeclarationRefTargetKind.Assembly or DeclarationRefTargetKind.Module
+                    return this.TargetKind is DeclarationRefTargetKind.Assembly or DeclarationRefTargetKind.Module
                         ? (T) (object) compilation
                         : throw new AssertionFailedException( "The reference target is null but the kind is not assembly or module." );
 
@@ -371,14 +376,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return Convert(
                         compilation.Factory.GetCompilationElement(
                                 compilation.CompilationContext.SymbolTranslator.Translate( symbol, this._compilationContext?.Compilation ).AssertNotNull(),
-                                kind )
+                                this.TargetKind )
                             .AssertNotNull() );
 
                 case SyntaxNode node:
                     return Convert(
                         compilation.Factory.GetCompilationElement(
                                 GetSymbolOfNode( compilation.PartialCompilation.CompilationContext, node ).AssertValidType<T>(),
-                                kind )
+                                this.TargetKind )
                             .AssertNotNull() );
 
                 case IDeclarationBuilder builder:
@@ -389,14 +394,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         if ( IsSerializableId( id ) )
                         {
                             var declaration = new SerializableDeclarationId( id ).ResolveToDeclaration( compilation )
-                                              ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
+                                              ?? (throwIfMissing ? throw new SymbolNotFoundException( id, compilation.RoslynCompilation ) : null);
+
+                            if ( declaration == null )
+                            {
+                                return null;
+                            }
 
                             return Convert( declaration );
                         }
                         else
                         {
                             var symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation )
-                                         ?? throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
+                                         ?? (throwIfMissing ? throw new SymbolNotFoundException( id, compilation.RoslynCompilation ) : null);
+
+                            if ( symbol == null )
+                            {
+                                return null;
+                            }
 
                             return Convert( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull() );
                         }

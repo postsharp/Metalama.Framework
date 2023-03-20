@@ -15,7 +15,7 @@ internal sealed class CompileTimeCompileTimeSerializationBinder : CompileTimeSer
         this._project = project;
     }
 
-    public override Type BindToType( string typeName, string assemblyName )
+    public override Type? BindToType( string typeName, string assemblyName )
     {
         if ( assemblyName.Equals( "mscorlib", StringComparison.Ordinal )
              || assemblyName.Equals( "System.Private.CoreLib", StringComparison.Ordinal ) )

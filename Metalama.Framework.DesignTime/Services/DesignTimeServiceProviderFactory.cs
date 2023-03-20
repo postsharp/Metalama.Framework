@@ -85,7 +85,7 @@ public abstract class DesignTimeServiceProviderFactory
 
         if ( _sharedFactory is not T )
         {
-            throw new AssertionFailedException( "The method was already called with a different value of the T parameter." );
+            throw new AssertionFailedException( $"The method was already called with T being '{_sharedFactory?.GetType()}', but now it's '{typeof(T)}'." );
         }
 
         return _sharedServiceProvider;

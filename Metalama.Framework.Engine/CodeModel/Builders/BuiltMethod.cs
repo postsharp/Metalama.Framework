@@ -45,7 +45,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
-    IMemberWithAccessors? IMethod.DeclaringMember => null;
+    IHasAccessors? IMethod.DeclaringMember => null;
 
     System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 

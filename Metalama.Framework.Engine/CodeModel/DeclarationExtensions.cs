@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         .ConcatNotNull( method.ReturnParameter ),
                     IIndexer indexer => indexer.Parameters.Concat<IDeclaration>( indexer.Accessors ),
                     IConstructor constructor => constructor.Parameters,
-                    IMemberWithAccessors member => member.Accessors,
+                    IHasAccessors member => member.Accessors,
                     _ => Enumerable.Empty<IDeclaration>()
                 } );
 

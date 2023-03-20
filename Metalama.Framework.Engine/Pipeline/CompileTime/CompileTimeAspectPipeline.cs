@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                             .ToImmutableArray(),
                         referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
 
-                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
+                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
                     additionalResources = additionalResources.Add( resource );
                 }
 
@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     resultingCompilation,
                     result.Value.AdditionalCompilationOutputFiles );
             }
-            catch ( DiagnosticException exception )
+            catch ( DiagnosticException exception ) when ( exception.InSourceCode )
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {

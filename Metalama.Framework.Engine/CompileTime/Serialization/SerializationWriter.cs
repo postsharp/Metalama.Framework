@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Serialization;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly bool _shouldReportExceptionCause;
 
         private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new();
-        private readonly Dictionary<Type, Type> _surrogateTypesCache = new();
+        private readonly Dictionary<ITypeSymbol, AssemblyTypeName> _typeSymbolNameCache = new();
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
         private readonly UserCodeInvoker _userCodeInvoker;
@@ -116,9 +118,17 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private void WriteType( Type type, SerializationCause? cause, SerializationIntrinsicType intrinsicType = SerializationIntrinsicType.None )
         {
+            if ( type is CompileTimeType compileTimeType )
+            {
+                var typeSymbol = (ITypeSymbol) compileTimeType.Target.GetSymbol( this._formatter.Compilation.AssertNotNull() ).AssertNotNull();
+                this.WriteType( typeSymbol, cause, intrinsicType );
+
+                return;
+            }
+
             if ( intrinsicType == SerializationIntrinsicType.None )
             {
-                intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
+                intrinsicType = type.GetIntrinsicType();
             }
 
             switch ( intrinsicType )
@@ -147,18 +157,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Enum:
                     this._binaryWriter.WriteByte( (byte) intrinsicType );
 
-                    // if ( this.formatter.MetadataEmitter == null )
-                    // {
                     this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Default );
                     this.WriteTypeName( type );
-
-                    // }
-                    // else
-                    // {
-                    //    // Since we have a MetadataEmitter, write the index of the metadata item.
-                    //    this.binaryWriter.WriteByte((byte)SerializationIntrinsicTypeFlags.MetadataIndex);
-                    //    this.binaryWriter.WriteCompressedInteger( this.GetMetadataIndex( type, cause ) );
-                    // }
 
                     break;
 
@@ -172,13 +172,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Struct:
                 case SerializationIntrinsicType.Class:
                     {
-                        // We don't have a MetadataEmitter, so write the type signature explicitly.
                         var genericTypeDefinition = type is { IsGenericType: true, IsGenericTypeDefinition: false } ? type.GetGenericTypeDefinition() : type;
                         this._binaryWriter.WriteByte( (byte) intrinsicType );
-
-                        // TODO:Remove
-                        // if ( this.formatter.MetadataEmitter == null )
-                        // {
 
                         if ( type is { IsGenericType: true, IsGenericTypeDefinition: false } )
                         {
@@ -199,16 +194,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                             this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Default );
                             this.WriteTypeName( genericTypeDefinition );
                         }
-
-                        // TODO: Remove
-                        // }
-                        // else
-                        // {
-                        //      // Since we have a MetadataEmitter, write the index of the metadata item.
-                        //     Type surrogateType = this.GetSurrogateType( type );
-                        //     this.binaryWriter.WriteByte((byte)SerializationIntrinsicTypeFlags.MetadataIndex);
-                        //     this.binaryWriter.WriteCompressedInteger( this.GetMetadataIndex( surrogateType, cause ) );
-                        // }
                     }
 
                     break;
@@ -223,17 +208,93 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        // private int GetMetadataIndex( Type metadata, SerializationCause cause )
-        // {
-        //    try
-        //    {
-        //        return this.formatter.MetadataEmitter.GetMetadataIndex( metadata );
-        //    }
-        //    catch ( Exception exception )
-        //    {
-        //        throw MetaSerializationException.CreateWithCause( "Serialization", metadata, exception, cause );
-        //    }
-        // }
+        private void WriteType( ITypeSymbol typeSymbol, SerializationCause? cause, SerializationIntrinsicType intrinsicType = SerializationIntrinsicType.None )
+        {
+            if ( intrinsicType == SerializationIntrinsicType.None )
+            {
+                intrinsicType = typeSymbol.GetIntrinsicType();
+            }
+
+            switch ( intrinsicType )
+            {
+                case SerializationIntrinsicType.None:
+                case SerializationIntrinsicType.Boolean:
+                case SerializationIntrinsicType.Char:
+                case SerializationIntrinsicType.SByte:
+                case SerializationIntrinsicType.Byte:
+                case SerializationIntrinsicType.Int16:
+                case SerializationIntrinsicType.UInt16:
+                case SerializationIntrinsicType.Int32:
+                case SerializationIntrinsicType.UInt32:
+                case SerializationIntrinsicType.Int64:
+                case SerializationIntrinsicType.UInt64:
+                case SerializationIntrinsicType.Single:
+                case SerializationIntrinsicType.Double:
+                case SerializationIntrinsicType.String:
+                case SerializationIntrinsicType.ObjRef:
+                case SerializationIntrinsicType.DottedString:
+                case SerializationIntrinsicType.Type:
+                    this._binaryWriter.WriteByte( (byte) intrinsicType );
+
+                    break;
+
+                case SerializationIntrinsicType.Enum:
+                    this._binaryWriter.WriteByte( (byte) intrinsicType );
+
+                    this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Default );
+                    this.WriteTypeName( typeSymbol );
+
+                    break;
+
+                case SerializationIntrinsicType.Array:
+                    {
+                        var arrayTypeSymbol = (IArrayTypeSymbol) typeSymbol;
+
+                        this._binaryWriter.WriteByte( (byte) intrinsicType );
+                        this._binaryWriter.WriteCompressedInteger( arrayTypeSymbol.Rank );
+                        this.WriteType( arrayTypeSymbol.ElementType, cause );
+
+                        break;
+                    }
+
+                case SerializationIntrinsicType.Struct:
+                case SerializationIntrinsicType.Class:
+                    {
+                        var genericTypeDefinition = typeSymbol.OriginalDefinition;
+                        this._binaryWriter.WriteByte( (byte) intrinsicType );
+
+                        if ( typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.OriginalDefinition != namedTypeSymbol )
+                        {
+                            this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Generic );
+                            this.WriteTypeName( genericTypeDefinition );
+
+                            var genericTypeArguments = namedTypeSymbol.TypeArguments;
+
+                            this._binaryWriter.WriteCompressedInteger( genericTypeArguments.Length );
+
+                            foreach ( var genericTypeArgument in genericTypeArguments )
+                            {
+                                this.WriteType( genericTypeArgument, cause );
+                            }
+                        }
+                        else
+                        {
+                            this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Default );
+                            this.WriteTypeName( genericTypeDefinition );
+                        }
+                    }
+
+                    break;
+
+                case SerializationIntrinsicType.GenericTypeParameter:
+                    this.WriteGenericTypeParameter( (ITypeParameterSymbol) typeSymbol, cause );
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(typeSymbol) );
+            }
+        }
 
         private void WriteTypeName( Type type )
         {
@@ -244,9 +305,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             if ( !this._typeNameCache.TryGetValue( type, out var assemblyTypeName ) )
             {
-                var surrogateType = this.GetSurrogateType( type );
-
-                this._formatter.Binder.BindToName( surrogateType, out var typeName, out var assemblyName );
+                this._formatter.Binder.BindToName( type, out var typeName, out var assemblyName );
                 assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
 
                 this._typeNameCache.Add( type, assemblyTypeName );
@@ -255,15 +314,22 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             this.WriteTypeName( assemblyTypeName );
         }
 
-        private Type GetSurrogateType( Type type )
+        private void WriteTypeName( ITypeSymbol typeSymbol )
         {
-            if ( !this._surrogateTypesCache.TryGetValue( type, out var surrogateType ) )
+            if ( typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.ConstructedFrom != namedTypeSymbol )
             {
-                surrogateType = this._formatter.SerializerProvider.GetSurrogateType( type );
-                this._surrogateTypesCache.Add( type, surrogateType );
+                throw new ArgumentOutOfRangeException( nameof(typeSymbol) );
             }
 
-            return surrogateType;
+            if ( !this._typeSymbolNameCache.TryGetValue( typeSymbol, out var assemblyTypeName ) )
+            {
+                this._formatter.Binder.BindToName( typeSymbol, out var typeName, out var assemblyName );
+                assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
+
+                this._typeSymbolNameCache.Add( typeSymbol, assemblyTypeName );
+            }
+
+            this.WriteTypeName( assemblyTypeName );
         }
 
         private void WriteTypeName( AssemblyTypeName type )
@@ -284,7 +350,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             objectInfo.ConstructionDataWritten = true;
 
             var objectType = objectInfo.Object.GetType();
-            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( objectType );
+            var intrinsicType = objectType.GetIntrinsicType();
 
             this.WriteType( objectType, cause, intrinsicType );
 
@@ -316,7 +382,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             objectInfo.InitializationArgumentsWritten = true;
 
             var type = objectInfo.Object.GetType();
-            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
+            var intrinsicType = type.GetIntrinsicType();
 
             var array = objectInfo.Object as Array;
 
@@ -337,7 +403,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private void WriteTypedValue( object value, bool writeInitializationDataInline, SerializationCause? cause )
         {
             var type = value.GetType();
-            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type, true );
+            var intrinsicType = type.GetIntrinsicType( useObjRef: true );
             this.WriteType( type, cause, intrinsicType );
 
             this.WriteValue( value, intrinsicType, writeInitializationDataInline, cause );
@@ -449,6 +515,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             this._binaryWriter.WriteCompressedInteger( type.GenericParameterPosition );
         }
 
+        private void WriteGenericTypeParameter( ITypeParameterSymbol typeParameterSymbol, SerializationCause? cause )
+        {
+            this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.GenericTypeParameter );
+            this.WriteType( typeParameterSymbol.ContainingType, cause );
+            this._binaryWriter.WriteCompressedInteger( typeParameterSymbol.Ordinal );
+        }
+
         private void WriteObjectReference( object value, bool writeInitializationDataInline, SerializationCause? cause )
         {
             var objectInfo = this.GetObjectInfo( value, cause );
@@ -530,7 +603,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 return;
             }
 
-            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( obj.GetType() );
+            var intrinsicType = obj.GetType().GetIntrinsicType();
 
             switch ( intrinsicType )
             {
@@ -593,7 +666,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
             else
             {
-                var elementIntrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( elementType, true );
+                var elementIntrinsicType = elementType.GetIntrinsicType( useObjRef: true );
 
                 for ( var i = lowerBound; i < lowerBound + length; i++ )
                 {

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -14,10 +13,12 @@ internal sealed partial class SymbolTranslator
     private sealed class Visitor : SymbolVisitor<ISymbol>
     {
         private readonly SymbolTranslator _parent;
+        private readonly bool _allowMultipleCandidates;
 
-        public Visitor( SymbolTranslator parent )
+        public Visitor( SymbolTranslator parent, bool allowMultipleCandidates )
         {
             this._parent = parent;
+            this._allowMultipleCandidates = allowMultipleCandidates;
         }
 
         public override ISymbol DefaultVisit( ISymbol symbol ) => throw new NotSupportedException( $"Cannot map a symbol of kind '{symbol.Kind}'." );
@@ -69,8 +70,15 @@ internal sealed partial class SymbolTranslator
             }
             else
             {
-                throw new AssertionFailedException(
-                    $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsEnumerable( x => $"'{x}'" ) )}." );
+                if ( this._allowMultipleCandidates )
+                {
+                    return candidates[0];
+                }
+                else
+                {
+                    throw new AssertionFailedException(
+                        $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsEnumerable( x => $"'{x}'" ) )}." );
+                }
             }
         }
 

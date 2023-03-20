@@ -1,11 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
@@ -15,16 +21,17 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly Dictionary<int, SerializationQueueItem<ObjRef>> _referenceTypeInstances = new();
 
-        private readonly SerializationBinaryReader _binaryReader;
-
         private readonly CompileTimeSerializer _formatter;
         private readonly bool _shouldReportExceptionCause;
+        private readonly SerializationBinaryReader _binaryReader;
+        private readonly CompileTimeTypeFactory? _compileTimeTypeFactory;
 
-        internal SerializationReader( Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
+        internal SerializationReader( ProjectServiceProvider serviceProvider, Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
             this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
+            this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
         }
 
         public object? Deserialize()
@@ -246,7 +253,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Enum:
                     type = this.ReadNamedType();
 
-                    if ( !type.IsEnum )
+                    // IsEnum throws on CompileTimeType. Similarly for the checks below.
+                    if ( type is not CompileTimeType && !type.IsEnum )
                     {
                         throw new CompileTimeSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be an enum type.", type ) );
@@ -257,7 +265,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Struct:
                     type = this.ReadNamedType();
 
-                    if ( !type.IsValueType )
+                    if ( type is not CompileTimeType && !type.IsValueType )
                     {
                         throw new CompileTimeSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a value type.", type ) );
@@ -268,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Class:
                     type = this.ReadNamedType();
 
-                    if ( type.IsValueType )
+                    if ( type is not CompileTimeType && type.IsValueType )
                     {
                         throw new CompileTimeSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a reference type.", type ) );
@@ -280,8 +288,19 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     int rank = this._binaryReader.ReadCompressedInteger();
                     this.ReadType( out var elementType, out _ );
 
-                    // Assertion on type nullability was added after code import from PostSharp.
-                    type = rank == 1 ? elementType.AssertNotNull().MakeArrayType() : elementType.AssertNotNull().MakeArrayType( rank );
+                    if ( elementType is CompileTimeType compileTimeType )
+                    {
+                        var compilation = this._formatter.Compilation.AssertNotNull();
+                        var elementTypeSymbol = (INamedTypeSymbol) compileTimeType.Target.GetSymbol( compilation ).AssertNotNull();
+
+                        var arrayTypeSymbol = compilation.CreateArrayTypeSymbol( elementTypeSymbol, rank );
+
+                        type = this._compileTimeTypeFactory.AssertNotNull().Get( arrayTypeSymbol );
+                    }
+                    else
+                    {
+                        type = rank == 1 ? elementType.AssertNotNull().MakeArrayType() : elementType.AssertNotNull().MakeArrayType( rank );
+                    }
 
                     break;
 
@@ -339,6 +358,18 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                                 genericArguments[i] = this.ReadType().AssertNotNull();
                             }
 
+                            if ( genericType is CompileTimeType || genericArguments.OfType<CompileTimeType>().Any() )
+                            {
+                                var compilation = this._formatter.Compilation.AssertNotNull();
+                                var mapper = CompilationContextFactory.GetInstance( compilation ).ReflectionMapper;
+
+                                var genericTypeSymbol = (INamedTypeSymbol) mapper.GetTypeSymbol( genericType );
+
+                                var constructedTypeSymbol = genericTypeSymbol.Construct( genericArguments.SelectAsArray( mapper.GetTypeSymbol ) );
+
+                                return this._compileTimeTypeFactory.AssertNotNull().Get( constructedTypeSymbol );
+                            }
+
                             return genericType.MakeGenericType( genericArguments );
                         }
                         else
@@ -346,13 +377,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                             return genericType;
                         }
                     }
-
-                // TODO: Remove
-                // case SerializationIntrinsicTypeFlags.MetadataIndex:
-                // {
-                //    int index = this.binaryReader.ReadCompressedInteger();
-                //    return (Type) this.formatter.MetadataDispenser.GetMetadata( index );
-                // }
 
                 default:
                     throw new CompileTimeSerializationException();
@@ -384,7 +408,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             if ( intrinsicType == SerializationIntrinsicType.None )
             {
-                intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
+                intrinsicType = type.GetIntrinsicType();
             }
 
             object? value;
@@ -500,7 +524,23 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return declaringType.GetGenericArguments()[position];
         }
 
-        private Type GetType( AssemblyTypeName typeName ) => this._formatter.Binder.BindToType( typeName.TypeName, typeName.AssemblyName );
+        private Type GetType( AssemblyTypeName typeName )
+        {
+            var result = this._formatter.Binder.BindToType( typeName.TypeName, typeName.AssemblyName );
+
+            if ( result == null )
+            {
+                var assemblySymbol = this._formatter.Compilation.AssertNotNull().GetAssembly( typeName.AssemblyName )
+                                     ?? throw new InvalidOperationException( $"Could not locate assembly {typeName.AssemblyName} in compilation." );
+
+                var typeSymbol = assemblySymbol.GetTypeByMetadataName( typeName.TypeName )
+                                 ?? throw new InvalidOperationException( $"Could not locate type {typeName.TypeName} in assembly {typeName.AssemblyName} in compilation." );
+
+                result = this._compileTimeTypeFactory.AssertNotNull().Get( typeSymbol );
+            }
+
+            return result;
+        }
 
         private void ReadArray( Array array, SerializationCause? cause )
         {
@@ -524,7 +564,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
             else
             {
-                var elementIntrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( elementType, true );
+                var elementIntrinsicType = elementType.GetIntrinsicType( true );
 
                 for ( var i = lowerBound; i < lowerBound + length; i++ )
                 {
@@ -532,7 +572,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                     var newCause = this._shouldReportExceptionCause ? SerializationCause.WithIndices( cause, indices ) : null;
 
-                    if ( SerializationIntrinsicTypeExtensions.IsPrimitiveIntrinsic( elementIntrinsicType ) )
+                    if ( elementIntrinsicType.IsPrimitiveIntrinsic() )
                     {
                         array.SetValue( this.ReadValue( elementIntrinsicType, elementType, false, newCause ), indices );
                     }

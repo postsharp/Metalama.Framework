@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
@@ -24,48 +23,33 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "Type" );
 
-        private CompileTimeType( ISdkRef<IType> typeSymbol, string fullName )
+        private CompileTimeType( ISdkRef<IType> targetRef, ITypeSymbol symbolForMetadata )
         {
-            if ( string.IsNullOrEmpty( fullName ) )
-            {
-                throw new ArgumentNullException( nameof(fullName) );
-            }
+            this.Namespace = symbolForMetadata.ContainingNamespace.GetFullName();
+            this.Name = symbolForMetadata.GetReflectionName().AssertNotNull();
+            this.FullName = symbolForMetadata.GetReflectionFullName().AssertNotNull();
+            this._toStringName = symbolForMetadata.GetReflectionToStringName().AssertNotNull();
 
-            this.FullName = fullName;
-            this.Target = typeSymbol;
+            this.Target = targetRef;
         }
 
-        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
-            => new( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
+        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata )
+            => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata );
 
         // For test only.
         internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().CompilationContext );
 
         // For test only.
         private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilation )
-            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
+            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol );
 
-        public override string Namespace
-        {
-            get
-            {
-                AttributeHelper.Parse( this.FullName, out var ns, out _, out _ );
+        public override string? Namespace { get; }
 
-                return ns;
-            }
-        }
-
-        public override string Name
-        {
-            get
-            {
-                AttributeHelper.Parse( this.FullName, out _, out var name, out _ );
-
-                return name;
-            }
-        }
+        public override string Name { get; }
 
         public override string FullName { get; }
+
+        private readonly string _toStringName;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
@@ -125,6 +109,8 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type UnderlyingSystemType => throw CreateNotSupportedException();
 
+        public override bool IsGenericType => throw CreateNotSupportedException();
+
         protected override bool IsArrayImpl() => throw CreateNotSupportedException();
 
         protected override bool IsByRefImpl() => throw CreateNotSupportedException();
@@ -162,8 +148,6 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type[] GetInterfaces() => throw CreateNotSupportedException();
 
-        public override string ToString() => this.FullName;
-
-        public override int GetHashCode() => this.Target.GetHashCode();
+        public override string ToString() => this._toStringName;
     }
 }

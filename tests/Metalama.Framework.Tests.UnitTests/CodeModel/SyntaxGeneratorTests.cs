@@ -134,10 +134,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( "null", "default(global::System.Object)" )]
         [InlineData( "typeof(string)", "typeof(global::System.String)" )]
         [InlineData( "DayOfWeek.Monday", "global::System.DayOfWeek.Monday" )]
-        [InlineData( "new[] { 0 }", "new global::System.Int32[]{0}" )]
-        [InlineData( "new[] { (string?) null }", "new global::System.String[]{null}" )]
-        [InlineData( "new[] { typeof(string) }", "new global::System.Type[]{typeof(global::System.String)}" )]
-        [InlineData( "new[] { DayOfWeek.Monday }", "new global::System.DayOfWeek[]{global::System.DayOfWeek.Monday}" )]
+        [InlineData( "new[] { 0 }", "new global::System.Int32[] { 0 }" )]
+        [InlineData( "new[] { (string?) null }", "new global::System.String[] { null }" )]
+        [InlineData( "new[] { typeof(string) }", "new global::System.Type[] { typeof(global::System.String) }" )]
+        [InlineData( "new[] { DayOfWeek.Monday }", "new global::System.DayOfWeek[] { global::System.DayOfWeek.Monday }" )]
         public void AttributeValue( string inputSyntax, string expectedOutputSyntax )
         {
             using var testContext = this.CreateTestContext();

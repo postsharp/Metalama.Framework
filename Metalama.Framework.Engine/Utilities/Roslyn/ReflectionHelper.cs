@@ -1,18 +1,30 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class ReflectionHelper
     {
+        // From internal System.TypeNameKind in System.Private.CoreLib
+        private enum TypeNameKind
+        {
+            Name,
+            ToString,
+            FullName,
+        }
+
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionFullNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionToStringNameCache = new();
+
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
         {
             ImmutableArray<byte> publicKeyOrToken = default;
@@ -56,23 +68,59 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             else
             {
-                var referencedAssembly = compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Identity.Equals( assemblyName ) );
+                return compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Identity.Equals( assemblyName ) );
+            }
+        }
 
-                if ( referencedAssembly != null )
-                {
-                    return referencedAssembly;
-                }
-                else
-                {
-                    return null;
-                }
+        public static IAssemblySymbol? GetAssembly( this Compilation compilation, string assemblyName )
+        {
+            if ( compilation.Assembly.Name == assemblyName )
+            {
+                return compilation.Assembly;
+            }
+            else
+            {
+                return compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Name == assemblyName );
             }
         }
 
         /// <summary>
+        /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
+        /// </summary>
+        public static string GetReflectionName( this INamedTypeSymbol symbol )
+            => ((INamespaceOrTypeSymbol) symbol).GetReflectionName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
+        /// </summary>
+        public static string? GetReflectionName( this INamespaceOrTypeSymbol s )
+            => _reflectionNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.Name ) );
+
+        /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
-        public static string? GetReflectionName( this ITypeSymbol s )
+        public static string GetReflectionFullName( this INamedTypeSymbol s )
+            => ((INamespaceOrTypeSymbol) s).GetReflectionFullName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
+        /// </summary>
+        public static string? GetReflectionFullName( this INamespaceOrTypeSymbol s )
+            => _reflectionFullNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.FullName ) );
+
+        /// <summary>
+        /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
+        /// </summary>
+        public static string GetReflectionToStringName( this INamedTypeSymbol s )
+            => ((INamespaceOrTypeSymbol) s).GetReflectionToStringName()!;
+
+        /// <summary>
+        /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
+        /// </summary>
+        public static string? GetReflectionToStringName( this INamespaceOrTypeSymbol s )
+            => _reflectionToStringNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.ToString ) );
+
+        private static string? GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
         {
             if ( s is ITypeParameterSymbol typeParameter )
             {
@@ -86,10 +134,14 @@ namespace Metalama.Framework.Engine.CompileTime
                 return null;
             }
 
-            bool TryAppend( INamespaceOrTypeSymbol symbol )
+            return sb.ToString();
+
+            bool TryAppend( INamespaceOrTypeSymbol symbol, List<ITypeSymbol>? typeArguments = null )
             {
+                var currentTypeArguments = typeArguments ?? new();
+
                 // Append the containing namespace or type.
-                if ( symbol is not ITypeParameterSymbol )
+                if ( kind != TypeNameKind.Name && symbol is not ITypeParameterSymbol )
                 {
                     switch ( symbol.ContainingSymbol )
                     {
@@ -97,7 +149,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             break;
 
                         case ITypeSymbol type:
-                            if ( !TryAppend( type ) )
+                            if ( !TryAppend( type, currentTypeArguments ) )
                             {
                                 return false;
                             }
@@ -127,26 +179,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 switch ( symbol )
                 {
-                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition():
+                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType
+                        when (!unboundGenericType.IsGenericTypeDefinition() && kind != TypeNameKind.Name)
+                             || kind == TypeNameKind.ToString:
                         sb.Append( unboundGenericType.MetadataName );
-                        sb.Append( "[" );
 
-                        for ( var i = 0; i < unboundGenericType.TypeArguments.Length; i++ )
-                        {
-                            if ( i > 0 )
-                            {
-                                sb.Append( ", " );
-                            }
-
-                            var arg = unboundGenericType.TypeArguments[i];
-
-                            if ( !TryAppend( arg ) )
-                            {
-                                return false;
-                            }
-                        }
-
-                        sb.Append( "]" );
+                        currentTypeArguments.AddRange( unboundGenericType.TypeArguments );
 
                         break;
 
@@ -194,10 +232,30 @@ namespace Metalama.Framework.Engine.CompileTime
                         throw new AssertionFailedException( $"Don't know how to process a {symbol!.Kind}." );
                 }
 
+                if ( typeArguments == null && currentTypeArguments.Any() )
+                {
+                    sb.Append( '[' );
+
+                    for ( var i = 0; i < currentTypeArguments.Count; i++ )
+                    {
+                        if ( i > 0 )
+                        {
+                            sb.Append( ',' );
+                        }
+
+                        var arg = currentTypeArguments[i];
+
+                        if ( !TryAppend( arg ) )
+                        {
+                            return false;
+                        }
+                    }
+
+                    sb.Append( ']' );
+                }
+
                 return true;
             }
-
-            return sb.ToString();
         }
 
 #pragma warning disable SA1629 // Documentation text should end with a period

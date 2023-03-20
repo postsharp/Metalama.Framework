@@ -494,15 +494,44 @@ class TargetCode
 
                 AssertEx.DynamicEquals(
                     method.Parameters.ToValueArray(),
-                    @"new object[]{a, b, c, default(global::System.DateTime), e}" );
+                    """
+                    new object[]
+                    {
+                        a,
+                        b,
+                        c,
+                        default(global::System.DateTime),
+                        e
+                    }
+                    """ );
 
                 AssertEx.DynamicEquals(
                     longMethod.Parameters.ToValueArray(),
-                    @"new object[]{a, b, c, d, e, f, g, h, i, j, k, l}" );
+                    """
+                    new object[]
+                    {
+                        a,
+                        b,
+                        c,
+                        d,
+                        e,
+                        f,
+                        g,
+                        h,
+                        i,
+                        j,
+                        k,
+                        l
+                    }
+                    """ );
 
                 AssertEx.DynamicEquals(
                     noParameterMethod.Parameters.ToValueArray(),
-                    @"new object[]{}" );
+                    """
+                    new object[]
+                    {
+                    }
+                    """ );
             }
         }
     }

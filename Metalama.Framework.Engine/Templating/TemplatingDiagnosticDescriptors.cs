@@ -89,12 +89,12 @@ namespace Metalama.Framework.Engine.Templating
                     Error );
 
         internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
-                string MissingKind)>
-            MemberMemberNotAvailable
+                string MissingKind, string? AlternativeSuggestion)>
+            MetaMemberNotAvailable
                 = new(
                     "LAMA0115",
                     "Cannot use a meta member in the current context",
-                    "The advice '{0}' cannot use '{1}' in an advice applied to {3} '{2}' because there is no '{4}' in the context of a {3}.",
+                    "The advice '{0}' cannot use '{1}' in an advice applied to {3} '{2}' because there is no '{4}'.{5}",
                     _category,
                     Error );
 
@@ -408,6 +408,14 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0257",
                 "Cannot set a template member from an attribute.",
                 "Cannot set a template member {0} from an attribute.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> CannotMarkDeclarationAsTemplate
+            = new(
+                "LAMA0258",
+                "Declaration is an invalid declaration to be marked as a template.",
+                "'{0}' is an invalid declaration to be marked as a template.",
                 _category,
                 Error );
     }

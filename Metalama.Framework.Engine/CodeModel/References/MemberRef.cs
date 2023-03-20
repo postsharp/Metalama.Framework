@@ -40,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
+        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTargetOrNull( compilation, options );
+
         public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation ).AssertNotNull();
 
         public Ref<T> ToRef() => this._underlying;

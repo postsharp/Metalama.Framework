@@ -1104,7 +1104,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     {
                         var methods = type.Methods.OfName( memberName );
 
-                        var accessors = EnumerableExtensions.Concat<IMemberWithAccessors>( type.Properties, type.Indexers, type.Events )
+                        var accessors = EnumerableExtensions.Concat<IHasAccessors>( type.Properties, type.Indexers, type.Events )
                             .SelectMany( p => p.Accessors )
                             .Where( a => a.Name == memberName );
 
