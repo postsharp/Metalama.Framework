@@ -11,13 +11,11 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private sealed class ReplaceDynamicToObjectRewriter : SafeSyntaxRewriter
         {
-            private static readonly ReplaceDynamicToObjectRewriter _instance = new();
-
             private ReplaceDynamicToObjectRewriter() { }
 
             public static T Rewrite<T>( T node )
                 where T : SyntaxNode
-                => (T) _instance.Visit( node )!;
+                => (T) new ReplaceDynamicToObjectRewriter().Visit( node );
 
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {

@@ -143,7 +143,7 @@ public class TargetClass
             {
                 inputCompilation = inputCompilation.ReplaceSyntaxTree(
                     inputSyntaxTree,
-                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() )!, inputSyntaxTree.Options ) );
+                    inputSyntaxTree.WithRootAndOptions( new RemovingRewriter().Visit( await inputSyntaxTree.GetRootAsync() )!, inputSyntaxTree.Options ) );
             }
 
             // Replace the project options to enable design time fallback.
@@ -197,8 +197,6 @@ public class TargetClass
 
         private sealed class RemovingRewriter : SafeSyntaxRewriter
         {
-            public static readonly RemovingRewriter Instance = new();
-
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 if ( HasRemoveTrivia( node ) )

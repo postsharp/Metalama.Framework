@@ -14,8 +14,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     [PublicAPI]
     public sealed class RemovePreprocessorDirectivesRewriter : SafeSyntaxRewriter
     {
-        internal static RemovePreprocessorDirectivesRewriter Instance { get; } = new();
-
         private readonly ImmutableHashSet<SyntaxKind> _preservedSyntaxKinds;
         private static readonly SyntaxTrivia _emptyTrivia = SyntaxFactory.Whitespace( "" );
 

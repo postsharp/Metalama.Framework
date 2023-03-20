@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -18,35 +17,24 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
 {
     protected SafeSyntaxWalker( SyntaxWalkerDepth depth = SyntaxWalkerDepth.Node ) : base( depth ) { }
 
-    private int _recursionDepth;
-
-    // InsufficientExecutionStackException can be observed when this is > 900, so set it to a value that is significantly smaller than that, to be safe.
-    private const int _maxRecursionDepth = 750;
+    private RecursionGuard _recursionGuard;
 
     public sealed override void Visit( SyntaxNode? node )
     {
         try
         {
-            this._recursionDepth++;
+            this._recursionGuard.IncrementDepth();
 
-            // If there is a risk of running out of stack space on the current thread, switch to a different thread.
-            // Note that RuntimeHelpers.EnsureSufficientExecutionStack wouldn't work here, since it doesn't take into account executing potentially
-            // deeply recursive Roslyn methods.
-
-            if ( this._recursionDepth % _maxRecursionDepth == 0 )
+            if ( this._recursionGuard.ShouldSwitch )
             {
-                // The ContinueWith is used to prevent inline execution of the Task.
-
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-                Task.Run( () => this.VisitCore( node ) ).ContinueWith( _ => { }, TaskScheduler.Default ).Wait();
-#pragma warning restore VSTHRD002
+                this._recursionGuard.Switch( () => this.VisitCore( node ) );
             }
             else
             {
                 this.VisitCore( node );
             }
 
-            this._recursionDepth--;
+            this._recursionGuard.DecrementDepth();
         }
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {

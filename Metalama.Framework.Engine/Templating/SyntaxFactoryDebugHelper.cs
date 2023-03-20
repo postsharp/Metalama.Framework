@@ -18,7 +18,7 @@ public static partial class SyntaxFactoryDebugHelper
 
         try
         {
-            var normalized = NormalizeRewriter.Instance.Visit( node );
+            var normalized = new NormalizeRewriter().Visit( node );
             var transformedNode = rewriter.Visit( normalized )!;
 
             return transformedNode.ToFullString();

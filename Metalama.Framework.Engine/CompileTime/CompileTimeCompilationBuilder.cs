@@ -225,7 +225,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.SyntaxTree.FilePath ) );
 
                     // Remove all preprocessor trivias.
-                    compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
+                    compileTimeSyntaxRoot = new RemovePreprocessorDirectivesRewriter().Visit( compileTimeSyntaxRoot ).AssertNotNull();
 
                     return CSharpSyntaxTree.Create(
                         (CSharpSyntaxNode) compileTimeSyntaxRoot,
