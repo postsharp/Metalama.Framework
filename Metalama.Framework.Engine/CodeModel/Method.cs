@@ -109,9 +109,9 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
-    public IMemberWithAccessors? DeclaringMember
+    public IHasAccessors? DeclaringMember
         => this.MethodSymbol.AssociatedSymbol != null
-            ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IMemberWithAccessors
+            ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IHasAccessors
             : null;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();

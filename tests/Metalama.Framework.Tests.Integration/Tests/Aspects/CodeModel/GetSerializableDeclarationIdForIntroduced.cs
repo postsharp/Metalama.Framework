@@ -133,7 +133,7 @@ static class TestDeclarationExtensions
                 .Concat(method.ReturnParameter == null ? Enumerable.Empty<IDeclaration>() : new[] { method.ReturnParameter }),
             IIndexer indexer => indexer.Parameters.Concat<IDeclaration>(indexer.Accessors),
             IConstructor constructor => constructor.Parameters,
-            IMemberWithAccessors member => member.Accessors,
+            IHasAccessors member => member.Accessors,
             _ => Enumerable.Empty<IDeclaration>()
         };
 }

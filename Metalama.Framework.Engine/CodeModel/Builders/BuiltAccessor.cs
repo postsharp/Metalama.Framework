@@ -97,7 +97,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public MethodInfo ToMethodInfo() => this._accessorBuilder.ToMethodInfo();
 
-    IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
+    IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
     public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
 
