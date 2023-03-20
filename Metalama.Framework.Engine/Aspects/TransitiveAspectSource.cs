@@ -112,14 +112,9 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 
         foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
         {
-            IDeclaration baseDeclaration;
+            var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTargetOrNull( compilation );
 
-            try
-            {
-                // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
-                baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTarget( compilation );
-            }
-            catch ( SymbolNotFoundException )
+            if ( baseDeclaration == null )
             {
                 continue;
             }
@@ -151,14 +146,9 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
             return this._referenceValidators.Select(
                     v =>
                     {
-                        IDeclaration validationTarget;
+                        var validationTarget = v.ValidatedDeclaration.GetTargetOrNull( compilation );
 
-                        try
-                        {
-                            // TODO #32837: There is currently to simple way to have "GetTarget" without changing public API, like TryGetTarget.
-                            validationTarget = v.ValidatedDeclaration.GetTarget( compilation );
-                        }
-                        catch ( SymbolNotFoundException )
+                        if ( validationTarget == null )
                         {
                             return null;
                         }

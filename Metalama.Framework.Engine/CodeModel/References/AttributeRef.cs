@@ -103,6 +103,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return attribute;
         }
 
+        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
+        {
+            if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
+            {
+                return null;
+            }
+
+            return attribute;
+        }
+
         private AttributeSyntax? Syntax
             => this.Target switch
             {
