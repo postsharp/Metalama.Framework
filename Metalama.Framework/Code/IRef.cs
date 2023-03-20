@@ -24,9 +24,15 @@ namespace Metalama.Framework.Code
         SerializableDeclarationId ToSerializableId();
 
         /// <summary>
-        /// Gets the target of the reference for a given compilation. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
+        /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
+        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
         T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default );
+
+        /// <summary>
+        /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
+        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
+        /// </summary>
+        T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default );
     }
 }
