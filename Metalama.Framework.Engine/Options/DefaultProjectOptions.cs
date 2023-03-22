@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 namespace Metalama.Framework.Engine.Options;
 
@@ -31,6 +32,23 @@ public class DefaultProjectOptions : IProjectOptions
     public virtual bool IsUserCodeTrusted => true;
 
     public virtual string? ProjectPath => null;
+
+    public virtual string? ProjectName
+    {
+        get
+        {
+            var path = this.ProjectPath;
+
+            if ( path == null )
+            {
+                return null;
+            }
+            else
+            {
+                return Path.GetFileNameWithoutExtension( path );
+            }
+        }
+    }
 
     public virtual string? TargetFramework => "net6.0";
 

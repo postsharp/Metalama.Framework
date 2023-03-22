@@ -18,7 +18,10 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public interface IProject
     {
-        string Name { get; }
+        /// <summary>
+        /// Gets the project name, i.e. the <see cref="Path"/> without the directory and without the extension.
+        /// </summary>
+        string? Name { get; }
 
         /// <summary>
         /// Gets the path to the <c>csproj</c> file.

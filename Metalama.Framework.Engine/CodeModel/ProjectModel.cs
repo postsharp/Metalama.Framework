@@ -55,9 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public string Name
-            => this._projectOptions.ProjectPath != null
-                ? System.IO.Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath )
-                : this._projectOptions.AssemblyName ?? "unnamed";
+            => this._projectOptions.ProjectName ?? this._projectOptions.AssemblyName ?? "unnamed";
 
         public string? Path => this._projectOptions.ProjectPath;
 

@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Options
         /// Gets a value indicating whether the output syntax trees must be formatted.
         /// </summary>
         bool FormatOutput { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether HTML files should be written for syntax-highlighted input and transformed
         /// code of all syntax trees in the project.
@@ -58,6 +58,11 @@ namespace Metalama.Framework.Engine.Options
         /// Gets the path to the <c>csproj</c> file.
         /// </summary>
         string? ProjectPath { get; }
+
+        /// <summary>
+        /// Gets the project file name without extension.
+        /// </summary>
+        string? ProjectName { get; }
 
         /// <summary>
         /// Gets the short target framework name, for instance <c>net6.0</c>.
@@ -126,7 +131,7 @@ namespace Metalama.Framework.Engine.Options
         /// Metalama.Compiler, which already has the additional license set.
         /// </remarks>
         string? License { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the json file with license consumption data should be written. If the property
         /// is null, it is considered <c>true</c> in trial mode and <c>false</c> otherwise.

@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.Formatting
             var finalBuilder = new StringBuilder();      // Builds the whole file.
             var codeLineBuilder = new StringBuilder();   // Builds the current line.
             var diagnosticBuilder = new StringBuilder(); // Builds the diagnostics of the current line.
+            var diagnosticSet = new HashSet<string>( StringComparer.Ordinal );
 
             void FlushLine()
             {
@@ -89,6 +90,7 @@ namespace Metalama.Framework.Engine.Formatting
                     finalBuilder.Append( "</span>" );
 
                     diagnosticBuilder.Clear();
+                    diagnosticSet.Clear();
                 }
 
                 // Then write the buffered code.
@@ -156,7 +158,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             var diagnostic = DiagnosticAnnotation.FromJson( diagnosticJson );
 
-                            if ( diagnostic.Severity != DiagnosticSeverity.Hidden )
+                            if ( diagnostic.Severity != DiagnosticSeverity.Hidden && diagnosticSet.Add( diagnostic.Message ) )
                             {
                                 titles.Add( diagnostic.ToString() );
 

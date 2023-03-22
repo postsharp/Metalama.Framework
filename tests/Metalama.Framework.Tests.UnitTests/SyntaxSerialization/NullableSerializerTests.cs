@@ -19,6 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         public void TestListOfNullables()
         {
             var list = new List<float?> { 5, null };
+
             this.AssertSerialization(
                 list,
                 """

@@ -22,8 +22,9 @@ namespace Metalama.Testing.UnitTesting
         private readonly Lazy<string> _projectDirectory;
         private int _fileLockers;
 
-        public TestProjectOptions( TestContextOptions contextOptions )
+        public TestProjectOptions( TestContextOptions contextOptions, string? testName )
         {
+            this.ProjectName = testName;
             this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;
 
             this._properties = contextOptions.Properties;
@@ -63,6 +64,8 @@ namespace Metalama.Testing.UnitTesting
 
                     return path;
                 } );
+
+        public override string? ProjectName { get; }
 
         public override ImmutableArray<object> PlugIns { get; }
 

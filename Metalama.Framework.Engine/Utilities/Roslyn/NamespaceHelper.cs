@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullNameCache = new();
 
         public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
-            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetFullNameImpl( s ) );
+            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, GetFullNameImpl );
 
         private static string? GetFullNameImpl( this INamespaceOrTypeSymbol? symbol )
         {
@@ -24,12 +24,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             void AppendNameRecursive( ISymbol s )
             {
-                var (parent, separator, arity) = s switch
+                var (parent, separator) = s switch
                 {
-                    INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, '.', namedType.Arity),
-                    INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.', namedType.Arity),
-                    INamespaceSymbol ns => (ns.ContainingNamespace, '.', 0),
-                    _ => (s.ContainingSymbol, '.', 0)
+                    INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, '.'),
+                    INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.'),
+                    INamespaceSymbol ns => (ns.ContainingNamespace, '.'),
+                    _ => (s.ContainingSymbol, '.')
                 };
 
                 if ( parent != null )

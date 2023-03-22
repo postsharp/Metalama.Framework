@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Xunit;
 
+// ReSharper disable UnusedTypeParameter
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 
 public sealed class ReflectionHelperTests
