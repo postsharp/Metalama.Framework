@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
@@ -59,7 +58,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             Error,
             "Missing parameterless constructor." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseSerializer= new(
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseSerializer = new(
             "LAMA0206",
             _category,
             "Cannot generate a compile-time serializer for '{0}', the base type '{1}' declared in a referenced assembly must declare a visible serializer.",

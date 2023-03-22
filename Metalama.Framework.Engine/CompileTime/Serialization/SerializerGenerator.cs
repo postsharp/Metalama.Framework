@@ -52,9 +52,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     {
         var targetType = serializableType.Type.AssertNotNull();
         var baseType = serializableType.Type.BaseType.AssertNotNull();
-        var compileTimeSerializableType = this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof( ICompileTimeSerializable ) );
+        var compileTimeSerializableType = this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
-        var hasDeserializingBaseConstructor = false;
+        bool hasDeserializingBaseConstructor;
 
         if ( !baseType.AllInterfaces.Any( i => this._runTimeCompilationContext.SymbolComparer.Equals( i, compileTimeSerializableType ) ) )
         {
@@ -64,16 +64,19 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     .Constructors
                     .SingleOrDefault(
                         x =>
-                            x is { Parameters: [] }
-                            && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
+                            x is { Parameters: [], DeclaredAccessibility: Accessibility.Public or Accessibility.Protected } );
 
             if ( baseConstructor == null )
             {
                 this._diagnosticAdder.Report(
-                    SerializationDiagnosticDescriptors.MissingParameterlessConstructor.CreateRoslynDiagnostic( targetType.GetDiagnosticLocation(), (targetType, baseType) ) );
+                    SerializationDiagnosticDescriptors.MissingParameterlessConstructor.CreateRoslynDiagnostic(
+                        targetType.GetDiagnosticLocation(),
+                        (targetType, baseType) ) );
 
                 return null;
             }
+
+            hasDeserializingBaseConstructor = false;
         }
         else if ( !this._runTimeCompilationContext.SymbolComparer.Equals( targetType.ContainingAssembly, baseType.ContainingAssembly ) )
         {
@@ -82,12 +85,12 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             if ( this._referencedProjects.TryGetValue( baseType.ContainingAssembly.Identity, out var referencedProject ) )
             {
                 var baseTypeReflectionType = referencedProject.GetType( baseType.GetFullName().AssertNotNull() );
-                translatedBaseType = (INamedTypeSymbol)this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
+                translatedBaseType = (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
             }
 
-            if (translatedBaseType == null)
+            if ( translatedBaseType == null )
             {
-                throw new AssertionFailedException($"Could not translate {baseType} into the compile-time assembly.");
+                throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
             }
 
             // The base type is outside of current assembly, check that it has the deserializing constructor.
@@ -99,8 +102,8 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
                             && this._compileTimeCompilationContext.SymbolComparer.Equals(
                                 x.Parameters[0].Type,
-                                this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof( IArgumentsReader ) ) )
-                            && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected);
+                                this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                            && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
 
             if ( baseConstructor != null )
             {
@@ -115,14 +118,19 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 else
                 {
                     this._diagnosticAdder.Report(
-                        SerializationDiagnosticDescriptors.MissingDeserializingConstructor.CreateRoslynDiagnostic( targetType.GetDiagnosticLocation(), (targetType, baseType) ) );
+                        SerializationDiagnosticDescriptors.MissingDeserializingConstructor.CreateRoslynDiagnostic(
+                            targetType.GetDiagnosticLocation(),
+                            (targetType, baseType) ) );
 
                     return null;
                 }
             }
         }
-
-        // Otherwise the base type is serializable and in the same assembly, in which case existence of the correct constructor can be presumed.
+        else
+        {
+            // Otherwise the base type is serializable and in the same assembly, in which case existence of the correct constructor can be presumed.
+            hasDeserializingBaseConstructor = true;
+        }
 
         const string argumentReaderParameterName = "reader";
 
@@ -161,7 +169,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         // defined in another assembly (e.g. ReferenceTypeSerializer).
         var baseSerializerType = this.GetBaseSerializer( serializableType.Type );
 
-        if (baseSerializerType == null)
+        if ( baseSerializerType == null )
         {
             // Error was reported inside GetBaseSerializer.
             return null;
@@ -173,7 +181,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         if ( baseCtor == null )
         {
             this._diagnosticAdder.Report(
-                SerializationDiagnosticDescriptors.MissingBaseSerializerConstructor.CreateRoslynDiagnostic( serializableType.Type.GetDiagnosticLocation(), (serializableType.Type, baseSerializerType) ) );
+                SerializationDiagnosticDescriptors.MissingBaseSerializerConstructor.CreateRoslynDiagnostic(
+                    serializableType.Type.GetDiagnosticLocation(),
+                    (serializableType.Type, baseSerializerType) ) );
 
             return null;
         }
@@ -213,8 +223,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     }
 
     private bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
-    { 
-        if ( !this._runTimeCompilationContext.SymbolComparer.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly ) )
+    {
+        if ( !this._runTimeCompilationContext.SymbolComparer.Equals(
+                serializedType.ContainingAssembly,
+                serializedType.BaseType.AssertNotNull().ContainingAssembly ) )
         {
             // The base is defined in a different assembly.
             return false;
@@ -226,9 +238,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             return false;
         }
 
-        if ( !serializedType.BaseType.AssertNotNull().AllInterfaces.Contains(
-                this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof( ICompileTimeSerializable ) ),
-                this._runTimeCompilationContext.SymbolComparer ) )
+        if ( !serializedType.BaseType.AssertNotNull()
+                .AllInterfaces.Contains(
+                    this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
+                    this._runTimeCompilationContext.SymbolComparer ) )
         {
             // The base type is not serializable.
             return false;
@@ -282,7 +295,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     if ( baseSerializer == null )
                     {
                         this._diagnosticAdder.Report(
-                            SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic( targetType.GetDiagnosticLocation(), (targetType, targetType.BaseType) ) );
+                            SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
+                                targetType.GetDiagnosticLocation(),
+                                (targetType, targetType.BaseType) ) );
 
                         return null;
                     }
@@ -292,7 +307,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 else
                 {
                     this._diagnosticAdder.Report(
-                        SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic( targetType.GetDiagnosticLocation(), (targetType, targetType.BaseType) ) );
+                        SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
+                            targetType.GetDiagnosticLocation(),
+                            (targetType, targetType.BaseType) ) );
 
                     return null;
                 }

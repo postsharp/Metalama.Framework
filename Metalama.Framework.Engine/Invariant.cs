@@ -217,8 +217,7 @@ namespace Metalama.Framework.Engine
 
             for ( var index = 0; index < items.Length; index++ )
             {
-                var item = 
-                    items[index] 
+                _ = items[index] 
                     ?? throw new AssertionFailedException( $"The {index}-th {typeof(T).Name} must not be not null." );
             }
 #endif
