@@ -2,7 +2,22 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable_CrossAssembly;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable;
+
+/*
+ * The serializable base class of a serializable type.
+ */
+
+[RunTimeOrCompileTime]
+public class BaseType : ICompileTimeSerializable
+{
+    public int BaseValue { get; }
+
+    public BaseType(int baseValue)
+    {
+        this.BaseValue = baseValue;
+    }
+}
 
 [RunTimeOrCompileTime]
 public class MiddleType : BaseType
@@ -48,7 +63,7 @@ public class TestAspect : OverrideMethodAspect
 
 public class BaseClass
 {
-    [TestAspect(13, 27, 42)]
+    [TestAspect(13,27,42)]
     public virtual void Foo()
     {
     }

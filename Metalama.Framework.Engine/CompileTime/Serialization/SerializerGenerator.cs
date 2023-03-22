@@ -425,15 +425,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
             body = Block(
-                baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
-                    : ExpressionStatement(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                BaseExpression(),
-                                IdentifierName( nameof(ReferenceTypeSerializer.SerializeObject) ) ),
-                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
+                CreateBaseCallStatement(),
                 localVariableDeclaration,
                 this.CreateFieldSerializationStatements(
                     serializedType,
@@ -443,12 +435,26 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
         else
         {
-            body = SyntaxFactoryEx.FormattedBlock();
+            body = SyntaxFactoryEx.FormattedBlock( CreateBaseCallStatement() );
         }
 
         return this.CreateOverrideMethod(
             baseSerializeMethod,
             body );
+
+        StatementSyntax CreateBaseCallStatement()
+        {
+            return
+                baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
+                ? EmptyStatement()
+                : ExpressionStatement(
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            BaseExpression(),
+                            IdentifierName( nameof( ReferenceTypeSerializer.SerializeObject ) ) ),
+                        ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
+        }
     }
 
     private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod(
@@ -470,15 +476,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
             body = Block(
-                baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
-                    : ExpressionStatement(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                BaseExpression(),
-                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
-                            ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
+                CreateBaseCallStatement(),
                 localVariableDeclaration,
                 this.CreateFieldDeserializationStatements(
                     serializedType,
@@ -489,12 +487,26 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
         else
         {
-            body = SyntaxFactoryEx.FormattedBlock();
+            body = SyntaxFactoryEx.FormattedBlock( CreateBaseCallStatement() );
         }
 
         return this.CreateOverrideMethod(
             baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) ),
             body );
+
+        StatementSyntax CreateBaseCallStatement()
+        {
+            return
+                baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
+                ? EmptyStatement()
+                : ExpressionStatement(
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            BaseExpression(),
+                            IdentifierName( nameof( ReferenceTypeSerializer.DeserializeFields ) ) ),
+                            ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
+        }
     }
 
     private MethodDeclarationSyntax CreateValueTypeSerializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )

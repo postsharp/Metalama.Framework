@@ -2,28 +2,27 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassNotSerializable_CrossAssembly;
-
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ValueType;
 
 [RunTimeOrCompileTime]
-public class DerivedType : BaseType, ICompileTimeSerializable
+public struct ValueType : ICompileTimeSerializable
 {
     public int Value { get; }
 
-    public DerivedType(int value)
+    public ValueType(int value)
     {
-        Value = value;
+        this.Value = value;
     }
 }
 
 [Inheritable]
 public class TestAspect : OverrideMethodAspect
 {
-    public DerivedType SerializedValue;
+    public ValueType SerializedValue;
 
-    public TestAspect(int z)
+    public TestAspect(int x)
     {
-        SerializedValue = new DerivedType(z);
+        SerializedValue = new ValueType(x);
     }
 
     public override dynamic OverrideMethod()
@@ -39,5 +38,6 @@ public class BaseClass
     [TestAspect(42)]
     public virtual void Foo()
     {
+        Console.WriteLine("Original");
     }
 }

@@ -8,39 +8,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseC
  * The base class of a serializable type defined in another assembly is not itself serializable and has a parameterless base constructor.
  */
 
-[RunTimeOrCompileTime]
-public class DerivedType : BaseType, ICompileTimeSerializable
-{
-    public int Value { get; }
-
-    public DerivedType(int value)
-    {
-        Value = value;
-    }
-}
-
-public class TestAspect : OverrideMethodAspect
-{
-    public DerivedType SerializedValue;
-
-    public TestAspect(int z)
-    {
-        SerializedValue = new DerivedType(z);
-    }
-
-    public override dynamic OverrideMethod()
-    {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
-        return meta.Proceed();
-    }
-
-}
-
 //<target>
-public class TargetClass
+public class TargetClass : BaseClass
 {
-    [TestAspect(42)]
-    public void Foo()
+    public override void Foo()
     {
         Console.WriteLine("Original");
     }

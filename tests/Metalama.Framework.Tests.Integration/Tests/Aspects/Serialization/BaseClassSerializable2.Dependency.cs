@@ -2,25 +2,29 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable_CrossAssembly;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable2;
+
+/*
+ * The serializable base class of a serializable type.
+ */
 
 [RunTimeOrCompileTime]
-public class MiddleType : BaseType
+public class BaseType : ICompileTimeSerializable
 {
-    public int MiddleValue { get; }
+    public int BaseValue { get; }
 
-    public MiddleType(int baseValue, int middleValue) : base(baseValue)
+    public BaseType(int baseValue)
     {
-        this.MiddleValue = middleValue;
+        this.BaseValue = baseValue;
     }
 }
 
 [RunTimeOrCompileTime]
-public class DerivedType : MiddleType
+public class DerivedType : BaseType
 {
     public int Value { get; }
 
-    public DerivedType(int baseValue, int middleValue, int value) : base(baseValue, middleValue)
+    public DerivedType(int baseValue, int value) : base(baseValue)
     {
         Value = value;
     }
@@ -31,15 +35,14 @@ public class TestAspect : OverrideMethodAspect
 {
     public DerivedType SerializedValue;
 
-    public TestAspect(int x, int y, int z)
+    public TestAspect(int x, int y)
     {
-        SerializedValue = new DerivedType(x, y, z);
+        SerializedValue = new DerivedType(x, y);
     }
 
     public override dynamic OverrideMethod()
     {
         Console.WriteLine(meta.CompileTime(SerializedValue.BaseValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.MiddleValue));
         Console.WriteLine(meta.CompileTime(SerializedValue.Value));
         return meta.Proceed();
     }
@@ -48,7 +51,7 @@ public class TestAspect : OverrideMethodAspect
 
 public class BaseClass
 {
-    [TestAspect(13, 27, 42)]
+    [TestAspect(13, 42)]
     public virtual void Foo()
     {
     }

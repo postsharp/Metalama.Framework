@@ -2,10 +2,10 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ValueType;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ReferenceType_ValueTypeReadOnly;
 
 /*
- * The serializable value type.
+ * The serializable reference type.
  */
 
 //<target>

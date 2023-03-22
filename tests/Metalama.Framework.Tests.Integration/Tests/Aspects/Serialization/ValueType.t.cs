@@ -1,7 +1,6 @@
-public class TargetClass
+public class TargetClass : BaseClass
 {
-  [TestAspect(42)]
-  public void Foo()
+  public override void Foo()
   {
     global::System.Console.WriteLine(42);
     Console.WriteLine("Original");

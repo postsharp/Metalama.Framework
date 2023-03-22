@@ -5,12 +5,12 @@ using System;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable_CrossAssembly2;
 
 [RunTimeOrCompileTime]
-public class MiddleType : BaseType
+public class BaseType : ICompileTimeSerializable
 {
-    public int MiddleValue { get; }
+    public int BaseValue { get; }
 
-    public MiddleType(int baseValue, int middleValue) : base(baseValue)
+    public BaseType(int baseValue)
     {
-        this.MiddleValue = middleValue;
+        this.BaseValue = baseValue;
     }
 }

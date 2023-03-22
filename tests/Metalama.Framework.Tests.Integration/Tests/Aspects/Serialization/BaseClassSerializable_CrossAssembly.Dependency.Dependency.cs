@@ -4,15 +4,13 @@ using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable_CrossAssembly;
 
-/*
- * The serializable base class of a serializable type defined in another assembly.
- */
-
-//<target>
-public class TargetClass : BaseClass
+[RunTimeOrCompileTime]
+public class BaseType : ICompileTimeSerializable
 {
-    public override void Foo()
+    public int BaseValue { get; }
+
+    public BaseType(int baseValue)
     {
-        Console.WriteLine("Original");
+        this.BaseValue = baseValue;
     }
 }

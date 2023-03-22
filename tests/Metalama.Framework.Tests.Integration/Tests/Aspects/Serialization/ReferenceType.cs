@@ -8,39 +8,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.Refer
  * The serializable reference type.
  */
 
-[RunTimeOrCompileTime]
-public class ReferenceType : ICompileTimeSerializable
-{
-    public int Value { get; }
-
-    public ReferenceType(int value)
-    {
-        this.Value = value;
-    }
-}
-
-public class TestAspect : OverrideMethodAspect
-{
-    public ReferenceType SerializedValue;
-
-    public TestAspect(int x)
-    {
-        SerializedValue = new ReferenceType(x);
-    }
-
-    public override dynamic OverrideMethod()
-    {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
-        return meta.Proceed();
-    }
-
-}
-
 //<target>
-public class TargetClass
+public class TargetClass : BaseClass
 {
-    [TestAspect(42)]
-    public void Foo()
+    public override void Foo()
     {
         Console.WriteLine("Original");
     }
