@@ -39,6 +39,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? ProjectPath => this.Wrapped.ProjectPath;
 
+    public virtual string? ProjectName => this.Wrapped.ProjectName;
+
     public virtual string? TargetFramework => this.Wrapped.TargetFramework;
 
     public virtual string? TargetFrameworkMoniker => this.Wrapped.TargetFrameworkMoniker;

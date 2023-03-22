@@ -50,7 +50,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var initialCompilation = pipelineStepsResult.FirstCompilation;
             var finalCompilation = pipelineStepsResult.LastCompilation;
 
-            // TODO: pass aspect repository to initialCompilation.
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.

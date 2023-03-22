@@ -247,11 +247,11 @@ namespace Metalama.Framework.Engine.Fabrics
             this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
         }
 
-        public IValidatorReceiver<IDeclaration> AfterAllAspects()
-            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._selector );
+        public IValidatorReceiver<T> AfterAllAspects()
+            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._selector );
 
-        public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
-            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
+        public IValidatorReceiver<T> BeforeAnyAspect()
+            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
 
         public IAspectReceiver<TMember> SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
@@ -501,15 +501,16 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
-                var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
+                var containingTypeOrCompilation = (IDeclaration) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
+                                                  ?? compilation;
 
-                if ( (!targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal)
-                     && containingDeclaration.DeclarationKind != DeclarationKind.Compilation )
+                if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
+                     && containingTypeOrCompilation.DeclarationKind != DeclarationKind.Compilation )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
-                            (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingDeclaration) ) );
+                            (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingDeclaration: containingTypeOrCompilation) ) );
 
                     continue;
                 }

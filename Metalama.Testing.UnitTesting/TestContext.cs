@@ -83,7 +83,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     /// </summary>
     public TestContext(
         TestContextOptions contextOptions,
-        IAdditionalServiceCollection? additionalServices = null )
+        IAdditionalServiceCollection? additionalServices = null,
+        string? testName = null )
     {
         this._throttlingHandle = TestThrottlingHelper.StartTest( contextOptions.RequiresExclusivity );
 
@@ -93,7 +94,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
-        this.ProjectOptions = new TestProjectOptions( contextOptions );
+        this.ProjectOptions = new TestProjectOptions( contextOptions, testName );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
         var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
@@ -253,7 +254,10 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         {
             // For the AssemblyLocator, we use a single directory that is shared by all tests, for every build of the main engine assembly.
             // The reason is performance: this step is too expensive to be performed at each test.
-            return this._backstageTempFileManager.GetTempDirectory( directory, cleanUpStrategy, typeof(CompileTimeAspectPipeline).Module.ModuleVersionId.ToString() );
+            return this._backstageTempFileManager.GetTempDirectory(
+                directory,
+                cleanUpStrategy,
+                typeof(CompileTimeAspectPipeline).Module.ModuleVersionId.ToString() );
         }
         else
         {

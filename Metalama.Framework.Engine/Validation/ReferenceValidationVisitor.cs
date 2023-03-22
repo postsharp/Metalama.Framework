@@ -74,7 +74,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        this.ValidateSymbol( node, ReferenceKinds.Other );
+        this.ValidateSymbol( node, ReferenceKinds.None );
     }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
@@ -89,11 +89,18 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitInvocationExpression( InvocationExpressionSyntax node )
     {
-        this.ValidateSymbol( node.Expression, ReferenceKinds.Invocation );
-
-        foreach ( var arg in node.ArgumentList.Arguments )
+        if ( node.IsNameOf() )
         {
-            this.Visit( arg );
+            this.ValidateSymbol( node.ArgumentList.Arguments[0].Expression, ReferenceKinds.NameOf );
+        }
+        else
+        {
+            this.ValidateSymbol( node.Expression, ReferenceKinds.Invocation );
+
+            foreach ( var arg in node.ArgumentList.Arguments )
+            {
+                this.Visit( arg );
+            }
         }
     }
 
@@ -147,7 +154,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
     {
-        this.VisitTypeReference( node.Type, ReferenceKinds.Other );
+        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
     }
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
@@ -257,8 +264,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
             this.ValidateSymbol( node, symbol?.OverriddenProperty, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
+            this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
 
-            base.VisitPropertyDeclaration( node );
+            this.Visit( node.ExpressionBody );
+            this.Visit( node.AccessorList );
+            this.Visit( node.Initializer );
         }
     }
 
@@ -270,7 +280,9 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             this.ValidateSymbol( node, symbol?.OverriddenEvent, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
-            base.VisitEventDeclaration( node );
+            this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
+
+            this.Visit( node.AccessorList );
         }
     }
 
@@ -278,7 +290,26 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node.Declaration.Variables[0] ) )
         {
-            this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.FieldType );
+            this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
+        }
+
+        foreach ( var field in node.Declaration.Variables )
+        {
+            if ( field.Initializer != null )
+            {
+                using ( this.EnterContext( field ) )
+                {
+                    this.Visit( field.Initializer );
+                }
+            }
+        }
+    }
+
+    public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+    {
+        using ( this.EnterContext( node.Declaration.Variables[0] ) )
+        {
+            this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
         }
 
         foreach ( var field in node.Declaration.Variables )
@@ -363,13 +394,30 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
         this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
-        base.VisitObjectCreationExpression( node );
+        this.Visit( node.ArgumentList );
+        this.Visit( node.Initializer );
     }
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
         this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
-        base.VisitImplicitObjectCreationExpression( node );
+        this.Visit( node.ArgumentList );
+        this.Visit( node.Initializer );
+    }
+
+    public override void VisitUsingDirective( UsingDirectiveSyntax node )
+    {
+        this.ValidateSymbol( node.Name, ReferenceKinds.Using );
+    }
+
+    public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+    {
+        this.Visit( node.Members );
+    }
+
+    public override void VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+    {
+        this.Visit( node.Members );
     }
 
     private bool ValidateSymbol( SyntaxNode? node, ReferenceKinds referenceKind )
@@ -398,9 +446,16 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     private bool ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )
     {
-        if ( symbol == null )
+        if ( symbol == null || symbol.Kind == SymbolKind.Discard )
         {
             return false;
+        }
+
+        if ( referenceKinds == ReferenceKinds.None )
+        {
+            // This happens for standalone identifiers or for member access.
+
+            referenceKinds = ReferenceKinds.Default;
         }
 
         switch ( symbol.Kind )
@@ -518,6 +573,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             case SyntaxKind.IdentifierName:
             case SyntaxKind.QualifiedName:
+            case SyntaxKind.PredefinedType:
                 this.ValidateSymbol( type, kind );
 
                 break;

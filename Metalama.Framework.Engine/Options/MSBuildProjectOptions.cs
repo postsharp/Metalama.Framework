@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 
 // ReSharper disable ClassCanBeSealed.Global
