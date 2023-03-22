@@ -42,6 +42,9 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public int InstanceField;
     }
 
+    [Aspect]
+    internal delegate void ValidatedDelegate();
+
     // <target>
     internal class DerivedClass : ValidatedClass
     {
@@ -68,7 +71,20 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             StaticField = 5;
             Method( typeof(ValidatedClass) );
 
+            var y = nameof(ValidatedClass);
+            var z = nameof(InstanceField);
+
             return null;
+        }
+
+        public ValidatedClass Property { get; set; }
+
+        public event ValidatedDelegate FieldLikeEvent;
+
+        public event ValidatedDelegate ExplicitEvent
+        {
+            add { }
+            remove { }
         }
     }
 

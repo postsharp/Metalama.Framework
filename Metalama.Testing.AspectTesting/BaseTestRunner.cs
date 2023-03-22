@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -117,7 +118,7 @@ internal abstract partial class BaseTestRunner
                 testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
                 var transformedOptions = this.GetContextOptions( testContextOptions );
-                using var testContext = new TestContext( transformedOptions );
+                using var testContext = new TestContext( transformedOptions, testName: testInput.TestName );
 
                 Dictionary<string, object?> state = new( StringComparer.Ordinal );
                 using var testResult = new TestResult();
@@ -181,6 +182,11 @@ internal abstract partial class BaseTestRunner
         else
         {
             _isTestRunning.Value = true;
+        }
+
+        if ( testInput.Options.LaunchDebugger == true )
+        {
+            Debugger.Launch();
         }
 
         testResult.TestInput = testInput;
