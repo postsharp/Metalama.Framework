@@ -9,8 +9,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     {
         bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol );
 
-        MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializedTypeName );
+        MemberDeclarationSyntax? CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializedTypeName );
 
-        TypeDeclarationSyntax CreateSerializerType( SerializableTypeInfo serializedType, in QualifiedTypeNameInfo serializedTypeName );
+        TypeDeclarationSyntax? CreateSerializerType( SerializableTypeInfo serializedType, in QualifiedTypeNameInfo serializedTypeName );
     }
 }
