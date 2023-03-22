@@ -446,14 +446,14 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             return
                 baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                ? EmptyStatement()
-                : ExpressionStatement(
-                    InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            BaseExpression(),
-                            IdentifierName( nameof( ReferenceTypeSerializer.SerializeObject ) ) ),
-                        ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
+                    ? EmptyStatement()
+                    : ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                BaseExpression(),
+                                IdentifierName( nameof(ReferenceTypeSerializer.SerializeObject) ) ),
+                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
         }
     }
 
@@ -498,13 +498,13 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             return
                 baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                ? EmptyStatement()
-                : ExpressionStatement(
-                    InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            BaseExpression(),
-                            IdentifierName( nameof( ReferenceTypeSerializer.DeserializeFields ) ) ),
+                    ? EmptyStatement()
+                    : ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                BaseExpression(),
+                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
                             ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
         }
     }
