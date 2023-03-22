@@ -9,7 +9,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
 
-#pragma warning disable CS0168, CS8618, CS0169
+#pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067
 
 namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
