@@ -27,7 +27,7 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
 
             if ( this._recursionGuard.ShouldSwitch )
             {
-                this._recursionGuard.Switch( () => this.VisitCore( node ) );
+                this._recursionGuard.Switch( node, this.VisitCore );
             }
             else
             {

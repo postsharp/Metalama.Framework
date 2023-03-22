@@ -27,19 +27,19 @@ internal struct RecursionGuard
 
     public readonly bool ShouldSwitch => this._recursionDepth % _maxRecursionDepth == 0 && this._recursionDepth <= _maxRecursionDepth * _maxTasks;
 
-    public readonly void Switch( Action recursiveAction )
+    public readonly void Switch<TState>( TState state, Action<TState> recursiveAction )
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
-        Task.Run( recursiveAction ).ContinueWith( _ => { }, TaskScheduler.Default ).GetAwaiter().GetResult();
+        Task.Run( () => recursiveAction( state ) ).ContinueWith( _ => { }, TaskScheduler.Default ).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
     }
 
-    public readonly T Switch<T>( Func<T> recursiveFunction )
+    public readonly TResult Switch<TState, TResult>( TState state, Func<TState, TResult> recursiveFunction )
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
-        return Task.Run( recursiveFunction ).ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default ).GetAwaiter().GetResult();
+        return Task.Run( () => recursiveFunction( state ) ).ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default ).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
     }
 

@@ -26,7 +26,7 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
         {
             this._recursionGuard.IncrementDepth();
 
-            var result = this._recursionGuard.ShouldSwitch ? this._recursionGuard.Switch( () => this.VisitCore( node ) ) : this.VisitCore( node );
+            var result = this._recursionGuard.ShouldSwitch ? this._recursionGuard.Switch( node, this.VisitCore ) : this.VisitCore( node );
 
             this._recursionGuard.DecrementDepth();
 
