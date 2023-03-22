@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         x => x.Type,
                         x => x,
                         symbolEqualityComparer );
-
+                
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
@@ -110,8 +110,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
+                    diagnosticAdder,
                     compilationContext.CompilationContext,
-                    compileTimeCompilationContext.Compilation,
+                    compileTimeCompilationContext,
                     this._syntaxGenerationContext,
                     referencedProjects );
 
@@ -581,8 +582,14 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .NormalizeWhitespace() );
                     }
 
-                    members.Add( this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName ).NormalizeWhitespace() );
-                    members.Add( this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName ).NormalizeWhitespace() );
+                    var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName );
+                    var serializerType = this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName );
+
+                    if ( deserializingConstructor != null && serializerType != null )
+                    {
+                        members.Add( deserializingConstructor.NormalizeWhitespace() );
+                        members.Add( serializerType.NormalizeWhitespace() );
+                    }
                 }
 
                 var transformedNode = node.WithMembers( List( members ) )

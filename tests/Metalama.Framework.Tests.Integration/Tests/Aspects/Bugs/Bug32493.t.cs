@@ -1,4 +1,9 @@
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32493;
-public class TheAspect
+public class TargetClass : BaseClass
 {
+  public override void Foo()
+  {
+    global::System.Console.WriteLine(42);
+    Console.WriteLine("Original");
+    return;
+  }
 }
