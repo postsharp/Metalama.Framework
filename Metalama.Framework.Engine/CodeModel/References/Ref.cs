@@ -330,19 +330,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private static ISymbol GetSymbolOfNode( CompilationContext compilationContext, SyntaxNode node )
         {
-            var semanticModel = compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+            var semanticModel = 
+                compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ) 
+                ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
 
-            if ( semanticModel == null )
-            {
-                throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
-            }
-
-            var symbol = semanticModel.GetDeclaredSymbol( node );
-
-            if ( symbol == null )
-            {
-                throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
-            }
+            var symbol = 
+                semanticModel.GetDeclaredSymbol( node ) 
+                ?? throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
 
             return symbol;
         }

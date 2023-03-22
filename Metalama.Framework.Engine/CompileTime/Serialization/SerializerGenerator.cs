@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -20,70 +22,130 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization;
 internal sealed class SerializerGenerator : ISerializerGenerator
 {
     private const string _serializerTypeName = "Serializer";
+    private readonly IDiagnosticAdder _diagnosticAdder;
     private readonly SyntaxGenerationContext _context;
-    private readonly ReflectionMapper _runTimeReflectionMapper;
-    private readonly ReflectionMapper _compileTimeReflectionMapper;
+    private readonly CompilationContext _runTimeCompilationContext;
+    private readonly CompilationContext _compileTimeCompilationContext;
     private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _referencedProjects;
-    private readonly SafeSymbolComparer _symbolEqualityComparer;
 
     public SerializerGenerator(
+        IDiagnosticAdder diagnosticAdder,
         CompilationContext runTimeCompilationContext,
-        Compilation compileTimeCompilation,
+        CompilationContext compileTimeCompilationContext,
         SyntaxGenerationContext context,
         IEnumerable<CompileTimeProject> compileTimeProjects )
     {
+        this._diagnosticAdder = diagnosticAdder;
         this._context = context;
-
-        this._runTimeReflectionMapper = runTimeCompilationContext.ReflectionMapper;
-        this._symbolEqualityComparer = runTimeCompilationContext.SymbolComparer;
-        this._compileTimeReflectionMapper = new ReflectionMapper( compileTimeCompilation );
         this._referencedProjects = compileTimeProjects.ToDictionary( x => x.RunTimeIdentity, x => x );
+        this._runTimeCompilationContext = runTimeCompilationContext;
+        this._compileTimeCompilationContext = compileTimeCompilationContext;
     }
 
     public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
     {
-        var serializableTypeMember = serializableType.SerializedMembers.Single( x => this._symbolEqualityComparer.Equals( x, memberSymbol ) );
+        var serializableTypeMember = serializableType.SerializedMembers.Single( x => this._runTimeCompilationContext.SymbolComparer.Equals( x, memberSymbol ) );
 
         return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
     }
 
-    public MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
+    public MemberDeclarationSyntax? CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
     {
+        var targetType = serializableType.Type.AssertNotNull();
         var baseType = serializableType.Type.BaseType.AssertNotNull();
+        var compileTimeSerializableType = this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
 
-        while ( this._symbolEqualityComparer.Equals(
-                   serializableType.Type.ContainingAssembly,
-                   baseType.ContainingAssembly ) )
+        bool hasDeserializingBaseConstructor;
+
+        if ( !baseType.AllInterfaces.Any( i => this._runTimeCompilationContext.SymbolComparer.Equals( i, compileTimeSerializableType ) ) )
         {
-            // The base type is in the same assembly, we have to walk back to get to the first type that is not in this assembly.
-            // All ancestor types in this assembly will have their attributes generated.
-            baseType = baseType.BaseType.AssertNotNull();
+            // The base type is not compile-time serializable. It must have parameterless constructor, otherwise it's an error.
+            var baseConstructor =
+                baseType
+                    .Constructors
+                    .SingleOrDefault(
+                        x =>
+                            x is { Parameters: [], DeclaredAccessibility: Accessibility.Public or Accessibility.Protected } );
+
+            if ( baseConstructor == null )
+            {
+                this._diagnosticAdder.Report(
+                    SerializationDiagnosticDescriptors.MissingParameterlessConstructor.CreateRoslynDiagnostic(
+                        targetType.GetDiagnosticLocation(),
+                        (targetType, baseType) ) );
+
+                return null;
+            }
+
+            hasDeserializingBaseConstructor = false;
         }
+        else if ( !this._runTimeCompilationContext.SymbolComparer.Equals( targetType.ContainingAssembly, baseType.ContainingAssembly ) )
+        {
+            IMethodSymbol? baseConstructor;
 
-        // Presume that base type is not null.
-        var baseConstructors =
-            baseType.AssertNotNull()
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(
-                    x =>
-                        x is { Name: WellKnownMemberNames.InstanceConstructorName, Parameters.Length: 1 }
-                        && this._symbolEqualityComparer.Equals(
-                            x.Parameters[0].Type,
-                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
-                        && x.Parameters[0].CustomModifiers.Length == 0
-                        && x.Parameters[0].RefCustomModifiers.Length == 0 )
-                .ToArray();
+            if ( this._referencedProjects.TryGetValue( baseType.ContainingAssembly.Identity, out var referencedProject ) )
+            {
+                var baseTypeReflectionType = referencedProject.GetType( baseType.GetFullName().AssertNotNull() );
+                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
 
-        // TODO: This should become an error.
-        // TODO: Custom modifiers or ref on the parameter should produce an error too.
-        Invariant.Assert(
-            baseConstructors.Length == 0
-            || baseConstructors is [{ DeclaredAccessibility: Accessibility.Public or Accessibility.Protected }] );
+                if ( translatedBaseType == null )
+                {
+                    throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
+                }
 
-        var hasDeserializingBaseConstructor =
-            baseConstructors.Length == 1
-            || baseType != serializableType.Type.BaseType.AssertNotNull();
+                // The base type is outside of current assembly, check that it has the deserializing constructor.
+                baseConstructor =
+                    translatedBaseType
+                        .Constructors
+                        .SingleOrDefault(
+                            x =>
+                                x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
+                                && this._compileTimeCompilationContext.SymbolComparer.Equals(
+                                    x.Parameters[0].Type,
+                                    this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
+            }
+            else
+            {
+                // There is no compile time project for the base type's assembly, it may be defined in the runtime assembly (hand written).
+                baseConstructor =
+                    baseType
+                        .Constructors
+                        .SingleOrDefault(
+                            x =>
+                                x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
+                                && this._runTimeCompilationContext.SymbolComparer.Equals(
+                                    x.Parameters[0].Type,
+                                    this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                && x.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) );
+            }
+
+            if ( baseConstructor != null )
+            {
+                hasDeserializingBaseConstructor = true;
+            }
+            else
+            {
+                if ( baseType.ContainingAssembly.Name == "Metalama.Framework" )
+                {
+                    hasDeserializingBaseConstructor = false;
+                }
+                else
+                {
+                    this._diagnosticAdder.Report(
+                        SerializationDiagnosticDescriptors.MissingDeserializingConstructor.CreateRoslynDiagnostic(
+                            targetType.GetDiagnosticLocation(),
+                            (targetType, baseType) ) );
+
+                    return null;
+                }
+            }
+        }
+        else
+        {
+            // Otherwise the base type is serializable and in the same assembly, in which case existence of the correct constructor can be presumed.
+            hasDeserializingBaseConstructor = true;
+        }
 
         const string argumentReaderParameterName = "reader";
 
@@ -114,23 +176,31 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 null );
     }
 
-    public TypeDeclarationSyntax CreateSerializerType( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
+    public TypeDeclarationSyntax? CreateSerializerType( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
     {
         var members = new List<MemberDeclarationSyntax>();
 
-        // Base serializer - if it does not exist in runtime compilation, the top-most existing base type is returned.
+        // Base serializer is always compile-time compilation symbol (if the base type is in the currently built compilation, this symbol would be the closest base
+        // defined in another assembly (e.g. ReferenceTypeSerializer).
         var baseSerializerType = this.GetBaseSerializer( serializableType.Type );
 
-        // Check that the base serializer constructor is visible.
+        if ( baseSerializerType == null )
+        {
+            // Error was reported inside GetBaseSerializer.
+            return null;
+        }
+
+        // Get base serializer ctor.
         var baseCtor = baseSerializerType.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 );
 
-        if ( baseCtor?.DeclaredAccessibility != Accessibility.Public && baseCtor?.DeclaredAccessibility != Accessibility.Protected )
+        if ( baseCtor == null )
         {
-            // TODO: Error.
-            throw new AssertionFailedException( $"The accessibility of the serializer type '{serializableType.Type}' must be public or protected." );
+            this._diagnosticAdder.Report(
+                SerializationDiagnosticDescriptors.MissingBaseSerializerConstructor.CreateRoslynDiagnostic(
+                    serializableType.Type.GetDiagnosticLocation(),
+                    (serializableType.Type, baseSerializerType) ) );
 
-            // SerializationMessageSource.Instance.Write( this.parent.baseSerializerConstructor.GetMethodDefinition(), SeverityType.Error, "SR0011",
-            //                                           this.parent.baseSerializerType, targetType );
+            return null;
         }
 
         members.Add( CreateSerializerConstructor() );
@@ -168,33 +238,58 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     }
 
     private bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
-        => this._symbolEqualityComparer.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly )
-           && !this._symbolEqualityComparer.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType );
+    {
+        if ( !this._runTimeCompilationContext.SymbolComparer.Equals(
+                serializedType.ContainingAssembly,
+                serializedType.BaseType.AssertNotNull().ContainingAssembly ) )
+        {
+            // The base is defined in a different assembly.
+            return false;
+        }
 
-    private INamedTypeSymbol GetBaseSerializer( ITypeSymbol targetType )
+        if ( this._runTimeCompilationContext.SymbolComparer.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType ) )
+        {
+            // The base type serializer is in the immediate base type (there are no "pending" types in between).
+            return false;
+        }
+
+        if ( !serializedType.BaseType.AssertNotNull()
+                .AllInterfaces.Contains(
+                    this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
+                    this._runTimeCompilationContext.SymbolComparer ) )
+        {
+            // The base type is not serializable.
+            return false;
+        }
+
+        return true;
+    }
+
+    private INamedTypeSymbol? GetBaseSerializer( INamedTypeSymbol targetType )
     {
         Invariant.Assert( targetType.BaseType != null );
+        Invariant.Assert( targetType.BelongsToCompilation( this._runTimeCompilationContext ) == true );
 
         if ( targetType.IsValueType )
         {
             // Value type serializers are always based on ValueTypeSerializer.
-            return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ValueTypeSerializer<>) )).Construct( targetType );
+            return ((INamedTypeSymbol) this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTypeSerializer<>) )).Construct( targetType );
         }
 
         if ( targetType.BaseType.AllInterfaces.Contains(
-                this._runTimeReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
-                this._symbolEqualityComparer ) )
+                this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
+                this._runTimeCompilationContext.SymbolComparer ) )
         {
             // The base type should have a serializer.
-            var baseSerializer = targetType.BaseType.GetTypeMembers( _serializerTypeName ).FirstOrDefault();
+            var baseSerializer = targetType.BaseType.GetTypeMembers( _serializerTypeName ).SingleOrDefault();
 
-            if ( baseSerializer != null )
+            if ( baseSerializer != null && baseSerializer.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) )
             {
                 return baseSerializer;
             }
             else
             {
-                if ( this._symbolEqualityComparer.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
+                if ( this._runTimeCompilationContext.SymbolComparer.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
                 {
                     // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
                     return this.GetBaseSerializer( targetType.BaseType );
@@ -202,36 +297,43 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 else if ( targetType.BaseType.ContainingAssembly.Name == "Metalama.Framework" )
                 {
                     // This is a serializable base type that does not have anything to serialize. 
-                    return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
+                    return (INamedTypeSymbol) this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
                 }
                 else if ( this._referencedProjects.TryGetValue( targetType.BaseType.ContainingAssembly.Identity, out var referencedProject ) )
                 {
                     // We are probably looking in the run-time assembly, but the serializer can be in the compile-time assembly.
 
                     var baseReflectionType = referencedProject.GetType( targetType.BaseType.GetFullName().AssertNotNull() );
-                    var baseTypeSymbol = this._compileTimeReflectionMapper.GetTypeSymbol( baseReflectionType );
+                    var baseTypeSymbol = this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseReflectionType );
                     baseSerializer = baseTypeSymbol.GetTypeMembers( _serializerTypeName ).FirstOrDefault();
 
                     if ( baseSerializer == null )
                     {
-                        // This should not happen.
-                        throw new AssertionFailedException(
-                            $"The type '{baseTypeSymbol}' in the compiled referenced aspect library does not contain a Serializer nested class." );
+                        this._diagnosticAdder.Report(
+                            SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
+                                targetType.GetDiagnosticLocation(),
+                                (targetType, targetType.BaseType) ) );
+
+                        return null;
                     }
 
                     return baseSerializer;
                 }
                 else
                 {
-                    // This also should not happen.
-                    throw new AssertionFailedException( $"Cannot find a serializer for '{targetType.BaseType}'." );
+                    this._diagnosticAdder.Report(
+                        SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
+                            targetType.GetDiagnosticLocation(),
+                            (targetType, targetType.BaseType) ) );
+
+                    return null;
                 }
             }
         }
         else
         {
             // This is first serializer in the hierarchy.
-            return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
+            return (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
         }
     }
 
@@ -337,31 +439,43 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             var localVariableDeclaration =
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
-            body = Block(
+            var statements = new[]
+            {
+                CreateBaseCallStatement(),
+                localVariableDeclaration,
+                this.CreateFieldSerializationStatements(
+                    serializedType,
+                    IdentifierName( localVariableName ),
+                    IdentifierName( baseSerializeMethod.Parameters[1].Name ),
+                    IdentifierName( baseSerializeMethod.Parameters[2].Name ) )
+            };
+
+            body = Block( statements.WhereNotNull() );
+        }
+        else
+        {
+            var baseCallStatement = CreateBaseCallStatement();
+
+            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
+        }
+
+        return this.CreateOverrideMethod(
+            baseSerializeMethod,
+            body );
+
+        StatementSyntax? CreateBaseCallStatement()
+        {
+            return
                 baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
+                    ? null
                     : ExpressionStatement(
                         InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
                                 IdentifierName( nameof(ReferenceTypeSerializer.SerializeObject) ) ),
-                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
-                localVariableDeclaration,
-                this.CreateFieldSerializationStatements(
-                    serializedType,
-                    IdentifierName( localVariableName ),
-                    IdentifierName( baseSerializeMethod.Parameters[1].Name ),
-                    IdentifierName( baseSerializeMethod.Parameters[2].Name ) ) );
+                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
         }
-        else
-        {
-            body = SyntaxFactoryEx.FormattedBlock();
-        }
-
-        return this.CreateOverrideMethod(
-            baseSerializeMethod,
-            body );
     }
 
     private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod(
@@ -382,32 +496,44 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             var localVariableDeclaration =
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
-            body = Block(
-                baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
-                    : ExpressionStatement(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                BaseExpression(),
-                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
-                            ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
+            var statements = new[]
+            {
+                CreateBaseCallStatement(),
                 localVariableDeclaration,
                 this.CreateFieldDeserializationStatements(
                     serializedType,
                     IdentifierName( localVariableName ),
                     IdentifierName( baseDeserializeMethod.Parameters[1].Name ),
                     this.SelectLateDeserializedFields,
-                    static _ => Array.Empty<ISymbol>() ) );
+                    static _ => Array.Empty<ISymbol>() )
+            };
+
+            body = Block( statements.WhereNotNull() );
         }
         else
         {
-            body = SyntaxFactoryEx.FormattedBlock();
+            var baseCallStatement = CreateBaseCallStatement();
+
+            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
             baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) ),
             body );
+
+        StatementSyntax? CreateBaseCallStatement()
+        {
+            return
+                baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
+                    ? null
+                    : ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                BaseExpression(),
+                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
+                            ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
+        }
     }
 
     private MethodDeclarationSyntax CreateValueTypeSerializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
@@ -575,7 +701,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
     private IEnumerable<ISymbol> SelectConstructorDefaultFields( SerializableTypeInfo serializableType )
     {
-        var constructorDeserializedMembers = new HashSet<ISymbol>( this._symbolEqualityComparer );
+        var constructorDeserializedMembers = new HashSet<ISymbol>( this._runTimeCompilationContext.SymbolComparer );
 
         foreach ( var serializedMember in serializableType.SerializedMembers )
         {
@@ -603,9 +729,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         if ( fieldOrProperty.GetAttributes()
             .Any(
-                a => this._symbolEqualityComparer.Is(
+                a => this._runTimeCompilationContext.SymbolComparer.Is(
                     a.AttributeClass.AssertNotNull(),
-                    this._runTimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
+                    this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
         {
             // Skip all template symbols.
             return false;
@@ -687,9 +813,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             if ( member.GetAttributes()
                 .Any(
-                    a => this._symbolEqualityComparer.Equals(
+                    a => this._runTimeCompilationContext.SymbolComparer.Equals(
                         a.AttributeClass,
-                        this._runTimeReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) ) ) ) )
+                        this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) ) ) ) )
             {
                 continue;
             }
@@ -698,7 +824,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             {
                 // System.Int32 (and similar types) contains a private field of type Int32
                 // skip it to avoid stack overflow
-                if ( this._symbolEqualityComparer.Equals( field.Type, type ) )
+                if ( this._runTimeCompilationContext.SymbolComparer.Equals( field.Type, type ) )
                 {
                     continue;
                 }
