@@ -33,16 +33,18 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             string? alternativeSuggestion = null;
 
-            if ( memberName is nameof( this.Property ) or nameof( this.Field ) or nameof( this.FieldOrProperty ) && this._fieldOrPropertyOrIndexer != null )
+            if ( memberName is nameof(this.Property) or nameof(this.Field) or nameof(this.FieldOrProperty) && this._fieldOrPropertyOrIndexer != null )
             {
-                var alternativeMemberName = this._fieldOrPropertyOrIndexer is IFieldOrProperty ? nameof( this.FieldOrProperty ) : nameof( this.FieldOrPropertyOrIndexer );
+                var alternativeMemberName = this._fieldOrPropertyOrIndexer is IFieldOrProperty
+                    ? nameof(this.FieldOrProperty)
+                    : nameof(this.FieldOrPropertyOrIndexer);
 
                 alternativeSuggestion = $" Consider using meta.{alternativeMemberName} instead.";
             }
 
             return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
-                        (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
-                         description ?? "I" + memberName, alternativeSuggestion) );
+                (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                 description ?? "I" + memberName, alternativeSuggestion) );
         }
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );

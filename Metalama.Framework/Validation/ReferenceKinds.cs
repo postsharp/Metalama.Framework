@@ -21,7 +21,7 @@ namespace Metalama.Framework.Validation
         All = -1,
 
         /// <summary>
-        /// Typically a field or property access.
+        /// A field or property access that does not fall into another category.
         /// </summary>
         Default = 1 << 0,
 
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Validation
         TypeArgument = 1 << 2,
 
         /// <summary>
-        /// <c>typeof</c>
+        /// <c>typeof</c>.
         /// </summary>
         TypeOf = 1 << 3,
 
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Validation
         Assignment = 1 << 18,
 
         /// <summary>
-        /// <c>override</c>
+        /// The member is being overridden using an <c>override</c>.
         /// </summary>
         OverrideMember = 1 << 19,
 

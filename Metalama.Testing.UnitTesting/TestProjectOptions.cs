@@ -22,7 +22,7 @@ namespace Metalama.Testing.UnitTesting
         private readonly Lazy<string> _projectDirectory;
         private int _fileLockers;
 
-        public TestProjectOptions( TestContextOptions contextOptions, string? testName = null )
+        public TestProjectOptions( TestContextOptions contextOptions, string? testName )
         {
             this.ProjectName = testName;
             this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;

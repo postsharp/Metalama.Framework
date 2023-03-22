@@ -501,7 +501,7 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
-                var containingTypeOrCompilation = (IDeclaration) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
+                var containingTypeOrCompilation = (IDeclaration?) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
                                                   ?? compilation;
 
                 if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
@@ -510,7 +510,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
-                            (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingDeclaration: containingTypeOrCompilation) ) );
+                            (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
 
                     continue;
                 }
