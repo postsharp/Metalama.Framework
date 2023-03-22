@@ -504,7 +504,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
-                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
+                                IdentifierName( nameof( ReferenceTypeSerializer.DeserializeFields ) ) ),
                             ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
         }
     }
