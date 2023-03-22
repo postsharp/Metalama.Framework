@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -80,30 +81,44 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
         else if ( !this._runTimeCompilationContext.SymbolComparer.Equals( targetType.ContainingAssembly, baseType.ContainingAssembly ) )
         {
-            INamedTypeSymbol? translatedBaseType = null;
+            IMethodSymbol? baseConstructor;
 
             if ( this._referencedProjects.TryGetValue( baseType.ContainingAssembly.Identity, out var referencedProject ) )
             {
                 var baseTypeReflectionType = referencedProject.GetType( baseType.GetFullName().AssertNotNull() );
-                translatedBaseType = (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
-            }
+                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
 
-            if ( translatedBaseType == null )
+                if ( translatedBaseType == null )
+                {
+                    throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
+                }
+
+                // The base type is outside of current assembly, check that it has the deserializing constructor.
+                baseConstructor =
+                    translatedBaseType
+                        .Constructors
+                        .SingleOrDefault(
+                            x =>
+                                x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
+                                && this._compileTimeCompilationContext.SymbolComparer.Equals(
+                                    x.Parameters[0].Type,
+                                    this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
+            }
+            else
             {
-                throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
+                // There is no compile time project for the base type's assembly, it may be defined in the runtime assembly (hand written).
+                baseConstructor =
+                    baseType
+                        .Constructors
+                        .SingleOrDefault(
+                            x =>
+                                x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
+                                && this._runTimeCompilationContext.SymbolComparer.Equals(
+                                    x.Parameters[0].Type,
+                                    this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                && x.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) );
             }
-
-            // The base type is outside of current assembly, check that it has the deserializing constructor.
-            var baseConstructor =
-                translatedBaseType
-                    .Constructors
-                    .SingleOrDefault(
-                        x =>
-                            x is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
-                            && this._compileTimeCompilationContext.SymbolComparer.Equals(
-                                x.Parameters[0].Type,
-                                this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
-                            && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
 
             if ( baseConstructor != null )
             {
@@ -424,29 +439,35 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             var localVariableDeclaration =
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
-            body = Block(
+            var statements = new[]
+            {
                 CreateBaseCallStatement(),
                 localVariableDeclaration,
                 this.CreateFieldSerializationStatements(
                     serializedType,
                     IdentifierName( localVariableName ),
                     IdentifierName( baseSerializeMethod.Parameters[1].Name ),
-                    IdentifierName( baseSerializeMethod.Parameters[2].Name ) ) );
+                    IdentifierName( baseSerializeMethod.Parameters[2].Name ) )
+            };
+
+            body = Block( statements.WhereNotNull() );
         }
         else
         {
-            body = SyntaxFactoryEx.FormattedBlock( CreateBaseCallStatement() );
+            var baseCallStatement = CreateBaseCallStatement();
+
+            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
             baseSerializeMethod,
             body );
 
-        StatementSyntax CreateBaseCallStatement()
+        StatementSyntax? CreateBaseCallStatement()
         {
             return
                 baseSerializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
+                    ? null
                     : ExpressionStatement(
                         InvocationExpression(
                             MemberAccessExpression(
@@ -475,7 +496,8 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             var localVariableDeclaration =
                 CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
-            body = Block(
+            var statements = new[]
+            {
                 CreateBaseCallStatement(),
                 localVariableDeclaration,
                 this.CreateFieldDeserializationStatements(
@@ -483,28 +505,33 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     IdentifierName( localVariableName ),
                     IdentifierName( baseDeserializeMethod.Parameters[1].Name ),
                     this.SelectLateDeserializedFields,
-                    static _ => Array.Empty<ISymbol>() ) );
+                    static _ => Array.Empty<ISymbol>() )
+            };
+
+            body = Block( statements.WhereNotNull() );
         }
         else
         {
-            body = SyntaxFactoryEx.FormattedBlock( CreateBaseCallStatement() );
+            var baseCallStatement = CreateBaseCallStatement();
+
+            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
             baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) ),
             body );
 
-        StatementSyntax CreateBaseCallStatement()
+        StatementSyntax? CreateBaseCallStatement()
         {
             return
                 baseDeserializeMethod.IsAbstract && !this.HasPendingBaseSerializer( serializedType.Type, baseSerializer )
-                    ? EmptyStatement()
+                    ? null
                     : ExpressionStatement(
                         InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
-                                IdentifierName( nameof( ReferenceTypeSerializer.DeserializeFields ) ) ),
+                                IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
                             ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) );
         }
     }

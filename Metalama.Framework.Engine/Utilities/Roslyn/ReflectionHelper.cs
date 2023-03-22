@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
         /// </summary>
         public static string? GetReflectionName( this INamespaceOrTypeSymbol s )
-            => _reflectionNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.Name ) );
+            => _reflectionNameCache.GetOrAdd( s, ss => ss.GetReflectionName( TypeNameKind.Name ) );
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
         public static string? GetReflectionFullName( this INamespaceOrTypeSymbol s )
-            => _reflectionFullNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.FullName ) );
+            => _reflectionFullNameCache.GetOrAdd( s, ss => ss.GetReflectionName( TypeNameKind.FullName ) );
 
         /// <summary>
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
         /// </summary>
         public static string? GetReflectionToStringName( this INamespaceOrTypeSymbol s )
-            => _reflectionToStringNameCache.GetOrAdd( s, s => s.GetReflectionName( TypeNameKind.ToString ) );
+            => _reflectionToStringNameCache.GetOrAdd( s, ss => ss.GetReflectionName( TypeNameKind.ToString ) );
 
         private static string? GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
         {
