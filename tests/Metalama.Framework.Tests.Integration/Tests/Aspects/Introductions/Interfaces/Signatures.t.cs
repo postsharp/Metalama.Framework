@@ -3,7 +3,7 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
 {
   public T? GenericMethod<T>(T? x)
   {
-    return (T? )x;
+    return x;
   }
   public T? GenericMethod_DoubleNestedParam<T>(global::System.Collections.Generic.List<global::System.Collections.Generic.List<T>> x)
   {
@@ -25,11 +25,11 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
   }
   public T? GenericMethod_Multiple<T, U>(T? x, U? y)
   {
-    return (T? )x;
+    return x;
   }
   public T? GenericMethod_MultipleReverse<T, U>(U? x, T? y)
   {
-    return (T? )y;
+    return y;
   }
   public T? GenericMethod_NestedParam<T>(global::System.Collections.Generic.List<T> x)
   {
@@ -48,15 +48,15 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
   }
   public T? GenericMethod_Ref<T>(ref T? x)
   {
-    return (T? )x;
+    return x;
   }
   public global::System.Int32 Method(global::System.Int32 x, global::System.String y)
   {
-    return (global::System.Int32)x;
+    return x;
   }
   public global::System.Int32 Method_Ref(ref global::System.Int32 x)
   {
-    return (global::System.Int32)x;
+    return x;
   }
   public void VoidMethod()
   {

@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
                 ExpressionFactory.Capture( meta.Target.Method.Invoke(), out baseCall );
             }
 
-            var clone = meta.Cast( meta.Target.Type, baseCall )!;
+            var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;
 
             // Select clonable fields.
             var clonableFields =

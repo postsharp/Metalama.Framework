@@ -35,13 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool? IsReferenceType => this.Symbol.IsReferenceType;
 
-        public bool? IsNullable
-            => (this.Symbol.IsReferenceType, this.Symbol.NullableAnnotation) switch
-            {
-                (true, NullableAnnotation.Annotated) => true,
-                (true, NullableAnnotation.NotAnnotated) => false,
-                _ => null
-            };
+        public bool? IsNullable => this.Symbol.IsNullable();
 
         public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
 

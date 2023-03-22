@@ -44,39 +44,36 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
-    private ITypeSymbol ResolveCore( SerializableTypeId id )
-    {
-        try
-        {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
-
-            var symbol = this._resolver.Visit( expression.Type );
-
-            if ( symbol == null )
-            {
-                throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
-            }
-
-            return symbol;
-        }
-        catch ( Exception e )
-        {
-            throw new InvalidOperationException( $"Cannot resolve the type '{id}': {e.Message}" );
-        }
-    }
+    private ITypeSymbol ResolveCore( SerializableTypeId id ) => ResolveCore( id, this._resolver );
 
     private ITypeSymbol ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, IType> genericArguments )
+        => ResolveCore( id, new Resolver( this._compilation, genericArguments ) );
+
+    private static ITypeSymbol ResolveCore( SerializableTypeId id, Resolver resolver )
     {
         try
         {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
+            var idString = id.Id;
 
-            var resolver = new Resolver( this._compilation, genericArguments );
-            var symbol = resolver.Visit( expression.Type );
-
-            if ( symbol == null )
+            bool? nullable = idString[^1] switch
             {
-                throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
+                '?' => true,
+                '!' => false,
+                _ => null
+            };
+
+            if ( nullable != null )
+            {
+                idString = idString[..^1];
+            }
+
+            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( idString );
+
+            var symbol = resolver.Visit( expression.Type ) ?? throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
+
+            if ( nullable != null )
+            {
+                symbol = symbol.WithNullableAnnotation( nullable == true ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
             }
 
             return symbol;

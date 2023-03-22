@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -78,13 +79,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => VarianceKind.None
             };
 
-        public bool? IsConstraintNullable
-            => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation switch
-            {
-                NullableAnnotation.Annotated => true,
-                NullableAnnotation.NotAnnotated => false,
-                _ => null
-            };
+        public bool? IsConstraintNullable 
+            => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated();
 
         public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;
 

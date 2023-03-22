@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.QuestionMark
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.StaticParameterQuestionMark
 {
     internal class Aspect : TypeAspect
     {

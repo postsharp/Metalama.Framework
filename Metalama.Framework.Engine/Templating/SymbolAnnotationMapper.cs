@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static ISymbol GetSymbolFromAnnotation( SyntaxAnnotation annotation )
+        private static ISymbol GetSymbolFromAnnotation( SyntaxAnnotation annotation )
         {
             // ReSharper disable once InconsistentlySynchronizedField
             if ( !_annotationToSymbolMap.TryGetValue( annotation, out var reference ) || !reference.TryGetTarget( out var symbol ) )
