@@ -50,7 +50,7 @@ public sealed class DerivedTypesTests : UnitTestClass
     [Theory]
     public void Test( DerivedTypesOptions options, string typeName, bool shouldBeIncluded )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( _code );
 
         // Test using GetDerivedTypes.
