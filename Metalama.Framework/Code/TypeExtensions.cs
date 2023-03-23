@@ -16,7 +16,6 @@ namespace Metalama.Framework.Code
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.
         /// </summary>
-        /// <returns></returns>
         public static bool Is( this IType left, IType right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
             => left.Compilation.Comparers.GetTypeComparer( typeComparison ).Is( left, right, kind );
 
@@ -26,10 +25,15 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <param name="left"></param>
         /// <param name="right">Another type.</param>
-        /// <returns></returns>
         public static bool Is( this IType left, Type right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
             => left.Compilation.Comparers.GetTypeComparer( typeComparison ).Is( left, right, kind );
 
+        /// <summary>
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
+        /// given as a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right">Another type.</param>
         public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
             => kind switch
             {
@@ -39,10 +43,41 @@ namespace Metalama.Framework.Code
             };
 
         /// <summary>
+        /// Determines if a type derives from another one, given as an <see cref="INamedType"/>.
+        /// </summary>
+        /// <param name="left">The child type.</param>
+        /// <param name="right">The base type. It cannot be a generic type instance.</param>
+        /// <param name="options">Determine with inheritance relationships should be considered.</param>
+        public static bool DerivesFrom( this INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
+        {
+            var compilation = (ICompilationInternal) left.Compilation;
+            
+            return compilation.Helpers.DerivesFrom( left, right, options );
+        }
+
+        /// <summary>
+        /// Determines if a type derives from another one, given as a <see cref="Type"/>.
+        /// </summary>
+        /// <param name="left">The child type.</param>
+        /// <param name="right">The base type. It cannot be a generic type instance.</param>
+        /// <param name="options">Determine with inheritance relationships should be considered.</param>
+        public static bool DerivesFrom( this INamedType left, Type right, DerivedTypesOptions options = DerivedTypesOptions.Default )
+        {
+            var compilation = (ICompilationInternal) left.Compilation;
+            
+            return compilation.Helpers
+                .DerivesFrom( left, (INamedType) compilation.Factory.GetTypeByReflectionType( right ), options );
+        }
+
+        /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
         public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.DefaultValue( type );
 
+        /// <summary>
+        /// Gets the <see cref="AsyncInfo"/> for a type.
+        /// </summary>
+        /// <param name="type">Typically the return type of a method, e.g. <c>Task</c>, <c>ValueTask&lt;T&gt;</c>, <c>void</c>...</param>
         public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
 
         /// <summary>

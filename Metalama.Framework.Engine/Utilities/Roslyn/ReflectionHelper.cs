@@ -18,12 +18,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             Name,
             ToString,
-            FullName,
+            FullName
         }
 
-        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionNameCache = new();
-        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionFullNameCache = new();
-        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _reflectionToStringNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string> _reflectionNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string> _reflectionFullNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string> _reflectionToStringNameCache = new();
 
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
         {
@@ -87,40 +87,37 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
         /// </summary>
-        public static string GetReflectionName( this INamedTypeSymbol symbol )
-            => ((INamespaceOrTypeSymbol) symbol).GetReflectionName()!;
+        public static string GetReflectionName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetReflectionName();
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
         /// </summary>
-        public static string? GetReflectionName( this INamespaceOrTypeSymbol s )
+        public static string GetReflectionName( this INamespaceOrTypeSymbol s )
             => _reflectionNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.Name ) );
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
-        public static string GetReflectionFullName( this INamedTypeSymbol s )
-            => ((INamespaceOrTypeSymbol) s).GetReflectionFullName()!;
+        public static string GetReflectionFullName( this INamedTypeSymbol s ) => ((INamespaceOrTypeSymbol) s).GetReflectionFullName();
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
-        public static string? GetReflectionFullName( this INamespaceOrTypeSymbol s )
+        public static string GetReflectionFullName( this INamespaceOrTypeSymbol s )
             => _reflectionFullNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.FullName ) );
 
         /// <summary>
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
         /// </summary>
-        public static string GetReflectionToStringName( this INamedTypeSymbol s )
-            => ((INamespaceOrTypeSymbol) s).GetReflectionToStringName()!;
+        public static string GetReflectionToStringName( this INamedTypeSymbol s ) => ((INamespaceOrTypeSymbol) s).GetReflectionToStringName();
 
         /// <summary>
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
         /// </summary>
-        public static string? GetReflectionToStringName( this INamespaceOrTypeSymbol s )
+        public static string GetReflectionToStringName( this INamespaceOrTypeSymbol s )
             => _reflectionToStringNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.ToString ) );
 
-        private static string? GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
+        private static string GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
         {
             if ( s is ITypeParameterSymbol typeParameter )
             {
@@ -129,16 +126,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             var sb = new StringBuilder();
 
-            if ( !TryAppend( s ) )
-            {
-                return null;
-            }
+            Append( s );
 
             return sb.ToString();
 
-            bool TryAppend( INamespaceOrTypeSymbol symbol, List<ITypeSymbol>? typeArguments = null )
+            void Append( INamespaceOrTypeSymbol symbol, List<ITypeSymbol>? typeArguments = null )
             {
-                var currentTypeArguments = typeArguments ?? new();
+                var currentTypeArguments = typeArguments ?? new List<ITypeSymbol>();
 
                 // Append the containing namespace or type.
                 if ( kind != TypeNameKind.Name && symbol is not ITypeParameterSymbol )
@@ -149,10 +143,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             break;
 
                         case ITypeSymbol type:
-                            if ( !TryAppend( type, currentTypeArguments ) )
-                            {
-                                return false;
-                            }
+                            Append( type, currentTypeArguments );
 
                             sb.Append( '+' );
 
@@ -161,10 +152,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         case INamespaceSymbol ns:
                             if ( !ns.IsGlobalNamespace )
                             {
-                                if ( !TryAppend( ns ) )
-                                {
-                                    return false;
-                                }
+                                Append( ns );
 
                                 sb.Append( '.' );
                             }
@@ -194,10 +182,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         break;
 
                     case IArrayTypeSymbol array:
-                        if ( !TryAppend( array.ElementType ) )
-                        {
-                            return false;
-                        }
+                        Append( array.ElementType );
 
                         sb.Append( '[' );
 
@@ -211,10 +196,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         break;
 
                     case IPointerTypeSymbol pointer:
-                        if ( !TryAppend( pointer.PointedAtType ) )
-                        {
-                            return false;
-                        }
+                        Append( pointer.PointedAtType );
 
                         sb.Append( '*' );
 
@@ -225,8 +207,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                         break;
 
-                    case IErrorTypeSymbol:
-                        return false;
+                    case IErrorTypeSymbol errorTypeSymbol:
+                        // We try to write a name for an unresolved type, even if it is incorrect.
+                        // If the caller requires a valid name, it has to verify the type validity differently.
+                        sb.Append( errorTypeSymbol.Name );
+
+                        break;
 
                     default:
                         throw new AssertionFailedException( $"Don't know how to process a {symbol!.Kind}." );
@@ -245,16 +231,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                         var arg = currentTypeArguments[i];
 
-                        if ( !TryAppend( arg ) )
-                        {
-                            return false;
-                        }
+                        Append( arg );
                     }
 
                     sb.Append( ']' );
                 }
-
-                return true;
             }
         }
 
