@@ -35,7 +35,7 @@ internal sealed class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
     public static InterpolationSyntax Fix( InterpolationSyntax interpolation )
     {
         // Interpolations cannot contain EOL, so we need to remove them.
-        var fixedInterpolation = (InterpolationSyntax) RemoveEndOfLinesRewriter.Instance.Visit( interpolation.NormalizeWhitespace() )!;
+        var fixedInterpolation = (InterpolationSyntax) new RemoveEndOfLinesRewriter().Visit( interpolation.NormalizeWhitespace() )!;
 
         // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
         // in a parenthesis or a square bracket, we need to parenthesize the expression.
@@ -51,10 +51,6 @@ internal sealed class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
 
     private sealed class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
     {
-        public static RemoveEndOfLinesRewriter Instance { get; } = new();
-
-        private RemoveEndOfLinesRewriter() { }
-
         public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
             => trivia.Kind() switch
             {

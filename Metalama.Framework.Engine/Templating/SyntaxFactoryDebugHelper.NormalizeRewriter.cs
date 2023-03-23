@@ -12,9 +12,7 @@ public static partial class SyntaxFactoryDebugHelper
 {
     private sealed class NormalizeRewriter : SafeSyntaxRewriter
     {
-        public static readonly NormalizeRewriter Instance = new();
-
-        private NormalizeRewriter() : base( true ) { }
+        public NormalizeRewriter() : base( true ) { }
 
         public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
         {

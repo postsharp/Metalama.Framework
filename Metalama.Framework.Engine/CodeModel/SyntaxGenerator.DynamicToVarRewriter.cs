@@ -11,10 +11,6 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private sealed class DynamicToVarRewriter : SafeSyntaxRewriter
         {
-            public static readonly CSharpSyntaxRewriter Instance = new DynamicToVarRewriter();
-
-            private DynamicToVarRewriter() { }
-
             public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
             {
                 if ( node.Identifier.Text == "dynamic" )

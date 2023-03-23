@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -16,11 +17,20 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
 {
     protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia ) { }
 
+    private RecursionGuard _recursionGuard;
+
+    [return: NotNullIfNotNull( nameof(node) )]
     public sealed override SyntaxNode? Visit( SyntaxNode? node )
     {
         try
         {
-            return this.VisitCore( node );
+            this._recursionGuard.IncrementDepth();
+
+            var result = this._recursionGuard.ShouldSwitch ? this._recursionGuard.Switch( node, this.VisitCore ) : this.VisitCore( node );
+
+            this._recursionGuard.DecrementDepth();
+
+            return result;
         }
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {

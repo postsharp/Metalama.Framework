@@ -12,10 +12,6 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private sealed class RemoveTypeArgumentsRewriter : SafeSyntaxRewriter
         {
-            public static readonly CSharpSyntaxRewriter Instance = new RemoveTypeArgumentsRewriter();
-
-            private RemoveTypeArgumentsRewriter() { }
-
             public override SyntaxNode VisitGenericName( GenericNameSyntax node )
             {
                 // We intentionally don't visit type arguments, because we don't want remove the nested type arguments.

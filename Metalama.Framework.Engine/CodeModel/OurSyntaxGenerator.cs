@@ -60,21 +60,22 @@ internal partial class OurSyntaxGenerator
             if ( namedType.IsGenericTypeDefinition() )
             {
                 // In generic definitions, we must remove type arguments.
-                typeSyntax = (TypeSyntax) RemoveTypeArgumentsRewriter.Instance.Visit( typeSyntax );
+                typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax );
             }
         }
 
         // In any typeof, we must remove ? annotations of nullable types.
         typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
 
+        var dynamicToVarRewriter = new DynamicToVarRewriter();
         // In any typeof, we must change dynamic to object.
-        typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
+        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Visit( typeSyntax );
 
-        var rewriter = type switch
+        SafeSyntaxRewriter rewriter = type switch
         {
-            INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => RemoveTypeArgumentsRewriter.Instance,
+            INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => new RemoveTypeArgumentsRewriter(),
             INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
-            _ => DynamicToVarRewriter.Instance
+            _ => dynamicToVarRewriter
         };
 
         var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
@@ -95,10 +96,10 @@ internal partial class OurSyntaxGenerator
 
         if ( !this.IsNullAware )
         {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
         }
 
-        return (TypeSyntax) NormalizeSpaceRewriter.Instance.Visit( typeSyntax )!;
+        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax );
     }
 
     public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
