@@ -43,6 +43,8 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
 
+    public bool DerivesFrom( INamedType childType, INamedType baseType, DerivedTypesOptions options = DerivedTypesOptions.Default ) => throw new NotImplementedException();
+
     private bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {
         left.ThrowIfBelongsToDifferentCompilationThan( right );

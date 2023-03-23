@@ -74,11 +74,6 @@ internal abstract class TemplateClassFactory<T>
 
                         var typeName = typeSymbol.GetReflectionFullName();
 
-                        if ( typeName == null )
-                        {
-                            return null;
-                        }
-
                         return new TemplateClassData(
                             item.Project,
                             item.TypeName,

@@ -37,11 +37,6 @@ internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
     {
         var typeName = typeSymbol.GetReflectionFullName();
 
-        if ( typeName == null )
-        {
-            return null;
-        }
-
         cancellationToken.ThrowIfCancellationRequested();
 
         if ( typeSymbol.ContainingAssembly != null )

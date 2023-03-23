@@ -51,11 +51,6 @@ internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeRe
 
         var reflectionName = typeSymbol.GetReflectionFullName();
 
-        if ( reflectionName == null )
-        {
-            return null;
-        }
-
         return compileTimeProject?.GetTypeOrNull( reflectionName );
     }
 }
