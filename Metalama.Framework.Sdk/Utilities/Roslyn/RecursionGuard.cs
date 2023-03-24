@@ -19,13 +19,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 internal struct RecursionGuard
 {
 #if DEBUG
-    private readonly ConcurrentStack<int> _threadStackId;
+    private readonly int _threadId;
     private readonly object _owner;
 #endif
 
     private int _recursionDepth;
+    private ConcurrentStack<int>? _threadIdStack;
 #if DEBUG
-    private bool _failed;
+    private volatile bool _failed;
 #endif
 
     // InsufficientExecutionStackException can be observed in SafeSyntaxWalker when this is > 900, so set it to a value that is significantly smaller than that, to be safe.
@@ -35,8 +36,7 @@ internal struct RecursionGuard
     public RecursionGuard( object owner )
     {
 #if DEBUG
-        this._threadStackId = new ConcurrentStack<int>();
-        this._threadStackId.Push(Thread.CurrentThread.ManagedThreadId);
+        this._threadId = Thread.CurrentThread.ManagedThreadId;
         this._owner = owner;
 #endif
     }    
@@ -49,11 +49,21 @@ internal struct RecursionGuard
             throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used after a failure occured." );
         }
 
-        this._threadStackId.TryPeek( out var currentThreadId );
-
-        if ( currentThreadId != Thread.CurrentThread.ManagedThreadId )
+        if (this._threadIdStack == null || this._threadIdStack.Count == 0 )
         {
-            throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used across threads." );
+            if ( this._threadId != Thread.CurrentThread.ManagedThreadId )
+            {
+                throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used across threads." );
+            }
+        }
+        else
+        {
+            this._threadIdStack.TryPeek( out var currentThreadId );
+
+            if ( currentThreadId != Thread.CurrentThread.ManagedThreadId )
+            {
+                throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used across threads." );
+            }
         }
 #endif
 
@@ -64,13 +74,13 @@ internal struct RecursionGuard
 
     public readonly bool ShouldSwitch => this._recursionDepth % _maxRecursionDepth == 0 && this._recursionDepth <= _maxRecursionDepth * _maxTasks;
 
-    public readonly void Switch<TState>( TState state, Action<TState> recursiveAction )
+    public void Switch<TState>( TState state, Action<TState> recursiveAction )
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
 
 #if DEBUG
-        var threadStack = this._threadStackId;
+        var threadStack = this._threadIdStack ??= new();
 #endif
 
         Task.Run( 
@@ -94,13 +104,13 @@ internal struct RecursionGuard
 #pragma warning restore VSTHRD002
     }
 
-    public readonly TResult Switch<TState, TResult>( TState state, Func<TState, TResult> recursiveFunction )
+    public TResult Switch<TState, TResult>( TState state, Func<TState, TResult> recursiveFunction )
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
 
 #if DEBUG
-        var threadStack = this._threadStackId;
+        var threadStack = this._threadIdStack ??= new();
 #endif
 
         return
