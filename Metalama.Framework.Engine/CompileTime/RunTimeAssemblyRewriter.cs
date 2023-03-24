@@ -107,9 +107,10 @@ namespace Metalama.Compiler
     {
         var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation.Compilation );
 
-        var rewriter = new RunTimeAssemblyRewriter( serviceProvider, compilationContext );
-
-        var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider );
+        var transformedCompilation =
+            await compilation.RewriteSyntaxTreesAsync(
+                () => new RunTimeAssemblyRewriter( serviceProvider, compilationContext ),
+                serviceProvider );
 
         if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
         {

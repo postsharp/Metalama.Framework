@@ -53,9 +53,6 @@ namespace Metalama.Framework.Engine.Linking
                 input.AnalysisRegistry,
                 input.DiagnosticSink );
 
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver );
-            var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
-
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();
 
             async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
@@ -70,8 +67,13 @@ namespace Metalama.Framework.Engine.Linking
                     var syntaxTree = modifiedSyntaxTree.NewTree.AssertNotNull();
 
                     // Run the linking rewriter for this tree.
-                    var linkedRoot = linkingRewriter.Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
-                    var cleanRoot = cleanupRewriter.Visit( linkedRoot )!;
+                    var linkedRoot = 
+                        new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
+                        .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
+
+                    var cleanRoot =
+                        new CleanupRewriter( input.ProjectOptions )
+                        .Visit( linkedRoot )!;
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 

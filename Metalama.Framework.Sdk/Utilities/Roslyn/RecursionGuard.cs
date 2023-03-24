@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
@@ -16,13 +18,48 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// </summary>
 internal struct RecursionGuard
 {
+#if DEBUG
+    private readonly ConcurrentStack<int> _threadStackId;
+    private readonly object _owner;
+#endif
+
     private int _recursionDepth;
+#if DEBUG
+    private bool _failed;
+#endif
 
     // InsufficientExecutionStackException can be observed in SafeSyntaxWalker when this is > 900, so set it to a value that is significantly smaller than that, to be safe.
     private const int _maxRecursionDepth = 750;
     private const int _maxTasks = 4;
 
-    public void IncrementDepth() => this._recursionDepth++;
+    public RecursionGuard( object owner )
+    {
+#if DEBUG
+        this._threadStackId = new ConcurrentStack<int>();
+        this._threadStackId.Push(Thread.CurrentThread.ManagedThreadId);
+        this._owner = owner;
+#endif
+    }    
+
+    public void IncrementDepth()
+    {
+#if DEBUG
+        if ( this._failed )
+        {
+            throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used after a failure occured." );
+        }
+
+        this._threadStackId.TryPeek( out var currentThreadId );
+
+        if ( currentThreadId != Thread.CurrentThread.ManagedThreadId )
+        {
+            throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used across threads." );
+        }
+#endif
+
+        this._recursionDepth++;
+    }
+
     public void DecrementDepth() => this._recursionDepth--;
 
     public readonly bool ShouldSwitch => this._recursionDepth % _maxRecursionDepth == 0 && this._recursionDepth <= _maxRecursionDepth * _maxTasks;
@@ -31,7 +68,29 @@ internal struct RecursionGuard
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
-        Task.Run( () => recursiveAction( state ) ).ContinueWith( _ => { }, TaskScheduler.Default ).GetAwaiter().GetResult();
+
+#if DEBUG
+        var threadStack = this._threadStackId;
+#endif
+
+        Task.Run( 
+            () =>
+            {
+                try
+                {
+#if DEBUG
+                    threadStack.Push( Thread.CurrentThread.ManagedThreadId );
+#endif
+                    recursiveAction( state );
+                }
+                finally
+                {
+#if DEBUG
+                    threadStack.TryPop( out _ );
+#endif
+                }
+            } )
+            .ContinueWith( _ => { }, TaskScheduler.Default ).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
     }
 
@@ -39,8 +98,37 @@ internal struct RecursionGuard
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         // The ContinueWith is used to prevent inline execution of the Task.
-        return Task.Run( () => recursiveFunction( state ) ).ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default ).GetAwaiter().GetResult();
+
+#if DEBUG
+        var threadStack = this._threadStackId;
+#endif
+
+        return
+            Task.Run( 
+                () =>
+                {
+                    try
+                    {
+#if DEBUG
+                        threadStack.Push( Thread.CurrentThread.ManagedThreadId );
+#endif
+                        return recursiveFunction( state );
+                    }
+                    finally
+                    {
+#if DEBUG
+                        threadStack.TryPop( out _ );
+#endif
+                    }
+                } )
+            .ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default ).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
     }
 
+    public void Failed()
+    {
+#if DEBUG
+        this._failed = true;
+#endif
+    }
 }
