@@ -10,11 +10,11 @@ internal static class SerializableTypeIdGenerator
 {
     internal static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
     {
-        var id = OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol ).ToString();
+        var id = OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol, keepNullableAnnotations: true ).ToString();
 
         if ( symbol.NullableAnnotation != NullableAnnotation.None )
         {
-            id += symbol.NullableAnnotation == NullableAnnotation.Annotated ? '?' : '!';
+            id += '!';
         }
 
         return new SerializableTypeId( id );

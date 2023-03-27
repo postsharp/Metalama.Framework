@@ -1710,17 +1710,22 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return node.Update( node.OperatorToken, transformedOperand ).WithSymbolAnnotationsFrom( node ).AddScopeAnnotation( scope );
     }
 
-    private (ExpressionSyntax TransformedOperand, TemplatingScope? Scope) VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
+    private (ExpressionSyntax TransformedOperand, TemplatingScope Scope) VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
     {
         var transformedOperand = this.Visit( operand );
 
-        TemplatingScope? scope = null;
+        var scope = this.GetNodeScope( transformedOperand );
+
+        if ( @operator.IsKind( SyntaxKind.ExclamationToken ) && scope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+        {
+            scope = TemplatingScope.RunTimeOnly;
+        }
 
         if ( IsMutatingUnaryOperator( @operator ) )
         {
             scope = this.GetAssignmentScope( transformedOperand );
 
-            if ( scope.Value.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
+            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
             {
                 // We cannot mutate a compile-time expression in a run-time-condition block.
                 this.ReportDiagnostic(
