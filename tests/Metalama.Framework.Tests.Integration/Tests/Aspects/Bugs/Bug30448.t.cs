@@ -6,5 +6,5 @@ internal class Foo
     nonNullableString = nonNullableString.Trim();
     Console.WriteLine($"nonNullableString='{nonNullableString}', nullableString='{nullableString}'");
   }
-  public string Property { get; set; }
+  public string? Property { get; set; }
 }

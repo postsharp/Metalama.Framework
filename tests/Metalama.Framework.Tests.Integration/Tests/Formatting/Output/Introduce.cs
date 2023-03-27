@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Introduce
         }
 
         [Introduce]
-        public event EventHandler Event;
+        public event EventHandler? Event;
     }
 
     [IntroduceAspect]

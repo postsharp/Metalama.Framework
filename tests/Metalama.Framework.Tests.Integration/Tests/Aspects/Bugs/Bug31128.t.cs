@@ -22,8 +22,7 @@ public sealed partial class UsersLoginInfoModel : BusinessObjectModel<UsersLogin
   {
     global::System.Collections.Generic.IList<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn> columns;
     columns = default(global::System.Collections.Generic.IList<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn>);
-    columns.Add(new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn("Id")
-    {VisibleInDetailView = false});
+    columns.Add(new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn("Id") { VisibleInDetailView = false });
     columns.Add(new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn("ProviderUserKey"));
     return (global::System.Collections.Generic.IList<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn>)columns;
   }

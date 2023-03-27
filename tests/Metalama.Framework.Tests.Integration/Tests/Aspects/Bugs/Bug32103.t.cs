@@ -12,6 +12,16 @@ public class TargetClass
   }
   public global::System.Collections.Generic.Dictionary<global::System.String, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount> GetMethodOverloadCount()
   {
-    return (global::System.Collections.Generic.Dictionary<global::System.String, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount>)new global::System.Collections.Generic.Dictionary<global::System.String, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount>{{"Method1", new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount("Method1", 2)}, {"Method2", new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount("Method2", 1)}};
+    return (global::System.Collections.Generic.Dictionary<global::System.String, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount>)new global::System.Collections.Generic.Dictionary<global::System.String, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount>
+    {
+      {
+        "Method1",
+        new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount("Method1", 2)
+      },
+      {
+        "Method2",
+        new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32103.MethodOverloadCount("Method2", 1)
+      }
+    };
   }
 }

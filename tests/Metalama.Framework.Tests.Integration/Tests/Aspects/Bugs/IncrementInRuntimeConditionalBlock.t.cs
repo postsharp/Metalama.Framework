@@ -1,19 +1,19 @@
 [AutoIncrementAttribute]
 int Property
 {
-    get
+  get
+  {
+    if (oldValue != this._property)
     {
-        if (oldValue != this._property)
-        {
-            this._property = this._property + 1;
-            this._property += 1;
-            this._property++;
-            ++this._property;
-        }
-        return this._property;
+      this._property = this._property + 1;
+      this._property += 1;
+      this._property++;
+      ++this._property;
     }
-    set
-    {
-        throw new global::System.NotImplementedException();
-    }
+    return this._property;
+  }
+  set
+  {
+    throw new global::System.NotImplementedException();
+  }
 }

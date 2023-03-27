@@ -1,8 +1,8 @@
 internal partial class Greeter
 {
-  private global::System.IO.TextWriter _console1;
+  private global::System.IO.TextWriter? _console1;
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample.InjectAttribute]
-  private global::System.IO.TextWriter _console
+  private global::System.IO.TextWriter? _console
   {
     get
     {
@@ -12,7 +12,7 @@ internal partial class Greeter
         value = (global::System.IO.TextWriter? )_serviceProvider.GetService(typeof(global::System.IO.TextWriter));
         this._console1 = value ?? throw new global::System.InvalidOperationException($"Cannot get a service of type {typeof(global::System.IO.TextWriter)}.");
       }
-      return (global::System.IO.TextWriter)value;
+      return (global::System.IO.TextWriter? )value;
     }
     set
     {

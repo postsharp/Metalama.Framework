@@ -4,7 +4,9 @@ public class TargetClass
   public void TestMethod1()
   {
     var td = new TestData()
-    {Property = TestData.TryParse1("42", out var result) ? result : null, };
+    {
+      Property = TestData.TryParse1("42", out var result) ? result : null,
+    };
     object result_1 = null;
     var result1 = 42;
     var result2 = 42;
@@ -16,7 +18,9 @@ public class TargetClass
   public void TestMethod2()
   {
     var td = new TestData()
-    {Property = TestData.TryParse2("42", out (int x, int y) result) ? result.x : null, };
+    {
+      Property = TestData.TryParse2("42", out (int x, int y) result) ? result.x : null,
+    };
     object result_1 = null;
     var result1 = 42;
     var result2 = 42;

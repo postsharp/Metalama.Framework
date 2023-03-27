@@ -214,7 +214,20 @@ namespace Metalama.Framework.Engine.Linking
 
         // Event backing field is intentionally an event field to handle thread-safety.
         private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
-            => EventFieldDeclaration(
+        {
+            if ( initializer == null && !symbol.Type.IsValueType && symbol.Type.NullableAnnotation == NullableAnnotation.NotAnnotated )
+            {
+                initializer =
+                    EqualsValueClause(
+                        PostfixUnaryExpression(
+                            SyntaxKind.SuppressNullableWarningExpression,
+                            LiteralExpression(
+                                SyntaxKind.DefaultLiteralExpression,
+                                Token( SyntaxKind.DefaultKeyword ) ) ) );
+            }
+
+            return
+                EventFieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
                         ? TokenList(
@@ -232,6 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                 .WithLeadingTrivia( ElasticLineFeed )
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
 
         private MemberDeclarationSyntax GetOriginalImplEvent(
             EventDeclarationSyntax @event,

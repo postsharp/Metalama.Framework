@@ -43,5 +43,5 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
       global::System.Console.WriteLine("This is introduced interface member.");
     }
   }
-  public event global::System.EventHandler EventField;
+  public event global::System.EventHandler? EventField;
 }

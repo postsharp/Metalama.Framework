@@ -26,8 +26,8 @@ internal class Aspect : OverrideMethodAspect
 
 internal class TargetCode : ICloneable
 {
-    private string s;
-    private TargetCode tc;
+    private string? s;
+    private TargetCode? tc;
 
     [Aspect]
     private TargetCode Method() => throw new NotImplementedException();

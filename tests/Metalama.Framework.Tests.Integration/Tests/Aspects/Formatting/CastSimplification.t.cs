@@ -14,14 +14,14 @@ internal class Aspect : OverrideMethodAspect
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 internal class TargetCode : ICloneable
 {
-  private string s;
-  private TargetCode tc;
+  private string? s;
+  private TargetCode? tc;
   [Aspect]
   private TargetCode Method()
   {
     var clone = (TargetCode)MemberwiseClone();
-    clone.s = (string)this.s.Clone();
-    clone.tc = (TargetCode)((ICloneable)this.tc).Clone();
+    clone.s = (string? )this.s.Clone();
+    clone.tc = (TargetCode? )((ICloneable)this.tc).Clone();
     return clone;
   }
   object ICloneable.Clone() => new();

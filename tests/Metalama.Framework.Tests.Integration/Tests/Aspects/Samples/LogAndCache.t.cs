@@ -8,7 +8,7 @@ class TargetCode
     try
     {
       global::System.Int32 result_1;
-      string cacheKey = string.Format("TargetCode.Add({0}, {1})", new object[]{a, b});
+      string cacheKey = string.Format("TargetCode.Add({0}, {1})", new object[] { a, b });
       if (global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryGetValue(cacheKey, out object? value))
       {
         global::System.Console.WriteLine("Cache hit.");

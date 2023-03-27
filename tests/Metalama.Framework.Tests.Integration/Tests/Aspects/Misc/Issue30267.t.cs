@@ -5,7 +5,8 @@ public class C
   {
     var x = new
     {
-    x1 = new C(), x2 = new C()}
-    ;
+      x1 = new C(),
+      x2 = new C()
+    };
   }
 }

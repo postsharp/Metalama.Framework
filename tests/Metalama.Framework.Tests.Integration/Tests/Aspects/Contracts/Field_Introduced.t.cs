@@ -1,7 +1,7 @@
 [IntroduceAndFilter]
 internal class Target
 {
-  private global::System.String _existingField;
+  private global::System.String _existingField = default !;
   private global::System.String ExistingField
   {
     get

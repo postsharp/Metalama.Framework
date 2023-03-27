@@ -1,9 +1,4 @@
-#if TEST_OPTIONS
-// @Skipped(#29235)
-#endif
-
 using System;
-using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug29235

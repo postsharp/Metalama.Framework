@@ -11,7 +11,7 @@ public class MyAdviceAttribute : DeclarativeAdviceAttribute
 {
     public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.IntroduceField( (INamedType)builder.Target, "_field", typeof(string) );
+        builder.Advice.IntroduceField( (INamedType)builder.Target, "_field", TypeFactory.GetType(typeof(string)).ToNullableType() );
     }
 }
 
