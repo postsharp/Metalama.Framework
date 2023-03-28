@@ -266,6 +266,12 @@ namespace Metalama.Framework.Engine.Templating
                                     SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
                     .WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
+                // Special case for default(void), which cannot be an expression statement.
+                if ( value is DefaultUserExpression )
+                {
+                    return localDeclarationStatement;
+                }
+
                 return SyntaxFactory.Block(
                         awaitResult
                             ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( runtimeExpression.RemoveParenthesis() ) )

@@ -102,7 +102,7 @@ internal partial class OurSyntaxGenerator
         return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax );
     }
 
-    public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
+    public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
         => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
             .WithAdditionalAnnotations( Simplifier.Annotation );
 
