@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
         [TestTemplate]
         dynamic? Template()
         {
-            var i = meta.CompileTime(SwitchEnum.one);
+            var i = SwitchEnum.one;
 
             switch (i)
             {

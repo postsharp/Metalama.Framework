@@ -2307,13 +2307,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
     {
         var annotatedExpression = this.Visit( node.Expression );
-        var expressionScope = annotatedExpression.GetScopeFromAnnotation().GetValueOrDefault();
+        var expressionScope = annotatedExpression.GetScopeFromAnnotation() ?? TemplatingScope.RunTimeOrCompileTime;
 
         TemplatingScope switchScope;
         string scopeReason;
 
         if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsNodeOfDynamicType( annotatedExpression ))
-             || expressionScope != TemplatingScope.CompileTimeOnly )
+             || expressionScope.GetExpressionValueScope( preferCompileTime: true ) != TemplatingScope.CompileTimeOnly )
         {
             switchScope = TemplatingScope.RunTimeOnly;
             scopeReason = $"the run-time 'switch( {node.Expression} )'";
