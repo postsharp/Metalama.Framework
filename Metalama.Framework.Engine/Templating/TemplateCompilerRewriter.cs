@@ -1698,7 +1698,22 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
                 var section = node.Sections[i];
-                var transformedStatements = this.ToMetaStatements( section.Statements );
+                var transformedStatements = this.ToMetaStatements( section.Statements ).ToList();
+
+                // If the last statement does not transfer control elsewhere, add a break statement.
+                // This happens when the transfer control statement in a template is run-time (e.g. a throw).
+                if ( transformedStatements[^1].Kind() is not
+                    (SyntaxKind.BreakStatement
+                    or SyntaxKind.ContinueStatement
+                    or SyntaxKind.ReturnStatement
+                    or SyntaxKind.ThrowStatement
+                    or SyntaxKind.GotoCaseStatement
+                    or SyntaxKind.GotoDefaultStatement
+                    or SyntaxKind.GotoStatement) )
+                {
+                    transformedStatements.Add( BreakStatement() );
+                }
+                
                 transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
             }
 
