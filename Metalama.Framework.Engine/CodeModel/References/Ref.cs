@@ -193,6 +193,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 return declaration.GetSerializableId( this.TargetKind );
             }
 
+            if ( this.Target is string id && IsSerializableId( id ) && this.TargetKind == DeclarationRefTargetKind.Default )
+            {
+                return new( id );
+            }
+
             if ( this._compilationContext == null )
             {
                 throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
