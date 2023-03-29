@@ -88,18 +88,18 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                                 break;
 
-                            case "self":
-                                order = AspectReferenceOrder.Self;
-
-                                break;
-
                             case "@base":
                                 order = AspectReferenceOrder.Base;
 
                                 break;
 
-                            case "original":
-                                order = AspectReferenceOrder.Original;
+                            case "previous":
+                                order = AspectReferenceOrder.Previous;
+
+                                break;
+
+                            case "current":
+                                order = AspectReferenceOrder.Current;
 
                                 break;
 

@@ -134,8 +134,9 @@ namespace Metalama.Framework.Engine.Linking
                 out var resolvedReferencedSymbol,
                 out var resolvedReferencedSymbolSourceNode );
 
-            // Root node is the node that will be replaced when rewriting the aspect reference.
-            // Symbol source node is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
+            // resolvedRootNode is the node that will be replaced when rewriting the aspect reference.
+            // resolvedReferencedSymbol is the real target of the reference.
+            // resolvedReferencedSymbolSourceNode is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
@@ -234,6 +235,20 @@ namespace Metalama.Framework.Engine.Linking
                             containingLocalFunction,
                             resolvedReferencedSymbol,
                             GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
+                            targetKind,
+                            isInlineable );
+                    }
+                    else if ( this.TryGetHiddenSymbol(referencedSymbol, out var hiddenSymbol ) )
+                    {                        
+                        // Introduction is hiding another symbol, resolve to symbol in the base class.
+                        return new ResolvedAspectReference(
+                            containingSemantic,
+                            containingLocalFunction,
+                            resolvedReferencedSymbol,
+                            hiddenSymbol.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
                             resolvedRootNode,
                             resolvedReferencedSymbolSourceNode,
@@ -405,15 +420,11 @@ namespace Metalama.Framework.Engine.Linking
 
             switch ( referenceSpecification.Order )
             {
-                case AspectReferenceOrder.Original:
-                    resolvedIndex = default;
-
-                    break;
 
                 case AspectReferenceOrder.Base:
                     // TODO: optimize.
 
-                    var lowerOverride = overrideIndices.LastOrDefault( x => x.Index < annotationLayerIndex );
+                    var lowerOverride = overrideIndices.LastOrDefault( x => x.Index.LayerIndex < annotationLayerIndex.LayerIndex );
 
                     if ( lowerOverride.Override != null )
                     {
@@ -432,10 +443,31 @@ namespace Metalama.Framework.Engine.Linking
 
                     break;
 
-                case AspectReferenceOrder.Self:
+                case AspectReferenceOrder.Previous:
+
+                    var previousOverride = overrideIndices.LastOrDefault( x => x.Index < annotationLayerIndex );
+
+                    if ( previousOverride.Override != null )
+                    {
+                        resolvedIndex = previousOverride.Index;
+                        resolvedInjectedMember = previousOverride.Override;
+                    }
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex )
+                    {
+                        resolvedIndex = targetIntroductionIndex.Value;
+                        resolvedInjectedMember = targetIntroductionInjectedMember;
+                    }
+                    else
+                    {
+                        resolvedIndex = default;
+                    }
+
+                    break;
+
+                case AspectReferenceOrder.Current:
                     // TODO: optimize.
 
-                    var lowerOrEqualOverride = overrideIndices.LastOrDefault( x => x.Index <= annotationLayerIndex );
+                    var lowerOrEqualOverride = overrideIndices.LastOrDefault( x => x.Index.LayerIndex <= annotationLayerIndex.LayerIndex );
 
                     if ( lowerOrEqualOverride.Override != null )
                     {
@@ -663,6 +695,39 @@ namespace Metalama.Framework.Engine.Linking
             rootNode = expression;
             targetSymbol = referencedSymbol;
             targetSymbolSource = expression;
+        }
+
+        /// <summary>
+        /// Finds symbol for the referenced declaration that is valid in the current type, i.e. a local override.
+        /// </summary>
+        /// <param name="containingType">Type that contains the reference.</param>
+        /// <param name="referencedSymbol">Referenced symbol.</param>
+        /// <returns></returns>
+        private ISymbol GetCanonicalReferencedSymbol( INamedTypeSymbol containingType, ISymbol referencedSymbol )
+        {
+            if ( this._intermediateCompilation.ClassifyConversion( containingType, referencedSymbol.ContainingType).IsReference)
+            {
+                var currentType = containingType;
+
+                while ( currentType != null )
+                {
+                    foreach ( var symbol in currentType.GetMembers( referencedSymbol.Name ) )
+                    {
+                        if ( StructuralSymbolComparer.Signature.Equals( symbol, referencedSymbol ) )
+                        {
+                            return symbol;
+                        }
+                    }
+
+                    currentType = currentType.BaseType;
+                }
+
+                throw new AssertionFailedException( "Could not find" );
+            }
+            else
+            {
+                return referencedSymbol;
+            }
         }
 
         private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )

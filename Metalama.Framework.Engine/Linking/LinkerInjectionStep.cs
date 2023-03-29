@@ -144,23 +144,22 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel.Comparers.Default );
 
             // Rewrite syntax trees.
-            Rewriter rewriter = new(
-                this._compilationContext,
-                syntaxTransformationCollection,
-                suppressionsByTarget,
-                input.CompilationModel,
-                symbolMemberLevelTransformations,
-                introductionMemberLevelTransformations,
-                nodesWithModifiedAttributes,
-                syntaxTreeForGlobalAttributes,
-                typeLevelTransformations );
-
             var intermediateCompilation = input.InitialCompilation;
-
             var transformations = new ConcurrentBag<SyntaxTreeTransformation>();
 
             async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
             {
+                Rewriter rewriter = new(
+                    this._compilationContext,
+                    syntaxTransformationCollection,
+                    suppressionsByTarget,
+                    input.CompilationModel,
+                    symbolMemberLevelTransformations,
+                    introductionMemberLevelTransformations,
+                    nodesWithModifiedAttributes,
+                    syntaxTreeForGlobalAttributes,
+                    typeLevelTransformations );
+
                 var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
                 var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
 

@@ -150,8 +150,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 ExpressionSyntax memberAccessExpression =
                     MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
 
-                // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-                if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )
+                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
+                if ( GetTargetType().Is( this.Member.DeclaringType ) )
                 {
                     memberAccessExpression =
                         memberAccessExpression.WithAspectReferenceAnnotation(
@@ -180,8 +180,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                             receiverTypedExpressionSyntax.Syntax,
                             InvocationExpression( MemberBindingExpression( name ) ) );
 
-                // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-                if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )
+                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
+                if ( GetTargetType().Is( this.Member.DeclaringType ) )
                 {
                     expression = expression.WithAspectReferenceAnnotation(
                         receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );

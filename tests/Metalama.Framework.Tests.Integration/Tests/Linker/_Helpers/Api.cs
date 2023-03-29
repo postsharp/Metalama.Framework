@@ -3,10 +3,10 @@
     public static class Api
     {
         public const string inline = "inline";
-        public const string original = "original";
-        public const string final = "final";
-        public const string self = "self";
         public const string @base = "base";
+        public const string previous = "previous";
+        public const string current = "current";
+        public const string final = "final";
 
         public static dynamic _this = new object();
         public static dynamic _static = new object();

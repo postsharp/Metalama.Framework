@@ -206,7 +206,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
                         addTransformation( overriddenMethod );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, existingMethod );
                     }
                     else
                     {
@@ -219,7 +219,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         addTransformation( overriddenMethod );
                         addTransformation( this.Builder.ToTransformation() );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.New );
+                        return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                     }
 
                 case OverrideStrategy.Override:
@@ -229,7 +229,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
                         addTransformation( overriddenMethod );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, existingMethod );
                     }
                     else if ( existingMethod.IsSealed || !existingMethod.IsOverridable() )
                     {
@@ -250,7 +250,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         addTransformation( this.Builder.ToTransformation() );
                         addTransformation( overriddenMethod );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                     }
 
                 default:

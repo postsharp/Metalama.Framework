@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                     targetSymbol.ContainingType,
                                     this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
                             {
-                                throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
+                                throw new AssertionFailedException( $"Resolved symbol {this._aspectReference.ContainingSemantic.Symbol} is declared in a derived class." );
                             }
                             else if ( this.CompilationContext.SymbolComparer.Is(
                                          this._aspectReference.ContainingSemantic.Symbol.ContainingType,
@@ -239,9 +239,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
 
                 case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-                    if ( SymbolEqualityComparer.Default.Equals(
-                            this._aspectReference.ContainingSemantic.Symbol.ContainingType,
-                            targetSymbol.ContainingType ) )
+                    if ( this.CompilationContext.SymbolComparer.Is( this._aspectReference.ContainingSemantic.Symbol.ContainingType, targetSymbol.ContainingType ) )
                     {
                         if ( this._aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                         {
@@ -254,9 +252,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression )!;
                         }
                     }
+                    else if ( this.CompilationContext.SymbolComparer.Is( targetSymbol.ContainingType, this._aspectReference.ContainingSemantic.Symbol.ContainingType ) )
+                    {
+                        throw new AssertionFailedException( $"Resolved symbol {this._aspectReference.ContainingSemantic.Symbol} is declared in a derived class." );
+                    }
                     else
                     {
-                        throw new AssertionFailedException( Justifications.CoverageMissing );
+                        var rewriter = new ConditionalAccessRewriter( targetMemberName );
+
+                        return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression )!;
                     }
 
                 default:

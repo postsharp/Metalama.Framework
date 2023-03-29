@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.OverriddenBaseMethod
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.IntroducedOverride
 {
     class Base
     {
@@ -31,11 +31,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         public void Foo_Override0()
         {
             // Should invoke base declaration.
-            link(_this.Bar, original)();
-            // Should invoke base declaration.
             link(_this.Bar, @base)();
             // Should invoke base declaration.
-            link(_this.Bar, self)();
+            link(_this.Bar, previous)();
+            // Should invoke base declaration.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
@@ -45,12 +45,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override2()
         {
-            // Should invoke base declaration.
-            link(_this.Bar, original)();
-            // Should invoke override 1.
+            // Should invoke override 1_2.
             link(_this.Bar, @base)();
-            // Should invoke override 1.
-            link(_this.Bar, self)();
+            // Should invoke override 1_2.
+            link(_this.Bar, previous)();
+            // Should invoke override 1_2.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
@@ -60,12 +60,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override4()
         {
-            // Should invoke base declaration.
-            link(_this.Bar, original)();
-            // Should invoke override 3.
+            // Should invoke override 3_2.
             link(_this.Bar, @base)();
-            // Should invoke override 3.
-            link(_this.Bar, self)();
+            // Should invoke override 3_2.
+            link(_this.Bar, previous)();
+            // Should invoke override 3_2.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
@@ -75,12 +75,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override6()
         {
-            // Should invoke base declaration.
-            link(_this.Bar, original)();
             // Should invoke the final declaration.
             link(_this.Bar, @base)();
             // Should invoke the final declaration.
-            link(_this.Bar, self)();
+            link(_this.Bar, previous)();
+            // Should invoke the final declaration.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
@@ -93,42 +93,84 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]
         [PseudoNotInlineable]
-        private void Bar_Override1()
+        private void Bar_Override1_1()
         {
             // Should invoke base declaration.
-            link(_this.Bar, original)();
+            link(_this.Bar, @base)();
+            // Should invoke base declaration.
+            link(_this.Bar, previous)();
+            // Should invoke override 1_2.
+            link(_this.Bar, current)();
+            // Should invoke the final declaration.
+            link(_this.Bar, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoNotInlineable]
+        private void Bar_Override1_2()
+        {
             // Should invoke base declaration.
             link(_this.Bar, @base)();
-            // Should invoke override 1.
-            link(_this.Bar, self)();
+            // Should invoke override 1_1.
+            link(_this.Bar, previous)();
+            // Should invoke override 1_2.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect3")]
         [PseudoNotInlineable]
-        private void Bar_Override3()
+        private void Bar_Override3_1()
         {
-            // Should invoke base declaration.
-            link(_this.Bar, original)();
-            // Should invoke override 1.
+            // Should invoke override 1_2.
             link(_this.Bar, @base)();
-            // Should invoke override 3.
-            link(_this.Bar, self)();
+            // Should invoke override 1_2.
+            link(_this.Bar, previous)();
+            // Should invoke override 3_2.
+            link(_this.Bar, current)();
+            // Should invoke the final declaration.
+            link(_this.Bar, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoNotInlineable]
+        private void Bar_Override3_2()
+        {
+            // Should invoke override 1_2.
+            link(_this.Bar, @base)();
+            // Should invoke override 3_1.
+            link(_this.Bar, previous)();
+            // Should invoke override 3_2.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect5")]
         [PseudoNotInlineable]
-        private void Bar_Override5()
+        private void Bar_Override5_1()
         {
-            // Should invoke base declaration.
-            link(_this.Bar, original)();
-            // Should invoke override 3.
+            // Should invoke override 3_2.
             link(_this.Bar, @base)();
+            // Should invoke override 3_2.
+            link(_this.Bar, previous)();
             // Should invoke the final declaration.
-            link(_this.Bar, self)();
+            link(_this.Bar, current)();
+            // Should invoke the final declaration.
+            link(_this.Bar, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoNotInlineable]
+        private void Bar_Override5_2()
+        {
+            // Should invoke override 3_2.
+            link(_this.Bar, @base)();
+            // Should invoke override 5_1.
+            link(_this.Bar, previous)();
+            // Should invoke the final declaration.
+            link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
         }
