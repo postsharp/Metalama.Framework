@@ -410,5 +410,13 @@ namespace Metalama.Framework.Engine.Templating
                 "'{0}' is an invalid declaration to be marked as a template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string Expression, string Left, string Right)> ExpressionScopeConflictInConditionalAccess
+            = new(
+                "LAMA0259",
+                "Execution scope mismatch in conditional access expression.",
+                "Execution scope mismatch in the expression '{0}': '{1}' is compile-time, but '{2}' is run-time. Consider splitting the expression into separate statements.",
+                _category,
+                Error );
     }
 }
