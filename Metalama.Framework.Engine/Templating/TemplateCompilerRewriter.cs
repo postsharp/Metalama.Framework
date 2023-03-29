@@ -607,11 +607,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case SyntaxKind.TypeOfExpression:
                 {
                     var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
-                    var typeId = type.GetSerializableTypeId().Id;
+                    var typeOfString = OurSyntaxGenerator.CompileTime.TypeOfExpression( type ).ToString();
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
-                            Argument( SyntaxFactoryEx.LiteralExpression( typeId ) ),
+                            Argument( SyntaxFactoryEx.LiteralExpression( typeOfString ) ),
                             Argument(
                                 this.CreateTypeParameterSubstitutionDictionary(
                                     nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations),
@@ -803,13 +803,32 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         new[]
                         {
                             Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
-                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) )
+                            Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
                         } ) ) );
         }
 
-        // TODO: do the same for ?.
-
         return base.VisitMemberAccessExpression( node );
+    }
+
+    protected override ExpressionSyntax TransformConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+    {
+        var transformationKind = this.GetTransformationKind( node.Expression );
+
+        if ( transformationKind != TransformationKind.Transform &&
+             this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
+        {
+            return InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalAccessExpression) ),
+                ArgumentList(
+                    SeparatedList(
+                        new[]
+                        {
+                            Argument( this.Transform( node.Expression ) ),
+                            Argument( this.Transform( node.WhenNotNull ) )
+                        } ) ) );
+        }
+
+        return base.TransformConditionalAccessExpression( node );
     }
 
     public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
@@ -2088,7 +2107,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             return InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
-                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( (ExpressionSyntax) this.Visit( node.Operand )! ) ) ) );
+                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( this.Transform( node.Operand ) ) ) ) );
         }
         else
         {

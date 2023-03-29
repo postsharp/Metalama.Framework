@@ -23,7 +23,7 @@ public class Target : Interface, global::Metalama.Framework.Tests.Integration.Te
   {
     global::System.Console.WriteLine("Override.");
     global::System.Console.WriteLine("Introduced");
-    return (T)value;
+    return value;
   }
   global::System.Int32 global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedMethod()
   {

@@ -1716,6 +1716,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var scope = this.GetNodeScope( transformedOperand );
 
+        if ( @operator.IsKind( SyntaxKind.ExclamationToken ) && scope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+        {
+            scope = TemplatingScope.RunTimeOnly;
+        }
+
         if ( IsMutatingUnaryOperator( @operator ) )
         {
             scope = this.GetAssignmentScope( transformedOperand );

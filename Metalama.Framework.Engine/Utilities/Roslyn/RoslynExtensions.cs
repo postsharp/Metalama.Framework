@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
@@ -77,5 +78,47 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 SymbolKind.FunctionPointerType => "function pointer type",
                 _ => throw new ArgumentOutOfRangeException( nameof(symbolKind), symbolKind, null )
             };
+
+        public static bool? ToIsAnnotated( this NullableAnnotation annotation )
+            => annotation switch
+            {
+                NullableAnnotation.Annotated => true,
+                NullableAnnotation.NotAnnotated => false,
+                _ => null
+            };
+
+        public static bool? IsNullable( this ITypeSymbol typeSymbol )
+        {
+            if ( typeSymbol is ITypeParameterSymbol typeParameterSymbol )
+            {
+                var isUnconstrained = !typeParameterSymbol.HasUnmanagedTypeConstraint
+                    && !typeParameterSymbol.HasValueTypeConstraint
+                    && !typeParameterSymbol.HasReferenceTypeConstraint
+                    && !typeParameterSymbol.HasNotNullConstraint
+                    && !typeParameterSymbol.ConstraintTypes.Any();
+
+                // Unconstrained, class? constrained and IFoo? constrained are considered nullable,
+                // even if they have NullableAnnotation.NotAnnotated.
+                if ( isUnconstrained
+                     || typeParameterSymbol.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated
+                     || typeParameterSymbol.ConstraintNullableAnnotations.Any( a => a == NullableAnnotation.Annotated ) )
+                {
+                    return true;
+                }
+
+                // Otherwise, annotation takes priority over constraint.
+                // E.g. in void M<T>(T? t) where T : notnull, the type of t is ItypeParameterSymbol with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
+                return typeParameterSymbol.NullableAnnotation.ToIsAnnotated();
+            }
+
+            if ( typeSymbol.IsReferenceType )
+            {
+                return typeSymbol.NullableAnnotation.ToIsAnnotated();
+            }
+            else
+            {
+                return typeSymbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
+            }
+        }
     }
 }

@@ -295,22 +295,22 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
+        public TypedExpressionSyntax DynamicMemberAccessExpression( IUserExpression userExpression, string member )
         {
             if ( userExpression is UserReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = userExpression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
+            var expression = userExpression.ToExpressionSyntax( this._syntaxGenerationContext );
 
             return new TypedExpressionSyntaxImpl(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        expression.Syntax,
+                        expression,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                this._templateExpansionContext.SyntaxGenerationContext );
+                this._syntaxGenerationContext );
         }
 
         public SyntaxToken GetUniqueIdentifier( string hint )
@@ -392,21 +392,46 @@ namespace Metalama.Framework.Engine.Templating
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
         {
+            var suppressNullableWarning = false;
+
             if ( this._templateExpansionContext.SyntaxGenerator.IsNullAware )
             {
-                return SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand );
+                suppressNullableWarning = true;
+
+                if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( operand, this._syntaxGenerationContext.CompilationContext, out var typeSymbol ) )
+                {
+                    // Value types, including nullable value types don't need suppression.
+                    if ( typeSymbol is { IsValueType: true } )
+                    {
+                        suppressNullableWarning = false;
+                    }
+
+                    if ( typeSymbol?.IsNullable() == false )
+                    {
+                        suppressNullableWarning = false;
+                    }
+                }
             }
-            else
-            {
-                return operand;
-            }
+
+            return suppressNullableWarning
+                ? SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand )
+                : operand;
+        }
+
+        public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )
+        {
+            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( expression, this._syntaxGenerationContext.CompilationContext, out var typeSymbol );
+
+            return typeSymbol?.IsNullable() != false
+                ? SyntaxFactory.ConditionalAccessExpression( expression, whenNotNullExpression )
+                : (ExpressionSyntax) new RemoveConditionalAccessRewriter( expression ).Visit( whenNotNullExpression )!;
         }
 
         public ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
-        public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax>? substitutions )
+        public TypeOfExpressionSyntax TypeOf( string typeOfString, Dictionary<string, TypeSyntax>? substitutions )
         {
-            var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( typeId );
+            var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( typeOfString );
 
             if ( substitutions is { Count: > 0 } )
             {

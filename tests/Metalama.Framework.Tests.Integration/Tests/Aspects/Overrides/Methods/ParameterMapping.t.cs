@@ -17,6 +17,6 @@ internal class TargetClass
     {
         global::System.Int32 z;
         z = x.Length + y;
-        return (global::System.Int32)y;
+        return y;
     }
 }

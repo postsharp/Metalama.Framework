@@ -631,38 +631,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
-            {
-                var semanticModel = this.RunTimeSemanticModelProvider.GetSemanticModel( member.SyntaxTree );
-
-                ISymbol GetSymbol() => semanticModel.GetDeclaredSymbol( member ).AssertNotNull();
-
-                var nullableContext = semanticModel.GetNullableContext( member.SpanStart );
-
-                if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )
-                {
-                    this.Success = false;
-
-                    this._diagnosticAdder.Report(
-                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
-                            name.GetLocation(),
-                            GetSymbol() ) );
-                }
-
-                foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.IsKind( SyntaxKind.NullableDirectiveTrivia ) ) )
-                {
-                    if ( !((NullableDirectiveTriviaSyntax) trivia).SettingToken.IsKind( SyntaxKind.EnableKeyword ) )
-                    {
-                        this.Success = false;
-
-                        this._diagnosticAdder.Report(
-                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
-                                trivia.GetLocation(),
-                                GetSymbol() ) );
-                    }
-                }
-            }
-
             private bool ShouldExcludeMember( ISymbol symbol )
             {
                 if ( this.SymbolClassifier.GetTemplatingScope( symbol ) is TemplatingScope.RunTimeOnly or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
@@ -708,8 +676,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     yield break;
                 }
-
-                this.CheckNullableContext( node, node.Identifier );
 
                 var success =
                     this._templateCompiler.TryCompile(
@@ -1075,8 +1041,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     yield break;
                 }
-
-                this.CheckNullableContext( node, node.Identifier );
 
                 var success = true;
                 SyntaxNode? transformedAddDeclaration = null;

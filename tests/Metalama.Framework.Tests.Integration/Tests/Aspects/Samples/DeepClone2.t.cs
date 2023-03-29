@@ -7,17 +7,15 @@ internal class AutomaticallyCloneable : global::System.ICloneable
     public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable Clone()
     {
         var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)base.MemberwiseClone());
-        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._b = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.ManuallyCloneable? )this._b?.Clone()!);
-        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._c = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable? )this._c?.Clone()!);
+        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._b = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.ManuallyCloneable?)this._b?.Clone()!);
+        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._c = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable?)this._c?.Clone()!);
         return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone;
     }
-
     global::System.Object global::System.ICloneable.Clone()
     {
         return (global::System.Object)this.Clone();
     }
 }
-
 internal class DerivedCloneable : AutomaticallyCloneable
 {
     private string? _d;

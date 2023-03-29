@@ -51,9 +51,9 @@ internal partial class OurSyntaxGenerator
 
     protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
 
-    public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null )
+    public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null, bool keepNullableAnnotations = false )
     {
-        var typeSyntax = this.Type( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+        var typeSyntax = this.Type( type );
 
         if ( type is INamedTypeSymbol { IsGenericType: true } namedType )
         {
@@ -64,8 +64,11 @@ internal partial class OurSyntaxGenerator
             }
         }
 
-        // In any typeof, we must remove ? annotations of nullable types.
-        typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
+        if ( !keepNullableAnnotations )
+        {
+            // In regular typeof, we must remove ? annotations of nullable types.
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
+        }
 
         var dynamicToVarRewriter = new DynamicToVarRewriter();
         // In any typeof, we must change dynamic to object.

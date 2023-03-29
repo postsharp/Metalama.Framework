@@ -41,7 +41,7 @@ public interface ITemplateSyntaxFactory
         IUserExpression? value,
         bool awaitResult );
 
-    TypedExpressionSyntax? DynamicMemberAccessExpression( IUserExpression userExpression, string member );
+    TypedExpressionSyntax DynamicMemberAccessExpression( IUserExpression userExpression, string member );
 
     SyntaxToken GetUniqueIdentifier( string hint );
 
@@ -68,9 +68,11 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );
 
+    ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression );
+
     ExpressionSyntax StringLiteralExpression( string? value );
 
-    TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions );
+    TypeOfExpressionSyntax TypeOf( string typeOfString, Dictionary<string, TypeSyntax> substitutions );
 
     InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation );
 

@@ -107,25 +107,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool? IsReferenceType => this.TypeSymbol.IsReferenceType;
 
-    public bool? IsNullable
-    {
-        get
-        {
-            if ( this.TypeSymbol.IsReferenceType )
-            {
-                return this.TypeSymbol.NullableAnnotation switch
-                {
-                    NullableAnnotation.Annotated => true,
-                    NullableAnnotation.NotAnnotated => false,
-                    _ => null
-                };
-            }
-            else
-            {
-                return this.TypeSymbol.OriginalDefinition.SpecialType == Microsoft.CodeAnalysis.SpecialType.System_Nullable_T;
-            }
-        }
-    }
+    public bool? IsNullable => this.TypeSymbol.IsNullable();
 
     public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
 

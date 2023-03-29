@@ -26,14 +26,14 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
                 {
-                    var typeId = typeSymbol.GetSerializableTypeId().Id;
+                    var typeOfString = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeSymbol ).ToString();
 
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
                             this._parent.CreateTypeParameterSubstitutionDictionary(
                                 nameof(TemplateTypeArgument.Type),
                                 this._parent._dictionaryOfITypeType ) )
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
+                        .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeOfString ) );
                 }
                 else
                 {
