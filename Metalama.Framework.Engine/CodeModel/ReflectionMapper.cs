@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -91,36 +92,27 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
-            if ( type.IsGenericParameter )
+            if ( type is NullableReferenceType nullableReferenceType )
             {
-                return this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
+                return this.GetTypeSymbol( nullableReferenceType.UnderlyingType ).WithNullableAnnotation( NullableAnnotation.Annotated );
             }
 
-            if ( type is CompileTimeType compileTimeType )
+            var result = type switch
             {
-                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation, true ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
+                { IsGenericParameter: true } => this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition],
+                CompileTimeType compileTimeType => (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation, true ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol ),
+                { IsByRef: true } => throw new ArgumentException( "Ref types cannot be represented as Metalama types." ),
+                { IsArray: true } => this._compilation.CreateArrayTypeSymbol( this.GetTypeSymbol( type.GetElementType()! ), type.GetArrayRank() ),
+                { IsPointer: true } => this._compilation.CreatePointerTypeSymbol( this.GetTypeSymbol( type.GetElementType()! ) ),
+                _ => this.GetNamedTypeSymbol( type, type.GenericTypeArguments )
+            };
+
+            if ( !result.IsValueType )
+            {
+                result = result.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
             }
 
-            if ( type.IsByRef )
-            {
-                throw new ArgumentException( "Ref types cannot be represented as Metalama types." );
-            }
-
-            if ( type.IsArray )
-            {
-                var elementType = this.GetTypeSymbol( type.GetElementType()! );
-
-                return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
-            }
-
-            if ( type.IsPointer )
-            {
-                var pointedToType = this.GetTypeSymbol( type.GetElementType()! );
-
-                return this._compilation.CreatePointerTypeSymbol( pointedToType );
-            }
-
-            return this.GetNamedTypeSymbol( type, type.GenericTypeArguments );
+            return result;
         }
 
         private INamedTypeSymbol GetNamedTypeSymbol( Type type, Type[] genericArguments )

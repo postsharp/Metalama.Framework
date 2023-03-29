@@ -8,6 +8,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -91,17 +92,17 @@ public sealed class DeclarationFactory : IDeclarationFactory
 
     public IType GetIType( ITypeSymbol typeSymbol )
         => (IType) this._typeCache.GetOrAdd(
-            typeSymbol,
+            typeSymbol.ToNonNullableIfOblivious(),
             l => CodeModelFactory.CreateIType( l, this._compilationModel ) );
 
     private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
         => (ArrayType) this._typeCache.GetOrAdd(
-            typeSymbol,
+            typeSymbol.ToNonNullableIfOblivious(),
             s => new ArrayType( (IArrayTypeSymbol) s, this._compilationModel ) );
 
     private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
         => (DynamicType) this._typeCache.GetOrAdd(
-            typeSymbol,
+            typeSymbol.ToNonNullableIfOblivious(),
             s => new DynamicType( (IDynamicTypeSymbol) s, this._compilationModel ) );
 
     private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
@@ -119,13 +120,13 @@ public sealed class DeclarationFactory : IDeclarationFactory
         }
 
         return (INamedType) this._typeCache.GetOrAdd(
-            typeSymbol,
+            typeSymbol.ToNonNullableIfOblivious(),
             s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
     }
 
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
         => (TypeParameter) this._defaultCache.GetOrAdd(
-            typeParameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            typeParameterSymbol.ToNonNullableIfOblivious().ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
@@ -336,7 +337,7 @@ public sealed class DeclarationFactory : IDeclarationFactory
         var typeSymbol = ((ITypeInternal) type).TypeSymbol;
         ITypeSymbol newTypeSymbol;
 
-        if ( type.IsReferenceType.GetValueOrDefault( true ) )
+        if ( type.IsReferenceType ?? true )
         {
             newTypeSymbol = typeSymbol.AssertNotNull()
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
@@ -355,6 +356,15 @@ public sealed class DeclarationFactory : IDeclarationFactory
         }
 
         return (T) this.GetIType( newTypeSymbol );
+    }
+
+    Type IDeclarationFactory.ConstructNullable( ICompileTimeType type )
+    {
+        var compileTimeType = (CompileTimeType) type;
+
+        var iType = compileTimeType.Target.GetTarget( this._compilationModel );
+
+        return this.ConstructNullable( iType, true ).ToType();
     }
 
     public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );

@@ -117,5 +117,20 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return typeSymbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
             }
         }
+
+        /// <summary>
+        /// Turns oblivious (unannotated) reference types to non-nullable reference types.
+        /// Returns all value types and annotated reference types unchanged.
+        /// </summary>
+        public static T ToNonNullableIfOblivious<T>( this T typeSymbol )
+            where T : ITypeSymbol
+        {
+            if ( typeSymbol is { NullableAnnotation: NullableAnnotation.None, IsValueType: false } )
+            {
+                return (T) typeSymbol.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+            }
+
+            return typeSymbol;
+        }
     }
 }

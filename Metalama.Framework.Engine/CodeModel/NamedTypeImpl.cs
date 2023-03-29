@@ -127,7 +127,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsGeneric => this.TypeSymbol.IsGenericType;
 
-    public bool IsCanonicalGenericInstance => this.TypeSymbol.OriginalDefinition == this.TypeSymbol;
+    public bool IsCanonicalGenericInstance => this.Compilation.CompilationContext.SymbolComparer.Equals( this.TypeSymbol.OriginalDefinition, this.TypeSymbol );
 
     [Memo]
     public INamedTypeCollection NestedTypes

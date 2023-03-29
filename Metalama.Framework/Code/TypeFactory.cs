@@ -72,4 +72,37 @@ public static class TypeFactory
     public static T ToNonNullableType<T>( this T type )
         where T : IType
         => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+
+    /// <summary>
+    /// Creates a nullable type from the current type. If the current type is already nullable, returns the current type.
+    /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
+    /// </summary>
+    public static Type ToNullableType( this Type type )
+    {
+        if ( type is ICompileTimeType compileTimeType )
+        {
+            // It's a CompileTimeType, return nullable CompileTimeType.
+            return Implementation.ConstructNullable( compileTimeType );
+        }
+        else if ( Nullable.GetUnderlyingType( type ) != null )
+        {
+            // It's already a nullable value type.
+            return type;
+        }
+        else if ( type.IsValueType )
+        {
+            // It's a non-nullable value type.
+            return typeof(Nullable<>).MakeGenericType( type );
+        }
+        else if ( type is NullableReferenceType )
+        {
+            // It's already a nullable reference type.
+            return type;
+        }
+        else
+        {
+            // It's a non-nullable (potentially) reference type, return a wrapper type.
+            return new NullableReferenceType( type );
+        }
+    }
 }

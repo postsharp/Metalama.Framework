@@ -52,6 +52,8 @@ namespace Metalama.Framework.Code
         T ConstructNullable<T>( T type, bool isNullable )
             where T : IType;
 
+        Type ConstructNullable( ICompileTimeType type );
+
         /// <summary>
         /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>.
         /// </summary>
