@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -13,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -52,10 +54,10 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 // * Layer (m, 0):   Target declaration, final semantic.
 
 // AspectReferenceOrder resolution:
-//  * Original - resolves to the first in the order.
-//  * Base - resolved to the last override preceding the origin layer.
-//  * Self - resolved to the last override preceding or equal to the origin layer.
-//  * Final - resolved to the last in the order.
+//  * Base - resolved to the last override preceding the referencing layer.
+//  * Previous - resolved to the last preceding override.
+//  * Current - resolved to the last override preceding or equal to the referencing layer.
+//  * Final - resolved to the last override in the order or final semantic.
 
 // Special cases:
 //  * Promoted fields do not count as introductions. The layer of the promotion target applies.
@@ -500,12 +502,10 @@ namespace Metalama.Framework.Engine.Linking
         {
             var referencedDeclarationOverrides = this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
 
-            // Compute indices of overrides of the referenced declaration.
-            return (from overrideInjectedMember in referencedDeclarationOverrides
-                    group overrideInjectedMember by overrideInjectedMember.AspectLayerId
-                    into g
-                    select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i + 1 ), Override: o) )
-                ).SelectMany( g => g )
+            // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
+            return
+                referencedDeclarationOverrides
+                .SelectAsEnumerable( x => (new MemberLayerIndex( this._layerIndex[x.AspectLayerId], x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ), x ) )
                 .ToReadOnlyList();
         }
 
@@ -532,7 +532,15 @@ namespace Metalama.Framework.Engine.Linking
                 if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId], 0 );
+                    var fieldInjectedMember = this._injectionRegistry.GetInjectedMemberForBuilder( replacedBuilder );
+
+                    if (fieldInjectedMember == null)
+                    {
+                        throw new AssertionFailedException( $"Could not find transformation for {replacedBuilder}" );
+                    }
+
+                    // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
+                    return new MemberLayerIndex( this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId], fieldInjectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
                 }
                 else
                 {
@@ -541,7 +549,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return new MemberLayerIndex( this._layerIndex[injectedMember.AspectLayerId], 0 );
+            return new MemberLayerIndex( this._layerIndex[injectedMember.AspectLayerId], injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
         }
 
         private MemberLayerIndex GetAnnotationLayerIndex(
@@ -549,38 +557,14 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol referencedSymbol,
             AspectReferenceSpecification referenceSpecification )
         {
-            var referencedDeclarationOverrides = this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
+            var containingInjectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol );
 
-            var containedInTargetOverride =
-                this._injectionRegistry.IsOverrideTarget( referencedSymbol )
-                && referencedDeclarationOverrides.Any(
-                    x => this._comparer.Equals(
-                        this._injectionRegistry.GetSymbolForInjectedMember( x ),
-                        GetPrimarySymbol( containingSymbol ) ) );
+            if (containingInjectedMember == null)
+            {
+                throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
+            }
 
-            // TODO: Optimize (most of this can be precomputed).
-            // TODO: Support multiple overrides in the same layer (the memberIndex has to be determined).
-            // Determine the layer from which this reference originates.
-            //  * If the reference is coming from and override of the same declaration it's referencing, we need to select the correct override index.
-            //  * Otherwise, treat the reference as coming from the last override of the declaration.
-            var annotationLayerIndex =
-                containedInTargetOverride
-                    ? new MemberLayerIndex(
-                        this._layerIndex[referenceSpecification.AspectLayerId],
-                        referencedDeclarationOverrides
-                            .Where( x => x.AspectLayerId == referenceSpecification.AspectLayerId )
-                            .Select( ( x, i ) => (Symbol: x, Index: i + 1) )
-                            .Single(
-                                x =>
-                                    this._comparer.Equals(
-                                        this._injectionRegistry.GetSymbolForInjectedMember( x.Symbol ),
-                                        GetPrimarySymbol( containingSymbol ) ) )
-                            .Index )
-                    : new MemberLayerIndex(
-                        this._layerIndex[referenceSpecification.AspectLayerId],
-                        referencedDeclarationOverrides.Count( x => x.AspectLayerId == referenceSpecification.AspectLayerId ) );
-
-            return annotationLayerIndex;
+            return new MemberLayerIndex( this._layerIndex[containingInjectedMember.AspectLayerId], containingInjectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
         }
 
         /// <summary>
@@ -893,8 +877,14 @@ namespace Metalama.Framework.Engine.Linking
 
         private readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
         {
+            /// <summary>
+            /// Gets the index of the aspect layer. Zero is the state before any transformation.
+            /// </summary>
             public int LayerIndex { get; }
 
+            /// <summary>
+            /// Gets the order withing the aspect layer.
+            /// </summary>
             public int MemberIndex { get; }
 
             public MemberLayerIndex( int layerIndex, int memberIndex )

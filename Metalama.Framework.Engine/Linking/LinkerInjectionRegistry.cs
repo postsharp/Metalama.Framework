@@ -245,6 +245,18 @@ namespace Metalama.Framework.Engine.Linking
             return this._injectedMemberLookup[annotation.Data.AssertNotNull()];
         }
 
+        public LinkerInjectedMember? GetInjectedMemberForBuilder(IDeclarationBuilder builder)
+        {
+            if (this._builderLookup.TryGetValue(builder, out var injectedMember))
+            {
+                return injectedMember;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// Gets a symbol in intermediate compilation that represents a declaration introduced by the introduced member.
         /// </summary>

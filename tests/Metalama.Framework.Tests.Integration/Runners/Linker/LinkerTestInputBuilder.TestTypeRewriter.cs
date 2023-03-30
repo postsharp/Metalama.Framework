@@ -39,6 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
+            private int _nextTransformationOrdinal;
 
             public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
@@ -670,6 +671,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
+                A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( this._nextTransformationOrdinal++ );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );

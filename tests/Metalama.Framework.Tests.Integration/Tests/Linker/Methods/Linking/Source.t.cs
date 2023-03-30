@@ -2,124 +2,124 @@ class Target
 {
   public void Foo()
   {
-    this.Foo_Override6();
+    this.Foo_A3_Override8();
   }
-  public void Foo_Override0()
-  {
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke the final declaration.
-    this.Bar();
-  }
-  public void Foo_Override2()
-  {
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke the final declaration.
-    this.Bar();
-  }
-  public void Foo_Override4()
-  {
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke the final declaration.
-    this.Bar();
-  }
-  public void Foo_Override6()
-  {
-    // Should invoke the final declaration.
-    this.Bar();
-    // Should invoke the final declaration.
-    this.Bar();
-    // Should invoke the final declaration.
-    this.Bar();
-    // Should invoke the final declaration.
-    this.Bar();
-  }
-  void Bar()
-  {
-    this.Bar_Override5_2();
-  }
-  private void Bar_Source()
+  private void Foo_Source()
   {
     Console.WriteLine("This is original code.");
   }
-  void Bar_Override1_1()
+  public void Bar()
   {
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke the final declaration.
-    this.Bar();
+    this.Bar_A4_Override10();
   }
-  void Bar_Override1_2()
+  public void Bar_A1_Override1()
   {
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke override 1_1.
-    this.Bar_Override1_1();
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo.
+    this.Foo();
   }
-  void Bar_Override3_1()
+  public void Bar_A2_Override2()
   {
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
   }
-  void Bar_Override3_2()
+  public void Bar_A2_Override4()
   {
-    // Should invoke override 1_2.
-    this.Bar_Override1_2();
-    // Should invoke override 3_1.
-    this.Bar_Override3_1();
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
   }
-  void Bar_Override5_1()
+  public void Bar_A3_Override5()
   {
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke the final declaration.
-    this.Bar();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
   }
-  void Bar_Override5_2()
+  public void Bar_A3_Override7()
   {
-    // Should invoke override 3_2.
-    this.Bar_Override3_2();
-    // Should invoke override 5_1.
-    this.Bar_Override5_1();
-    // Should invoke the final declaration.
-    this.Bar();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo_A3_Override6.
+    this.Foo_A3_Override6();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+  }
+  public void Bar_A3_Override9()
+  {
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+  }
+  public void Bar_A4_Override10()
+  {
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+  }
+  public void Foo_A2_Override3()
+  {
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke this.Foo_Source.
+    this.Foo_Source();
+    // Should invoke Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
+  }
+  public void Foo_A3_Override6()
+  {
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
+  }
+  public void Foo_A3_Override8()
+  {
+    // Should invoke this.Foo_A2_Override3.
+    this.Foo_A2_Override3();
+    // Should invoke this.Foo_A3_Override6.
+    this.Foo_A3_Override6();
+    // Should invoke this.Foo.
+    this.Foo();
+    // Should invoke this.Foo.
+    this.Foo();
   }
 }

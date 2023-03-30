@@ -3,13 +3,10 @@ using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Source
 {
-    [PseudoLayerOrder("TestAspect0")]
-    [PseudoLayerOrder("TestAspect1")]
-    [PseudoLayerOrder("TestAspect2")]
-    [PseudoLayerOrder("TestAspect3")]
-    [PseudoLayerOrder("TestAspect4")]
-    [PseudoLayerOrder("TestAspect5")]
-    [PseudoLayerOrder("TestAspect6")]
+    [PseudoLayerOrder("A1")]
+    [PseudoLayerOrder("A2")]
+    [PseudoLayerOrder("A3")]
+    [PseudoLayerOrder("A4")]
     // <target>
     class Target
     {
@@ -18,153 +15,159 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Sour
             Console.WriteLine("This is original code.");
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect0")]
-        [PseudoNotInlineable]
-        [PseudoNotDiscardable]
-        public void Foo_Override0()
-        {
-            // Should invoke source code.
-            link(_this.Bar, @base)();
-            // Should invoke source code.
-            link(_this.Bar, previous)();
-            // Should invoke source code.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
-        }
-
-        [PseudoOverride(nameof(Foo), "TestAspect2")]
-        [PseudoNotInlineable]
-        [PseudoNotDiscardable]
-        public void Foo_Override2()
-        {
-            // Should invoke override 1_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 1_2.
-            link(_this.Bar, previous)();
-            // Should invoke override 1_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
-        }
-
-        [PseudoOverride(nameof(Foo), "TestAspect4")]
-        [PseudoNotInlineable]
-        [PseudoNotDiscardable]
-        public void Foo_Override4()
-        {
-            // Should invoke override 3_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 3_2.
-            link(_this.Bar, previous)();
-            // Should invoke override 3_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
-        }
-
-        [PseudoOverride(nameof(Foo), "TestAspect6")]
-        [PseudoNotInlineable]
-        [PseudoNotDiscardable]
-        public void Foo_Override6()
-        {
-            // Should invoke the final declaration.
-            link(_this.Bar, @base)();
-            // Should invoke the final declaration.
-            link(_this.Bar, previous)();
-            // Should invoke the final declaration.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
-        }
-
-        void Bar()
+        public void Bar()
         {
             Console.WriteLine("This is original code.");
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoOverride(nameof(Bar), "A1")]
         [PseudoNotInlineable]
-        void Bar_Override1_1()
+        [PseudoNotDiscardable]
+        public void Bar_A1_Override1()
         {
-            // Should invoke source code.
-            link(_this.Bar, @base)();
-            // Should invoke source code.
-            link(_this.Bar, previous)();
-            // Should invoke override 1_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoOverride(nameof(Bar), "A2")]
         [PseudoNotInlineable]
-        void Bar_Override1_2()
+        [PseudoNotDiscardable]
+        public void Bar_A2_Override2()
         {
-            // Should invoke source code.
-            link(_this.Bar, @base)();
-            // Should invoke override 1_1.
-            link(_this.Bar, previous)();
-            // Should invoke override 1_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoOverride(nameof(Foo), "A2")]
         [PseudoNotInlineable]
-        void Bar_Override3_1()
+        [PseudoNotDiscardable]
+        public void Foo_A2_Override3()
         {
-            // Should invoke override 1_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 1_2.
-            link(_this.Bar, previous)();
-            // Should invoke override 3_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, previous)();
+            // Should invoke Foo_A2_Override3.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoOverride(nameof(Bar), "A2")]
         [PseudoNotInlineable]
-        void Bar_Override3_2()
+        [PseudoNotDiscardable]
+        public void Bar_A2_Override4()
         {
-            // Should invoke override 1_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 3_1.
-            link(_this.Bar, previous)();
-            // Should invoke override 3_2.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_Source.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoOverride(nameof(Bar), "A3")]
         [PseudoNotInlineable]
-        void Bar_Override5_1()
+        [PseudoNotDiscardable]
+        public void Bar_A3_Override5()
         {
-            // Should invoke override 3_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 3_2.
-            link(_this.Bar, previous)();
-            // Should invoke the final declaration.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoOverride(nameof(Foo), "A3")]
         [PseudoNotInlineable]
-        void Bar_Override5_2()
+        [PseudoNotDiscardable]
+        public void Foo_A3_Override6()
         {
-            // Should invoke override 3_2.
-            link(_this.Bar, @base)();
-            // Should invoke override 5_1.
-            link(_this.Bar, previous)();
-            // Should invoke the final declaration.
-            link(_this.Bar, current)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "A3")]
+        [PseudoNotInlineable]
+        [PseudoNotDiscardable]
+        public void Bar_A3_Override7()
+        {
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_A3_Override6.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
+        }
+
+        [PseudoOverride(nameof(Foo), "A3")]
+        [PseudoNotInlineable]
+        [PseudoNotDiscardable]
+        public void Foo_A3_Override8()
+        {
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo_A3_Override6.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "A3")]
+        [PseudoNotInlineable]
+        [PseudoNotDiscardable]
+        public void Bar_A3_Override9()
+        {
+            // Should invoke this.Foo_A2_Override3.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
+        }
+
+        [PseudoOverride(nameof(Bar), "A4")]
+        [PseudoNotInlineable]
+        [PseudoNotDiscardable]
+        public void Bar_A4_Override10()
+        {
+            // Should invoke this.Foo.
+            link(_this.Foo, @base)();
+            // Should invoke this.Foo.
+            link(_this.Foo, previous)();
+            // Should invoke this.Foo.
+            link(_this.Foo, current)();
+            // Should invoke this.Foo.
+            link(_this.Foo, final)();
         }
     }
 }
