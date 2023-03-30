@@ -1,18 +1,18 @@
 internal class TargetClass
 {
-    [Test]
-    void M(int i, int j)
+  [Test]
+  void M(int i, int j)
+  {
+    if (i == 0)
     {
-        if (i == 0)
-        {
-            this.M_Source(42, (global::System.Int32)42);
-            return;
-        }
-        else
-        {
-            this.M_Source(i, j);
-            return;
-        }
+      this.M_Source(42, (global::System.Int32)42);
+      return;
     }
-    private void M_Source(int i, int j) => Console.WriteLine(i + j);
+    else
+    {
+      this.M_Source(i, j);
+      return;
+    }
+  }
+  private void M_Source(int i, int j) => Console.WriteLine(i + j);
 }

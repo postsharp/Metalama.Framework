@@ -40,7 +40,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
 
         int Property { get; set; }
 
-        event EventHandler Event;
+        event EventHandler? Event;
     }
 
     // <target>

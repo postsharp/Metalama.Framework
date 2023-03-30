@@ -1,6 +1,6 @@
 internal class Target
 {
-  private string q;
+  private string? q;
   [NotNull]
   public string P
   {
@@ -21,7 +21,7 @@ internal class Target
     get
     {
       global::System.String returnValue;
-      returnValue = q;
+      returnValue = q!;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();

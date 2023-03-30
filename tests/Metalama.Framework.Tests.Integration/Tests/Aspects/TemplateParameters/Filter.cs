@@ -24,5 +24,5 @@ internal class MyAspect : FieldAspect
 internal class Target
 {
     [MyAspect]
-    private string q;
+    private string? q;
 }

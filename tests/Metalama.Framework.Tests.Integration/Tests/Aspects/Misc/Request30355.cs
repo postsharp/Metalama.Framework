@@ -188,7 +188,11 @@ internal partial class Person
 {
     #region Constructors
 
-    public Person() { }
+    public Person(string firstName, string lastName) 
+    {
+        this.FirstName = firstName;
+        this.LastName = lastName;
+    }
 
     #endregion
 

@@ -1,10 +1,12 @@
 [NotifyPropertyChanged]
 internal partial class Person : global::System.ComponentModel.INotifyPropertyChanged
 {
-  public Person()
+  public Person(string firstName, string lastName)
   {
+    this.FirstName = firstName;
+    this.LastName = lastName;
   }
-  private string _firstName;
+  private string _firstName = default !;
   public string FirstName
   {
     get
@@ -28,7 +30,7 @@ internal partial class Person : global::System.ComponentModel.INotifyPropertyCha
       return $"{FirstName} {LastName}";
     }
   }
-  private string _lastName;
+  private string _lastName = default !;
   public string LastName
   {
     get

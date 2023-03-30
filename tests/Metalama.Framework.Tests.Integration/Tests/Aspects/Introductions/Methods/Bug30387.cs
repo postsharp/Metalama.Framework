@@ -8,18 +8,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 internal class InjectAttribute : FieldOrPropertyAspect
 {
     [Introduce( WhenExists = OverrideStrategy.Ignore )]
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider? _serviceProvider;
 }
 
 // <target>
 public class Commerce
 {
     [Inject]
-    private IDisposable _BillingProcessor;
+    private IDisposable? _BillingProcessor;
 
     [Inject]
-    private IDisposable _CustomerProcessor;
+    private IDisposable? _CustomerProcessor;
 
     [Inject]
-    private IDisposable _Notifier;
+    private IDisposable? _Notifier;
 }

@@ -5,7 +5,16 @@ public class Foo
   {
     var httpResult = "N/A";
     global::System.Collections.Generic.Dictionary<global::System.String, global::System.String> result = new()
-    {{"Title", "The title"}, {"HTTP result", httpResult}};
+    {
+      {
+        "Title",
+        "The title"
+      },
+      {
+        "HTTP result",
+        httpResult
+      }
+    };
     return;
   }
 }

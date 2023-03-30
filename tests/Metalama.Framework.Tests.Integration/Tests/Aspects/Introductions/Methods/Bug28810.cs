@@ -54,7 +54,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         private class BaseClass
         {
             private int a;
-            private NaturallyCloneable b;
+            private NaturallyCloneable? b;
         }
     }
 }

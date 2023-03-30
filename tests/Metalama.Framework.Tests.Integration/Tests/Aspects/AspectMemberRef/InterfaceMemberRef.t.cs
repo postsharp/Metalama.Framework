@@ -14,5 +14,5 @@ internal class Program : global::Metalama.Framework.IntegrationTests.Aspects.Asp
     Property = Property + 1;
     Event += EventHandler;
   }
-  public event global::System.EventHandler Event;
+  public event global::System.EventHandler? Event;
 }

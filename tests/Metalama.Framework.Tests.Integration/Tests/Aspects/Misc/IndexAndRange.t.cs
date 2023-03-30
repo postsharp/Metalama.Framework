@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
     [UseIndexAndRange]
     private int Method(int a, int b, int c, int d)
     {
-      var runTimeCollection = global::System.MemoryExtensions.AsSpan(new global::System.String[]{"int", "int"});
+      var runTimeCollection = global::System.MemoryExtensions.AsSpan(new global::System.String[] { "int", "int" });
       global::System.Console.WriteLine("int");
       global::System.Console.WriteLine(1);
       var runTimeCollectionWithRunTimeIndex = runTimeCollection[^1];

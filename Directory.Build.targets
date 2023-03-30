@@ -15,7 +15,6 @@
 			CS8603: Possible null reference return. 
 			CS8604: Possible null reference argument for parameter 'x' in 'y'.
             CS8605: Unboxing possibly null value.
-			CS8618: Non-nullable property 'x' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.			
             CS8619: 
             CS8620: Argument of type 'x' cannot be used for parameter 'y' of type 'x due to differences in the nullability of reference types. 
             CS8767:Nullability of reference types in type of parameter 'x' of 'y' doesn't match implicitly implemented member 'x'.
@@ -23,7 +22,7 @@
             IDE0079: Unnecessary suppression.
         -->
 		
-        <NoWarn>$(NoWarn),CS8600,CS8601,CS8602,CS8603,CS8604,CS8605,CS8618,CS8619,CS8620,CS8767,IDE0079</NoWarn>
+        <NoWarn>$(NoWarn),CS8600,CS8601,CS8602,CS8603,CS8604,CS8605,CS8619,CS8620,CS8767,IDE0079</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>

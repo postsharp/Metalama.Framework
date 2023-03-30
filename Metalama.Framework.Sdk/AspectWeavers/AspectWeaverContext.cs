@@ -149,6 +149,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.CancellationToken = cancellationToken;
             this.ServiceProvider = serviceProvider;
+            this.CompilationServices = compilationServices;
         }
 
         /// <summary>

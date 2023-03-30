@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169, CS0649
+#pragma warning disable CS0169, CS0649
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Get
 {
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
     // <target>
     internal class Target
     {
-        private string q;
+        private string? q;
 
         [NotNull]
         public string P => "p";
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
         {
             get
             {
-                return q;
+                return q!;
             }
         }
     }

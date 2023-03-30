@@ -30,5 +30,5 @@ public class TheAspect : TypeAspect
 [TheAspect]
 internal class C
 {
-    private C _f;
+    private C? _f;
 }
