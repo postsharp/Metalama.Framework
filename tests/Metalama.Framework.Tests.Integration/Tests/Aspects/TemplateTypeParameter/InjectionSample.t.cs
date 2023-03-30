@@ -19,6 +19,6 @@ internal partial class Greeter
       this._console1 = value;
     }
   }
-  public void Greet() => _console.WriteLine("Hello, world.");
+  public void Greet() => _console!.WriteLine("Hello, world.");
   private readonly global::System.IServiceProvider _serviceProvider = (global::System.IServiceProvider)global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample.ServiceLocator.Current;
 }

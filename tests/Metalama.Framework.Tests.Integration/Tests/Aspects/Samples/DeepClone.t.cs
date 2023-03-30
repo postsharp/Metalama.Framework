@@ -8,8 +8,8 @@ internal partial class AutomaticallyCloneable : global::System.ICloneable
   public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable Clone()
   {
     var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable)base.MemberwiseClone();
-    clone.B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.ManuallyCloneable)this.B.Clone());
-    clone.C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable)this.C.Clone());
+    clone.B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.ManuallyCloneable? )this.B?.Clone());
+    clone.C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable? )this.C?.Clone());
     return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable)clone;
   }
   global::System.Object global::System.ICloneable.Clone()
