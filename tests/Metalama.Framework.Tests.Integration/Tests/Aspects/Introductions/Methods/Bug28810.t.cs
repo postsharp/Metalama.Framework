@@ -11,7 +11,7 @@ internal class Targets
   private class BaseClass : global::System.ICloneable
   {
     private int a;
-    private NaturallyCloneable b;
+    private NaturallyCloneable? b;
     public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810.Targets.BaseClass Clone()
     {
       return null;

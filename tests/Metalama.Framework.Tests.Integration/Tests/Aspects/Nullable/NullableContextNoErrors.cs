@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableContextErrors
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableContextNoErrors
 {
     internal class Aspect : TypeAspect
     {

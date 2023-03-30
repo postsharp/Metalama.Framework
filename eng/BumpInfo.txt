@@ -1,1 +1,1 @@
-{"Dependencies":{"Metalama.Compiler":"2023.0.106"}}
+{"Dependencies":{"Metalama.Compiler":"2023.0.107"}}

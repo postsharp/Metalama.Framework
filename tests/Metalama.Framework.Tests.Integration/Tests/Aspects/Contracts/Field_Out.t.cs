@@ -1,6 +1,6 @@
 internal class Target
 {
-  private global::System.String _q1;
+  private global::System.String _q1 = default !;
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Out.NotNullAttribute]
   private global::System.String q
   {

@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.ExclamationMark
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.StaticParameterExclamationMark
 {
     internal class Aspect : TypeAspect
     {

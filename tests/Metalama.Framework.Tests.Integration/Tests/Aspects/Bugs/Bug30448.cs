@@ -10,14 +10,7 @@ internal class TrimAttribute : ContractAspect
 {
     public override void Validate( dynamic? value )
     {
-        if (( (IHasType) meta.Target.Declaration ).Type.IsNullable.GetValueOrDefault())
-        {
-            value = value?.Trim();
-        }
-        else
-        {
-            value = value.Trim();
-        }
+        value = value?.Trim();
     }
 }
 
@@ -29,5 +22,5 @@ internal class Foo
         Console.WriteLine( $"nonNullableString='{nonNullableString}', nullableString='{nullableString}'" );
     }
 
-    public string Property { get; set; }
+    public string? Property { get; set; }
 }

@@ -98,11 +98,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
     {
         public int A;
 
-        public ManuallyCloneable B;
+        public ManuallyCloneable? B;
 
-        public AutomaticallyCloneable C;
+        public AutomaticallyCloneable? C;
 
-        public NotCloneable D;
+        public NotCloneable? D;
     }
 
     // <target>
@@ -125,6 +125,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
     // <target>
     internal partial class Derived : AutomaticallyCloneable
     {
-        public ManuallyCloneable G { get; private set; }
+        public ManuallyCloneable? G { get; private set; }
     }
 }

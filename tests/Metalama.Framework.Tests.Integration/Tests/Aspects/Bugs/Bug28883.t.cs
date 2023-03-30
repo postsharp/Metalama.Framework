@@ -1,15 +1,15 @@
 internal class TargetCode
 {
-    [TestAttribute]
-    private int Property
+  [TestAttribute]
+  private int Property
+  {
+    get
     {
-        get
-        {
-            return this.Property;
-        }
-        set
-        {
-            this.Property = value;
-        }
+      return this.Property;
     }
+    set
+    {
+      this.Property = value;
+    }
+  }
 }

@@ -1,7 +1,7 @@
 internal class Target
 {
-  private string q;
-  private string _p;
+  private string? q;
+  private string _p = default !;
   [NotNull]
   public string P
   {
@@ -23,7 +23,7 @@ internal class Target
   {
     get
     {
-      return q;
+      return q!;
     }
     set
     {

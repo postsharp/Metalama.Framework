@@ -1,5 +1,5 @@
 void Method()
 {
-    _ = (object)(null!);
-    return;
+  _ = (object)(null !);
+  return;
 }

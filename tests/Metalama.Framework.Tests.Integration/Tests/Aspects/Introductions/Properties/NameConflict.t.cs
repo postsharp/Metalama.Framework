@@ -22,7 +22,7 @@ internal class TargetClass
     }
     set
     {
-      string value_1 = value.ToString();
+      string value_1 = value!.ToString();
     }
   }
 }

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
     internal class DerivedClass : ValidatedClass
     {
         // Field type.
-        private ValidatedClass _field1;
+        private ValidatedClass? _field1;
 
         // Typeof in field initializer.
         private Type _field2 = typeof(ValidatedClass);

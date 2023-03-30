@@ -58,8 +58,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
     internal partial class Greeter
     {
         [Inject]
-        private TextWriter _console;
+        private TextWriter? _console;
 
-        public void Greet() => _console.WriteLine( "Hello, world." );
+        public void Greet() => _console!.WriteLine( "Hello, world." );
     }
 }

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
     // <target>
     internal class Target
     {
-        private string q;
+        private string? q;
 
         [NotNull]
         public string P { get; set; }
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
         [NotNull]
         public string Q
         {
-            get => q;
+            get => q!;
 
             set => q = value + "-";
         }

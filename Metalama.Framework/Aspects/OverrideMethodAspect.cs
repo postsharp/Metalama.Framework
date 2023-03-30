@@ -23,27 +23,16 @@ namespace Metalama.Framework.Aspects
         /// <inheritdoc />
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-#if NET5_0_OR_GREATER
+            // The .Net Standard version of Metalama.Framework is used at compile-time, which is why we have to specify async enumerable methods even then (and then ignore them if not present).
             var templates = new MethodTemplateSelector(
-                nameof(this.OverrideMethod),
-                nameof(this.OverrideAsyncMethod),
-                nameof(this.OverrideEnumerableMethod),
-                nameof(this.OverrideEnumeratorMethod),
-                nameof(this.OverrideAsyncEnumerableMethod),
-                nameof(this.OverrideAsyncEnumeratorMethod),
+                nameof( this.OverrideMethod ),
+                nameof( this.OverrideAsyncMethod ),
+                nameof( this.OverrideEnumerableMethod ),
+                nameof( this.OverrideEnumeratorMethod ),
+                "OverrideAsyncEnumerableMethod",
+                "OverrideAsyncEnumeratorMethod",
                 this.UseAsyncTemplateForAnyAwaitable,
                 this.UseEnumerableTemplateForAnyEnumerable );
-#else
-            var templates = new MethodTemplateSelector(
-                nameof(this.OverrideMethod),
-                nameof(this.OverrideAsyncMethod),
-                nameof(this.OverrideEnumerableMethod),
-                nameof(this.OverrideEnumeratorMethod),
-                null,
-                null,
-                this.UseAsyncTemplateForAnyAwaitable,
-                this.UseEnumerableTemplateForAnyEnumerable );
-#endif
 
             builder.Advice.Override( builder.Target, templates );
         }

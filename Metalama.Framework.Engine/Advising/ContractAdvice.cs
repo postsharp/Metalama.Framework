@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -117,6 +118,10 @@ namespace Metalama.Framework.Engine.Advising
                     _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{filterTarget}'." )
                 };
 
+                var parameterType = ((IHasType) filterTarget).Type;
+                ExpressionSyntax parameterExpression = SyntaxFactory.IdentifierName( parameterName );
+                parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
+
                 statements ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
@@ -135,7 +140,7 @@ namespace Metalama.Framework.Engine.Advising
                     metaApiProperties,
                     direction );
 
-                var boundTemplate = filter.Template.ForContract( parameterName, filter.TemplateArguments );
+                var boundTemplate = filter.Template.ForContract( parameterExpression, filter.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
                     context.ServiceProvider,

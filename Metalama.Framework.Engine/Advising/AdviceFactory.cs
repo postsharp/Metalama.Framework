@@ -63,8 +63,10 @@ internal sealed class AdviceFactory : IAdviceFactory
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
 
-    private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
+    private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
     {
+        Invariant.Assert( !(required && ignoreMissing) );
+
         if ( this._templateInstance == null )
         {
             throw new AssertionFailedException( "The template instance cannot be null." );
@@ -80,7 +82,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
             else
             {
-                return default;
+                return null;
             }
         }
         else if ( this._templateInstance.TemplateClass.Members.TryGetValue( templateName, out var template ) )
@@ -97,7 +99,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             {
                 if ( !required )
                 {
-                    return default;
+                    return null;
                 }
                 else
                 {
@@ -109,8 +111,15 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
         else
         {
-            throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                (this._templateInstance.TemplateClass.ShortName, templateName) );
+            if ( ignoreMissing )
+            {
+                return null;
+            }
+            else
+            {
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
+                    (this._templateInstance.TemplateClass.ShortName, templateName) );
+            }
         }
     }
 
@@ -121,11 +130,9 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
         var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateKind.IEnumerator );
-        var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable );
 
-        var asyncEnumeratorTemplate = this.ValidateTemplateName(
-            templateSelector.AsyncEnumeratorTemplate,
-            TemplateKind.IAsyncEnumerator );
+        var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable, ignoreMissing: true );
+        var asyncEnumeratorTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumeratorTemplate, TemplateKind.IAsyncEnumerator, ignoreMissing: true );
 
         var interpretedKind = TemplateKind.Default;
 

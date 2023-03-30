@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         event EventHandler Event;
 
-        event EventHandler EventField;
+        event EventHandler? EventField;
 
         int Property { get; set; }
 

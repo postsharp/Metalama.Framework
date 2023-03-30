@@ -34,7 +34,7 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
   public T Method<T>(T x)
   {
     global::System.Console.WriteLine("Introduced");
-    return (T)x;
+    return x;
   }
   public event global::System.EventHandler Event
   {

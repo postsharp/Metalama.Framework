@@ -73,13 +73,22 @@ namespace Metalama.Framework.Engine.AspectWeavers
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
 
         /// <summary>
+        /// Rewrites all syntax trees in the compilation using a shared and thread-safe <see cref="CSharpSyntaxRewriter"/>.
+        /// </summary>
+        /// <param name="rewriter">A shared and thread-safe <see cref="CSharpSyntaxRewriter"/>.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        public Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriterFactory, CancellationToken cancellationToken = default )
+            => throw new NotSupportedException( "Use the overload accepting a delegate." );
+
+        /// <summary>
         /// Rewrites all syntax trees in the compilation.
         /// </summary>
-        /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> called for each <see cref="SyntaxTree"/> in the compilation.</param>
+        /// <param name="rewriter">A delegate creating a <see cref="CSharpSyntaxRewriter"/> given the root <see cref="SyntaxNode"/> of a syntax tree.
+        /// Called for every <see cref="SyntaxTree"/> in the compilation.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+        public async Task RewriteSyntaxTreesAsync( Func<SyntaxNode, CSharpSyntaxRewriter> rewriterFactory, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
-                rewriter,
+                rewriterFactory,
                 this.ServiceProvider,
                 this.GetCancellationToken( cancellationToken ) );
 
@@ -143,6 +152,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.CancellationToken = cancellationToken;
             this.ServiceProvider = serviceProvider;
+            this.CompilationServices = compilationServices;
         }
 
         /// <summary>

@@ -243,6 +243,17 @@ namespace Metalama.Framework.Engine.Linking
                 modifiers.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
             }
 
+            if (initializer == null && !symbol.Type.IsValueType && symbol.Type.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            {
+                initializer =
+                    EqualsValueClause(
+                        PostfixUnaryExpression(
+                            SyntaxKind.SuppressNullableWarningExpression,
+                            LiteralExpression(
+                                SyntaxKind.DefaultLiteralExpression,
+                                Token( SyntaxKind.DefaultKeyword ) ) ) );
+            }
+
             return FieldDeclaration(
                     attributes,
                     TokenList( modifiers ),

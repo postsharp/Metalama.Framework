@@ -195,14 +195,6 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> TemplateMustBeInNullableContext
-            = new(
-                "LAMA0228",
-                "A template must be fully in a nullable context",
-                "The template '{0}' must be contained in a nullable context. Add `#nullable enable` before the aspect class.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<ITypeSymbol> NeutralTypesForbiddenInNestedRunTimeTypes
             = new(
                 "LAMA0229",

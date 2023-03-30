@@ -1,0 +1,41 @@
+using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
+
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimeOldSwitchWithThrow;
+
+[CompileTime]
+enum SwitchEnum
+{
+    one = 1,
+    two = 2,
+}
+
+class Aspect
+{
+    [TestTemplate]
+    dynamic? Template()
+    {
+        var i = SwitchEnum.one;
+
+        switch (i)
+        {
+            case SwitchEnum.one:
+            case SwitchEnum.two:
+                Console.WriteLine("1 or 2");
+                break;
+            default:
+                throw new Exception();
+        }
+        
+        return meta.Proceed();
+    }
+}
+
+class TargetCode
+{
+    int Method(int a)
+    {
+        return a;
+    }
+}

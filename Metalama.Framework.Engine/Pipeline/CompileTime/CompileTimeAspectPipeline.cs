@@ -164,8 +164,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 // Write HTML (used only when building projects for documentation).
                 if ( this.ProjectOptions.WriteHtml )
                 {
-                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, compilation );
-                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, resultPartialCompilation, ".out" );
+                    // We keep the same naming conventions as for tests.
+                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, compilation, ".cs.html" );
+                    await HtmlCodeWriter.WriteAllAsync( this.ProjectOptions, this.ServiceProvider, resultPartialCompilation, ".t.cs.html" );
                 }
 
                 // Add managed resources.

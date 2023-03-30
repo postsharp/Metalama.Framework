@@ -43,9 +43,6 @@ internal abstract partial class BaseTestRunner
 {
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
-    private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
-        new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
-
     private readonly TestProjectReferences _references;
     private readonly IFileSystem _fileSystem;
 
@@ -238,7 +235,8 @@ internal abstract partial class BaseTestRunner
 
                 var prunedSyntaxRoot =
                     testInput.Options.KeepDisabledCode != true
-                        ? _removePreprocessorDirectivesRewriter.Visit( await parsedSyntaxTree.GetRootAsync() )!
+                        ? new RemovePreprocessorDirectivesRewriter( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia )
+                            .Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
                 if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
@@ -689,7 +687,7 @@ internal abstract partial class BaseTestRunner
             var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", outputSyntaxRoot );
 
             var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
-            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
+            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.TransformedHtml );
             var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
 
             var outputHtml = new StreamWriter( this._fileSystem.Open( outputHtmlPath, FileMode.Create ) );

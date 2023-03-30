@@ -15,9 +15,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 [PublicAPI]
 public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
 {
-    protected SafeSyntaxWalker( SyntaxWalkerDepth depth = SyntaxWalkerDepth.Node ) : base( depth ) { }
-
     private RecursionGuard _recursionGuard;
+
+    protected SafeSyntaxWalker( SyntaxWalkerDepth depth = SyntaxWalkerDepth.Node ) : base( depth ) 
+    {
+        this._recursionGuard = new RecursionGuard( this );
+    }
 
     public sealed override void Visit( SyntaxNode? node )
     {
@@ -38,6 +41,7 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
         }
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
+            this._recursionGuard.Failed();
             throw new SyntaxProcessingException( e, node );
         }
     }

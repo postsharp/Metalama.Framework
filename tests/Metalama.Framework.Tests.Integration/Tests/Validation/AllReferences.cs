@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     internal class DerivedClass : ValidatedClass
     {
         // Field type.
-        private ValidatedClass _field1;
+        private ValidatedClass? _field1;
 
         // Typeof in field initializer.
         private Type _field2 = typeof(ValidatedClass);
@@ -77,9 +77,9 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             return null;
         }
 
-        public ValidatedClass Property { get; set; }
+        public ValidatedClass? Property { get; set; }
 
-        public event ValidatedDelegate FieldLikeEvent;
+        public event ValidatedDelegate? FieldLikeEvent;
 
         public event ValidatedDelegate ExplicitEvent
         {

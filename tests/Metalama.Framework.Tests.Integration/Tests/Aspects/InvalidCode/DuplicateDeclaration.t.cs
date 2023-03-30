@@ -3,14 +3,14 @@
 // Error CS0111 on `Method`: `Type 'TargetCode' already defines a member called 'Method' with the same parameter types`
 class TargetCode
 {
-    [Aspect]
-    int Method(int a)
-    {
-        global::System.Console.WriteLine("Aspect");
-        return this.Method(a);
-    }
-    int Method(int a)
-    {
-        return a;
-    }
+  [Aspect]
+  int Method(int a)
+  {
+    global::System.Console.WriteLine("Aspect");
+    return this.Method(a);
+  }
+  int Method(int a)
+  {
+    return a;
+  }
 }

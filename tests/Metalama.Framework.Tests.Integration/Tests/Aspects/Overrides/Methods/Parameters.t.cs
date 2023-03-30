@@ -96,7 +96,7 @@ internal class TargetClass
   {
     T result;
     global::System.Console.WriteLine("This is the introduced method.");
-    result = (T)param;
+    result = param;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param param = {param}");
     global::System.Console.WriteLine("Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");

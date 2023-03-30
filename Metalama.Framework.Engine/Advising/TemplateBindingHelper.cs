@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -56,17 +57,25 @@ internal static class TemplateBindingHelper
             return null;
         }
 
-        if ( targetMethod.OperatorKind.GetCategory() == OperatorCategory.None )
+        ImmutableDictionary<string, ExpressionSyntax> CreateParameterMapping()
         {
-            var mappingBuilder = ImmutableDictionary<string, ExpressionSyntax>.Empty.ToBuilder();
+            var mappingBuilder = ImmutableDictionary.CreateBuilder<string, ExpressionSyntax>();
 
             for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
             {
                 var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
-                mappingBuilder.Add( templateParameter.Name, IdentifierName( targetMethod.Parameters[i].Name ) );
+                var parameter = targetMethod.Parameters[i];
+                ExpressionSyntax parameterSyntax = IdentifierName( parameter.Name );
+                parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type.GetSymbol() );
+                mappingBuilder.Add( templateParameter.Name, parameterSyntax );
             }
 
-            var templateArguments = GetTemplateArguments( template, mappingBuilder.ToImmutable() );
+            return mappingBuilder.ToImmutable();
+        }
+
+        if ( targetMethod.OperatorKind.GetCategory() == OperatorCategory.None )
+        {
+            var templateArguments = GetTemplateArguments( template, CreateParameterMapping() );
 
             return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
@@ -89,7 +98,9 @@ internal static class TemplateBindingHelper
                         $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
             }
 
-            return new BoundTemplateMethod( template.TemplateMember, GetTemplateArguments( template.TemplateMember, template.TemplateArguments ) );
+            var templateArguments = GetTemplateArguments( template.TemplateMember, template.TemplateArguments, CreateParameterMapping() );
+
+            return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
     }
 
@@ -114,13 +125,13 @@ internal static class TemplateBindingHelper
                     $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
         }
 
-        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
+        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty ) );
     }
 
     /// <summary>
     /// Binds a template to a contract for a given location name with given arguments.
     /// </summary>
-    public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
+    public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, ExpressionSyntax parameterExpression, IObjectReader? arguments = null )
     {
         // The template must be void.
         if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
@@ -146,12 +157,8 @@ internal static class TemplateBindingHelper
                     $"Cannot use the method '{template.Declaration}' as a contract template: the method must have a run-time parameter named 'value'." ) );
         }
 
-        var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty;
-
-        if ( parameterName != "value" )
-        {
-            parameterMapping = parameterMapping.Add( "value", IdentifierName( parameterName ) );
-        }
+        var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty
+            .Add( "value", parameterExpression );
 
         return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
     }
@@ -163,7 +170,16 @@ internal static class TemplateBindingHelper
     {
         template.Declaration.GetSymbol().ThrowIfBelongsToDifferentCompilationThan( targetMethod.GetSymbol() );
         arguments ??= ObjectReader.Empty;
-        ImmutableDictionary<string, ExpressionSyntax>.Builder? parameterMapping = null;
+        var parameterMapping = ImmutableDictionary.CreateBuilder<string, ExpressionSyntax>();
+
+        void AddParameter( IParameter methodParameter, IParameter templateParameter )
+        {
+            ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
+
+            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+
+            parameterMapping.Add( templateParameter.Name, parameterSyntax );
+        }
 
         // Check that template run-time parameters match the target.
         switch ( targetMethod )
@@ -198,14 +214,12 @@ internal static class TemplateBindingHelper
                                 $"Cannot use the method '{template.Declaration}' as a template for the {declarationKind} '{targetMethod}': this {declarationKind} expects {expectedParameterCount} parameter(s) but got {template.TemplateClassMember.RunTimeParameters.Length} were provided." ) );
                     }
 
-                    parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty.ToBuilder();
-
                     for ( var i = 0; i < template.TemplateClassMember.RunTimeParameters.Length; i++ )
                     {
                         var templateParameter = template.Declaration.Parameters[template.TemplateClassMember.RunTimeParameters[i].SourceIndex];
                         var methodParameter = targetMethod.Parameters[i];
 
-                        parameterMapping.Add( templateParameter.Name, IdentifierName( methodParameter.Name ) );
+                        AddParameter( methodParameter, templateParameter );
 
                         if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
                         {
@@ -244,6 +258,8 @@ internal static class TemplateBindingHelper
                             MetalamaStringFormatter.Format(
                                 $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
                     }
+
+                    AddParameter( methodParameter, templateParameter );
                 }
 
                 // Check that template generic parameters match the target.
@@ -278,7 +294,7 @@ internal static class TemplateBindingHelper
         }
 
         // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
-        var templateArguments = GetTemplateArguments( template, arguments, parameterMapping?.ToImmutable() );
+        var templateArguments = GetTemplateArguments( template, arguments, parameterMapping.ToImmutable() );
 
         // Verify that the template return type matches the target.
         if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template, arguments ) )
@@ -391,7 +407,7 @@ internal static class TemplateBindingHelper
 
     private static object?[] GetTemplateArguments(
         PartiallyBoundTemplateMethod? template,
-        ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
+        ImmutableDictionary<string, ExpressionSyntax> runTimeParameterMapping )
     {
         if ( template == null )
         {
@@ -416,7 +432,7 @@ internal static class TemplateBindingHelper
     private static object?[] GetTemplateArguments(
         TemplateMember<IMethod>? template,
         IObjectReader? compileTimeArguments,
-        ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
+        ImmutableDictionary<string, ExpressionSyntax> runTimeParameterMapping )
     {
         if ( template == null )
         {
@@ -441,7 +457,7 @@ internal static class TemplateBindingHelper
     private static void AddTemplateParameters(
         TemplateMember<IMethod> template,
         IObjectReader compileTimeArguments,
-        ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping,
+        ImmutableDictionary<string, ExpressionSyntax> runTimeParameterMapping,
         List<object?> templateArguments )
     {
         foreach ( var parameter in template.TemplateClassMember.Parameters )
@@ -459,7 +475,7 @@ internal static class TemplateBindingHelper
             }
             else
             {
-                var expression = runTimeParameterMapping != null && runTimeParameterMapping.TryGetValue( parameter.Name, out var mapped )
+                var expression = runTimeParameterMapping.TryGetValue( parameter.Name, out var mapped )
                     ? mapped
                     : IdentifierName( parameter.Name );
 
