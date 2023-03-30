@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
-            CSharpSyntaxRewriter rewriter,
+            Func<CSharpSyntaxRewriter> rewriterFactory,
             ProjectServiceProvider serviceProvider,
             CancellationToken cancellationToken = default )
         {
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var oldRoot = await tree.GetRootAsync( cancellationToken );
-                var newRoot = rewriter.Visit( oldRoot );
+                var newRoot = rewriterFactory().Visit( oldRoot );
 
                 if ( newRoot != oldRoot )
                 {

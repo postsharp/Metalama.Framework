@@ -15,9 +15,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 [PublicAPI]
 public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
 {
-    protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia ) { }
-
     private RecursionGuard _recursionGuard;
+
+    protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia )
+    {
+        this._recursionGuard = new RecursionGuard( this );
+    }
 
     [return: NotNullIfNotNull( nameof(node) )]
     public sealed override SyntaxNode? Visit( SyntaxNode? node )
@@ -34,6 +37,7 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
         }
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
+            this._recursionGuard.Failed();
             throw new SyntaxProcessingException( e, node );
         }
     }
