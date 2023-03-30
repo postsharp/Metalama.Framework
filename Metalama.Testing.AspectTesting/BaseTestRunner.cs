@@ -689,7 +689,7 @@ internal abstract partial class BaseTestRunner
             var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", outputSyntaxRoot );
 
             var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
-            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
+            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.TransformedHtml );
             var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
 
             var outputHtml = new StreamWriter( this._fileSystem.Open( outputHtmlPath, FileMode.Create ) );

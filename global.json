@@ -4,6 +4,6 @@
     "rollForward": "disable"
   },
   "msbuild-sdks": {
-    "PostSharp.Engineering.Sdk": "1.0.131-preview"
+    "PostSharp.Engineering.Sdk": "1.0.135-preview"
   }
 }

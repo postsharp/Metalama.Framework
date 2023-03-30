@@ -297,7 +297,7 @@ namespace Metalama.Framework.Engine.Formatting
             IProjectOptions projectOptions,
             ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
-            string suffix = "" )
+            string htmlExtension )
         {
             var compilation = partialCompilation.Compilation;
             var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
@@ -339,7 +339,7 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 var relativePath = documentPath.Substring( projectDirectory.Length + 1 );
-                var outputPath = Path.Combine( outputDirectory, relativePath + suffix + ".html" );
+                var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
 
                 var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
                 Directory.CreateDirectory( outputSubdirectory );

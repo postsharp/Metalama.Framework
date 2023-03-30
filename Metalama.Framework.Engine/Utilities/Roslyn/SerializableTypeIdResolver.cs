@@ -17,7 +17,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 public sealed class SerializableTypeIdResolver
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
-    private readonly Resolver _resolver;
     private readonly Compilation _compilation;
 
     internal SerializableTypeIdResolver( Compilation compilation )
@@ -29,14 +28,13 @@ public sealed class SerializableTypeIdResolver
         }
 #endif
         this._compilation = compilation;
-        this._resolver = new Resolver( compilation, null );
     }
 
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
     {
         if ( genericArguments == null || genericArguments.Count == 0 )
         {
-            return this._cache.GetOrAdd( typeId, this.ResolveCore );
+            return this._cache.GetOrAdd( typeId, id => this.ResolveCore( id ) );
         }
         else
         {
@@ -44,42 +42,24 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
-    private ITypeSymbol ResolveCore( SerializableTypeId id )
+    private ITypeSymbol ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, IType>? genericArguments = null )
     {
         try
         {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
+            var idString = id.Id;
 
-            var symbol = this._resolver.Visit( expression.Type );
+            var nullOblivious = idString[^1] != '!';
 
-            if ( symbol == null )
+            if ( !nullOblivious )
             {
-                throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
+                idString = idString[..^1];
             }
 
-            return symbol;
-        }
-        catch ( Exception e )
-        {
-            throw new InvalidOperationException( $"Cannot resolve the type '{id}': {e.Message}" );
-        }
-    }
+            var resolver = new Resolver( this._compilation, genericArguments, isNullOblivious: nullOblivious );
 
-    private ITypeSymbol ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, IType> genericArguments )
-    {
-        try
-        {
-            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( id.ToString() );
+            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( idString );
 
-            var resolver = new Resolver( this._compilation, genericArguments );
-            var symbol = resolver.Visit( expression.Type );
-
-            if ( symbol == null )
-            {
-                throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
-            }
-
-            return symbol;
+            return resolver.Visit( expression.Type ) ?? throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
         }
         catch ( Exception e )
         {
@@ -91,17 +71,28 @@ public sealed class SerializableTypeIdResolver
     {
         private readonly Compilation _compilation;
         private readonly IReadOnlyDictionary<string, IType>? _genericArguments;
+        private readonly bool _isNullOblivious;
 
-        public Resolver( Compilation compilation, IReadOnlyDictionary<string, IType>? genericArguments )
+        public Resolver( Compilation compilation, IReadOnlyDictionary<string, IType>? genericArguments, bool isNullOblivious )
         {
             this._compilation = compilation;
             this._genericArguments = genericArguments;
+            this._isNullOblivious = isNullOblivious;
         }
 
         public override ITypeSymbol VisitArrayType( ArrayTypeSyntax node )
             => this._compilation.CreateArrayTypeSymbol( this.Visit( node.ElementType )!, node.RankSpecifiers.Count );
 
         public override ITypeSymbol VisitPointerType( PointerTypeSyntax node ) => this._compilation.CreatePointerTypeSymbol( this.Visit( node.ElementType )! );
+
+        public override ITypeSymbol VisitNullableType( NullableTypeSyntax node )
+        {
+            var elementType = this.Visit( node.ElementType ).AssertNotNull();
+
+            return elementType.IsValueType
+                ? this._compilation.GetSpecialType( SpecialType.System_Nullable_T ).Construct( elementType )
+                : elementType.WithNullableAnnotation( NullableAnnotation.Annotated );
+        }
 
         private INamespaceOrTypeSymbol LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
         {
@@ -127,7 +118,17 @@ public sealed class SerializableTypeIdResolver
             throw new InvalidOperationException( $"The type or namespace '{ns}' does not contain a member named '{name}' of arity {arity}." );
         }
 
-        private ITypeSymbol LookupName( NameSyntax name ) => (ITypeSymbol) this.LookupName( name, null );
+        private ITypeSymbol LookupName( NameSyntax name )
+        {
+            var result = (ITypeSymbol) this.LookupName( name, null );
+
+            if ( !this._isNullOblivious )
+            {
+                result = result.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+            }
+
+            return result;
+        }
 
         private INamespaceOrTypeSymbol LookupName( NameSyntax name, INamespaceOrTypeSymbol? ns )
         {
@@ -174,7 +175,8 @@ public sealed class SerializableTypeIdResolver
         public override ITypeSymbol DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
         public override ITypeSymbol VisitPredefinedType( PredefinedTypeSyntax node )
-            => node.Keyword.Kind() switch
+        {
+            ITypeSymbol result = node.Keyword.Kind() switch
             {
                 SyntaxKind.VoidKeyword => this._compilation.GetSpecialType( SpecialType.System_Void ),
                 SyntaxKind.BoolKeyword => this._compilation.GetSpecialType( SpecialType.System_Boolean ),
@@ -195,5 +197,13 @@ public sealed class SerializableTypeIdResolver
 
                 _ => throw new InvalidOperationException( $"Unexpected predefined type: {node.Keyword.Kind()}" )
             };
+
+            if ( !this._isNullOblivious && node.Keyword.Kind() is SyntaxKind.ObjectKeyword or SyntaxKind.StringKeyword )
+            {
+                result = result.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+            }
+
+            return result;
+        }
     }
 }

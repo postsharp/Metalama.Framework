@@ -48,13 +48,13 @@ internal class TargetClass
   public global::System.Int32 IntroducedMethod_Expression(global::System.Int32 x)
   {
     global::System.Console.WriteLine("Override");
-    return (global::System.Int32)x;
+    return x;
   }
   public T IntroducedMethod_Generic<T>(T x)
   {
     global::System.Console.WriteLine("Override");
     global::System.Console.WriteLine("Original");
-    return (T)x;
+    return x;
   }
   private global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedMethod_Iterator_Introduction()
   {

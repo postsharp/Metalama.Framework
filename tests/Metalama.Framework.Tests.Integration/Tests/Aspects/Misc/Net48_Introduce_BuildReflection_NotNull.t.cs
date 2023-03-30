@@ -164,7 +164,7 @@ internal class Target
   private static global::System.Int32 IntroducedProperty_Auto_Static_Private { get; set; }
   public T GenericMethod<T>(T a)
   {
-    return (T)a;
+    return a;
   }
   public global::System.Int32 IntroducedMethod_Int()
   {

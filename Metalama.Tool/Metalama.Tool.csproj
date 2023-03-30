@@ -37,6 +37,7 @@
     </ItemGroup>
     
     <ItemGroup>
+        <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
         <PackageReference Include="Metalama.Backstage.Commands" Version="$(MetalamaBackstageVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     </ItemGroup>

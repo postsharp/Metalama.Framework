@@ -54,7 +54,7 @@ public class DeepCloneAttribute : TypeAspect
         }
 
         // Define a local variable of the same type as the target type.
-        var clone = meta.Cast( meta.Target.Type, baseCall )!;
+        var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;
 
         // Select clonable fields.
         var clonableFields =

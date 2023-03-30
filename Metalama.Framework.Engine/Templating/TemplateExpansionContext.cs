@@ -494,15 +494,21 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 if ( returnType.Equals( SpecialType.Void )
                      || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
                 {
+                    var returnStatement = ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
+
+                    // Special case for default(void), which cannot be an expression statement
+                    // (because it's not a valid expression in the first place, but is useful in templates).
+                    if ( returnUserExpression is DefaultUserExpression )
+                    {
+                        return returnStatement;
+                    }
+
                     var returnExpression = returnUserExpression
                         .ToExpressionSyntax( this.SyntaxGenerationContext )
                         .RemoveParenthesis();
 
-                    return
-                        Block(
-                                ExpressionStatement( returnExpression ),
-                                ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    return Block( ExpressionStatement( returnExpression ), returnStatement )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {

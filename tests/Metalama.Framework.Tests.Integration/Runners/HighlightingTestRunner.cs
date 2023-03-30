@@ -133,7 +133,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 var expectedOutputHtmlPath = Path.Combine(
                     Path.GetDirectoryName( testInput.FullPath )!,
-                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.OutputHtml );
+                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.TransformedHtml );
 
                 this.CompareHtmlFiles( testResult.OutputHtmlPath!, expectedOutputHtmlPath );
             }

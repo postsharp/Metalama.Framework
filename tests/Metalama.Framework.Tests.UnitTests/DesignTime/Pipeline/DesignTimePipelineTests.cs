@@ -206,18 +206,21 @@ F1.cs:
     {
         using var testContext = this.CreateTestContext();
 
-        const string code = @"
-using Metalama.Framework.Aspects;
-public class Aspect : OverrideMethodAspect 
-{ 
-   public override dynamic? OverrideMethod() => null;
-}
-";
+        const string code = """
+            using Metalama.Framework.Aspects;
+
+            public class Aspect : OverrideMethodAspect 
+            { 
+                public override dynamic? OverrideMethod()
+                {
+                    dynamic[] x; // This should cause LAMA0227
+                    return null;
+                }
+            }
+
+            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
-
-        compilation = compilation.WithOptions(
-            compilation.Options.WithNullableContextOptions( NullableContextOptions.Disable ) ); // This should cause LAMA0228.
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
         var pipeline = factory.CreatePipeline( compilation );
@@ -225,12 +228,12 @@ public class Aspect : OverrideMethodAspect
         // First execution of the pipeline.
         Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _, out var diagnostics ) );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
-        Assert.Single( diagnostics.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
+        Assert.Single( diagnostics.Where( d => d.Id == TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction.Id ) );
 
         // Second execution. The result should be the same, and the number of executions should not change.
         Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _, out var diagnostics2 ) );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
-        Assert.Single( diagnostics2.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
+        Assert.Single( diagnostics2.Where( d => d.Id == TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction.Id ) );
     }
 
     [Fact]

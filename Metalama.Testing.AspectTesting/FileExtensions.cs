@@ -28,6 +28,6 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// HTML rendering of the transformed C# (<c>.cs.html</c>).
         /// </summary>
-        public const string OutputHtml = ".out.cs.html";
+        public const string TransformedHtml = ".t.cs.html";
     }
 }
