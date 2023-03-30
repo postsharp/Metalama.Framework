@@ -109,7 +109,7 @@ namespace Metalama.Compiler
 
         var transformedCompilation =
             await compilation.RewriteSyntaxTreesAsync(
-                () => new RunTimeAssemblyRewriter( serviceProvider, compilationContext ),
+                _ => new RunTimeAssemblyRewriter( serviceProvider, compilationContext ),
                 serviceProvider );
 
         if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
