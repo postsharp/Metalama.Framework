@@ -72,18 +72,21 @@ namespace Metalama.Framework.Engine.AspectWeavers
         private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
 
-        /// <exclude />
-        [Obsolete( "Obsolete due to thread-safery. Use the overload accepting a delegate.", true )]
+        /// <summary>
+        /// Rewrites all syntax trees in the compilation using a shared and thread-safe <see cref="CSharpSyntaxRewriter"/>.
+        /// </summary>
+        /// <param name="rewriter">A shared and thread-safe <see cref="CSharpSyntaxRewriter"/>.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriterFactory, CancellationToken cancellationToken = default )
             => throw new NotSupportedException( "Use the overload accepting a delegate." );
 
         /// <summary>
         /// Rewrites all syntax trees in the compilation.
         /// </summary>
-        /// <param name="rewriter">A delegate creating a <see cref="CSharpSyntaxRewriter"/>. Called for every thread and
-        /// created rewriters are called for each <see cref="SyntaxTree"/> in the compilation.</param>
+        /// <param name="rewriter">A delegate creating a <see cref="CSharpSyntaxRewriter"/> given the root <see cref="SyntaxNode"/> of a syntax tree.
+        /// Called for every <see cref="SyntaxTree"/> in the compilation.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task RewriteSyntaxTreesAsync( Func<CSharpSyntaxRewriter> rewriterFactory, CancellationToken cancellationToken = default )
+        public async Task RewriteSyntaxTreesAsync( Func<SyntaxNode, CSharpSyntaxRewriter> rewriterFactory, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriterFactory,
                 this.ServiceProvider,

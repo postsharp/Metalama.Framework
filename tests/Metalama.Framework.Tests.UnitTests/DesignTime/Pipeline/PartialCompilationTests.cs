@@ -189,7 +189,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 
             // Modify syntax trees.
             var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
-                () => new Rewriter(),
+                _ => new Rewriter(),
                 ServiceProvider<IProjectService>.Empty.WithService( new SingleThreadedTaskRunner() ) );
 
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
