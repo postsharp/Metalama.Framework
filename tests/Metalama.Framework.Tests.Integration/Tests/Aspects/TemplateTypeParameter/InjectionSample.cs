@@ -60,6 +60,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
         [Inject]
         private TextWriter? _console;
 
-        public void Greet() => _console.WriteLine( "Hello, world." );
+        public void Greet() => _console!.WriteLine( "Hello, world." );
     }
 }
