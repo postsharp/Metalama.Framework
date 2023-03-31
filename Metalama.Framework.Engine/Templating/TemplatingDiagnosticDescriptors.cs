@@ -415,7 +415,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0259",
                 "Execution scope mismatch in conditional access expression.",
-                "Execution scope mismatch in the expression '{0}': '{1}' is compile-time, but '{2}' is run-time. Consider splitting the expression into separate statements.",
+                "The null-conditional operator cannot be used in the expression '{0}', because '{1}' is compile-time, but '{2}' is run-time. Consider using a separate null-checking 'if' statement instead of the null-conditional operator.",
                 _category,
                 Error );
     }
