@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -118,7 +119,8 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
                 CreateFrameworkTemplateProjectManifest( compilation ),
                 null,
                 0,
-                ImmutableArray<CompileTimeFileManifest>.Empty );
+                Array.Empty<CompileTimeFileManifest>(),
+                Array.Empty<CompileTimeDiagnosticManifest>() );
         }
 
         return new CompileTimeProject(
