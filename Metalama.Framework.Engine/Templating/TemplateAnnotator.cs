@@ -461,8 +461,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             parentExpressionScope = this.GetExpressionTypeScope( originalExpression );
         }
 
-        var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope();
-        var combinedValueScope = parentExpressionScope.GetExpressionValueScope();
+        var combinedExecutionScope = TemplatingScope.RunTimeOrCompileTime;
+        var combinedValueScope = TemplatingScope.RunTimeOrCompileTime;
         var useCompileTimeIfPossible = false;
         var lastNonNeutralNodeIndex = -1;
 
@@ -498,11 +498,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     }
                     else
                     {
-                        this.ReportDiagnostic(
-                            TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
-                            originalParent,
-                            (originalParent.ToString(), parentExpressionScope.ToDisplayString(), children[i].AssertNotNull().ToString(),
-                             childrenScopes[i].ToDisplayString()) );
+                        throw new AssertionFailedException( $"The expression '{children[i]}' seems to be in conflict with itself." );
                     }
 
                     // We don't propagate the conflict state after we report the error, because this would cause the reporting of more errors and be more confusing.
@@ -517,6 +513,30 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             if ( childExecutionScope != TemplatingScope.RunTimeOrCompileTime )
             {
                 lastNonNeutralNodeIndex = i;
+            }
+        }
+
+        combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( parentExpressionScope.GetExpressionExecutionScope() );
+        combinedValueScope = combinedValueScope.GetCombinedValueScope( parentExpressionScope.GetExpressionValueScope() );
+
+        if ( combinedExecutionScope == TemplatingScope.Conflict ||
+             combinedValueScope == TemplatingScope.Conflict )
+        {
+            if ( reportError )
+            {
+                // Report an error.
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
+                    originalParent,
+                    (originalParent.ToString(), parentExpressionScope.ToDisplayString(), children[lastNonNeutralNodeIndex].AssertNotNull().ToString(),
+                     childrenScopes[lastNonNeutralNodeIndex].ToDisplayString()) );
+
+                // We don't propagate the conflict state after we report the error, because this would cause the reporting of more errors and be more confusing.
+                return TemplatingScope.RunTimeOrCompileTime;
+            }
+            else
+            {
+                return TemplatingScope.Conflict;
             }
         }
 
@@ -814,6 +834,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var transformedWhenNotNull,
             out var transformedOperator,
             out var scope );
+
+        // TODO: comment
+        if ( scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly && this.GetNodeScope( transformedExpression ) == TemplatingScope.CompileTimeOnly )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.ExpressionScopeConflictInConditionalAccess,
+                node,
+                (node.ToString(), node.Expression.ToString(), node.Expression.ToString() + node.WhenNotNull.ToString()) );
+        }
 
         return node
             .Update( transformedExpression, transformedOperator, transformedWhenNotNull )
