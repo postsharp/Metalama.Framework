@@ -41,7 +41,7 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
     protected sealed override void Execute( ExtendedCommandContext context, CreditsCommandSettings settings )
     {
         var horizon = settings.GetHorizon();
-        
+
         context.Console.WriteMessage( $"Considering builds from {horizon:f}. Use -d, -w or -h option to change the time horizon." );
 
         // Check horizon.
@@ -49,14 +49,14 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
         {
             throw new CommandException( "The time horizon cannot be larger than 30 days because data files are automatically cleaned up over this horizon." );
         }
-        
+
         // Check license settings.
         var licenseService = context.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
         if ( !licenseService.IsTrialLicense )
         {
             context.Console.WriteWarning(
-                "The trial mode is currently not activated. Credit consumption data is therefore only being collected " + 
+                "The trial mode is currently not activated. Credit consumption data is therefore only being collected " +
                 "when projects are built with the parameter `/p:MetalamaWriteLicenseCreditData=True` or when the build " +
                 "fails because of insufficient license credits." );
         }

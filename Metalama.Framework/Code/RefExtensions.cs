@@ -19,7 +19,7 @@ namespace Metalama.Framework.Code
         public static T GetTarget<T>( this IRef<T> reference, ReferenceResolutionOptions options )
             where T : class, ICompilationElement
             => reference.GetTarget( MetalamaExecutionContext.Current.Compilation, options );
-        
+
         /// <summary>
         /// Gets the target of the reference for the current execution context, or returns <c>null</c> if the reference cannot be resolved.
         /// </summary>

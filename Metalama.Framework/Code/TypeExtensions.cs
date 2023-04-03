@@ -51,7 +51,7 @@ namespace Metalama.Framework.Code
         public static bool DerivesFrom( this INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
         {
             var compilation = (ICompilationInternal) left.Compilation;
-            
+
             return compilation.Helpers.DerivesFrom( left, right, options );
         }
 
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Code
         public static bool DerivesFrom( this INamedType left, Type right, DerivedTypesOptions options = DerivedTypesOptions.Default )
         {
             var compilation = (ICompilationInternal) left.Compilation;
-            
+
             return compilation.Helpers
                 .DerivesFrom( left, (INamedType) compilation.Factory.GetTypeByReflectionType( right ), options );
         }

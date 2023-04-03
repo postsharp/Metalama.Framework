@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code.Invokers
     /// Allows invocation of the method.
     /// </summary>
     [CompileTime]
-    public interface IMethodInvoker 
+    public interface IMethodInvoker
     {
         /// <summary>
         /// Generates run-time code that invokes the current method with a given list of arguments. By default, the target instance

@@ -24,7 +24,8 @@ internal sealed class CreditsCommandSettings : BaseCommandSettings
     public double? LastHours { get; init; }
 
     [CommandOption( "-p|--project" )]
-    [Description( "Includes only the specified projects, specified by file name without extension. You can use `*` to match any substring.  May be a comma-separated list." )]
+    [Description(
+        "Includes only the specified projects, specified by file name without extension. You can use `*` to match any substring.  May be a comma-separated list." )]
     public string? Projects { get; init; }
 
     [CommandOption( "-c|--configuration" )]
