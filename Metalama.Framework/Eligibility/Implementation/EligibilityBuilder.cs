@@ -25,16 +25,23 @@ namespace Metalama.Framework.Eligibility.Implementation
 
         public IEligibilityRule<T> Build()
         {
-            if ( this._predicates.Count == 0 )
+            switch ( this._predicates.Count )
             {
-                return EligibilityRule<T>.Empty;
+                case 0:
+                    return EligibilityRule<T>.Empty;
+
+                case 1:
+                    return this._predicates[0];
+
+                default:
+                    {
+                        var predicates = this._predicates.ToImmutableArray();
+
+                        return this._combinationOperator == BooleanCombinationOperator.Or
+                            ? new OrEligibilityRule<T>( predicates )
+                            : new AndEligibilityRule<T>( predicates );
+                    }
             }
-
-            var predicates = this._predicates.ToImmutableArray();
-
-            return this._combinationOperator == BooleanCombinationOperator.Or
-                ? new OrEligibilityRule<T>( predicates )
-                : new AndEligibilityRule<T>( predicates );
         }
     }
 }

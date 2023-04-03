@@ -1,165 +1,165 @@
 // Warning CS0162 on `return`: `Unreachable code detected`
 public class TestClass
 {
-    [IgnoreException]
-    public void VoidMethod()
+  [IgnoreException]
+  public void VoidMethod()
+  {
+    try
     {
-        try
-        {
-            throw new InvalidOperationException();
-            return;
-        }
-        catch
-        {
-            return;
-        }
+      throw new InvalidOperationException();
+      return;
     }
-    [IgnoreException]
-    public async void AsyncVoidMethod()
+    catch
     {
-        try
-        {
-            await this.AsyncVoidMethod_Source();
-            return;
-        }
-        catch
-        {
-            return;
-        }
+      return;
     }
-    private async global::System.Threading.Tasks.ValueTask AsyncVoidMethod_Source()
+  }
+  [IgnoreException]
+  public async void AsyncVoidMethod()
+  {
+    try
     {
-        await Task.Yield();
-        throw new InvalidOperationException();
+      await this.AsyncVoidMethod_Source();
+      return;
     }
-    [IgnoreException]
-    public int IntMethod()
+    catch
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return default(global::System.Int32);
-        }
+      return;
     }
-    [IgnoreException]
-    public Task TaskMethod()
+  }
+  private async global::System.Threading.Tasks.ValueTask AsyncVoidMethod_Source()
+  {
+    await Task.Yield();
+    throw new InvalidOperationException();
+  }
+  [IgnoreException]
+  public int IntMethod()
+  {
+    try
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return default(global::System.Threading.Tasks.Task);
-        }
+      throw new InvalidOperationException();
     }
-    [IgnoreException]
-    public async Task AsyncTaskMethod()
+    catch
     {
-        try
-        {
-            await this.AsyncTaskMethod_Source();
-            return;
-        }
-        catch
-        {
-            return;
-        }
+      return default(global::System.Int32);
     }
-    private async Task AsyncTaskMethod_Source()
+  }
+  [IgnoreException]
+  public Task TaskMethod()
+  {
+    try
     {
-        await Task.Yield();
-        throw new InvalidOperationException();
+      throw new InvalidOperationException();
     }
-    [IgnoreException]
-    public Task<int> TaskIntMethod()
+    catch
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return default(global::System.Threading.Tasks.Task<global::System.Int32>);
-        }
+      return default(global::System.Threading.Tasks.Task);
     }
-    [IgnoreException]
-    public async Task<int> AsyncTaskIntMethod()
+  }
+  [IgnoreException]
+  public async Task AsyncTaskMethod()
+  {
+    try
     {
-        try
-        {
-            return (await this.AsyncTaskIntMethod_Source());
-        }
-        catch
-        {
-            return default(global::System.Int32);
-        }
+      await this.AsyncTaskMethod_Source();
+      return;
     }
-    private async Task<int> AsyncTaskIntMethod_Source()
+    catch
     {
-        await Task.Yield();
-        throw new InvalidOperationException();
+      return;
     }
-    [IgnoreException]
-    public ValueTask ValueTaskMethod()
+  }
+  private async Task AsyncTaskMethod_Source()
+  {
+    await Task.Yield();
+    throw new InvalidOperationException();
+  }
+  [IgnoreException]
+  public Task<int> TaskIntMethod()
+  {
+    try
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return default(global::System.Threading.Tasks.ValueTask);
-        }
+      throw new InvalidOperationException();
     }
-    [IgnoreException]
-    public async ValueTask AsyncValueTaskMethod()
+    catch
     {
-        try
-        {
-            await this.AsyncValueTaskMethod_Source();
-            return;
-        }
-        catch
-        {
-            return;
-        }
+      return default(global::System.Threading.Tasks.Task<global::System.Int32>);
     }
-    private async ValueTask AsyncValueTaskMethod_Source()
+  }
+  [IgnoreException]
+  public async Task<int> AsyncTaskIntMethod()
+  {
+    try
     {
-        await Task.Yield();
-        throw new InvalidOperationException();
+      return (await this.AsyncTaskIntMethod_Source());
     }
-    [IgnoreException]
-    public ValueTask<int> ValueTaskIntMethod()
+    catch
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return default(global::System.Threading.Tasks.ValueTask<global::System.Int32>);
-        }
+      return default(global::System.Int32);
     }
-    [IgnoreException]
-    public async ValueTask<int> AsyncValueTaskIntMethod()
+  }
+  private async Task<int> AsyncTaskIntMethod_Source()
+  {
+    await Task.Yield();
+    throw new InvalidOperationException();
+  }
+  [IgnoreException]
+  public ValueTask ValueTaskMethod()
+  {
+    try
     {
-        try
-        {
-            return (await this.AsyncValueTaskIntMethod_Source());
-        }
-        catch
-        {
-            return default(global::System.Int32);
-        }
+      throw new InvalidOperationException();
     }
-    private async ValueTask<int> AsyncValueTaskIntMethod_Source()
+    catch
     {
-        await Task.Yield();
-        throw new InvalidOperationException();
+      return default(global::System.Threading.Tasks.ValueTask);
     }
+  }
+  [IgnoreException]
+  public async ValueTask AsyncValueTaskMethod()
+  {
+    try
+    {
+      await this.AsyncValueTaskMethod_Source();
+      return;
+    }
+    catch
+    {
+      return;
+    }
+  }
+  private async ValueTask AsyncValueTaskMethod_Source()
+  {
+    await Task.Yield();
+    throw new InvalidOperationException();
+  }
+  [IgnoreException]
+  public ValueTask<int> ValueTaskIntMethod()
+  {
+    try
+    {
+      throw new InvalidOperationException();
+    }
+    catch
+    {
+      return default(global::System.Threading.Tasks.ValueTask<global::System.Int32>);
+    }
+  }
+  [IgnoreException]
+  public async ValueTask<int> AsyncValueTaskIntMethod()
+  {
+    try
+    {
+      return (await this.AsyncValueTaskIntMethod_Source());
+    }
+    catch
+    {
+      return default(global::System.Int32);
+    }
+  }
+  private async ValueTask<int> AsyncValueTaskIntMethod_Source()
+  {
+    await Task.Yield();
+    throw new InvalidOperationException();
+  }
 }

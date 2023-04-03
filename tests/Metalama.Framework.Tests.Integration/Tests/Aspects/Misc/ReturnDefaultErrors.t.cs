@@ -13,102 +13,102 @@
 // Warning CS8619 on `r_1`: `Nullability of reference types in value of type 'var' doesn't match target type 'int'.`
 public class TestClass
 {
-    [IgnoreException]
-    public Task TaskMethod()
+  [IgnoreException]
+  public Task TaskMethod()
+  {
+    try
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return;
-        }
+      throw new InvalidOperationException();
     }
-    [IgnoreException]
-    public Task<int> TaskIntMethod()
+    catch
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return (global::System.Threading.Tasks.Task<global::System.Int32>)default(global::System.Int32);
-        }
+      return;
     }
-    [IgnoreException]
-    public ValueTask ValueTaskMethod()
+  }
+  [IgnoreException]
+  public Task<int> TaskIntMethod()
+  {
+    try
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return;
-        }
+      throw new InvalidOperationException();
     }
-    [IgnoreException]
-    public ValueTask<int> ValueTaskIntMethod()
+    catch
     {
-        try
-        {
-            throw new InvalidOperationException();
-        }
-        catch
-        {
-            return (global::System.Threading.Tasks.ValueTask<global::System.Int32>)default(global::System.Int32);
-        }
+      return (global::System.Threading.Tasks.Task<global::System.Int32>)default(global::System.Int32);
     }
-    [IgnoreException]
-    public async IAsyncEnumerable<int> IAsyncEnumerableMethod()
+  }
+  [IgnoreException]
+  public ValueTask ValueTaskMethod()
+  {
+    try
     {
-        try
-        {
-            await foreach (var r in this.IAsyncEnumerableMethod_Source())
-            {
-                yield return r;
-            }
-            yield break;
-        }
-        catch
-        {
-            await foreach (var r_1 in default(global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32>))
-            {
-                yield return r_1;
-            }
-            yield break;
-        }
+      throw new InvalidOperationException();
     }
-    private IAsyncEnumerable<int> IAsyncEnumerableMethod_Source()
+    catch
     {
-        throw new InvalidOperationException();
+      return;
     }
-    [IgnoreException]
-    public async IAsyncEnumerable<int> AsyncIAsyncEnumerableMethod()
+  }
+  [IgnoreException]
+  public ValueTask<int> ValueTaskIntMethod()
+  {
+    try
     {
-        try
-        {
-            await foreach (var r in (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIAsyncEnumerableMethod_Source())))
-            {
-                yield return r;
-            }
-            yield break;
-        }
-        catch
-        {
-            await foreach (var r_1 in default(global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32>))
-            {
-                yield return r_1;
-            }
-            yield break;
-        }
+      throw new InvalidOperationException();
     }
-    private async IAsyncEnumerable<int> AsyncIAsyncEnumerableMethod_Source()
+    catch
     {
-        await Task.Yield();
-        yield return 42;
-        throw new InvalidOperationException();
+      return (global::System.Threading.Tasks.ValueTask<global::System.Int32>)default(global::System.Int32);
     }
+  }
+  [IgnoreException]
+  public async IAsyncEnumerable<int> IAsyncEnumerableMethod()
+  {
+    try
+    {
+      await foreach (var r in this.IAsyncEnumerableMethod_Source())
+      {
+        yield return r;
+      }
+      yield break;
+    }
+    catch
+    {
+      await foreach (var r_1 in default(global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32>))
+      {
+        yield return r_1;
+      }
+      yield break;
+    }
+  }
+  private IAsyncEnumerable<int> IAsyncEnumerableMethod_Source()
+  {
+    throw new InvalidOperationException();
+  }
+  [IgnoreException]
+  public async IAsyncEnumerable<int> AsyncIAsyncEnumerableMethod()
+  {
+    try
+    {
+      await foreach (var r in (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIAsyncEnumerableMethod_Source())))
+      {
+        yield return r;
+      }
+      yield break;
+    }
+    catch
+    {
+      await foreach (var r_1 in default(global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32>))
+      {
+        yield return r_1;
+      }
+      yield break;
+    }
+  }
+  private async IAsyncEnumerable<int> AsyncIAsyncEnumerableMethod_Source()
+  {
+    await Task.Yield();
+    yield return 42;
+    throw new InvalidOperationException();
+  }
 }
