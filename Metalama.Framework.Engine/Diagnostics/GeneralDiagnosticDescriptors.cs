@@ -134,11 +134,11 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "The class already defines a template of the same name." );
 
-        internal static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, FormattableString Reason)>
+        internal static readonly DiagnosticDefinition<(string AspectName, DeclarationKind DeclarationKind, IDeclaration Target, FormattableString Reason)>
             AspectNotEligibleOnTarget = new(
                 "LAMA0037",
                 _category,
-                "The aspect '{0}' cannot be applied to '{1}' because {2}.",
+                "The aspect '{0}' cannot be applied to the {1} '{2}' because {3}.",
                 Error,
                 "The aspect cannot be applied to a declaration because eligibility conditions are not met." );
 

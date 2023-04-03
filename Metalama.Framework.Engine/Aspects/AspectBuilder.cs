@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Aspects
                 this._aspectBuilderState.Diagnostics.Report(
                     GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                         this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Target, justification!) ) );
+                        (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!) ) );
 
                 this.SkipAspect();
 

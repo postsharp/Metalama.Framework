@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -22,7 +21,6 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
         this._recursionGuard = new RecursionGuard( this );
     }
 
-    [return: NotNullIfNotNull( nameof(node) )]
     public sealed override SyntaxNode? Visit( SyntaxNode? node )
     {
         try
@@ -38,6 +36,7 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
             this._recursionGuard.Failed();
+
             throw new SyntaxProcessingException( e, node );
         }
     }

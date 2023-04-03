@@ -93,7 +93,7 @@ internal sealed class CompilationAspectSource : IAspectSource
                             diagnosticAdder.Report(
                                 GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                                     attribute.GetDiagnosticLocation(),
-                                    (aspectClass.ShortName, targetDeclaration, reason) ) );
+                                    (aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, reason) ) );
 
                             return null;
                         }

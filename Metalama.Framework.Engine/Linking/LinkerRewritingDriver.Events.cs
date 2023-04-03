@@ -215,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking
         // Event backing field is intentionally an event field to handle thread-safety.
         private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
         {
-            if ( initializer == null && !symbol.Type.IsValueType && symbol.Type.NullableAnnotation == NullableAnnotation.NotAnnotated )
+            if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
             {
                 initializer =
                     EqualsValueClause(
@@ -228,23 +228,23 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 EventFieldDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList(
-                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                    VariableDeclaration(
-                        eventType.WithTrailingTrivia( Space ),
-                        SingletonSeparatedList(
-                            VariableDeclarator(
-                                Identifier( GetBackingFieldName( symbol ) ),
-                                null,
-                                initializer ) ) ) )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                        VariableDeclaration(
+                            eventType.WithTrailingTrivia( Space ),
+                            SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier( GetBackingFieldName( symbol ) ),
+                                    null,
+                                    initializer ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
         private MemberDeclarationSyntax GetOriginalImplEvent(

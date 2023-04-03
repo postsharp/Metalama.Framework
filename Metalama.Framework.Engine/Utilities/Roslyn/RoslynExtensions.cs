@@ -91,11 +91,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( typeSymbol is ITypeParameterSymbol typeParameterSymbol )
             {
-                var isUnconstrained = !typeParameterSymbol.HasUnmanagedTypeConstraint
-                    && !typeParameterSymbol.HasValueTypeConstraint
-                    && !typeParameterSymbol.HasReferenceTypeConstraint
-                    && !typeParameterSymbol.HasNotNullConstraint
-                    && !typeParameterSymbol.ConstraintTypes.Any();
+                var isUnconstrained = typeParameterSymbol is { HasUnmanagedTypeConstraint: false, HasValueTypeConstraint: false } and { HasReferenceTypeConstraint: false, HasNotNullConstraint: false } 
+                                      && !typeParameterSymbol.ConstraintTypes.Any();
 
                 // Unconstrained, class? constrained and IFoo? constrained are considered nullable,
                 // even if they have NullableAnnotation.NotAnnotated.
