@@ -17,7 +17,7 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
 {
     private RecursionGuard _recursionGuard;
 
-    protected SafeSyntaxWalker( SyntaxWalkerDepth depth = SyntaxWalkerDepth.Node ) : base( depth ) 
+    protected SafeSyntaxWalker( SyntaxWalkerDepth depth = SyntaxWalkerDepth.Node ) : base( depth )
     {
         this._recursionGuard = new RecursionGuard( this );
     }
@@ -42,6 +42,7 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
         catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
             this._recursionGuard.Failed();
+
             throw new SyntaxProcessingException( e, node );
         }
     }

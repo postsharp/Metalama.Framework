@@ -25,10 +25,10 @@ namespace Metalama.Framework.Aspects
         {
             // The .Net Standard version of Metalama.Framework is used at compile-time, which is why we have to specify async enumerable methods even then (and then ignore them if not present).
             var templates = new MethodTemplateSelector(
-                nameof( this.OverrideMethod ),
-                nameof( this.OverrideAsyncMethod ),
-                nameof( this.OverrideEnumerableMethod ),
-                nameof( this.OverrideEnumeratorMethod ),
+                nameof(this.OverrideMethod),
+                nameof(this.OverrideAsyncMethod),
+                nameof(this.OverrideEnumerableMethod),
+                nameof(this.OverrideEnumeratorMethod),
                 "OverrideAsyncEnumerableMethod",
                 "OverrideAsyncEnumeratorMethod",
                 this.UseAsyncTemplateForAnyAwaitable,

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public static T Rewrite<T>( T node )
                 where T : SyntaxNode
-                => (T) new ReplaceDynamicToObjectRewriter().Visit( node );
+                => (T) new ReplaceDynamicToObjectRewriter().Visit( node ).AssertNotNull();
 
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {

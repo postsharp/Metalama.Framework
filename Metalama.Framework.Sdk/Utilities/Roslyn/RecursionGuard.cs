@@ -39,7 +39,7 @@ internal struct RecursionGuard
         this._threadId = Thread.CurrentThread.ManagedThreadId;
         this._owner = owner;
 #endif
-    }    
+    }
 
     public void IncrementDepth()
     {
@@ -49,7 +49,7 @@ internal struct RecursionGuard
             throw new InvalidOperationException( $"Object ({this._owner.GetType().FullName}) is being used after a failure occured." );
         }
 
-        if (this._threadIdStack == null || this._threadIdStack.Count == 0 )
+        if ( this._threadIdStack == null || this._threadIdStack.Count == 0 )
         {
             if ( this._threadId != Thread.CurrentThread.ManagedThreadId )
             {
@@ -77,44 +77,14 @@ internal struct RecursionGuard
     public void Switch<TState>( TState state, Action<TState> recursiveAction )
     {
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+
         // The ContinueWith is used to prevent inline execution of the Task.
 
 #if DEBUG
-        var threadStack = this._threadIdStack ??= new();
+        var threadStack = this._threadIdStack ??= new ConcurrentStack<int>();
 #endif
 
-        Task.Run( 
-            () =>
-            {
-                try
-                {
-#if DEBUG
-                    threadStack.Push( Thread.CurrentThread.ManagedThreadId );
-#endif
-                    recursiveAction( state );
-                }
-                finally
-                {
-#if DEBUG
-                    threadStack.TryPop( out _ );
-#endif
-                }
-            } )
-            .ContinueWith( _ => { }, TaskScheduler.Default ).GetAwaiter().GetResult();
-#pragma warning restore VSTHRD002
-    }
-
-    public TResult Switch<TState, TResult>( TState state, Func<TState, TResult> recursiveFunction )
-    {
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        // The ContinueWith is used to prevent inline execution of the Task.
-
-#if DEBUG
-        var threadStack = this._threadIdStack ??= new();
-#endif
-
-        return
-            Task.Run( 
+        Task.Run(
                 () =>
                 {
                     try
@@ -122,7 +92,7 @@ internal struct RecursionGuard
 #if DEBUG
                         threadStack.Push( Thread.CurrentThread.ManagedThreadId );
 #endif
-                        return recursiveFunction( state );
+                        recursiveAction( state );
                     }
                     finally
                     {
@@ -131,7 +101,43 @@ internal struct RecursionGuard
 #endif
                     }
                 } )
-            .ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default ).GetAwaiter().GetResult();
+            .ContinueWith( _ => { }, TaskScheduler.Default )
+            .GetAwaiter()
+            .GetResult();
+#pragma warning restore VSTHRD002
+    }
+
+    public TResult Switch<TState, TResult>( TState state, Func<TState, TResult> recursiveFunction )
+    {
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+
+        // The ContinueWith is used to prevent inline execution of the Task.
+
+#if DEBUG
+        var threadStack = this._threadIdStack ??= new ConcurrentStack<int>();
+#endif
+
+        return
+            Task.Run(
+                    () =>
+                    {
+                        try
+                        {
+#if DEBUG
+                            threadStack.Push( Thread.CurrentThread.ManagedThreadId );
+#endif
+                            return recursiveFunction( state );
+                        }
+                        finally
+                        {
+#if DEBUG
+                            threadStack.TryPop( out _ );
+#endif
+                        }
+                    } )
+                .ContinueWith( task => task.GetAwaiter().GetResult(), TaskScheduler.Default )
+                .GetAwaiter()
+                .GetResult();
 #pragma warning restore VSTHRD002
     }
 
