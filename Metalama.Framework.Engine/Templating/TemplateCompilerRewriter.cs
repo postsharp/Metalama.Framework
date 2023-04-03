@@ -819,13 +819,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             return InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalAccessExpression) ),
-                ArgumentList(
-                    SeparatedList(
-                        new[]
-                        {
-                            Argument( this.Transform( node.Expression ) ),
-                            Argument( this.Transform( node.WhenNotNull ) )
-                        } ) ) );
+                ArgumentList( SeparatedList( new[] { Argument( this.Transform( node.Expression ) ), Argument( this.Transform( node.WhenNotNull ) ) } ) ) );
         }
 
         return base.TransformConditionalAccessExpression( node );
@@ -1085,23 +1079,32 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( symbol is IMethodSymbol { IsExtensionMethod: true } method )
             {
                 var receiver = ((MemberAccessExpressionSyntax) node.Expression).Expression;
+                var receiverSymbol = this._syntaxTreeAnnotationMap.GetSymbol( receiver );
 
-                List<ArgumentSyntax> arguments = new( node.ArgumentList.Arguments.Count + 1 ) { Argument( receiver ).WithTemplateAnnotationsFrom( receiver ) };
+                if ( receiverSymbol is not ITypeSymbol )
+                {
+                    List<ArgumentSyntax> arguments =
+                        new( node.ArgumentList.Arguments.Count + 1 ) { Argument( receiver ).WithTemplateAnnotationsFrom( receiver ) };
 
-                arguments.AddRange( node.ArgumentList.Arguments );
+                    arguments.AddRange( node.ArgumentList.Arguments );
 
-                var replacementNode = InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            MetaSyntaxFactoryImpl.Type( method.ContainingType ),
-                            IdentifierName( method.Name ) ),
-                        ArgumentList( SeparatedList( arguments ) ) )
-                    .WithSymbolAnnotationsFrom( node )
-                    .WithTemplateAnnotationsFrom( node );
+                    var replacementNode = InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MetaSyntaxFactoryImpl.Type( method.ContainingType ),
+                                IdentifierName( method.Name ) ),
+                            ArgumentList( SeparatedList( arguments ) ) )
+                        .WithSymbolAnnotationsFrom( node )
+                        .WithTemplateAnnotationsFrom( node );
 
-                var result = this.VisitInvocationExpression( replacementNode );
+                    var result = this.VisitInvocationExpression( replacementNode );
 
-                return result;
+                    return result;
+                }
+                else
+                {
+                    // The extension method is called as a plain method.
+                }
             }
         }
 
@@ -1497,7 +1500,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Declaration statements (for local variable or function) and labeled statements cannot be embedded in e.g. an if statement directly,
         // so enclose them in a block here, in case they're used that way.
-        return statements is [not (LocalDeclarationStatementSyntax or LabeledStatementSyntax or LocalFunctionStatementSyntax)] ? statements[0] : Block( statements );
+        return statements is [not (LocalDeclarationStatementSyntax or LabeledStatementSyntax or LocalFunctionStatementSyntax)]
+            ? statements[0]
+            : Block( statements );
     }
 
     /// <summary>
@@ -1732,7 +1737,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     transformedStatements.Add( BreakStatement() );
                 }
-                
+
                 transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
             }
 

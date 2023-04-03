@@ -841,7 +841,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             this.ReportDiagnostic(
                 TemplatingDiagnosticDescriptors.ExpressionScopeConflictInConditionalAccess,
                 node,
-                (node.ToString(), node.Expression.ToString(), node.Expression.ToString() + node.WhenNotNull.ToString()) );
+                (node.ToString(), node.Expression.ToString(), node.Expression + node.WhenNotNull.ToString()) );
         }
 
         return node
