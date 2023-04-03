@@ -36,9 +36,9 @@ namespace Metalama.Testing.AspectTesting
                 ? TestDirectoryOptions.ReadFile( this._fileSystem, optionsPath )
                 : new TestDirectoryOptions();
 
-            // Apply settings from the parent directory.
-            if ( !directory.Equals( this.ProjectDirectory, StringComparison.OrdinalIgnoreCase ) )
+            if ( options.IsRoot != true )
             {
+                // Apply settings from the parent directory.
                 var parentDirectory = Path.GetDirectoryName( directory );
 
                 if ( parentDirectory != null )
