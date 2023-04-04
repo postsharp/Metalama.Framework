@@ -1361,5 +1361,47 @@ namespace Ns
 
             AssertTemplateType( TemplateAttributeType.Template, aspect1Type.Methods.Single() );
         }
+
+        [Fact]
+        public void DiagnosticsAreCached()
+        {
+            var code = $$"""
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+
+                namespace NS_{{Guid.NewGuid():N}};
+
+                [CompileTime]
+                class C
+                {
+                    [Template]
+                    void Template(IField field)
+                    {
+                        field.Value.M();
+                    }
+                }
+                """;
+
+            using var testContext = this.CreateTestContext();
+
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );
+
+            var diagnostics = new DiagnosticBag();
+
+            using var domain = testContext.Domain;
+
+            CompileTimeProjectRepository.Create( domain, testContext.ServiceProvider, compilation.RoslynCompilation, diagnostics );
+
+            var warnings = new[] { "Dereference of a possibly null reference." };
+
+            Assert.Equal( warnings, diagnostics.SelectAsArray( d => d.GetMessage( CultureInfo.InvariantCulture ) ) );
+
+            diagnostics.Clear();
+
+            CompileTimeProjectRepository.Create( domain, testContext.ServiceProvider, compilation.RoslynCompilation, diagnostics );
+
+            Assert.Equal( warnings, diagnostics.SelectAsArray( d => d.GetMessage( CultureInfo.InvariantCulture ) ) );
+        }
     }
 }

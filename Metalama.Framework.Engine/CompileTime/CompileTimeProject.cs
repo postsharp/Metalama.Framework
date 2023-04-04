@@ -308,7 +308,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplateProjectManifest.Empty,
                 null,
                 hash.Digest(),
-                Array.Empty<CompileTimeFileManifest>() );
+                Array.Empty<CompileTimeFileManifest>(),
+                Array.Empty<CompileTimeDiagnosticManifest>() );
 
             compileTimeProject = new CompileTimeProject(
                 serviceProvider,

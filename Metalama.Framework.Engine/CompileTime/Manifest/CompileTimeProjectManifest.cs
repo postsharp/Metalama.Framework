@@ -29,6 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             string? redistributionLicenseKey,
             ulong sourceHash,
             IReadOnlyList<CompileTimeFileManifest> files,
+            IReadOnlyList<CompileTimeDiagnosticManifest> diagnostics,
             string? metalamaVersion = null,
             int manifestVersion = 0 )
         {
@@ -41,10 +42,11 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             this.TransitiveFabricTypes = transitiveFabricTypes;
             this.OtherTemplateTypes = otherTemplateTypes;
             this.References = references;
+            this.Templates = templates;
             this.RedistributionLicenseKey = redistributionLicenseKey;
             this.SourceHash = sourceHash;
             this.Files = files;
-            this.Templates = templates;
+            this.Diagnostics = diagnostics;
             this.MetalamaVersion = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
             this.ManifestVersion = manifestVersion == 0 ? CurrentManifestVersion : manifestVersion;
 
@@ -116,6 +118,11 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// Gets the list of code files.
         /// </summary>
         public IReadOnlyList<CompileTimeFileManifest> Files { get; }
+
+        /// <summary>
+        /// Gets the list of diagnostics produced during the compilation.
+        /// </summary>
+        public IReadOnlyList<CompileTimeDiagnosticManifest>? Diagnostics { get; }
 
         public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
