@@ -56,6 +56,12 @@ namespace Metalama.Framework.Engine.Formatting
 
         private void SetSpanImpl( TextSpan span, TextSpanClassification? classification, string? tagName, string? tagValue )
         {
+            if ( span.Start >= this._length || span.End < 0 )
+            {
+                // This span is totally out of our range so the call can be ignored.
+                return;
+            }
+
             if ( span.Start < 0 || span.End > this._length )
             {
                 span = TextSpan.FromBounds( Math.Max( 0, span.Start ), Math.Min( this._length, span.End ) );

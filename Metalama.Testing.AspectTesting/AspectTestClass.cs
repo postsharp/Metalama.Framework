@@ -111,7 +111,8 @@ public abstract class AspectTestClass
         {
             PlugIns = projectReferences.PlugIns,
             References = projectReferences.MetadataReferences,
-            RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
+            RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault(),
+            FormatCompileTimeCode = testInput.Options.FormatCompileTimeCode ?? false
         };
 
         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, projectReferences, this._logger );

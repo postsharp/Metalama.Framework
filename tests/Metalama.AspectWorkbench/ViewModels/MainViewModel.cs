@@ -107,7 +107,10 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             var testContextOptions =
-                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray() };
+                new TestContextOptions()
+                {
+                    FormatCompileTimeCode = testInput.Options.FormatCompileTimeCode ?? true, References = metadataReferences.ToImmutableArray()
+                };
 
             using var testContext = new TestContext( testContextOptions );
 
@@ -170,9 +173,16 @@ namespace Metalama.AspectWorkbench.ViewModels
                         transformedTemplateSyntax,
                         filePath: testSyntaxTree.OutputCompileTimePath );
 
-                    var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+                    if ( testInput.Options.FormatCompileTimeCode != false )
+                    {
+                        var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                        this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                    }
+                    else
+                    {
+                        this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( document3, true );
+                    }
 
                     if ( testResult.CompileTimeCompilation != null )
                     {
