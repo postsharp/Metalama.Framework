@@ -542,6 +542,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                     case TemplatingScope.Conflict:
                                         return TemplatingScope.Conflict;
 
+                                    case TemplatingScope.DynamicTypeConstruction:
+                                        return TemplatingScope.DynamicTypeConstruction;
+
                                     default:
                                         throw new AssertionFailedException( $"Unexpected scope: {typeArgumentScope}." );
                                 }
