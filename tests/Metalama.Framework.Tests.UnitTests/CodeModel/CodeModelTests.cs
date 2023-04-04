@@ -1233,11 +1233,10 @@ public class PublicClass
 
             var compilation = testContext.CreateCompilationModel( "" );
             var objectType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(object) );
-            Assert.Null( objectType.IsNullable );
-            Assert.Same( objectType, objectType.UnderlyingType );
+            Assert.False( objectType.IsNullable );
             var nonNullableObjectType = objectType.ToNonNullableType();
             Assert.False( nonNullableObjectType.IsNullable );
-            Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
+            Assert.Same( objectType, nonNullableObjectType );
             var nullableObjectType = objectType.ToNullableType();
             Assert.NotSame( objectType, nullableObjectType );
             Assert.True( nullableObjectType.IsNullable );
@@ -1247,7 +1246,7 @@ public class PublicClass
             Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.Default );
             Assert.Equal( nullableObjectType, nonNullableObjectType, compilation.Comparers.Default );
             Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.IncludeNullability );
-            Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+            Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
             Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
         }
 

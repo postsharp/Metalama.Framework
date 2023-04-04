@@ -3,14 +3,14 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.NullableTypes;
 
-public class OverrideAttribute : OverrideMethodAspect
+public class Aspect : TypeAspect
 {
-    public override dynamic? OverrideMethod()
+    public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        TypeFactory.GetType(typeof(RT));
-        TypeFactory.GetType(typeof(RTOCT));
-        
-        return default;
+        builder.Advice.IntroduceField(builder.Target, "RT", typeof(RT));
+        builder.Advice.IntroduceField(builder.Target, "NRT", typeof(RT).ToNullableType());
+        builder.Advice.IntroduceField(builder.Target, "RTOCT", typeof(RTOCT));
+        builder.Advice.IntroduceField(builder.Target, "NRTOCT", typeof(RTOCT).ToNullableType());
     }
 }
 
@@ -20,12 +20,5 @@ class RTOCT { }
 class RT { }
 
 // <target>
-internal class TargetClass
-{
-   
-    [Override]
-    public TargetClass? TargetMethod_Void(object o, decimal d)
-    {
-        return null;
-    }
-}
+[Aspect]
+class TargetClass { }

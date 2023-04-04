@@ -1,11 +1,11 @@
-internal class TargetClass
+// Warning CS8618 on `NRT`: `Non-nullable field 'NRT' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
+// Warning CS8618 on `RT`: `Non-nullable field 'RT' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
+// Warning CS8618 on `RTOCT`: `Non-nullable field 'RTOCT' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
+[Aspect]
+class TargetClass
 {
-  [Override]
-  public TargetClass? TargetMethod_Void(object o, decimal d)
-  {
-    var castNull = ((global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.Cast.TargetClass? )null);
-    var castParam = ((global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.Cast.TargetClass? )((object? )o));
-    var castLiteral = ((global::System.Decimal)1);
-    return default;
-  }
+    private global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.NullableTypes.RT NRT;
+    private global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.NullableTypes.RTOCT? NRTOCT;
+    private global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.NullableTypes.RT RT;
+    private global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.NullableTypes.RTOCT RTOCT;
 }

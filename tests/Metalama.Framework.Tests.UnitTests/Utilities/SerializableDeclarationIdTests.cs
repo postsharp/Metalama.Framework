@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 using Xunit.Abstractions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -97,13 +98,15 @@ class C<T>
             var symbolDeclarationId = symbol.GetSerializableId();
             var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
 
+            var symbolComparer = ((CompilationModel) compilation).CompilationContext.SymbolComparerIncludingNullability;
+
             if ( symbol is INamespaceSymbol nss )
             {
                 Assert.Equal( nss.GetFullName(), (symbolRoundtrip as INamespaceSymbol)?.GetFullName() );
             }
             else
             {
-                Assert.Same( symbol, symbolRoundtrip );
+                Assert.True( symbolComparer.Equals( symbol, symbolRoundtrip ) );
             }
 
             var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )

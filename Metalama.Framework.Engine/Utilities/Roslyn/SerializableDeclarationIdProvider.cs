@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Elfie.Model;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -191,6 +192,8 @@ public static class SerializableDeclarationIdProvider
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
+        ISymbol? symbol;
+
         if ( indexOfAt > 0 )
         {
             // We have a parameter or a type parameter.
@@ -203,7 +206,7 @@ public static class SerializableDeclarationIdProvider
 
             var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation );
 
-            return (parent, kind) switch
+            symbol = (parent, kind) switch
             {
                 (null, _) => null,
                 (IMethodSymbol method, "Parameter") => method.Parameters[ordinal],
@@ -231,8 +234,15 @@ public static class SerializableDeclarationIdProvider
         }
         else
         {
-            return DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
+            symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
         }
+
+        if ( symbol is ITypeSymbol { IsValueType: false } typeSymbol )
+        {
+            symbol = typeSymbol.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+        }
+
+        return symbol;
     }
 
     internal static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )

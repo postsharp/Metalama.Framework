@@ -1242,14 +1242,18 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    var typeSymbol = (ITypeSymbol?) this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
+                    var semanticModel = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                    var typeSymbol = (ITypeSymbol?) semanticModel.GetSymbolInfo( node.Type ).Symbol;
 
-                    if ( typeSymbol != null )
+                    if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
-                        if ( this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
-                        {
-                            return this._typeOfRewriter.RewriteTypeOf( typeSymbol );
-                        }
+                        //// Mark the type as non-nullable reference type, if the nullable feature is enabled.
+                        //if ( !typeSymbol.IsValueType && (semanticModel.GetNullableContext( node.Type.SpanStart ) & NullableContext.AnnotationsEnabled) != 0 )
+                        //{
+                        //    typeSymbol = typeSymbol.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+                        //}
+
+                        return this._typeOfRewriter.RewriteTypeOf( typeSymbol );
                     }
                 }
 
