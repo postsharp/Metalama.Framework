@@ -14,6 +14,8 @@ namespace Metalama.Testing.AspectTesting
         /// Gets or sets a value indicating whether the current directory and all child directories should be excluded.
         /// </summary>
         public bool? Exclude { get; set; }
+        
+        public bool? IsRoot { get; set; }
 
         internal static TestDirectoryOptions ReadFile( IFileSystem fileSystem, string path )
         {
