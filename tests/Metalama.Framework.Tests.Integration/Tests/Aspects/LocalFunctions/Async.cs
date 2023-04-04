@@ -20,9 +20,7 @@ public class RetryAttribute : OverrideMethodAspect
     {
         async Task<object?> ExecuteCoreAsync()
         {
-            var result = await meta.ProceedAsync();
-
-            return result;
+            return await meta.ProceedAsync();
         }
 
         return await Task.Run( ExecuteCoreAsync );

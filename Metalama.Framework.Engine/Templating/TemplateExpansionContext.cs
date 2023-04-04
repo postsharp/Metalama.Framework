@@ -39,7 +39,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext
            ?? _currentSyntaxGenerationContext.Value;
-    
+
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
     /// </summary>
@@ -526,7 +526,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             }
             else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
-                Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
+                Invariant.Assert( this._template != null && (this._template.MustInterpretAsAsyncTemplate() || this._localFunctionInfo is { IsAsync: true }) );
 
                 var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
 
@@ -544,8 +544,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 }
                 else
                 {
-                    // TODO: Emit error.
-                    throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
+                    return
+                        Block(
+                                ExpressionStatement(
+                                    AwaitExpression(
+                                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                                ReturnStatement( SyntaxFactoryEx.Default ).WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
             }
             else
