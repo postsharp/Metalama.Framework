@@ -809,7 +809,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         {
             var diagnostics = project.Manifest.AssertNotNull().Diagnostics;
 
-            if ( diagnostics.Any() )
+            if ( diagnostics?.Any() == true )
             {
                 var sourceTreesForDiagnostics = sourceTreesWithCompileTimeCode.OrderBy( t => t.FilePath ).ToArray();
 

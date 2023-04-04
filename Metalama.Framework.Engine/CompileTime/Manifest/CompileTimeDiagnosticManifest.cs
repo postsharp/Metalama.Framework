@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -31,13 +29,13 @@ internal sealed class CompileTimeDiagnosticManifest
 
     public string Title { get; set; }
 
-    public string Description { get; private set; }
+    public string Description { get; set; }
 
     public string HelpLinkUri { get; set; }
 
-    public LocationManifest Location { get; set; }
+    public CompileTimeDiagnosticLocationManifest Location { get; set; }
 
-    public IReadOnlyList<LocationManifest> AdditionalLocations { get; set; }
+    public IReadOnlyList<CompileTimeDiagnosticLocationManifest> AdditionalLocations { get; set; }
 
     public IEnumerable<string> CustomTags { get; set; }
 
@@ -62,8 +60,8 @@ internal sealed class CompileTimeDiagnosticManifest
         this.Description = diagnostic.Descriptor.Description.ToString( CultureInfo.CurrentUICulture );
 #pragma warning restore CA1305
         this.HelpLinkUri = diagnostic.Descriptor.HelpLinkUri;
-        this.Location = new LocationManifest( diagnostic.Location, sourceFilePathIndexes );
-        this.AdditionalLocations = diagnostic.AdditionalLocations.SelectAsArray( location => new LocationManifest( location, sourceFilePathIndexes ) );
+        this.Location = new CompileTimeDiagnosticLocationManifest( diagnostic.Location, sourceFilePathIndexes );
+        this.AdditionalLocations = diagnostic.AdditionalLocations.SelectAsArray( location => new CompileTimeDiagnosticLocationManifest( location, sourceFilePathIndexes ) );
         this.CustomTags = diagnostic.Descriptor.CustomTags;
         this.Properties = diagnostic.Properties;
     }
@@ -85,48 +83,4 @@ internal sealed class CompileTimeDiagnosticManifest
             this.AdditionalLocations.SelectAsEnumerable( l => l.ToLocation( sourceTrees ) ),
             this.CustomTags,
             this.Properties );
-
-    [JsonObject( ItemNullValueHandling = NullValueHandling.Ignore )]
-    internal sealed class LocationManifest
-    {
-        public int? FileIndex { get; set; }
-
-        public string? FilePath { get; set; }
-
-        public TextSpan TextSpan { get; set; }
-
-        public LinePositionSpan? LineSpan { get; set; }
-
-        public LocationManifest() { }
-
-        public LocationManifest( Location location, Dictionary<string, int> sourceFilePathIndexes )
-        {
-            // Paths of compile-time source files are always changing, so the cache uses an index as a persistent identifier for a file when possible.
-            var path = location.SourceTree.AssertNotNull().FilePath;
-
-            if ( sourceFilePathIndexes.TryGetValue( path, out var index ) )
-            {
-                this.FileIndex = index;
-                this.TextSpan = location.SourceSpan;
-            }
-            else
-            {
-                this.FilePath = path;
-                this.TextSpan = location.SourceSpan;
-                this.LineSpan = location.GetLineSpan().Span;
-            }
-        }
-
-        public Location ToLocation( SyntaxTree[] sourceTrees )
-        {
-            if ( this.FileIndex is { } index )
-            {
-                return Microsoft.CodeAnalysis.Location.Create( sourceTrees[index], this.TextSpan );
-            }
-            else
-            {
-                return Microsoft.CodeAnalysis.Location.Create( this.FilePath.AssertNotNull(), this.TextSpan, this.LineSpan.AssertNotNull() );
-            }
-        }
-    }
 }

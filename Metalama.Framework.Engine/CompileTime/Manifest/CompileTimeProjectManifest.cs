@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// <summary>
         /// Gets the list of diagnostics produced during the compilation.
         /// </summary>
-        public IReadOnlyList<CompileTimeDiagnosticManifest> Diagnostics { get; }
+        public IReadOnlyList<CompileTimeDiagnosticManifest>? Diagnostics { get; }
 
         public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
