@@ -1,18 +1,20 @@
-#if TEST_OPTIONS
+﻿#if TEST_OPTIONS
 // @FormatCompileTimeCode(false)
 #endif
 
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LocalFunctions.Async;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LocalFunctions.Async2;
 
 public class RetryAttribute : OverrideMethodAspect
 {
     // Template for non-async methods.
     public override dynamic? OverrideMethod()
     {
-        return meta.Proceed();
+        var result = meta.Proceed();
+
+        return result;
     }
 
     // Template for async methods.
@@ -20,7 +22,9 @@ public class RetryAttribute : OverrideMethodAspect
     {
         async Task<object?> ExecuteCoreAsync()
         {
-            return await meta.ProceedAsync();
+            var result = await meta.ProceedAsync();
+
+            return result;
         }
 
         return await Task.Run( ExecuteCoreAsync );

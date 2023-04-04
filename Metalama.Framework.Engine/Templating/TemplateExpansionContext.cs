@@ -166,7 +166,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             Invariant.Assert( !awaitResult );
 
-            return ReturnStatement();
+            return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
         }
 
         switch ( this.MetaApi.Declaration )
@@ -237,6 +237,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     else
                     {
                         var returnType = this._localFunctionInfo.ReturnType;
+
+                        if ( this._localFunctionInfo.IsAsync )
+                        {
+                            returnType = returnType.GetAsyncInfo().ResultType;
+                        }
 
                         if ( returnType.Equals( SpecialType.Void ) )
                         {
@@ -472,7 +477,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                     SyntaxFactoryEx.SafeCastExpression(
                                         PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
                                         ParenthesizedExpression( returnExpression ).WithSimplifierAnnotation() ) ) ),
-                            ReturnStatement() )
+                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
     }
