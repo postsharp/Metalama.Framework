@@ -2,6 +2,8 @@
 // @FormatCompileTimeCode(false)
 #endif
 
+#pragma warning disable CS1998
+
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
