@@ -38,8 +38,8 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public virtual IMethod? SetMethod
         => this.PropertySymbol switch
         {
-            // Generate a pseudo-setter for read-only automatic properties defined in the current project.
-            { IsReadOnly: true, DeclaringSyntaxReferences.IsEmpty: false } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault()
+            // Generate a pseudo-setter for read-only automatic properties.
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault()
                 => new PseudoSetter( (IFieldOrPropertyOrIndexerImpl) this, Accessibility.Private ),
             { IsReadOnly: true } => null,
             _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod! )
