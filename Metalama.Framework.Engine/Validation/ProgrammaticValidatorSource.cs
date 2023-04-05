@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -63,15 +64,29 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        IDiagnosticSink diagnosticAdder )
+        UserDiagnosticSink diagnosticAdder )
     {
         if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
         {
-            return this._func.Invoke( this, compilation, diagnosticAdder );
+            foreach ( var instance in this._func.Invoke( this, compilation, diagnosticAdder ) )
+            {
+                if ( instance.ValidatedDeclaration.GetSymbol() == null )
+                {
+                    var diagnostic = GeneralDiagnosticDescriptors.InvalidTargetForValidator.CreateRoslynDiagnostic(
+                        null,
+                        (instance.ValidatedDeclaration.DeclarationKind, instance.ValidatedDeclaration, instance.Driver.UserCodeMemberInfo.ToString()) );
+
+                    diagnosticAdder.Report( diagnostic );
+
+                    continue;
+                }
+
+                yield return instance;
+            }
         }
         else
         {
-            return Enumerable.Empty<ValidatorInstance>();
+            yield break;
         }
     }
 }

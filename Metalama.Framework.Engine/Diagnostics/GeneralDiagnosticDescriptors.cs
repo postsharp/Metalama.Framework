@@ -332,6 +332,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "The referenced assembly must be recompiled with a more recent version of Metalama.",
                     _category );
 
+        internal static readonly DiagnosticDefinition<(DeclarationKind DeclarationKind, IDeclaration Declaration, string Validator)>
+            InvalidTargetForValidator =
+                new(
+                    "LAMA0062",
+                    Error,
+                    "References to the {0} '{1}' cannot be validated by '{2}' because the {0} is not a real source code declaration.",
+                    "References to the declaration cannot be validated because it is not a real source code declaration.",
+                    _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

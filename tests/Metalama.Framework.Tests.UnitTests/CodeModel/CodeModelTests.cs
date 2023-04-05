@@ -13,6 +13,7 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -1516,6 +1517,27 @@ class C {}
             var blue = enumType.Fields[nameof(ConsoleColor.Blue)];
             Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
         }
+
+        /*
+        [Fact]
+        public void ExternalInternalAutomaticProperty()
+        {
+            using var testContext = this.CreateTestContext();
+            var dependency = TestCompilationFactory.CreateCSharpCompilation( "public class C { public string P { get; internal set; } }" );
+            var dependencyStream = new MemoryStream();
+            Assert.True( dependency.Emit( dependencyStream ).Success );
+            dependencyStream.Seek( 0, SeekOrigin.Begin );
+            var dependencyReference = MetadataReference.CreateFromStream( dependencyStream );
+            
+            var compilation = testContext.CreateCompilationModel( "class D : C {}", additionalReferences:new[]{dependencyReference}  );
+
+            var type = compilation.Types.OfName( "D" ).Single().BaseType.AssertNotNull(  );
+            var property = type.Properties.Single();
+            Assert.Equal( Writeability.None, property.Writeability );
+            Assert.Null( property.SetMethod );
+
+        }
+        */
 
         private sealed class TestClassificationService : ISymbolClassificationService
         {

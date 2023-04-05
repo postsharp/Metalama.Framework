@@ -139,7 +139,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
         ValidatorKind kind,
         CompilationModelVersion version,
         CompilationModel compilation,
-        IDiagnosticSink diagnosticAdder )
+        UserDiagnosticSink diagnosticAdder )
     {
         if ( kind == ValidatorKind.Reference )
         {
@@ -148,7 +148,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                     {
                         var validationTarget = v.ValidatedDeclaration.GetTargetOrNull( compilation );
 
-                        if ( validationTarget == null )
+                        if ( validationTarget == null || validationTarget.GetSymbol() == null )
                         {
                             return null;
                         }

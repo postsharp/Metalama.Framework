@@ -104,7 +104,7 @@ internal sealed class ValidationRunner
             .ToImmutableArray();
     }
 
-    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, UserDiagnosticSink diagnosticAdder )
         => this._sources
             .SelectMany( s => s.GetValidators( ValidatorKind.Reference, CompilationModelVersion.Current, initialCompilation, diagnosticAdder ) )
             .Cast<ReferenceValidatorInstance>();
