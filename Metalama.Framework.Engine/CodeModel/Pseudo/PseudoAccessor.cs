@@ -89,8 +89,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
-    public SerializableDeclarationId ToSerializableId()
-        => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
+    public SerializableDeclarationId ToSerializableId() => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
     public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
@@ -109,9 +108,9 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
-   
+
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
-   
+
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public ICompilation Compilation => this.DeclaringMember.Compilation;
@@ -121,13 +120,16 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
-    public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+    MemberInfo IMemberOrNamedType.ToMemberInfo()
+        => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     public ExecutionScope ExecutionScope => this.DeclaringMember.ExecutionScope;
 
-    public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
+    System.Reflection.MethodBase IMethodBase.ToMethodBase()
+        => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
-    public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+    MethodInfo IMethod.ToMethodInfo()
+        => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     IHasAccessors IMethod.DeclaringMember => this.DeclaringMember;
 
@@ -139,9 +141,9 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     bool IDeclarationImpl.CanBeInherited => false;
 
-    public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
+    IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => throw new NotSupportedException();
 
-    public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 
     public IDeclaration OriginalDefinition
         => this.MethodKind switch
@@ -167,4 +169,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
     bool? IMethodImpl.IsIteratorMethod => false;
+
+    public override string ToString() => this.ToDisplayString();
 }

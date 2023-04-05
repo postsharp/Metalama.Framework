@@ -56,7 +56,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
     private ISymbol? _rootTemplateSymbol;
-
+    
     public TemplateCompilerRewriter(
         string templateName,
         TemplateCompilerSemantics syntaxKind,
@@ -1422,7 +1422,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                                 SeparatedList(
                                                                     new[]
                                                                     {
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ), Argument( map )
+                                                                        Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ),
+                                                                        Argument( map ),
+                                                                        Argument( SyntaxFactoryEx.LiteralExpression( localFunctionSymbol.IsAsync ) )
                                                                     } ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );

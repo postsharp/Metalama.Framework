@@ -41,12 +41,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
-            var statement = SyntaxFactory.ExpressionStatement(
-                expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
+            var statement = SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
 
-            list.Add(
-                new StatementOrTrivia(
-                    statement ) );
+            list.Add( new StatementOrTrivia( statement ) );
         }
 
         public void AddStatement( List<StatementOrTrivia> list, string statement )
@@ -372,8 +369,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax GetTypedExpression( IExpression expression )
-            => expression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
+        public TypedExpressionSyntax GetTypedExpression( IExpression expression ) => expression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
 
         public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
@@ -398,7 +394,10 @@ namespace Metalama.Framework.Engine.Templating
             {
                 suppressNullableWarning = true;
 
-                if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( operand, this._syntaxGenerationContext.CompilationContext, out var typeSymbol ) )
+                if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+                        operand,
+                        this._syntaxGenerationContext.CompilationContext,
+                        out var typeSymbol ) )
                 {
                     // Value types, including nullable value types don't need suppression.
                     if ( typeSymbol is { IsValueType: true } )
@@ -444,11 +443,11 @@ namespace Metalama.Framework.Engine.Templating
 
         public InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation ) => InterpolationSyntaxHelper.Fix( interpolation );
 
-        public ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments )
+        public ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments, bool isAsync = false )
         {
             var returnTypeSymbol = new SerializableTypeId( returnType ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), genericArguments );
 
-            return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol ) ) );
+            return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
     }
 }

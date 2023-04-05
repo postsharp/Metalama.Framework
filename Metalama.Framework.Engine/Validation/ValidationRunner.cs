@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -104,7 +103,7 @@ internal sealed class ValidationRunner
             .ToImmutableArray();
     }
 
-    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, UserDiagnosticSink diagnosticAdder )
         => this._sources
             .SelectMany( s => s.GetValidators( ValidatorKind.Reference, CompilationModelVersion.Current, initialCompilation, diagnosticAdder ) )
             .Cast<ReferenceValidatorInstance>();

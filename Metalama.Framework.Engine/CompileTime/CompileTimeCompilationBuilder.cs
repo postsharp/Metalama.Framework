@@ -154,7 +154,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         h.Update( sourceHash );
         this._logger.Trace?.Log( $"ProjectHash: Source={sourceHash:x}" );
-        
+
         h.Update( redistributionLicenseKey );
         this._logger.Trace?.Log( $"RedistributionLicenseKey: {redistributionLicenseKey ?? "null"}" );
 
@@ -858,12 +858,14 @@ internal sealed partial class CompileTimeCompilationBuilder
             var diagnostics = new List<Diagnostic>();
 
             // Without this local function, the closure for this method causes a memory leak.
-            static DiagnosticAdderAdapter CreateDiagnosticAdder( IDiagnosticAdder diagnosticSink, List<Diagnostic> diagnostics ) => new( diagnostic =>
-            {
-                // Report diagnostics to the current sink and also store them for the cache.
-                diagnosticSink.Report( diagnostic );
-                diagnostics.Add( diagnostic );
-            } );
+            static DiagnosticAdderAdapter CreateDiagnosticAdder( IDiagnosticAdder diagnosticSink, List<Diagnostic> diagnostics )
+                => new(
+                    diagnostic =>
+                    {
+                        // Report diagnostics to the current sink and also store them for the cache.
+                        diagnosticSink.Report( diagnostic );
+                        diagnostics.Add( diagnostic );
+                    } );
 
             var diagnosticAdder = CreateDiagnosticAdder( diagnosticSink, diagnostics );
 

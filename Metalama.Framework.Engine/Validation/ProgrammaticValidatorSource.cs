@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        IDiagnosticSink diagnosticAdder )
+        UserDiagnosticSink diagnosticAdder )
     {
         if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
         {
