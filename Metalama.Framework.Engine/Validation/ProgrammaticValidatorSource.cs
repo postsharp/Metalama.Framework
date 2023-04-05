@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -66,27 +65,25 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         CompilationModel compilation,
         UserDiagnosticSink diagnosticAdder )
     {
-        if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
-        {
-            foreach ( var instance in this._func.Invoke( this, compilation, diagnosticAdder ) )
-            {
-                if ( instance.ValidatedDeclaration.GetSymbol() == null )
-                {
-                    var diagnostic = GeneralDiagnosticDescriptors.InvalidTargetForValidator.CreateRoslynDiagnostic(
-                        null,
-                        (instance.ValidatedDeclaration.DeclarationKind, instance.ValidatedDeclaration, instance.Driver.UserCodeMemberInfo.ToString()) );
-
-                    diagnosticAdder.Report( diagnostic );
-
-                    continue;
-                }
-
-                yield return instance;
-            }
-        }
-        else
+        if ( kind != this._kind || this._compilationModelVersion != compilationModelVersion )
         {
             yield break;
+        }
+
+        foreach ( var instance in this._func.Invoke( this, compilation, diagnosticAdder ) )
+        {
+            if ( instance.ValidatedDeclaration.GetSymbol() == null )
+            {
+                var diagnostic = GeneralDiagnosticDescriptors.InvalidTargetForValidator.CreateRoslynDiagnostic(
+                    null,
+                    (instance.ValidatedDeclaration.DeclarationKind, instance.ValidatedDeclaration, instance.Driver.UserCodeMemberInfo.ToString()) );
+
+                diagnosticAdder.Report( diagnostic );
+
+                continue;
+            }
+
+            yield return instance;
         }
     }
 }

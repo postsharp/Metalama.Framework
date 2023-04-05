@@ -56,8 +56,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
     private ISymbol? _rootTemplateSymbol;
-    private IMethodSymbol _currentLocalFunction;
-
+    
     public TemplateCompilerRewriter(
         string templateName,
         TemplateCompilerSemantics syntaxKind,
@@ -2251,20 +2250,5 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Fallback to the default implementation.
         return base.VisitAssignmentExpression( node );
-    }
-
-    public override SyntaxNode VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
-    {
-        var oldLocalFunction = this._currentLocalFunction;
-        this._currentLocalFunction = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetSymbol( node );
-
-        try
-        {
-            return base.VisitLocalFunctionStatement( node );
-        }
-        finally
-        {
-            this._currentLocalFunction = oldLocalFunction;
-        }
     }
 }

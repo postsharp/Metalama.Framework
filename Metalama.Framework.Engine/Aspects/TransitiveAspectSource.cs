@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
@@ -148,7 +147,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                     {
                         var validationTarget = v.ValidatedDeclaration.GetTargetOrNull( compilation );
 
-                        if ( validationTarget == null || validationTarget.GetSymbol() == null )
+                        if ( validationTarget?.GetSymbol() == null )
                         {
                             return null;
                         }
