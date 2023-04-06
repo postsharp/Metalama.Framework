@@ -30,6 +30,12 @@
         </PackageReference>
         <AssemblyToEmbed Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" />
 
+        
+        <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" PrivateAssets="all">
+			<GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
+        <AssemblyToEmbed Include="$(PkgDiffPlex)\lib\netstandard2.0\DiffPlex.dll" />
+
 		<!-- The following dependencies are required by Rider because it does not ship them. -->
 		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all">
 			<GeneratePathProperty>true</GeneratePathProperty>
@@ -40,6 +46,7 @@
 			<GeneratePathProperty>true</GeneratePathProperty>
 		</PackageReference>
 		<AssemblyToEmbed Include="$(PkgMicrosoft_VisualStudio_Validation)\lib\netstandard2.0\Microsoft.VisualStudio.Validation.dll" />
+
 
         <!-- First-party dependencies to external repos -->
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" PrivateAssets="all">

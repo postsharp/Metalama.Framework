@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 TypeKindConstraint.Struct => false,
                 TypeKindConstraint.NotNull => false,
                 TypeKindConstraint.Unmanaged => false,
-                _ => null 
+                _ => null
             };
         }
 
@@ -59,10 +59,10 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( a.TypeKindConstraint )
             {
                 case TypeKindConstraint.Class when b.TypeKindConstraint is not TypeKindConstraint.Class:
-                case TypeKindConstraint.Struct when b.TypeKindConstraint is not TypeKindConstraint.Struct or TypeKindConstraint.Unmanaged:
+                case TypeKindConstraint.Struct when b.TypeKindConstraint is not (TypeKindConstraint.Struct or TypeKindConstraint.Unmanaged):
                 case TypeKindConstraint.Unmanaged when b.TypeKindConstraint is not TypeKindConstraint.Unmanaged:
                 case TypeKindConstraint.NotNull
-                    when b.TypeKindConstraint is not TypeKindConstraint.NotNull or TypeKindConstraint.Unmanaged or TypeKindConstraint.Struct:
+                    when b.TypeKindConstraint is not (TypeKindConstraint.NotNull or TypeKindConstraint.Unmanaged or TypeKindConstraint.Struct):
                     return false;
             }
 

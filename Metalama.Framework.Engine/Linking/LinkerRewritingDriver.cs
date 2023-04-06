@@ -471,7 +471,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IPropertySymbol { Parameters.Length: 0 } propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
-                case IPropertySymbol { Parameters.Length: > 0 } indexerSymbol:
+                case IPropertySymbol indexerSymbol:
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
