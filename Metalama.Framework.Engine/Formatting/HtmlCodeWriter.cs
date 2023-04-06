@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 if ( number != null && number != 0 )
                 {
-                    finalBuilder.AppendLine( $"<span class='diff-Imaginary' data-height='{number}'> " );
+                    finalBuilder.AppendLineInvariant( $"<span class='diff-Imaginary' data-height='{number}'> " );
 
                     for ( var i = 1; i < number.Value; i++ )
                     {
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
 
-                finalBuilder.Append( $"<span class='line-number'>{lineNumber + 1}</span>" );
+                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
 
                 if ( diagnosticBuilder.Length > 0 )
                 {
