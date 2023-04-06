@@ -437,10 +437,8 @@ namespace Metalama.Framework.Engine.Formatting
                 var imaginaryLinesBefore = 0;
                 var lineNumber = 0;
 
-                for ( var i = 0; i < diffPane.Lines.Count; i++ )
+                foreach ( var diffLine in diffPane.Lines )
                 {
-                    var diffLine = diffPane.Lines[i];
-
                     if ( diffLine.Type == ChangeType.Imaginary )
                     {
                         imaginaryLinesBefore++;
@@ -448,9 +446,8 @@ namespace Metalama.Framework.Engine.Formatting
                     else
                     {
                         var lineText = text.Lines[lineNumber].ToString();
-                        var nextDiffLine = i + 1 < diffPane.Lines.Count ? diffPane.Lines[i + 1] : null;
 
-                        if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 && nextDiffLine != null && nextDiffLine.Type != ChangeType.Imaginary )
+                        if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
                         {
                             // Prefer to insert imaginary lines after a bracket than before.
                             lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
