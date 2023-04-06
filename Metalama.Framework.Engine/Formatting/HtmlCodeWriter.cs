@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
         private static readonly Regex _cleanAutomaticPropertiesRegex =
             new( @"\{(\s*(private|internal|protected|private protected|protected internal)?\s*[gs]et;\s*){1,2}\}" );
 
-        private static readonly Regex _cleanReturnStatementRegex = new( @"^\s*return\s*(?=[^\;])" );
+        private static readonly Regex _cleanReturnStatementRegex = new( @"(?<=^\s*)return(?=\s*[^\;])" );
 
         public HtmlCodeWriter( ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
         {
@@ -411,8 +411,8 @@ namespace Metalama.Framework.Engine.Formatting
             await WriteAllAsync( projectOptions, serviceProvider, inputCompilation, ".cs.html", p => GetDiffInfo( p, true ) );
             await WriteAllAsync( projectOptions, serviceProvider, outputCompilation, ".t.cs.html", p => GetDiffInfo( p, false ) );
 
-            // Gets the text that should be compared by the differ. This text has no other role than diffing, so we can do any transformation we
-            // want to make the diff cleaner.
+            // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
+            // so we can do any transformation we want to make the diff cleaner.
             static string GetTextToCompare( SourceText text )
             {
                 // We remove automatic accessors of automatic properties because it better matches the property

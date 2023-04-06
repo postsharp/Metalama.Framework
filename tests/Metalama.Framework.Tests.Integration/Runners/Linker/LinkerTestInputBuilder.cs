@@ -298,9 +298,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     var containingDeclaration = nodeIdToCodeElement[containingNodeId];
 
-                    if ( nodeIdToCodeElement.ContainsKey( symbolHelperNodeId ) )
+                    if ( nodeIdToCodeElement.TryGetValue( symbolHelperNodeId, out var codeElement ) )
                     {
-                        switch ( nodeIdToCodeElement[symbolHelperNodeId] )
+                        switch ( codeElement )
                         {
                             case IMethod symbolHelperMethod:
                                 FinalizeTransformationMethod(
