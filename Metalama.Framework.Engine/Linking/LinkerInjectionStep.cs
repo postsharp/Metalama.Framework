@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
+            var supportsNullability = input.CompilationModel.RoslynCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
             var transformationComparer = TransformationLinkerOrderComparer.Instance;
             var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
@@ -143,8 +144,36 @@ namespace Metalama.Framework.Engine.Linking
                 s => s.Declaration,
                 input.CompilationModel.Comparers.Default );
 
+            // Replace wildcard AssemblyVersionAttribute with actual version.
+            var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
+            var assemblyVersionType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof( System.Reflection.AssemblyVersionAttribute ) );
+            var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionType ).FirstOrDefault();
+
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+            if ( assemblyVersionAttribute?.ConstructorArguments.FirstOrDefault() is { Value: string version }
+                 && version.Contains( '*' ) )
+            {
+                attributes.Remove( assemblyVersionType );
+
+                using ( UserCodeExecutionContext.WithContext( this._serviceProvider, input.CompilationModel ) )
+                {
+                    // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
+                    attributes.Add(
+                        new AttributeBuilder(
+                            null!,
+                            input.CompilationModel.DeclaringAssembly,
+                            AttributeConstruction.Create(
+                                assemblyVersionType,
+                                new object[]
+                                {
+                                    input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString()
+                                } ) ) );
+                }
+            }
+#pragma warning restore CA1307
+
             // Rewrite syntax trees.
-            var intermediateCompilation = input.InitialCompilation;
+            var intermediateCompilation = input.CompilationModel.PartialCompilation;
 
             var transformations = new ConcurrentBag<SyntaxTreeTransformation>();
 
@@ -172,7 +201,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+            await this._concurrentTaskRunner.RunInParallelAsync( intermediateCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
             var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
@@ -183,6 +212,7 @@ namespace Metalama.Framework.Engine.Linking
                 transformationComparer,
                 input.CompilationModel,
                 intermediateCompilation,
+                transformations,
                 syntaxTransformationCollection.InjectedMembers );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();

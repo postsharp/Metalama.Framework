@@ -15,11 +15,6 @@ namespace Metalama.Framework.Engine.Linking
     internal readonly struct AspectLinkerInput
     {
         /// <summary>
-        /// Gets the input compilation.
-        /// </summary>
-        public PartialCompilation InitialCompilation { get; }
-
-        /// <summary>
         /// Gets the input compilation model, modified by all aspects.
         /// </summary>
         public CompilationModel CompilationModel { get; }
@@ -39,14 +34,12 @@ namespace Metalama.Framework.Engine.Linking
         public CompileTimeProject CompileTimeProject { get; }
 
         public AspectLinkerInput(
-            PartialCompilation initialCompilation,
             CompilationModel compilationModel,
             IReadOnlyCollection<ITransformation> transformations,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IReadOnlyList<ScopedSuppression> suppressions,
             CompileTimeProject compileTimeProject )
         {
-            this.InitialCompilation = initialCompilation;
             this.CompilationModel = compilationModel;
             this.Transformations = transformations;
             this.OrderedAspectLayers = orderedAspectLayers;
