@@ -15,7 +15,7 @@ namespace Metalama.Framework.Code
         string GetFullMetadataName( INamedType type );
 
         SerializableTypeId GetSerializableId( IType type );
-        
+
         bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default );
     }
 }

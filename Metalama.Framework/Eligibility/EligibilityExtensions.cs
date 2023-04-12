@@ -7,6 +7,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Project;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 // ReSharper disable UnusedMember.Global
@@ -22,6 +23,31 @@ namespace Metalama.Framework.Eligibility;
 [PublicAPI]
 public static partial class EligibilityExtensions
 {
+    private static readonly List<(Type Type, string Name)> _interfaceNames = new()
+    {
+        // The order is significant: the most significant should come first.
+
+        (typeof(IMethod), "method"),
+        (typeof(IField), "field"),
+        (typeof(INamedType), "type"),
+        (typeof(IProperty), "property"),
+        (typeof(IEvent), "event"),
+        (typeof(IConstructor), "constructor"),
+        (typeof(IMethodBase), "method or constructor"),
+        (typeof(IParameter), "parameter"),
+        (typeof(ICompilation), "compilation"),
+        (typeof(INamespace), "namespace"),
+        (typeof(ITypeParameter), "type parameter"),
+        (typeof(IAttribute), "custom attribute"),
+        (typeof(IPropertyOrIndexer), "property or indexer"),
+        (typeof(IFieldOrProperty), "field or a property"),
+        (typeof(IFieldOrPropertyOrIndexer), "field, property or indexer"),
+        (typeof(IHasAccessors), "field, property, indexer or event"),
+        (typeof(IHasParameters), "property, indexer or event"),
+        (typeof(IMember), "method, constructor, field, property, indexer or event"),
+        (typeof(IMemberOrNamedType), "method, constructor, field, property, indexer, event or type")
+    };
+
     /// <summary>
     /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the given <see cref="IEligibilityBuilder"/>.
     /// </summary>
@@ -292,26 +318,18 @@ public static partial class EligibilityExtensions
 
     private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );
 
-    private static string GetInterfaceName( Type type ) => GetInterfaceName( type.Name );
-
-    private static string GetInterfaceName( string typeName )
-        => typeName switch
+    private static string GetInterfaceName( Type type )
+    {
+        foreach ( var pair in _interfaceNames )
         {
-            nameof(IMethod) => "method",
-            nameof(IField) => "field",
-            nameof(INamedType) => "type",
-            nameof(IProperty) => "property",
-            nameof(IFieldOrProperty) => "field or a property",
-            nameof(IFieldOrPropertyOrIndexer) => "field, property or indexer",
-            nameof(IPropertyOrIndexer) => "property or indexer",
-            nameof(IMember) => "method, constructor, field, property, indexer or event",
-            nameof(IMemberOrNamedType) => "method, constructor, field, property, indexer, event or type",
-            nameof(IEvent) => "event",
-            nameof(IConstructor) => "constructor",
-            nameof(IMethodBase) => "method or constructor",
-            nameof(IParameter) => "parameter",
-            _ => typeName
-        };
+            if ( pair.Type.IsAssignableFrom( type ) )
+            {
+                return pair.Name;
+            }
+        }
+
+        return type.Name;
+    }
 
     /// <summary>
     /// Requires the validated object to be of a certain type. Note that this validates the object itself, not the declaration
@@ -328,7 +346,7 @@ public static partial class EligibilityExtensions
 
         eligibilityBuilder.MustSatisfy(
             type.IsInstanceOfType,
-            d => $"{d} cannot be converted to an {GetInterfaceName<T>()}" );
+            d => $"{d} is not a {GetInterfaceName( type )} but a {GetInterfaceName( d.Object.GetType() )}" );
     }
 
     /// <summary>
@@ -432,14 +450,28 @@ public static partial class EligibilityExtensions
         params Action<IEligibilityBuilder<T>>[] requirements )
         where T : class
     {
-        var orBuilder = new EligibilityBuilder<T>( combinationOperator );
-
-        foreach ( var requirement in requirements )
+        switch ( requirements.Length )
         {
-            requirement( orBuilder );
-        }
+            case 0:
+                throw new ArgumentOutOfRangeException( nameof(requirements), "At least one requirement must be provided." );
 
-        eligibilityBuilder.AddRule( orBuilder.Build() );
+            case 1:
+                requirements[0]( eligibilityBuilder );
+
+                return;
+
+            default:
+                var orBuilder = new EligibilityBuilder<T>( combinationOperator );
+
+                foreach ( var requirement in requirements )
+                {
+                    requirement( orBuilder );
+                }
+
+                eligibilityBuilder.AddRule( orBuilder.Build() );
+
+                return;
+        }
     }
 
     /// <summary>

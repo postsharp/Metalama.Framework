@@ -49,57 +49,58 @@
             }
         </style>
     </head>
-    <body><pre><code class="nohighlight"><span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-punctuation">;</span>
-<span class="cs-keyword">using</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
-
-<span class="cs-preprocessor-keyword">#pragma</span> <span class="cs-preprocessor-keyword">warning</span> <span class="cs-preprocessor-keyword">disable</span> <span class="cs-identifier">CS0067</span>
-
-<span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">AllDeclarations</span>
-<span class="cs-punctuation">{</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-NeutralTrivia cs-comment">// We need at least an aspect otherwise the template annotator does not run.</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">:</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">OverrideMethodAspect</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
-<span class="cr-NeutralTrivia">        </span><span class="cs-keyword">public</span> <span class="cs-keyword">override</span> <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-method-name">OverrideMethod</span><span class="cs-punctuation">()</span> <span class="cr-RunTime cs-operator">=&gt;</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-keyword">null</span><span class="cs-punctuation">;</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span>
-<span class="cr-NeutralTrivia">    </span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">struct</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-struct-name">CompileTimeStruct</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
-<span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">FieldEvent</span><span class="cr-CompileTime cs-punctuation">;</span>
-<span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">ManualEvent</span>
-<span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-punctuation">{</span>
-<span class="cr-NeutralTrivia">            </span><span class="cr-CompileTime cs-keyword">add</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
-<span class="cr-NeutralTrivia">            </span><span class="cr-CompileTime cs-keyword">remove</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
-<span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-punctuation">}</span>
-<span class="cr-NeutralTrivia">        </span>
-<span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">string</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-property-name">Property</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">{</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">get</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">set</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">}</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span>
-
-    <span class="cs-keyword">struct</span> <span class="cs-struct-name">RunTimeStruct</span>
-    <span class="cs-punctuation">{</span>
-        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">FieldEvent</span><span class="cs-punctuation">;</span>
-        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">ManualEvent</span>
-        <span class="cs-punctuation">{</span>
-            <span class="cs-keyword">add</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
-            <span class="cs-keyword">remove</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
-        <span class="cs-punctuation">}</span>
-        
-        <span class="cs-keyword">public</span> <span class="cs-keyword">string</span> <span class="cs-property-name">Property</span> <span class="cs-punctuation">{</span> <span class="cs-keyword">get</span><span class="cs-punctuation">;</span> <span class="cs-keyword">set</span><span class="cs-punctuation">;</span> <span class="cs-punctuation">}</span>
-    <span class="cs-punctuation">}</span>
-
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
-<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">record</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-record-class-name">CompileTimeRecord</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">int</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-parameter-name">f</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">)</span><span class="cs-punctuation">;</span>
-
-    <span class="cs-keyword">record</span> <span class="cs-record-class-name">RunTimeRecord</span><span class="cs-punctuation">(</span> <span class="cs-keyword">int</span> <span class="cs-parameter-name">f</span> <span class="cs-punctuation">);</span>
-
-    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
-    <span class="cr-CompileTime cs-keyword">delegate</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">void</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">CompileTimeDelegate</span><span class="cr-CompileTime cs-punctuation">();</span>
-
-    <span class="cs-keyword">delegate</span> <span class="cs-keyword">void</span> <span class="cs-delegate-name">RunTimeDelegate</span><span class="cs-punctuation">();</span>
-
-
-
-<span class="cs-punctuation">}</span></code></pre>
+    <body><pre><code class="nohighlight"><span class='line-number'>1</span><span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-punctuation">;</span>
+<span class='line-number'>2</span><span class="cs-keyword">using</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span><span class="cs-preprocessor-keyword">#pragma</span> <span class="cs-preprocessor-keyword">warning</span> <span class="cs-preprocessor-keyword">disable</span> <span class="cs-identifier">CS0067</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span><span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">AllDeclarations</span>
+<span class='line-number'>7</span><span class="cs-punctuation">{</span>
+<span class='line-number'>8</span><span class="cr-NeutralTrivia">    </span><span class="cr-NeutralTrivia cs-comment">// We need at least an aspect otherwise the template annotator does not run.</span>
+<span class='line-number'>9</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">:</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">OverrideMethodAspect</span>
+<span class='line-number'>10</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
+<span class='line-number'>11</span><span class="cr-NeutralTrivia">        </span><span class="cs-keyword">public</span> <span class="cs-keyword">override</span> <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-method-name">OverrideMethod</span><span class="cs-punctuation">()</span> <span class="cr-RunTime cs-operator">=&gt;</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-keyword">null</span><span class="cs-punctuation">;</span>
+<span class='line-number'>12</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span>
+<span class='line-number'>13</span><span class="cr-NeutralTrivia">    </span>
+<span class='line-number'>14</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
+<span class='line-number'>15</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">struct</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-struct-name">CompileTimeStruct</span>
+<span class='line-number'>16</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
+<span class='line-number'>17</span><span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">FieldEvent</span><span class="cr-CompileTime cs-punctuation">;</span>
+<span class='line-number'>18</span><span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">ManualEvent</span>
+<span class='line-number'>19</span><span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-punctuation">{</span>
+<span class='line-number'>20</span><span class="cr-NeutralTrivia">            </span><span class="cr-CompileTime cs-keyword">add</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
+<span class='line-number'>21</span><span class="cr-NeutralTrivia">            </span><span class="cr-CompileTime cs-keyword">remove</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
+<span class='line-number'>22</span><span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-punctuation">}</span>
+<span class='line-number'>23</span><span class="cr-NeutralTrivia">        </span>
+<span class='line-number'>24</span><span class="cr-NeutralTrivia">        </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">string</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-property-name">Property</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">{</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">get</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">set</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">}</span>
+<span class='line-number'>25</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>    <span class="cs-keyword">struct</span> <span class="cs-struct-name">RunTimeStruct</span>
+<span class='line-number'>28</span>    <span class="cs-punctuation">{</span>
+<span class='line-number'>29</span>        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">FieldEvent</span><span class="cs-punctuation">;</span>
+<span class='line-number'>30</span>        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">ManualEvent</span>
+<span class='line-number'>31</span>        <span class="cs-punctuation">{</span>
+<span class='line-number'>32</span>            <span class="cs-keyword">add</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
+<span class='line-number'>33</span>            <span class="cs-keyword">remove</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
+<span class='line-number'>34</span>        <span class="cs-punctuation">}</span>
+<span class='line-number'>35</span>        
+<span class='line-number'>36</span>        <span class="cs-keyword">public</span> <span class="cs-keyword">string</span> <span class="cs-property-name">Property</span> <span class="cs-punctuation">{</span> <span class="cs-keyword">get</span><span class="cs-punctuation">;</span> <span class="cs-keyword">set</span><span class="cs-punctuation">;</span> <span class="cs-punctuation">}</span>
+<span class='line-number'>37</span>    <span class="cs-punctuation">}</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
+<span class='line-number'>40</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">record</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-record-class-name">CompileTimeRecord</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">int</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-parameter-name">f</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">)</span><span class="cs-punctuation">;</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>    <span class="cs-keyword">record</span> <span class="cs-record-class-name">RunTimeRecord</span><span class="cs-punctuation">(</span> <span class="cs-keyword">int</span> <span class="cs-parameter-name">f</span> <span class="cs-punctuation">);</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
+<span class='line-number'>45</span>    <span class="cr-CompileTime cs-keyword">delegate</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">void</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">CompileTimeDelegate</span><span class="cr-CompileTime cs-punctuation">();</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>    <span class="cs-keyword">delegate</span> <span class="cs-keyword">void</span> <span class="cs-delegate-name">RunTimeDelegate</span><span class="cs-punctuation">();</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span><span class="cs-punctuation">}</span>
+</code></pre>
        <p class='legend'>Legend:</p>
        <pre>
 <span class='cr-Default'>Default</span>

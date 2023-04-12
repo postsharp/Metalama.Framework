@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Templating;
 
 /// <summary>
 /// Replaces the leftmost binding expression with its "access" version. E.g. it can turn <c>.b?.c</c> into <c>a.b?.c</c>.
-/// Used in the process of removing a conditional access expresson.
+/// Used in the process of removing a conditional access expression.
 /// Can only be used once.
 /// </summary>
 internal sealed class RemoveConditionalAccessRewriter : SafeSyntaxRewriter

@@ -51,7 +51,10 @@ internal partial class OurSyntaxGenerator
 
     protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
 
-    public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null, bool keepNullableAnnotations = false )
+    public TypeOfExpressionSyntax TypeOfExpression(
+        ITypeSymbol type,
+        IReadOnlyDictionary<string, TypeSyntax>? substitutions = null,
+        bool keepNullableAnnotations = false )
     {
         var typeSyntax = this.Type( type );
 
@@ -60,7 +63,7 @@ internal partial class OurSyntaxGenerator
             if ( namedType.IsGenericTypeDefinition() )
             {
                 // In generic definitions, we must remove type arguments.
-                typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax );
+                typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax ).AssertNotNull();
             }
         }
 
@@ -71,8 +74,9 @@ internal partial class OurSyntaxGenerator
         }
 
         var dynamicToVarRewriter = new DynamicToVarRewriter();
+
         // In any typeof, we must change dynamic to object.
-        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Visit( typeSyntax );
+        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Visit( typeSyntax ).AssertNotNull();
 
         SafeSyntaxRewriter rewriter = type switch
         {
@@ -81,7 +85,7 @@ internal partial class OurSyntaxGenerator
             _ => dynamicToVarRewriter
         };
 
-        var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
+        var rewrittenTypeSyntax = rewriter.Visit( typeSyntax ).AssertNotNull();
 
         // Substitute type arguments.
         if ( substitutions is { Count: > 0 } )
@@ -99,10 +103,10 @@ internal partial class OurSyntaxGenerator
 
         if ( !this.IsNullAware )
         {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax );
+        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
     }
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )

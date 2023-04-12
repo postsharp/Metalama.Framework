@@ -1273,7 +1273,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                     .ForOverride( targetEvent.AddMethod, this.GetObjectReader( args ) );
 
-            var boundRemoveTemplate = 
+            var boundRemoveTemplate =
                 this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                     .ForOverride( targetEvent.RemoveMethod, this.GetObjectReader( args ) );
@@ -1552,13 +1552,13 @@ internal sealed class AdviceFactory : IAdviceFactory
         {
             switch ( kind )
             {
-                case ContractDirection.Output when targetParameter.RefKind is not RefKind.Ref or RefKind.Out:
+                case ContractDirection.Output when targetParameter.RefKind is not (RefKind.Ref or RefKind.Out):
                     throw new ArgumentOutOfRangeException(
                         nameof(kind),
                         MetalamaStringFormatter.Format(
                             $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
 
-                case ContractDirection.Input when targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In:
+                case ContractDirection.Input when targetParameter.RefKind is not (RefKind.None or RefKind.Ref or RefKind.In):
                     throw new ArgumentOutOfRangeException(
                         nameof(kind),
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );

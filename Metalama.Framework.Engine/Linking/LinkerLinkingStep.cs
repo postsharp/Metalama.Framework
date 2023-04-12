@@ -67,13 +67,13 @@ namespace Metalama.Framework.Engine.Linking
                     var syntaxTree = modifiedSyntaxTree.NewTree.AssertNotNull();
 
                     // Run the linking rewriter for this tree.
-                    var linkedRoot = 
+                    var linkedRoot =
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
-                        .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
+                            .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
                     var cleanRoot =
                         new CleanupRewriter( input.ProjectOptions )
-                        .Visit( linkedRoot )!;
+                            .Visit( linkedRoot )!;
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 

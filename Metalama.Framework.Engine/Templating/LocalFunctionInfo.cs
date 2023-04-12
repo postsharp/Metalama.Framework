@@ -4,4 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal sealed record LocalFunctionInfo( IType ReturnType );
+internal sealed record LocalFunctionInfo( IType ReturnType, bool IsAsync );

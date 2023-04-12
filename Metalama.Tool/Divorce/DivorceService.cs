@@ -26,13 +26,15 @@ internal class DivorceService
     public void CheckGitStatus()
     {
         var repoPath = Repository.Discover( this._path )
-                       ?? throw new CommandException( $"The path '{this._path}' is not part of a git repository. To execute this command anyway, use --force." );
+                       ?? throw new CommandException(
+                           $"The path '{this._path}' is not part of a git repository. To execute this command anyway, use --force." );
 
         using var repo = new Repository( repoPath );
 
         if ( repo.RetrieveStatus().IsDirty )
         {
-            throw new CommandException( $"The git repository at '{repo.Info.WorkingDirectory}' has pending changes (see git status). To execute this command anyway, use --force." );
+            throw new CommandException(
+                $"The git repository at '{repo.Info.WorkingDirectory}' has pending changes (see git status). To execute this command anyway, use --force." );
         }
     }
 
@@ -75,7 +77,8 @@ internal class DivorceService
 
         if ( !fileMapPaths.Any() )
         {
-            throw new CommandException( $"""
+            throw new CommandException(
+                $"""
                 Did not find any Metalama directories in '{this._path}'.
                 To perform divorce, first build the relevant projects while setting the MetalamaEmitCompilerTransformedFiles and MetalamaFormatOutput properties to True.
                 For example using the command: dotnet build -p:MetalamaEmitCompilerTransformedFiles=True -p:MetalamaFormatOutput=True YourSolution.sln

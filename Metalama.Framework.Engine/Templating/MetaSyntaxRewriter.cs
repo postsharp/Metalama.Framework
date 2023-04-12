@@ -195,6 +195,7 @@ namespace Metalama.Framework.Engine.Templating
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
+                                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( ElasticSpace ),
                                     this.MetaSyntaxFactory.ArrayType<SyntaxToken>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,

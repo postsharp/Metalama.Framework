@@ -309,6 +309,14 @@ namespace Metalama.Testing.AspectTesting
         public bool? LaunchDebugger { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether code of the compile-time project should be formatted.
+        /// The default value is <c>false</c> in the default test runner, but <c>true</c> in Aspect Workbench.
+        /// To set this option in a test, add this comment to your test file: <c>// @FormatCompileTimeCode(value)</c> where <c>value</c>
+        /// is <c>true</c> or <c>false</c>.
+        /// </summary>
+        public bool? FormatCompileTimeCode { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -390,6 +398,8 @@ namespace Metalama.Testing.AspectTesting
             this.ExcludeAssemblyAttributes ??= baseOptions.ExcludeAssemblyAttributes;
 
             this.LaunchDebugger ??= baseOptions.LaunchDebugger;
+
+            this.FormatCompileTimeCode ??= baseOptions.FormatCompileTimeCode;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -665,6 +675,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "LaunchDebugger":
                         this.LaunchDebugger = true;
+
+                        break;
+
+                    case "FormatCompileTimeCode":
+                        this.FormatCompileTimeCode = bool.Parse( optionArg );
 
                         break;
 

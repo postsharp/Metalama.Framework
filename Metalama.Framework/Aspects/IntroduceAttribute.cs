@@ -113,7 +113,7 @@ namespace Metalama.Framework.Aspects
                         {
                             var t = x.GetClosestNamedType();
 
-                            return t is { TypeKind: not TypeKind.Struct or TypeKind.RecordStruct } and { IsStatic: false, IsSealed: false };
+                            return t is { TypeKind: not (TypeKind.Struct or TypeKind.RecordStruct) } and { IsStatic: false, IsSealed: false };
                         },
                         _ => $"the aspect contains an virtual declarative introduction and therefore cannot be applied to sealed types, static types and structs" ) );
             }

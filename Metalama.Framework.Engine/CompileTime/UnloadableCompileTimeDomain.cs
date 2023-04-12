@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     GC.Collect();
                     GC.WaitForFullGCComplete();
 
-                    if ( stopwatch.Elapsed.Seconds > 30 )
+                    if ( stopwatch.Elapsed.TotalSeconds > 30 )
                     {
                         var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
 
@@ -151,11 +151,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         this.UnloadTimeout?.Invoke();
 
-                        var exception = new InvalidOperationException(
+                        throw new InvalidOperationException(
                             "The domain could not be unloaded. There are probably dangling references. " +
                             "The following assemblies are still loaded: " + assemblies + "." );
-
-                        throw exception;
                     }
                 }
             }

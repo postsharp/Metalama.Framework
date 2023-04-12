@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.Linking
                 modifiers.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
             }
 
-            if (initializer == null && !symbol.Type.IsValueType && symbol.Type.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
             {
                 initializer =
                     EqualsValueClause(
@@ -318,7 +318,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.GetAccessorDeclaration => symbol.GetMethod.AssertNotNull(),
                                             SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => symbol.SetMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" ),
+                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 

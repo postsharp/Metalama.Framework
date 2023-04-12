@@ -54,6 +54,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
                     continue;
                 }
 
+                // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
                 if ( !members.ContainsKey( member ) )
                 {
                     members.Add( member, member );

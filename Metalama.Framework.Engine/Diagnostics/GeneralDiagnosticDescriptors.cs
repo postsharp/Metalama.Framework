@@ -134,11 +134,11 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "The class already defines a template of the same name." );
 
-        internal static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, FormattableString Reason)>
+        internal static readonly DiagnosticDefinition<(string AspectName, DeclarationKind DeclarationKind, IDeclaration Target, FormattableString Reason)>
             AspectNotEligibleOnTarget = new(
                 "LAMA0037",
                 _category,
-                "The aspect '{0}' cannot be applied to '{1}' because {2}.",
+                "The aspect '{0}' cannot be applied to the {1} '{2}' because {3}.",
                 Error,
                 "The aspect cannot be applied to a declaration because eligibility conditions are not met." );
 
@@ -330,6 +330,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "The referenced assembly '{0}' has been compiled with Metalama {1}. It must be recompiled with the current version because " +
                     "backward compatibility of compiled assemblies has been broken.",
                     "The referenced assembly must be recompiled with a more recent version of Metalama.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<(DeclarationKind DeclarationKind, IDeclaration Declaration, string Validator)>
+            InvalidTargetForValidator =
+                new(
+                    "LAMA0062",
+                    Error,
+                    "References to the {0} '{1}' cannot be validated by '{2}' because the {0} is not a real source code declaration.",
+                    "References to the declaration cannot be validated because it is not a real source code declaration.",
                     _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).

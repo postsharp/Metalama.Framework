@@ -20,7 +20,7 @@ internal sealed class DistributedDesignTimeTestContext : TestContext
     private AnalysisProcessServiceHubEndpoint? _analysisProcessServiceHubEndpoint;
     private AnalysisProcessEndpoint? _analysisProcessEndpoint;
     private TestDesignTimeAspectPipelineFactory? _pipelineFactory;
-    
+
     public DistributedDesignTimeTestContext( TestContextOptions contextOptions, IAdditionalServiceCollection additionalServices ) : base(
         contextOptions with { RequiresExclusivity = true },
         additionalServices )

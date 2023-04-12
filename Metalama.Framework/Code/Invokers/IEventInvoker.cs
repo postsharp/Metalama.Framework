@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code.Invokers
     /// Allows adding/removing delegates to/from events.
     /// </summary>
     [CompileTime]
-    public interface IEventInvoker 
+    public interface IEventInvoker
     {
         /// <summary>
         /// Generates run-time code that adds a given handler to the event. By default, the target instance

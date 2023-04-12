@@ -1,14 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,12 +22,20 @@ namespace Metalama.Framework.Engine.Formatting
     {
         private readonly HtmlCodeWriterOptions _options;
 
+        private static readonly Regex _cleanAutomaticPropertiesRegex =
+            new( @"\{(\s*(private|internal|protected|private protected|protected internal)?\s*[gs]et;\s*){1,2}\}" );
+
+        private static readonly Regex _cleanReturnStatementRegex = new( @"(?<=^\s*)return(?=\s*[^\;])" );
+
         public HtmlCodeWriter( ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
         {
             this._options = options;
         }
 
-        public async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
+        public Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
+            => this.WriteAsync( document, textWriter, diagnostics, null );
+
+        private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
 
@@ -33,9 +45,31 @@ namespace Metalama.Framework.Engine.Formatting
             var codeLineBuilder = new StringBuilder();   // Builds the current line.
             var diagnosticBuilder = new StringBuilder(); // Builds the diagnostics of the current line.
             var diagnosticSet = new HashSet<string>( StringComparer.Ordinal );
+            var lineNumber = 0;
+
+            void AppendEmptyDiffLine( int? number )
+            {
+                if ( number != null && number != 0 )
+                {
+                    finalBuilder.AppendLineInvariant( $"<span class='diff-Imaginary' data-height='{number}'> " );
+
+                    for ( var i = 1; i < number.Value; i++ )
+                    {
+                        finalBuilder.AppendLine();
+                    }
+
+                    finalBuilder.Append( "</span>" );
+                }
+            }
 
             void FlushLine()
             {
+                var lineDiffInfo = diffInfo?.Lines[lineNumber];
+
+                AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
+
+                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
+
                 if ( diagnosticBuilder.Length > 0 )
                 {
                     // Figure out the indentation of the next block.
@@ -94,8 +128,12 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 // Then write the buffered code.
-                finalBuilder.Append( codeLineBuilder );
+                finalBuilder.AppendLine( codeLineBuilder.ToString() );
                 codeLineBuilder.Clear();
+
+                AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
+
+                lineNumber++;
             }
 
             if ( this._options.Prolog != null )
@@ -270,7 +308,8 @@ namespace Metalama.Framework.Engine.Formatting
 
                         break;
 
-                    case '\r' when attributeEncode:
+                    case '\r':
+                        // Always ignored.
                         break;
 
                     case '\n' when attributeEncode:
@@ -279,9 +318,14 @@ namespace Metalama.Framework.Engine.Formatting
                         break;
 
                     case '\n':
-                        stringBuilder.Append( c );
-
-                        onNewLine?.Invoke();
+                        if ( onNewLine == null )
+                        {
+                            stringBuilder.Append( c );
+                        }
+                        else
+                        {
+                            onNewLine();
+                        }
 
                         break;
 
@@ -293,11 +337,12 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        internal static async Task WriteAllAsync(
+        private static async Task WriteAllAsync(
             IProjectOptions projectOptions,
             ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
-            string htmlExtension )
+            string htmlExtension,
+            Func<string, FileDiffInfo>? getDiffInfo = null )
         {
             var compilation = partialCompilation.Compilation;
             var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
@@ -349,8 +394,85 @@ namespace Metalama.Framework.Engine.Formatting
 #else
                 using var textWriter = new StreamWriter( outputPath );
 #endif
-                await writer.WriteAsync( document, textWriter );
+                var diffInfo = getDiffInfo?.Invoke( documentPath );
+
+                await writer.WriteAsync( document, textWriter, null, diffInfo );
             }
         }
+
+        internal static async Task WriteAllDiffAsync(
+            IProjectOptions projectOptions,
+            ProjectServiceProvider serviceProvider,
+            PartialCompilation inputCompilation,
+            PartialCompilation outputCompilation )
+        {
+            var diffBuilder = new SideBySideDiffBuilder();
+
+            await WriteAllAsync( projectOptions, serviceProvider, inputCompilation, ".cs.html", p => GetDiffInfo( p, true ) );
+            await WriteAllAsync( projectOptions, serviceProvider, outputCompilation, ".t.cs.html", p => GetDiffInfo( p, false ) );
+
+            // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
+            // so we can do any transformation we want to make the diff cleaner.
+            static string GetTextToCompare( SourceText text )
+            {
+                // We remove automatic accessors of automatic properties because it better matches the property
+                // after automatic accessors have been replaced by explicit implementations.
+                // We also rewrite all return statements to make it more likely to match.
+                return _cleanReturnStatementRegex.Replace( _cleanAutomaticPropertiesRegex.Replace( text.ToString(), "" ), "result = " );
+            }
+
+            FileDiffInfo GetDiffInfo( string path, bool isOld )
+            {
+#pragma warning disable VSTHRD103
+                var oldText = inputCompilation.SyntaxTrees[path].GetText();
+                var newText = outputCompilation.SyntaxTrees[path].GetText();
+#pragma warning restore VSTHRD103
+
+                var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
+
+                var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
+
+                var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
+
+                var imaginaryLinesBefore = 0;
+                var lineNumber = 0;
+
+                foreach ( var diffLine in diffPane.Lines )
+                {
+                    if ( diffLine.Type == ChangeType.Imaginary )
+                    {
+                        imaginaryLinesBefore++;
+                    }
+                    else
+                    {
+                        var lineText = text.Lines[lineNumber].ToString();
+
+                        if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
+                        {
+                            // Prefer to insert imaginary lines after a bracket than before.
+                            lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
+                        }
+                        else
+                        {
+                            lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
+                            imaginaryLinesBefore = 0;
+                        }
+
+                        lineNumber++;
+                    }
+                }
+
+                if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
+                {
+                    lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+                }
+
+                return new FileDiffInfo( lineDiffInfos.ToArray() );
+            }
+        }
+
+        private sealed record FileDiffInfo( LineDiffInfo[] Lines );
+
+        private sealed record LineDiffInfo( int ImaginaryLinesBefore, int ImaginaryLinesAfter, ChangeType ChangeType );
     }
 }
