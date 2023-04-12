@@ -29,20 +29,21 @@ namespace Metalama.Framework.Engine.AspectWeavers
                         return base.VisitCore( node );
 
                     case MemberDeclarationSyntax or AccessorDeclarationSyntax:
+                        var rewrittenNode = node;
+
+                        if ( node is BaseTypeDeclarationSyntax or BaseNamespaceDeclarationSyntax )
                         {
-                            if ( this._targets.Contains( node ) )
-                            {
-                                return this._userRewriter.Visit( node );
-                            }
-                            else if ( node is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax )
-                            {
-                                // Visit types and namespaces.
+                            // Visit types and namespaces.
 
-                                return base.VisitCore( node );
-                            }
-
-                            break;
+                            rewrittenNode = base.VisitCore( rewrittenNode );
                         }
+
+                        if ( this._targets.Contains( node ) )
+                        {
+                            rewrittenNode = this._userRewriter.Visit( rewrittenNode );
+                        }
+
+                        return rewrittenNode;
                 }
 
                 // Don't visit other members.
