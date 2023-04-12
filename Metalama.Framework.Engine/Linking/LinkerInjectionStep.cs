@@ -182,7 +182,8 @@ namespace Metalama.Framework.Engine.Linking
                 transformationComparer,
                 input.CompilationModel,
                 intermediateCompilation,
-                syntaxTransformationCollection.InjectedMembers );
+                syntaxTransformationCollection.InjectedMembers,
+                builderToTransformationMap );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 

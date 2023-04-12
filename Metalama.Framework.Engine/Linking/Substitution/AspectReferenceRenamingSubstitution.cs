@@ -208,10 +208,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                     case (_, IdentifierNameSyntax):
                                     case (_, BaseExpressionSyntax):
                                     case (_, ThisExpressionSyntax):
+                                        ExpressionSyntax targetExpression =
+                                            targetSemanticKind switch
+                                            {
+                                                IntermediateSymbolSemanticKind.Final => ThisExpression(),
+                                                _ => BaseExpression(),
+                                            };
+                                        
                                         return
                                             MemberAccessExpression(
                                                     SyntaxKind.SimpleMemberAccessExpression,
-                                                    BaseExpression(),
+                                                    targetExpression,
                                                     GetRewrittenName( memberAccessExpression.Name ) )
                                                 .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
                                                 .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );

@@ -18,6 +18,7 @@ public class Aspect : OverrideMethodAspect
     }
 }
 
+// <target>
 class TargetCode
 {
     [Aspect]

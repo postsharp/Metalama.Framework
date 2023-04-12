@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
                 LinkerInjectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
-                        AspectReferenceOrder.Base,
+                        AspectReferenceOrder.Previous,
                         flags: AspectReferenceFlags.Inlineable ) );
 
         public override ExpressionSyntax GetPropertyReference(
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
                             LinkerInjectionHelperProvider.GetPropertyMemberExpression()
                                 .WithAspectReferenceAnnotation(
                                     aspectLayer,
-                                    AspectReferenceOrder.Base,
+                                    AspectReferenceOrder.Previous,
                                     targetKind,
                                     flags: AspectReferenceFlags.Inlineable ),
                             ArgumentList( SingletonSeparatedList( Argument( symbolSourceExpression ) ) ) );
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                         CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
                             .WithAspectReferenceAnnotation(
                                 aspectLayer,
-                                AspectReferenceOrder.Base,
+                                AspectReferenceOrder.Previous,
                                 targetKind,
                                 AspectReferenceFlags.Inlineable );
             }
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking
                                     } ) ) ) )
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
-                        AspectReferenceOrder.Base,
+                        AspectReferenceOrder.Previous,
                         targetKind,
                         AspectReferenceFlags.Inlineable );
         }
@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                             overriddenOperator.Parameters.SelectAsEnumerable( p => p.Type ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
-                            AspectReferenceOrder.Base,
+                            AspectReferenceOrder.Previous,
                             flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }

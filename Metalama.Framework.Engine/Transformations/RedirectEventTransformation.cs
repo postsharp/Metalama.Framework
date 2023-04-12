@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this._targetEvent.IsStatic
                         ? IdentifierName( this._targetEvent.Name )
                         : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
-                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
+                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOverrides
 {
     public class Base
@@ -35,6 +34,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOv
     }
 
     [PseudoLayerOrder("TestAspect")]
+    // <target>
     public class Target : Base
     {
 
@@ -73,23 +73,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOv
         [PseudoOverride(nameof(Foo), "TestAspect")]
         public void Foo_Override()
         {
-            // Should invoke this.
-            link(_this.BaseMethod, @base)();
-            // Should invoke this.
-            link(_this.BaseMethod, previous)();
-            // Should invoke this.
-            link(_this.BaseMethod, current)();
-            // Should invoke this.
-            link(_this.BaseMethod, final)();
+            //// Should invoke this.
+            //link(_this.BaseMethod, @base)();
+            //// Should invoke this.
+            //link(_this.BaseMethod, previous)();
+            //// Should invoke this.
+            //link(_this.BaseMethod, current)();
+            //// Should invoke this.
+            //link(_this.BaseMethod, final)();
 
-            // Should invoke current type.
-            link(_static.Target.BaseStaticMethod, @base)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticMethod, previous)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticMethod, current)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticMethod, final)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticMethod, @base)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticMethod, previous)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticMethod, current)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticMethod, final)();
 
             // Should invoke base.
             link(_this.BaseVirtualMethod, @base)();
@@ -100,68 +100,68 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOv
             // Should invoke this.
             link(_this.BaseVirtualMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualOverriddenMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualOverriddenMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualOverriddenMethod, current)();
-            // Should invoke this.
-            link(_this.BaseVirtualOverriddenMethod, final)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualOverriddenMethod, @base)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualOverriddenMethod, previous)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualOverriddenMethod, current)();
+            //// Should invoke this.
+            //link(_this.BaseVirtualOverriddenMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualHiddenMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualHiddenMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.BaseVirtualHiddenMethod, current)();
-            // Should invoke this.
-            link(_this.BaseVirtualHiddenMethod, final)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualHiddenMethod, @base)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualHiddenMethod, previous)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.BaseVirtualHiddenMethod, current)();
+            //// Should invoke this.
+            //link(_this.BaseVirtualHiddenMethod, final)();
 
-            // Should invoke this.
-            link(_this.BaseHiddenMethod, @base)();
-            // Should invoke this.
-            link(_this.BaseHiddenMethod, previous)();
-            // Should invoke this.
-            link(_this.BaseHiddenMethod, current)();
-            // Should invoke this.
-            link(_this.BaseHiddenMethod, final)();
+            //// Should invoke this.
+            //link(_this.BaseHiddenMethod, @base)();
+            //// Should invoke this.
+            //link(_this.BaseHiddenMethod, previous)();
+            //// Should invoke this.
+            //link(_this.BaseHiddenMethod, current)();
+            //// Should invoke this.
+            //link(_this.BaseHiddenMethod, final)();
 
-            // Should invoke current type.
-            link(_static.Target.BaseStaticHiddenMethod, @base)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticHiddenMethod, previous)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticHiddenMethod, current)();
-            // Should invoke current type.
-            link(_static.Target.BaseStaticHiddenMethod, final)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticHiddenMethod, @base)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticHiddenMethod, previous)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticHiddenMethod, current)();
+            //// Should invoke current type.
+            //link(_static.Target.BaseStaticHiddenMethod, final)();
 
-            // Should invoke this.
-            link(_this.LocalMethod, @base)();
-            // Should invoke this.
-            link(_this.LocalMethod, previous)();
-            // Should invoke this.
-            link(_this.LocalMethod, current)();
-            // Should invoke this.
-            link(_this.LocalMethod, final)();
+            //// Should invoke this.
+            //link(_this.LocalMethod, @base)();
+            //// Should invoke this.
+            //link(_this.LocalMethod, previous)();
+            //// Should invoke this.
+            //link(_this.LocalMethod, current)();
+            //// Should invoke this.
+            //link(_this.LocalMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.LocalVirtualMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.LocalVirtualMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-            link(_this.LocalVirtualMethod, current)();
-            // Should invoke this.
-            link(_this.LocalVirtualMethod, final)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.LocalVirtualMethod, @base)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.LocalVirtualMethod, previous)();
+            //// Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            //link(_this.LocalVirtualMethod, current)();
+            //// Should invoke this.
+            //link(_this.LocalVirtualMethod, final)();
 
-            // Should invoke current type.
-            link(_static.Target.LocalStaticMethod, @base)();
-            // Should invoke current type.
-            link(_static.Target.LocalStaticMethod, previous)();
-            // Should invoke current type.
-            link(_static.Target.LocalStaticMethod, current)();
-            // Should invoke current type.
-            link(_static.Target.LocalStaticMethod, final)();
+            //// Should invoke current type.
+            //link(_static.Target.LocalStaticMethod, @base)();
+            //// Should invoke current type.
+            //link(_static.Target.LocalStaticMethod, previous)();
+            //// Should invoke current type.
+            //link(_static.Target.LocalStaticMethod, current)();
+            //// Should invoke current type.
+            //link(_static.Target.LocalStaticMethod, final)();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -36,12 +37,14 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
         private readonly IReadOnlyDictionary<IDeclaration, LinkerInjectedMember> _builderLookup;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
+        private readonly IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
         public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
-            IReadOnlyCollection<LinkerInjectedMember> injectedMembers )
+            IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
+            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap)
         {
             Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
             Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
@@ -62,6 +65,7 @@ namespace Metalama.Framework.Engine.Linking
 
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerInjectedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
+            this._builderToTransformationMap = builderToTransformationMap;
             this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
@@ -245,11 +249,12 @@ namespace Metalama.Framework.Engine.Linking
             return this._injectedMemberLookup[annotation.Data.AssertNotNull()];
         }
 
-        public LinkerInjectedMember? GetInjectedMemberForBuilder(IDeclarationBuilder builder)
+        public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
         {
-            if (this._builderLookup.TryGetValue(builder, out var injectedMember))
+            if (this._builderToTransformationMap.TryGetValue(builder, out var transformation))
             {
-                return injectedMember;
+                // Builder that was removed.
+                return transformation;
             }
             else
             {

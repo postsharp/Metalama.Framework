@@ -8,12 +8,13 @@ namespace Metalama.Framework.Engine.Linking
     internal enum IntermediateSymbolSemanticKind
     {
         /// <summary>
-        /// Default symbol semantic, i.e. version in the intermediate compilation.
+        /// Default symbol semantic, i.e. version visible in the intermediate compilation.
+        /// For aspect-overridden members, this is the "_Source" member, i.e. the original body.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Base symbol semantic. Relevant only for introduced override targets with no overridden declaration.
+        /// Base symbol semantic. Represents the previous version of the symbol before the current type.
         /// </summary>
         Base,
 
