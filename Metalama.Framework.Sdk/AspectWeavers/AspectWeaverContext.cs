@@ -77,14 +77,18 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// </summary>
         /// <param name="rewriter">A shared and thread-safe <see cref="CSharpSyntaxRewriter"/>.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriterFactory, CancellationToken cancellationToken = default )
-            => throw new NotSupportedException( "Use the overload accepting a delegate." );
+        public async Task RewriteSyntaxTreesAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+            => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
+                rewriter,
+                this.ServiceProvider,
+                this.GetCancellationToken( cancellationToken ) );
 
         /// <summary>
         /// Rewrites all syntax trees in the compilation.
         /// </summary>
         /// <param name="rewriter">A delegate creating a <see cref="CSharpSyntaxRewriter"/> given the root <see cref="SyntaxNode"/> of a syntax tree.
-        /// Called for every <see cref="SyntaxTree"/> in the compilation.</param>
+        /// Called for every <see cref="SyntaxTree"/> in the compilation.
+        /// If the delegate returns the same instance for multiple trees, that instance needs to be thread-safe.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task RewriteSyntaxTreesAsync( Func<SyntaxNode, CSharpSyntaxRewriter> rewriterFactory, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
@@ -93,12 +97,13 @@ namespace Metalama.Framework.Engine.AspectWeavers
                 this.GetCancellationToken( cancellationToken ) );
 
         /// <summary>
-        /// Rewrites the syntax nodes targeted by aspects.
+        /// Rewrites the syntax nodes targeted by aspects using a thread-safe <see cref="CSharpSyntaxRewriter"/>.
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> whose <c>Visit</c> method is invoked for all declarations
         /// that are the target of aspects handled by the current <see cref="IAspectWeaver"/> (see <see cref="AspectInstances"/>).
         /// In case of partial classes or methods, the <c>Visit</c> method is invoked for each partial declaration.
         /// </param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task RewriteAspectTargetsAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
         {
             cancellationToken = this.GetCancellationToken( cancellationToken );
