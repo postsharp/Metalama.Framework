@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -12,8 +11,8 @@ namespace Metalama.Framework.Engine.CodeModel
     internal interface ISdkDeclaration : IDeclaration
     {
         /// <summary>
-        /// Gets the Roslyn <see cref="ISymbol"/> for the current declaration, or throws <see cref="NotSupportedException"/>
-        /// if <see cref="IDeclaration.Origin"/> is a <see cref="IAspectDeclarationOrigin"/>. Note that the symbol returned can be linked to a different
+        /// Gets the Roslyn <see cref="ISymbol"/> for the current declaration, or <see langword="null"/>
+        /// if <see cref="IDeclaration.Origin"/> is an <see cref="IAspectDeclarationOrigin"/>. Note that the symbol returned can be linked to a different
         /// Roslyn compilation than the one provided to the aspect weaver.
         /// </summary>
         ISymbol? Symbol { get; }

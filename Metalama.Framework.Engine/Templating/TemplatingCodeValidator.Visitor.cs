@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -186,7 +187,7 @@ namespace Metalama.Framework.Engine.Templating
                             {
                                 this.Report(
                                     TemplatingDiagnosticDescriptors.CannotSetTemplateMemberFromAttribute.CreateRoslynDiagnostic(
-                                        argument.NameEquals.GetDiagnosticLocation(),
+                                        argument.NameEquals.GetLocationForDiagnostic(),
                                         memberSymbol.Name ) );
                             }
                         }
@@ -513,7 +514,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol.GetLocationForDiagnostic(),
                             declaredSymbol ) );
 
                     return default;
@@ -534,7 +535,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol.GetLocationForDiagnostic(),
                             (declaredSymbol, CompileTimeCodeFastDetector.Namespace, attributeName) ) );
                 }
 
@@ -544,7 +545,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol.GetLocationForDiagnostic(),
                             (declaredSymbol, declaredSymbol.ContainingType, typeScope!.Value) ) );
                 }
 

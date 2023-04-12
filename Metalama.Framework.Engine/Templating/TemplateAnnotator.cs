@@ -721,7 +721,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         if ( this._currentScopeContext.IsDynamicTypingForbidden && node.Identifier.Text == "dynamic" )
         {
-            this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CannotUseDynamicTypingInLocalFunction, node.GetDiagnosticLocation(), default );
+            this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CannotUseDynamicTypingInLocalFunction, node.GetLocationForDiagnostic(), default );
         }
 
         var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;

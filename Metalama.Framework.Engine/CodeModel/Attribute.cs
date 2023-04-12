@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
-        public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
+        public Location? DiagnosticLocation => this.AttributeData.GetLocationForDiagnostic();
 
         ISymbol? ISdkDeclaration.Symbol => null;
 

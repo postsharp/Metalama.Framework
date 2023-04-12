@@ -271,7 +271,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
                                                         .CreateRoslynDiagnostic(
-                                                            childSymbol.GetDiagnosticLocation(),
+                                                            childSymbol.GetLocationForDiagnostic(),
                                                             (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
@@ -333,7 +333,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
-                                        childSymbol.GetDiagnosticLocation(),
+                                        childSymbol.GetLocationForDiagnostic(),
                                         (childSymbol, typeof(TypeFabric)) ) );
 
                                 this.Success = false;
@@ -624,7 +624,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     this._diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateRoslynDiagnostic(
-                            symbol.GetDiagnosticLocation(),
+                            symbol.GetLocationForDiagnostic(),
                             (symbol.Name, this._currentTypeName!) ) );
 
                     return false;
@@ -881,7 +881,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         this._diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
-                                propertySymbol.GetDiagnosticLocation(),
+                                propertySymbol.GetLocationForDiagnostic(),
                                 propertySymbol ) );
                     }
                     else
@@ -1090,7 +1090,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         this._diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
-                                eventSymbol.GetDiagnosticLocation(),
+                                eventSymbol.GetLocationForDiagnostic(),
                                 eventSymbol ) );
                     }
 
@@ -1291,7 +1291,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             nestingLevel - 1 ),
                         QualifiedNameSyntax qualifiedNameSyntax when nestingLevel == 0 => qualifiedNameSyntax.WithRight( IdentifierName( newIdentifier ) ),
                         SimpleNameSyntax => IdentifierName( newIdentifier ),
-                        _ => throw new AssertionFailedException( $"Unexpected syntax kind {syntax.Kind()} at '{syntax.GetDiagnosticLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected syntax kind {syntax.Kind()} at '{syntax.GetLocationForDiagnostic()}'." )
                     };
 
                 if ( unnestedType != null && symbol.Equals( unnestedType ) )

@@ -4,16 +4,15 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
-    /// Helper methods to work with diagnostics.
+    /// Helper methods to work with diagnostic locations.
     /// </summary>
     public static class DiagnosticLocationHelper
     {
-        internal static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
+        internal static Location? GetLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
 
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
@@ -21,10 +20,10 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( this ISymbol symbol ) => symbol.GetDiagnosticLocationImpl( 0 );
+        public static Location? GetLocationForDiagnostic( this ISymbol symbol ) => symbol.GetLocationForDiagnosticImpl( 0 );
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        private static Location? GetDiagnosticLocationImpl( this ISymbol symbol, int depth )
+        private static Location? GetLocationForDiagnosticImpl( this ISymbol symbol, int depth )
         {
             if ( depth > 8 )
             {
@@ -38,7 +37,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 if ( symbol.ContainingSymbol != null && symbol.ContainingSymbol.Kind != SymbolKind.Namespace )
                 {
                     // Implicit symbols do not have a syntax. In this case, we go to the parent declaration.
-                    return symbol.ContainingSymbol?.GetDiagnosticLocationImpl( depth + 1 );
+                    return symbol.ContainingSymbol?.GetLocationForDiagnosticImpl( depth + 1 );
                 }
                 else
                 {
@@ -48,64 +47,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
             else
             {
-                return bestDeclaration.GetSyntax().GetDiagnosticLocation();
-            }
-        }
-
-        internal static Location? GetDiagnosticLocation( this SyntaxNode node )
-        {
-            switch ( node )
-            {
-                case null:
-                    return null;
-
-                case MethodDeclarationSyntax method:
-                    return method.Identifier.GetLocation();
-
-                case EventDeclarationSyntax @event:
-                    return @event.Identifier.GetLocation();
-
-                case PropertyDeclarationSyntax property:
-                    return property.Identifier.GetLocation();
-
-                case IndexerDeclarationSyntax indexer:
-                    return indexer.ThisKeyword.GetLocation();
-
-                case OperatorDeclarationSyntax @operator:
-                    return @operator.OperatorKeyword.GetLocation();
-
-                case ConversionOperatorDeclarationSyntax @operator:
-                    return @operator.OperatorKeyword.GetLocation();
-
-                case BaseTypeDeclarationSyntax type:
-                    return type.Identifier.GetLocation();
-
-                case ParameterSyntax parameter:
-                    return parameter.Identifier.GetLocation();
-
-                case AccessorDeclarationSyntax accessor:
-                    return accessor.Keyword.GetLocation();
-
-                case DestructorDeclarationSyntax destructor:
-                    return destructor.Identifier.GetLocation();
-
-                case ConstructorDeclarationSyntax constructor:
-                    return constructor.Identifier.GetLocation();
-
-                case TypeParameterSyntax typeParameter:
-                    return typeParameter.Identifier.GetLocation();
-
-                case VariableDeclaratorSyntax variable:
-                    return variable.Identifier.GetLocation();
-
-                case DelegateDeclarationSyntax @delegate:
-                    return @delegate.Identifier.GetLocation();
-
-                case NameEqualsSyntax nameEquals:
-                    return nameEquals.Name.GetLocation();
-
-                default:
-                    return node.GetLocation();
+                return bestDeclaration.GetSyntax().GetLocationForDiagnostic();
             }
         }
 
@@ -113,9 +55,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
         /// a given <see cref="AttributeData"/>.
         /// </summary>
-        /// <param name="attribute"></param>
-        /// <returns></returns>
-        internal static Location? GetDiagnosticLocation( this AttributeData attribute )
+        internal static Location? GetLocationForDiagnostic( this AttributeData attribute )
             => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
 }

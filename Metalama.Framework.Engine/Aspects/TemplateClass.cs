@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Aspects
                             if ( method.RefKind != RefKind.None )
                             {
                                 diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetLocationForDiagnostic(), method ) );
 
                                 this.HasError = true;
                             }
@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.Aspects
                         if ( property.RefKind != RefKind.None )
                         {
                             diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetLocationForDiagnostic(), property ) );
 
                             this.HasError = true;
                         }
@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine.Aspects
                         if ( field.RefKind != RefKind.None )
                         {
                             diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetLocationForDiagnostic(), field ) );
 
                             this.HasError = true;
                         }
@@ -307,7 +307,7 @@ namespace Metalama.Framework.Engine.Aspects
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
-                                memberSymbol.GetDiagnosticLocation(),
+                                memberSymbol.GetLocationForDiagnostic(),
                                 (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
 
                         this.HasError = true;

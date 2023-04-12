@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
@@ -28,7 +28,7 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
     IDiagnosticLocation ISyntaxReferenceImpl.GetDiagnosticLocation( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
         {
-            SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
+            SyntaxNode node => new LocationWrapper( node.GetLocationForDiagnostic() ),
             SyntaxToken token => new LocationWrapper( token.GetLocation() ),
             _ => throw new AssertionFailedException( $"Unexpected type {syntaxReference.NodeOrToken.GetType()}." )
         };

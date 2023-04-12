@@ -279,7 +279,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 diagnosticAdder.Report(
                     TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction.CreateRoslynDiagnostic(
-                        node.GetDiagnosticLocation(),
+                        node.GetLocationForDiagnostic(),
                         symbol.ToDisplayString( SymbolDisplayFormat.CSharpErrorMessageFormat ) ) );
             }
             else
@@ -291,13 +291,13 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Cannot find the reason.
                     diagnosticAdder.Report(
-                        TemplatingDiagnosticDescriptors.UnexplainedTemplatingScopeConflict.CreateRoslynDiagnostic( node.GetDiagnosticLocation(), symbol ) );
+                        TemplatingDiagnosticDescriptors.UnexplainedTemplatingScopeConflict.CreateRoslynDiagnostic( node.GetLocationForDiagnostic(), symbol ) );
                 }
                 else
                 {
                     diagnosticAdder.Report(
                         TemplatingDiagnosticDescriptors.TemplatingScopeConflict.CreateRoslynDiagnostic(
-                            node.GetDiagnosticLocation(),
+                            node.GetLocationForDiagnostic(),
                             (symbol, firstRunTimeOnly.Symbol!, firstCompileTimeOnly.Symbol!) ) );
                 }
             }

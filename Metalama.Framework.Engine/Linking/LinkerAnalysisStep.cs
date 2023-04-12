@@ -343,7 +343,7 @@ namespace Metalama.Framework.Engine.Linking
                     // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
                     diagnosticSink.Report(
                         AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic(
-                            overrideTarget.GetDiagnosticLocation(),
+                            overrideTarget.GetLocationForDiagnostic(),
                             (sourceName, overrideTarget) ) );
                 }
             }

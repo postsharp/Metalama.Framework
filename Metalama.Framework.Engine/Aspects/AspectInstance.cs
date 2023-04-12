@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Aspects
             => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration.GetTarget( compilation )}'";
 
         public Location? GetDiagnosticLocation( Compilation compilation )
-            => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetDiagnosticLocation();
+            => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetLocationForDiagnostic();
 
         public int CompareTo( AspectInstance? other )
         {

@@ -74,7 +74,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
                 LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
                     aspectInstance.TargetDeclaration.GetSymbol( result.Value.Compilation.Compilation )
                         .AssertNotNull( "Live templates should be always applied on a target." )
-                        .GetDiagnosticLocation(),
+                        .GetLocationForDiagnostic(),
                     ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
 
             return default;

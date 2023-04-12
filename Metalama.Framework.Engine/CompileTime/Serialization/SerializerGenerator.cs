@@ -71,7 +71,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             {
                 this._diagnosticAdder.Report(
                     SerializationDiagnosticDescriptors.MissingParameterlessConstructor.CreateRoslynDiagnostic(
-                        targetType.GetDiagnosticLocation(),
+                        targetType.GetLocationForDiagnostic(),
                         (targetType, baseType) ) );
 
                 return null;
@@ -134,7 +134,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 {
                     this._diagnosticAdder.Report(
                         SerializationDiagnosticDescriptors.MissingDeserializingConstructor.CreateRoslynDiagnostic(
-                            targetType.GetDiagnosticLocation(),
+                            targetType.GetLocationForDiagnostic(),
                             (targetType, baseType) ) );
 
                     return null;
@@ -197,7 +197,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             this._diagnosticAdder.Report(
                 SerializationDiagnosticDescriptors.MissingBaseSerializerConstructor.CreateRoslynDiagnostic(
-                    serializableType.Type.GetDiagnosticLocation(),
+                    serializableType.Type.GetLocationForDiagnostic(),
                     (serializableType.Type, baseSerializerType) ) );
 
             return null;
@@ -311,7 +311,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     {
                         this._diagnosticAdder.Report(
                             SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
-                                targetType.GetDiagnosticLocation(),
+                                targetType.GetLocationForDiagnostic(),
                                 (targetType, targetType.BaseType) ) );
 
                         return null;
@@ -323,7 +323,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 {
                     this._diagnosticAdder.Report(
                         SerializationDiagnosticDescriptors.MissingBaseSerializer.CreateRoslynDiagnostic(
-                            targetType.GetDiagnosticLocation(),
+                            targetType.GetLocationForDiagnostic(),
                             (targetType, targetType.BaseType) ) );
 
                     return null;

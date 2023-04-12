@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Services
         private object? GetOwnService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
+        /// Returns a new <see cref="ServiceProvider{TBase}"/> where the given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
         /// If some of the new services are already present in the current <see cref="ServiceProvider{TBase}"/>, they are replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( IEnumerable<TBase>? services )

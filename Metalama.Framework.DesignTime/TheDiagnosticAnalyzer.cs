@@ -155,7 +155,7 @@ namespace Metalama.Framework.DesignTime
 
                     if ( symbol != null )
                     {
-                        var location = symbol.GetDiagnosticLocation();
+                        var location = symbol.GetLocationForDiagnostic();
 
                         if ( location is not null )
                         {

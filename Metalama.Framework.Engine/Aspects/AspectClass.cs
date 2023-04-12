@@ -115,7 +115,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         var attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
-        this.DiagnosticLocation = typeSymbol.GetDiagnosticLocation();
+        this.DiagnosticLocation = typeSymbol.GetLocationForDiagnostic();
         this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
@@ -214,7 +214,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             {
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
-                        typeSymbol.GetDiagnosticLocation(),
+                        typeSymbol.GetLocationForDiagnostic(),
                         typeSymbol ) );
 
                 this.HasError = true;
@@ -345,7 +345,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         {
             diagnosticAdder.Report(
                 GeneralDiagnosticDescriptors.GenericAspectTypeNotSupported.CreateRoslynDiagnostic(
-                    aspectTypeSymbol.GetDiagnosticLocation(),
+                    aspectTypeSymbol.GetLocationForDiagnostic(),
                     aspectTypeSymbol ) );
 
             aspectClass = null;

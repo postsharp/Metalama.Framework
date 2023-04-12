@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Compiler;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -120,5 +121,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
             => compilation.WithSyntaxTreeTransformations( syntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToList() );
+
+        public static IPartialCompilation GetPartialCompilation( this ICompilation compilation ) => ((IHasPartialCompilation) compilation).PartialCompilation;
     }
 }

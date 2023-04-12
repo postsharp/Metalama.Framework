@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                                     context.RewritingDriver.DiagnosticSink.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(
-                                            targetDeclaration.GetDiagnosticLocation(),
+                                            targetDeclaration.GetLocationForDiagnostic(),
                                             (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );
 
                                     return elementAccessExpression;

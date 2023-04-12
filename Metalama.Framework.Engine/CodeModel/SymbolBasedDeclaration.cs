@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected override ISymbol GetSymbol() => this.Symbol;
 
-        public override Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
+        public override Location? DiagnosticLocation => this.Symbol.GetLocationForDiagnostic();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 

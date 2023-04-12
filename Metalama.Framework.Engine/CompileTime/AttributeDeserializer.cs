@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateRoslynDiagnostic(
-                        attribute.GetDiagnosticLocation(),
+                        attribute.GetLocationForDiagnostic(),
                         constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
@@ -195,7 +195,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         diagnosticAdder.Report(
                             AttributeDeserializerDiagnostics.PropertyHasNoSetter.CreateRoslynDiagnostic(
-                                attribute.GetDiagnosticLocation(),
+                                attribute.GetLocationForDiagnostic(),
                                 arg.Key ) );
 
                         attributeInstance = null;

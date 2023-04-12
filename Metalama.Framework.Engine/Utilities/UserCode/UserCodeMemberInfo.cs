@@ -33,7 +33,7 @@ internal readonly struct UserCodeMemberInfo : IFormattable
         => this._underlying switch
         {
             Expression => null,
-            ISymbol symbol => symbol.GetDiagnosticLocation(),
+            ISymbol symbol => symbol.GetLocationForDiagnostic(),
             MemberInfo => null,
             null => null,
             _ => throw new AssertionFailedException( $"Unexpected underlying object {this._underlying.GetType()}." )
