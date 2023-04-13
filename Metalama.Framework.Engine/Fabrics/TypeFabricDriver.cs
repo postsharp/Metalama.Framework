@@ -104,12 +104,12 @@ internal sealed class TypeFabricDriver : FabricDriver
         {
             this._aspectBuilder = aspectBuilder;
             this.Type = namedType;
-            this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
+            this.Advice = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
         }
 
         public INamedType Type { get; }
 
-        public IAdviceFactory Advices { get; }
+        public IAdviceFactory Advice { get; }
 
         public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
