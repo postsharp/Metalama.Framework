@@ -61,6 +61,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 text-decoration: underline 1px wavy red;
             }
 
+         .diff-Imaginary {
+                display: block;
+                background-image: repeating-linear-gradient( -45deg, gray, gray 2px, transparent 2px, transparent 8px );
+            }
+
+
             .legend 
             {
                 margin-top: 100px;
@@ -124,7 +130,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         Path.GetDirectoryName( sourceAbsolutePath )!,
                         Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.InputHtml );
 
-                    this.CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
+                    this.CompareHtmlFiles( syntaxTree.HtmlInputPath!, expectedInputHtmlPath );
                 }
             }
 
@@ -135,7 +141,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     Path.GetDirectoryName( testInput.FullPath )!,
                     Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.TransformedHtml );
 
-                this.CompareHtmlFiles( testResult.OutputHtmlPath!, expectedOutputHtmlPath );
+                this.CompareHtmlFiles( testResult.SyntaxTrees[0].HtmlOutputPath!, expectedOutputHtmlPath );
             }
         }
 

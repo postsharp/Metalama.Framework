@@ -77,11 +77,6 @@ internal sealed class TestResult : IDisposable
     public Compilation? OutputCompilation { get; set; }
 
     /// <summary>
-    /// Gets or sets the full path of the HTML file with syntax highlighting.
-    /// </summary>
-    public string? OutputHtmlPath { get; set; }
-
-    /// <summary>
     /// Gets a value indicating whether the test run succeeded.
     /// </summary>
     public bool Success { get; private set; } = true;

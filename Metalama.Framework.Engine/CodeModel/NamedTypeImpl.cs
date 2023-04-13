@@ -165,7 +165,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     [Memo]
     public IFieldOrPropertyCollection FieldsAndProperties => new FieldAndPropertiesCollection( this.Fields, this.Properties );
 
-    public IFieldOrPropertyCollection AllFieldsAndProperties => throw new NotImplementedException();
+    [Memo]
+    public IFieldOrPropertyCollection AllFieldsAndProperties => new AllFieldsAndPropertiesCollection( this._facade );
 
     [Memo]
     public IEventCollection Events

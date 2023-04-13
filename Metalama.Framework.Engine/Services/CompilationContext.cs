@@ -96,6 +96,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
 
     [Memo]
+    internal IEqualityComparer<IFieldOrProperty> FieldOrPropertyComparer => new MemberComparer<IFieldOrProperty>( this.SymbolComparer );
+
+    [Memo]
     internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
 
     [Memo]
