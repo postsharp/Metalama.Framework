@@ -49,6 +49,7 @@ namespace Metalama.Testing.AspectTesting
                         $"Unexpected value for the ExpectedEndOfLine test option: '{testInput.Options.ExpectedEndOfLine}'." )
                 };
 
+            // If we have an expected EOL, change the EOLs of the input.
             if ( expectedEol != null )
             {
                 var sb = new StringBuilder();
@@ -82,8 +83,10 @@ namespace Metalama.Testing.AspectTesting
                 testInput = testInput.WithSource( sb.ToString() );
             }
 
+            // Run the sample.
             await base.RunAsync( testInput, testResult, projectOptions, state );
 
+            // If we have an expected EOL, verify that EOLs are preserved in the output document.
             if ( expectedEol != null && testResult.OutputProject != null )
             {
                 foreach ( var sourceDocument in testResult.OutputProject.Documents )

@@ -79,10 +79,10 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 var lineDiffInfo = diffInfo?.Lines[lineNumber];
 
+                // First write the imaginary diff lines before.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
 
-                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
-
+                // Then write the diagnostics.
                 if ( diagnosticBuilder.Length > 0 )
                 {
                     // Figure out the indentation of the next block.
@@ -140,10 +140,12 @@ namespace Metalama.Framework.Engine.Formatting
                     diagnosticSet.Clear();
                 }
 
-                // Then write the buffered code.
+                // Finally write the line number and the buffered code.
+                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
                 finalBuilder.AppendLine( codeLineBuilder.ToString() );
                 codeLineBuilder.Clear();
 
+                // Write the diff lines after, if any.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
 
                 lineNumber++;
