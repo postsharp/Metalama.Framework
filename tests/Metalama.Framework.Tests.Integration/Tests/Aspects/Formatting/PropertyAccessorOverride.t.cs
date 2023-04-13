@@ -35,6 +35,7 @@ public class Target
       Console.WriteLine("Aspect2");
       // Comment mid Aspect2.
       Console.WriteLine("Foo.set");
+      return;
     // Comment after Aspect1.
     // After Foo.set closing brace.
     // Comment after Aspect2.
@@ -76,6 +77,7 @@ public class Target
       Console.WriteLine("Aspect2");
       // Comment mid Aspect2.
       this._bar = value;
+      return;
     // Comment after Aspect1.
     // After Bar.set semicolon.
     // Comment after Aspect2.
@@ -121,6 +123,7 @@ public class Target
       // Before Baz.set expression.
       Console.WriteLine("Foo.set") // After Baz.set expression.
       ;
+      return;
     // Comment after Aspect1.
     // After Baz.set expression.
     // Comment after Aspect2.

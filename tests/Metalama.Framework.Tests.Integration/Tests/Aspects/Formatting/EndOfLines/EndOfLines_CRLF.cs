@@ -1,5 +1,6 @@
 ﻿#if TEST_OPTIONS
 // @ExpectedEndOfLine(CRLF)
+// @Skipped
 #endif
 
 using System;

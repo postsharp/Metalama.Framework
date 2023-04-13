@@ -152,23 +152,25 @@ namespace Metalama.Compiler
         {
             leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                 Trivia(
-                    PragmaWarningDirectiveTrivia(
-                            Token( SyntaxKind.DisableKeyword ),
-                            true )
-                        .WithErrorCodes( _suppressedWarnings )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( ElasticLineFeed )
-                        .WithTrailingTrivia( ElasticLineFeed ) ) );
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.DisableKeyword ),
+                                true )
+                            .WithErrorCodes( _suppressedWarnings )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
 
             trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
                 Trivia(
-                    PragmaWarningDirectiveTrivia(
-                            Token( SyntaxKind.RestoreKeyword ),
-                            true )
-                        .WithErrorCodes( _suppressedWarnings )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( ElasticLineFeed )
-                        .WithTrailingTrivia( ElasticLineFeed ) ) );
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.RestoreKeyword ),
+                                true )
+                            .WithErrorCodes( _suppressedWarnings )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 
         return base.VisitClassDeclaration( node )!

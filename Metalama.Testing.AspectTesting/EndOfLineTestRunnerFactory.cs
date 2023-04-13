@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace Metalama.Testing.AspectTesting;
 
 [UsedImplicitly]
-internal class OutputFormatterAspectTestRunnerFactory : ITestRunnerFactory
+internal class EndOfLineTestRunnerFactory : ITestRunnerFactory
 #pragma warning restore SA1649 // File name should match first type name
 #pragma warning restore SA1402 // File may only contain a single type
 {
