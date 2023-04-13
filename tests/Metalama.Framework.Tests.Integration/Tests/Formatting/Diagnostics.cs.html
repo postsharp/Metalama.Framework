@@ -62,19 +62,19 @@
 <span class='line-number'>5</span><span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">Diagnostics</span><span class="cs-punctuation">;</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span><span class="cs-punctuation">[</span><span class="cs-class-name">MyAspect</span><span class="cs-punctuation">]</span>
-<span class='line-number'>8</span><span class="diagLines"><span class="diagLine-Warning">Warning MY001: Some custom warning.</span>
+<span class="diagLines"><span class="diagLine-Warning">Warning MY001: Some custom warning.</span>
 
-</span><span class="cs-keyword">public</span> <span class="cs-keyword">class</span> <span class="cs-class-name diag-Warning" title="Warning MY001: Some custom warning.">Diagnostics</span>
+</span><span class='line-number'>8</span><span class="cs-keyword">public</span> <span class="cs-keyword">class</span> <span class="cs-class-name diag-Warning" title="Warning MY001: Some custom warning.">Diagnostics</span>
 <span class='line-number'>9</span><span class="cs-punctuation">{</span>
 <span class='line-number'>10</span>    <span class="cs-comment">// C# warning: unused field.</span>
-<span class='line-number'>11</span><span class="diagLines">    <span class="diagLine-Warning">Warning CS0414: The field 'Diagnostics._unusedField' is assigned but its value is never used</span>
+<span class="diagLines">    <span class="diagLine-Warning">Warning CS0414: The field 'Diagnostics._unusedField' is assigned but its value is never used</span>
     
-</span>    <span class="cs-keyword">private</span> <span class="cs-keyword">int</span> <span class="cs-field-name diag-Warning" title="Warning CS0414: The field 'Diagnostics._unusedField' is assigned but its value is never used">_unusedField</span> <span class="cs-operator">=</span> <span class="cs-number">0</span><span class="cs-punctuation">;</span>
+</span><span class='line-number'>11</span>    <span class="cs-keyword">private</span> <span class="cs-keyword">int</span> <span class="cs-field-name diag-Warning" title="Warning CS0414: The field 'Diagnostics._unusedField' is assigned but its value is never used">_unusedField</span> <span class="cs-operator">=</span> <span class="cs-number">0</span><span class="cs-punctuation">;</span>
 <span class='line-number'>12</span>    
 <span class='line-number'>13</span>    <span class="cs-comment">// C# error: invalid type: </span>
-<span class='line-number'>14</span><span class="diagLines">    <span class="diagLine-Error">Error CS0246: The type or namespace name 'ErrorType' could not be found (are you missing a using directive or an assembly reference?)</span>
+<span class="diagLines">    <span class="diagLine-Error">Error CS0246: The type or namespace name 'ErrorType' could not be found (are you missing a using directive or an assembly reference?)</span>
     
-</span>    <span class="cs-keyword">private</span> <span class="cs-identifier diag-Error" title="Error CS0246: The type or namespace name 'ErrorType' could not be found (are you missing a using directive or an assembly reference?)">ErrorType</span> <span class="cs-field-name">_field</span><span class="cs-punctuation">;</span>
+</span><span class='line-number'>14</span>    <span class="cs-keyword">private</span> <span class="cs-identifier diag-Error" title="Error CS0246: The type or namespace name 'ErrorType' could not be found (are you missing a using directive or an assembly reference?)">ErrorType</span> <span class="cs-field-name">_field</span><span class="cs-punctuation">;</span>
 <span class='line-number'>15</span>
 <span class='line-number'>16</span><span class="cs-punctuation">}</span>
 <span class='line-number'>17</span>

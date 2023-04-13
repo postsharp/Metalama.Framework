@@ -45,11 +45,27 @@ namespace Metalama.Framework.Engine.Formatting
                 return result;
             }
 
-            private bool IsInGeneratedCode()
+            public override SyntaxToken VisitToken( SyntaxToken token )
             {
-                // This assumes that every generated compilation unit has generated code annotation on itself.
-                return this._currentNodeKind == NodeKind.GeneratedCode;
+                var oldNodeKind = this._currentNodeKind;
+
+                if ( token.HasAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
+                {
+                    this._currentNodeKind = NodeKind.GeneratedCode;
+                }
+                else if ( token.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
+                {
+                    this._currentNodeKind = NodeKind.SourceCode;
+                }
+
+                var result = base.VisitToken( token );
+
+                this._currentNodeKind = oldNodeKind;
+
+                return result;
             }
+
+            private bool IsInGeneratedCode() => this._currentNodeKind == NodeKind.GeneratedCode;
 
             public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
             {
