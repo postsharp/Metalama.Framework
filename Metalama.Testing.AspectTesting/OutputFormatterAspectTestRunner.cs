@@ -49,6 +49,7 @@ namespace Metalama.Testing.AspectTesting
                         $"Unexpected value for the ExpectedEndOfLine test option: '{testInput.Options.ExpectedEndOfLine}'." )
                 };
 
+            // If we have an expected EOL, change the EOLs of the input.
             if ( expectedEol != null )
             {
                 var sb = new StringBuilder();
@@ -82,17 +83,23 @@ namespace Metalama.Testing.AspectTesting
                 testInput = testInput.WithSource( sb.ToString() );
             }
 
+            // Run the sample.
             await base.RunAsync( testInput, testResult, projectOptions, state );
 
+            // If we have an expected EOL, verify that EOLs are preserved in the output document.
             if ( expectedEol != null && testResult.OutputProject != null )
             {
                 foreach ( var sourceDocument in testResult.OutputProject.Documents )
                 {
                     var outputSource = (await sourceDocument.GetTextAsync()).ToString();
 
+                    var sourceSoFar = new StringBuilder();
+
                     for ( var i = 0; i < outputSource.Length; i++ )
                     {
                         var current = outputSource[i];
+                        sourceSoFar.Append( current );
+
                         var next = i < outputSource.Length - 1 ? outputSource[i + 1] : (char?) null;
 
                         static string MapEolToString( string value )
@@ -112,7 +119,9 @@ namespace Metalama.Testing.AspectTesting
                                 if ( expectedEol != "\r\n" )
                                 {
                                     error = true;
-                                    testResult.SetFailed( $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"\\r\\n\"." );
+
+                                    testResult.SetFailed(
+                                        $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"\\r\\n\" at position {i}." );
                                 }
 
                                 i++;
@@ -126,7 +135,7 @@ namespace Metalama.Testing.AspectTesting
                                     error = true;
 
                                     testResult.SetFailed(
-                                        $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"{MapEolToString( $"{current}" )}\"." );
+                                        $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"{MapEolToString( $"{current}" )}\" at position {i}." );
                                 }
 
                                 break;

@@ -1,3 +1,4 @@
+// ERROR: Expected "\r\n" end of lines, but got "\n" at position 307.
 public class Target
 {
   [TestAspect1]

@@ -671,33 +671,14 @@ internal abstract partial class BaseTestRunner
         }
 
         // Write each document individually.
-        if ( testInput.Options.WriteInputHtml.GetValueOrDefault() )
+        if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                await this.WriteHtmlAsync( testResult, syntaxTree, htmlDirectory, htmlCodeWriter );
+                var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
+
+                await this.WriteHtmlAsync( testResult, syntaxTree, htmlDirectory, htmlCodeWriter, isTargetCode );
             }
-        }
-
-        // Write the consolidated output.
-        if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
-        {
-            // Multi file tests are not supported for html output.
-            var outputSyntaxRoot = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
-            var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", outputSyntaxRoot );
-
-            var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
-            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.TransformedHtml );
-            var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
-
-            var outputHtml = new StreamWriter( this._fileSystem.Open( outputHtmlPath, FileMode.Create ) );
-
-            using ( outputHtml.IgnoreAsyncDisposable() )
-            {
-                await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
-            }
-
-            testResult.OutputHtmlPath = outputHtmlPath;
         }
     }
 
@@ -706,33 +687,81 @@ internal abstract partial class BaseTestRunner
 
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );
 
-    private async Task WriteHtmlAsync( TestResult testResult, TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
+    private async Task WriteHtmlAsync(
+        TestResult testResult,
+        TestSyntaxTree testSyntaxTree,
+        string htmlDirectory,
+        HtmlCodeWriter htmlCodeWriter,
+        bool writeDiff )
     {
-        var inputHtmlPath = Path.Combine(
-            htmlDirectory,
-            Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.InputHtml );
+        StreamWriter? inputTextWriter = null;
+        StreamWriter? outputTextWriter = null;
+        List<Diagnostic>? inputDiagnostics = null;
 
-        var diagnostics = new List<Diagnostic>();
-        diagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
-        var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
-        diagnostics.AddRange( semanticModel.GetDiagnostics() );
-
-        testSyntaxTree.HtmlInputRunTimePath = inputHtmlPath;
-
-        this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
-
-        // Write the input document.
-        var inputTextWriter = new StreamWriter( this._fileSystem.Open( inputHtmlPath, FileMode.Create ) );
-
-        using ( inputTextWriter.IgnoreAsyncDisposable() )
+        if ( testResult.TestInput!.Options.WriteInputHtml == true )
         {
-            await htmlCodeWriter.WriteAsync(
-                testSyntaxTree.InputDocument,
-                inputTextWriter,
-                diagnostics );
+            testSyntaxTree.HtmlInputPath = Path.Combine(
+                htmlDirectory,
+                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.InputHtml );
+
+            this.Logger?.WriteLine( "HTML of input: " + testSyntaxTree.HtmlInputPath );
+
+            inputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlInputPath, FileMode.Create ) );
+
+            // Add diagnostics to the input tree.
+            inputDiagnostics = new List<Diagnostic>();
+            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
+            var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+            inputDiagnostics.AddRange( semanticModel.GetDiagnostics() );
         }
 
-        // We have no use case to write the output document because all cases use the consolidated output document instead.
+        if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
+        {
+            testSyntaxTree.HtmlOutputPath = Path.Combine(
+                htmlDirectory,
+                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.TransformedHtml );
+
+            this.Logger?.WriteLine( "HTML of output: " + testSyntaxTree.HtmlOutputPath );
+
+            outputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlOutputPath, FileMode.Create ) );
+        }
+
+        if ( writeDiff && inputTextWriter != null && outputTextWriter != null )
+        {
+            using ( inputTextWriter.IgnoreAsyncDisposable() )
+            using ( outputTextWriter.IgnoreAsyncDisposable() )
+            {
+                await htmlCodeWriter.WriteDiffAsync(
+                    testSyntaxTree.InputDocument,
+                    testSyntaxTree.OutputDocument.AssertNotNull(),
+                    inputTextWriter,
+                    outputTextWriter,
+                    inputDiagnostics! );
+            }
+        }
+        else
+        {
+            if ( inputTextWriter != null )
+            {
+                using ( inputTextWriter.IgnoreAsyncDisposable() )
+                {
+                    await htmlCodeWriter.WriteAsync(
+                        testSyntaxTree.InputDocument,
+                        inputTextWriter,
+                        inputDiagnostics! );
+                }
+            }
+
+            if ( outputTextWriter != null )
+            {
+                using ( outputTextWriter.IgnoreAsyncDisposable() )
+                {
+                    await htmlCodeWriter.WriteAsync(
+                        testSyntaxTree.OutputDocument.AssertNotNull(),
+                        outputTextWriter );
+                }
+            }
+        }
     }
 
     protected bool VerifyBinaryStream( TestInput testInput, TestResult testResult, MemoryStream stream )

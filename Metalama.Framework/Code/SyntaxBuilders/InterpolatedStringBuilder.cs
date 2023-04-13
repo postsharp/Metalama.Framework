@@ -15,6 +15,11 @@ namespace Metalama.Framework.Code.SyntaxBuilders
 
         internal IReadOnlyList<object?> Items => this._items;
 
+        /// <summary>
+        /// Gets the number of items that have been added to the current builder.
+        /// </summary>
+        public int ItemCount => this._items.Count;
+
         public InterpolatedStringBuilder() { }
 
         private InterpolatedStringBuilder( InterpolatedStringBuilder prototype )

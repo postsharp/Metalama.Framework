@@ -97,6 +97,9 @@ namespace Metalama.Framework.Engine.Formatting
         public static T? WithGeneratedCodeAnnotation<T>( this T? node, SyntaxAnnotation annotation )
             where T : SyntaxNode
             => node?.WithAnnotationInsideBlock( annotation );
+        
+        public static SyntaxTrivia WithGeneratedCodeAnnotation( this in SyntaxTrivia trivia, SyntaxAnnotation annotation )
+            => trivia.WithAdditionalAnnotations( annotation );
 
         /// <summary>
         /// Annotates a syntax node with an annotation meaning that the syntax node and all its children are user code.

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct_
                 {
                     if (method.IsImplicitlyDeclared)
                     {
-                        amender.Advices.Override( method, nameof(Template) );
+                        amender.Advice.Override( method, nameof(Template) );
                     }
                 }
             }

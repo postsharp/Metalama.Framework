@@ -22,17 +22,24 @@ namespace Metalama.Framework.Engine.Formatting
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
         {
+            // Add diagnostics as annotations.
             if ( diagnostics != null )
             {
                 document = document.WithSyntaxRoot(
                     FormattedCodeWriter.AddDiagnosticAnnotations( (await document.GetSyntaxRootAsync( cancellationToken ))!, document.FilePath, diagnostics ) );
             }
+            
+            // Normalize EOLs.
+            var normalizedSyntax = EndOfLineHelper.NormalizeEndOfLineStyle( (CompilationUnitSyntax) (await document.GetSyntaxRootAsync( cancellationToken ))! );
+            var normalizedDocument = document.WithSyntaxRoot( normalizedSyntax );
 
-            var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+            // Add imports and simplify.
+            var documentWithImports = await ImportAdder.AddImportsAsync( normalizedDocument, Simplifier.Annotation, cancellationToken: cancellationToken );
             var simplifiedDocument = await Simplifier.ReduceAsync( documentWithImports, cancellationToken: cancellationToken );
 
             Document formattedDocument;
 
+            // Reformat.
             if ( reformatAll )
             {
                 formattedDocument = await Formatter.FormatAsync( simplifiedDocument, cancellationToken: cancellationToken );
@@ -53,11 +60,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             var formattedSyntax = (CompilationUnitSyntax) (await formattedDocument.GetSyntaxRootAsync( cancellationToken ))!;
 
-            var finalSyntax = EndOfLineHelper.NormalizeEndOfLineStyle( formattedSyntax );
-
-            var finalDocument = formattedDocument.WithSyntaxRoot( finalSyntax );
-
-            return (finalDocument, finalSyntax);
+            return (formattedDocument, formattedSyntax);
         }
 
         internal static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )

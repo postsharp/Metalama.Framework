@@ -19,13 +19,15 @@ namespace Metalama.Testing.AspectTesting
     internal sealed class TestSyntaxTree
     {
         private readonly TestResult _parent;
-
+        
         public string? InputPath { get; }
 
         /// <summary>
         /// Gets the input <see cref="Document" />.
         /// </summary>
         public Document InputDocument { get; }
+
+        public Document? OutputDocument { get; private set; }
 
         /// <summary>
         /// Gets the input <see cref="SyntaxTree" />.
@@ -59,7 +61,9 @@ namespace Metalama.Testing.AspectTesting
         [UsedImplicitly]
         public string? OutputCompileTimePath { get; private set; }
 
-        public string? HtmlInputRunTimePath { get; internal set; }
+        public string? HtmlInputPath { get; internal set; }
+
+        public string? HtmlOutputPath { get; internal set; }
 
         internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )
         {
@@ -101,14 +105,18 @@ namespace Metalama.Testing.AspectTesting
                 this._parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
                     .AddDocument( documentName, compilationUnit );
 
+            this._parent.OutputProject = document.Project;
+
             if ( this._parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
                 var formatted = await OutputCodeFormatter.FormatAsync( document );
 
+                this.OutputDocument = formatted.Document;
                 this.OutputRunTimeSyntaxRoot = formatted.Syntax;
             }
             else
             {
+                this.OutputDocument = document;
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
         }

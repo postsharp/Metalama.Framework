@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
-                using var rewriter = new TriviaRewriter( dominantStyle );
+                var rewriter = new TriviaRewriter( dominantStyle );
 
                 return (CompilationUnitSyntax) rewriter.Visit( compilationUnit ).AssertNotNull();
             }
@@ -35,25 +35,22 @@ namespace Metalama.Framework.Engine.Formatting
         }
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        private static EndOfLineStyle GetEndOfLineStyle( in Span<char> chars )
+        private static EndOfLineStyle GetEndOfLineStyle( in ReadOnlySpan<char> chars )
         {
             if ( chars.Length >= 1 )
             {
-                if ( chars.Length >= 2 && chars[chars.Length - 2] == '\r' && chars[chars.Length - 1] == '\n' )
+                if ( chars.Length >= 2 && chars[^2] == '\r' && chars[^1] == '\n' )
                 {
                     return EndOfLineStyle.Windows;
                 }
-                else if ( chars[chars.Length - 1] == '\n' )
-                {
-                    return EndOfLineStyle.Unix;
-                }
-                else if ( chars[chars.Length - 1] == '\r' )
-                {
-                    return EndOfLineStyle.MacOs;
-                }
                 else
                 {
-                    return EndOfLineStyle.Unknown;
+                    return chars[^1] switch
+                    {
+                        '\n' => EndOfLineStyle.Unix,
+                        '\r' => EndOfLineStyle.MacOs,
+                        _ => EndOfLineStyle.Unknown
+                    };
                 }
             }
             else

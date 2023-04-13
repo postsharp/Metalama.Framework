@@ -35,6 +35,19 @@ namespace Metalama.Framework.Engine.Formatting
         public Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
             => this.WriteAsync( document, textWriter, diagnostics, null );
 
+        public async Task WriteDiffAsync(
+            Document inputDocument,
+            Document outputDocument,
+            TextWriter inputTextWriter,
+            TextWriter outputTextWriter,
+            IEnumerable<Diagnostic> inputDiagnostics )
+        {
+            var oldSyntaxTree = await inputDocument.GetSyntaxTreeAsync();
+            var newSyntaxTree = await outputDocument.GetSyntaxTreeAsync();
+            await this.WriteAsync( inputDocument, inputTextWriter, inputDiagnostics, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, true ) );
+            await this.WriteAsync( outputDocument, outputTextWriter, null, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, false ) );
+        }
+
         private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
@@ -66,10 +79,10 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 var lineDiffInfo = diffInfo?.Lines[lineNumber];
 
+                // First write the imaginary diff lines before.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
 
-                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
-
+                // Then write the diagnostics.
                 if ( diagnosticBuilder.Length > 0 )
                 {
                     // Figure out the indentation of the next block.
@@ -127,10 +140,12 @@ namespace Metalama.Framework.Engine.Formatting
                     diagnosticSet.Clear();
                 }
 
-                // Then write the buffered code.
+                // Finally write the line number and the buffered code.
+                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
                 finalBuilder.AppendLine( codeLineBuilder.ToString() );
                 codeLineBuilder.Clear();
 
+                // Write the diff lines after, if any.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
 
                 lineNumber++;
@@ -406,11 +421,31 @@ namespace Metalama.Framework.Engine.Formatting
             PartialCompilation inputCompilation,
             PartialCompilation outputCompilation )
         {
-            var diffBuilder = new SideBySideDiffBuilder();
+            await WriteAllAsync(
+                projectOptions,
+                serviceProvider,
+                inputCompilation,
+                ".cs.html",
+                p => GetDiffInfoForPath( p, true ) );
 
-            await WriteAllAsync( projectOptions, serviceProvider, inputCompilation, ".cs.html", p => GetDiffInfo( p, true ) );
-            await WriteAllAsync( projectOptions, serviceProvider, outputCompilation, ".t.cs.html", p => GetDiffInfo( p, false ) );
+            await WriteAllAsync(
+                projectOptions,
+                serviceProvider,
+                outputCompilation,
+                ".t.cs.html",
+                p => GetDiffInfoForPath( p, false ) );
 
+            FileDiffInfo GetDiffInfoForPath( string path, bool isOld )
+            {
+                var oldTree = inputCompilation.SyntaxTrees[path];
+                var newTree = outputCompilation.SyntaxTrees[path];
+
+                return GetDiffInfo( oldTree, newTree, isOld );
+            }
+        }
+
+        private static FileDiffInfo GetDiffInfo( SyntaxTree oldTree, SyntaxTree newTree, bool isOld )
+        {
             // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
             // so we can do any transformation we want to make the diff cleaner.
             static string GetTextToCompare( SourceText text )
@@ -421,54 +456,53 @@ namespace Metalama.Framework.Engine.Formatting
                 return _cleanReturnStatementRegex.Replace( _cleanAutomaticPropertiesRegex.Replace( text.ToString(), "" ), "result = " );
             }
 
-            FileDiffInfo GetDiffInfo( string path, bool isOld )
-            {
+            var diffBuilder = new SideBySideDiffBuilder();
+
 #pragma warning disable VSTHRD103
-                var oldText = inputCompilation.SyntaxTrees[path].GetText();
-                var newText = outputCompilation.SyntaxTrees[path].GetText();
+            var oldText = oldTree.GetText();
+            var newText = newTree.GetText();
 #pragma warning restore VSTHRD103
 
-                var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
+            var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
 
-                var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
+            var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
 
-                var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
+            var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
 
-                var imaginaryLinesBefore = 0;
-                var lineNumber = 0;
+            var imaginaryLinesBefore = 0;
+            var lineNumber = 0;
 
-                foreach ( var diffLine in diffPane.Lines )
+            foreach ( var diffLine in diffPane.Lines )
+            {
+                if ( diffLine.Type == ChangeType.Imaginary )
                 {
-                    if ( diffLine.Type == ChangeType.Imaginary )
+                    imaginaryLinesBefore++;
+                }
+                else
+                {
+                    var lineText = text.Lines[lineNumber].ToString();
+
+                    if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
                     {
-                        imaginaryLinesBefore++;
+                        // Prefer to insert imaginary lines after a bracket than before.
+                        lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
                     }
                     else
                     {
-                        var lineText = text.Lines[lineNumber].ToString();
-
-                        if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
-                        {
-                            // Prefer to insert imaginary lines after a bracket than before.
-                            lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
-                        }
-                        else
-                        {
-                            lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
-                            imaginaryLinesBefore = 0;
-                        }
-
-                        lineNumber++;
+                        lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
+                        imaginaryLinesBefore = 0;
                     }
-                }
 
-                if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
-                {
-                    lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+                    lineNumber++;
                 }
-
-                return new FileDiffInfo( lineDiffInfos.ToArray() );
             }
+
+            if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
+            {
+                lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+            }
+
+            return new FileDiffInfo( lineDiffInfos.ToArray() );
         }
 
         private sealed record FileDiffInfo( LineDiffInfo[] Lines );
