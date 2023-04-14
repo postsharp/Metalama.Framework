@@ -84,9 +84,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     linkerResult.Compilation,
                     input.Project,
                     input.AspectLayers,
-                    input.FirstCompilationModel, 
+                    input.FirstCompilationModel,
                     pipelineStepsResult.LastCompilation,
-                    pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
+                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                     pipelineStepsResult.ExternalAspectSources,
                     input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                     input.ExternallyInheritableAspects.AddRange(
