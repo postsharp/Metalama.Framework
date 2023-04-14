@@ -18,6 +18,11 @@ namespace Metalama.Framework.Engine.Formatting
             public TriviaRewriter( EndOfLineStyle targetEndOfLineStyle ) : base( true )
             {
                 this._targetEndOfLineStyle = targetEndOfLineStyle;
+
+                if ( this._targetEndOfLineStyle == EndOfLineStyle.Unknown )
+                {
+                    this._targetEndOfLineStyle = GetEndOfLineStyle( Environment.NewLine.AsSpan() );
+                }
             }
 
             protected override SyntaxNode? VisitCore( SyntaxNode? node )
@@ -83,7 +88,7 @@ namespace Metalama.Framework.Engine.Formatting
                                 EndOfLineStyle.CR => ElasticEndOfLine( "\r" ),
                                 EndOfLineStyle.LF => ElasticEndOfLine( "\n" ),
                                 EndOfLineStyle.CRLF => ElasticEndOfLine( "\r\n" ),
-                                _ => throw new AssertionFailedException()
+                                _ => throw new AssertionFailedException( $"Unexpected EndOfLineStyle: {this._targetEndOfLineStyle}." )
                             };
                         }
                         else
