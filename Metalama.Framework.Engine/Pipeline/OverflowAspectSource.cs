@@ -5,8 +5,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -28,11 +26,9 @@ internal sealed class OverflowAspectSource : IAspectSource
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClass.FullName ).AssertNotNull();
-
         var aspectSourceResults =
             this._aspectSources
-                .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionFullName().AssertNotNull(), StringComparison.Ordinal ) )
+                .Where( s => s.AspectClass.FullName == aspectClass.FullName )
                 .Select( a => a.Source )
                 .Distinct()
                 .Select( a => a.GetAspectInstances( compilation, aspectClass, diagnosticAdder, cancellationToken ) )
