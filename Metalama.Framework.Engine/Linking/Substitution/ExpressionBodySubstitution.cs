@@ -42,6 +42,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             switch ( currentNode )
             {
+                case ArrowExpressionClauseSyntax { Expression: ThrowExpressionSyntax throwExpressionSyntax }:
+                    {
+                        return
+                            SyntaxFactoryEx.FormattedBlock(
+                                    ThrowStatement(
+                                        throwExpressionSyntax.ThrowKeyword,
+                                        throwExpressionSyntax.Expression,
+                                        Token( SyntaxKind.SemicolonToken ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    }
+
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     if ( this._usingSimpleInlining )
                     {

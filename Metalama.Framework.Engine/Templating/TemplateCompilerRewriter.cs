@@ -34,7 +34,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 {
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
     private static readonly SyntaxAnnotation _userExpressionAnnotation = new( "Metalama.UserExpression" );
-    private static readonly Regex _endOfLineRegex = new( "[\r\n]+", RegexOptions.Multiline );
+    private static readonly Regex _endOfLineRegex = new( "[\r\n\\s]+", RegexOptions.Multiline );
 
     private readonly TemplateCompilerSemantics _syntaxKind;
     private readonly Compilation _runTimeCompilation;
