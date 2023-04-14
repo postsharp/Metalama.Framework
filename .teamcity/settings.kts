@@ -59,6 +59,10 @@ object DebugBuild : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
+
+        // Temporarily collect performance metrics.
+        perfmon {
+        }
     }
 
     triggers {
