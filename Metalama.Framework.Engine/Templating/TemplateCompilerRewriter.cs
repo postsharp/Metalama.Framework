@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -34,6 +34,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 {
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
     private static readonly SyntaxAnnotation _userExpressionAnnotation = new( "Metalama.UserExpression" );
+    private static readonly Regex _endOfLineRegex = new( "[\r\n]+", RegexOptions.Multiline );
 
     private readonly TemplateCompilerSemantics _syntaxKind;
     private readonly Compilation _runTimeCompilation;
@@ -56,7 +57,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
     private ISymbol? _rootTemplateSymbol;
-    
+
     public TemplateCompilerRewriter(
         string templateName,
         TemplateCompilerSemantics syntaxKind,
@@ -111,22 +112,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         if ( diagnostic.Severity == DiagnosticSeverity.Error )
         {
             this.Success = false;
-        }
-    }
-
-    private static string NormalizeSpace( string statementComment )
-    {
-        statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
-
-        while ( true )
-        {
-            var old = statementComment;
-            statementComment = statementComment.ReplaceOrdinal( "  ", " " );
-
-            if ( old == statementComment )
-            {
-                return statementComment;
-            }
         }
     }
 
@@ -1038,7 +1023,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         var addCommentsStatement = this.DeepIndent(
                             addCommentsMetaStatement.WithLeadingTrivia(
-                                TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
+                                GetCommentFromNode( node.Parent! )
                                     .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
 
                         this._currentMetaContext.Statements.Add( addCommentsStatement );
@@ -1061,7 +1046,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         var addStatementStatement = this.DeepIndent(
                             addStatementMetaStatement.WithLeadingTrivia(
-                                TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
+                                GetCommentFromNode( node.Parent! )
                                     .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
 
                         this._currentMetaContext.Statements.Add( addStatementStatement );
@@ -1109,6 +1094,18 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
 
         return base.VisitInvocationExpression( node );
+    }
+
+    private static SyntaxTriviaList GetCommentFromNode( SyntaxNode node )
+    {
+        var text = _endOfLineRegex.Replace( node.ToString(), " " );
+
+        if ( text.Length > 120 )
+        {
+            text = text.Substring( 0, 117 ) + "...";
+        }
+
+        return TriviaList( Comment( "// " + text ), ElasticCarriageReturnLineFeed );
     }
 
     private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
@@ -1566,18 +1563,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         // The statement is run-time code and has been transformed into an expression creating the StatementSyntax.
                         // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
 
-                        // Generate a comment with the template source code.
-                        var statementComment = NormalizeSpace( singleStatement.ToString() );
-
-                        if ( statementComment.Length > 120 )
-                        {
-                            // TODO: handle surrogate pairs correctly
-                            statementComment = statementComment.Substring( 0, 117 ) + "...";
-                        }
-
                         var leadingTrivia = TriviaList( ElasticCarriageReturnLineFeed )
                             .AddRange( this.GetIndentation() )
-                            .Add( Comment( "// " + statementComment ) )
+                            .AddRange( GetCommentFromNode( singleStatement ) )
                             .Add( ElasticCarriageReturnLineFeed )
                             .AddRange( this.GetIndentation() );
 
