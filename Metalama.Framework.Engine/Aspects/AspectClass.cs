@@ -514,7 +514,10 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             executionContext );
     }
 
-    internal IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull();
+    internal IAspect CreateDefaultInstance()
+        => this._userCodeInvoker.Invoke(
+            () => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull(),
+            new UserCodeExecutionContext( this.ServiceProvider ) );
 
     public override string ToString() => this.FullName;
 

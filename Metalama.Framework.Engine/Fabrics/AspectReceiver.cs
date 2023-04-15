@@ -461,7 +461,16 @@ namespace Metalama.Framework.Engine.Fabrics
                     continue;
                 }
 
-                var aspectInstance = createResult( targetDeclaration );
+                TResult? aspectInstance;
+
+                if ( invoker != null && executionContext != null )
+                {
+                    aspectInstance = invoker.Invoke( () => createResult( targetDeclaration ), executionContext );
+                }
+                else
+                {
+                    aspectInstance = createResult( targetDeclaration );
+                }
 
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
                 if ( aspectInstance != null )
@@ -528,13 +537,15 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : class, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
-                        null,
-                        null,
+                        userCodeInvoker,
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                         compilation,
                         diagnosticAdder,
                         aspectClass,
