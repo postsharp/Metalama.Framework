@@ -13,7 +13,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Adds a generic parameter to the method.
         /// </summary>
         /// <param name="name"></param>
-        /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
+        /// <returns>An <see cref="ITypeParameterBuilder"/> that allows you to further build the new parameter.</returns>
         ITypeParameterBuilder AddTypeParameter( string name );
 
         /// <remarks>

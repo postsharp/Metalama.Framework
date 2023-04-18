@@ -320,10 +320,10 @@ public sealed class DeclarationFactory : IDeclarationFactory
     }
 
     IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
-        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
+        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ISdkType) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
     IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
-        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
+        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ISdkType) pointedType).TypeSymbol.AssertNotNull() ) );
 
     public T ConstructNullable<T>( T type, bool isNullable )
         where T : IType
@@ -333,10 +333,10 @@ public sealed class DeclarationFactory : IDeclarationFactory
             return type;
         }
 
-        var typeSymbol = ((ITypeInternal) type).TypeSymbol;
+        var typeSymbol = ((ISdkType) type).TypeSymbol;
         ITypeSymbol newTypeSymbol;
 
-        if ( type.IsReferenceType.GetValueOrDefault( true ) )
+        if ( type.IsReferenceType ?? true )
         {
             newTypeSymbol = typeSymbol.AssertNotNull()
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );

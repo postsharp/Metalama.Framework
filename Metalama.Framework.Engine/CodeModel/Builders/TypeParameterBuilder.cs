@@ -11,7 +11,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterBuilder
+    internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterBuilder, ISdkType
     {
         private readonly List<IType> _typeConstraints = new();
 
@@ -71,5 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         bool IEquatable<IType>.Equals( IType? other ) => throw new NotSupportedException();
+
+        public Microsoft.CodeAnalysis.ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported." );
     }
 }
