@@ -2,15 +2,11 @@
 
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using Metalama.Backstage.Utilities;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -263,7 +259,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                                 diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
 
-                                this.HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
+                                HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
                                 diagnosticBuilder.Append( "</span>\n" );
                             }
                         }
@@ -312,19 +308,19 @@ namespace Metalama.Framework.Engine.Formatting
                                     codeLineBuilder.Append( "&#13;&#10;" );
                                 }
 
-                                this.HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
+                                HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
                             }
 
                             codeLineBuilder.Append( "\"" );
                         }
 
                         codeLineBuilder.Append( ">" );
-                        this.HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
+                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                         codeLineBuilder.Append( "</span>" );
                     }
                     else
                     {
-                        this.HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
+                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                     }
                 }
             }
@@ -341,7 +337,7 @@ namespace Metalama.Framework.Engine.Formatting
             await textWriter.WriteAsync( finalBuilder.ToString() );
         }
 
-        private void HtmlEncode( StringBuilder stringBuilder, TextSpan span, string text, bool attributeEncode = false, Action<TextSpan>? onNewLine = null )
+        private static void HtmlEncode( StringBuilder stringBuilder, TextSpan span, string text, bool attributeEncode = false, Action<TextSpan>? onNewLine = null )
         {
             foreach ( var c in text )
             {

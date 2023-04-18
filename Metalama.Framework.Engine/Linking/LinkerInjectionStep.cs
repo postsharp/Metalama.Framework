@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 #if DEBUG
@@ -146,7 +147,7 @@ namespace Metalama.Framework.Engine.Linking
 
             // Replace wildcard AssemblyVersionAttribute with actual version.
             var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
-            var assemblyVersionType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof( System.Reflection.AssemblyVersionAttribute ) );
+            var assemblyVersionType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
             var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionType ).FirstOrDefault();
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
@@ -164,10 +165,7 @@ namespace Metalama.Framework.Engine.Linking
                             input.CompilationModel.DeclaringAssembly,
                             AttributeConstruction.Create(
                                 assemblyVersionType,
-                                new object[]
-                                {
-                                    input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString()
-                                } ) ) );
+                                new object[] { input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString() } ) ) );
                 }
             }
 #pragma warning restore CA1307
