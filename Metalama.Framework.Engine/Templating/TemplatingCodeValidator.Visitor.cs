@@ -34,6 +34,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
             private readonly bool _hasCompileTimeCodeFast;
+            private readonly ITypeSymbol _typeFabricType;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -61,6 +62,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Framework.Fabrics.TypeFabric) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -488,17 +490,19 @@ namespace Metalama.Framework.Engine.Templating
 
                 var scope = this._classifier.GetTemplatingScope( declaredSymbol );
 
-                // Get the type scope.
-                TemplatingScope? typeScope;
+                // Report an error for TypeFabric nested in RunTimeOrCompileTime type.
+                if ( scope == TemplatingScope.CompileTimeOnly
+                     && this._currentTypeScope == TemplatingScope.RunTimeOrCompileTime
+                     && this._compilationContext.SourceCompilation.HasImplicitConversion( declaredSymbol as ITypeSymbol, this._typeFabricType ) )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.RunTimeOrCompileTimeTypesCannotHaveTypeFabrics.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol ) );
+                }
 
-                if ( declaredSymbol is INamedTypeSymbol namedType )
-                {
-                    typeScope = this._classifier.GetTemplatingScope( namedType );
-                }
-                else
-                {
-                    typeScope = this._currentTypeScope;
-                }
+                // Get the type scope.
+                var typeScope = declaredSymbol is INamedTypeSymbol ? scope : this._currentTypeScope;
 
                 // Get the template info.
                 var templateInfo = this._currentTemplateInfo;
