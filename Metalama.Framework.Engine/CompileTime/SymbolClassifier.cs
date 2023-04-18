@@ -451,8 +451,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // Error (unresolved types).
                     case IErrorTypeSymbol:
-                        // We treat all error symbols as run-time only, by convention.
-                        return TemplatingScope.RunTimeOnly;
+                        // We treat all error symbols as run-time-or-compile-time, by convention.
+                        return TemplatingScope.RunTimeOrCompileTime;
 
                     // Array.
                     case IArrayTypeSymbol array:
