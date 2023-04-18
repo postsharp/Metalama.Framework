@@ -2,15 +2,21 @@
 
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+using Metalama.Backstage.Utilities;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -51,6 +57,7 @@ namespace Metalama.Framework.Engine.Formatting
         private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
+            var syntaxRoot = (await document.GetSyntaxRootAsync()).AssertNotNull();
 
             var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles, diagnostics: diagnostics );
 
@@ -75,7 +82,7 @@ namespace Metalama.Framework.Engine.Formatting
                 }
             }
 
-            void FlushLine()
+            void FlushLine( TextSpan span )
             {
                 var lineDiffInfo = diffInfo?.Lines[lineNumber];
 
@@ -140,8 +147,45 @@ namespace Metalama.Framework.Engine.Formatting
                     diagnosticSet.Clear();
                 }
 
-                // Finally write the line number and the buffered code.
-                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
+                // Find the member at the line number.
+                var line = sourceText.Lines.GetLineFromPosition( span.Start );
+                var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
+
+                var members = node.AncestorsAndSelf()
+                    .Select(
+                        n => n switch
+                        {
+                            MethodDeclarationSyntax method => (Node: (SyntaxNode) method, method.Identifier.Text),
+                            BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
+                            EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
+                            BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
+                            PropertyDeclarationSyntax property => (property, property.Identifier.Text),
+                            _ => (null, null)
+                        } )
+                    .Where( x => x.Node != null )
+                    .ToList();
+
+                finalBuilder.AppendInvariant( $"<span class='line-number'" );
+
+                if ( members.Count > 0 )
+                {
+                    var topNode = members[0].Node;
+
+                    var syntaxToken = topNode!.GetFirstToken();
+
+                    if ( (line.End < syntaxToken.Span.Start || line.Start > topNode.GetLastToken().Span.End)
+                         && string.IsNullOrWhiteSpace( sourceText.GetSubText( line.Span ).ToString() ) )
+                    {
+                        // This is a blank line.
+                    }
+                    else
+                    {
+                        members.Reverse();
+                        finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsEnumerable( x => x.Text! ) )}'" );
+                    }
+                }
+
+                finalBuilder.AppendInvariant( $">{lineNumber + 1}</span>" );
                 finalBuilder.AppendLine( codeLineBuilder.ToString() );
                 codeLineBuilder.Clear();
 
@@ -219,7 +263,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                                 diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
 
-                                HtmlEncode( diagnosticBuilder, diagnostic.Message );
+                                this.HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
                                 diagnosticBuilder.Append( "</span>\n" );
                             }
                         }
@@ -268,24 +312,24 @@ namespace Metalama.Framework.Engine.Formatting
                                     codeLineBuilder.Append( "&#13;&#10;" );
                                 }
 
-                                HtmlEncode( codeLineBuilder, titles[i], true );
+                                this.HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
                             }
 
                             codeLineBuilder.Append( "\"" );
                         }
 
                         codeLineBuilder.Append( ">" );
-                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
+                        this.HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                         codeLineBuilder.Append( "</span>" );
                     }
                     else
                     {
-                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
+                        this.HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                     }
                 }
             }
 
-            FlushLine();
+            FlushLine( default );
 
             finalBuilder.AppendLine( "</code></pre>" );
 
@@ -297,9 +341,9 @@ namespace Metalama.Framework.Engine.Formatting
             await textWriter.WriteAsync( finalBuilder.ToString() );
         }
 
-        private static void HtmlEncode( StringBuilder stringBuilder, string s, bool attributeEncode = false, Action? onNewLine = null )
+        private void HtmlEncode( StringBuilder stringBuilder, TextSpan span, string text, bool attributeEncode = false, Action<TextSpan>? onNewLine = null )
         {
-            foreach ( var c in s )
+            foreach ( var c in text )
             {
                 switch ( c )
                 {
@@ -339,7 +383,7 @@ namespace Metalama.Framework.Engine.Formatting
                         }
                         else
                         {
-                            onNewLine();
+                            onNewLine( span );
                         }
 
                         break;
