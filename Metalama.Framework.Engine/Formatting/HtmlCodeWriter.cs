@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Formatting
                     .Select(
                         n => n switch
                         {
-                            MethodDeclarationSyntax method => (Node: (SyntaxNode) method, method.Identifier.Text),
+                            MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
                             BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
                             EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
                             BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
