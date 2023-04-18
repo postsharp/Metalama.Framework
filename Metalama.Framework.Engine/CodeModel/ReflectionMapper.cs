@@ -50,13 +50,18 @@ namespace Metalama.Framework.Engine.CodeModel
 
                     if ( assemblies.IsEmpty )
                     {
-                        throw new InvalidOperationException(
-                            $"Cannot find the reference '{assemblyName}' in project '{this._compilation.AssemblyName}' required for type '{metadataName}'." );
+                        // Don't imply that the a reference to Metalama.Framework.Engine should be added to the project,
+                        // the error is in attempting to resolve such a type in the first place.
+                        var explanation = assemblyShortName.StartsWith( "Metalama.Framework.Engine", StringComparison.Ordinal )
+                            ? "."
+                            : $", because the assembly '{assemblyShortName}' is not referenced in project '{this._compilation.AssemblyName}'.";
+
+                        throw new InvalidOperationException( $"The type '{metadataName}' cannot be used at run-time{explanation}" );
                     }
                     else if ( assemblies.Length > 1 )
                     {
                         throw new InvalidOperationException(
-                            $"Found more than one assembly named '{assemblyShortName}' in project '{this._compilation.AssemblyName}': {string.Join( ",", assemblies.Select( x => $"'{x.Identity}'" ) )}." );
+                            $"When resolving type '{metadataName}', found more than one assembly named '{assemblyShortName}' in project '{this._compilation.AssemblyName}': {string.Join( ",", assemblies.Select( x => $"'{x.Identity}'" ) )}." );
                     }
 
                     symbol = assemblies[0].GetTypeByMetadataName( metadataName );
