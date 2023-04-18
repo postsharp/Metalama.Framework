@@ -176,7 +176,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             {
                 _ = interfaceIndexer;
 
-                throw new NotImplementedException();
+                throw new NotImplementedException( $"Cannot introduce indexer '{interfaceIndexer}' because indexers are not supported." );
             }
 
             foreach ( var interfaceProperty in introducedInterface.Properties )
@@ -264,12 +264,18 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             // Validate that the interface must be introduced to the specific target.
             if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
             {
-                if ( this._overrideStrategy == OverrideStrategy.Fail )
+                switch ( this._overrideStrategy )
                 {
-                    diagnostics.Report(
-                        AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
-                            targetType.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                    case OverrideStrategy.Ignore when interfaceSpecification.InterfaceType.Equals( this._interfaceType ):
+                        return AdviceImplementationResult.Ignored;
+
+                    case OverrideStrategy.Fail:
+                        diagnostics.Report(
+                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
+                                targetType.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+
+                        break;
                 }
 
                 continue;
