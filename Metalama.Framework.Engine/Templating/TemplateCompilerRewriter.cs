@@ -1770,7 +1770,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // condition has to be preserved if one of the expressions is throw
         var runTimeCondition =
             this.GetTransformationKind( node.Condition ) == TransformationKind.Transform ||
-            node.WhenTrue is ThrowExpressionSyntax || node.WhenFalse is ThrowExpressionSyntax;
+            node.Condition.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionValueScope(  ) == TemplatingScope.RunTimeOnly ||
+            node.WhenTrue is ThrowExpressionSyntax || 
+            node.WhenFalse is ThrowExpressionSyntax;
 
         if ( runTimeCondition )
         {
