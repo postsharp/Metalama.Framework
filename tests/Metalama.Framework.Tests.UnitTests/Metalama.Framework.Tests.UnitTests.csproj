@@ -24,6 +24,7 @@
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableMaxVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
+        <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
