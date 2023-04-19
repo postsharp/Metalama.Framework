@@ -176,7 +176,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             {
                 _ = interfaceIndexer;
 
-                throw new NotImplementedException();
+                throw new NotImplementedException( $"Cannot introduce indexer '{interfaceIndexer}' because indexers are not supported." );
             }
 
             foreach ( var interfaceProperty in introducedInterface.Properties )
@@ -264,12 +264,18 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             // Validate that the interface must be introduced to the specific target.
             if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
             {
-                if ( this._overrideStrategy == OverrideStrategy.Fail )
+                switch ( this._overrideStrategy )
                 {
-                    diagnostics.Report(
-                        AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
-                            targetType.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                    case OverrideStrategy.Ignore when interfaceSpecification.InterfaceType.Equals( this._interfaceType ):
+                        return AdviceImplementationResult.Ignored;
+
+                    case OverrideStrategy.Fail:
+                        diagnostics.Report(
+                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
+                                targetType.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+
+                        break;
                 }
 
                 continue;
@@ -280,8 +286,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
             {
                 // Collect implemented interface members and add non-observable transformations.
-                MemberBuilder memberBuilder;
-
                 var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
 
                 bool isExplicit;
@@ -322,19 +326,20 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                         var isIteratorMethod = templateMethod?.IsIteratorMethod ?? redirectionTargetMethod.AssertNotNull().IsIteratorMethod() == true;
 
-                        memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit );
+                        var methodBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit );
 
-                        CopyAttributes( interfaceMethod, memberBuilder );
+                        CopyAttributes( interfaceMethod, methodBuilder );
 
-                        interfaceMemberMap.Add( interfaceMethod, memberBuilder );
+                        addTransformation( methodBuilder.ToTransformation() );
+                        interfaceMemberMap.Add( interfaceMethod, methodBuilder );
 
                         if ( templateMethod != null )
                         {
                             addTransformation(
                                 new OverrideMethodTransformation(
                                     this,
-                                    (IMethod) memberBuilder,
-                                    templateMethod.ForIntroduction( (IMethod) memberBuilder ),
+                                    methodBuilder,
+                                    templateMethod.ForIntroduction( methodBuilder ),
                                     mergedTags ) );
                         }
                         else
@@ -342,7 +347,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             addTransformation(
                                 new RedirectMethodTransformation(
                                     this,
-                                    (IMethod) memberBuilder,
+                                    methodBuilder,
                                     (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
                         }
 
@@ -407,11 +412,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             var missingAccessor =
                                 (getMethodMissingFromTemplate, setMethodMissingFromTemplate, setInitOnlyInTemplate, setInitOnlyInInterface) switch
                                 {
-                                    (true, _, _, _) => "get",              // Missing getter.
-                                    (false, true, _, false) => "set",      // Missing setter.
-                                    (false, true, _, true) => "init",      // Missing init-only setter.
-                                    (false, false, true, false) => "set",  // Interface has setter, template has init-only setter.
-                                    (false, false, false, true) => "init", // Interface has init-only setter, template has setter.
+                                    (true, _, _, _ ) => "get",              // Missing getter.
+                                    (false, true, _, false ) => "set",      // Missing setter.
+                                    (false, true, _, true ) => "init",      // Missing init-only setter.
+                                    (false, false, true, false ) => "set",  // Interface has setter, template has init-only setter.
+                                    (false, false, false, true ) => "init", // Interface has init-only setter, template has setter.
                                     _ => null
                                 };
 
@@ -428,9 +433,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             var unexpectedAccessor =
                                 (isExplicit, getMethodUnexpectedInTemplate, setMethodUnexpectedInTemplate, setInitOnlyInTemplate) switch
                                 {
-                                    (true, true, _, _) => "get",         // Unexpected getter.
-                                    (true, false, true, false) => "set", // Unexpected setter.
-                                    (true, false, true, true) => "init", // Unexpected init-only setter.
+                                    (true, true, _, _ ) => "get",         // Unexpected getter.
+                                    (true, false, true, false ) => "set", // Unexpected setter.
+                                    (true, false, true, true ) => "init", // Unexpected init-only setter.
                                     _ => null
                                 };
 
@@ -479,8 +484,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
                         }
 
-                        memberBuilder = propertyBuilder;
-                        interfaceMemberMap.Add( interfaceProperty, memberBuilder );
+                        addTransformation( propertyBuilder.ToTransformation() );
+                        interfaceMemberMap.Add( interfaceProperty, propertyBuilder );
 
                         if ( templateProperty != null )
                         {
@@ -559,8 +564,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.RemoveMethod.AssertNotNull() );
                         }
 
-                        memberBuilder = eventBuilder;
-                        interfaceMemberMap.Add( interfaceEvent, memberBuilder );
+                        addTransformation( eventBuilder.ToTransformation() );
+                        interfaceMemberMap.Add( interfaceEvent, eventBuilder );
 
                         if ( templateEvent != null )
                         {
@@ -610,8 +615,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         }
                     }
                 }
-
-                addTransformation( memberBuilder.ToTransformation() );
             }
 
             addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
@@ -628,7 +631,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null );
     }
 
-    private MemberBuilder GetImplMethodBuilder(
+    private MethodBuilder GetImplMethodBuilder(
         INamedType declaringType,
         IMethod interfaceMethod,
         bool isIteratorMethod,
@@ -702,7 +705,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             interfaceProperty.Writeability == Writeability.InitOnly,
             false,
             hasImplicitSetter,
-            tags ) { Type = interfaceProperty.Type };
+            tags )
+        { Type = interfaceProperty.Type };
 
         if ( isExplicit )
         {

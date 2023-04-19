@@ -27,6 +27,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly CompilationContext _compilationContext;
             private readonly LinkerSyntaxHandler _syntaxHandler;
+            private readonly LinkerInjectionRegistry _injectionRegistry;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
@@ -51,6 +52,7 @@ namespace Metalama.Framework.Engine.Linking
                 ProjectServiceProvider serviceProvider,
                 CompilationContext compilationContext,
                 LinkerSyntaxHandler syntaxHandler,
+                LinkerInjectionRegistry injectionRegistry,
                 IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
@@ -65,6 +67,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._compilationContext = compilationContext;
                 this._syntaxHandler = syntaxHandler;
+                this._injectionRegistry = injectionRegistry;
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
@@ -146,9 +149,34 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
+                                    when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                    // Base references to new slot or override members are rewritten to the base member call.
+                                    AddSubstitution(
+                                        context,
+                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Base }:
+                                    // Base references to other members are rewritten to "empty" member call.
+                                    AddSubstitution(
+                                        context,
+                                        new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Default } when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                    // Base references to other members are rewritten to "source" member call.
+                                    AddSubstitution(
+                                        context,
+                                        new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
                                 default:
-                                    // Everything else, renames the target.
-                                    AddSubstitution( context, new AspectReferenceRenamingSubstitution( this._compilationContext, nonInlinedReference ) );
+                                    // Everything else targets the override.
+                                    AddSubstitution( context, new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
 
                                     break;
                             }
@@ -300,11 +328,34 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                default:
-                                    // Everything else, renames the target.
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
+                                    when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                    // Base references to new slot or override members are rewritten to the base member call.
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceRenamingSubstitution( this._compilationContext, nonInlinedReference ) );
+                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Base }:
+                                    // Base references to other members are rewritten to "empty" member call.
+                                    AddSubstitution(
+                                        inliningSpecification.ContextIdentifier,
+                                        new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Default } when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                    // Base references to other members are rewritten to "source" member call.
+                                    AddSubstitution(
+                                        inliningSpecification.ContextIdentifier,
+                                        new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                default:
+                                    // Everything else targets the override.
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
 
                                     break;
                             }

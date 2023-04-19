@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             // TODO: This not used, instead of predefined helper types, the linker should generate private helper
             //       types for each aspect layer into each target type.
@@ -45,14 +45,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         when SymbolEqualityComparer.Default.Equals(
                                  this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
                                  this._aspectReference.ContainingSemantic.Symbol.ContainingType )
-                             && context.RewritingDriver.InjectionRegistry.IsOverrideTarget( targetSymbol )
+                             && substitutionContext.RewritingDriver.InjectionRegistry.IsOverrideTarget( targetSymbol )
                         => LinkerRewritingDriver.GetOriginalImplParameterType(),
                     IntermediateSymbolSemanticKind.Base
                         when SymbolEqualityComparer.Default.Equals(
                             this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
                             this._aspectReference.ContainingSemantic.Symbol.ContainingType )
                         => LinkerRewritingDriver.GetEmptyImplParameterType(),
-                    _ when context.RewritingDriver.InjectionRegistry.IsOverride( targetSymbol ) =>
+                    _ when substitutionContext.RewritingDriver.InjectionRegistry.IsOverride( targetSymbol ) =>
                         this.GetExistingIndexerAspectParameterType(),
                     _ => null
                 };
@@ -100,12 +100,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                             .WithTrailingTrivia( elementAccessExpression.GetTrailingTrivia() );
 
                                 default:
-                                    var aspectInstance = this.ResolveAspectInstance( context );
+                                    var aspectInstance = this.ResolveAspectInstance( substitutionContext );
 
-                                    var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( context.RewritingDriver.IntermediateCompilation )
+                                    var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( substitutionContext.RewritingDriver.IntermediateCompilation )
                                         .AssertNotNull();
 
-                                    context.RewritingDriver.DiagnosticSink.Report(
+                                    substitutionContext.RewritingDriver.DiagnosticSink.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(
                                             targetDeclaration.GetDiagnosticLocation(),
                                             (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );

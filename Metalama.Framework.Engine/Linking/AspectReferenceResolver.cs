@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -160,36 +161,17 @@ namespace Metalama.Framework.Engine.Linking
 
             var overrideIndices = this.GetOverrideIndices( resolvedReferencedSymbol );
 
+            Invariant.Assert( targetIntroductionIndex == null || overrideIndices.All( o => targetIntroductionIndex < o.Index ) || !HasImplicitImplementation( referencedSymbol ) );
+
             this.ResolveLayerIndex(
                 referenceSpecification,
                 annotationLayerIndex,
+                resolvedReferencedSymbol, 
                 targetIntroductionInjectedMember,
                 targetIntroductionIndex,
                 overrideIndices,
                 out var resolvedIndex,
                 out var resolvedInjectedMember );
-
-            if ( resolvedReferencedSymbol is IFieldSymbol field )
-            {
-                // Field symbols are resolved to themselves (this may be temporary).
-                var fieldSemantic =
-                    targetIntroductionInjectedMember == null
-                        ? IntermediateSymbolSemanticKind.Default
-                        : resolvedIndex < targetIntroductionIndex
-                            ? IntermediateSymbolSemanticKind.Base
-                            : IntermediateSymbolSemanticKind.Default;
-
-                return new ResolvedAspectReference(
-                    containingSemantic,
-                    containingLocalFunction,
-                    resolvedReferencedSymbol,
-                    field.ToSemantic( fieldSemantic ),
-                    expression,
-                    resolvedRootNode,
-                    resolvedReferencedSymbolSourceNode,
-                    targetKind,
-                    isInlineable );
-            }
 
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
             Invariant.Assert(
@@ -204,21 +186,24 @@ namespace Metalama.Framework.Engine.Linking
                 resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0, 0 );
             }
 
+            // Let's see whether the symbol is override or if it hides another member. This is true only for main declarations, never for override symbols.
+            var resolvedSymbolIsOverrideOrNew = resolvedReferencedSymbol.IsOverride || resolvedReferencedSymbol.TryGetHiddenSymbol( this._intermediateCompilation, out _ );
+
             if ( resolvedIndex == default )
             {
-                if ( targetIntroductionInjectedMember == null )
+                // Resolved to the initial version of the symbol (before any aspects).
+
+                if ( targetIntroductionInjectedMember == null
+                     || ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                        && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null ) )                        
                 {
-                    // There is no introduction, i.e. this is a user source symbol. If there are no overrides, use the final semantic.
-                    var targetSemantic =
-                        overrideIndices.Count > 0
-                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
-                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+                    // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
 
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        targetSemantic,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,
@@ -228,84 +213,55 @@ namespace Metalama.Framework.Engine.Linking
                 else
                 {
                     // There is an introduction and this reference points to a state before that introduction.
-                    if ( referencedSymbol.IsOverride )
-                    {
-                        // Introduction is an override, resolve to symbol in the base class.
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
-                    else if ( referencedSymbol.TryGetHiddenSymbol( this._intermediateCompilation, out var hiddenSymbol ) )
-                    {
-                        // Introduction is hiding another symbol, resolve to symbol in the base class.
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            hiddenSymbol.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
-                    else if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                              && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
-                                  .GetSymbol() != null )
-                    {
-                        // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
-                        Invariant.Assert( overrideIndices.Count > 0 );
-
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
-                    else
-                    {
-                        // Introduction is a new member, resolve to base semantics, i.e. the base method.
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
+                    return new ResolvedAspectReference(
+                        containingSemantic,
+                        containingLocalFunction,
+                        resolvedReferencedSymbol,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
+                        expression,
+                        resolvedRootNode,
+                        resolvedReferencedSymbolSourceNode,
+                        targetKind,
+                        isInlineable );
                 }
             }
-            else if ( resolvedIndex == targetIntroductionIndex )
+            else if ( targetIntroductionInjectedMember != null && resolvedIndex < targetIntroductionIndex)
             {
-                // We have resolved to the target member introduction.
-                // The only way to get here is using "Base" order in the first override or within the same aspect to a non-overridden method.
+                // Resolved to a version before the symbol was introduced.
+                // The only valid case are introduced promoted fields.
+                if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                     && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() == null )
+                {
+                    // This is the same as targeting the property.
+                    return new ResolvedAspectReference(
+                        containingSemantic,
+                        containingLocalFunction,
+                        resolvedReferencedSymbol,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        expression,
+                        resolvedRootNode,
+                        resolvedReferencedSymbolSourceNode,
+                        targetKind,
+                        isInlineable );
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to a non-initial state before the introduction is valid only for replaced introduced members." );
+                }
+            }
+            else if ( targetIntroductionInjectedMember != null && resolvedIndex == targetIntroductionIndex )
+            {
+                // Targeting the introduced version of the symbol.
+                // The only way to get here is for declarations with implicit implementation, everything else is not valid.
+
                 if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
-                    var targetSemantic =
-                        overrideIndices.Count > 0
-                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default )
-                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
 
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        targetSemantic,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,
@@ -314,103 +270,53 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    if ( resolvedReferencedSymbol.IsOverride )
-                    {
-                        // Introduction is an override, resolve to the symbol in the base class.
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
-                    else if ( resolvedReferencedSymbol.TryGetHiddenSymbol( this._intermediateCompilation, out var hiddenSymbol ) )
-                    {
-                        // The introduction is hiding another member, resolve to default semantics.
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            hiddenSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
-                    else
-                    {
-                        // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
-
-                        return new ResolvedAspectReference(
-                            containingSemantic,
-                            containingLocalFunction,
-                            resolvedReferencedSymbol,
-                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
-                            expression,
-                            resolvedRootNode,
-                            resolvedReferencedSymbolSourceNode,
-                            targetKind,
-                            isInlineable );
-                    }
+                    throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to the introduction is not allowed because the declaration does not have implicit body." );
                 }
             }
-            else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count )
+            else if ( resolvedIndex < new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
             {
-                // One of the overrides or the introduced member.
-                if ( targetIntroductionInjectedMember != null && resolvedIndex.InstanceIndex == 0 )
-                {
-                    // TODO: This would happen has the introduced member contained aspect reference. Bodies of introduced members are
-                    //       currently not used.
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                    // // There is no introduction, i.e. this is a user source symbol.
-                    // return new ResolvedAspectReference(
-                    //     containingSymbol,
-                    //     referencedSymbol,
-                    //     new IntermediateSymbolSemantic(
-                    //         this.GetSymbolFromInjectedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
-                    //         IntermediateSymbolSemanticKind.Default ),
-                    //     expression,
-                    //     referenceSpecification );
-                }
-                else
-                {
-                    return new ResolvedAspectReference(
-                        containingSemantic,
-                        containingLocalFunction,
-                        resolvedReferencedSymbol,
-                        this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
-                            .ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                        expression,
-                        resolvedRootNode,
-                        resolvedReferencedSymbolSourceNode,
-                        targetKind,
-                        isInlineable );
-                }
-            }
-            else
-            {
+                // One particular override.
                 return new ResolvedAspectReference(
                     containingSemantic,
                     containingLocalFunction,
                     resolvedReferencedSymbol,
-                    resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
+                    this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
+                        .ToSemantic( IntermediateSymbolSemanticKind.Default ),
                     expression,
                     resolvedRootNode,
                     resolvedReferencedSymbolSourceNode,
                     targetKind,
                     isInlineable );
             }
+            else if ( resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
+            {
+                var targetSemantic =
+                    overrideIndices.Count > 0
+                    ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final )
+                    : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+
+                // The version after all aspects.
+                return new ResolvedAspectReference(
+                    containingSemantic,
+                    containingLocalFunction,
+                    resolvedReferencedSymbol,
+                    targetSemantic,
+                    expression,
+                    resolvedRootNode,
+                    resolvedReferencedSymbolSourceNode,
+                    targetKind,
+                    isInlineable );
+            }
+            else
+            {
+                throw new AssertionFailedException($"Resolving {resolvedReferencedSymbol} aspect reference to {resolvedIndex} is not supported." );
+            }
         }
 
         private void ResolveLayerIndex(
             AspectReferenceSpecification referenceSpecification,
             MemberLayerIndex annotationLayerIndex,
+            ISymbol referencedSymbol,
             LinkerInjectedMember? targetIntroductionInjectedMember,
             MemberLayerIndex? targetIntroductionIndex,
             IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> overrideIndices,
@@ -432,7 +338,7 @@ namespace Metalama.Framework.Engine.Linking
                         resolvedIndex = lowerOverride.Index;
                         resolvedInjectedMember = lowerOverride.Override;
                     }
-                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex && HasImplicitImplementation( referencedSymbol ) )
                     {
                         resolvedIndex = targetIntroductionIndex.Value;
                         resolvedInjectedMember = targetIntroductionInjectedMember;
@@ -453,7 +359,7 @@ namespace Metalama.Framework.Engine.Linking
                         resolvedIndex = previousOverride.Index;
                         resolvedInjectedMember = previousOverride.Override;
                     }
-                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex && HasImplicitImplementation( referencedSymbol ) )
                     {
                         resolvedIndex = targetIntroductionIndex.Value;
                         resolvedInjectedMember = targetIntroductionInjectedMember;
@@ -477,6 +383,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value <= annotationLayerIndex )
                     {
+                        Invariant.Assert( HasImplicitImplementation( referencedSymbol ) );
+
                         resolvedIndex = targetIntroductionIndex.Value;
                         resolvedInjectedMember = targetIntroductionInjectedMember;
                     }

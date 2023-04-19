@@ -162,6 +162,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._serviceProvider,
                 input.IntermediateCompilation.CompilationContext,
                 syntaxHandler,
+                input.InjectionRegistry,
                 inlinedSemantics,
                 nonInlinedSemantics,
                 nonInlinedReferencesByContainingSemantic,

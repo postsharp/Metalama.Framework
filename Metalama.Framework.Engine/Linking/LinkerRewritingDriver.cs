@@ -553,6 +553,16 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
+        public bool ShouldGenerateEmptyMember(ISymbol symbol)
+        {
+            return this.InjectionRegistry.IsIntroduced(symbol) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilation, out _ );
+        }
+
+        public bool ShouldGenerateSourceMember(ISymbol symbol)
+        {
+            return this.InjectionRegistry.IsOverrideTarget( symbol );
+        }
+
         public static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );
 
         public static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
