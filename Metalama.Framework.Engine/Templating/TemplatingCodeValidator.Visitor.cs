@@ -490,13 +490,13 @@ namespace Metalama.Framework.Engine.Templating
 
                 var scope = this._classifier.GetTemplatingScope( declaredSymbol );
 
-                // Report an error for TypeFabric nested in RunTimeOrCompileTime type.
+                // Report an error for TypeFabric nested in a compile-time type.
                 if ( scope == TemplatingScope.CompileTimeOnly
-                     && this._currentTypeScope == TemplatingScope.RunTimeOrCompileTime
+                     && this._currentTypeScope is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime
                      && this._compilationContext.SourceCompilation.HasImplicitConversion( declaredSymbol as ITypeSymbol, this._typeFabricType ) )
                 {
                     this.Report(
-                        TemplatingDiagnosticDescriptors.RunTimeOrCompileTimeTypesCannotHaveTypeFabrics.CreateRoslynDiagnostic(
+                        TemplatingDiagnosticDescriptors.CompileTimeTypesCannotHaveTypeFabrics.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
                             declaredSymbol ) );
                 }

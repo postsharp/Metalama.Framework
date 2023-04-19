@@ -419,11 +419,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> RunTimeOrCompileTimeTypesCannotHaveTypeFabrics
+        internal static readonly DiagnosticDefinition<ISymbol> CompileTimeTypesCannotHaveTypeFabrics
             = new(
                 "LAMA0260",
-                "Type fabrics cannot be nested in run-time-or-compile-time types.",
-                "The type fabric '{0}' cannot be nested in a run-time-or-compile-time type.",
+                "Type fabrics cannot be nested in compile-time types.",
+                "The type fabric '{0}' cannot be nested in a compile-time type.",
                 _category,
                 Error );
     }
