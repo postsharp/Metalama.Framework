@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_GREATER) - Nullability differences in .Net Framework
+#endif
+
 using System;
 using System.Linq;
 using System.ComponentModel;
@@ -8,8 +12,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
 [assembly: AspectOrder( typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
-
-#pragma warning disable CS8618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
