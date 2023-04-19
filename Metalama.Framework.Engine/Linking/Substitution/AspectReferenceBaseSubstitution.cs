@@ -30,51 +30,45 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
             && @event.IsEventField() == true );
     }
 
-    public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    public override string GetTargetMemberName()
+    {
+        var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+        return targetSymbol.Name;
+    }
+
+    public override SyntaxNode? SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    {
+        return
+            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
+                .WithLeadingTrivia( currentNode.GetLeadingTrivia() )
+                .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
+    }
+
+    public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
-        if ( this.AspectReference.RootNode != this.AspectReference.SymbolSourceNode )
+        if ( targetSymbol.IsStatic )
         {
-            // Root node is different that symbol source node - this is introduction in form:
-            // <helper_type>.<helper_member>(<symbol_source_node>);
-            // We need to get to symbol source node.
-
-            currentNode = this.AspectReference.RootNode switch
+            if ( !targetSymbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out var hiddenSymbol ) )
             {
-                InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
-                    argumentList.Arguments[0].Expression,
-                _ => throw new AssertionFailedException( $"{this.AspectReference.RootNode.Kind()} is not in a supported form." )
-            };
+                throw new AssertionFailedException( $"Expected hidden symbol for {targetSymbol}." );
+            }
+
+            return currentNode
+                .WithExpression(
+                    substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
+                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
         }
-
-        switch ( currentNode )
+        else
         {
-            case MemberAccessExpressionSyntax memberAccessExpression:
-                if ( targetSymbol.IsStatic )
-                {
-                    if ( !targetSymbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out var hiddenSymbol ) )
-                    {
-                        throw new AssertionFailedException( $"Expected hidden symbol for {targetSymbol}." );
-                    }
-
-                    return memberAccessExpression
-                        .WithExpression(
-                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
-                            .WithLeadingTrivia( memberAccessExpression.Expression.GetLeadingTrivia() )
-                            .WithTrailingTrivia( memberAccessExpression.Expression.GetTrailingTrivia() ) );
-                }
-                else
-                {
-                    return memberAccessExpression
-                        .WithExpression(
-                            BaseExpression()
-                            .WithLeadingTrivia( memberAccessExpression.Expression.GetLeadingTrivia() )
-                            .WithTrailingTrivia( memberAccessExpression.Expression.GetTrailingTrivia() ) );
-                }
-
-            default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+            return currentNode
+                .WithExpression(
+                    BaseExpression()
+                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
         }
     }
 }

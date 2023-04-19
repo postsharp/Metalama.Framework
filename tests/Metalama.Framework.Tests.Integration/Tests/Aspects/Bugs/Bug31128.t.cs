@@ -8,14 +8,14 @@ public sealed partial class UsersLoginInfoModel : BusinessObjectModel<UsersLogin
   {
     get
     {
-      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn)base.Columns["Id"];
+      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn)this.Columns["Id"];
     }
   }
   public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn ProviderUserKey
   {
     get
     {
-      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn)base.Columns["ProviderUserKey"];
+      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn)this.Columns["ProviderUserKey"];
     }
   }
   protected global::System.Collections.Generic.IList<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128.BusinessObjectModelColumn> CreateColumns()

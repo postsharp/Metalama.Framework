@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -30,41 +29,26 @@ internal class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstit
             && @event.IsEventField() == true );
     }
 
-    public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    public override string GetTargetMemberName()
+    {
+        var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+        return LinkerRewritingDriver.GetEmptyImplMemberName( targetSymbol );
+    }
+
+    public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
-        if ( this.AspectReference.RootNode != this.AspectReference.SymbolSourceNode )
-        {
-            // Root node is different that symbol source node - this is introduction in form:
-            // <helper_type>.<helper_member>(<symbol_source_node>);
-            // We need to get to symbol source node.
+        ExpressionSyntax expression =
+        targetSymbol.IsStatic
+        ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
+        : ThisExpression();
 
-            currentNode = this.AspectReference.RootNode switch
-            {
-                InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
-                    argumentList.Arguments[0].Expression,
-                _ => throw new AssertionFailedException( $"{this.AspectReference.RootNode.Kind()} is not in a supported form." )
-            };
-        }
-
-        switch ( currentNode )
-        {
-            case MemberAccessExpressionSyntax memberAccessExpression:
-                ExpressionSyntax expression =
-                    targetSymbol.IsStatic
-                    ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
-                    : ThisExpression();
-
-                return memberAccessExpression
-                    .WithExpression(
-                        expression
-                        .WithLeadingTrivia( memberAccessExpression.Expression.GetLeadingTrivia() )
-                        .WithTrailingTrivia( memberAccessExpression.Expression.GetTrailingTrivia() ) )
-                    .WithName( IdentifierName( LinkerRewritingDriver.GetEmptyImplMemberName( targetSymbol ) ) );
-
-            default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
-        }
+        return currentNode
+            .WithExpression(
+                expression
+                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
+            .WithName( this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }
 }
