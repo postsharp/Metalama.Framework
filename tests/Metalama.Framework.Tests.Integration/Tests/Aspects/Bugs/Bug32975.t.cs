@@ -1,101 +1,82 @@
-using System.ComponentModel;
-using IChangeTracking = Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975.IChangeTracking;
-
 [TrackChanges]
 [NotifyPropertyChanged]
-public partial class Comment : INotifyPropertyChanged, IChangeTracking
+public partial class Comment : global::System.ComponentModel.INotifyPropertyChanged, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975.IChangeTracking
 {
-    public Guid Id { get; }
-
-    private string _author = default !;
-
-    public string Author
+  public Guid Id { get; }
+  private string _author = default !;
+  public string Author
+  {
+    get
     {
-        get
-        {
-            return _author;
-        }
-
-        set
-        {
-            if (value != _author)
-            {
-                _author = value;
-                OnPropertyChanged( "Author" );
-            }
-
-            return;
-        }
+      return this._author;
     }
-
-    private string _content = default !;
-
-    public string Content
+    set
     {
-        get
-        {
-            return _content;
-        }
-
-        set
-        {
-            if (value != _content)
-            {
-                _content = value;
-                OnPropertyChanged( "Content" );
-            }
-
-            return;
-        }
+      if (value != this._author)
+      {
+        this._author = value;
+        OnPropertyChanged("Author");
+      }
+      return;
     }
-
-    public Comment( Guid id, string author, string content )
+  }
+  private string _content = default !;
+  public string Content
+  {
+    get
     {
-        Id = id;
-        Author = author;
-        Content = content;
+      return this._content;
     }
-
-    public bool? HasChanges { get; protected set; }
-
-    public bool IsTrackingChanges
+    set
     {
-        get
-        {
-            return (bool)HasChanges.HasValue;
-        }
-
-        set
-        {
-            if (IsTrackingChanges != value)
-            {
-                HasChanges = value ? false : null;
-                OnPropertyChanged( (string)"IsTrackingChanges" );
-            }
-        }
+      if (value != this._content)
+      {
+        this._content = value;
+        OnPropertyChanged("Content");
+      }
+      return;
     }
-
-    protected void OnChange()
+  }
+  public Comment(Guid id, string author, string content)
+  {
+    Id = id;
+    Author = author;
+    Content = content;
+  }
+  public global::System.Boolean? HasChanges { get; protected set; }
+  public global::System.Boolean IsTrackingChanges
+  {
+    get
     {
-        if (HasChanges == false)
-        {
-            HasChanges = true;
-            OnPropertyChanged( (string)"HasChanges" );
-        }
+      return (global::System.Boolean)HasChanges.HasValue;
     }
-
-    protected void OnPropertyChanged( string name )
+    set
     {
-        PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( name ) );
+      if (IsTrackingChanges != value)
+      {
+        HasChanges = value ? false : null;
+        this.OnPropertyChanged((global::System.String)"IsTrackingChanges");
+      }
     }
-
-    public void ResetChanges()
+  }
+  protected void OnChange()
+  {
+    if (HasChanges == false)
     {
-        if (IsTrackingChanges)
-        {
-            HasChanges = false;
-        }
+      HasChanges = true;
+      this.OnPropertyChanged((global::System.String)"HasChanges");
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
+  }
+  protected void OnPropertyChanged(global::System.String name)
+  {
+    PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+  }
+  public void ResetChanges()
+  {
+    if (IsTrackingChanges)
+    {
+      HasChanges = false;
+    }
+  }
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }

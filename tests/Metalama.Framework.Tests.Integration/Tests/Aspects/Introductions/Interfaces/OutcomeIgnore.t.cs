@@ -1,5 +1,7 @@
 [TheAspect]
 internal class C : IDisposable
 {
-    public void Dispose() { }
+  public void Dispose()
+  {
+  }
 }

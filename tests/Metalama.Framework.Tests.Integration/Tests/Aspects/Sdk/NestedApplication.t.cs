@@ -1,14 +1,14 @@
 internal class TargetCode
 {
+  // Rewritten.
+  [Aspect]
+  internal class Outer
+  {
+    // Rewritten.
     // Rewritten.
     [Aspect]
-    internal class Outer
+    internal class Inner
     {
-        // Rewritten.
-        // Rewritten.
-        [Aspect]
-        internal class Inner
-        {
-        }
     }
+  }
 }
