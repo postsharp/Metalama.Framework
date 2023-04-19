@@ -9,6 +9,8 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
 [assembly: AspectOrder( typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
 
+#pragma warning disable CS8618
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
 public interface IChangeTracking
