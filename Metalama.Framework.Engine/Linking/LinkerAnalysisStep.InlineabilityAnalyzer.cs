@@ -94,7 +94,8 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    if ( semantic.Kind is IntermediateSymbolSemanticKind.Base && (semantic.Symbol.IsOverride || semantic.Symbol.TryGetHiddenSymbol(this._compilationContext.Compilation, out _)) )
+                    if ( semantic.Kind is IntermediateSymbolSemanticKind.Base 
+                        && (semantic.Symbol.IsOverride || semantic.Symbol.TryGetHiddenSymbol(this._compilationContext.Compilation, out _) ) )
                     {
                         // Base semantics are not inlineable if they point to a base member.
                         return false;

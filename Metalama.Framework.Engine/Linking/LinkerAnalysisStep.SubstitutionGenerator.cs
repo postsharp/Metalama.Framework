@@ -134,9 +134,11 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
-                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field.
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
+                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget(property):
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } 
+                                    when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
+                                    // For default semantic of auto properties and event fields that have overrides, generate substitution that redirects to the backing field.
                                     // Take care to include interface event fields that are containing initializer expressions.
                                     AddSubstitution( context, new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
 
@@ -172,6 +174,12 @@ namespace Metalama.Framework.Engine.Linking
                                         context,
                                         new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
 
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Default } 
+                                    when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
+                                        && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                    // Default semantics that are not override targets need no substitutions.
                                     break;
 
                                 default:
@@ -310,8 +318,10 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } when property.IsAutoProperty() == true:
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } when @event.IsEventFieldIntroduction():
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
+                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget( property ):
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
+                                    when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
                                     // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,
@@ -351,6 +361,12 @@ namespace Metalama.Framework.Engine.Linking
                                         inliningSpecification.ContextIdentifier,
                                         new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
 
+                                    break;
+
+                                case { Kind: IntermediateSymbolSemanticKind.Default }
+                                    when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
+                                        && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                    // Default non-inlined semantics that are not override targets need no substitutions.
                                     break;
 
                                 default:
