@@ -327,6 +327,11 @@ namespace Metalama.Framework.Engine.Linking
                             // Final semantics are not inlined.
                             continue;
                         }
+                        else if (nonInlinedSemantic.Kind == IntermediateSymbolSemanticKind.Base && nonInlinedSemantic.Symbol.IsOverride )
+                        {
+                            // Base semantics for overrides are not inlined.
+                            continue;
+                        }
                         else
                         {
                             overrideTarget = nonInlinedSemantic.Symbol;

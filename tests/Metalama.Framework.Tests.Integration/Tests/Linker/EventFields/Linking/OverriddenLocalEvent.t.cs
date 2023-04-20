@@ -40,8 +40,8 @@ class Target
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
+      // Should invoke override 1.
+      this.Bar_Override1 += value;
       // Should invoke override 1.
       this.Bar_Override1 += value;
       // Should invoke override 1.
@@ -51,8 +51,8 @@ class Target
     }
     remove
     {
-      // Should invoke source code.
-      this._bar -= value;
+      // Should invoke override 1.
+      this.Bar_Override1 -= value;
       // Should invoke override 1.
       this.Bar_Override1 -= value;
       // Should invoke override 1.
@@ -65,8 +65,8 @@ class Target
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
+      // Should invoke override 3.
+      this.Bar_Override3 += value;
       // Should invoke override 3.
       this.Bar_Override3 += value;
       // Should invoke override 3.
@@ -76,8 +76,8 @@ class Target
     }
     remove
     {
-      // Should invoke source code.
-      this._bar -= value;
+      // Should invoke override 3.
+      this.Bar_Override3 -= value;
       // Should invoke override 3.
       this.Bar_Override3 -= value;
       // Should invoke override 3.
@@ -90,8 +90,8 @@ class Target
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
+      // Should invoke the final declaration.
+      this.Bar += value;
       // Should invoke the final declaration.
       this.Bar += value;
       // Should invoke the final declaration.
@@ -101,8 +101,8 @@ class Target
     }
     remove
     {
-      // Should invoke source code.
-      this._bar -= value;
+      // Should invoke the final declaration.
+      this.Bar -= value;
       // Should invoke the final declaration.
       this.Bar -= value;
       // Should invoke the final declaration.
@@ -152,8 +152,8 @@ class Target
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
+      // Should invoke override 1.
+      this.Bar_Override1 += value;
       // Should invoke override 1.
       this.Bar_Override1 += value;
       // Should invoke override 3.
@@ -163,8 +163,8 @@ class Target
     }
     remove
     {
-      // Should invoke source code.
-      this._bar -= value;
+      // Should invoke override 1.
+      this.Bar_Override1 -= value;
       // Should invoke override 1.
       this.Bar_Override1 -= value;
       // Should invoke override 3.
@@ -177,8 +177,8 @@ class Target
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
+      // Should invoke override 3.
+      this.Bar_Override3 += value;
       // Should invoke override 3.
       this.Bar_Override3 += value;
       // Should invoke the final declaration.
@@ -188,8 +188,8 @@ class Target
     }
     remove
     {
-      // Should invoke source code.
-      this._bar -= value;
+      // Should invoke override 3.
+      this.Bar_Override3 -= value;
       // Should invoke override 3.
       this.Bar_Override3 -= value;
       // Should invoke the final declaration.
