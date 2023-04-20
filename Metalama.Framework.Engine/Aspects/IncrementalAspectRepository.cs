@@ -30,7 +30,7 @@ internal sealed class IncrementalAspectRepository : AspectRepository
 
     private void VerifyDeclaration( IDeclaration declaration )
     {
-        var type = declaration.GetClosestNamedType()?.GetSymbol();
+        var type = declaration.GetTopmostNamedType()?.GetSymbol();
 
         if ( type == null )
         {
