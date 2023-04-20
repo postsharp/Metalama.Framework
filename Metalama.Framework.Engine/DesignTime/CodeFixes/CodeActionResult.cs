@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -42,7 +43,7 @@ public sealed class CodeActionResult
     public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
 
     public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
-        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage( MetalamaStringFormatter.Instance ) ) );
+        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetLocalizedMessage() ) );
 
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
