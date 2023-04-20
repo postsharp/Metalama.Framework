@@ -712,7 +712,7 @@ internal abstract partial class BaseTestRunner
             inputDiagnostics = new List<Diagnostic>();
             inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
             var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
-            inputDiagnostics.AddRange( semanticModel.GetDiagnostics() );
+            inputDiagnostics.AddRange( semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) );
         }
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
