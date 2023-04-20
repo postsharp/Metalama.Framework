@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,34 +16,71 @@ namespace Metalama.Framework.Engine.Aspects;
 internal sealed class IncrementalAspectRepository : AspectRepository
 {
     private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> _aspects;
+    private readonly CompilationModel _compilation;
+
+    private IncrementalAspectRepository( ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> aspects, CompilationModel compilation )
+    {
+        this._aspects = aspects;
+        this._compilation = compilation;
+    }
+
+    public IncrementalAspectRepository( CompilationModel compilation ) : this(
+        ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance>.Empty,
+        compilation ) { }
+
+    private void VerifyDeclaration( IDeclaration declaration )
+    {
+        var type = declaration.GetClosestNamedType()?.GetSymbol();
+
+        if ( type == null )
+        {
+            throw new InvalidOperationException(
+                MetalamaStringFormatter.Format( $"The Enhancement() method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
+        }
+
+        if ( !this._compilation.PartialCompilation.Types.Contains( type ) )
+        {
+            if ( MetalamaExecutionContext.Current.ExecutionScenario.IsDesignTime )
+            {
+                throw new InvalidOperationException(
+                    MetalamaStringFormatter.Format(
+                        $"Cannot call the Enhancements() method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current compilation." )
+                    +
+                    "At design time, you can only use the Enhancements() method within the current type and its ancestors. " +
+                    "Use the `MetalamaExecutionContext.Current.ExecutionScenario.IsDesignTime` expression to check if your code is running at design time. " +
+                    "Also check the IDeclaration.BelongsToCurrentProject property." );
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    MetalamaStringFormatter.Format(
+                        $"Cannot call the Enhancements() method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current project. Check the IDeclaration.BelongsToCurrentProject property." ) );
+            }
+        }
+    }
 
     // TODO: throw exception if the aspect of type T is not processed yet.
     // TODO: refactor the aspect lookup service so that the implementation can be injected from the CodeRefactoringService, so
     // that we don't have to run the pipeline to have a model including aspects.
-    public override AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances )
+    public override AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances, CompilationModel compilation )
     {
         var newDictionary = this._aspects.AddRange( aspectInstances, instance => ((IAspectInstanceInternal) instance).TargetDeclaration );
 
-        if ( newDictionary == this._aspects )
-        {
-            return this;
-        }
-        else
-        {
-            return new IncrementalAspectRepository( newDictionary );
-        }
+        return new IncrementalAspectRepository( newDictionary, compilation );
     }
 
-    public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration ) => this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
+    public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
+    {
+        this.VerifyDeclaration( declaration );
+
+        return this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
+    }
 
     // TODO: return null if the aspect of type T is not processed yet.
     public override bool HasAspect( IDeclaration declaration, Type aspectType )
-        => this._aspects[declaration.ToTypedRef()].Any( a => a.AspectClass.Type == aspectType );
-
-    private IncrementalAspectRepository( ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> aspects )
     {
-        this._aspects = aspects;
-    }
+        this.VerifyDeclaration( declaration );
 
-    public IncrementalAspectRepository() : this( ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance>.Empty ) { }
+        return this._aspects[declaration.ToTypedRef()].Any( a => a.AspectClass.Type == aspectType );
+    }
 }

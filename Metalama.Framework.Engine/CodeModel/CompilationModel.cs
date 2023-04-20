@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
 
             this._derivedTypes = partialCompilation.DerivedTypes;
-            this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository();
+            this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -195,7 +195,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( aspectInstances != null )
             {
-                this.AspectRepository = this.AspectRepository.WithAspectInstances( aspectInstances );
+                this.AspectRepository = this.AspectRepository.WithAspectInstances( aspectInstances, this );
             }
         }
 

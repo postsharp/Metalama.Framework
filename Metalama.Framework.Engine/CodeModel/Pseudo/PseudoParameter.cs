@@ -98,5 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl( SyntaxFactory.IdentifierName( this.Name ), this.Type, (SyntaxGenerationContext) syntaxGenerationContext, isReferenceable: true );
+        
+        public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
     }
 }
