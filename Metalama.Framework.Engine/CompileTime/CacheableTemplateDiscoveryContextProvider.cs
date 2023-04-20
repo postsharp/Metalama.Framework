@@ -69,7 +69,8 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
                 () => CompilationModel.CreateInitialInstance(
                     new ProjectModel( compilation, parent._serviceProvider ),
                     this.Compilation,
-                    new CompilationModelOptions( ShowExternalPrivateMembers: true ) ) );
+                    new CompilationModelOptions( ShowExternalPrivateMembers: true ),
+                    "CacheableTemplateDiscoveryContextProvider" ) );
         }
 
         public Compilation Compilation { get; }

@@ -63,7 +63,10 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 
         var mergedAspectInstancesOfSameType = aspectInstancesOfSameType.Count > 0 ? aspectInstancesOfSameType.SelectMany( t => t ) : null;
 
-        return compilation.WithTransformationsAndAspectInstances( observableTransformations, mergedAspectInstancesOfSameType );
+        return compilation.WithTransformationsAndAspectInstances(
+            observableTransformations,
+            mergedAspectInstancesOfSameType,
+            $"After ExecuteAspectLayer({this.AspectLayer})" );
     }
 
     private void ProcessType(
@@ -89,7 +92,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             indexWithinType++;
 
             // Create a snapshot of the compilation.
-            var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone();
+            var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone( $"Temporary mutable clone for {this.AspectLayer}." );
 
             // Execute the aspect.
             var aspectResult = aspectDriver.ExecuteAspect(
@@ -102,7 +105,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                 indexWithinType,
                 cancellationToken );
 
-            currentCompilation = mutableCompilationForThisAspect.CreateImmutableClone();
+            currentCompilation = mutableCompilationForThisAspect.CreateImmutableClone( $"Executing layer {this.AspectLayer}, {indexWithinType}" );
 
             this.Parent.AddDiagnostics( aspectResult.Diagnostics );
 

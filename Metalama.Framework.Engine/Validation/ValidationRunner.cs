@@ -36,7 +36,7 @@ internal sealed class ValidationRunner
     /// </summary>
     public ValidationResult RunAll( CompilationModel initialCompilation, CompilationModel finalCompilation )
     {
-        var initialCompilationWithEnhancements = initialCompilation.WithAspectRepository( finalCompilation.AspectRepository );
+        var initialCompilationWithEnhancements = initialCompilation.WithAspectRepository( finalCompilation.AspectRepository, "With final aspect repository" );
 
         var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
         this.RunDeclarationValidators( initialCompilationWithEnhancements, finalCompilation, userDiagnosticSink );

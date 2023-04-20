@@ -34,21 +34,27 @@ namespace Metalama.Framework.Engine.CodeModel
             MetalamaEngineModuleInitializer.EnsureInitialized();
         }
 
-        public static CompilationModel CreateInitialInstance( ProjectModel project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
-            => new( project, compilation, aspectRepository, CompilationModelOptions.Default );
+        public static CompilationModel CreateInitialInstance(
+            ProjectModel project,
+            PartialCompilation compilation,
+            AspectRepository? aspectRepository = null,
+            string? debugLabel = null )
+            => new( project, compilation, aspectRepository, CompilationModelOptions.Default, debugLabel );
 
         public static CompilationModel CreateInitialInstance(
             ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
-            AspectRepository? aspectRepository = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default );
+            AspectRepository? aspectRepository = null,
+            string? debugLabel = null )
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default, debugLabel );
 
         internal static CompilationModel CreateInitialInstance(
             ProjectModel project,
             Compilation compilation,
-            CompilationModelOptions options )
-            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options );
+            CompilationModelOptions options,
+            string? debugLabel )
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options, debugLabel: debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -78,14 +84,18 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModelOptions Options { get; }
 
+        private readonly string? _debugLabel;
+
         private CompilationModel(
             ProjectModel project,
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
-            CompilationModelOptions? options )
+            CompilationModelOptions? options,
+            string? debugLabel )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
+            this._debugLabel = debugLabel;
 
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
@@ -149,9 +159,11 @@ namespace Metalama.Framework.Engine.CodeModel
         private CompilationModel(
             CompilationModel prototype,
             IReadOnlyCollection<ITransformation>? observableTransformations,
-            IEnumerable<AspectInstance>? aspectInstances ) : this(
+            IEnumerable<AspectInstance>? aspectInstances,
+            string? debugLabel ) : this(
             prototype,
-            true )
+            true,
+            debugLabel )
         {
             if ( observableTransformations != null )
             {
@@ -187,13 +199,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable, CompilationModelOptions? options = null )
+        private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null )
         {
             this.IsMutable = mutable;
             this.Project = prototype.Project;
-            this.Revision = prototype.Revision + 1;
             this.Helpers = prototype.Helpers;
             this.Options = options ?? prototype.Options;
+            this._debugLabel = debugLabel;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -220,25 +232,26 @@ namespace Metalama.Framework.Engine.CodeModel
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
-        private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository ) : this( prototype, false )
+        private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository, string? debugLabel ) : this( prototype, false, debugLabel )
         {
             this.AspectRepository = aspectRepository;
         }
 
         internal CompilationModel WithTransformationsAndAspectInstances(
             IReadOnlyCollection<ITransformation>? introducedDeclarations,
-            IEnumerable<AspectInstance>? aspectInstances )
+            IEnumerable<AspectInstance>? aspectInstances,
+            string? debugLabel )
         {
             if ( introducedDeclarations?.Count == 0 && aspectInstances == null )
             {
                 return this;
             }
 
-            return new CompilationModel( this, introducedDeclarations, aspectInstances );
+            return new CompilationModel( this, introducedDeclarations, aspectInstances, debugLabel );
         }
 
-        internal CompilationModel WithAspectRepository( AspectRepository aspectRepository )
-            => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository );
+        internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
+            => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository, debugLabel );
 
         [Memo]
         public INamedTypeCollection Types
@@ -286,8 +299,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), options );
-
-        public int Revision { get; }
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
@@ -438,7 +449,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal string? Name => this.RoslynCompilation.AssemblyName;
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
+        public override string ToString()
+        {
+            if ( this._debugLabel == null )
+            {
+                return this.RoslynCompilation.AssemblyName ?? "<anonymous>";
+            }
+            else
+            {
+                return $"{this.RoslynCompilation.AssemblyName} ({this._debugLabel})";
+            }
+        }
 
         private CompilationHelpers Helpers { get; }
 
@@ -461,9 +482,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
-        internal CompilationModel CreateMutableClone() => new( this, true, this.Options );
+        internal CompilationModel CreateMutableClone( string? debugLabel = null ) => new( this, true, debugLabel, this.Options );
 
-        internal CompilationModel CreateImmutableClone() => new( this, false, this.Options );
+        internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
             => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );

@@ -60,6 +60,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             return false;
         }
 
+        declaration = declaration.ForCompilation( metaApi.Compilation );
+
         if ( metaApi.Declaration.Equals( declaration ) || metaApi.Declaration.ContainingDeclaration?.Equals( declaration ) == true )
         {
             return true;
