@@ -15,11 +15,6 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>
-        /// <param name="pipelineConfiguration"></param>
-        /// <param name="input">The inputs.</param>
-        /// <param name="diagnostics"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         public abstract Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,

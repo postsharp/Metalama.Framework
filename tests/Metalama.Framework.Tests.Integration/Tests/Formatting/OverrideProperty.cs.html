@@ -43,6 +43,12 @@
                 text-decoration: underline 1px wavy red;
             }
 
+         .diff-Imaginary {
+                display: block;
+                background-image: repeating-linear-gradient( -45deg, gray, gray 2px, transparent 2px, transparent 8px );
+            }
+
+
             .legend 
             {
                 margin-top: 100px;
@@ -54,14 +60,14 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span><span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">TestInputs</span><span class="cs-operator">.</span><span class="cs-namespace-name">Highlighting</span><span class="cs-operator">.</span><span class="cs-namespace-name">OverrideProperty</span>
 <span class='line-number'>5</span><span class="cs-punctuation">{</span>
-<span class='line-number'>6</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">MyOverride</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">:</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">OverrideFieldOrPropertyAspect</span>
-<span class='line-number'>7</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
-<span class='line-number'>8</span><span class="cr-NeutralTrivia">        </span><span class="cs-keyword">public</span> <span class="cs-keyword">override</span> <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-property-name">OverrideProperty</span>
-<span class='line-number'>9</span><span class="cr-NeutralTrivia">        </span><span class="cs-punctuation">{</span>
-<span class='line-number'>10</span><span class="cr-NeutralTrivia">            </span><span class="cs-keyword">get</span> <span class="cs-operator">=&gt;</span> <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cs-punctuation">;</span>
-<span class='line-number'>11</span><span class="cr-NeutralTrivia">            </span><span class="cs-keyword">set</span> <span class="cs-operator">=&gt;</span> <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cs-punctuation">;</span>
-<span class='line-number'>12</span><span class="cr-NeutralTrivia">        </span><span class="cs-punctuation">}</span>
-<span class='line-number'>13</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span><span class="cr-CompileTime">
+<span class='line-number' data-member='MyOverride'>6</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">MyOverride</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">:</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">OverrideFieldOrPropertyAspect</span>
+<span class='line-number' data-member='MyOverride'>7</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
+<span class='line-number' data-member='MyOverride.OverrideProperty'>8</span><span class="cr-NeutralTrivia">        </span><span class="cs-keyword">public</span> <span class="cs-keyword">override</span> <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-property-name">OverrideProperty</span>
+<span class='line-number' data-member='MyOverride.OverrideProperty'>9</span><span class="cr-NeutralTrivia">        </span><span class="cs-punctuation">{</span>
+<span class='line-number' data-member='MyOverride.OverrideProperty'>10</span><span class="cr-NeutralTrivia">            </span><span class="cs-keyword">get</span> <span class="cs-operator">=&gt;</span> <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cs-punctuation">;</span>
+<span class='line-number' data-member='MyOverride.OverrideProperty'>11</span><span class="cr-NeutralTrivia">            </span><span class="cs-keyword">set</span> <span class="cs-operator">=&gt;</span> <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cs-punctuation">;</span>
+<span class='line-number' data-member='MyOverride.OverrideProperty'>12</span><span class="cr-NeutralTrivia">        </span><span class="cs-punctuation">}</span>
+<span class='line-number' data-member='MyOverride'>13</span><span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span><span class="cr-CompileTime">
 <span class='line-number'>14</span></span><span class="cs-punctuation">}</span>
 </code></pre>
        <p class='legend'>Legend:</p>

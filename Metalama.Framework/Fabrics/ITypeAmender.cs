@@ -18,6 +18,6 @@ namespace Metalama.Framework.Fabrics
         /// <summary>
         /// Gets an object that allows creating advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
-        IAdviceFactory Advices { get; }
+        IAdviceFactory Advice { get; }
     }
 }

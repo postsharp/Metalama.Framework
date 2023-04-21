@@ -10,9 +10,8 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private sealed class TriviaWalker : SafeSyntaxWalker, IDisposable
+        private sealed class TriviaWalker : SafeSyntaxWalker
         {
-            private readonly ReusableTextWriter _writer = new();
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();
 
             private int _crLfNumber;
@@ -102,9 +101,7 @@ namespace Metalama.Framework.Engine.Formatting
                 // We are interested only in trivia in source code.
                 if ( trivia.IsKind( SyntaxKind.EndOfLineTrivia ) && this.IsInSourceCode() )
                 {
-                    trivia.WriteTo( this._writer );
-
-                    var chars = this._writer.Data;
+                    var chars = trivia.ToString().AsSpan();
 
                     switch ( GetEndOfLineStyle( chars ) )
                     {
@@ -123,14 +120,10 @@ namespace Metalama.Framework.Engine.Formatting
 
                             break;
                     }
-
-                    this._writer.Reset();
                 }
 
                 base.VisitTrivia( trivia );
             }
-
-            public void Dispose() => this._writer.Dispose();
         }
     }
 }

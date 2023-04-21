@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline
             IDiagnosticAdder diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var compilation = input.LastCompilationModel ?? CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
 
             pipelineConfiguration.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 

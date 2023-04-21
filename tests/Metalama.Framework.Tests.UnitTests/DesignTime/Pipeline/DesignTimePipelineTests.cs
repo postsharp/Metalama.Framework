@@ -894,4 +894,54 @@ class D{version}
 
         return (masterCompilation, dependentCompilation);
     }
+
+#if NET6_0_OR_GREATER
+    [SkippableFact]
+    public void OverrideMethodWithMultipleTfms()
+    {
+        var code = """
+            using Metalama.Framework.Aspects;
+
+            class Aspect : OverrideMethodAspect
+            {
+                public override dynamic? OverrideMethod() => null;
+            }
+
+            class Target
+            {
+                [Aspect]
+                void M() {}
+            }
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var netCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "Project" );
+
+        var coreReferences = netCompilation.References
+            .Where( reference => reference.Display?.EndsWith( "Metalama.Framework.dll", StringComparison.Ordinal ) != true );
+
+        var netMetalamaFrameworkPath = typeof(CompileTimeAttribute).Assembly.Location;
+        var baseDirectoryPath = new FileInfo( netMetalamaFrameworkPath ).Directory!.Parent!.FullName;
+        var metalamaFrameworkAssemblyName = Path.GetFileName( netMetalamaFrameworkPath );
+
+        var netFrameworkMetalamaFrameworkPath = Path.Combine( baseDirectoryPath, "netframework4.8", metalamaFrameworkAssemblyName );
+
+        // It may be possible that only the .Net 6.0 TFM of this project has been built. In that case, this test cannot proceed.
+        Skip.If( !File.Exists( netFrameworkMetalamaFrameworkPath ) );
+
+        var netFrameworkCompilation = TestCompilationFactory.CreateCSharpCompilation( "", name: "Project" )
+            .WithReferences( coreReferences.Append( MetadataReference.CreateFromFile( netFrameworkMetalamaFrameworkPath ) ) );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, netFrameworkCompilation, default, out _ ) );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, netCompilation, default, out var result ) );
+
+        foreach ( var (_, treeResult) in result!.TransformationResult.SyntaxTreeResults )
+        {
+            Assert.Empty( treeResult.Diagnostics );
+        }
+    }
+#endif
 }

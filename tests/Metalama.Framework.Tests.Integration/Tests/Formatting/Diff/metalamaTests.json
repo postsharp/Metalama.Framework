@@ -1,0 +1,5 @@
+{
+  "TestRunnerFactoryType": "Metalama.Framework.Tests.Integration.Runners.HighlightingTestRunnerFactory, Metalama.Framework.Tests.Integration",
+  "WriteInputHtml": true,
+  "WriteOutputHtml": true
+}

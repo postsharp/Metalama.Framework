@@ -418,5 +418,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The null-conditional operator cannot be used in the expression '{0}', because '{1}' is compile-time, but '{2}' is run-time. Consider using a separate null-checking 'if' statement instead of the null-conditional operator.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> CompileTimeTypesCannotHaveTypeFabrics
+            = new(
+                "LAMA0260",
+                "Type fabrics cannot be nested in compile-time types.",
+                "The type fabric '{0}' cannot be nested in a compile-time type.",
+                _category,
+                Error );
     }
 }

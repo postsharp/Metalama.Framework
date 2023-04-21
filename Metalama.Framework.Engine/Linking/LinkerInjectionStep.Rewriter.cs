@@ -297,7 +297,7 @@ internal sealed partial class LinkerInjectionStep
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithTrailingTrivia( ElasticLineFeed )
-                        .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithAdditionalAnnotations( attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )
                     {

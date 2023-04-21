@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
+
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -43,8 +44,9 @@ namespace Metalama.Framework.Engine.Linking
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
+            IEnumerable<SyntaxTreeTransformation> transformations,
             IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
-            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap)
+            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap )
         {
             Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
             Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
@@ -55,10 +57,9 @@ namespace Metalama.Framework.Engine.Linking
             this._intermediateCompilation = intermediateCompilation;
             this._injectedMemberLookup = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
 
-            this._transformedSyntaxTreeMap =
-                this._intermediateCompilation.ModifiedSyntaxTrees
-                    .Where( m => m.Value.Kind == Compiler.SyntaxTreeTransformationKind.Replace )
-                    .ToDictionary( m => m.Value.OldTree.AssertNotNull(), m => m.Value.NewTree.AssertNotNull() );
+            this._transformedSyntaxTreeMap = transformations
+                .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
+                .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
 
             this._overrideMap = overrideMap =
                 new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.Comparers.Default );

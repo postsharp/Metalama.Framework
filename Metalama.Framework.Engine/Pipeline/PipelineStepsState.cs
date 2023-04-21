@@ -154,7 +154,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
                 if ( this._currentStep?.AspectLayer.AspectClass == aspectType )
                 {
-                    // When an aspect class is adding the an instance of the same aspect class, we need to evaluate
+                    // When an aspect class is adding an instance of the same aspect class, we need to evaluate
                     // the aspect source immediately. This is done by the caller, and not here, so we skip it.
                 }
                 else
@@ -164,11 +164,29 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     if ( !this._comparer.Contains( aspectLayerId ) )
                     {
                         // This is an aspect of a different stage.
+                        if ( this._currentStep != null )
+                        {
+                            var currentLayerIndex = this.PipelineConfiguration.AspectLayers.IndexOf( this._currentStep.AspectLayer );
+
+                            Invariant.Assert( currentLayerIndex != -1 );
+
+                            // Find out if there is no future layer for this aspect type.
+                            if ( !this.PipelineConfiguration.AspectLayers.Skip( currentLayerIndex + 1 ).Any( layer => layer.Equals( aspectLayerId ) ) )
+                            {
+                                this._diagnostics.Report(
+                                    GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
+                                        this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
+                                        (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
+
+                                continue;
+                            }
+                        }
+
                         this._overflowAspectSource.Add( aspectSource, aspectType );
                     }
                     else
                     {
-                        // There is a unique depth and TargetKind for the AspectSource step step.
+                        // There is a unique depth and TargetKind for the AspectSource step.
                         var stepId = new PipelineStepId( aspectLayerId, -1, -1, -1 );
 
                         if ( !this.TryGetOrAddStep( stepId, false, out var step ) )

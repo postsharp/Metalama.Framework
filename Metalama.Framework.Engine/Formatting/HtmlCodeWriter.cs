@@ -7,10 +7,12 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -35,9 +37,23 @@ namespace Metalama.Framework.Engine.Formatting
         public Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
             => this.WriteAsync( document, textWriter, diagnostics, null );
 
+        public async Task WriteDiffAsync(
+            Document inputDocument,
+            Document outputDocument,
+            TextWriter inputTextWriter,
+            TextWriter outputTextWriter,
+            IEnumerable<Diagnostic> inputDiagnostics )
+        {
+            var oldSyntaxTree = await inputDocument.GetSyntaxTreeAsync();
+            var newSyntaxTree = await outputDocument.GetSyntaxTreeAsync();
+            await this.WriteAsync( inputDocument, inputTextWriter, inputDiagnostics, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, true ) );
+            await this.WriteAsync( outputDocument, outputTextWriter, null, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, false ) );
+        }
+
         private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
+            var syntaxRoot = (await document.GetSyntaxRootAsync()).AssertNotNull();
 
             var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles, diagnostics: diagnostics );
 
@@ -62,14 +78,14 @@ namespace Metalama.Framework.Engine.Formatting
                 }
             }
 
-            void FlushLine()
+            void FlushLine( TextSpan span )
             {
                 var lineDiffInfo = diffInfo?.Lines[lineNumber];
 
+                // First write the imaginary diff lines before.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
 
-                finalBuilder.AppendInvariant( $"<span class='line-number'>{lineNumber + 1}</span>" );
-
+                // Then write the diagnostics.
                 if ( diagnosticBuilder.Length > 0 )
                 {
                     // Figure out the indentation of the next block.
@@ -127,10 +143,49 @@ namespace Metalama.Framework.Engine.Formatting
                     diagnosticSet.Clear();
                 }
 
-                // Then write the buffered code.
+                // Find the member at the line number.
+                var line = sourceText.Lines.GetLineFromPosition( span.Start );
+                var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
+
+                var members = node.AncestorsAndSelf()
+                    .Select(
+                        n => n switch
+                        {
+                            MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
+                            BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
+                            EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
+                            BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
+                            PropertyDeclarationSyntax property => (property, property.Identifier.Text),
+                            _ => (null, null)
+                        } )
+                    .Where( x => x.Node != null )
+                    .ToList();
+
+                finalBuilder.AppendInvariant( $"<span class='line-number'" );
+
+                if ( members.Count > 0 )
+                {
+                    var topNode = members[0].Node;
+
+                    var syntaxToken = topNode!.GetFirstToken();
+
+                    if ( (line.End < syntaxToken.Span.Start || line.Start > topNode.GetLastToken().Span.End)
+                         && string.IsNullOrWhiteSpace( sourceText.GetSubText( line.Span ).ToString() ) )
+                    {
+                        // This is a blank line.
+                    }
+                    else
+                    {
+                        members.Reverse();
+                        finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsEnumerable( x => x.Text! ) )}'" );
+                    }
+                }
+
+                finalBuilder.AppendInvariant( $">{lineNumber + 1}</span>" );
                 finalBuilder.AppendLine( codeLineBuilder.ToString() );
                 codeLineBuilder.Clear();
 
+                // Write the diff lines after, if any.
                 AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
 
                 lineNumber++;
@@ -204,7 +259,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                                 diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
 
-                                HtmlEncode( diagnosticBuilder, diagnostic.Message );
+                                HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
                                 diagnosticBuilder.Append( "</span>\n" );
                             }
                         }
@@ -253,24 +308,24 @@ namespace Metalama.Framework.Engine.Formatting
                                     codeLineBuilder.Append( "&#13;&#10;" );
                                 }
 
-                                HtmlEncode( codeLineBuilder, titles[i], true );
+                                HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
                             }
 
                             codeLineBuilder.Append( "\"" );
                         }
 
                         codeLineBuilder.Append( ">" );
-                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
+                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                         codeLineBuilder.Append( "</span>" );
                     }
                     else
                     {
-                        HtmlEncode( codeLineBuilder, spanText, onNewLine: FlushLine );
+                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                     }
                 }
             }
 
-            FlushLine();
+            FlushLine( default );
 
             finalBuilder.AppendLine( "</code></pre>" );
 
@@ -282,9 +337,9 @@ namespace Metalama.Framework.Engine.Formatting
             await textWriter.WriteAsync( finalBuilder.ToString() );
         }
 
-        private static void HtmlEncode( StringBuilder stringBuilder, string s, bool attributeEncode = false, Action? onNewLine = null )
+        private static void HtmlEncode( StringBuilder stringBuilder, TextSpan span, string text, bool attributeEncode = false, Action<TextSpan>? onNewLine = null )
         {
-            foreach ( var c in s )
+            foreach ( var c in text )
             {
                 switch ( c )
                 {
@@ -324,7 +379,7 @@ namespace Metalama.Framework.Engine.Formatting
                         }
                         else
                         {
-                            onNewLine();
+                            onNewLine( span );
                         }
 
                         break;
@@ -406,11 +461,31 @@ namespace Metalama.Framework.Engine.Formatting
             PartialCompilation inputCompilation,
             PartialCompilation outputCompilation )
         {
-            var diffBuilder = new SideBySideDiffBuilder();
+            await WriteAllAsync(
+                projectOptions,
+                serviceProvider,
+                inputCompilation,
+                ".cs.html",
+                p => GetDiffInfoForPath( p, true ) );
 
-            await WriteAllAsync( projectOptions, serviceProvider, inputCompilation, ".cs.html", p => GetDiffInfo( p, true ) );
-            await WriteAllAsync( projectOptions, serviceProvider, outputCompilation, ".t.cs.html", p => GetDiffInfo( p, false ) );
+            await WriteAllAsync(
+                projectOptions,
+                serviceProvider,
+                outputCompilation,
+                ".t.cs.html",
+                p => GetDiffInfoForPath( p, false ) );
 
+            FileDiffInfo GetDiffInfoForPath( string path, bool isOld )
+            {
+                var oldTree = inputCompilation.SyntaxTrees[path];
+                var newTree = outputCompilation.SyntaxTrees[path];
+
+                return GetDiffInfo( oldTree, newTree, isOld );
+            }
+        }
+
+        private static FileDiffInfo GetDiffInfo( SyntaxTree oldTree, SyntaxTree newTree, bool isOld )
+        {
             // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
             // so we can do any transformation we want to make the diff cleaner.
             static string GetTextToCompare( SourceText text )
@@ -421,54 +496,53 @@ namespace Metalama.Framework.Engine.Formatting
                 return _cleanReturnStatementRegex.Replace( _cleanAutomaticPropertiesRegex.Replace( text.ToString(), "" ), "result = " );
             }
 
-            FileDiffInfo GetDiffInfo( string path, bool isOld )
-            {
+            var diffBuilder = new SideBySideDiffBuilder();
+
 #pragma warning disable VSTHRD103
-                var oldText = inputCompilation.SyntaxTrees[path].GetText();
-                var newText = outputCompilation.SyntaxTrees[path].GetText();
+            var oldText = oldTree.GetText();
+            var newText = newTree.GetText();
 #pragma warning restore VSTHRD103
 
-                var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
+            var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
 
-                var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
+            var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
 
-                var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
+            var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
 
-                var imaginaryLinesBefore = 0;
-                var lineNumber = 0;
+            var imaginaryLinesBefore = 0;
+            var lineNumber = 0;
 
-                foreach ( var diffLine in diffPane.Lines )
+            foreach ( var diffLine in diffPane.Lines )
+            {
+                if ( diffLine.Type == ChangeType.Imaginary )
                 {
-                    if ( diffLine.Type == ChangeType.Imaginary )
+                    imaginaryLinesBefore++;
+                }
+                else
+                {
+                    var lineText = text.Lines[lineNumber].ToString();
+
+                    if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
                     {
-                        imaginaryLinesBefore++;
+                        // Prefer to insert imaginary lines after a bracket than before.
+                        lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
                     }
                     else
                     {
-                        var lineText = text.Lines[lineNumber].ToString();
-
-                        if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
-                        {
-                            // Prefer to insert imaginary lines after a bracket than before.
-                            lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
-                        }
-                        else
-                        {
-                            lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
-                            imaginaryLinesBefore = 0;
-                        }
-
-                        lineNumber++;
+                        lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
+                        imaginaryLinesBefore = 0;
                     }
-                }
 
-                if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
-                {
-                    lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+                    lineNumber++;
                 }
-
-                return new FileDiffInfo( lineDiffInfos.ToArray() );
             }
+
+            if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
+            {
+                lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+            }
+
+            return new FileDiffInfo( lineDiffInfos.ToArray() );
         }
 
         private sealed record FileDiffInfo( LineDiffInfo[] Lines );

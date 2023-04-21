@@ -37,7 +37,8 @@ internal sealed class EvaluateAspectSourcesPipelineStep : PipelineStep
         }
         else
         {
-            return Task.FromResult( compilation.WithTransformationsAndAspectInstances( null, concreteAspectInstances ) );
+            return Task.FromResult(
+                compilation.WithTransformationsAndAspectInstances( null, concreteAspectInstances, $"EvaluateAspectSource:{this.AspectLayer.AspectName}" ) );
         }
     }
 
