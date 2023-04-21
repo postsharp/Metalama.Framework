@@ -75,5 +75,11 @@ namespace Metalama.Framework.Code
         /// it implements.
         /// </summary>
         int Depth { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the current declaration is declared to the current project. It returns <c>false</c> for declarations
+        /// declared in referenced projects or assemblies.
+        /// </summary>
+        bool BelongsToCurrentProject { get; }
     }
 }

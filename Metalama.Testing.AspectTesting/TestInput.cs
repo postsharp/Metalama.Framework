@@ -156,6 +156,9 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public bool IsSkipped => this.SkipReason != null;
 
+        internal bool ShouldIgnoreDiagnostic( string id )
+            => this.Options.IgnoredDiagnostics.Contains( id ) || this.ProjectProperties.IgnoredWarnings.Contains( id );
+
         internal sealed class Factory
         {
             private readonly GlobalServiceProvider _serviceProvider;

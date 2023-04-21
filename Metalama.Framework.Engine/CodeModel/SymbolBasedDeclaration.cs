@@ -98,5 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => other is SymbolBasedDeclaration declaration && this.Compilation.CompilationContext.SymbolComparer.Equals( this.Symbol, declaration.Symbol );
 
         protected override int GetHashCodeCore() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
+
+        public override bool BelongsToCurrentProject => this.Symbol.ContainingAssembly.Equals( this.Compilation.RoslynCompilation.Assembly );
     }
 }

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System.Globalization;
 
 namespace Metalama.Framework.Engine.Diagnostics;
 
@@ -9,5 +9,5 @@ namespace Metalama.Framework.Engine.Diagnostics;
 
 public static class DiagnosticExtensions
 {
-    public static string GetLocalizedMessage( this Diagnostic diagnostic ) => diagnostic.GetMessage( CultureInfo.CurrentUICulture );
+    public static string GetLocalizedMessage( this Diagnostic diagnostic ) => diagnostic.GetMessage( MetalamaStringFormatter.Instance );
 }

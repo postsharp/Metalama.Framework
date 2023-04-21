@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          !f.IsImplicitlyDeclared &&
                          ( ( f.Type.Is( typeof(ICloneable) ) && f.Type.SpecialType != SpecialType.String ) ||
-                           ( f.Type is INamedType fieldNamedType && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
+                           ( f.Type is INamedType {  BelongsToCurrentProject: true } fieldNamedType && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
 
             foreach (var field in clonableFields)
             {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 public abstract class AspectRepository : IAspectRepository
 {
-    public abstract AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances );
+    public abstract AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances, CompilationModel compilation );
 
     public abstract IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
         where T : IAspect;

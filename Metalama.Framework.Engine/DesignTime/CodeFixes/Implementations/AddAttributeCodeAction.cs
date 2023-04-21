@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -15,7 +16,7 @@ internal sealed class AddAttributeCodeAction : ICodeAction
     private readonly AttributeConstruction _attribute;
 
     public IDeclaration TargetDeclaration { get; }
-    
+
     public AddAttributeCodeAction( IDeclaration targetDeclaration, AttributeConstruction attribute )
     {
         this.TargetDeclaration = targetDeclaration;
@@ -35,11 +36,19 @@ internal sealed class AddAttributeCodeAction : ICodeAction
             throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
         }
 
-        var originalNode = this.TargetDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
+        var originalNode = this.TargetDeclaration.GetPrimaryDeclarationSyntax();
 
-        if ( originalNode is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration } )
+        switch ( originalNode )
         {
-            originalNode = variableDeclaration.Parent!;
+            case null:
+                // TODO: This happens with property-backing fields, but we can actually add attributes to property-backing fields, it is just not implemented.
+                throw new InvalidOperationException(
+                    MetalamaStringFormatter.Format( $"Cannot add an attribute to the {this.TargetDeclaration.DeclarationKind} '{targetSymbol}' because it is implicitly defined." ) );
+
+            case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration }:
+                originalNode = variableDeclaration.Parent!;
+
+                break;
         }
 
         var originalTree = originalNode.SyntaxTree;

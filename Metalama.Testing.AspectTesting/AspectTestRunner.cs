@@ -203,7 +203,7 @@ namespace Metalama.Testing.AspectTesting
                 }
 
                 return d.Severity >= minimalVerbosity
-                       && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+                       && !testInput.ShouldIgnoreDiagnostic( d.Id );
             }
 
             if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
