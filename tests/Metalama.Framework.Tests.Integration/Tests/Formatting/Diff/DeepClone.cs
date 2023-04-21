@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Diff
                 meta.Target.Type.FieldsAndProperties.Where(
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          ( f.Type.Is( typeof(ICloneable) ) ||
-                           ( f.Type is INamedType fieldNamedType && fieldNamedType.Enhancements().GetAspects<DeepCloneAttribute>().Any() ) ) );
+                           ( f.Type is INamedType {  BelongsToCurrentProject: true } fieldNamedType && fieldNamedType.Enhancements().GetAspects<DeepCloneAttribute>().Any() ) ) );
 
             foreach (var field in clonableFields)
             {

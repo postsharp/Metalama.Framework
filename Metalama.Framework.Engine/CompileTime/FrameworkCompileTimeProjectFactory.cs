@@ -9,9 +9,11 @@ using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
@@ -19,9 +21,8 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
 {
     private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
     private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
-    private readonly object _sync = new();
 
-    private volatile CompileTimeProjectManifest? _frameworkProjectManifest;
+    private readonly ConcurrentDictionary<string, CompileTimeProjectManifest> _frameworkProjectManifestDictionary = new();
 
     private static DiagnosticManifest CreateFrameworkDiagnosticManifest()
     {
@@ -33,12 +34,9 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
         return new DiagnosticManifest( diagnostics, suppressions );
     }
 
-    private static TemplateProjectManifest CreateFrameworkTemplateProjectManifest( Compilation compilation )
+    private static TemplateProjectManifest CreateFrameworkTemplateProjectManifest( IAssemblySymbol assembly )
     {
-        // Get the Metalama.Framework assembly.
-        var assembly = compilation.SourceModule.ReferencedAssemblySymbols.First( x => x.Name == "Metalama.Framework" );
-
-        // Create a builder. 
+        // Create a builder.
         var builder = new TemplateProjectManifestBuilder( assembly.GlobalNamespace );
 
         // Index all template members.
@@ -102,26 +100,33 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
 
     public CompileTimeProject CreateFrameworkProject( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, Compilation compilation )
     {
-        lock ( this._sync )
-        {
-            // ReSharper disable once NonAtomicCompoundOperator
-            this._frameworkProjectManifest ??= new CompileTimeProjectManifest(
+        var assembly = compilation.SourceModule.ReferencedAssemblySymbols.First( x => x.Name == "Metalama.Framework" );
+
+        var tfm = assembly.GetAttributes()
+            .Single( attribute => attribute.AttributeClass?.Name == nameof(TargetFrameworkAttribute) )
+            .ConstructorArguments
+            .Single()
+            .Value
+            .AssertCast<string>()
+            .AssertNotNull();
+
+        var manifest = this._frameworkProjectManifestDictionary.GetOrAdd(
+            tfm,
+            _ => new CompileTimeProjectManifest(
                 _frameworkAssemblyIdentity.ToString(),
                 _frameworkAssemblyIdentity.ToString(),
                 "",
-                new[] { typeof(InternalImplementAttribute) }
-                    .SelectAsImmutableArray( t => t.FullName ),
+                new[] { typeof(InternalImplementAttribute) }.SelectAsImmutableArray( t => t.FullName ),
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
-                CreateFrameworkTemplateProjectManifest( compilation ),
+                CreateFrameworkTemplateProjectManifest( assembly ),
                 null,
                 0,
                 Array.Empty<CompileTimeFileManifest>(),
-                Array.Empty<CompileTimeDiagnosticManifest>() );
-        }
+                Array.Empty<CompileTimeDiagnosticManifest>() ) );
 
         return new CompileTimeProject(
             serviceProvider,
@@ -129,7 +134,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
             _frameworkAssemblyIdentity,
             _frameworkAssemblyIdentity,
             ImmutableArray<CompileTimeProject>.Empty,
-            this._frameworkProjectManifest,
+            manifest,
             null,
             _ => null,
             null,

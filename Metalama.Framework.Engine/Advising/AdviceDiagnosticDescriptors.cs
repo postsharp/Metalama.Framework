@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advising
             CannotIntroduceMemberAlreadyExists = new(
                 "LAMA0500",
                 "Cannot introduce member into a type because it already exists.",
-                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'. Use a different OverrideStrategy or skip the member.",
                 _category,
                 Error );
 
@@ -137,12 +137,13 @@ namespace Metalama.Framework.Engine.Advising
             InterfaceUnsupportedOverrideStrategy = new(
                 "LAMA0516",
                 "Using unsupported override strategy for interface type.",
-                "The aspect '{0}' cannot implement interface '{1}' in type '{2}' with 'whenExists={3}' because it is not supported." +
+                "The aspect '{0}' cannot implement interface '{1}' in type '{2}' with 'whenExists={3}' because it is not supported. " +
                 "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string
+                AccessorKind)>
             InterfacePropertyIsMissingAccessor = new(
                 "LAMA0517",
                 "Cannot implement an interface property, the template is missing an accessor.",
@@ -152,7 +153,8 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string AccessorKind)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceProperty, INamedType TargetType, IMember TemplateMember, string
+                AccessorKind)>
             ExplicitInterfacePropertyHasSuperficialAccessor = new(
                 "LAMA0518",
                 "Cannot implement an interface property, the template has superficial accessor.",
@@ -232,6 +234,22 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0527",
                 "Cannot introduce static indexer.",
                 "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it is static.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
+            CannotOverrideNonPublicInterfaceMethod = new(
+                "LAMA0528",
+                "Cannot override an interface member because it is not public.",
+                "The aspect '{0}' cannot override the member '{1}' because it is not public.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
+            CannotOverrideNonVirtualInterfaceMethod = new(
+                "LAMA0529",
+                "Cannot override an interface member because it is not virtual.",
+                "The aspect '{0}' cannot override the member '{1}' because it is not virtual.",
                 _category,
                 Error );
     }

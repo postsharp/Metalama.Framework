@@ -36,6 +36,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             null,
             ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
             "net6.0",
+            ImmutableArray<string>.Empty,
             new TestFrameworkLicenseStatus( typeof(MainViewModel).Assembly.GetName().Name!, null, false ) );
 
         private TemplateTest? _currentTest;

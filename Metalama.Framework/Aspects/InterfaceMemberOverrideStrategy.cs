@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
+
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
@@ -9,19 +11,27 @@ namespace Metalama.Framework.Aspects
     public enum InterfaceMemberOverrideStrategy
     {
         /// <summary>
-        /// The advice fails with a compilation error if a matching interface member already exists in the target declaration. Same as <see cref="Fail"/>.
+        /// The behavior depends on the <see cref="OverrideStrategy"/> specified when calling the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+        /// method. When set to <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
+        /// the strategy is to override.
         /// </summary>
-        Default = Fail,
+        Default = 0,
 
         /// <summary>
         /// The advice fails with a compilation error if a matching interface member already exists in the target declaration.
         /// </summary>
-        Fail = 0,
+        Fail,
 
         /// <summary>
         /// The advice introduces the interface member as explicit even if the interface member was supposed to be introduced as implicit.
         /// </summary>
-        MakeExplicit = 1
+        MakeExplicit,
+        
+        /// <summary>
+        /// When the <see cref="OverrideStrategy"/> of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+        /// is set to <see cref="OverrideStrategy.Override"/>, does not override this member if there is already an implementation. 
+        /// </summary>
+        Ignore = 3,
 
         // TODO: Support.
         //       The problem is that these are not really useful when the other declaration is not compatible.
@@ -31,11 +41,11 @@ namespace Metalama.Framework.Aspects
         // /// <summary>
         // /// The advice uses the existing type member if it exactly matches the interface member and ignores the provided template, otherwise the advice fails with a compilation error.
         // /// </summary>
-        // UseExisting = 2,
+        // UseExisting,
 
         // /// <summary>
         // /// The advice overrides the target declaration using the template specified for the interface member. The advice fails with a compilation error if it is not possible.
         // /// </summary>
-        // Override = 3,
+        // Override,
     }
 }

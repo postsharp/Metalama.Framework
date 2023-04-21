@@ -171,4 +171,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     bool? IMethodImpl.IsIteratorMethod => false;
 
     public override string ToString() => this.ToDisplayString();
+    
+    public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 }

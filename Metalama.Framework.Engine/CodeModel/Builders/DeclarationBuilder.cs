@@ -57,6 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         int IDeclaration.Depth => this.GetDepthImpl();
 
+        bool IDeclaration.BelongsToCurrentProject => true;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation

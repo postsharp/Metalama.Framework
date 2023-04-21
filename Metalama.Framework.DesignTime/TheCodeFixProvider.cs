@@ -212,10 +212,14 @@ namespace Metalama.Framework.DesignTime
 
         private static ImmutableArray<CodeFixModel> ProvideCodeFixes( ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken )
         {
+            // TODO: we may have to merge the code fixes provided for different diagnostics into a single menu.
+
             var codeFixesBuilder = ImmutableArray.CreateBuilder<CodeFixModel>();
 
             foreach ( var diagnostic in diagnostics )
             {
+                var menuBuilder = new CodeActionMenuBuilder();
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
@@ -225,15 +229,13 @@ namespace Metalama.Framework.DesignTime
 
                     foreach ( var codeFixTitle in splitTitles )
                     {
-                        // TODO: We may support hierarchical code fixes by allowing a separator in the title given by the user, i.e. '|'.
-                        // The creation of the tree structure would then be done here.
-
-                        var codeAction = new UserCodeActionModel(
-                            codeFixTitle,
-                            diagnostic );
-
-                        codeFixesBuilder.Add( new CodeFixModel( codeAction, ImmutableArray.Create( diagnostic ) ) );
+                        menuBuilder.AddItem( codeFixTitle, title => new UserCodeActionModel( title, codeFixTitle, diagnostic ) );
                     }
+                }
+
+                foreach ( var topMenuItem in menuBuilder.Build() )
+                {
+                    codeFixesBuilder.Add( new CodeFixModel( topMenuItem, ImmutableArray.Create( diagnostic ) ) );
                 }
             }
 

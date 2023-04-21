@@ -75,5 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => throw new NotSupportedException( "Cannot use a return parameter as an expression." );
+
+        public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
     }
 }

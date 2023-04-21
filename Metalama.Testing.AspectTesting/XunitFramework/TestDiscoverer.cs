@@ -69,7 +69,12 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         {
             var metadata = this._metadataReader.GetMetadata( this._assembly );
 
-            return new TestProjectProperties( metadata.ProjectDirectory, metadata.ParserSymbols, metadata.TargetFramework, metadata.License );
+            return new TestProjectProperties(
+                metadata.ProjectDirectory,
+                metadata.ParserSymbols,
+                metadata.TargetFramework,
+                metadata.IgnoredWarnings,
+                metadata.License );
         }
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )

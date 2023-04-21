@@ -22,17 +22,21 @@ internal sealed class TestProjectProperties
 
     public string TargetFramework { get; }
 
+    public ImmutableArray<string> IgnoredWarnings { get; }
+
     internal TestFrameworkLicenseStatus? License { get; }
 
     internal TestProjectProperties(
         string? projectDirectory,
         ImmutableArray<string> preprocessorSymbols,
         string targetFramework,
+        ImmutableArray<string> ignoredWarnings,
         TestFrameworkLicenseStatus? license = null )
     {
         this._projectDirectory = projectDirectory;
         this.PreprocessorSymbols = preprocessorSymbols;
         this.TargetFramework = targetFramework;
+        this.IgnoredWarnings = ignoredWarnings;
         this.License = license;
     }
 }
