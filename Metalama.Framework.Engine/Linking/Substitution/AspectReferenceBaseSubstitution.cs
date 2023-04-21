@@ -13,14 +13,19 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// </summary>
 internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitution
 {
-    public AspectReferenceBaseSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext, aspectReference )
+    public AspectReferenceBaseSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+        compilationContext,
+        aspectReference )
     {
         // Support only base semantics.
         Invariant.Assert( aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Base );
+
         Invariant.Assert(
             aspectReference.ResolvedSemantic.Symbol.IsOverride
             || aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ )
-            || !compilationContext.SymbolComparer.Is( aspectReference.ContainingSemantic.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) );
+            || !compilationContext.SymbolComparer.Is(
+                aspectReference.ContainingSemantic.Symbol.ContainingType,
+                aspectReference.ResolvedSemantic.Symbol.ContainingType ) );
 
         // Auto properties and event field default semantics should not get here.
         Invariant.AssertNot(
@@ -35,10 +40,11 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
     public override string GetTargetMemberName()
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+
         return targetSymbol.Name;
     }
 
-    public override SyntaxNode? SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    public override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         return
             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
@@ -47,7 +53,7 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
                 .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
     }
 
-    public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -61,25 +67,25 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
             return currentNode
                 .WithExpression(
                     substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
-                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                        .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                        .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
         }
         else
         {
             return currentNode
                 .WithExpression(
                     BaseExpression()
-                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                        .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                        .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
         }
     }
 
-    public override SyntaxNode? SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    public override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         return currentNode
             .WithExpression(
                 BaseExpression()
-                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
     }
 }

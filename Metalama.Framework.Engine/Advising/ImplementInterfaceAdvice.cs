@@ -481,11 +481,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 var missingAccessor =
                                     (getMethodMissingFromTemplate, setMethodMissingFromTemplate, setInitOnlyInTemplate, setInitOnlyInInterface) switch
                                     {
-                                        (true, _, _, _ ) => "get",              // Missing getter.
-                                        (false, true, _, false ) => "set",      // Missing setter.
-                                        (false, true, _, true ) => "init",      // Missing init-only setter.
-                                        (false, false, true, false ) => "set",  // Interface has setter, template has init-only setter.
-                                        (false, false, false, true ) => "init", // Interface has init-only setter, template has setter.
+                                        (true, _, _, _) => "get",              // Missing getter.
+                                        (false, true, _, false) => "set",      // Missing setter.
+                                        (false, true, _, true) => "init",      // Missing init-only setter.
+                                        (false, false, true, false) => "set",  // Interface has setter, template has init-only setter.
+                                        (false, false, false, true) => "init", // Interface has init-only setter, template has setter.
                                         _ => null
                                     };
 
@@ -503,9 +503,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 var unexpectedAccessor =
                                     (isExplicit, getMethodUnexpectedInTemplate, setMethodUnexpectedInTemplate, setInitOnlyInTemplate) switch
                                     {
-                                        (true, true, _, _ ) => "get",         // Unexpected getter.
-                                        (true, false, true, false ) => "set", // Unexpected setter.
-                                        (true, false, true, true ) => "init", // Unexpected init-only setter.
+                                        (true, true, _, _) => "get",         // Unexpected getter.
+                                        (true, false, true, false) => "set", // Unexpected setter.
+                                        (true, false, true, true) => "init", // Unexpected init-only setter.
                                         _ => null
                                     };
 
@@ -801,8 +801,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             interfaceProperty.Writeability == Writeability.InitOnly,
             false,
             hasImplicitSetter,
-            tags )
-        { Type = interfaceProperty.Type };
+            tags ) { Type = interfaceProperty.Type };
 
         if ( isExplicit )
         {

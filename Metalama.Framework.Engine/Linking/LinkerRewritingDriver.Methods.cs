@@ -52,14 +52,14 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && this.ShouldGenerateSourceMember( symbol ))
+                     && this.ShouldGenerateSourceMember( symbol ) )
                 {
                     members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && this.ShouldGenerateEmptyMember( symbol ))
+                     && this.ShouldGenerateEmptyMember( symbol ) )
                 {
                     members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }

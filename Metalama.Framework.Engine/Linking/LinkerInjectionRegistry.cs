@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -197,7 +196,9 @@ namespace Metalama.Framework.Engine.Linking
                 var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-                var intermediateSemanticModel = this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
+
+                var intermediateSemanticModel =
+                    this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
 
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
@@ -251,7 +252,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
         {
-            if (this._builderToTransformationMap.TryGetValue(builder, out var transformation))
+            if ( this._builderToTransformationMap.TryGetValue( builder, out var transformation ) )
             {
                 // Builder that was removed.
                 return transformation;

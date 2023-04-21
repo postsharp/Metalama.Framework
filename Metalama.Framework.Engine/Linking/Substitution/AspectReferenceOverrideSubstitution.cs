@@ -1,26 +1,23 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
     /// <summary>
     /// Substitutes non-inlined aspect reference.
     /// </summary>
-    internal sealed partial class AspectReferenceOverrideSubstitution : AspectReferenceRenamingSubstitution
+    internal sealed class AspectReferenceOverrideSubstitution : AspectReferenceRenamingSubstitution
     {
-        public AspectReferenceOverrideSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext, aspectReference )
+        public AspectReferenceOverrideSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+            compilationContext,
+            aspectReference )
         {
             Invariant.Assert( aspectReference.ResolvedSemantic.Kind is IntermediateSymbolSemanticKind.Default or IntermediateSymbolSemanticKind.Final );
 
@@ -37,10 +34,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public override string GetTargetMemberName()
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+
             return targetSymbol.Name;
         }
 
-        public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -52,12 +50,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     return currentNode
                         .WithExpression( ThisExpression() )
-                        .WithName( this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                        .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
                 }
                 else
                 {
                     return currentNode
-                        .WithName( this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                        .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
                 }
             }
             else
@@ -68,13 +66,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) )
+                                RewriteName( currentNode.Name, this.GetTargetMemberName() ) )
                             .WithLeadingTrivia( currentNode.GetLeadingTrivia() )
                             .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
                 }
                 else
                 {
-
                     if ( this.CompilationContext.SymbolComparer.Is(
                             targetSymbol.ContainingType,
                             this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
@@ -92,17 +89,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         // Resolved symbol is unrelated to the containing symbol.
                         return currentNode
-                            .WithName( this.RewriteName(currentNode.Name, this.GetTargetMemberName()) );
+                            .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
                     }
                 }
             }
-        }
-
-        private IAspectInstanceInternal ResolveAspectInstance( SubstitutionContext context )
-        {
-            var injectedMember = context.RewritingDriver.InjectionRegistry.GetInjectedMemberForSymbol( this.AspectReference.ContainingSemantic.Symbol );
-
-            return injectedMember.AssertNotNull().Transformation.ParentAdvice.Aspect;
         }
     }
 }

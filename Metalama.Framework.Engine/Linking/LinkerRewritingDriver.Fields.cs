@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -16,8 +14,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteField(
             FieldDeclarationSyntax fieldDeclaration,
-            IFieldSymbol symbol,
-            SyntaxGenerationContext generationContext )
+            IFieldSymbol symbol )
         {
             Invariant.Assert( !this.InjectionRegistry.IsOverrideTarget( symbol ) );
 
@@ -28,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
                 members.Add(
-                    this.GetEmptyImplField(
+                    GetEmptyImplField(
                         symbol,
                         List<AttributeListSyntax>(),
                         fieldDeclaration.Declaration.Type ) );
@@ -39,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking
             return members;
         }
 
-        private MemberDeclarationSyntax GetEmptyImplField(
+        private static MemberDeclarationSyntax GetEmptyImplField(
             IFieldSymbol symbol,
             SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax type )
@@ -54,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 AccessorList(
                         List(
-                            new[] 
+                            new[]
                             {
                                 AccessorDeclaration(
                                     SyntaxKind.GetAccessorDeclaration,
@@ -66,27 +63,28 @@ namespace Metalama.Framework.Engine.Linking
                                     Token( SyntaxKind.SemicolonToken ) ),
                                 AccessorDeclaration(
                                     setAccessorKind,
-                                    SyntaxFactoryEx.FormattedBlock() ) 
+                                    SyntaxFactoryEx.FormattedBlock() )
                             } ) )
                     .NormalizeWhitespace();
+
             return
                 PropertyDeclaration(
-                    attributes,
-                    symbol.IsStatic
-                        ? TokenList(
-                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                    type,
-                    null,
-                    Identifier( GetEmptyImplMemberName( symbol ) ),
-                    null,
-                    null,
-                    null )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithAccessorList( accessorList.WithTrailingTrivia( ElasticLineFeed ) )
-                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                        attributes,
+                        symbol.IsStatic
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                        type,
+                        null,
+                        Identifier( GetEmptyImplMemberName( symbol ) ),
+                        null,
+                        null,
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithAccessorList( accessorList.WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }
 }

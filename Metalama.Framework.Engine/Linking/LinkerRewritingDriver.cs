@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.Linking
                 return true;
             }
 
-            if ( this.InjectionRegistry.IsIntroduced(symbol) )
+            if ( this.InjectionRegistry.IsIntroduced( symbol ) )
             {
                 // Introduced declarations need to be rewritten.
                 return true;
@@ -492,7 +492,7 @@ namespace Metalama.Framework.Engine.Linking
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IFieldSymbol fieldSymbol:
-                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
+                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
@@ -580,12 +580,12 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
-        public bool ShouldGenerateEmptyMember(ISymbol symbol)
+        public bool ShouldGenerateEmptyMember( ISymbol symbol )
         {
-            return this.InjectionRegistry.IsIntroduced(symbol) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilation, out _ );
+            return this.InjectionRegistry.IsIntroduced( symbol ) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilation, out _ );
         }
 
-        public bool ShouldGenerateSourceMember(ISymbol symbol)
+        public bool ShouldGenerateSourceMember( ISymbol symbol )
         {
             return this.InjectionRegistry.IsOverrideTarget( symbol );
         }
@@ -655,6 +655,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         return CreateName( symbol, eventSymbol.Name, suffix );
                     }
+
                 case IFieldSymbol fieldSymbol:
                     return CreateName( symbol, fieldSymbol.Name, suffix );
 

@@ -159,12 +159,14 @@ namespace Metalama.Framework.Engine.Linking
 
             var overrideIndices = this.GetOverrideIndices( resolvedReferencedSymbol );
 
-            Invariant.Assert( targetIntroductionIndex == null || overrideIndices.All( o => targetIntroductionIndex < o.Index ) || !HasImplicitImplementation( referencedSymbol ) );
+            Invariant.Assert(
+                targetIntroductionIndex == null || overrideIndices.All( o => targetIntroductionIndex < o.Index )
+                                                || !HasImplicitImplementation( referencedSymbol ) );
 
             this.ResolveLayerIndex(
                 referenceSpecification,
                 annotationLayerIndex,
-                resolvedReferencedSymbol, 
+                resolvedReferencedSymbol,
                 targetIntroductionInjectedMember,
                 targetIntroductionIndex,
                 overrideIndices,
@@ -174,7 +176,7 @@ namespace Metalama.Framework.Engine.Linking
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
             Invariant.Assert(
                 resolvedIndex == default
-                || resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0, 0)
+                || resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0, 0 )
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetIntroductionIndex );
 
@@ -184,22 +186,19 @@ namespace Metalama.Framework.Engine.Linking
                 resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0, 0 );
             }
 
-            // Let's see whether the symbol is override or if it hides another member. This is true only for main declarations, never for override symbols.
-            var resolvedSymbolIsOverrideOrNew = resolvedReferencedSymbol.IsOverride || resolvedReferencedSymbol.TryGetHiddenSymbol( this._intermediateCompilation, out _ );
-
             if ( resolvedIndex == default )
             {
                 // Resolved to the initial version of the symbol (before any aspects).
 
                 if ( targetIntroductionInjectedMember == null
-                     || ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                        && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null ) )                        
+                     || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                         && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
                 {
                     // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                     var targetSemantic =
                         !this._comparer.Is( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType )
-                        ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
-                        : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                            ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
+                            : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
                     return new ResolvedAspectReference(
                         containingSemantic,
@@ -227,7 +226,7 @@ namespace Metalama.Framework.Engine.Linking
                         isInlineable );
                 }
             }
-            else if ( targetIntroductionInjectedMember != null && resolvedIndex < targetIntroductionIndex)
+            else if ( targetIntroductionInjectedMember != null && resolvedIndex < targetIntroductionIndex )
             {
                 // Resolved to a version before the symbol was introduced.
                 // The only valid case are introduced promoted fields.
@@ -248,7 +247,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to a non-initial state before the introduction is valid only for replaced introduced members." );
+                    throw new AssertionFailedException(
+                        $"Resolving {resolvedReferencedSymbol} aspect reference to a non-initial state before the introduction is valid only for replaced introduced members." );
                 }
             }
             else if ( targetIntroductionInjectedMember != null && resolvedIndex == targetIntroductionIndex )
@@ -258,7 +258,6 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
-
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
@@ -272,7 +271,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to the introduction is not allowed because the declaration does not have implicit body." );
+                    throw new AssertionFailedException(
+                        $"Resolving {resolvedReferencedSymbol} aspect reference to the introduction is not allowed because the declaration does not have implicit body." );
                 }
             }
             else if ( resolvedIndex < new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
@@ -294,8 +294,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var targetSemantic =
                     overrideIndices.Count > 0
-                    ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final )
-                    : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                        ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final )
+                        : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
                 // The version after all aspects.
                 return new ResolvedAspectReference(
@@ -311,7 +311,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException($"Resolving {resolvedReferencedSymbol} aspect reference to {resolvedIndex} is not supported." );
+                throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to {resolvedIndex} is not supported." );
             }
         }
 
@@ -329,7 +329,6 @@ namespace Metalama.Framework.Engine.Linking
 
             switch ( referenceSpecification.Order )
             {
-
                 case AspectReferenceOrder.Base:
                     // TODO: optimize.
 
@@ -340,7 +339,8 @@ namespace Metalama.Framework.Engine.Linking
                         resolvedIndex = lowerOverride.Index;
                         resolvedInjectedMember = lowerOverride.Override;
                     }
-                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex && HasImplicitImplementation( referencedSymbol ) )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex
+                                                              && HasImplicitImplementation( referencedSymbol ) )
                     {
                         resolvedIndex = targetIntroductionIndex.Value;
                         resolvedInjectedMember = targetIntroductionInjectedMember;
@@ -361,7 +361,8 @@ namespace Metalama.Framework.Engine.Linking
                         resolvedIndex = previousOverride.Index;
                         resolvedInjectedMember = previousOverride.Override;
                     }
-                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex && HasImplicitImplementation( referencedSymbol ) )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex
+                                                              && HasImplicitImplementation( referencedSymbol ) )
                     {
                         resolvedIndex = targetIntroductionIndex.Value;
                         resolvedInjectedMember = targetIntroductionInjectedMember;
@@ -414,14 +415,15 @@ namespace Metalama.Framework.Engine.Linking
             // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
             return
                 referencedDeclarationOverrides
-                .SelectAsEnumerable( x => (
-                    Index: new MemberLayerIndex( 
-                        this._layerIndex[x.AspectLayerId], 
-                        x.Transformation.OrderWithinPipelineStepAndType + 1,
-                        x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ), 
-                    Override: x ) )
-                .OrderBy(x => x.Index)
-                .ToReadOnlyList();
+                    .SelectAsEnumerable(
+                        x => (
+                            Index: new MemberLayerIndex(
+                                this._layerIndex[x.AspectLayerId],
+                                x.Transformation.OrderWithinPipelineStepAndType + 1,
+                                x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
+                            Override: x) )
+                    .OrderBy( x => x.Index )
+                    .ToReadOnlyList();
         }
 
         private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerInjectedMember? injectedMember )
@@ -447,13 +449,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    var fieldInjectionTransformation = 
-                        this._injectionRegistry.GetTransformationForBuilder( replacedBuilder ) 
+                    var fieldInjectionTransformation =
+                        this._injectionRegistry.GetTransformationForBuilder( replacedBuilder )
                         ?? throw new AssertionFailedException( $"Could not find transformation for {replacedBuilder}" );
 
                     // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
-                    return 
-                        new MemberLayerIndex( 
+                    return
+                        new MemberLayerIndex(
                             this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId],
                             fieldInjectionTransformation.OrderWithinPipelineStepAndType + 1,
                             fieldInjectionTransformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
@@ -465,8 +467,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return 
-                new MemberLayerIndex( 
+            return
+                new MemberLayerIndex(
                     this._layerIndex[injectedMember.AspectLayerId],
                     injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
                     injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
@@ -474,12 +476,12 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberLayerIndex GetAnnotationLayerIndex( ISymbol containingSymbol )
         {
-            var containingInjectedMember = 
+            var containingInjectedMember =
                 this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol )
                 ?? throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
 
-            return 
-                new MemberLayerIndex( 
+            return
+                new MemberLayerIndex(
                     this._layerIndex[containingInjectedMember.AspectLayerId],
                     containingInjectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
                     containingInjectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
@@ -607,7 +609,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         private ISymbol GetCanonicalReferencedSymbol( INamedTypeSymbol containingType, ISymbol referencedSymbol )
         {
-            if ( this._intermediateCompilation.ClassifyConversion( containingType, referencedSymbol.ContainingType).IsReference)
+            if ( this._intermediateCompilation.ClassifyConversion( containingType, referencedSymbol.ContainingType ).IsReference )
             {
                 var currentType = containingType;
 
@@ -768,11 +770,13 @@ namespace Metalama.Framework.Engine.Linking
             /// </summary>
             public int LayerIndex { get; }
 
+            // ReSharper disable once MemberCanBePrivate.Local
             /// <summary>
             /// Gets the index of the aspect instance within the target type.
             /// </summary>
             public int InstanceIndex { get; }
 
+            // ReSharper disable once MemberCanBePrivate.Local
             /// <summary>
             /// Gets the index of the transformation within the aspect instance.
             /// </summary>
@@ -792,8 +796,8 @@ namespace Metalama.Framework.Engine.Linking
                 if ( layerDiff == 0 )
                 {
                     var instanceDiff = this.InstanceIndex - other.InstanceIndex;
-                    
-                    if (instanceDiff == 0)
+
+                    if ( instanceDiff == 0 )
                     {
                         return this.TransformationIndex - other.TransformationIndex;
                     }

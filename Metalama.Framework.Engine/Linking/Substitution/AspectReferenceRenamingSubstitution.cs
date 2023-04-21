@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -9,18 +8,17 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
     {
-        public ResolvedAspectReference AspectReference { get; }
+        protected ResolvedAspectReference AspectReference { get; }
 
         public override SyntaxNode TargetNode => this.AspectReference.RootNode;
 
-        public AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext )
+        protected AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+            compilationContext )
         {
             this.AspectReference = aspectReference;
         }
@@ -64,7 +62,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return this.SubstituteElementAccess( elementAccessExpression, substitutionContext );
 
                 case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-                    return this.SubstituteConditionalAccess( conditionalAccessExpression, substitutionContext);
+                    return this.SubstituteConditionalAccess( conditionalAccessExpression, substitutionContext );
 
                 default:
                     throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
@@ -73,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public abstract string GetTargetMemberName();
 
-        public virtual SyntaxNode? SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        public virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             return
                 MemberAccessExpression(
@@ -82,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     IdentifierName( this.GetTargetMemberName() ) );
         }
 
-        public virtual SyntaxNode? SubstituteOperatorMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        public virtual SyntaxNode SubstituteOperatorMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -95,10 +93,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
 
-        public virtual SyntaxNode? SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext ) =>
-            throw new NotSupportedException($"Element access is not supported by {this.GetType().Name}");
+        public virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+            => throw new NotSupportedException( $"Element access is not supported by {this.GetType().Name}" );
 
-        public virtual SyntaxNode? SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        public virtual SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -127,7 +125,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             }
         }
 
-        protected SimpleNameSyntax RewriteName( SimpleNameSyntax name, string targetMemberName )
+        protected static SimpleNameSyntax RewriteName( SimpleNameSyntax name, string targetMemberName )
             => name switch
             {
                 GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),

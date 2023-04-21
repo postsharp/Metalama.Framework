@@ -35,20 +35,20 @@ internal class AspectReferenceSourceSubstitution : AspectReferenceRenamingSubsti
         return LinkerRewritingDriver.GetOriginalImplMemberName( targetSymbol );
     }
 
-    public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
         ExpressionSyntax expression =
-        targetSymbol.IsStatic
-        ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
-        : ThisExpression();
+            targetSymbol.IsStatic
+                ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
+                : ThisExpression();
 
         return currentNode
             .WithExpression(
                 expression
-                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
-            .WithName( this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
+            .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }
 }

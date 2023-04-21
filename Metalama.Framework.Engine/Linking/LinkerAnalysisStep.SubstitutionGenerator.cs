@@ -134,9 +134,9 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( nonInlinedReference.ResolvedSemantic )
                             {
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property } 
-                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget(property):
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event } 
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
+                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget( property ):
+                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
                                     when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
                                     // For default semantic of auto properties and event fields that have overrides, generate substitution that redirects to the backing field.
                                     // Take care to include interface event fields that are containing initializer expressions.
@@ -167,7 +167,8 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Kind: IntermediateSymbolSemanticKind.Default } when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                case { Kind: IntermediateSymbolSemanticKind.Default }
+                                    when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                                     // Base references to other members are rewritten to "source" member call.
                                     AddSubstitution(
                                         context,
@@ -175,9 +176,9 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Kind: IntermediateSymbolSemanticKind.Default } 
+                                case { Kind: IntermediateSymbolSemanticKind.Default }
                                     when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
-                                        && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                         && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
                                     // Default semantics that are not override targets need no substitutions.
                                     break;
 
@@ -344,7 +345,9 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
 
                                 case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                                    when !this._compilationContext.SymbolComparer.Is( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, symbol.ContainingType ):
+                                    when !this._compilationContext.SymbolComparer.Is(
+                                        nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
+                                        symbol.ContainingType ):
                                     // Base references to a declaration in another type mean base member call.
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,
@@ -360,7 +363,8 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Kind: IntermediateSymbolSemanticKind.Default } when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                case { Kind: IntermediateSymbolSemanticKind.Default }
+                                    when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                                     // Base references to other members are rewritten to "source" member call.
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,
@@ -370,13 +374,15 @@ namespace Metalama.Framework.Engine.Linking
 
                                 case { Kind: IntermediateSymbolSemanticKind.Default }
                                     when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
-                                        && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                         && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
                                     // Default non-inlined semantics that are not override targets need no substitutions.
                                     break;
 
                                 default:
                                     // Everything else targets the override.
-                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
+                                    AddSubstitution(
+                                        inliningSpecification.ContextIdentifier,
+                                        new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
 
                                     break;
                             }

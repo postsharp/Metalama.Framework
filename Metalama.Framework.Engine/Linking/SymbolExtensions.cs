@@ -95,18 +95,19 @@ namespace Metalama.Framework.Engine.Linking
 
             return false;
 
-            static bool SignatureEquals(ISymbol localMember, ISymbol baseMember)
+            static bool SignatureEquals( ISymbol localMember, ISymbol baseMember )
             {
-                switch ( (localMember, baseMember) )
+                switch (localMember, baseMember)
                 {
-                    case (IPropertySymbol property, IFieldSymbol field ):
+                    case (IPropertySymbol property, IFieldSymbol field):
                         // Promoted field that hides a base field.
-                        if (StringComparer.Ordinal.Equals(property.Name, field.Name))
+                        if ( StringComparer.Ordinal.Equals( property.Name, field.Name ) )
                         {
                             return true;
                         }
 
                         goto default;
+
                     default:
                         return SignatureTypeSymbolComparer.Instance.Equals( localMember, baseMember );
                 }

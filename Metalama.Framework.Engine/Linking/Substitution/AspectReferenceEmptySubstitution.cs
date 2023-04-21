@@ -13,11 +13,16 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// </summary>
 internal class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstitution
 {
-    public AspectReferenceEmptySubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext, aspectReference )
+    public AspectReferenceEmptySubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+        compilationContext,
+        aspectReference )
     {
         // Support only base semantics.
         Invariant.Assert( aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Base );
-        Invariant.Assert( !aspectReference.ResolvedSemantic.Symbol.IsOverride && !aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ ) );
+
+        Invariant.Assert(
+            !aspectReference.ResolvedSemantic.Symbol.IsOverride
+            && !aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ ) );
 
         // Auto properties and event field default semantics should not get here.
         Invariant.AssertNot(
@@ -32,23 +37,24 @@ internal class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstit
     public override string GetTargetMemberName()
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+
         return LinkerRewritingDriver.GetEmptyImplMemberName( targetSymbol );
     }
 
-    public override SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
         ExpressionSyntax expression =
-        targetSymbol.IsStatic
-        ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
-        : ThisExpression();
+            targetSymbol.IsStatic
+                ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
+                : ThisExpression();
 
         return currentNode
             .WithExpression(
                 expression
-                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
-            .WithName( this.RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
+            .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }
 }

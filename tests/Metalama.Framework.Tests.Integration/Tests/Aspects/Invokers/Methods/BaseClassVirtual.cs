@@ -36,6 +36,7 @@ public class BaseClass
 public class TargetClass : BaseClass
 { 
     [InvokerAspect(TargetName = nameof(Method), TargetLevel = 1, InvokeParameterInstance = true)]
+    [ThisInstanceAssertions()]
     public void InvokerMethod(TargetClass instance, string arg)
     {
     }
