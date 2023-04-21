@@ -3,7 +3,6 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
