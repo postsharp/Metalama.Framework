@@ -26,42 +26,48 @@ internal abstract class WorkspaceProvider : IGlobalService, IDisposable
     {
         var workspace = await this.GetWorkspaceAsync( cancellationToken );
 
-        if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
+        if ( this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
         {
-            foreach ( var project in workspace.CurrentSolution.Projects )
+            var project = workspace.CurrentSolution.GetProject( projectId );
+
+            if ( project != null )
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if ( project.AssemblyName != projectKey.AssemblyName )
-                {
-                    continue;
-                }
-
-                var thisProjectKey = ProjectKeyFactory.FromProject( project );
-
-                if ( thisProjectKey == null )
-                {
-                    // This is not a C# project.
-                    continue;
-                }
-
-                this._projectKeyToProjectIdMap.TryAdd( thisProjectKey, project.Id );
-
-                if ( thisProjectKey == projectKey )
-                {
-                    return project;
-                }
+                return project;
             }
 
-            // Error: the compilation could not be found.
-            this.Logger.Warning?.Log( $"Cannot find a project in the workspace for '{projectKey}'." );
+            // When a project is unloaded and reloaded, its ID changes, so we need to remove the old ID from the cache.
+            this._projectKeyToProjectIdMap.TryRemove( projectKey );
+        }
 
-            return default;
-        }
-        else
+        foreach ( var project in workspace.CurrentSolution.Projects )
         {
-            return workspace.CurrentSolution.GetProject( projectId );
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if ( project.AssemblyName != projectKey.AssemblyName )
+            {
+                continue;
+            }
+
+            var thisProjectKey = ProjectKeyFactory.FromProject( project );
+
+            if ( thisProjectKey == null )
+            {
+                // This is not a C# project.
+                continue;
+            }
+
+            this._projectKeyToProjectIdMap.TryAdd( thisProjectKey, project.Id );
+
+            if ( thisProjectKey == projectKey )
+            {
+                return project;
+            }
         }
+
+        // Error: the compilation could not be found.
+        this.Logger.Warning?.Log( $"Cannot find a project in the workspace for '{projectKey}'." );
+
+        return default;
     }
 
     public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken = default )

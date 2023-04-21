@@ -247,6 +247,23 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
         }
     }
 
+    public bool TryRemove( TKey key )
+    {
+        var caches = this._caches;
+
+        if ( caches.Recent.TryRemove( key, out _ ) )
+        {
+            return true;
+        }
+
+        if ( caches.Old?.TryRemove( key, out _ ) == true )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private void Rotate()
     {
         if ( this.ShouldRotate() )
