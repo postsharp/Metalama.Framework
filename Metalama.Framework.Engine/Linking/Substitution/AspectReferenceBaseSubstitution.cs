@@ -73,4 +73,13 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
                     .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
         }
     }
+
+    public override SyntaxNode? SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    {
+        return currentNode
+            .WithExpression(
+                BaseExpression()
+                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
+                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+    }
 }

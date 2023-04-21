@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -59,6 +60,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
 
+                case ElementAccessExpressionSyntax elementAccessExpression:
+                    return this.SubstituteElementAccess( elementAccessExpression, substitutionContext );
+
                 case ConditionalAccessExpressionSyntax conditionalAccessExpression:
                     return this.SubstituteConditionalAccess( conditionalAccessExpression, substitutionContext);
 
@@ -90,6 +94,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         }
 
         public abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
+
+        public virtual SyntaxNode? SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext ) =>
+            throw new NotSupportedException($"Element access is not supported by {this.GetType().Name}");
 
         public virtual SyntaxNode? SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {

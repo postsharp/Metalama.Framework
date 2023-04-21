@@ -144,19 +144,18 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
-                                    // Indexers (and in future constructors), adds aspect parameter to the target.
-                                    // TODO: Currently unused because indexer inlining is not supported.
-                                    AddSubstitution( context, new AspectReferenceParameterSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
                                 case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
                                     when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
                                     // Base references to new slot or override members are rewritten to the base member call.
                                     AddSubstitution(
                                         context,
                                         new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported. See AspectReferenceParameterSubstitution in history.
 
                                     break;
 
@@ -329,21 +328,18 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
-                                    // Indexers (and in future constructors), adds aspect parameter to the target.
-                                    // TODO: Currently unused because indexer inlining is not supported.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceParameterSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
                                 case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
                                     when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
                                     // Base references to new slot or override members are rewritten to the base member call.
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,
                                         new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
+                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    // TODO: Currently unused because indexer inlining is not supported. See AspectReferenceParameterSubstitution in history.
 
                                     break;
 
