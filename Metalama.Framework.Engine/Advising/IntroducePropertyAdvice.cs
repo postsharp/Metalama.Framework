@@ -362,7 +362,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             this.Tags,
                             addTransformation );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                     }
 
                 default:

@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.Advising
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                         }
 
                     default:
