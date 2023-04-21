@@ -16,13 +16,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
         }
     }
 
-    [PseudoLayerOrder("TestAspect0")]
-    [PseudoLayerOrder("TestAspect1")]
-    [PseudoLayerOrder("TestAspect2")]
-    [PseudoLayerOrder("TestAspect3")]
-    [PseudoLayerOrder("TestAspect4")]
-    [PseudoLayerOrder("TestAspect5")]
-    [PseudoLayerOrder("TestAspect6")]
+    [PseudoLayerOrder("A0")]
+    [PseudoLayerOrder("A1")]
+    [PseudoLayerOrder("A2")]
+    [PseudoLayerOrder("A3")]
+    [PseudoLayerOrder("A4")]
+    [PseudoLayerOrder("A5")]
+    [PseudoLayerOrder("A6")]
     // <target>
     class Target : Base
     {
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect0")]
+        [PseudoOverride(nameof(Foo), "A0")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public static int Foo_Override0
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect2")]
+        [PseudoOverride(nameof(Foo), "A2")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public static int Foo_Override2
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect4")]
+        [PseudoOverride(nameof(Foo), "A4")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public static int Foo_Override4
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect6")]
+        [PseudoOverride(nameof(Foo), "A6")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public static int Foo_Override6
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoOverride(nameof(Bar), "A1")]
         [PseudoNotInlineable]
         private static int Bar_Override1_1
         {
@@ -203,7 +203,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoOverride(nameof(Bar), "A1")]
         [PseudoNotInlineable]
         private static int Bar_Override1_2
         {
@@ -232,7 +232,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoOverride(nameof(Bar), "A3")]
         [PseudoNotInlineable]
         private static int Bar_Override3_1
         {
@@ -261,7 +261,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoOverride(nameof(Bar), "A3")]
         [PseudoNotInlineable]
         private static int Bar_Override3_2
         {
@@ -290,7 +290,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoOverride(nameof(Bar), "A5")]
         [PseudoNotInlineable]
         private static int Bar_Override5_1
         {
@@ -319,7 +319,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.S
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoOverride(nameof(Bar), "A5")]
         [PseudoNotInlineable]
         private static int Bar_Override5_2
         {

@@ -49,7 +49,21 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
+                var members = new List<MemberDeclarationSyntax>();
+
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && this.ShouldGenerateEmptyMember( symbol ) )
+                {
+                    members.Add(
+                        this.GetEmptyImplEventField(
+                            eventFieldDeclaration.Declaration.Type,
+                            symbol ) );
+                }
+
+                members.Add( eventFieldDeclaration );
+
+                return members;
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

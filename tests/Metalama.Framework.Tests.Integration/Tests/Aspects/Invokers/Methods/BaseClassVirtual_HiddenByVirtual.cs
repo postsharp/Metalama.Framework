@@ -13,7 +13,7 @@ public class InvokerAttribute : OverrideMethodAspect
 {
     public override dynamic OverrideMethod()
     {
-        var targetMethod = meta.Target.Type.BaseType.Methods.OfName("TargetMethod").SingleOrDefault();
+        var targetMethod = meta.Target.Type.BaseType!.Methods.OfName("TargetMethod").Single();
 
         meta.InsertComment("Dynamic invokers");
         meta.This.TargetMethod("Dynamic-This");
@@ -32,7 +32,7 @@ public class InvokerAttribute : OverrideMethodAspect
         targetMethod.With(InvokerOptions.Final | InvokerOptions.NullConditional).Invoke("Final-NullConditional");
 
         meta.InsertComment("Another instance dynamic");
-        meta.Target.Parameters[0].Value.TargetMethod("Dynamic-Parameter");
+        meta.Target.Parameters[0].Value!.TargetMethod("Dynamic-Parameter");
 
         meta.InsertComment("Another instance");
         targetMethod.With(meta.Target.Parameters[0]).Invoke("ImplicitDefault");

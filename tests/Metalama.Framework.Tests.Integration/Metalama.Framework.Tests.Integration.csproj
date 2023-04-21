@@ -37,10 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Linker\Methods\Linking\Introduced - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />

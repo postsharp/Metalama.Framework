@@ -52,9 +52,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return members;
             }
-            else
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+            }
+            else
+            {
+                return new[] { destructorDeclaration };
             }
 
             DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

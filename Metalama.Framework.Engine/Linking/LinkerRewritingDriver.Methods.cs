@@ -76,9 +76,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
-            else
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+            }
+            else
+            {
+                return new[] { methodDeclaration };
             }
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )

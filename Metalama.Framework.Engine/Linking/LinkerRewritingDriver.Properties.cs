@@ -95,9 +95,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
-            else
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+            }
+            else
+            {
+                return new[] { propertyDeclaration };
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

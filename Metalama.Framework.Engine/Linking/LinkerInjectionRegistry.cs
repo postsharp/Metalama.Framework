@@ -234,9 +234,8 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( symbol is IEventSymbol && declaringSyntax is VariableDeclaratorSyntax )
+            if ( symbol is IEventSymbol or IFieldSymbol && declaringSyntax is VariableDeclaratorSyntax )
             {
-                // TODO: Move this to special method, we are going to need the same thing for fields.
                 declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
             }
 

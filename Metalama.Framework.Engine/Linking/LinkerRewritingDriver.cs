@@ -431,10 +431,27 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this.InjectionRegistry.IsOverride( symbol )
-                 || this.InjectionRegistry.IsOverrideTarget( symbol )
-                 || this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
+                // Override targets need to be rewritten.
+                return true;
+            }
+
+            if ( this.InjectionRegistry.IsOverride( symbol ) )
+            {
+                // Overrides need to be rewritten.
+                return true;
+            }
+
+            if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            {
+                // Any declarations with substitutions need to be rewritten.
+                return true;
+            }
+
+            if ( this.InjectionRegistry.IsIntroduced(symbol) )
+            {
+                // Introduced declarations need to be rewritten.
                 return true;
             }
 
@@ -473,6 +490,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IPropertySymbol indexerSymbol:
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
+
+                case IFieldSymbol fieldSymbol:
+                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
@@ -522,6 +542,13 @@ namespace Metalama.Framework.Engine.Linking
                     default:
                         throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
                 }
+            }
+            else if ( this.InjectionRegistry.IsIntroduced( semantic.Symbol ) )
+            {
+                // Introduced, but not override target.
+
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = false;
             }
             else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
@@ -628,6 +655,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         return CreateName( symbol, eventSymbol.Name, suffix );
                     }
+                case IFieldSymbol fieldSymbol:
+                    return CreateName( symbol, fieldSymbol.Name, suffix );
 
                 default:
                     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract

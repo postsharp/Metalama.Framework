@@ -14,9 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -151,7 +149,7 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             // At this point we should always target a method or a specific target.
-            Invariant.AssertNot( resolvedReferencedSymbol is IPropertySymbol or IEventSymbol && targetKind == AspectReferenceTargetKind.Self );
+            Invariant.AssertNot( resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol && targetKind == AspectReferenceTargetKind.Self );
 
             var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol );
 
@@ -476,12 +474,9 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberLayerIndex GetAnnotationLayerIndex( ISymbol containingSymbol )
         {
-            var containingInjectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol );
-
-            if (containingInjectedMember == null)
-            {
-                throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
-            }
+            var containingInjectedMember = 
+                this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol )
+                ?? throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
 
             return 
                 new MemberLayerIndex( 
