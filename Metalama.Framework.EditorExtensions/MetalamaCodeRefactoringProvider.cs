@@ -30,6 +30,13 @@ namespace Metalama.Framework.CompilerExtensions
 
                     break;
 
+                case ProcessKind.Rider:
+                    this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime",
+                        "Metalama.Framework.DesignTime.Rider.RiderCodeRefactoringProvider" );
+
+                    break;
+
                 default:
                     this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime",

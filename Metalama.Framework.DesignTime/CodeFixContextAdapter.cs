@@ -25,6 +25,6 @@ internal sealed class CodeFixContextAdapter : ICodeFixContext
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
-    public void RegisterCodeFix( CodeAction create, ImmutableArray<Diagnostic> contextDiagnostics )
-        => this._context.RegisterCodeFix( create, contextDiagnostics );
+    public void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics )
+        => this._context.RegisterCodeFix( action, diagnostics );
 }

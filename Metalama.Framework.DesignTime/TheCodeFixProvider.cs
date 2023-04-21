@@ -118,7 +118,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): relevant diagnostic ID detected." );
 
-                var codeFixes = ProvideCodeFixes(
+                var codeFixes = this.ProvideCodeFixes(
                     context.Diagnostics,
                     context.CancellationToken );
 
@@ -210,12 +210,19 @@ namespace Metalama.Framework.DesignTime
                 _ => null
             };
 
-        private static ImmutableArray<CodeFixModel> ProvideCodeFixes( ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken )
+        protected virtual bool SkipDiagnostic( Diagnostic diagnostic ) => false;
+
+        private ImmutableArray<CodeFixModel> ProvideCodeFixes( ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken )
         {
             var codeFixesBuilder = ImmutableArray.CreateBuilder<CodeFixModel>();
 
             foreach ( var diagnostic in diagnostics )
             {
+                if ( this.SkipDiagnostic( diagnostic ) )
+                {
+                    continue;
+                }
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
