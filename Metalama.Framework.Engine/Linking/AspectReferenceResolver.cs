@@ -198,12 +198,16 @@ namespace Metalama.Framework.Engine.Linking
                         && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null ) )                        
                 {
                     // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
+                    var targetSemantic =
+                        !this._comparer.Is( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType )
+                        ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
+                        : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
                     return new ResolvedAspectReference(
                         containingSemantic,
                         containingLocalFunction,
                         resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        targetSemantic,
                         expression,
                         resolvedRootNode,
                         resolvedReferencedSymbolSourceNode,

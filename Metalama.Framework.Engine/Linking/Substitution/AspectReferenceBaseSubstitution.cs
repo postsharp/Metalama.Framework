@@ -18,7 +18,10 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
     {
         // Support only base semantics.
         Invariant.Assert( aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Base );
-        Invariant.Assert( aspectReference.ResolvedSemantic.Symbol.IsOverride || aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ ) );
+        Invariant.Assert(
+            aspectReference.ResolvedSemantic.Symbol.IsOverride
+            || aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ )
+            || !compilationContext.SymbolComparer.Is( aspectReference.ContainingSemantic.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) );
 
         // Auto properties and event field default semantics should not get here.
         Invariant.AssertNot(

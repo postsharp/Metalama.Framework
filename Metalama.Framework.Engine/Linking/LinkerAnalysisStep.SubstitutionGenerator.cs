@@ -347,6 +347,15 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
+                                    when !this._compilationContext.SymbolComparer.Is( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, symbol.ContainingType ):
+                                    // Base references to a declaration in another type mean base member call.
+                                    AddSubstitution(
+                                        inliningSpecification.ContextIdentifier,
+                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                                    break;
+
                                 case { Kind: IntermediateSymbolSemanticKind.Base }:
                                     // Base references to other members are rewritten to "empty" member call.
                                     AddSubstitution(

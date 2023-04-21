@@ -6,7 +6,7 @@ class Target
   }
   private void Foo_Source()
   {
-    Console.WriteLine("This is original code.");
+    System.Console.WriteLine("This is original code (discarded).");
   }
   public void Bar()
   {

@@ -4,50 +4,6 @@ class Target
   {
     Foo_Override6();
   }
-  public static void Foo_Override0()
-  {
-    // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
-    // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
-    // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
-    // Should invoke the final declaration.
-    Target.Bar();
-  }
-  public static void Foo_Override2()
-  {
-    // Should invoke override 1_2.
-    Target.Bar_Override1_2();
-    // Should invoke override 1_2.
-    Target.Bar_Override1_2();
-    // Should invoke override 1_2.
-    Target.Bar_Override1_2();
-    // Should invoke the final declaration.
-    Target.Bar();
-  }
-  public static void Foo_Override4()
-  {
-    // Should invoke override 3_2.
-    Target.Bar_Override3_2();
-    // Should invoke override 3_2.
-    Target.Bar_Override3_2();
-    // Should invoke override 3_2.
-    Target.Bar_Override3_2();
-    // Should invoke the final declaration.
-    Target.Bar();
-  }
-  public static void Foo_Override6()
-  {
-    // Should invoke the final declaration.
-    Target.Bar();
-    // Should invoke the final declaration.
-    Target.Bar();
-    // Should invoke the final declaration.
-    Target.Bar();
-    // Should invoke the final declaration.
-    Target.Bar();
-  }
   static void Bar()
   {
     Bar_Override5_2();
@@ -117,6 +73,50 @@ class Target
     Target.Bar_Override3_2();
     // Should invoke override 5_1.
     Target.Bar_Override5_1();
+    // Should invoke the final declaration.
+    Target.Bar();
+    // Should invoke the final declaration.
+    Target.Bar();
+  }
+  public static void Foo_Override0()
+  {
+    // Should invoke source code.
+    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    // Should invoke source code.
+    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    // Should invoke source code.
+    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    // Should invoke the final declaration.
+    Target.Bar();
+  }
+  public static void Foo_Override2()
+  {
+    // Should invoke override 1_2.
+    Target.Bar_Override1_2();
+    // Should invoke override 1_2.
+    Target.Bar_Override1_2();
+    // Should invoke override 1_2.
+    Target.Bar_Override1_2();
+    // Should invoke the final declaration.
+    Target.Bar();
+  }
+  public static void Foo_Override4()
+  {
+    // Should invoke override 3_2.
+    Target.Bar_Override3_2();
+    // Should invoke override 3_2.
+    Target.Bar_Override3_2();
+    // Should invoke override 3_2.
+    Target.Bar_Override3_2();
+    // Should invoke the final declaration.
+    Target.Bar();
+  }
+  public static void Foo_Override6()
+  {
+    // Should invoke the final declaration.
+    Target.Bar();
+    // Should invoke the final declaration.
+    Target.Bar();
     // Should invoke the final declaration.
     Target.Bar();
     // Should invoke the final declaration.

@@ -22,8 +22,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Intr
     {
         public void Foo()
         {
+            System.Console.WriteLine("This is original code (discarded).");
         }
 
+        [PseudoIntroduction("TestAspect1")]
+        [PseudoNotInlineable]
+        public new void Bar()
+        {
+            Console.WriteLine("SHOULD BE DISCARDED (this is introduced code).");
+        }
 
         [PseudoOverride(nameof(Foo), "TestAspect0")]
         [PseudoNotInlineable]
@@ -83,12 +90,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Intr
             link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
-        }
-
-        [PseudoIntroduction("TestAspect1")]
-        [PseudoNotInlineable]
-        public new void Bar()
-        {
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]

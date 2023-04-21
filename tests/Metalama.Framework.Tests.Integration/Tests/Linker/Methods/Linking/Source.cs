@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Sour
     {
         public void Foo()
         {
-            Console.WriteLine("This is original code.");
+            System.Console.WriteLine("This is original code (discarded).");
         }
 
         public void Bar()

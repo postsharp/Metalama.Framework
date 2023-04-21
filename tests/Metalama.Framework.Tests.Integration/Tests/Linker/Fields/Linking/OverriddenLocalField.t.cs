@@ -41,8 +41,8 @@ class Target
   {
     get
     {
-      // Should invoke source code.
-      _ = this._bar;
+      // Should invoke override 2.
+      _ = this.Bar_Override2;
       // Should invoke override 2.
       _ = this.Bar_Override2;
       // Should invoke override 2.
@@ -53,8 +53,8 @@ class Target
     }
     set
     {
-      // Should invoke source code.
-      this._bar = value;
+      // Should invoke override 2.
+      this.Bar_Override2 = value;
       // Should invoke override 2.
       this.Bar_Override2 = value;
       // Should invoke override 2.
@@ -67,8 +67,8 @@ class Target
   {
     get
     {
-      // Should invoke source code.
-      _ = this._bar;
+      // Should invoke override 4.
+      _ = this.Bar_Override4;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke override 4.
@@ -79,8 +79,8 @@ class Target
     }
     set
     {
-      // Should invoke source code.
-      this._bar = value;
+      // Should invoke override 4.
+      this.Bar_Override4 = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke override 4.
@@ -93,8 +93,8 @@ class Target
   {
     get
     {
-      // Should invoke source code.
-      _ = this._bar;
+      // Should invoke the final declaration.
+      _ = this.Bar;
       // Should invoke the final declaration.
       _ = this.Bar;
       // Should invoke the final declaration.
@@ -105,8 +105,8 @@ class Target
     }
     set
     {
-      // Should invoke source code.
-      this._bar = value;
+      // Should invoke the final declaration.
+      this.Bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
       // Should invoke the final declaration.
@@ -157,8 +157,8 @@ class Target
   {
     get
     {
-      // Should invoke source code.
-      _ = this._bar;
+      // Should invoke override 2.
+      _ = this.Bar_Override2;
       // Should invoke override 2.
       _ = this.Bar_Override2;
       // Should invoke override 4.
@@ -169,8 +169,8 @@ class Target
     }
     set
     {
-      // Should invoke source code.
-      this._bar = value;
+      // Should invoke override 2.
+      this.Bar_Override2 = value;
       // Should invoke override 2.
       this.Bar_Override2 = value;
       // Should invoke override 4.
@@ -183,8 +183,8 @@ class Target
   {
     get
     {
-      // Should invoke source code.
-      _ = this._bar;
+      // Should invoke override 4.
+      _ = this.Bar_Override4;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke the final declaration.
@@ -195,8 +195,8 @@ class Target
     }
     set
     {
-      // Should invoke source code.
-      this._bar = value;
+      // Should invoke override 4.
+      this.Bar_Override4 = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke the final declaration.

@@ -41,8 +41,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke source code.
+      _ = this._bar;
       // Should invoke source code.
       _ = this._bar;
       // Should invoke source code.
@@ -53,8 +53,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke source code.
+      this._bar = value;
       // Should invoke source code.
       this._bar = value;
       // Should invoke source code.
@@ -67,8 +67,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke override 4.
+      _ = this.Bar_Override4;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke override 4.
@@ -79,8 +79,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke override 4.
+      this.Bar_Override4 = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke override 4.
@@ -93,8 +93,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke override 6.
+      _ = this.Bar_Override6;
       // Should invoke override 6.
       _ = this.Bar_Override6;
       // Should invoke override 6.
@@ -105,8 +105,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke override 6.
+      this.Bar_Override6 = value;
       // Should invoke override 6.
       this.Bar_Override6 = value;
       // Should invoke override 6.
@@ -119,8 +119,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke the final declaration.
+      _ = this.Bar;
       // Should invoke the final declaration.
       _ = this.Bar;
       // Should invoke the final declaration.
@@ -131,8 +131,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke the final declaration.
+      this.Bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
       // Should invoke the final declaration.
@@ -145,8 +145,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke source code.
+      _ = this._bar;
       // Should invoke source code.
       _ = this._bar;
       // Should invoke override 4.
@@ -157,8 +157,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke source code.
+      this._bar = value;
       // Should invoke source code.
       this._bar = value;
       // Should invoke override 4.
@@ -171,8 +171,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke override 4.
+      _ = this.Bar_Override4;
       // Should invoke override 4.
       _ = this.Bar_Override4;
       // Should invoke override 6.
@@ -183,8 +183,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke override 4.
+      this.Bar_Override4 = value;
       // Should invoke override 4.
       this.Bar_Override4 = value;
       // Should invoke override 6.
@@ -197,8 +197,8 @@ class Target
   {
     get
     {
-      // Should invoke empty code.
-      _ = this.Bar_Empty;
+      // Should invoke override 6.
+      _ = this.Bar_Override6;
       // Should invoke override 6.
       _ = this.Bar_Override6;
       // Should invoke the final declaration.
@@ -209,8 +209,8 @@ class Target
     }
     set
     {
-      // Should invoke empty code.
-      this.Bar_Empty = value;
+      // Should invoke override 6.
+      this.Bar_Override6 = value;
       // Should invoke override 6.
       this.Bar_Override6 = value;
       // Should invoke the final declaration.

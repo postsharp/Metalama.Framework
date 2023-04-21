@@ -22,6 +22,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Sour
     {
         public void Foo()
         {
+            System.Console.WriteLine("This is original code (discarded).");
+        }
+
+        public new void Bar()
+        {
             Console.WriteLine("This is original code.");
         }
 
@@ -83,11 +88,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Sour
             link(_this.Bar, current)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
-        }
-
-        public new void Bar()
-        {
-            Console.WriteLine("This is original code.");
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]
