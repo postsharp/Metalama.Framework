@@ -22,6 +22,7 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
         switch ( ProcessUtilities.ProcessKind )
         {
             case ProcessKind.Rider:
+            case ProcessKind.OmniSharp:
                 return new LocalWorkspaceProvider( serviceProvider );
 
             default:
