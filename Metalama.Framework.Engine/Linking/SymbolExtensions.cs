@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -78,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
                 var matchingSymbol = currentType.GetMembers()
                     .SingleOrDefault(
                         member => member.IsVisibleTo( compilation, symbol )
-                                  && SignatureTypeSymbolComparer.Instance.Equals( symbol, member ) );
+                                  && SignatureEquals( symbol, member ) );
 
                 if ( matchingSymbol != null )
                 {
@@ -93,6 +94,23 @@ namespace Metalama.Framework.Engine.Linking
             hiddenSymbol = null;
 
             return false;
+
+            static bool SignatureEquals(ISymbol localMember, ISymbol baseMember)
+            {
+                switch ( (localMember, baseMember) )
+                {
+                    case (IPropertySymbol property, IFieldSymbol field ):
+                        // Promoted field that hides a base field.
+                        if (StringComparer.Ordinal.Equals(property.Name, field.Name))
+                        {
+                            return true;
+                        }
+
+                        goto default;
+                    default:
+                        return SignatureTypeSymbolComparer.Instance.Equals( localMember, baseMember );
+                }
+            }
         }
     }
 }
