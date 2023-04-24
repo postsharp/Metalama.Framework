@@ -196,7 +196,8 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                     var targetSemantic =
-                        !this._comparer.Is( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType )
+                        !this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType )
+                        && resolvedReferencedSymbol.IsVirtual
                             ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
                             : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 

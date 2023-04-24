@@ -144,8 +144,11 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                                    when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
+                                    when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var overrideOrHidingSymbol }
+                                    when overrideOrHidingSymbol.IsOverride || overrideOrHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                    // Base reference to a virtual member of the parent that is not overridden.
                                     // Base references to new slot or override members are rewritten to the base member call.
                                     AddSubstitution(
                                         context,
@@ -328,9 +331,12 @@ namespace Metalama.Framework.Engine.Linking
                                         new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
 
                                     break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                                    when symbol.IsOverride || symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                    
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
+                                    when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
+                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var overrideOrHidingSymbol }
+                                    when overrideOrHidingSymbol.IsOverride || overrideOrHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
+                                    // Base reference to a virtual member of the parent that is not overridden.
                                     // Base references to new slot or override members are rewritten to the base member call.
                                     AddSubstitution(
                                         inliningSpecification.ContextIdentifier,

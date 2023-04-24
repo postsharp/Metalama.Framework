@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Include(_Shared.cs)
-#endif
-
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System;
@@ -11,24 +7,38 @@ using System.Linq;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassVirtual_UserOverride;
 
 /*
- * Tests that when invokers are targeting a virtual method that is declared in a base class and C# override is declared in the current class:
- *   - DEFAULT means this.Method
- *   - BASE means base.Method
- *   - CURRENT means this.Method
- *   - FINAL means this.Method
- *
- * On non-this instances:
- *   - DEFAULT means instance.Method
- *   - BASE is not usable
- *   - CURRENT is not usable
- *   - FINAL means instance.Method
- *
- * Also if the override target the base method or it's override the result should be identical.
+ * Tests invokers targeting a virtual method declared in the base class which is overridden by a C# method.
  */
+
+public class InvokerAspect : MethodAspect
+{
+    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    {
+        builder.Advice.Override(
+            builder.Target,
+            nameof(Template),
+            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+    }
+
+    [Template]
+    public dynamic? Template([CompileTime] IMethod target)
+    {
+        meta.InsertComment("Invoke this.Method");
+        target.Invoke();
+        meta.InsertComment("Invoke this.Method");
+        target.With(InvokerOptions.Base).Invoke();
+        meta.InsertComment("Invoke this.Method");
+        target.With(InvokerOptions.Current).Invoke();
+        meta.InsertComment("Invoke this.Method");
+        target.With(InvokerOptions.Final).Invoke();
+
+        return meta.Proceed();
+    }
+}
 
 public class BaseClass
 {
-    public virtual void Method(BaseClass instance, string value)
+    public virtual void Method()
     {
     }
 }
@@ -36,17 +46,12 @@ public class BaseClass
 // <target>
 public class TargetClass : BaseClass
 {
-    [InvokerAspect(TargetName = nameof(Method), TargetLevel = 1, InvokeParameterInstance = true)]
-    public void InvokerMethod(BaseClass instance, string value)
+    public override void Method()
     {
     }
 
-    //[InvokerAspect(TargetName = nameof(Method), TargetLevel = 0, InvokeParameterInstance = true)]
-    //public void OverrideInvokerMethod(BaseClass instance, string value)
-    //{
-    //}
-
-    public override void Method(BaseClass instance, string value)
+    [InvokerAspect]
+    public void Invoker()
     {
     }
 }

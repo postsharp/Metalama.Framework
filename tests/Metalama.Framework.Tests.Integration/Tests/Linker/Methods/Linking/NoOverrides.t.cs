@@ -40,11 +40,11 @@ public class Target : Base
     // Should invoke current type.
     Target.BaseStaticMethod();
     // Should invoke base.
-    this.BaseVirtualMethod();
+    base.BaseVirtualMethod();
     // Should invoke base.
-    this.BaseVirtualMethod();
+    base.BaseVirtualMethod();
     // Should invoke base.
-    this.BaseVirtualMethod();
+    base.BaseVirtualMethod();
     // Should invoke this.
     this.BaseVirtualMethod();
     // Should invoke _Source (#32906 - linker should create _Source declaration and target it).

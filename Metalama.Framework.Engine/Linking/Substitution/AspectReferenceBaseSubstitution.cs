@@ -23,7 +23,7 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
         Invariant.Assert(
             aspectReference.ResolvedSemantic.Symbol.IsOverride
             || aspectReference.ResolvedSemantic.Symbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out _ )
-            || !compilationContext.SymbolComparer.Is(
+            || !compilationContext.SymbolComparer.Equals(
                 aspectReference.ContainingSemantic.Symbol.ContainingType,
                 aspectReference.ResolvedSemantic.Symbol.ContainingType ) );
 
