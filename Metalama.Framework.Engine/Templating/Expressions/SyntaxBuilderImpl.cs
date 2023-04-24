@@ -38,11 +38,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     }
 
     public SyntaxBuilderImpl( CompilationModel compilation )
-    {
-        this._compilation = compilation;
-        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
-        this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
-    }
+        : this( compilation, compilation.CompilationContext.SyntaxGenerationContextFactory.Default ) { }
 
     public IProject Project => this.Compilation.Project;
 
