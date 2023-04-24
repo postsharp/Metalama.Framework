@@ -19,6 +19,8 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
 
     private static WorkspaceProvider GetWorkspaceProvider( GlobalServiceProvider serviceProvider )
     {
+        // TODO: WorkspaceProvider should be refactored as an IGlobalService.
+        
         switch ( ProcessUtilities.ProcessKind )
         {
             case ProcessKind.Rider:
