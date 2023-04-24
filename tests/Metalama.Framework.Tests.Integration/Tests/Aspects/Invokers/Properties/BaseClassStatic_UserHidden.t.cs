@@ -1,19 +1,38 @@
 public class TargetClass : BaseClass
 {
-  public new static void Method()
+  public new static int Property
   {
+    get
+    {
+      return 0;
+    }
+    set
+    {
+    }
   }
   [InvokerAspect]
-  public void Invoker()
+  public int Invoker
   {
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden.BaseClass.Method();
-    return;
+    get
+    { // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property;
+      return 0;
+    }
+    set
+    { // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden.BaseClass.Property = 42;
+    }
   }
 }

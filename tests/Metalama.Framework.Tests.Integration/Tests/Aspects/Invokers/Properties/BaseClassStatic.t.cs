@@ -1,16 +1,28 @@
 public class TargetClass : BaseClass
 {
   [InvokerAspect]
-  public void Invoker()
+  public int Invoker
   {
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic.BaseClass.Method();
-    // Invoke BaseClass.Method
-    global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic.BaseClass.Method();
-    return;
+    get
+    { // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property;
+      // Invoke BaseClass.Property
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property;
+      return 0;
+    }
+    set
+    { // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property = 42;
+      // Invoke BaseClass.Property
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic.BaseClass.Property = 42;
+    }
   }
 }

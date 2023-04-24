@@ -1,47 +1,94 @@
 public class TargetClass
 {
   [OverrideAspect]
-  public void Method()
+  public int Property
   {
-    // Invoke this.Method_Source
-    this.Method_Source();
-    // Invoke this.Method_Source
-    this.Method_Source();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method_Source
-    this.Method_Source();
+    get
+    { // Invoke this.Property_Source
+      _ = this.Property_Source;
+      // Invoke this.Property_Source
+      _ = this.Property_Source;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property_Source
+      return this.Property_Source;
+    }
+    set
+    { // Invoke this.Property_Source
+      this.Property_Source = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = value;
+    }
   }
-  private void Method_Source()
+  private int Property_Source
   {
+    get
+    {
+      return 0;
+    }
+    set
+    {
+    }
   }
   [InvokerBeforeAspect]
-  public void InvokerBefore()
+  public int InvokerBefore
   {
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method_Source
-    this.Method_Source();
-    // Invoke this.Method_Source
-    this.Method_Source();
-    // Invoke this.Method
-    this.Method();
-    return;
+    get
+    { // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property_Source
+      _ = this.Property_Source;
+      // Invoke this.Property_Source
+      _ = this.Property_Source;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property_Source
+      return 0;
+    }
+    set
+    { // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = 42;
+      // Invoke this.Property
+      this.Property = 42;
+    // Invoke this.Property_Source
+    }
   }
   [InvokerAfterAspect]
-  public void InvokerAfter()
+  public int InvokerAfter
   {
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    return;
+    get
+    { // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      return 0;
+    }
+    set
+    { // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+    }
   }
 }

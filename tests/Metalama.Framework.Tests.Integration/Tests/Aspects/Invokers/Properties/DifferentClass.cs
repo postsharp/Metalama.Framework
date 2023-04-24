@@ -7,47 +7,65 @@ using System.Linq;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.DifferentClass;
 
 /*
- * Tests default and final invokers targeting a method declared in a different class.
+ * Tests default and final invokers targeting a property declared in a different class.
  */
 
-public class InvokerAspect : MethodAspect
+public class InvokerAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {
-        builder.Advice.Override(
+        builder.Advice.OverrideAccessors(
             builder.Target,
-            nameof(Template),
-            new { target = ((INamedType)builder.Target.Parameters[0].Type).Methods.OfName("Method").Single() });
+            nameof(GetTemplate),
+            nameof(SetTemplate),
+            new { target = ((INamedType)builder.Target.DeclaringType.Fields.Single().Type).Properties.OfName("Property").Single() });
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? GetTemplate([CompileTime] IProperty target)
     {
-        meta.InsertComment("Invoke instance.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!).Invoke();
-        meta.InsertComment("Invoke instance?.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.NullConditional).Invoke();
-        meta.InsertComment("Invoke instance.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final).Invoke();
-        meta.InsertComment("Invoke instance?.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final | InvokerOptions.NullConditional).Invoke();
+        meta.InsertComment("Invoke instance.Property");
+        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value).Value;
+        meta.InsertComment("Invoke instance?.Property");
+        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.NullConditional).Value;
+        meta.InsertComment("Invoke instance.Property");
+        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final).Value;
+        meta.InsertComment("Invoke instance?.Property");
+        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final | InvokerOptions.NullConditional).Value;
 
         return meta.Proceed();
+    }
+
+    [Template]
+    public void SetTemplate([CompileTime] IProperty target)
+    {
+        meta.InsertComment("Invoke instance.Property");
+        target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value).Value = 42;
+        meta.InsertComment("Invoke instance.Property");
+        target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final).Value = 42;
+
+        meta.Proceed();
     }
 }
 
 public class DifferentClass
 {
-    public void Method()
+    public int Property
     {
+        get { return 0; }
+        set {}       
     }
 }
 
 // <target>
 public class TargetClass
-{    
+{
+    private DifferentClass? instance;
+
     [InvokerAspect]
-    public void Invoker(DifferentClass instance)
+    public int Invoker
     {
+        get { return 0; }
+        set { }
     }
 }

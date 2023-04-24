@@ -1,19 +1,35 @@
 public class TargetClass
 {
-  public void Method()
+  public int Property
   {
+    get
+    {
+      return 0;
+    }
+    set
+    {
+    }
   }
+  private TargetClass? instance;
   [InvokerAspect]
-  public void Invoker(TargetClass instance)
+  public int Invoker
   {
-    // Invoke instance.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance.TargetClass)instance).Method();
-    // Invoke instance?.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance.TargetClass)instance)?.Method();
-    // Invoke instance.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance.TargetClass)instance).Method();
-    // Invoke instance?.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance.TargetClass)instance)?.Method();
-    return;
+    get
+    { // Invoke instance.Property
+      _ = this.instance.Property;
+      // Invoke instance?.Property
+      _ = this.instance?.Property;
+      // Invoke instance.Property
+      _ = this.instance.Property;
+      // Invoke instance?.Property
+      _ = this.instance?.Property;
+      return 0;
+    }
+    set
+    { // Invoke instance.Property
+      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!).Property = 42;
+      // Invoke instance.Property
+      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!).Property = 42;
+    }
   }
 }

@@ -1,16 +1,28 @@
 public class TargetClass : BaseClass
 {
   [InvokerAspect]
-  public void Invoker()
+  public int Invoker
   {
-    // Invoke this.Method
-    this.Method();
-    // Invoke base.Method
-    base.Method();
-    // Invoke base.Method
-    base.Method();
-    // Invoke this.Method
-    this.Method();
-    return;
+    get
+    { // Invoke this.Property
+      _ = this.Property;
+      // Invoke base.Property
+      _ = base.Property;
+      // Invoke base.Property
+      _ = base.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      return 0;
+    }
+    set
+    { // Invoke this.Property
+      this.Property = 42;
+      // Invoke base.Property
+      base.Property = 42;
+      // Invoke base.Property
+      base.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+    }
   }
 }

@@ -1,16 +1,25 @@
-public class TargetClass
+    public class TargetClass
 {
+  private DifferentClass? instance;
   [InvokerAspect]
-  public void Invoker(DifferentClass instance)
+  public int Invoker
   {
-    // Invoke instance.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.DifferentClass.DifferentClass)instance).Method();
-    // Invoke instance?.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.DifferentClass.DifferentClass)instance)?.Method();
-    // Invoke instance.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.DifferentClass.DifferentClass)instance).Method();
-    // Invoke instance?.Method
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.DifferentClass.DifferentClass)instance)?.Method();
-    return;
+    get
+    { // Invoke instance.Property
+      _ = this.instance.Property;
+      // Invoke instance?.Property
+      _ = this.instance?.Property;
+      // Invoke instance.Property
+      _ = this.instance.Property;
+      // Invoke instance?.Property
+      _ = this.instance?.Property;
+      return 0;
+    }
+    set
+    { // Invoke instance.Property
+      this.instance.Property = 42;
+      // Invoke instance.Property
+      this.instance.Property = 42;
+    }
   }
 }

@@ -1,19 +1,38 @@
 public class TargetClass
 {
-  public void Method()
+  public int Property
   {
+    get
+    {
+      return 0;
+    }
+    set
+    {
+    }
   }
   [InvokerAspect]
-  public void Invoker()
+  public int Invoker
   {
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    // Invoke this.Method
-    this.Method();
-    return;
+    get
+    { // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      // Invoke this.Property
+      _ = this.Property;
+      return 0;
+    }
+    set
+    { // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+      // Invoke this.Property
+      this.Property = 42;
+    }
   }
 }

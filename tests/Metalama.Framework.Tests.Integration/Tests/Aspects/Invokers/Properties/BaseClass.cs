@@ -7,39 +7,57 @@ using System.Linq;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClass;
 
 /*
- * Tests invokers targeting a method declared in the base class.
+ * Tests invokers targeting a property declared in the base class.
  */
 
-public class InvokerAspect : MethodAspect
+public class InvokerAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {
-        builder.Advice.Override(
+        builder.Advice.OverrideAccessors(
             builder.Target,
-            nameof(Template),
-            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+            nameof(GetTemplate),
+            nameof(SetTemplate),
+            new { target = builder.Target.DeclaringType!.BaseType!.Properties.OfName("Property").Single() });
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? GetTemplate([CompileTime] IProperty target)
     {
-        meta.InsertComment("Invoke this.Method");
-        target.Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment("Invoke this.Property");
+        _ = target.Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Base).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Current).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Final).Value;
 
         return meta.Proceed();
+    }
+
+    [Template]
+    public void SetTemplate([CompileTime] IProperty target)
+    {
+        meta.InsertComment("Invoke this.Property");
+        target.Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Base).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Current).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Final).Value = 42;
+
+        meta.Proceed();
     }
 }
 
 public class BaseClass
 {
-    public void Method()
+    public int Property
     {
+        get { return 0; }
+        set {}       
     }
 }
 
@@ -47,7 +65,9 @@ public class BaseClass
 public class TargetClass : BaseClass
 {
     [InvokerAspect]
-    public void Invoker()
+    public int Invoker
     {
+        get { return 0; }
+        set {}
     }
 }

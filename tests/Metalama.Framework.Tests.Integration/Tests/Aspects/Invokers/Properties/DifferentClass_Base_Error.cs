@@ -7,40 +7,55 @@ using System.Linq;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.DifferentClass_Base_Error;
 
 /*
- * Tests that base invoker targeting a method declared in a different class produces an error.
+ * Tests that base invoker targeting a property declared in a different class produces an error.
  */
 
-public class InvokerAspect : MethodAspect
+public class InvokerAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {
-        builder.Advice.Override(
+        builder.Advice.OverrideAccessors(
             builder.Target,
-            nameof(Template),
-            new { target = ((INamedType)builder.Target.Parameters[0].Type).Methods.OfName("Method").Single() });
+            nameof(GetTemplate),
+            nameof(SetTemplate),
+            new { target = ((INamedType)builder.Target.DeclaringType.Fields.Single().Type).Properties.OfName("Property").Single() });
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? GetTemplate([CompileTime] IProperty target)
     {
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base).Invoke();
+        _ = target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value;
 
         return meta.Proceed();
+    }
+
+    [Template]
+    public void SetTemplate([CompileTime] IProperty target)
+    {
+        target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value = 42;
+
+        meta.Proceed();
     }
 }
 
 public class DifferentClass
 {
-    public void Method()
+    public int Property
     {
+        get { return 0; }
+        set {}       
     }
 }
 
 // <target>
 public class TargetClass
-{    
+{
+    private DifferentClass? instance;
+
     [InvokerAspect]
-    public void Invoker(DifferentClass instance)
+    public int Invoker
     {
+        get { return 0; }
+        set { }
     }
 }

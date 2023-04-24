@@ -10,88 +10,137 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.Bas
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassVirtual_UserHidden_AspectOverride;
 
 /*
- * Tests invokers targeting a virtual method declared in the base class which is hidden by a C# method which is then overridden by an aspect.
+ * Tests invokers targeting a virtual property declared in the base class which is hidden by a C# property which is then overridden by an aspect.
  */
 
-public class InvokerBeforeAspect : MethodAspect
+public class InvokerBeforeAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {
-        builder.Advice.Override(
+        builder.Advice.OverrideAccessors(
             builder.Target,
-            nameof(Template),
-            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+            nameof(GetTemplate),
+            nameof(SetTemplate),
+            new { target = builder.Target.DeclaringType!.BaseType!.Properties.OfName("Property").Single() });
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? GetTemplate([CompileTime] IProperty target)
     {
-        meta.InsertComment("Invoke this.Method");
-        target.Invoke();
-        meta.InsertComment("Invoke this.Method_Source");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method_Source");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment("Invoke this.Property");
+        _ = target.Value;
+        meta.InsertComment("Invoke this.Property_Source");
+        _ = target.With(InvokerOptions.Base).Value;
+        meta.InsertComment("Invoke this.Property_Source");
+        _ = target.With(InvokerOptions.Current).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Final).Value;
 
         return meta.Proceed();
     }
-}
-
-public class OverrideAspect : MethodAspect
-{
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
-    {
-        builder.Advice.Override(builder.Target, nameof(Template));
-    }
 
     [Template]
-    public void Template()
+    public void SetTemplate([CompileTime] IProperty target)
     {
-        meta.InsertComment("Invoke this.Method_Source");
-        meta.Target.Method.Invoke();
-        meta.InsertComment("Invoke this.Method_Source");
-        meta.Target.Method.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        meta.Target.Method.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        meta.Target.Method.With(InvokerOptions.Final).Invoke();
-        meta.InsertComment("Invoke this.Method_Source");
+        meta.InsertComment("Invoke this.Property");
+        target.Value = 42;
+        meta.InsertComment("Invoke this.Property_Source");
+        target.With(InvokerOptions.Base).Value = 42;
+        meta.InsertComment("Invoke this.Property_Source");
+        target.With(InvokerOptions.Current).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Final).Value = 42;
+
         meta.Proceed();
     }
 }
 
-public class InvokerAfterAspect : MethodAspect
+public class OverrideAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {
-        builder.Advice.Override(
-            builder.Target,
-            nameof(Template),
-            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+        builder.Advice.OverrideAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? GetTemplate()
     {
-        meta.InsertComment("Invoke this.Method");
-        target.Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Final).Invoke();
-        meta.InsertComment("Invoke this.Method");
+        meta.InsertComment("Invoke this.Property_Source");
+        _ = meta.Target.Property.Value;
+        meta.InsertComment("Invoke this.Property_Source");
+        _ = meta.Target.Property.With(InvokerOptions.Base).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = meta.Target.Property.With(InvokerOptions.Current).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = meta.Target.Property.With(InvokerOptions.Final).Value;
+        meta.InsertComment("Invoke this.Property_Source");
         return meta.Proceed();
+    }
+
+    [Template]
+    public void SetTemplate()
+    {
+        meta.InsertComment("Invoke this.Property_Source");
+        meta.Target.Property.Value = 42;
+        meta.InsertComment("Invoke this.Property_Source");
+        meta.Target.Property.With(InvokerOptions.Base).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        meta.Target.Property.With(InvokerOptions.Current).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        meta.Target.Property.With(InvokerOptions.Final).Value = 42;
+        meta.InsertComment("Invoke this.Property_Source");
+        meta.Proceed();
+    }
+}
+
+public class InvokerAfterAspect : PropertyAspect
+{
+    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    {
+        builder.Advice.OverrideAccessors(
+            builder.Target,
+            nameof(GetTemplate),
+            nameof(SetTemplate),
+            new { target = builder.Target.DeclaringType!.BaseType!.Properties.OfName("Property").Single() });
+    }
+
+    [Template]
+    public dynamic? GetTemplate([CompileTime] IProperty target)
+    {
+        meta.InsertComment("Invoke this.Property");
+        _ = target.Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Base).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Current).Value;
+        meta.InsertComment("Invoke this.Property");
+        _ = target.With(InvokerOptions.Final).Value;
+        meta.InsertComment("Invoke this.Property");
+        return meta.Proceed();
+    }
+
+    [Template]
+    public void SetTemplate([CompileTime] IProperty target)
+    {
+        meta.InsertComment("Invoke this.Property");
+        target.Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Base).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Current).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        target.With(InvokerOptions.Final).Value = 42;
+        meta.InsertComment("Invoke this.Property");
+        meta.Proceed();
     }
 }
 
 public class BaseClass
 {
-    public virtual void Method()
+    public virtual int Property
     {
+        get { return 0; }
+        set {}       
     }
 }
 
@@ -99,17 +148,23 @@ public class BaseClass
 public class TargetClass : BaseClass
 {
     [OverrideAspect]
-    public new void Method()
+    public new int Property
     {
+        get { return 0; }
+        set {}       
     }
 
     [InvokerBeforeAspect]
-    public void InvokerBefore()
+    public int InvokerBefore
     {
+        get { return 0; }
+        set {}       
     }
 
     [InvokerAfterAspect]
-    public void InvokerAfter()
+    public int InvokerAfter
     {
+        get { return 0; }
+        set {}       
     }
 }
