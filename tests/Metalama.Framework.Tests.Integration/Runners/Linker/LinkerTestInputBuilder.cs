@@ -89,10 +89,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
                 this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
+                null,
                 null );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformationsAndAspectInstances(
                 this._rewriter.ObservableTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
+                null,
                 null );
 
             var linkerInput = new AspectLinkerInput(

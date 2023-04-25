@@ -29,42 +29,43 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
 
     protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
 
-    private ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null, string[]? preprocessorSymbols = null )
+    private ProjectKey GetOrAddProject( string projectName, string[]? projectReferences = null, string[]? preprocessorSymbols = null )
     {
         if ( this._projectIdsByProjectName.TryGetValue( projectName, out var projectData ) )
         {
-            return projectData.ProjectKey;
-        }
-        else
-        {
-            var projectId = ProjectId.CreateNewId();
-
-            var parseOptions = TestCompilationFactory.GetParseOptions( preprocessorSymbols );
-
-            var projectInfo = ProjectInfo.Create(
-                projectId,
-                VersionStamp.Create(),
-                projectName,
-                projectName,
-                LanguageNames.CSharp,
-                metadataReferences: TestCompilationFactory.GetMetadataReferences(),
-                parseOptions: parseOptions,
-                compilationOptions: TestCompilationFactory.GetCompilationOptions() );
-
-            projectInfo = projectInfo.WithMetadataReferences( TestCompilationFactory.GetMetadataReferences() );
-
-            if ( projectReferences != null )
+            if ( this._workspace.CurrentSolution.ContainsProject( projectData.ProjectId ) )
             {
-                projectInfo = projectInfo.WithProjectReferences(
-                    projectReferences.SelectAsArray( r => new ProjectReference( this._projectIdsByProjectName[r].ProjectId ) ) );
+                return projectData.ProjectKey;
             }
-
-            var projectKey = ProjectKeyFactory.Create( projectName, parseOptions );
-            this._projectIdsByProjectName[projectName] = new ProjectData( projectId, projectKey );
-            this._workspace.AddProject( projectInfo );
-
-            return projectKey;
         }
+
+        var projectId = ProjectId.CreateNewId();
+
+        var parseOptions = TestCompilationFactory.GetParseOptions( preprocessorSymbols );
+
+        var projectInfo = ProjectInfo.Create(
+            projectId,
+            VersionStamp.Create(),
+            projectName,
+            projectName,
+            LanguageNames.CSharp,
+            metadataReferences: TestCompilationFactory.GetMetadataReferences(),
+            parseOptions: parseOptions,
+            compilationOptions: TestCompilationFactory.GetCompilationOptions() );
+
+        projectInfo = projectInfo.WithMetadataReferences( TestCompilationFactory.GetMetadataReferences() );
+
+        if ( projectReferences != null )
+        {
+            projectInfo = projectInfo.WithProjectReferences(
+                projectReferences.SelectAsArray( r => new ProjectReference( this._projectIdsByProjectName[r].ProjectId ) ) );
+        }
+
+        var projectKey = ProjectKeyFactory.Create( projectName, parseOptions );
+        this._projectIdsByProjectName[projectName] = new ProjectData( projectId, projectKey );
+        this._workspace.AddProject( projectInfo );
+
+        return projectKey;
     }
 
     public ProjectKey AddOrUpdateProject(
@@ -73,7 +74,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         string[]? projectReferences = null,
         string[]? preprocessorSymbols = null )
     {
-        var projectKey = this.AddOrUpdateProject( projectName, projectReferences, preprocessorSymbols );
+        var projectKey = this.GetOrAddProject( projectName, projectReferences, preprocessorSymbols );
         this.AddOrUpdateDocuments( projectName, code );
 
         return projectKey;
@@ -81,6 +82,8 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
 
     public Microsoft.CodeAnalysis.Project GetProject( string projectName )
         => this._workspace.CurrentSolution.GetProject( this._projectIdsByProjectName[projectName].ProjectId ).AssertNotNull();
+
+    public Workspace Workspace => this._workspace;
 
     private void AddOrUpdateDocuments( string projectName, Dictionary<string, string> code )
     {

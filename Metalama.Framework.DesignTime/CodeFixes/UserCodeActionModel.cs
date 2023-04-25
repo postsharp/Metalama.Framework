@@ -14,19 +14,24 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 [JsonObject]
 internal sealed class UserCodeActionModel : CodeActionModel
 {
+    public string CompleteTitle { get; init; }
+    
     public UserCodeActionModel()
     {
         this.DiagnosticId = null!;
         this.SyntaxTreeFilePath = null!;
+        this.CompleteTitle = null!;
     }
 
     public UserCodeActionModel(
         string title,
+        string completeTitle,
         Diagnostic diagnostic ) : base( title )
     {
         this.DiagnosticId = diagnostic.Id;
         this.DiagnosticSpan = diagnostic.Location.SourceSpan;
         this.SyntaxTreeFilePath = diagnostic.Location.SourceTree!.FilePath;
+        this.CompleteTitle = completeTitle;
     }
 
     public string DiagnosticId { get; init; }
@@ -54,7 +59,7 @@ internal sealed class UserCodeActionModel : CodeActionModel
             syntaxTree,
             this.DiagnosticId,
             this.DiagnosticSpan,
-            this.Title,
+            this.CompleteTitle,
             isComputingPreview,
             cancellationToken );
     }

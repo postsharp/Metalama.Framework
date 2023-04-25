@@ -83,6 +83,10 @@
                 <_Parameter1>MetalamaLicense</_Parameter1>
                 <_Parameter2>$(MetalamaLicense)</_Parameter2>
             </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>IgnoredWarnings</_Parameter1>
+                <_Parameter2>$(NoWarn)</_Parameter2>
+            </AssemblyAttribute>
         </ItemGroup>
     </Target>
 

@@ -45,11 +45,6 @@ namespace Metalama.Framework.Code
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default );
 
         /// <summary>
-        /// Gets the version of the current compilation in the Metalama pipeline. This number is only informational.
-        /// </summary>
-        int Revision { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.
         /// </summary>

@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public int Depth => this.GetDepthImpl();
 
+        public abstract bool BelongsToCurrentProject { get; }
+
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 
         protected virtual ISymbol? GetSymbol() => null;

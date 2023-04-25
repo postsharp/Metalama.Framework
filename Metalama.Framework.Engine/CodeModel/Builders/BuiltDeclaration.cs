@@ -37,7 +37,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclarationOrigin Origin => this.Builder.Origin;
 
         [Memo]
-        public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration );
+        public override IDeclaration? ContainingDeclaration
+            => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
 
         public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
 
@@ -78,5 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         protected override int GetHashCodeCore() => this.Builder.GetHashCode();
+
+        public override bool BelongsToCurrentProject => true;
     }
 }
