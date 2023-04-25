@@ -84,7 +84,7 @@ public class InvokerAfterAspect : MethodAspect
 
 public class BaseClass
 {
-    public virtual void Method()
+    public void Method()
     {
     }
 }

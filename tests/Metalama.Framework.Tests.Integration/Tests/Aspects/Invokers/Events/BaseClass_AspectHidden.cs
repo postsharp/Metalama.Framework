@@ -134,7 +134,7 @@ public class InvokerAfterAspect : EventAspect
 
 public class BaseClass
 {
-    public virtual event System.EventHandler Event
+    public event System.EventHandler Event
     {
         add { }
         remove { }

@@ -132,7 +132,7 @@ public class InvokerAfterAspect : PropertyAspect
 
 public class BaseClass
 {
-    public virtual int Property
+    public int Property
     {
         get { return 0; }
         set {}       
