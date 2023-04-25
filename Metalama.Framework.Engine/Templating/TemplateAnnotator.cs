@@ -1262,8 +1262,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         this.SetLocalSymbolScope( local, forEachScope );
 
-        this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
-
         StatementSyntax annotatedStatement;
 
         using ( this.WithScopeContext( this._currentScopeContext.BreakOrContinue( forEachScope, reason ) ) )
@@ -2083,7 +2081,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var annotatedCondition = this.Visit( node.Condition );
         var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
 
-        this.RequireLoopScope( node.Condition, conditionScope, "while" );
+        this.RequireWhileScope( node.Condition, conditionScope );
 
         StatementSyntax annotatedStatement;
 
@@ -2471,19 +2469,19 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return true;
     }
 
-    private void RequireLoopScope( SyntaxNode nodeForDiagnostic, TemplatingScope requiredScope, string statementName )
+    private void RequireWhileScope( SyntaxNode nodeForDiagnostic, TemplatingScope requiredScope )
     {
         if ( requiredScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
         {
-            // It is not allowed to have a loop in a run-time-conditional block because compile-time loops require a compile-time
+            // It is not allowed to have a while loop in a run-time-conditional block because compile-time loops require a compile-time
             // variable, and mutating a compile-time variable is not allowed in a run-time-conditional block. This condition may be
-            // removed in the future because the loop variable may actually not be observable from outside the block, this this
-            // is not implemented.
+            // removed in the future because the loop variable may actually not be observable from outside the block, this
+            // is not implemented. Since the iteration variable of a foreach loop cannot be mutated explicitly, this check does not apply there.
 
             this.ReportDiagnostic(
-                TemplatingDiagnosticDescriptors.CannotHaveCompileTimeLoopInRunTimeConditionalBlock,
+                TemplatingDiagnosticDescriptors.CannotHaveCompileTimeWhileInRunTimeConditionalBlock,
                 nodeForDiagnostic,
-                (statementName, this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
+                this._currentScopeContext.IsRuntimeConditionalBlockReason! );
         }
     }
 

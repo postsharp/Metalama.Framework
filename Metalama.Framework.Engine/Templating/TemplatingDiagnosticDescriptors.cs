@@ -61,11 +61,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string VariableName, string RunTimeCondition)> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
+        internal static readonly DiagnosticDefinition<string> CannotHaveCompileTimeWhileInRunTimeConditionalBlock
             = new(
                 "LAMA0110",
-                "Cannot have a compile-time loop in a block whose execution depends on a run-time condition",
-                "The compile-time loop '{0}' is not allowed here because it is a part of block whose execution depends on the run-time condition '{1}'. " +
+                "Cannot have a compile-time while loop in a block whose execution depends on a run-time condition",
+                "The compile-time while loop is not allowed here because it is a part of block whose execution depends on the run-time condition '{0}'. " +
                 "Move the loop out of the run-time-conditional block.",
                 _category,
                 Error );
