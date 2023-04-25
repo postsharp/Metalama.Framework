@@ -16,6 +16,4 @@ public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IFieldOrPropert
     /// Gets the <see cref="IMethodBuilder"/> for the setter.
     /// </summary>
     new IMethodBuilder? SetMethod { get; }
-
-    new Writeability Writeability { get; set; }
 }

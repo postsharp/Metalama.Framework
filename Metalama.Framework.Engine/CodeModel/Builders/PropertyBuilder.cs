@@ -44,24 +44,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 };
 
             set
-            {
-                switch (this, value)
+                => this.HasInitOnlySetter = (this, value) switch
                 {
-                    case ({ SetMethod: not null }, Writeability.All):
-                        this.HasInitOnlySetter = false;
-
-                        break;
-
-                    case ({ SetMethod: not null }, Writeability.InitOnly):
-                        this.HasInitOnlySetter = true;
-
-                        break;
-
-                    default:
-                        throw new InvalidOperationException(
-                            $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
-                }
-            }
+                    ({ SetMethod: not null }, Writeability.All) => false,
+                    ({ SetMethod: not null }, Writeability.InitOnly) => true,
+                    _ => throw new InvalidOperationException(
+                        $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." ),
+                };
         }
 
         public bool IsAutoPropertyOrField { get; }

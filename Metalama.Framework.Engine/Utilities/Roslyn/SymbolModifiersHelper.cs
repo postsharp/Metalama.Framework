@@ -102,6 +102,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
             }
 
+            if ( (categories & ModifierCategories.Const) != 0 && member is IFieldSymbol { IsConst: true } )
+            {
+                tokens.Add( Token( SyntaxKind.ConstKeyword ).WithTrailingTrivia( Space ) );
+            }
+
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
                 tokens.Add( Token( SyntaxKind.UnsafeKeyword ).WithTrailingTrivia( Space ) );
