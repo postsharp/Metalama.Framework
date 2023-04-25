@@ -76,7 +76,6 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
-        private readonly Compilation _intermediateCompilation;
         private readonly SafeSymbolComparer _comparer;
 
         public AspectReferenceResolver(
@@ -96,7 +95,6 @@ namespace Metalama.Framework.Engine.Linking
             this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
-            this._intermediateCompilation = intermediateCompilationContext.Compilation;
             this._comparer = intermediateCompilationContext.SymbolComparer;
         }
 
@@ -602,39 +600,6 @@ namespace Metalama.Framework.Engine.Linking
             targetSymbolSource = expression;
         }
 
-        /// <summary>
-        /// Finds symbol for the referenced declaration that is valid in the current type, i.e. a local override.
-        /// </summary>
-        /// <param name="containingType">Type that contains the reference.</param>
-        /// <param name="referencedSymbol">Referenced symbol.</param>
-        /// <returns></returns>
-        private ISymbol GetCanonicalReferencedSymbol( INamedTypeSymbol containingType, ISymbol referencedSymbol )
-        {
-            if ( this._intermediateCompilation.ClassifyConversion( containingType, referencedSymbol.ContainingType ).IsReference )
-            {
-                var currentType = containingType;
-
-                while ( currentType != null )
-                {
-                    foreach ( var symbol in currentType.GetMembers( referencedSymbol.Name ) )
-                    {
-                        if ( StructuralSymbolComparer.Signature.Equals( symbol, referencedSymbol ) )
-                        {
-                            return symbol;
-                        }
-                    }
-
-                    currentType = currentType.BaseType;
-                }
-
-                throw new AssertionFailedException( "Could not find" );
-            }
-            else
-            {
-                return referencedSymbol;
-            }
-        }
-
         private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )
         {
             switch (referencedSymbol, expression)
@@ -691,27 +656,6 @@ namespace Metalama.Framework.Engine.Linking
 
             return GetCorrespondingSymbolForResolvedSymbol( referencedSymbol, symbol );
         }
-
-        private static ISymbol? GetOverriddenSymbol( ISymbol symbol )
-            => symbol switch
-            {
-                IMethodSymbol methodSymbol => methodSymbol.OverriddenMethod,
-                IPropertySymbol propertySymbol => propertySymbol.OverriddenProperty,
-                IEventSymbol eventSymbol => eventSymbol.OverriddenEvent,
-                _ => throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." )
-            };
-
-        private static ISymbol? GetPrimarySymbol( ISymbol symbol )
-            => symbol switch
-            {
-                IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } methodSymbol => methodSymbol.AssociatedSymbol,
-                IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } methodSymbol => methodSymbol
-                    .AssociatedSymbol,
-                IMethodSymbol methodSymbol => methodSymbol,
-                IPropertySymbol propertySymbol => propertySymbol,
-                IEventSymbol eventSymbol => eventSymbol,
-                _ => throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." )
-            };
 
         /// <summary>
         /// Gets a symbol that corresponds to the referenced symbol for the resolved symbol. 
