@@ -1822,6 +1822,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                  && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
             {
                 leftScope = this.GetNodeScope( transformedRight );
+
+                if ( leftScope == TemplatingScope.RunTimeTemplateParameter )
+                {
+                    leftScope = TemplatingScope.RunTimeOnly;
+                }
             }
 
             return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( leftScope );

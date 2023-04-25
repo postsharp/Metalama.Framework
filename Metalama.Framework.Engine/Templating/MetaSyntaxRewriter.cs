@@ -236,7 +236,21 @@ namespace Metalama.Framework.Engine.Templating
                     return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) );
 
                 case SyntaxKind.IdentifierToken:
-                    return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( token.Text ) );
+                    var text = SyntaxFactoryEx.LiteralExpression( token.Text );
+
+                    if ( token.Text == "_" )
+                    {
+                        return this.MetaSyntaxFactory.Identifier(
+                            SyntaxFactoryEx.Default,
+                            this.MetaSyntaxFactory.Kind( SyntaxKind.UnderscoreToken ),
+                            text,
+                            text,
+                            SyntaxFactoryEx.Default );
+                    }
+                    else
+                    {
+                        return this.MetaSyntaxFactory.Identifier( text );
+                    }
 
                 case SyntaxKind.CharacterLiteralToken:
                 case SyntaxKind.NumericLiteralToken:
