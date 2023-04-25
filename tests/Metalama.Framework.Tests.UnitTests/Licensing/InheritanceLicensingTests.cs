@@ -9,7 +9,36 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public sealed class InheritanceLicensingTests : LicensingTestsBase
     {
-        private const string _codeWithInheritedAspect = @"
+        private const string _codeWithNonInstantiatedInheritedAspect = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+namespace Doc.InheritedTypeLevel
+{
+    [Inheritable]
+    internal class InheritedAspectAttribute : TypeAspect
+    {
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        {
+            foreach ( var method in builder.Target.Methods )
+            {
+                builder.Advice.Override( method, nameof(this.MethodTemplate) );
+            }
+        }
+
+        [Template]
+        private dynamic? MethodTemplate()
+        {
+            Console.WriteLine( ""Hacked!"" );
+
+            return meta.Proceed();
+        }
+    }
+}
+";
+
+        private const string _codeWithInstantiatedInheritedAspect = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -80,7 +109,7 @@ namespace Doc.InheritedTypeLevel
         {
             _ = licenseName;
 
-            var diagnostics = await this.GetDiagnosticsAsync( _codeWithInheritedAspect, licenseKey );
+            var diagnostics = await this.GetDiagnosticsAsync( _codeWithInstantiatedInheritedAspect, licenseKey );
 
             if ( accepted )
             {
@@ -90,6 +119,9 @@ namespace Doc.InheritedTypeLevel
             {
                 Assert.Contains( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.InheritanceNotAvailable.Id );
             }
+
+            diagnostics = await this.GetDiagnosticsAsync( _codeWithNonInstantiatedInheritedAspect, licenseKey );
+            Assert.Empty( diagnostics );
         }
     }
 }

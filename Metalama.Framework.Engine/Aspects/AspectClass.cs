@@ -202,10 +202,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
         this.Layers = layers.SelectAsImmutableArray( l => new AspectLayer( this, l ) );
 
+        // This condition handles the IConditionallyInheritableAspect aspects as well.
         if ( this.IsInheritable != false )
         {
             var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
-            licenseVerifier?.VerifyCanBeInherited( this, diagnosticAdder );
+            this.IsInheritable = licenseVerifier?.VerifyCanBeInherited( this );
         }
 
         if ( this.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() )
