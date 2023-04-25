@@ -169,22 +169,18 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            switch ( symbol )
+            if ( symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                 && this.GetTemplateInfo( associatedSymbol, isInherited ) is { IsNone: false } associatedTemplateInfo )
             {
-                case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
-                    return this.GetTemplateInfo( associatedSymbol );
-
-                case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
-                    // Look at the overriden method.
-                    return this.GetTemplateInfo( overriddenMethod, true );
-
-                case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
-                    // Look at the overridden property.
-                    return this.GetTemplateInfo( overriddenProperty, true );
-
-                default:
-                    return TemplateInfo.None;
+                return associatedTemplateInfo;
             }
+
+            if ( symbol.GetOverriddenMember() is { } overriddenMember )
+            {
+                return this.GetTemplateInfo( overriddenMember, true );
+            }
+
+            return TemplateInfo.None;
         }
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
@@ -736,7 +732,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             var memberScope = GetScopeFromAttributes( symbol );
 
-                            // If we have no attribute, look at the containing symbol.
+                            // If we have no attribute, look at the associated symbol (property/event).
+                            if ( memberScope == null && symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
+                            {
+                                memberScope = this.GetTemplatingScopeCore( associatedSymbol, options, symbolsBeingProcessedIncludingCurrent, tracer );
+                            }
+
+                            // If we still have no attribute, look at the containing symbol.
                             if ( memberScope == null && symbol.ContainingSymbol != null )
                             {
                                 memberScope = this.GetTemplatingScopeCore( symbol.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent, tracer )

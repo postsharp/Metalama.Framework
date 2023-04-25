@@ -426,5 +426,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The type fabric '{0}' cannot be nested in a compile-time type.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration1, INamedTypeSymbol Attribute1, ISymbol Declaration2, INamedTypeSymbol Attribute2)> MultipleAdviceAttributes
+            = new(
+                "LAMA0261",
+                "Declarations cannot have more than one template or advice attribute applied.",
+                "Multiple template or advice attributes found on the same declaration: {1} on {0} and {3} on {2}.",
+                _category,
+                Error );
     }
 }
