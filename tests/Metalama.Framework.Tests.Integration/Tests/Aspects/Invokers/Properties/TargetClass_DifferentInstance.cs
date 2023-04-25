@@ -3,6 +3,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
 
+#pragma warning disable CS0169
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance;
 
 /*

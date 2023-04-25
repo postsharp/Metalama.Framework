@@ -36,8 +36,6 @@ namespace Metalama.Framework.Engine.Linking
 
         private CompilationContext IntermediateCompilationContext { get; }
 
-        public Compilation IntermediateCompilation => this.IntermediateCompilationContext.Compilation;
-
         private LinkerAnalysisRegistry AnalysisRegistry { get; }
 
         public LinkerRewritingDriver(
@@ -580,12 +578,12 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
-        public bool ShouldGenerateEmptyMember( ISymbol symbol )
+        private bool ShouldGenerateEmptyMember( ISymbol symbol )
         {
-            return this.InjectionRegistry.IsIntroduced( symbol ) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilation, out _ );
+            return this.InjectionRegistry.IsIntroduced( symbol ) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilationContext.Compilation, out _ );
         }
 
-        public bool ShouldGenerateSourceMember( ISymbol symbol )
+        private bool ShouldGenerateSourceMember( ISymbol symbol )
         {
             return this.InjectionRegistry.IsOverrideTarget( symbol );
         }
@@ -594,7 +592,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
 
-        internal static TypeSyntax GetOriginalImplParameterType()
+        private static TypeSyntax GetOriginalImplParameterType()
         {
             return
                 QualifiedName(
@@ -608,7 +606,7 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( "Source" ) );
         }
 
-        internal static TypeSyntax GetEmptyImplParameterType()
+        private static TypeSyntax GetEmptyImplParameterType()
         {
             return
                 QualifiedName(

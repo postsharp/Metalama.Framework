@@ -465,6 +465,7 @@ namespace Metalama.Framework.Engine.Linking
             return injectedMember.Semantic == InjectedMemberSemantic.Override;
         }
 
+        // Resharper disable once UnusedMember.Global
         public bool IsLastOverride( ISymbol symbol )
         {
             return this.IsOverride( symbol ) && this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
@@ -480,7 +481,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         // Not yet used.
-        // Resharper disable UnusedMember.Global
+        // Resharper disable once UnusedMember.Global
         [ExcludeFromCodeCoverage]
         public ISymbol? GetPreviousOverride( ISymbol symbol )
         {

@@ -14,15 +14,6 @@ namespace Metalama.Framework.Engine.Linking
 
         private const string _category = "Metalama.Linker";
 
-        internal static readonly DiagnosticDefinition<(string AspectType, ISymbol? TargetDeclaration)>
-            CannotUseBaseInvokerWithNonInstanceExpression = new(
-                "LAMA0600",
-                "Cannot use Base invoker with non-this instance expression.",
-                "The aspect '{0}' on '{1}' uses Base invoker with an instance expression different than 'this'."
-                + " Use 'meta.This' as the first argument or use Final invoker.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             DeclarationMustBeInlined = new(
                 "LAMA0699",

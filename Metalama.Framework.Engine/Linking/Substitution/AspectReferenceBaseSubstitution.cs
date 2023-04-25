@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// <summary>
 /// Substitutes an aspect reference that points to the base declaration (override or hidden slot).
 /// </summary>
-internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitution
+internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitution
 {
     public AspectReferenceBaseSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
         compilationContext,
@@ -37,14 +37,14 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
             && @event.IsEventField() == true );
     }
 
-    public override string GetTargetMemberName()
+    protected override string GetTargetMemberName()
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
         return targetSymbol.Name;
     }
 
-    public override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         return
             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
@@ -53,7 +53,7 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
                 .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
     }
 
-    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -80,7 +80,7 @@ internal class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitu
         }
     }
 
-    public override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         return currentNode
             .WithExpression(

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// <summary>
 /// Substitutes an aspect reference that points to the base declaration (override or a hidden slot).
 /// </summary>
-internal class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstitution
+internal sealed class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstitution
 {
     public AspectReferenceEmptySubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
         compilationContext,
@@ -34,14 +34,14 @@ internal class AspectReferenceEmptySubstitution : AspectReferenceRenamingSubstit
             && @event.IsEventField() == true );
     }
 
-    public override string GetTargetMemberName()
+    protected override string GetTargetMemberName()
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
         return LinkerRewritingDriver.GetEmptyImplMemberName( targetSymbol );
     }
 
-    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 

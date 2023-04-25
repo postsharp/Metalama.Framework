@@ -69,9 +69,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             }
         }
 
-        public abstract string GetTargetMemberName();
+        protected abstract string GetTargetMemberName();
 
-        public virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             return
                 MemberAccessExpression(
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     IdentifierName( this.GetTargetMemberName() ) );
         }
 
-        public virtual SyntaxNode SubstituteOperatorMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected SyntaxNode SubstituteOperatorMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -91,12 +91,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     IdentifierName( this.GetTargetMemberName() ) );
         }
 
-        public abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
+        protected abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
 
-        public virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
             => throw new NotSupportedException( $"Element access is not supported by {this.GetType().Name}" );
 
-        public virtual SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected virtual SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 

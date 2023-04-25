@@ -28,14 +28,14 @@ internal class AspectReferenceSourceSubstitution : AspectReferenceRenamingSubsti
             && @event.IsEventField() == true );
     }
 
-    public override string GetTargetMemberName()
+    protected override string GetTargetMemberName()
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
         return LinkerRewritingDriver.GetOriginalImplMemberName( targetSymbol );
     }
 
-    public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 

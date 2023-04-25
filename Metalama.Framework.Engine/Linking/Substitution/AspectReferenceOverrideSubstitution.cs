@@ -31,14 +31,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 && @event.IsEventField() == true );
         }
 
-        public override string GetTargetMemberName()
+        protected override string GetTargetMemberName()
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
             return targetSymbol.Name;
         }
 
-        public override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
