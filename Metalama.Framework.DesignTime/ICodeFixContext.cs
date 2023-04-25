@@ -17,5 +17,5 @@ internal interface ICodeFixContext
 
     CancellationToken CancellationToken { get; }
 
-    void RegisterCodeFix( CodeAction create, ImmutableArray<Diagnostic> contextDiagnostics );
+    void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics );
 }

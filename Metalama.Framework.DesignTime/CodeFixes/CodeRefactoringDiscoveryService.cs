@@ -97,9 +97,9 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
 
         foreach ( var aspect in eligibleAspects )
         {
-            var targetSymbolId = SymbolId.Create( symbol );
+            var targetSymbolId = SymbolId.Create( symbol, cancellationToken );
 
-            if ( aspect.EditorExperienceOptions.SuggestAsAddAttribute.GetValueOrDefault( true ) )
+            if ( aspect.EditorExperienceOptions.SuggestAsAddAttribute ?? true )
             {
                 var fullTitle = aspect.EditorExperienceOptions.AddAttributeSuggestionTitle ?? $"Add Aspect|Add [{aspect.ShortName}]";
 
