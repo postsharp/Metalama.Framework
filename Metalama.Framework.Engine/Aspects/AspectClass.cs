@@ -206,7 +206,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         if ( this.IsInheritable != false )
         {
             var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
-            this.IsInheritable = licenseVerifier?.VerifyCanBeInherited( this );
+
+            if ( licenseVerifier != null && !licenseVerifier.VerifyCanBeInherited( this ) )
+            {
+                this.IsInheritable = false;
+            }
         }
 
         if ( this.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() )

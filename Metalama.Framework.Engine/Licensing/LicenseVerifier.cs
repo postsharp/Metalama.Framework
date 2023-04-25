@@ -242,6 +242,7 @@ public sealed class LicenseVerifier : IProjectService
             if ( instantiatedInheritableAspectsWithoutLicense.Length > 0 )
             {
                 var suffix = instantiatedInheritableAspectsWithoutLicense.Length > 1 ? "s" : "";
+
                 diagnostics.Report(
                     LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
                         null,
