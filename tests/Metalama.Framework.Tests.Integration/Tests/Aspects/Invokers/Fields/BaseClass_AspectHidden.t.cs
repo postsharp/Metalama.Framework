@@ -5,79 +5,58 @@ public class TargetClass : BaseClass
   public int InvokerBefore
   {
     get
-    { // Invoke this.Property
-      _ = this.Property;
-      // Invoke base.Property
-      _ = base.Property;
-      // Invoke base.Property
-      _ = base.Property;
-      // Invoke this.Property
-      _ = this.Property;
+    { // Invoke this.Field
+      _ = this.Field;
+      // Invoke base.Field
+      _ = this.Field_Empty;
+      // Invoke base.Field
+      _ = this.Field_Empty;
+      // Invoke this.Field
+      _ = this.Field;
       return 0;
     }
     set
-    { // Invoke this.Property
-      this.Property = 42;
-      // Invoke base.Property
-      base.Property = 42;
-      // Invoke base.Property
-      base.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
+    { // Invoke this.Field
+      this.Field = 42;
+      // Invoke base.Field
+      this.Field_Empty = 42;
+      // Invoke base.Field
+      this.Field_Empty = 42;
+      // Invoke this.Field
+      this.Field = 42;
     }
   }
   [InvokerAfterAspect]
   public int InvokerAfter
   {
     get
-    { // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
+    { // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
       return 0;
     }
     set
-    { // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
+    { // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
     }
   }
-  public new global::System.Int32 Property
+  private global::System.Int32 Field_Empty
   {
-    get
-    {
-      // Invoke base.Property
-      _ = base.Property;
-      // Invoke base.Property
-      _ = base.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke base.Property
-      return base.Property;
-    }
+    get => default(global::System.Int32);
     set
     {
-      // Invoke base.Property
-      base.Property = 42;
-      // Invoke base.Property
-      base.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke base.Property
-      base.Property = value;
     }
   }
+  public new global::System.Int32 Field;
 }

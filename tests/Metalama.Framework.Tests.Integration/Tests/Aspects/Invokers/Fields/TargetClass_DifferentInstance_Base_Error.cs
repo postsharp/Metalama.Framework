@@ -23,7 +23,7 @@ public class InvokerAspect : FieldOrPropertyAspect
     [Template]
     public dynamic? GetTemplate([CompileTime] IFieldOrProperty target)
     {
-        _ = target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value;
+        _ = target.With((IExpression)meta.Target.FieldOrProperty.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value;
 
         return meta.Proceed();
     }
@@ -31,7 +31,7 @@ public class InvokerAspect : FieldOrPropertyAspect
     [Template]
     public void SetTemplate([CompileTime] IFieldOrProperty target)
     {
-        target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value = 42;
+        target.With((IExpression)meta.Target.FieldOrProperty.DeclaringType.Fields.Single().Value!, InvokerOptions.Base).Value = 42;
 
         meta.Proceed();
     }

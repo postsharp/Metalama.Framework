@@ -2,61 +2,83 @@
 public class TargetClass : BaseClass
 {
   [InvokerBeforeAspect]
-  public int InvokerBefore
+  public event System.EventHandler InvokerBefore
   {
-    get
-    { // Invoke this.Field
-      _ = this.Field;
-      // Invoke base.Field
-      _ = this.Field_Empty;
-      // Invoke base.Field
-      _ = this.Field_Empty;
-      // Invoke this.Field
-      _ = this.Field;
-      return 0;
+    add
+    { // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
     }
-    set
-    { // Invoke this.Field
-      this.Field = 42;
-      // Invoke base.Field
-      this.Field_Empty = 42;
-      // Invoke base.Field
-      this.Field_Empty = 42;
-      // Invoke this.Field
-      this.Field = 42;
+    remove
+    { // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
     }
   }
   [InvokerAfterAspect]
-  public int InvokerAfter
+  public event System.EventHandler InvokerAfter
   {
-    get
-    { // Invoke this.Field
-      _ = this.Field;
-      // Invoke this.Field
-      _ = this.Field;
-      // Invoke this.Field
-      _ = this.Field;
-      // Invoke this.Field
-      _ = this.Field;
-      return 0;
+    add
+    { // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
     }
-    set
-    { // Invoke this.Field
-      this.Field = 42;
-      // Invoke this.Field
-      this.Field = 42;
-      // Invoke this.Field
-      this.Field = 42;
-      // Invoke this.Field
-      this.Field = 42;
+    remove
+    { // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
     }
   }
-  private global::System.Int32 Field_Empty
+  public static void StaticTarget(object? sender, System.EventArgs args)
   {
-    get => default(global::System.Int32);
-    set
+  }
+  public new event global::System.EventHandler Event
+  {
+    add
     {
+      // Invoke base.Event
+      base.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event += value;
+    }
+    remove
+    {
+      // Invoke base.Event
+      base.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke this.Event
+      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClass_AspectHidden.TargetClass.StaticTarget;
+      // Invoke base.Event
+      base.Event -= value;
     }
   }
-  public new global::System.Int32 Field;
 }

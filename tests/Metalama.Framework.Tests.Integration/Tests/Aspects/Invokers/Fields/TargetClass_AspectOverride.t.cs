@@ -1,94 +1,87 @@
 public class TargetClass
 {
-  [OverrideAspect]
-  public int Property
-  {
-    get
-    { // Invoke this.Property_Source
-      _ = this.Property_Source;
-      // Invoke this.Property_Source
-      _ = this.Property_Source;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property_Source
-      return this.Property_Source;
-    }
-    set
-    { // Invoke this.Property_Source
-      this.Property_Source = 42;
-      // Invoke this.Property_Source
-      this.Property_Source = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property_Source
-      this.Property_Source = value;
-    }
-  }
-  private int Property_Source
+  private global::System.Int32 _field;
+  [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.TargetClass_AspectOverride.OverrideAspect]
+  public global::System.Int32 Field
   {
     get
     {
-      return 0;
+      // Invoke this._field
+      _ = this._field;
+      // Invoke this._field
+      _ = this._field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this._field
+      return this._field;
     }
     set
     {
+      // Invoke this._field
+      this._field = 42;
+      // Invoke this._field
+      this._field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this._field
+      this._field = value;
     }
   }
   [InvokerBeforeAspect]
   public int InvokerBefore
   {
     get
-    { // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property_Source
-      _ = this.Property_Source;
-      // Invoke this.Property_Source
-      _ = this.Property_Source;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property_Source
+    { // Invoke this.Field
+      _ = this.Field;
+      // Invoke this._field
+      _ = this._field;
+      // Invoke this._field
+      _ = this._field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this._field
       return 0;
     }
     set
-    { // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property_Source
-      this.Property_Source = 42;
-      // Invoke this.Property_Source
-      this.Property_Source = 42;
-      // Invoke this.Property
-      this.Property = 42;
-    // Invoke this.Property_Source
+    { // Invoke this.Field
+      this.Field = 42;
+      // Invoke this._field
+      this._field = 42;
+      // Invoke this._field
+      this._field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+    // Invoke this._field
     }
   }
   [InvokerAfterAspect]
   public int InvokerAfter
   {
     get
-    { // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
+    { // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
       return 0;
     }
     set
-    { // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
+    { // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
     }
   }
 }

@@ -28,9 +28,9 @@ public class InvokerBeforeAspect : FieldOrPropertyAspect
     {
         meta.InsertComment("Invoke TargetClass.Field");
         _ = target.Value;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        meta.InsertComment("Invoke TargetClass._field");
         _ = target.With(InvokerOptions.Base).Value;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        meta.InsertComment("Invoke TargetClass._field");
         _ = target.With(InvokerOptions.Current).Value;
         meta.InsertComment("Invoke TargetClass.Field");
         _ = target.With(InvokerOptions.Final).Value;
@@ -43,9 +43,9 @@ public class InvokerBeforeAspect : FieldOrPropertyAspect
     {
         meta.InsertComment("Invoke TargetClass.Field");
         target.Value = 42;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        meta.InsertComment("Invoke TargetClass._field");
         target.With(InvokerOptions.Base).Value = 42;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        meta.InsertComment("Invoke TargetClass._field");
         target.With(InvokerOptions.Current).Value = 42;
         meta.InsertComment("Invoke TargetClass.Field");
         target.With(InvokerOptions.Final).Value = 42;
@@ -64,30 +64,30 @@ public class OverrideAspect : FieldOrPropertyAspect
     [Template]
     public dynamic? GetTemplate()
     {
-        meta.InsertComment("Invoke TargetClass.Property_Source");
-        _ = meta.Target.Property.Value;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
-        _ = meta.Target.Property.With(InvokerOptions.Base).Value;
+        meta.InsertComment("Invoke TargetClass._field");
+        _ = meta.Target.FieldOrProperty.Value;
+        meta.InsertComment("Invoke TargetClass._field");
+        _ = meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value;
         meta.InsertComment("Invoke TargetClass.Field");
-        _ = meta.Target.Property.With(InvokerOptions.Current).Value;
+        _ = meta.Target.FieldOrProperty.With(InvokerOptions.Current).Value;
         meta.InsertComment("Invoke TargetClass.Field");
-        _ = meta.Target.Property.With(InvokerOptions.Final).Value;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        _ = meta.Target.FieldOrProperty.With(InvokerOptions.Final).Value;
+        meta.InsertComment("Invoke TargetClass._field");
         return meta.Proceed();
     }
 
     [Template]
     public void SetTemplate()
     {
-        meta.InsertComment("Invoke TargetClass.Property_Source");
-        meta.Target.Property.Value = 42;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
-        meta.Target.Property.With(InvokerOptions.Base).Value = 42;
+        meta.InsertComment("Invoke TargetClass._field");
+        meta.Target.FieldOrProperty.Value = 42;
+        meta.InsertComment("Invoke TargetClass._field");
+        meta.Target.FieldOrProperty.With(InvokerOptions.Base).Value = 42;
         meta.InsertComment("Invoke TargetClass.Field");
-        meta.Target.Property.With(InvokerOptions.Current).Value = 42;
+        meta.Target.FieldOrProperty.With(InvokerOptions.Current).Value = 42;
         meta.InsertComment("Invoke TargetClass.Field");
-        meta.Target.Property.With(InvokerOptions.Final).Value = 42;
-        meta.InsertComment("Invoke TargetClass.Property_Source");
+        meta.Target.FieldOrProperty.With(InvokerOptions.Final).Value = 42;
+        meta.InsertComment("Invoke TargetClass._field");
         meta.Proceed();
     }
 }

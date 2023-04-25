@@ -1,38 +1,29 @@
 public class TargetClass : BaseClass
 {
-  public new int Property
-  {
-    get
-    {
-      return 0;
-    }
-    set
-    {
-    }
-  }
+  public new int Field;
   [InvokerAspect]
   public int Invoker
   {
     get
-    { // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
+    { // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
+      // Invoke this.Field
+      _ = this.Field;
       return 0;
     }
     set
-    { // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
+    { // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
+      // Invoke this.Field
+      this.Field = 42;
     }
   }
 }

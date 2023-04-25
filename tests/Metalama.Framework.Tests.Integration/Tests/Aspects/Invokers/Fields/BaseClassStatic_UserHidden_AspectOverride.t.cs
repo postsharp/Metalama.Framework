@@ -1,92 +1,86 @@
+// Warning CS0108 on `Field`: `'TargetClass.Field' hides inherited member 'BaseClass.Field'. Use the new keyword if hiding was intended.`
 public class TargetClass : BaseClass
 {
-  [OverrideAspect]
-  public new static int Property
-  {
-    get
-    { // Invoke TargetClass.Property_Source
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source;
-      // Invoke TargetClass.Property_Source
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property;
-      // Invoke TargetClass.Property_Source
-      return global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source;
-    }
-    set
-    { // Invoke TargetClass.Property_Source
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source = 42;
-      // Invoke TargetClass.Property_Source
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property = 42;
-      // Invoke TargetClass.Property_Source
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source = value;
-    }
-  }
-  private static int Property_Source
+  private static global::System.Int32 _field;
+  [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.OverrideAspect]
+  public static global::System.Int32 Field
   {
     get
     {
-      return 0;
+      // Invoke TargetClass._field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field;
+      // Invoke TargetClass._field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Field;
+      // Invoke TargetClass._field
+      return global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field;
     }
     set
     {
+      // Invoke TargetClass._field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field = 42;
+      // Invoke TargetClass._field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Field = 42;
+      // Invoke TargetClass._field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.TargetClass._field = value;
     }
   }
   [InvokerBeforeAspect]
   public int InvokerBefore
   {
     get
-    { // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property_Source
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property_Source
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
+    { // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass._field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass._field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
       return 0;
     }
     set
-    { // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property_Source
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property_Source
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
+    { // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass._field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass._field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
     }
   }
   [InvokerAfterAspect]
   public int InvokerAfter
   {
     get
-    { // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
-      // Invoke TargetClass.Property
+    { // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass.Field
+      _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field;
+      // Invoke TargetClass.Field
       return 0;
     }
     set
-    { // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
-      // Invoke TargetClass.Property
-      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.FieldsAndProperties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property = 42;
+    { // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
+      // Invoke TargetClass.Field
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Field = 42;
     }
   }
 }

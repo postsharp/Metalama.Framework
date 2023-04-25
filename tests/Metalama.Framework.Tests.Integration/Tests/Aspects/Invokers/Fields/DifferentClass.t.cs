@@ -1,25 +1,25 @@
-    public class TargetClass
+public class TargetClass
 {
   private DifferentClass? instance;
   [InvokerAspect]
   public int Invoker
   {
     get
-    { // Invoke instance.Property
-      _ = this.instance.Property;
-      // Invoke instance?.Property
-      _ = this.instance?.Property;
-      // Invoke instance.Property
-      _ = this.instance.Property;
-      // Invoke instance?.Property
-      _ = this.instance?.Property;
+    { // Invoke instance.Field
+      _ = this.instance.Field;
+      // Invoke instance?.Field
+      _ = this.instance?.Field;
+      // Invoke instance.Field
+      _ = this.instance.Field;
+      // Invoke instance?.Field
+      _ = this.instance?.Field;
       return 0;
     }
     set
-    { // Invoke instance.Property
-      this.instance.Property = 42;
-      // Invoke instance.Property
-      this.instance.Property = 42;
+    { // Invoke instance.Field
+      this.instance.Field = 42;
+      // Invoke instance.Field
+      this.instance.Field = 42;
     }
   }
 }
