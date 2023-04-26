@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments
-            => this._attributeBuilder.ConstructorArguments.Select( a => TypedConstant.Create( a.Value, this.GetCompilationModel().Factory.GetIType( a.Type ) ) )
+            => this._attributeBuilder.ConstructorArguments.Select( a => a.ForCompilation( this.GetCompilationModel() ) )
                 .ToImmutableArray();
 
         [Memo]
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this._attributeBuilder.NamedArguments.SelectAsList(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
-                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );
+                        a.Value.ForCompilation( this.GetCompilationModel() ) ) ) );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 

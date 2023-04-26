@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
             {
                 foreach (var ignoredValue in _ignoredValues)
                 {
-                    if (value == meta.RunTime(ignoredValue))
+                    if (value == meta.Cast(meta.Target.FieldOrProperty.Type, meta.RunTime(ignoredValue)))
                     {
                         return;
                     }
@@ -46,5 +46,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
 
         [IgnoreValues( MyEnum.None )]
         public MyEnum E;
+
+        [IgnoreValues( MyEnum.Something )]
+        public MyEnum E2;
     }
 }
