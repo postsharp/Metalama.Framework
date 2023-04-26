@@ -477,7 +477,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             }
         }
 
-        return this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
+        return base.TransformIdentifierName( node );
     }
 
     protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
