@@ -62,7 +62,7 @@ namespace Metalama.Framework.DesignTime
             context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
         }
 
-        private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
+        internal void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
             => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context ) );
 
         internal void AnalyzeSemanticModel( ISemanticModelAnalysisContext context )

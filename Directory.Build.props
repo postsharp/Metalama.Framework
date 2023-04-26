@@ -51,6 +51,11 @@
 
 
     <!-- Include the package version in metadata. -->
+    <PropertyGroup>
+        <!-- Since .NET SDK 7.0.206, this property has to be set. TODO: Is there another way? -->
+        <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
+    </PropertyGroup>
+
     <Target Name="AddAssemblyMetadata"
             BeforeTargets="GenerateAdditionalSources"
             DependsOnTargets="RunResolvePackageDependencies">

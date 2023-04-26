@@ -346,7 +346,7 @@ internal sealed class TestResult : IDisposable
                     .Where(
                         d => d.Id != "LAMA0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.Options.IgnoredDiagnostics.Contains( d.Id ) )
+                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
                     .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )

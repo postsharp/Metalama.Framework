@@ -79,5 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         protected override int GetHashCodeCore() => this.Builder.GetHashCode();
+
+        public override bool BelongsToCurrentProject => true;
     }
 }

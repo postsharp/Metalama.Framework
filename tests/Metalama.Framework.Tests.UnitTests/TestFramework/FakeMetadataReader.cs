@@ -25,5 +25,6 @@ internal sealed class FakeMetadataReader : ITestAssemblyMetadataReader
             ImmutableArray<TestAssemblyReference>.Empty,
             ImmutableArray<TestAssemblyReference>.Empty,
             null,
-            new TestFrameworkLicenseStatus( "test", null, false ) );
+            new TestFrameworkLicenseStatus( "test", null, false ),
+            ImmutableArray<string>.Empty );
 }

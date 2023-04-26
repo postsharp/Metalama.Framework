@@ -22,7 +22,8 @@ internal sealed record TestAssemblyMetadata(
     ImmutableArray<TestAssemblyReference> AssemblyReferences,
     ImmutableArray<TestAssemblyReference> AnalyzerReferences,
     string? GlobalUsingsFile,
-    TestFrameworkLicenseStatus License )
+    TestFrameworkLicenseStatus License,
+    ImmutableArray<string> IgnoredWarnings )
 {
     private static bool IsUserAnalyzer( TestAssemblyReference x )
     {

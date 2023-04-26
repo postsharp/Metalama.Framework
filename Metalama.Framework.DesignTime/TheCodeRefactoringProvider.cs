@@ -46,10 +46,10 @@ namespace Metalama.Framework.DesignTime
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
         }
 
-        public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+        public sealed override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
             => this.ComputeRefactoringsAsync( new CodeRefactoringContextAdapter( context ) );
 
-        internal async Task ComputeRefactoringsAsync( ICodeRefactoringContext context )
+        internal virtual async Task ComputeRefactoringsAsync( ICodeRefactoringContext context )
         {
             this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}')" );
 

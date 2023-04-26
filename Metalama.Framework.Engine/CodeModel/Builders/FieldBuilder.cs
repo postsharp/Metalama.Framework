@@ -22,6 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         private IType _type;
+        private Writeability _writeability;
 
         public IObjectReader InitializerTags { get; }
 
@@ -60,7 +61,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Obsolete]
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
-        public Writeability Writeability { get; set; }
+        public Writeability Writeability
+        {
+            get => this._writeability;
+            set
+            {
+                if ( value == Writeability.InitOnly )
+                {
+                    throw new InvalidOperationException( $"Writeability for fields can only be set to {Writeability.All} (no modifier), {Writeability.ConstructorOnly} (readonly) or {Writeability.None} (const)." );
+                }
+
+                this._writeability = value;
+            }
+        }
 
         public bool? IsAutoPropertyOrField => true;
 

@@ -18,6 +18,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public sealed class PreviewTests : UnitTestClass
 {
+    private const string _mainProjectName = "master";
+
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
 
     protected override void ConfigureServices( IAdditionalServiceCollection services )
@@ -63,12 +65,12 @@ public sealed class PreviewTests : UnitTestClass
             references = null;
         }
 
-        var projectKey = workspace.AddOrUpdateProject( "master", code, references );
+        var projectKey = workspace.AddOrUpdateProject( _mainProjectName, code, references );
 
         var service = new TransformationPreviewServiceImpl( serviceProvider );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
-        Assert.True( result.ErrorMessages == null || result.ErrorMessages.Length == 0 );
+        Assert.Empty( result.ErrorMessages ?? Array.Empty<string>() );
         Assert.True( result.IsSuccessful );
         Assert.NotNull( result.TransformedSyntaxTree );
 
@@ -276,5 +278,55 @@ class MyAspect : TypeAspect
         var result2 = await RunPreviewAsync( testContext, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
 
         Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task WithProjectReload()
+    {
+        var code = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = @"
+using Metalama.Framework.Aspects;
+
+class MyAspect : TypeAspect
+{
+   [Introduce]
+   void IntroducedMethod() {}
+}
+",
+            ["target.cs"] = "[MyAspect] class C {}"
+        };
+
+        using var testContext = this.CreateTestContext();
+        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var result = await RunPreviewAsync(
+            testContext,
+            testContext.ServiceProvider.Global.WithService( pipelineFactory ),
+            code,
+            "target.cs",
+            null );
+
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
+
+        var workspaceProvider = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
+        var workspace = workspaceProvider.Workspace;
+        var solution = workspace.CurrentSolution;
+
+        solution = solution.RemoveProject( workspaceProvider.GetProject( _mainProjectName ).Id );
+
+        if ( !workspace.TryApplyChanges( solution ) )
+        {
+            throw new InvalidOperationException( "Removing project failed." );
+        }
+
+        result = await RunPreviewAsync(
+            testContext,
+            testContext.ServiceProvider.Global.WithService( pipelineFactory ),
+            code,
+            "target.cs",
+            null );
+
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
 }

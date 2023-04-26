@@ -120,6 +120,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 AddToken( SyntaxKind.ReadOnlyKeyword );
             }
 
+            if ( (categories & ModifierCategories.Const) != 0 && member is IField { Writeability: Writeability.None } )
+            {
+                AddToken( SyntaxKind.ConstKeyword );
+            }
+
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.GetSymbol() is { } symbol && symbol.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
                 AddToken( SyntaxKind.UnsafeKeyword );

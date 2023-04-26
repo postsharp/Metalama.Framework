@@ -16,7 +16,8 @@ internal sealed class PipelineResultBasedAspectRepository : AspectRepository
         this._result = result;
     }
 
-    public override AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances ) => throw new NotSupportedException();
+    public override AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances, CompilationModel compilation )
+        => throw new NotSupportedException();
 
     public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
     {

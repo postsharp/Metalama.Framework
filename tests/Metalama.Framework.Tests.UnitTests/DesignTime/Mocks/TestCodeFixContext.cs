@@ -27,9 +27,9 @@ internal sealed class TestCodeFixContext : ICodeFixContext
 
     public CancellationToken CancellationToken => CancellationToken.None;
 
-    public void RegisterCodeFix( CodeAction codeAction, ImmutableArray<Diagnostic> diagnostics )
+    public void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics )
     {
-        this.RegisteredCodeFixes.Add( (codeAction, diagnostics) );
+        this.RegisteredCodeFixes.Add( (action, diagnostics) );
     }
 
     public List<(CodeAction CodeAction, ImmutableArray<Diagnostic> Diagnostics)> RegisteredCodeFixes { get; } = new();

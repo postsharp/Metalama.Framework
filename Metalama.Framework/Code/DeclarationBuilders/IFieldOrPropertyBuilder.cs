@@ -12,6 +12,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         new IExpression? InitializerExpression { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field or property is <c>required</c>, i.e. it must be initialized
+        /// when an instance of the declaring type is initialized.
+        /// </summary>
         new bool IsRequired { get; set; }
     }
 }

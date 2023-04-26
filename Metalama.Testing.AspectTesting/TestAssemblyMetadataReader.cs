@@ -86,6 +86,13 @@ namespace Metalama.Testing.AspectTesting
 
             TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetProjectLicense(), GetIgnoreUserProfileLicenses() );
 
+            ImmutableArray<string> GetIgnoredWarnings()
+                => GetOptionalAssemblyMetadataValue( "IgnoredWarnings" )
+                    ?.Split( ';' )
+                    .Select( s => s.Trim() )
+                    .Where( s => !string.IsNullOrEmpty( s ) )
+                    .ToImmutableArray() ?? ImmutableArray<string>.Empty;
+
             var projectDirectory = GetProjectDirectory();
 
             return new TestAssemblyMetadata(
@@ -96,7 +103,8 @@ namespace Metalama.Testing.AspectTesting
                 GetAssemblyReferences( projectDirectory, "ReferenceAssemblyList" ),
                 GetAssemblyReferences( projectDirectory, "AnalyzerAssemblyList" ),
                 GetGlobalUsingsFile(),
-                GetLicense() );
+                GetLicense(),
+                GetIgnoredWarnings() );
         }
 
         private static string FilterReference( string projectDirectory, string path )
