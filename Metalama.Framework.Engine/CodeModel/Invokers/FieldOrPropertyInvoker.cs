@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -43,8 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 expression = ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) );
             }
 
-            // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )
+            // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
+            if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
             {
                 expression = expression.WithAspectReferenceAnnotation( receiverInfo.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }

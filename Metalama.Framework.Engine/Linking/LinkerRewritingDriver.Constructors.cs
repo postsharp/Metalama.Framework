@@ -20,7 +20,14 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            return new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
+            if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            {
+                return new[] { GetLinkedDeclaration() };
+            }
+            else
+            {
+                return new[] { constructorDeclaration };
+            }
 
             ConstructorDeclarationSyntax GetLinkedDeclaration()
             {

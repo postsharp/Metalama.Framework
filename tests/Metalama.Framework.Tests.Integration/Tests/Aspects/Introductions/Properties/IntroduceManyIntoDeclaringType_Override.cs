@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Properties.
             {
                 Console.WriteLine( $"{meta.AspectInstance.TargetDeclaration} says hello." );
 
-                return meta.Proceed()!;    
+                return meta.Proceed()!;
             }
         }
     }

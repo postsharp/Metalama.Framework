@@ -55,7 +55,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.ShouldGenerateSourceMember( symbol ) )
                 {
                     members.Add(
                         this.GetOriginalImplProperty(
@@ -69,7 +70,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && this.ShouldGenerateEmptyMember( symbol ) )
                 {
                     members.Add(
                         this.GetEmptyImplProperty(

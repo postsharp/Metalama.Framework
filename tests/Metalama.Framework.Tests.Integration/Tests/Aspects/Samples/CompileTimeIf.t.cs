@@ -3,7 +3,7 @@ internal class TargetCode
   [CompileTimeIf]
   public void InstanceMethod()
   {
-    global::System.Console.WriteLine($"Invoking TargetCode.InstanceMethod() on instance {base.ToString()}.");
+    global::System.Console.WriteLine($"Invoking TargetCode.InstanceMethod() on instance {this.ToString()}.");
     Console.WriteLine("InstanceMethod");
     return;
   }

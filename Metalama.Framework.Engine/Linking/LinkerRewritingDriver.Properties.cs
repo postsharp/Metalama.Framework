@@ -58,7 +58,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( !propertyDeclaration.IsAutoPropertyDeclaration()
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.ShouldGenerateSourceMember( symbol ) )
                 {
                     members.Add(
                         this.GetOriginalImplProperty(
@@ -72,7 +73,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && this.ShouldGenerateEmptyMember( symbol ) )
                 {
                     members.Add(
                         this.GetEmptyImplProperty(
@@ -93,9 +95,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
-            else
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+            }
+            else
+            {
+                return new[] { propertyDeclaration };
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

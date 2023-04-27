@@ -17,10 +17,10 @@ public enum InvokerOptions
     /// When the invoked member is the target member of the current template (i.e. <c>meta.Target.Declaration</c>), and when no target instance or type is explicitly specified,
     /// for the invoker, equivalent to <see cref="Base"/>. Otherwise, equivalent to <see cref="Final"/>.
     /// </summary>
-    Default,
+    Default = 0,
 
     /// <summary>
-    /// Generates calls to the <i>current</i> implementation, i.e. after all override or introductions by the current aspect layer,
+    /// Generates calls to the <i>current</i> implementation, i.e. after all overrides or introductions by the current aspect layer,
     /// but before any next aspect layer or any derived type. 
     /// </summary>
     Current = 1,
@@ -36,7 +36,10 @@ public enum InvokerOptions
     /// </summary>
     Final = 3,
 
-    OrderMask = Base | Final,
+    /// <summary>
+    /// Mask for bits that encode order values.
+    /// </summary>
+    OrderMask = 0x0f,
 
     /// <summary>
     /// Specifies that the null-conditional access operator (<c>?.</c> aka Elvis) has to be used instead of the dot operator. 

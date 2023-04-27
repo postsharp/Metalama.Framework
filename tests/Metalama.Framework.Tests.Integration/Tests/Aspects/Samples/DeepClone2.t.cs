@@ -6,7 +6,7 @@ internal class AutomaticallyCloneable : global::System.ICloneable
   private AutomaticallyCloneable? _c;
   public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable Clone()
   {
-    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)base.MemberwiseClone());
+    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)this.MemberwiseClone());
     ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._b = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.ManuallyCloneable? )this._b?.Clone()!);
     ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._c = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable? )this._c?.Clone()!);
     return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone;

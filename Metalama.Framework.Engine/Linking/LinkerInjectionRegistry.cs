@@ -37,13 +37,15 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
         private readonly IReadOnlyDictionary<IDeclaration, LinkerInjectedMember> _builderLookup;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
+        private readonly IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
         public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             IEnumerable<SyntaxTreeTransformation> transformations,
-            IReadOnlyCollection<LinkerInjectedMember> injectedMembers )
+            IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
+            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap )
         {
             Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
             Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
@@ -63,6 +65,7 @@ namespace Metalama.Framework.Engine.Linking
 
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerInjectedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
+            this._builderToTransformationMap = builderToTransformationMap;
             this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
@@ -193,7 +196,9 @@ namespace Metalama.Framework.Engine.Linking
                 var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-                var intermediateSemanticModel = this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
+
+                var intermediateSemanticModel =
+                    this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
 
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
@@ -230,9 +235,8 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( symbol is IEventSymbol && declaringSyntax is VariableDeclaratorSyntax )
+            if ( symbol is IEventSymbol or IFieldSymbol && declaringSyntax is VariableDeclaratorSyntax )
             {
-                // TODO: Move this to special method, we are going to need the same thing for fields.
                 declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
             }
 
@@ -244,6 +248,19 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return this._injectedMemberLookup[annotation.Data.AssertNotNull()];
+        }
+
+        public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
+        {
+            if ( this._builderToTransformationMap.TryGetValue( builder, out var transformation ) )
+            {
+                // Builder that was removed.
+                return transformation;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -448,6 +465,7 @@ namespace Metalama.Framework.Engine.Linking
             return injectedMember.Semantic == InjectedMemberSemantic.Override;
         }
 
+        // Resharper disable once UnusedMember.Global
         public bool IsLastOverride( ISymbol symbol )
         {
             return this.IsOverride( symbol ) && this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
@@ -463,7 +481,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         // Not yet used.
-        // Resharper disable UnusedMember.Global
+        // Resharper disable once UnusedMember.Global
         [ExcludeFromCodeCoverage]
         public ISymbol? GetPreviousOverride( ISymbol symbol )
         {

@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Transformations
                             IdentifierName( this._targetMethod.Name ) );
 
                 return expression
-                    .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
+                    .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
             }
         }
     }

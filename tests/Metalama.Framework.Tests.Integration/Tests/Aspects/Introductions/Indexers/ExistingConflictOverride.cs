@@ -22,8 +22,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
             builder.Advice.IntroduceIndexer(
                 builder.Target,
                 new[] { (typeof(int), "x"), (typeof(int), "y") },
-                nameof(ExistingIndexer), 
-                nameof(ExistingIndexer), 
+                nameof(ExistingIndexer),
+                nameof(ExistingIndexer),
                 whenExists: OverrideStrategy.Override,
                 buildIndexer: i =>
                 {
@@ -33,8 +33,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
             builder.Advice.IntroduceIndexer(
                 builder.Target,
                 new[] { (typeof(int), "x"), (typeof(int), "y"), (typeof(int), "z") },
-                nameof(NotExistingIndexer), 
-                nameof(NotExistingIndexer), 
+                nameof(NotExistingIndexer),
+                nameof(NotExistingIndexer),
                 whenExists: OverrideStrategy.Override,
                 buildIndexer: i =>
                 {

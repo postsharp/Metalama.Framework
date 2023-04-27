@@ -51,13 +51,15 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.ShouldGenerateSourceMember( symbol ) )
                 {
                     members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && this.ShouldGenerateEmptyMember( symbol ) )
                 {
                     members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
@@ -74,9 +76,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
-            else
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+            }
+            else
+            {
+                return new[] { methodDeclaration };
             }
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
