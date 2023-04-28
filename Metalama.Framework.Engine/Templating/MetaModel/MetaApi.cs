@@ -141,15 +141,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
-        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
+        private MetaApi( IDeclaration declaration, MetaApiProperties common )
+            : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
         {
             this.Declaration = declaration;
             this._common = common;
         }
 
-        private MetaApi( IMethod method, MetaApiProperties common ) : this(
-            (IDeclaration) method,
-            common )
+        private MetaApi( IMethod method, MetaApiProperties common )
+            : this( (IDeclaration) method, common )
         {
             this._method = method;
             this._type = method.DeclaringType;

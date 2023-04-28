@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -32,7 +34,7 @@ internal partial class OurSyntaxGenerator
 
     static OurSyntaxGenerator()
     {
-        var type = WorkspaceHelper.CSharpWorkspacesAssembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
+        var type = WorkspaceHelper.CSharpWorkspacesAssembly.GetType( "Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
         var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
         var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
         Default = new OurSyntaxGenerator( syntaxGenerator, true );
@@ -113,9 +115,9 @@ internal partial class OurSyntaxGenerator
         => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
             .WithAdditionalAnnotations( Simplifier.Annotation );
 
-    public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax type, IEnumerable<SyntaxNode> elements )
+    public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
     {
-        var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( type, elements );
+        var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( elementType, elements );
 
         return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
     }
@@ -163,7 +165,17 @@ internal partial class OurSyntaxGenerator
 
     public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) this._syntaxGenerator.ThisExpression();
 
-    public LiteralExpressionSyntax LiteralExpression( object literal ) => (LiteralExpressionSyntax) this._syntaxGenerator.LiteralExpression( literal );
+    public LiteralExpressionSyntax LiteralExpression( object literal )
+    {
+        var result = (LiteralExpressionSyntax) this._syntaxGenerator.LiteralExpression( literal );
+
+        if ( result.Kind() is SyntaxKind.NullLiteralExpression or SyntaxKind.DefaultLiteralExpression )
+        {
+            throw new InvalidOperationException( $"The value {literal} could not be represented as a literal expression." );
+        }
+
+        return result;
+    }
 
     public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) this._syntaxGenerator.IdentifierName( identifier );
 
@@ -311,6 +323,14 @@ internal partial class OurSyntaxGenerator
         else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
         {
             return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
+        }
+        else if ( typedConstant.Value is ImmutableArray<TypedConstant> immutableArray )
+        {
+            var elementType = typedConstant.Type.AssertCast<IArrayType>().ElementType;
+
+            return this.ArrayCreationExpression(
+                this.Type( elementType.GetSymbol() ),
+                immutableArray.SelectAsEnumerable( item => this.TypedConstant( item ) ) );
         }
         else
         {

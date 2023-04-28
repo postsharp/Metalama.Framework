@@ -1,54 +1,71 @@
 internal class TargetCode
 {
-  private global::System.Int32 _f;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { 0 })]
-  public global::System.Int32 F
-  {
-    get
+    private global::System.Int32 _f;
+    [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { 0 })]
+    public global::System.Int32 F
     {
-      return this._f;
+        get
+        {
+            return this._f;
+        }
+        set
+        {
+            if (value == ((global::System.Int32)0))
+            {
+                return;
+            }
+            this._f = value;
+        }
     }
-    set
+    private global::System.String? _s;
+    [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { "" })]
+    public global::System.String? S
     {
-      if (value == 0)
-      {
-        return;
-      }
-      this._f = value;
+        get
+        {
+            return this._s;
+        }
+        set
+        {
+            if (value == ((global::System.String?)""))
+            {
+                return;
+            }
+            this._s = value;
+        }
     }
-  }
-  private global::System.String? _s;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { "" })]
-  public global::System.String? S
-  {
-    get
+    private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e;
+    [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.None })]
+    public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E
     {
-      return this._s;
+        get
+        {
+            return this._e;
+        }
+        set
+        {
+            if (value == ((global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum)0))
+            {
+                return;
+            }
+            this._e = value;
+        }
     }
-    set
+    private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e2;
+    [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.Something })]
+    public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E2
     {
-      if (value == "")
-      {
-        return;
-      }
-      this._s = value;
+        get
+        {
+            return this._e2;
+        }
+        set
+        {
+            if (value == ((global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum)1))
+            {
+                return;
+            }
+            this._e2 = value;
+        }
     }
-  }
-  private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { 0 })]
-  public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E
-  {
-    get
-    {
-      return this._e;
-    }
-    set
-    {
-      if (value == 0)
-      {
-        return;
-      }
-      this._e = value;
-    }
-  }
 }
