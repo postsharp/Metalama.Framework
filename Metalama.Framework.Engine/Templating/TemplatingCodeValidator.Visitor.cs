@@ -519,6 +519,21 @@ namespace Metalama.Framework.Engine.Templating
                             declaredSymbol ) );
                 }
 
+                // Report an error for advice attribute on an accessor.
+                if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
+                {
+                    var adviceAttribute = declaredSymbol.GetAttributes()
+                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+
+                    if ( adviceAttribute != null )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.AdviceAttributeOnAccessor.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, adviceAttribute.AttributeClass.AssertNotNull(), associatedSymbol.Kind.ToDisplayName()) ) );
+                    }
+                }
+
                 // Report an error for multiple advice attributes.
                 IEnumerable<(ISymbol Member, INamedTypeSymbol AttributeClass)> GetAdviceAttributes( ISymbol? member )
                 {
@@ -531,9 +546,9 @@ namespace Metalama.Framework.Engine.Templating
                         .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
                         .Select( a => (member, a.AttributeClass!) );
 
-                    return selfAttributes
-                        .Concat( GetAdviceAttributes( (member as IMethodSymbol)?.AssociatedSymbol ) )
-                        .Concat( GetAdviceAttributes( member.GetOverriddenMember() ) );
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } ? associatedSymbol : member.GetOverriddenMember();
+
+                    return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }
 
                 var adviceAttributes = GetAdviceAttributes( declaredSymbol ).Distinct().Take( 2 ).ToList();

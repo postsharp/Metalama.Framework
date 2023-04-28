@@ -434,5 +434,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Multiple template or advice attributes found on the same declaration: {1} on {0} and {3} on {2}.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol AccessorDeclaration, INamedTypeSymbol Attribute, string ContainingMemberKind)> AdviceAttributeOnAccessor
+            = new(
+                "LAMA0262",
+                "Accessors cannot have template or advice attributes applied.",
+                "Accessor '{0}' cannot have the '{1}' attribute. Add the attribute to the containing {2} instead.",
+                _category,
+                Error );
     }
 }
