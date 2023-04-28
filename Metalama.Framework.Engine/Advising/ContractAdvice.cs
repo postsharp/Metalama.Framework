@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -56,6 +57,26 @@ namespace Metalama.Framework.Engine.Advising
 
             switch ( targetDeclaration )
             {
+                case IMethod { ContainingDeclaration: IProperty containingProperty } propertyAccessor:
+                    addTransformation( new ContractPropertyTransformation( this, containingProperty, propertyAccessor.MethodKind ) );
+
+                    return AdviceImplementationResult.Success( containingProperty );
+
+                case IProperty property:
+                    addTransformation( new ContractPropertyTransformation( this, property, null ) );
+
+                    return AdviceImplementationResult.Success( property );
+
+                case IMethod { ContainingDeclaration: IIndexer containingIndexer } indexerAccesor:
+                    addTransformation( new ContractIndexerTransformation( this, containingIndexer, indexerAccesor.MethodKind ) );
+
+                    return AdviceImplementationResult.Success( containingIndexer );
+
+                case IIndexer indexer:
+                    addTransformation( new ContractIndexerTransformation( this, indexer, null ) );
+
+                    return AdviceImplementationResult.Success( indexer );
+
                 case IMethod method:
                     addTransformation( new ContractMethodTransformation( this, method ) );
 
@@ -66,21 +87,11 @@ namespace Metalama.Framework.Engine.Advising
 
                     return AdviceImplementationResult.Success( constructor );
 
-                case IProperty property:
-                    addTransformation( new ContractPropertyTransformation( this, property ) );
-
-                    return AdviceImplementationResult.Success( property );
-
-                case IIndexer indexer:
-                    addTransformation( new ContractIndexerTransformation( this, indexer ) );
-
-                    return AdviceImplementationResult.Success( indexer );
-
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
                     addTransformation( promotedField.ToTransformation() );
                     OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this, addTransformation );
-                    addTransformation( new ContractPropertyTransformation( this, promotedField ) );
+                    addTransformation( new ContractPropertyTransformation( this, promotedField, null ) );
 
                     return AdviceImplementationResult.Success( promotedField );
 
