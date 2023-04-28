@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Metadata;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -67,8 +66,8 @@ namespace Metalama.Framework.Engine.Advising
 
                     return AdviceImplementationResult.Success( property );
 
-                case IMethod { ContainingDeclaration: IIndexer containingIndexer } indexerAccesor:
-                    addTransformation( new ContractIndexerTransformation( this, containingIndexer, indexerAccesor.MethodKind ) );
+                case IMethod { ContainingDeclaration: IIndexer containingIndexer } indexerAccessor:
+                    addTransformation( new ContractIndexerTransformation( this, containingIndexer, indexerAccessor.MethodKind ) );
 
                     return AdviceImplementationResult.Success( containingIndexer );
 

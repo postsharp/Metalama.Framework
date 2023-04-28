@@ -4,10 +4,6 @@ internal class Target
   [NotZero]
   public int this[int x]
   {
-    get
-    {
-      return 42;
-    }
     set
     {
       if (value == 0)
@@ -19,10 +15,6 @@ internal class Target
   [NotZero]
   public int this[int x, int y]
   {
-    get
-    {
-      return q;
-    }
     set
     {
       if (value == 0)

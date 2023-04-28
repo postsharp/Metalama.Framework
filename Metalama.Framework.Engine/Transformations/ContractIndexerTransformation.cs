@@ -41,8 +41,8 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
             out string? returnValueLocalName )
         {
             if ( accessor != null
-                && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
-                && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Input ) ) )
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
+                 && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Input ) ) )
             {
                 if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Input, null, out inputStatements ) )
                 {
@@ -58,17 +58,13 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
             }
 
             if ( accessor != null
-                && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
-                && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
+                 && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
             {
-                if ( accessor.MethodKind == MethodKind.PropertyGet )
-                {
-                    returnValueLocalName = contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
-                }
-                else
-                {
-                    returnValueLocalName = null;
-                }
+                returnValueLocalName = 
+                    accessor.MethodKind == MethodKind.PropertyGet 
+                        ? contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
+                        : null;
 
                 if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Output, returnValueLocalName, out outputStatements ) )
                 {
@@ -85,10 +81,11 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                 returnValueLocalName = null;
             }
 
-            if (accessor == null
-                || !(this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) )
+            if ( accessor == null
+                 || !(this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) )
             {
                 proceedExpression = null;
+
                 return false;
             }
 
@@ -163,10 +160,10 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                 getterStatements.AddRange( getterOutputStatements );
 
                 getterStatements.Add(
-                SyntaxFactory.ReturnStatement(
-                    SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
-                    SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
-                    SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
+                    SyntaxFactory.ReturnStatement(
+                        SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                        SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
+                        SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
             }
             else
             {

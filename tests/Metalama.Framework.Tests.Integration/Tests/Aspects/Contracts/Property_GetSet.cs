@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618 
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Set
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_GetSet
 {
     internal class NotNullAttribute : ContractAspect
     {
@@ -22,8 +22,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
         private string? q;
 
         [NotNull]
+        public string P { get; set; }
+
+        [NotNull]
         public string Q
         {
+            get => q!;
+
             set => q = value + "-";
         }
     }

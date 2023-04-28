@@ -41,8 +41,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             out string? returnValueLocalName )
         {
             if ( accessor != null 
-                && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) 
-                && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) 
+                 && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
             {
                 if ( direction == ContractDirection.Output )
                 {
