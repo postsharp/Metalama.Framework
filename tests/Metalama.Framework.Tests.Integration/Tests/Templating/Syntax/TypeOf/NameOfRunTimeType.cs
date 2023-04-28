@@ -24,11 +24,20 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Na
 
             Console.WriteLine(nameof(MyClass1));
 
+            Console.WriteLine(nameof(MyClass1.SingularMethod));
+            Console.WriteLine(nameof(MyClass1.OverloadedMethod));
+
             return meta.Proceed();
         }
     }
 
-    public class MyClass1 { }
+    public class MyClass1
+    {
+        public void SingularMethod() { }
+
+        public void OverloadedMethod() { }
+        public void OverloadedMethod(int i) { }
+    }
 
     class TargetCode
     {
