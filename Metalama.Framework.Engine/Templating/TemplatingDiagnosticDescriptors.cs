@@ -426,5 +426,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The type fabric '{0}' cannot be nested in a compile-time type.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
+            = new(
+                "LAMA0261",
+                "Dynamic expressions in lambdas are not supported.",
+                "Using a dynamic expression in a lambda is not supported, unless it's casted to IExpression.",
+                _category,
+                Error );
     }
 }

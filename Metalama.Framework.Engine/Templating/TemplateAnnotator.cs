@@ -2227,6 +2227,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         if ( node.ExpressionBody != null )
         {
+            // Dynamic expressions are not supported in lambdas.
+            if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.ExpressionBody ) is IDynamicTypeSymbol )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.DynamicInLambdaUnsupported, node, default );
+            }
+
             var annotatedExpression = this.Visit( node.ExpressionBody );
 
             return node.WithExpressionBody( annotatedExpression ).WithScopeAnnotationFrom( annotatedExpression );
