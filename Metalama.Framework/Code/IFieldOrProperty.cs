@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.RunTime;
-using System;
 
 namespace Metalama.Framework.Code
 {
@@ -21,12 +20,6 @@ namespace Metalama.Framework.Code
         /// property implementation no longer corresponds to the one of an automatic property.
         /// </remarks>
         bool? IsAutoPropertyOrField { get; }
-
-        /// <summary>
-        /// Gets an object that allows to get or set the value of the current field or property.
-        /// </summary>
-        [Obsolete( "Use the methods of the IFieldOrPropertyInvoker interface that this object implements.", true )]
-        IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.

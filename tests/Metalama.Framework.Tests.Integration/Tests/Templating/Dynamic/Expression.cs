@@ -13,9 +13,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Expression
         [TestTemplate]
         private dynamic? Template()
         {
-            ExpressionFactory.Capture( meta.Target.Method.Name, out var exp1 );
-            var x = exp1.Value;
-            ExpressionFactory.Capture( meta.Target.Parameters[0].Value, out IExpression exp2 );
+            var x = meta.RunTime( meta.Target.Method.Name );
+            var exp2 = (IExpression)meta.Target.Parameters[0].Value;
             exp2.Value = 5;
 
             return default;

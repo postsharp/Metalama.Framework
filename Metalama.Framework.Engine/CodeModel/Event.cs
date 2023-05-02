@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,9 +25,6 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this._symbol = symbol;
         }
-
-        [Obsolete]
-        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         [Memo]
         public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );

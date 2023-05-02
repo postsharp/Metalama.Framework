@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -27,12 +26,6 @@ namespace Metalama.Framework.Code
         /// Gets the method return type.
         /// </summary>
         IType ReturnType { get; }
-
-        /// <summary>
-        /// Gets an object that allows to invoke the current method.
-        /// </summary>
-        [Obsolete( "Use the methods of the IMethodInvoker interface that this object implements.", true )]
-        IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets the base method that is overridden or hidden by the current method.

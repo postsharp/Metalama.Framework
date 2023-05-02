@@ -10,7 +10,7 @@ public class TestAttribute : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        INamedType mappingType = (INamedType)meta.Target.Method.Parameters[0].Type;
+        var mappingType = (INamedType)meta.Target.Method.Parameters[0].Type;
 
         var from = meta.Target.Method.Parameters[0];
         var to = meta.Target.Method.Parameters[1];
@@ -18,10 +18,10 @@ public class TestAttribute : OverrideMethodAspect
         foreach (var fieldOrProperty in mappingType.FieldsAndProperties)
         {
             var eb = new ExpressionBuilder();
-            eb.AppendExpression(fieldOrProperty.ToExpression(to.ToExpression()));
-            eb.AppendVerbatim(" = ");
-            eb.AppendExpression(fieldOrProperty.ToExpression(from.ToExpression()));
-            meta.InsertStatement(eb.ToExpression());
+            eb.AppendExpression( fieldOrProperty.With( to ) );
+            eb.AppendVerbatim( " = " );
+            eb.AppendExpression( fieldOrProperty.With( from ) );
+            meta.InsertStatement( eb.ToExpression() );
         }
 
         return meta.Proceed();
@@ -32,7 +32,7 @@ public class TestAttribute : OverrideMethodAspect
 internal class TargetClass
 {
     public int F;
- 
+
     [Test]
-    public void Map(TargetClass source, TargetClass target) { }
+    public void Map( TargetClass source, TargetClass target ) { }
 }

@@ -39,11 +39,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
 
             if (!meta.Target.Method.IsOverride)
             {
-                ExpressionFactory.Capture( meta.Base.MemberwiseClone(), out baseCall );
+                baseCall = (IExpression)meta.Base.MemberwiseClone();
             }
             else
             {
-                ExpressionFactory.Capture( meta.Target.Method.Invoke(), out baseCall );
+                baseCall = (IExpression)meta.Target.Method.Invoke();
             }
 
             var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;
@@ -53,11 +53,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
                 meta.Target.Type.FieldsAndProperties.Where(
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          ( f.Type.Is( typeof(ICloneable) ) ||
-                           ( f.Type is INamedType {  BelongsToCurrentProject: true } fieldNamedType && fieldNamedType.Enhancements().GetAspects<DeepCloneAttribute>().Any() ) ) );
+                           ( f.Type is INamedType { BelongsToCurrentProject: true } fieldNamedType
+                             && fieldNamedType.Enhancements().GetAspects<DeepCloneAttribute>().Any() ) ) );
 
             foreach (var field in clonableFields)
             {
-                field.With( (IExpression) clone ).Value = meta.Cast( field.Type, ( (ICloneable)field.Value! ).Clone() );
+                field.With( (IExpression)clone ).Value = meta.Cast( field.Type, ( (ICloneable)field.Value! ).Clone() );
             }
 
             return clone;

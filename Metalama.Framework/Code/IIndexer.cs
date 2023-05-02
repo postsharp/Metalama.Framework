@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
@@ -16,12 +15,6 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// Gets a list of interface properties this property explicitly implements.
     /// </summary>
     IReadOnlyList<IIndexer> ExplicitInterfaceImplementations { get; }
-
-    /// <summary>
-    /// Gets an object that allows to invoke the current property.
-    /// </summary>
-    [Obsolete( "Use the methods of the IIndexerInvoker interface that this object implements.", true )]
-    IInvokerFactory<IIndexerInvoker> Invokers { get; }
 
     /// <summary>
     /// Gets the base property that is overridden by the current property.

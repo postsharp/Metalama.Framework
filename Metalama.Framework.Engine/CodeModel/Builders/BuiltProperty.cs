@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -41,9 +40,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IMethod? SetMethod
             => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
-
-        [Obsolete]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => throw new NotSupportedException();
 
         [Memo]
         public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );

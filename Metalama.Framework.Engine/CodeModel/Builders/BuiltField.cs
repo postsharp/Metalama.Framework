@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -38,9 +37,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
-
-        [Obsolete]
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
