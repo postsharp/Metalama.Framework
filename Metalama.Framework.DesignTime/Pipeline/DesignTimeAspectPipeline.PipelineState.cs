@@ -327,7 +327,7 @@ internal sealed partial class DesignTimeAspectPipeline
             {
                 invalidateCompilationResult = false;
 
-                if ( newState.Status == DesignTimeAspectPipelineStatus.Ready )
+                if ( newState.Status is DesignTimeAspectPipelineStatus.Ready or DesignTimeAspectPipelineStatus.Default )
                 {
                     logger.Trace?.Log( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
@@ -357,11 +357,6 @@ internal sealed partial class DesignTimeAspectPipeline
                         newConfiguration = null;
                         newStatus = DesignTimeAspectPipelineStatus.Default;
                     }
-                }
-                else if ( newState.Status == DesignTimeAspectPipelineStatus.Default )
-                {
-                    // We may have cached an invalid configuration, so if we have a compile-time change, reset this.
-                    newConfiguration = null;
                 }
             }
         }

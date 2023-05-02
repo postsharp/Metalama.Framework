@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
@@ -28,7 +29,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly IProjectHandlerObserver? _observer;
-    private readonly string? _sourceGeneratorTouchFile;
+    private readonly string _sourceGeneratorTouchFile;
     private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly QuietPeriodTimer _dirtyProjectQuietPeriodTimer;
@@ -47,6 +48,11 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         var options = serviceProvider.GetRequiredService<IGlobalOptions>();
 
+        this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile.AssertNotNull();
+        Invariant.AssertNot( string.IsNullOrEmpty( this._sourceGeneratorTouchFile ) );
+
+        RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
+
         this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         this._dirtyProjectQuietPeriodTimer = new QuietPeriodTimer( options.QuietPeriodTimerDelay, this.Logger );
         this._dirtyProjectQuietPeriodTimer.Tick += this.OnDirtyProjectDelayed;
@@ -57,10 +63,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         this._observer = this.ServiceProvider.GetService<IProjectHandlerObserver>();
         this._testableCancellationTokenSourceFactory = this.ServiceProvider.GetRequiredService<ITestableCancellationTokenSourceFactory>();
-
-        this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
-
-        RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
     }
 
     private void OnDirtyProject( ProjectKey projectKey )
@@ -282,9 +284,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
 
-        using ( MutexHelper.WithGlobalLock( this._sourceGeneratorTouchFile!, this.Logger ) )
+        using ( MutexHelper.WithGlobalLock( this._sourceGeneratorTouchFile, this.Logger ) )
         {
-            RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
+            RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile, newGuid ) );
         }
 
         this._observer?.OnTouchFileWritten( this.ProjectKey, newGuid );

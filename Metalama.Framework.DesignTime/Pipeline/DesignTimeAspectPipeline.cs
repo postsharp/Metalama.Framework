@@ -767,12 +767,21 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                         if ( this._currentState.ProjectVersion != null )
                         {
-                            compilationResult = new CompilationResult(
-                                this._currentState.ProjectVersion.AssertNotNull(),
-                                this._currentState.PipelineResult,
-                                validationResult,
-                                this._currentState.Status,
-                                this._currentState.PipelineResult.Configuration.AssertNotNull() );
+                            if ( this._currentState.PipelineResult.Configuration == null )
+                            {
+                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                                    ImmutableArray<Diagnostic>.Empty,
+                                    "The pipeline was paused while there were compile-time errors." );
+                            }
+                            else
+                            {
+                                compilationResult = new CompilationResult(
+                                    this._currentState.ProjectVersion,
+                                    this._currentState.PipelineResult,
+                                    validationResult,
+                                    this._currentState.Status,
+                                    this._currentState.PipelineResult.Configuration );
+                            }
                         }
                         else
                         {
