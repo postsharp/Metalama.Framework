@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Diff
             }
             else
             {
-                baseCall = (IExpression) meta.Target.Method.Invoke();
+                baseCall = (IExpression) meta.Target.Method.Invoke()!;
             }
 
             var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;

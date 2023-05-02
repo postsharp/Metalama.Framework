@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Expression
         private dynamic? Template()
         {
             var x = meta.RunTime( meta.Target.Method.Name );
-            var exp2 = (IExpression)meta.Target.Parameters[0].Value;
+            var exp2 = (IExpression) meta.Target.Parameters[0].Value!;
             exp2.Value = 5;
 
             return default;
