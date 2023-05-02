@@ -46,11 +46,11 @@ public class DeepCloneAttribute : TypeAspect
 
         if (meta.Target.Method.IsOverride)
         {
-            ExpressionFactory.Capture( meta.Base.Clone(), out baseCall );
+            baseCall = (IExpression)meta.Base.Clone();
         }
         else
         {
-            ExpressionFactory.Capture( meta.Base.MemberwiseClone(), out baseCall );
+            baseCall = (IExpression)meta.Base.MemberwiseClone();
         }
 
         // Define a local variable of the same type as the target type.
@@ -61,7 +61,7 @@ public class DeepCloneAttribute : TypeAspect
             meta.Target.Type.FieldsAndProperties.Where(
                 f => f.IsAutoPropertyOrField == true &&
                      ( ( f.Type.Is( typeof(ICloneable) ) && f.Type.SpecialType != SpecialType.String ) ||
-                       ( f.Type is INamedType { BelongsToCurrentProject: true } fieldNamedType  &&
+                       ( f.Type is INamedType { BelongsToCurrentProject: true } fieldNamedType &&
                          fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
 
         foreach (var field in clonableFields)
@@ -72,8 +72,8 @@ public class DeepCloneAttribute : TypeAspect
 
             IExpression callClone;
 
-            if (cloneMethod is { Accessibility: Accessibility.Public } || (fieldType.BelongsToCurrentProject &&
-                fieldType.Enhancements().HasAspect<DeepCloneAttribute>()))
+            if (cloneMethod is { Accessibility: Accessibility.Public } || ( fieldType.BelongsToCurrentProject &&
+                                                                            fieldType.Enhancements().HasAspect<DeepCloneAttribute>() ))
             {
                 // If yes, call the method without a cast.
                 callClone = field.Value?.Clone()!;

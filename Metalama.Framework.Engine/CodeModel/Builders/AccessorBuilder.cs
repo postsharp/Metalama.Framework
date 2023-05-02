@@ -67,9 +67,6 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public bool IsCanonicalGenericInstance => true;
 
-    [Obsolete]
-    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
-
     public IMethod? OverriddenMethod
         => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
         {

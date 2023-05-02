@@ -54,9 +54,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    [Obsolete]
-    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
-
     public IMethod? OverriddenMethod => null;
 
     public abstract IParameterList Parameters { get; }
@@ -171,6 +168,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     bool? IMethodImpl.IsIteratorMethod => false;
 
     public override string ToString() => this.ToDisplayString();
-    
+
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 }
