@@ -30,7 +30,7 @@ internal static class LicensingDiagnosticDescriptors
         new(
             "LAMA0802",
             _category,
-            "The {0} cannot be inherited because this feature is not covered by your license.",
+            "The {0} shall not be automatically inherited because this feature is not covered by your license. Aspects must be explicitly added to all derived types using custom attributes.",
             Severity.Warning,
             "Cannot inherit aspects." );
 
