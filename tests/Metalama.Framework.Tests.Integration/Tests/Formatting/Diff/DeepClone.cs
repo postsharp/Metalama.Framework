@@ -39,11 +39,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Diff
 
             if (!meta.Target.Method.IsOverride)
             {
-                baseCall = (IExpression)meta.Base.MemberwiseClone();
+                baseCall = (IExpression) meta.Base.MemberwiseClone();
             }
             else
             {
-                baseCall = meta.Target.Method.Invoke();
+                baseCall = (IExpression) meta.Target.Method.Invoke();
             }
 
             var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;

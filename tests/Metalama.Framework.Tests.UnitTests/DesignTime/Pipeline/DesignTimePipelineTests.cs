@@ -897,9 +897,9 @@ class D{version}
 
 #if NET6_0_OR_GREATER
     [SkippableFact]
-    public void OverrideMethodWithMultipleTfms()
+    public void OverrideMethodWithMultipleTargetFrameworks()
     {
-        var code = """
+        const string code = """
             using Metalama.Framework.Aspects;
 
             class Aspect : OverrideMethodAspect

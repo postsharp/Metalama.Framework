@@ -304,8 +304,7 @@ class MyAspect : TypeAspect
             testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
-            "target.cs",
-            null );
+            "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
 
@@ -324,8 +323,7 @@ class MyAspect : TypeAspect
             testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
-            "target.cs",
-            null );
+            "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
