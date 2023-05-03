@@ -106,29 +106,35 @@ namespace Metalama.Framework.Engine.Advising
             TransformationContext context,
             ContractDirection direction,
             string? returnValueLocalName,
+            Func<Contract, bool>? contractFilter,
             [NotNullWhen( true )] out List<StatementSyntax>? statements )
         {
             statements = null;
 
-            foreach ( var filter in this.Contracts )
+            foreach ( var contract in this.Contracts )
             {
-                if ( !filter.AppliesTo( direction ) )
+                if ( !contract.AppliesTo( direction ) )
                 {
                     continue;
                 }
 
-                var filterTarget = filter.TargetDeclaration.GetTarget( targetMember.Compilation );
+                var contractTarget = contract.TargetDeclaration.GetTarget( targetMember.Compilation );
 
-                var parameterName = filterTarget switch
+                if ( contractFilter != null && !contractFilter( contract ) )
+                {
+                    continue;
+                }
+
+                var parameterName = contractTarget switch
                 {
                     IParameter { IsReturnParameter: true } => returnValueLocalName.AssertNotNull(),
                     IParameter parameter => parameter.Name,
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Input => "value",
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Output => returnValueLocalName.AssertNotNull(),
-                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{filterTarget}'." )
+                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{contractTarget}'." )
                 };
 
-                var parameterType = ((IHasType) filterTarget).Type;
+                var parameterType = ((IHasType) contractTarget).Type;
                 ExpressionSyntax parameterExpression = SyntaxFactory.IdentifierName( parameterName );
                 parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
 
@@ -137,8 +143,8 @@ namespace Metalama.Framework.Engine.Advising
                 var metaApiProperties = new MetaApiProperties(
                     this.SourceCompilation,
                     context.DiagnosticSink,
-                    filter.Template.Cast(),
-                    filter.Tags,
+                    contract.Template.Cast(),
+                    contract.Tags,
                     this.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Aspect,
@@ -146,11 +152,11 @@ namespace Metalama.Framework.Engine.Advising
                     MetaApiStaticity.Default );
 
                 var metaApi = MetaApi.ForDeclaration(
-                    filterTarget,
+                    contractTarget,
                     metaApiProperties,
                     direction );
 
-                var boundTemplate = filter.Template.ForContract( parameterExpression, filter.TemplateArguments );
+                var boundTemplate = contract.Template.ForContract( parameterExpression, contract.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
                     context.ServiceProvider,
@@ -163,7 +169,7 @@ namespace Metalama.Framework.Engine.Advising
                     null,
                     this.AspectLayerId );
 
-                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( filter.Template.Declaration );
+                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( contract.Template.Declaration );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
                 {

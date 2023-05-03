@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             // Execute the templates.
 
-            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, out var inputFilterBodies );
+            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies );
 
             List<StatementSyntax>? outputFilterBodies;
             string? returnValueName;
@@ -42,6 +42,7 @@ namespace Metalama.Framework.Engine.Transformations
                     context,
                     ContractDirection.Output,
                     returnValueName,
+                    null,
                     out outputFilterBodies );
             }
             else

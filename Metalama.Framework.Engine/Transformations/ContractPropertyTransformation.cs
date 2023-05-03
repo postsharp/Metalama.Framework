@@ -53,7 +53,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, out statements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, null, out statements ) )
                 {
                     proceedExpression = null;
 

@@ -44,12 +44,25 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                  && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
                  && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Input ) ) )
             {
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Input, null, out inputStatements ) )
+                if ( !advice.TryExecuteTemplates( 
+                        this.OverriddenDeclaration, 
+                        contextCopy, 
+                        ContractDirection.Input, 
+                        null, 
+                        accessor.MethodKind == MethodKind.PropertyGet ? RemoveInputContract : null,
+                        out inputStatements ) )
                 {
                     inputStatements = null;
                     proceedExpression = null;
                     outputStatements = null;
                     returnValueLocalName = null;
+                }
+
+                bool RemoveInputContract( Contract contract )
+                {
+                    var targetDeclaration = contract.TargetDeclaration.GetTarget( this.OverriddenDeclaration.Compilation );
+
+                    return targetDeclaration is not IIndexer;
                 }
             }
             else
@@ -66,7 +79,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                         ? contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
                         : null;
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Output, returnValueLocalName, out outputStatements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) )
                 {
                     inputStatements = null;
                     proceedExpression = null;
