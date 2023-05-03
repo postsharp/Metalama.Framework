@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -123,10 +124,19 @@ namespace Metalama.Framework.Engine.Advising
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        this.Builder.IsNew = true;
-                        addTransformation( this.Builder.ToTransformation() );
+                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        {
+                            // TODO
+                            throw new AssertionFailedException();
+                        }
+                        else
+                        {
+                            this.Builder.IsNew = true;
+                            addTransformation( this.Builder.ToTransformation() );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
+                            return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
+                        }
 
                     case OverrideStrategy.Override:
                         throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );

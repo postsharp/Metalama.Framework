@@ -291,19 +291,28 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     return AdviceImplementationResult.Ignored;
 
                 case OverrideStrategy.New:
-                    // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
+                    // If the existing declaration is in the current type, override it, otherwise, declare a new property and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                     {
-                        var overriddenProperty = new OverridePropertyTransformation(
-                            this,
-                            existingProperty,
-                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
-                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
-                            this.Tags );
+                        if ( isAutoProperty )
+                        {
+                            // For auto properties we have to produce an error.
+                            // TODO
+                            throw new AssertionFailedException();
+                        }
+                        else
+                        {
+                            var overriddenProperty = new OverridePropertyTransformation(
+                                this,
+                                existingProperty,
+                                this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
+                                this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
+                                this.Tags );
 
-                        addTransformation( overriddenProperty );
+                            addTransformation( overriddenProperty );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingDeclaration );
+                        }
                     }
                     else
                     {
@@ -335,7 +344,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                         addTransformation( overriddenMethod );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, existingDeclaration );
                     }
                     else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )
                     {

@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                 addTransformation( overriddenMethod );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override, existingEvent );
                             }
                         }
                         else
@@ -293,7 +293,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                 addTransformation( overriddenMethod );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override, existingEvent );
                             }
                         }
                         else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )

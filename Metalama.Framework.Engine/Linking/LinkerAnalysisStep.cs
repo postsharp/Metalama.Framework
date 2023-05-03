@@ -124,6 +124,7 @@ namespace Metalama.Framework.Engine.Linking
 
             VerifyUnsupportedInlineability(
                 input.InjectionRegistry,
+                input.IntermediateCompilation,
                 input.DiagnosticSink,
                 nonInlinedSemantics );
 
@@ -312,6 +313,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void VerifyUnsupportedInlineability(
             LinkerInjectionRegistry injectionRegistry,
+            PartialCompilation intermediateCompilation,
             UserDiagnosticSink diagnosticSink,
             IEnumerable<IntermediateSymbolSemantic> nonInlinedSemantics )
         {
@@ -328,8 +330,10 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             case IntermediateSymbolSemanticKind.Final:
                             case IntermediateSymbolSemanticKind.Base when nonInlinedSemantic.Symbol.IsOverride:
-                                // Final semantics are not inlined.
-                                // Base semantics for overrides are not inlined.
+                            case IntermediateSymbolSemanticKind.Base when nonInlinedSemantic.Symbol.TryGetHiddenSymbol( intermediateCompilation.Compilation, out _ ):
+                                // Final semantics are never inlined.
+                                // Base semantics for overrides are never inlined.
+                                // Base semantics for hiding indexers are never inlined.
                                 continue;
 
                             default:

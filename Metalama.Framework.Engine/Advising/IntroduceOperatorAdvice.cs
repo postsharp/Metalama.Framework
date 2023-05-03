@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             addTransformation( overriddenOperator );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingOperator );
                         }
                         else
                         {
@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this._template.ForIntroduction( existingOperator ), this.Tags );
                             addTransformation( overriddenOperator );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingOperator );
                         }
                         else if ( existingOperator.IsSealed || !existingOperator.IsOverridable() )
                         {
