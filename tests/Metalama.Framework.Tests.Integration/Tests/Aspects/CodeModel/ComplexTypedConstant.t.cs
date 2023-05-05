@@ -2,26 +2,26 @@
 [global::Metalama.Framework.Tests.Integration.Aspects.CodeModel.ComplexTypedConstant.MyAttribute(new global::System.Object[] { new global::System.ConsoleColor[] { global::System.ConsoleColor.Red }, new global::System.Object[] { global::System.ConsoleColor.Red } })]
 class TargetCode
 {
-    private global::System.Object[] f = new global::System.Object[]
+  private global::System.Object[] f = new global::System.Object[]
+  {
+    new global::System.ConsoleColor[]
     {
-        new global::System.ConsoleColor[]
-        {
-          global::System.ConsoleColor.Red
-        },
-        new global::System.Object[]
-        {
-          global::System.ConsoleColor.Red
-        }
-    };
-    private global::System.Object[] P { get; } = new global::System.Object[]
+      global::System.ConsoleColor.Red
+    },
+    new global::System.Object[]
     {
-        new global::System.ConsoleColor[]
-        {
-          global::System.ConsoleColor.Red
-        },
-        new global::System.Object[]
-        {
-          global::System.ConsoleColor.Red
-        }
-    };
+      global::System.ConsoleColor.Red
+    }
+  };
+  private global::System.Object[] P { get; } = new global::System.Object[]
+  {
+    new global::System.ConsoleColor[]
+    {
+      global::System.ConsoleColor.Red
+    },
+    new global::System.Object[]
+    {
+      global::System.ConsoleColor.Red
+    }
+  };
 }

@@ -1,8 +1,5 @@
 internal readonly struct TargetStruct
 {
-  public TargetStruct()
-  {
-  }
   private readonly global::System.Int32 _field = default;
   [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_ReadOnly_Simple.TestAttribute]
   public global::System.Int32 Field
@@ -47,5 +44,8 @@ internal readonly struct TargetStruct
       global::System.Console.WriteLine("This is aspect code.");
       global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_ReadOnly_Simple.TargetStruct._staticReadOnlyField = value;
     }
+  }
+  public TargetStruct()
+  {
   }
 }

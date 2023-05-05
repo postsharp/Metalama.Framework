@@ -1,15 +1,10 @@
-// Warning CS0414 on `_event`: `The field 'TargetClass._event' is assigned but its value is never used`
-// Warning CS0414 on `_staticEvent`: `The field 'TargetClass._staticEvent' is assigned but its value is never used`
 // Warning CS0414 on `_introducedEvent`: `The field 'TargetClass._introducedEvent' is assigned but its value is never used`
 // Warning CS0414 on `_introducedStaticEvent`: `The field 'TargetClass._introducedStaticEvent' is assigned but its value is never used`
 [Override]
 [Introduction]
 internal struct TargetClass
 {
-  public TargetClass()
-  {
-  }
-  private event EventHandler? _event = default;
+  private event EventHandler? _event;
   public event EventHandler? Event
   {
     add
@@ -23,7 +18,7 @@ internal struct TargetClass
       this._event -= value;
     }
   }
-  private static event EventHandler? _staticEvent = default;
+  private static event EventHandler? _staticEvent;
   public static event EventHandler? StaticEvent
   {
     add
@@ -36,6 +31,9 @@ internal struct TargetClass
       global::System.Console.WriteLine("This is the remove template.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct.TargetClass._staticEvent -= value;
     }
+  }
+  public TargetClass()
+  {
   }
   private event global::System.EventHandler? _introducedEvent = default;
   public event global::System.EventHandler? IntroducedEvent

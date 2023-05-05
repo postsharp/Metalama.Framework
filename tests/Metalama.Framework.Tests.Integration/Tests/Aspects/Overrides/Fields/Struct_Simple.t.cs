@@ -1,8 +1,5 @@
 internal struct TargetStruct
 {
-  public TargetStruct()
-  {
-  }
   private global::System.Int32 _field = default;
   [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Simple.TestAttribute]
   public global::System.Int32 Field
@@ -32,5 +29,8 @@ internal struct TargetStruct
       global::System.Console.WriteLine("This is aspect code.");
       global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Simple.TargetStruct._staticField = value;
     }
+  }
+  public TargetStruct()
+  {
   }
 }
