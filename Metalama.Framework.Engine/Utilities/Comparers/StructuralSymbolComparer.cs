@@ -3,14 +3,14 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     /// <summary>
     /// Compares symbols, possibly from different compilations.
     /// </summary>
-    internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>
+    internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, IComparer<ISymbol>
     {
         public static readonly StructuralSymbolComparer Default =
             new(
@@ -39,10 +39,15 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterModifiers );
 
         internal static readonly StructuralSymbolComparer NameObliviousComparer = new(
-            StructuralSymbolComparerOptions.GenericArguments
-            | StructuralSymbolComparerOptions.GenericParameterCount
-            | StructuralSymbolComparerOptions.ParameterModifiers
-            | StructuralSymbolComparerOptions.ParameterTypes );
+            StructuralSymbolComparerOptions.GenericArguments |
+            StructuralSymbolComparerOptions.GenericParameterCount |
+            StructuralSymbolComparerOptions.ParameterModifiers |
+            StructuralSymbolComparerOptions.ParameterTypes );
+
+        private static readonly StructuralSymbolComparer _nonRecursive = new(
+            StructuralSymbolComparerOptions.Name |
+            StructuralSymbolComparerOptions.GenericParameterCount |
+            StructuralSymbolComparerOptions.ParameterModifiers );
 
         private readonly StructuralSymbolComparerOptions _options;
 
@@ -51,118 +56,113 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             this._options = options;
         }
 
-        public bool Equals( ISymbol? x, ISymbol? y )
+        public bool Equals( ISymbol? x, ISymbol? y ) => this.Compare( x, y ) == 0;
+
+        public int Compare( ISymbol? x, ISymbol? y )
         {
             if ( ReferenceEquals( x, y ) )
             {
-                return true;
+                return 0;
             }
-            else if ( x == null || y == null )
+            else if ( x == null )
             {
-                return false;
+                return -1;
+            }
+            else if ( y == null )
+            {
+                return 1;
             }
 
-            if ( x.Kind != y.Kind )
+            var result = Comparer<SymbolKind>.Default.Compare( x.Kind, y.Kind );
+
+            if ( result != 0 )
             {
                 // Unequal kinds.
-                return false;
+                return result;
             }
 
             switch (x, y)
             {
                 case (IMethodSymbol methodX, IMethodSymbol methodY):
-                    if ( !MethodEquals( methodX, methodY, this._options ) )
+                    result = this.CompareMethods( methodX, methodY, this._options );
+
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
                 case (IParameterSymbol parameterX, IParameterSymbol parameterY):
-                    if ( !this.Equals( parameterX.ContainingSymbol, parameterY.ContainingSymbol ) )
+                    result = this.Compare( parameterX.ContainingSymbol, parameterY.ContainingSymbol );
+                    
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
-                    return parameterX.Ordinal == parameterY.Ordinal;
+                    return parameterX.Ordinal.CompareTo( parameterY.Ordinal );
 
                 case (IPropertySymbol propertyX, IPropertySymbol propertyY):
-                    if ( !PropertyEquals( propertyX, propertyY, this._options ) )
+                    result = this.CompareProperties( propertyX, propertyY, this._options );
+                    
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
                 case (IEventSymbol eventX, IEventSymbol eventY):
-                    if ( !EventEquals( eventX, eventY, this._options ) )
+                    result = CompareEvents( eventX, eventY, this._options );
+                    
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
                 case (IFieldSymbol fieldX, IFieldSymbol fieldY):
-                    if ( !FieldEquals( fieldX, fieldY, this._options ) )
+                    result = CompareFields( fieldX, fieldY, this._options );
+            
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
-                    if ( !NamedTypeEquals( namedTypeX, namedTypeY, this._options ) )
+                case (ITypeSymbol typeX, ITypeSymbol typeY):
+                    result = this.CompareTypes( typeX, typeY );
+        
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
                 case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
-                    if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
+                    result = CompareNamespaces( namespaceX, namespaceY );
+           
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
 
                 case (IAssemblySymbol assemblyX, IAssemblySymbol assemblyY):
-                    return assemblyX.Identity.Equals( assemblyY.Identity );
-
-                case (IArrayTypeSymbol arrayX, IArrayTypeSymbol arrayY):
-                    if ( !TypeEquals( arrayX.ElementType, arrayY.ElementType ) )
-                    {
-                        return false;
-                    }
-
-                    if ( arrayX.Rank != arrayY.Rank )
-                    {
-                        return false;
-                    }
-
-                    break;
-
-                case (ITypeParameterSymbol typeParameterX, ITypeParameterSymbol typeParameterY):
-                    if ( typeParameterX.Ordinal != typeParameterY.Ordinal )
-                    {
-                        return false;
-                    }
-
-                    break;
-
-                case (IPointerTypeSymbol pointerSymbolX, IPointerTypeSymbol pointerSymbolY):
-                    if ( !TypeEquals( pointerSymbolX.PointedAtType, pointerSymbolY.PointedAtType ) )
-                    {
-                        return false;
-                    }
-
-                    break;
+                    return CompareAssemblies( assemblyX, assemblyY );
 
                 case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY):
                     // TODO: Is this correct in all options?
-                    if ( localSymbolX.Name != localSymbolY.Name )
+                    result = StringComparer.Ordinal.Compare( localSymbolX.Name, localSymbolY.Name );
+         
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
 
                     break;
@@ -171,261 +171,422 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     throw new NotImplementedException( $"{x.Kind}" );
             }
 
-            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration )
-                 && !ContainingDeclarationEquals( x.ContainingSymbol, y.ContainingSymbol ) )
+            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration ) )
             {
-                return false;
+                result = this.CompareContainingDeclarations( x.ContainingSymbol, y.ContainingSymbol );
+       
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
 
-            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly )
-                 && !ContainingModuleEquals( x.ContainingModule, y.ContainingModule ) )
+            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly ) )
             {
-                return false;
+                result = CompareContainingModules( x.ContainingModule, y.ContainingModule );
+       
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
 
-            return true;
+            return 0;
         }
 
-        private static bool NamespaceEquals( INamespaceSymbol nsX, INamespaceSymbol nsY )
+        private static int CompareAssemblies( IAssemblySymbol assemblyX, IAssemblySymbol assemblyY )
         {
-            if ( !StringComparer.Ordinal.Equals( nsX.Name, nsY.Name ) )
+            var identityX = assemblyX.Identity;
+            var identityY = assemblyY.Identity;
+
+            var result = AssemblyIdentityComparer.SimpleNameComparer.Compare( identityX.Name, identityY.Name );
+    
+            if ( result != 0 )
             {
-                return false;
+                return result;
             }
 
-            if ( nsX.IsGlobalNamespace != nsY.IsGlobalNamespace )
+            return identityX.Version.CompareTo( identityY.Version );
+
+            // Ignore culture and public key, since they shouldn't be relevant.
+        }
+
+        private static int CompareNamespaces( INamespaceSymbol nsX, INamespaceSymbol nsY )
+        {
+            var result = nsX.NamespaceKind.CompareTo( nsY.NamespaceKind );
+      
+            if ( result != 0 )
             {
-                return false;
+                return result;
+            }
+
+            result = StringComparer.Ordinal.Compare( nsX.Name, nsY.Name );
+
+            if ( result != 0 )
+            {
+                return result;
+            }
+
+            result = nsX.IsGlobalNamespace.CompareTo( nsY.IsGlobalNamespace );
+     
+            if ( result != 0 )
+            {
+                return result;
             }
 
             if ( nsX.IsGlobalNamespace )
             {
-                return true;
+                return 0;
             }
 
-            return NamespaceEquals( nsX.ContainingNamespace, nsY.ContainingNamespace );
+            return CompareNamespaces( nsX.ContainingNamespace, nsY.ContainingNamespace );
         }
 
-        private static bool NamedTypeEquals( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralSymbolComparerOptions options )
+        private int CompareNamedTypes( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) &&
-                 (!StringComparer.Ordinal.Equals( namedTypeX.Name, namedTypeY.Name ) || !NamespaceEquals(
-                     namedTypeX.ContainingNamespace,
-                     namedTypeY.ContainingNamespace )) )
+            int result;
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
-                return false;
+                result = StringComparer.Ordinal.Compare( namedTypeX.Name, namedTypeY.Name );
+         
+                if ( result != 0 )
+                {
+                    return result;
+                }
+
+                if ( namedTypeX.ContainingType == null && namedTypeY.ContainingType == null )
+                {
+                    result = CompareNamespaces( namedTypeX.ContainingNamespace, namedTypeY.ContainingNamespace );
+          
+                    if ( result != 0 )
+                    {
+                        return result;
+                    }
+                }
             }
 
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability )
-                 && namedTypeX.NullableAnnotation != namedTypeY.NullableAnnotation )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability ) )
             {
-                return false;
+                result = Comparer<NullableAnnotation>.Default.Compare( namedTypeX.NullableAnnotation, namedTypeY.NullableAnnotation );
+         
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
 
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount )
-                 && namedTypeX.TypeParameters.Length != namedTypeY.TypeParameters.Length )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                return false;
+                result = namedTypeX.TypeParameters.Length.CompareTo( namedTypeY.TypeParameters.Length );
+      
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericArguments ) )
             {
-                // TODO: optimize using for loop.
-                foreach ( var (typeArgumentX, typeArgumentY) in namedTypeX.TypeArguments.Zip( namedTypeY.TypeArguments, ( x, y ) => (x, y) ) )
+                Invariant.Assert( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) );
+
+                for ( var i = 0; i < namedTypeX.TypeArguments.Length; i++ )
                 {
-                    if ( !TypeEquals( typeArgumentX, typeArgumentY ) )
+                    var typeArgumentX = namedTypeX.TypeArguments[i];
+                    var typeArgumentY = namedTypeY.TypeArguments[i];
+
+                    result = this.CompareTypes( typeArgumentX, typeArgumentY );
+        
+                    if ( result != 0 )
                     {
-                        return false;
+                        return result;
                     }
                 }
             }
 
-            return true;
+            return this.CompareTypes( namedTypeX.ContainingType, namedTypeY.ContainingType );
         }
 
-        private static bool MethodEquals( IMethodSymbol methodX, IMethodSymbol methodY, StructuralSymbolComparerOptions options )
+        private int CompareMethods( IMethodSymbol methodX, IMethodSymbol methodY, StructuralSymbolComparerOptions options )
         {
             if ( ReferenceEquals( methodX, methodY ) )
             {
-                return true;
+                return 0;
             }
 
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( methodX.Name, methodY.Name ) )
+            int result;
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
-                return false;
+                result = StringComparer.Ordinal.Compare( methodX.Name, methodY.Name );
+       
+                if ( result != 0 )
+                {
+                    return result;
+                }
             }
 
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount )
-                 && methodX.TypeParameters.Length != methodY.TypeParameters.Length )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                return false;
+                result = methodX.TypeParameters.Length.CompareTo( methodY.TypeParameters.Length );
+     
+                if ( result != 0 )
+                {
+                    return result;
+                }
+            }
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericArguments ) )
+            {
+                Invariant.Assert( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) );
+
+                for ( var i = 0; i < methodX.TypeArguments.Length; i++ )
+                {
+                    var typeArgumentX = methodX.TypeArguments[i];
+                    var typeArgumentY = methodY.TypeArguments[i];
+
+                    result = this.CompareTypes( typeArgumentX, typeArgumentY );
+      
+                    if ( result != 0 )
+                    {
+                        return result;
+                    }
+                }
+            }
+
+            return this.CompareParameters( methodX.Parameters, methodY.Parameters, methodX.ReturnType, methodY.ReturnType, options );
+        }
+        
+        private int CompareProperties( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralSymbolComparerOptions options )
+        {
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
+            {
+                var result = StringComparer.Ordinal.Compare( propertyX.Name, propertyY.Name );
+
+                if ( result != 0 )
+                {
+                    return result;
+                }
+            }
+
+            return this.CompareParameters( propertyX.Parameters, propertyY.Parameters, null, null, options );
+        }
+
+        private int CompareParameters(
+            ImmutableArray<IParameterSymbol> methodXParameters,
+            ImmutableArray<IParameterSymbol> methodYParameters,
+            ITypeSymbol? methodXReturnType,
+            ITypeSymbol? methodYReturnType,
+            StructuralSymbolComparerOptions options )
+        {
+            int CompareParameterTypes( ITypeSymbol? parameterTypeX, ITypeSymbol? parameterTypeY )
+            {
+                // Prevent infinite recursion.
+                var comparer = parameterTypeX?.ContainingSymbol is IMethodSymbol && parameterTypeY?.ContainingSymbol is IMethodSymbol ? _nonRecursive : this;
+
+                return comparer.Compare( parameterTypeX, parameterTypeY );
             }
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
                  || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
             {
-                if ( methodX.Parameters.Length != methodY.Parameters.Length )
+                var result = methodXParameters.Length.CompareTo( methodYParameters.Length );
+    
+                if ( result != 0 )
                 {
-                    return false;
+                    return result;
                 }
 
-                // TODO: optimize using for loop.
-                foreach ( var (parameterX, parameterY) in methodX.Parameters.Zip( methodY.Parameters, ( x, y ) => (x, y) ) )
+                for ( var i = 0; i < methodXParameters.Length; i++ )
                 {
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
+                    var parameterX = methodXParameters[i];
+                    var parameterY = methodYParameters[i];
+
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
                     {
-                        return false;
+                        result = CompareParameterTypes( parameterX.Type, parameterY.Type );
+      
+                        if ( result != 0 )
+                        {
+                            return result;
+                        }
                     }
 
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
-                        return false;
+                        result = Comparer<RefKind>.Default.Compare( parameterX.RefKind, parameterY.RefKind );
+          
+                        if ( result != 0 )
+                        {
+                            return result;
+                        }
                     }
                 }
 
                 // Conversion operators have the same parameters but a different return type.
-                if ( !TypeEquals( methodX.ReturnType, methodY.ReturnType ) )
+                result = CompareParameterTypes( methodXReturnType, methodYReturnType );
+   
+                if ( result != 0 )
                 {
-                    return false;
+                    return result;
                 }
             }
 
-            return true;
+            return 0;
         }
 
-        private static bool PropertyEquals( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralSymbolComparerOptions options )
+        private static int CompareEvents( IEventSymbol eventX, IEventSymbol eventY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( propertyX.Name, propertyY.Name ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
-                return false;
+                return StringComparer.Ordinal.Compare( eventX.Name, eventY.Name );
             }
 
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
-                 || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
-            {
-                if ( propertyX.Parameters.Length != propertyY.Parameters.Length )
-                {
-                    return false;
-                }
-
-                // TODO: optimize using for loop.
-                foreach ( var (parameterX, parameterY) in propertyX.Parameters.Zip( propertyY.Parameters, ( x, y ) => (x, y) ) )
-                {
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
-                    {
-                        return false;
-                    }
-
-                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
+            return 0;
         }
 
-        private static bool EventEquals( IEventSymbol eventX, IEventSymbol eventY, StructuralSymbolComparerOptions options )
+        private static int CompareFields( IFieldSymbol fieldX, IFieldSymbol fieldY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( eventX.Name, eventY.Name ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
-                return false;
+                return StringComparer.Ordinal.Compare( fieldX.Name, fieldY.Name );
             }
 
-            return true;
+            return 0;
         }
 
-        private static bool FieldEquals( IFieldSymbol fieldX, IFieldSymbol fieldY, StructuralSymbolComparerOptions options )
-        {
-            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( fieldX.Name, fieldY.Name ) )
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool TypeEquals( ITypeSymbol typeX, ITypeSymbol typeY )
+        private int CompareTypes( ITypeSymbol? typeX, ITypeSymbol? typeY )
         {
             if ( ReferenceEquals( typeX, typeY ) )
             {
-                return true;
+                return 0;
+            }
+     
+            if ( typeX == null )
+            {
+                return -1;
+            }
+    
+            if ( typeY == null )
+            {
+                return 1;
             }
 
-            if ( typeX.Kind != typeY.Kind )
+            var result = Comparer<TypeKind>.Default.Compare( typeX.TypeKind, typeY.TypeKind );
+    
+            if ( result != 0 )
             {
                 // Unequal kinds.
-                return false;
+                return result;
             }
 
             switch (typeX, typeY)
             {
                 case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
-                    return StringComparer.Ordinal.Equals( typeParamX.Name, typeParamY.Name )
-                           && typeParamX.TypeParameterKind == typeParamY.TypeParameterKind;
+                    result = StringComparer.Ordinal.Compare( typeParamX.Name, typeParamY.Name );
+       
+                    if ( result != 0 )
+                    {
+                        return result;
+                    }
+
+                    if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration ) )
+                    {
+                        result = _nonRecursive.Compare( typeParamX.ContainingSymbol, typeParamY.ContainingSymbol );
+                    }
+
+                    return result;
 
                 case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
-                    return NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type );
+                    return this.CompareNamedTypes( namedTypeX, namedTypeY, this._options );
 
                 case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
-                    return arrayTypeX.Rank == arrayTypeY.Rank
-                           && TypeEquals( arrayTypeX.ElementType, arrayTypeY.ElementType );
+                    result = arrayTypeX.Rank.CompareTo( arrayTypeY.Rank );
+      
+                    if ( result != 0 )
+                    {
+                        return result;
+                    }
+
+                    return this.CompareTypes( arrayTypeX.ElementType, arrayTypeY.ElementType );
 
                 case (IDynamicTypeSymbol, IDynamicTypeSymbol):
-                    return true;
+                    return 0;
 
                 case (IPointerTypeSymbol xPointerType, IPointerTypeSymbol yPointerType):
-                    return TypeEquals( xPointerType.PointedAtType, yPointerType.PointedAtType );
+                    return this.CompareTypes( xPointerType.PointedAtType, yPointerType.PointedAtType );
 
                 case (IFunctionPointerTypeSymbol xFunctionPointerType, IFunctionPointerTypeSymbol yFunctionPointerType):
-                    return MethodEquals( xFunctionPointerType.Signature, yFunctionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
+                    return this.CompareMethods( xFunctionPointerType.Signature, yFunctionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
 
                 default:
                     throw new NotImplementedException( $"{typeX.Kind}" );
             }
         }
 
-        private static bool ContainingDeclarationEquals( ISymbol x, ISymbol y )
+        private int CompareContainingDeclarations( ISymbol x, ISymbol y )
         {
             var currentX = x;
             var currentY = y;
 
-            while ( currentX != null && currentY != null )
+            while ( true )
             {
-                if ( currentX.Kind != currentY.Kind )
+                if ( ReferenceEquals( currentX, currentY ) )
                 {
-                    return false;
+                    return 0;
+                }
+     
+                if ( currentX == null )
+                {
+                    return -1;
+                }
+      
+                if ( currentY == null )
+                {
+                    return 1;
+                }
+
+                var result = Comparer<SymbolKind>.Default.Compare( currentX.Kind, currentY.Kind );
+      
+                if ( result != 0 )
+                {
+                    return result;
                 }
 
                 switch (currentX, currentY)
                 {
                     case (IMethodSymbol methodX, IMethodSymbol methodY):
-                        if ( !MethodEquals( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature ) )
+                        result = this.CompareMethods( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature );
+          
+                        if ( result != 0 )
                         {
-                            return false;
+                            return result;
                         }
 
                         break;
 
                     case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
-                        if ( !NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type ) )
+                        result = this.CompareNamedTypes( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type );
+          
+                        if ( result != 0 )
                         {
-                            return false;
+                            return result;
                         }
 
                         break;
 
                     case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
-                        if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
+                        result = StringComparer.Ordinal.Compare( namespaceX.Name, namespaceY.Name );
+      
+                        if ( result != 0 )
                         {
-                            return false;
+                            return result;
                         }
 
                         break;
 
                     case (IModuleSymbol _, IModuleSymbol _):
-                        return true;
+                        return 0;
 
                     default:
                         throw new NotImplementedException( $"{currentX.Kind}" );
@@ -434,16 +595,33 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 currentX = currentX.ContainingSymbol;
                 currentY = currentY.ContainingSymbol;
             }
-
-            // Both have to be null at the same time.
-            return currentX == null && currentY == null;
         }
 
-        private static bool ContainingModuleEquals( IModuleSymbol moduleX, IModuleSymbol moduleY )
+        private static int CompareContainingModules( IModuleSymbol? moduleX, IModuleSymbol? moduleY )
         {
-            return
-                StringComparer.Ordinal.Equals( moduleX.Name, moduleY.Name )
-                && EqualityComparer<AssemblyIdentity>.Default.Equals( moduleX.ContainingAssembly.Identity, moduleY.ContainingAssembly.Identity );
+            if ( ReferenceEquals( moduleX, moduleY ) )
+            {
+                return 0;
+            }
+     
+            if ( moduleX == null )
+            {
+                return -1;
+            }
+     
+            if ( moduleY == null )
+            {
+                return 1;
+            }
+
+            var result = StringComparer.Ordinal.Compare( moduleX.Name, moduleY.Name );
+     
+            if ( result != 0 )
+            {
+                return result;
+            }
+
+            return CompareAssemblies( moduleX.ContainingAssembly, moduleY.ContainingAssembly );
         }
 
         public int GetHashCode( ISymbol symbol )
@@ -489,7 +667,6 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     {
                         h = HashCode.Combine( h, method.Parameters.Length );
 
-                        // TODO: optimize using for loop.
                         foreach ( var parameter in method.Parameters )
                         {
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
@@ -517,7 +694,6 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     {
                         h = HashCode.Combine( h, property.Parameters.Length );
 
-                        // TODO: optimize using for loop.
                         foreach ( var parameter in property.Parameters )
                         {
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
@@ -577,10 +753,10 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case IAssemblySymbol assembly:
-                    return assembly.Identity.GetHashCode();
+                    return HashCode.Combine( h, AssemblyIdentityComparer.SimpleNameComparer.GetHashCode( assembly.Identity.Name ), assembly.Identity.Version );
 
                 case IPointerTypeSymbol pointerType:
-                    return GetHashCode( pointerType.PointedAtType, StructuralSymbolComparerOptions.FunctionPointer );
+                    return GetHashCode( pointerType.PointedAtType, StructuralSymbolComparerOptions.Type );
 
                 case IFunctionPointerTypeSymbol functionPointerType:
                     return GetHashCode( functionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
@@ -635,8 +811,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             break;
 
-                        case IAssemblySymbol _:
-                        case IModuleSymbol _:
+                        case IAssemblySymbol:
+                        case IModuleSymbol:
                             // These are included below if required.
                             break;
 
@@ -651,7 +827,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly ) )
             {
                 // Version should not differ often.
-                h = HashCode.Combine( h, symbol.ContainingModule.Name, symbol.ContainingAssembly.Name );
+                h = HashCode.Combine( h, symbol.ContainingModule?.Name, symbol.ContainingAssembly?.Name );
             }
 
             return h;
