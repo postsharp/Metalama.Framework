@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Advising
             CannotIntroduceWithDifferentKind = new(
                 "LAMA0506",
                 "Cannot introduce member into a type because another member of a different kind already exists.",
-                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name declared in the type or in a base type.",
                 _category,
                 Error );
 
@@ -82,6 +82,14 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0508",
                 "Cannot introduce sealed member because it is also static.",
                 "The aspect '{0}' cannot introduce sealed member '{1}' because it is also static.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
+            CannotIntroduceNewMemberWhenItAlreadyExists = new(
+                "LAMA0509",
+                "Cannot introduce a new member into a type because a member with the same signature already exists.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' with OverrideStrategy.New because the member is already declared in the type.",
                 _category,
                 Error );
 

@@ -53,15 +53,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         public event EventHandler? DerivedClassVirtualSealedEvent;
 
         [Introduce( WhenExists = OverrideStrategy.New )]
-        public event EventHandler? ExistingEvent;
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler? ExistingEvent_Static;
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
-        public event EventHandler? ExistingVirtualEvent;
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler? NonExistentEvent;
 
         [Introduce( WhenExists = OverrideStrategy.New )]
@@ -355,43 +346,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
     [Introduction]
     internal class TargetClass : DerivedClass
     {
-        public event EventHandler? ExistingEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public static event EventHandler? ExistingEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public virtual event EventHandler? ExistingVirtualEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
     }
 }

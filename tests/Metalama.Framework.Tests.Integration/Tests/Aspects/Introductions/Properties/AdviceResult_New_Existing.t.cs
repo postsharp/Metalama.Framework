@@ -1,18 +1,2 @@
-[TestAspect]
-public class TargetClass
-{
-  public int Property
-  {
-    get
-    {
-      global::System.Console.WriteLine("Aspect code.");
-      Console.WriteLine("Original code.");
-      return 42;
-    }
-    set
-    {
-      global::System.Console.WriteLine("Aspect code.");
-      Console.WriteLine("Original code.");
-    }
-  }
-}
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0509 on `TargetClass`: `The aspect 'TestAspect' cannot introduce member 'TargetClass.Property' into type 'TargetClass' with OverrideStrategy.New because the member is already declared in the type.`

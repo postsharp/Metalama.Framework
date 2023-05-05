@@ -16,9 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
         {
             var result = builder.Advice.IntroduceEvent(builder.Target, nameof(Event), whenExists: OverrideStrategy.New);
 
-            if (result.Outcome != Advising.AdviceOutcome.Override)
+            if (result.Outcome != Advising.AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Override.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.IntroduceEvent)
@@ -31,10 +31,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
                 throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
             }
 
-            if (!builder.Target.Compilation.Comparers.Default.Equals(result.Declaration.ForCompilation(builder.Advice.MutableCompilation), builder.Target.Events.Single()))
-            {
-                throw new InvalidOperationException($"Declaration was not correct.");
-            }
+            // TODO: #33060
+            //if (!builder.Target.Compilation.Comparers.Default.Equals(result.Declaration.ForCompilation(builder.Advice.MutableCompilation), builder.Target.Events.Single()))
+            //{
+            //    throw new InvalidOperationException($"Declaration was not correct.");
+            //}
         }
 
         [Template]

@@ -199,14 +199,13 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     return AdviceImplementationResult.Ignored;
 
                 case OverrideStrategy.New:
-                    // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
+                    // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
-
-                        addTransformation( overriddenMethod );
-
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override, existingMethod );
+                        return AdviceImplementationResult.Failed(
+                            AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.Builder, existingMethod.DeclaringType) ) );
                     }
                     else
                     {

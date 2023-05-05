@@ -1,5 +1,5 @@
 [TestAspect]
-public class TargetClass : BaseClass
+public class TargetClass
 {
-  public new global::System.Int32 Field;
+  public global::System.Int32 Field;
 }

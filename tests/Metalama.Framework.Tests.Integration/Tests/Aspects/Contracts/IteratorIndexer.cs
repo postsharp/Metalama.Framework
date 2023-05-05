@@ -15,8 +15,8 @@ public sealed class TestAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect( builder ); 
-        
+        base.BuildAspect( builder );
+
         foreach (var indexer in builder.Target.Indexers)
         {
             foreach (var parameter in indexer.GetMethod!.Parameters)

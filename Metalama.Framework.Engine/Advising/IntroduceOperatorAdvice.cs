@@ -128,14 +128,13 @@ namespace Metalama.Framework.Engine.Advising
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
+                        // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
-                            var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this._template.ForIntroduction( existingOperator ), this.Tags );
-
-                            addTransformation( overriddenOperator );
-
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingOperator );
+                            return AdviceImplementationResult.Failed(
+                                AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingOperator.DeclaringType) ) );
                         }
                         else
                         {

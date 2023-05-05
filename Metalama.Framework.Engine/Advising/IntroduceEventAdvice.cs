@@ -195,13 +195,13 @@ namespace Metalama.Framework.Engine.Advising
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
                 }
-                else if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
+                else if ( existingEvent.IsStatic != this.Builder.IsStatic )
                 {
                     return AdviceImplementationResult.Failed(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingDeclaration.DeclaringType) ) );
+                             existingEvent.DeclaringType) ) );
                 }
                 else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingEvent.Type ) )
                 {
@@ -209,7 +209,7 @@ namespace Metalama.Framework.Engine.Advising
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingDeclaration.DeclaringType, existingEvent.Type) ) );
+                             existingEvent.DeclaringType, existingEvent.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -220,33 +220,20 @@ namespace Metalama.Framework.Engine.Advising
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingDeclaration.DeclaringType) ) );
+                                 existingEvent.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingEvent.DeclaringType ) )
                         {
-                            if ( hasNoOverrideSemantics )
-                            {
-                                return AdviceImplementationResult.Ignored;
-                            }
-                            else
-                            {
-                                var overriddenMethod = new OverrideEventTransformation(
-                                    this,
-                                    existingEvent,
-                                    this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
-                                    this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
-                                    this.Tags );
-
-                                addTransformation( overriddenMethod );
-
-                                return AdviceImplementationResult.Success( AdviceOutcome.Override, existingEvent );
-                            }
+                            return AdviceImplementationResult.Failed(
+                                AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingEvent.DeclaringType) ) );
                         }
                         else
                         {
@@ -276,7 +263,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingEvent.DeclaringType ) )
                         {
                             if ( hasNoOverrideSemantics )
                             {
@@ -296,14 +283,14 @@ namespace Metalama.Framework.Engine.Advising
                                 return AdviceImplementationResult.Success( AdviceOutcome.Override, existingEvent );
                             }
                         }
-                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )
+                        else if ( existingEvent.IsSealed || !existingEvent.IsOverridable() )
                         {
                             return
                                 AdviceImplementationResult.Failed(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                         existingDeclaration.DeclaringType) ) );
+                                         existingEvent.DeclaringType) ) );
                         }
                         else
                         {

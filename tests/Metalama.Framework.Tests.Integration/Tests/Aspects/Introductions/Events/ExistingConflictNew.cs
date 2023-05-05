@@ -198,38 +198,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         }
 
         [Introduce( WhenExists = OverrideStrategy.New )]
-        public event EventHandler ExistingEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
-        public event EventHandler ExistingVirtualEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler NonExistentEvent
         {
             add
@@ -481,30 +449,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
     [Introduction]
     internal class TargetClass : DerivedClass
     {
-        public event EventHandler ExistingEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public virtual event EventHandler ExistingVirtualEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
     }
 }

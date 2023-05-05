@@ -1,30 +1,6 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-  public int ExistingProperty
-  {
-    get
-    {
-      global::System.Console.WriteLine("This is introduced property.");
-      return 27;
-    }
-  }
-  public static int ExistingProperty_Static
-  {
-    get
-    {
-      global::System.Console.WriteLine("This is introduced property.");
-      return 27;
-    }
-  }
-  public virtual int ExistingVirtualProperty
-  {
-    get
-    {
-      global::System.Console.WriteLine("This is introduced property.");
-      return 27;
-    }
-  }
   public new global::System.Int32 BaseClassAbstractProperty
   {
     get

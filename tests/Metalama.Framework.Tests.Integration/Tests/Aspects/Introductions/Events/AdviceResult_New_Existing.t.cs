@@ -1,17 +1,2 @@
-[TestAspect]
-public class TargetClass
-{
-  public event EventHandler Event
-  {
-    add
-    {
-      global::System.Console.WriteLine("Aspect code.");
-      Console.WriteLine("Original code.");
-    }
-    remove
-    {
-      global::System.Console.WriteLine("Aspect code.");
-      Console.WriteLine("Original code.");
-    }
-  }
-}
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0509 on `TargetClass`: `The aspect 'TestAspect' cannot introduce member 'TargetClass.Event' into type 'TargetClass' with OverrideStrategy.New because the member is already declared in the type.`

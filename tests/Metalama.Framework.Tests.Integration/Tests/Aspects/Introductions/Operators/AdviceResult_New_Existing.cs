@@ -24,9 +24,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
                     OperatorKind.Addition,
                     whenExists: OverrideStrategy.New);
 
-            if (result.Outcome != Advising.AdviceOutcome.Override)
+            if (result.Outcome != Advising.AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Override.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.IntroduceOperator)
@@ -39,12 +39,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
                 throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
             }
 
-            if (!builder.Target.Compilation.Comparers.Default.Equals(
-                    result.Declaration.ForCompilation(builder.Advice.MutableCompilation), 
-                    builder.Target.Methods.OfName("op_Addition").Single()))
-            {
-                throw new InvalidOperationException($"Declaration was not correct.");
-            }
+
+            // TODO: #33060
+            //if (!builder.Target.Compilation.Comparers.Default.Equals(
+            //        result.Declaration.ForCompilation(builder.Advice.MutableCompilation), 
+            //        builder.Target.Methods.OfName("op_Addition").Single()))
+            //{
+            //    throw new InvalidOperationException($"Declaration was not correct.");
+            //}
         }
 
         [Template]
