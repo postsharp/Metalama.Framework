@@ -431,7 +431,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0261",
                 "Dynamic expressions in lambdas are not supported.",
-                "Using a dynamic expression in a lambda is not supported, unless it's casted to IExpression.",
+                "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
                 _category,
                 Error );
     }
