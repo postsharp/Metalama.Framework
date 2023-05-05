@@ -287,12 +287,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         in GetterTemplateSelector templateSelector,
         bool required )
     {
-        var getter = targetFieldOrProperty.GetMethod;
-
-        if ( getter == null )
-        {
-            throw new InvalidOperationException();
-        }
+        var getter = targetFieldOrProperty.GetMethod ?? throw new InvalidOperationException();
 
         var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required );
         var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );

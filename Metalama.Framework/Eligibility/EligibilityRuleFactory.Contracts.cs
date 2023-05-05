@@ -23,7 +23,7 @@ public static partial class EligibilityRuleFactory
             static void AddCommonGetterParameterRules( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
             {
                 builder.MustSatisfy(
-                    p => p.GetMethod?.GetIteratorInfo().EnumerableKind is EnumerableKind.None,
+                    p => p.GetMethod?.GetIteratorInfo().EnumerableKind is EnumerableKind.None or null,
                     member
                         => $"{member} must not have get accessor that returns IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }

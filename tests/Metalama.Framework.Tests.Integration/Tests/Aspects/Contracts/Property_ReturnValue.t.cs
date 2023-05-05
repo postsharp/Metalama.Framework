@@ -1,16 +1,18 @@
 internal class Target
 {
   private string? q;
-  [NotNull]
   public string Q
   {
-    set
+    [return: NotNull]
+    get
     {
-      if (value == null)
+      global::System.String returnValue;
+      returnValue = q!;
+      if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
       }
-      q = value + "-";
+      return returnValue;
     }
   }
 }

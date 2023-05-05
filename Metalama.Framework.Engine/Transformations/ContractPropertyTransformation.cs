@@ -16,8 +16,13 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation
 {
-    public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+    private readonly MethodKind? _targetMethodKind;
+
+    public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration, MethodKind? targetMethodKind ) :
+        base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+    {
+        this._targetMethodKind = targetMethodKind;
+    }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
@@ -35,7 +40,9 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             [NotNullWhen( true )] out ExpressionSyntax? proceedExpression,
             out string? returnValueLocalName )
         {
-            if ( accessor != null && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
+            if ( accessor != null 
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) 
+                 && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
             {
                 if ( direction == ContractDirection.Output )
                 {
@@ -46,7 +53,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, out statements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, null, out statements ) )
                 {
                     proceedExpression = null;
 

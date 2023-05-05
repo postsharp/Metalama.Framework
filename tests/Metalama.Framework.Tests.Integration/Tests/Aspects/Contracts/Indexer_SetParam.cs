@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618 
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Set
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_SetParam
 {
     internal class NotZeroAttribute : ContractAspect
     {
@@ -21,17 +21,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_S
     {
         private int q;
 
-        [NotZero]
+        
         public int this[int x]
         {
+            get
+            {
+                return 42;
+            }
+
+            [param: NotZero]
             set
             {
             }
         }
 
-        [NotZero]
         public int this[int x, int y]
         {
+            get => q;
+
+            [param: NotZero]
             set => q = value + 1;
         }
     }

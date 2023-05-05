@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @Skipped(#32681 and #32616)
+// @Skipped(#32616)
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.IteratorIndexer;
