@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Original code declaration - we should be able to get IDeclaration by symbol name.
 
-                if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol, out var originalElement ) )
+                if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol.OriginalDefinition, out var originalElement ) )
                 {
                     return Array.Empty<LinkerInjectedMember>();
                 }

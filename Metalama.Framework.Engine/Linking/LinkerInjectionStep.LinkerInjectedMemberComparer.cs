@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -80,9 +80,7 @@ internal sealed partial class LinkerInjectionStep
             // Order by signature.
             if ( declaration is IMethod )
             {
-                var signatureComparison = string.CompareOrdinal(
-                    declaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimSuffix( "" ),
-                    otherDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimSuffix( "" ) );
+                var signatureComparison = StructuralSymbolComparer.NameObliviousComparer.Compare( declaration.GetSymbol(), otherDeclaration.GetSymbol() );
 
                 if ( signatureComparison != 0 )
                 {

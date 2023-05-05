@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Collections.Concurrent;
@@ -203,7 +204,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                         && xMethod.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct
                         && xMethod.IsImplicitlyDeclared && yMethod.IsImplicitlyDeclared );
 
-                    var signatureComparison = StringComparer.Ordinal.Compare( xMethod.ToString(), yMethod.ToString() );
+                    var signatureComparison = StructuralSymbolComparer.Signature.Compare( xMethod.GetSymbol(), yMethod.GetSymbol() );
 
                     if ( signatureComparison != 0 )
                     {

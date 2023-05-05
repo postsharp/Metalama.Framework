@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic other )
         {
-            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol.OriginalDefinition, other.Symbol.OriginalDefinition )
                    && other.Kind == this.Kind;
         }
 
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic<TSymbol> other )
         {
-            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol.OriginalDefinition, other.Symbol.OriginalDefinition )
                    && other.Kind == this.Kind;
         }
 
