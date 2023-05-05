@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                if ( existingDeclaration is not IIndexer existingIndexer )
+                if ( existingDeclaration is not { } existingIndexer )
                 {
                     return
                         AdviceImplementationResult.Failed(
