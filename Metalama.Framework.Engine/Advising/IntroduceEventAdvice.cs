@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                 addTransformation( overriddenMethod );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.New );
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
                         }
                         else
@@ -257,7 +257,7 @@ namespace Metalama.Framework.Engine.Advising
                             {
                                 addTransformation( this.Builder.ToTransformation() );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.New );
+                                return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                             }
                             else
                             {
@@ -271,7 +271,7 @@ namespace Metalama.Framework.Engine.Advising
                                 addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenMethod );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.New );
+                                return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                             }
                         }
 
@@ -314,7 +314,7 @@ namespace Metalama.Framework.Engine.Advising
                             {
                                 addTransformation( this.Builder.ToTransformation() );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                             }
                             else
                             {
@@ -328,7 +328,7 @@ namespace Metalama.Framework.Engine.Advising
                                 addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenEvent );
 
-                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                             }
                         }
 

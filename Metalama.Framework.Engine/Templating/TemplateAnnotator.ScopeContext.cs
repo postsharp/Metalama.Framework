@@ -93,7 +93,6 @@ namespace Metalama.Framework.Engine.Templating
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
             /// Local variables modified within such branch cannot be compile-time.
             /// </summary>
-            /// <returns>A cookie to dispose at the end.</returns>
             public ScopeContext RunTimeConditional( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
@@ -108,7 +107,7 @@ namespace Metalama.Framework.Engine.Templating
                 => new(
                     scope,
                     scope == TemplatingScope.RunTimeOnly || this.IsRuntimeConditionalBlock,
-                    reason,
+                    scope == TemplatingScope.RunTimeOnly ? reason : this.IsRuntimeConditionalBlockReason,
                     this._preferredScope,
                     this.PreferredScopeReason,
                     this.IsDynamicTypingForbidden,

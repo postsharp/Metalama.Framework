@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Advising
                             addTransformation( overriddenOperator );
                             addTransformation( this.Builder.ToTransformation() );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.New );
+                            return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                         }
 
                     case OverrideStrategy.Override:
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.Advising
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenOperator );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                         }
 
                     default:

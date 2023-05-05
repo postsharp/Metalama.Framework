@@ -95,7 +95,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         return expression
             .WithAspectReferenceAnnotation(
                 this.ParentAdvice.AspectLayerId,
-                AspectReferenceOrder.Base,
+                AspectReferenceOrder.Previous,
                 referenceTargetKind,
                 AspectReferenceFlags.Inlineable );
     }

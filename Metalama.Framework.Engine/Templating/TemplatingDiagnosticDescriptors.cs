@@ -61,11 +61,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string VariableName, string RunTimeCondition)> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
+        internal static readonly DiagnosticDefinition<(string LoopKind, string RunTimeCondition)> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
             = new(
                 "LAMA0110",
                 "Cannot have a compile-time loop in a block whose execution depends on a run-time condition",
-                "The compile-time loop '{0}' is not allowed here because it is a part of block whose execution depends on the run-time condition '{1}'. " +
+                "The compile-time {0} loop is not allowed here because it is a part of block whose execution depends on the run-time condition '{1}'. " +
                 "Move the loop out of the run-time-conditional block.",
                 _category,
                 Error );
@@ -427,9 +427,25 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration1, INamedTypeSymbol Attribute1, ISymbol Declaration2, INamedTypeSymbol Attribute2)> MultipleAdviceAttributes
             = new(
                 "LAMA0261",
+                "Declarations cannot have more than one template or advice attribute applied.",
+                "Multiple template or advice attributes found on the same declaration: {1} on {0} and {3} on {2}.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol AccessorDeclaration, INamedTypeSymbol Attribute, string ContainingMemberKind)> AdviceAttributeOnAccessor
+            = new(
+                "LAMA0262",
+                "Accessors cannot have template or advice attributes applied.",
+                "Accessor '{0}' cannot have the '{1}' attribute. Add the attribute to the containing {2} instead.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
+            = new(
+                "LAMA0263",
                 "Dynamic expressions in lambdas are not supported.",
                 "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
                 _category,

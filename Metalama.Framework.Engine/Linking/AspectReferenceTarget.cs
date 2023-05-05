@@ -45,6 +45,7 @@ namespace Metalama.Framework.Engine.Linking
                     => (@event, targetKind),
                 (IPropertySymbol property, AspectReferenceTargetKind.Self) => (property, AspectReferenceTargetKind.Self),
                 (IEventSymbol @event, AspectReferenceTargetKind.Self) => (@event, AspectReferenceTargetKind.Self),
+                (IFieldSymbol field, AspectReferenceTargetKind.PropertyGetAccessor or AspectReferenceTargetKind.PropertySetAccessor) => (field, targetKind),
                 _ => throw new AssertionFailedException( $"Unexpected combination: ('{symbol}', {targetKind})." )
             };
 

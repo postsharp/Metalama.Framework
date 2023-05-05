@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -30,11 +29,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
 
-            if ( orderOptions == InvokerOptions.Base && !isSelfTarget )
+            if ( orderOptions is InvokerOptions.Base or InvokerOptions.Current && !isSelfTarget )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(target),
-                    "Cannot provide a target other than 'this', 'base' or the current type when specifying the InvokerOptions.Base option." );
+                    "Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current." );
             }
 
             var otherFlags = options.Value & ~InvokerOptions.OrderMask;
@@ -51,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this._order = orderOptions switch
             {
-                InvokerOptions.Current => AspectReferenceOrder.Self,
+                InvokerOptions.Current => AspectReferenceOrder.Current,
                 InvokerOptions.Base => AspectReferenceOrder.Base,
                 InvokerOptions.Final => AspectReferenceOrder.Final,
                 _ => throw new AssertionFailedException( $"Invalid value: {this.Options}." )
@@ -69,8 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             else if ( isSelfTarget && TemplateExpansionContext.IsTransformingDeclaration( member ) )
             {
                 // When we expand a template, the default invoker for the declaration being overridden or introduced is
-                // always the base one. Otherwise, if we keep the Current default option, the default behavior would be
-                // to generate infinite recursions.
+                // always the base one.
 
                 return InvokerOptions.Base;
             }
@@ -110,11 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             if ( this.Target is UserReceiver receiver )
             {
-                if ( this._order == AspectReferenceOrder.Base )
-                {
-                    // Replace 'this' with 'base'.
-                    receiver = receiver.WithAspectReferenceOrder( AspectReferenceOrder.Base );
-                }
+                receiver = receiver.WithAspectReferenceOrder( this._order );
 
                 return new ReceiverTypedExpressionSyntax(
                     receiver.ToTypedExpressionSyntax( this.GenerationContext ),
@@ -152,12 +146,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
         }
 
-        protected static INamedTypeSymbol? GetTargetTypeSymbol()
+        protected static INamedType? GetTargetType()
         {
             return TemplateExpansionContext.CurrentTargetDeclaration switch
             {
-                INamedType type => type.GetSymbol().OriginalDefinition,
-                IMember member => member.DeclaringType.GetSymbol().OriginalDefinition,
+                INamedType type => type,
+                IMember member => member.DeclaringType,
                 null => null,
                 _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
             };

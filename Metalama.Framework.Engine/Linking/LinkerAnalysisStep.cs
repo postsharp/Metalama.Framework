@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
@@ -162,6 +163,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._serviceProvider,
                 input.IntermediateCompilation.CompilationContext,
                 syntaxHandler,
+                input.InjectionRegistry,
                 inlinedSemantics,
                 nonInlinedSemantics,
                 nonInlinedReferencesByContainingSemantic,
@@ -248,8 +250,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach ( var reference in pair.Value )
                 {
-                    if ( !reference.HasResolvedSemanticBody )
+                    if ( reference.TargetKind == AspectReferenceTargetKind.EventRaiseAccessor )
                     {
+                        // Temporary suppression of raise.
                         continue;
                     }
 
@@ -310,7 +313,7 @@ namespace Metalama.Framework.Engine.Linking
         private static void VerifyUnsupportedInlineability(
             LinkerInjectionRegistry injectionRegistry,
             UserDiagnosticSink diagnosticSink,
-            IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics )
+            IEnumerable<IntermediateSymbolSemantic> nonInlinedSemantics )
         {
             foreach ( var nonInlinedSemantic in nonInlinedSemantics )
             {
@@ -321,14 +324,18 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( injectionRegistry.IsOverrideTarget( nonInlinedSemantic.Symbol ) )
                     {
-                        if ( nonInlinedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
+                        switch ( nonInlinedSemantic.Kind )
                         {
-                            // Final semantics are not inlined.
-                            continue;
-                        }
-                        else
-                        {
-                            overrideTarget = nonInlinedSemantic.Symbol;
+                            case IntermediateSymbolSemanticKind.Final:
+                            case IntermediateSymbolSemanticKind.Base when nonInlinedSemantic.Symbol.IsOverride:
+                                // Final semantics are not inlined.
+                                // Base semantics for overrides are not inlined.
+                                continue;
+
+                            default:
+                                overrideTarget = nonInlinedSemantic.Symbol;
+
+                                break;
                         }
                     }
                     else

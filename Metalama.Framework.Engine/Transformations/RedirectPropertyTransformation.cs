@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this._targetProperty.IsStatic
                         ? IdentifierName( this._targetProperty.Name )
                         : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
-                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
+                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
             }
         }
     }

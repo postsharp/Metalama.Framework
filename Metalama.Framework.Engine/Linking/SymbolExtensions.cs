@@ -1,8 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
@@ -59,6 +62,56 @@ namespace Metalama.Framework.Engine.Linking
         {
             return parameter.GetAttributes()
                 .Any( a => a.AttributeConstructor.AssertNotNull().ContainingType.GetFullName() == "System.Runtime.CompilerServices.CallerMemberNameAttribute" );
+        }
+
+        /// <summary>
+        /// Gets a symbol the "new" symbol is hiding.
+        /// </summary>
+        /// <param name="symbol">The hiding symbol.</param>
+        /// <param name="hiddenSymbol">The hidden symbol.</param>
+        /// <returns>Hidden symbol or null.</returns>
+        public static bool TryGetHiddenSymbol( this ISymbol symbol, Compilation compilation, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
+        {
+            var currentType = symbol.ContainingType.BaseType;
+
+            while ( currentType != null )
+            {
+                var matchingSymbol = currentType.GetMembers()
+                    .SingleOrDefault(
+                        member => member.IsVisibleTo( compilation, symbol )
+                                  && SignatureEquals( symbol, member ) );
+
+                if ( matchingSymbol != null )
+                {
+                    hiddenSymbol = matchingSymbol;
+
+                    return true;
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            hiddenSymbol = null;
+
+            return false;
+
+            static bool SignatureEquals( ISymbol localMember, ISymbol baseMember )
+            {
+                switch (localMember, baseMember)
+                {
+                    case (IPropertySymbol property, IFieldSymbol field):
+                        // Promoted field that hides a base field.
+                        if ( StringComparer.Ordinal.Equals( property.Name, field.Name ) )
+                        {
+                            return true;
+                        }
+
+                        goto default;
+
+                    default:
+                        return SignatureTypeSymbolComparer.Instance.Equals( localMember, baseMember );
+                }
+            }
         }
     }
 }

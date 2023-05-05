@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -58,7 +59,8 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
 
                 if ( member is IFieldSymbol field && field.ContainingType.TypeKind == TypeKind.Enum )
                 {
-                    return TypedConstant.Create( field.ConstantValue, this.Type );
+                    var enumType = this.Type.GetCompilationModel().Factory.GetTypeByReflectionName( field.ContainingType.GetReflectionFullName() );
+                    return TypedConstant.Create( field.ConstantValue, enumType );
                 }
                 else
                 {

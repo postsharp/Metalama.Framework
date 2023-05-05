@@ -4,6 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
 using System;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
@@ -57,6 +60,23 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( (long) 1 )]
         [InlineData( (ulong) 1 )]
         [InlineData( "" )]
+#pragma warning restore SA1139
+        public void CreateFromValue( object value )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var c = TypedConstant.Create( value );
+
+            Assert.Equal( value, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ), c.Type );
+        }
+
+#pragma warning disable SA1139
+        [Theory]
         [InlineData( new[] { (byte) 1, (byte) 2 } )]
         [InlineData( new[] { (sbyte) 1 } )]
         [InlineData( new[] { (short) 1 } )]
@@ -69,7 +89,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( new object[] { new[] { typeof(int) } } )]
         [InlineData( new[] { ConsoleColor.Blue } )]
 #pragma warning restore SA1139
-        public void CreateFromValue( object value )
+        public void CreateFromValueArray( Array value )
         {
             using var testContext = this.CreateTestContext();
 
@@ -77,10 +97,17 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
 
+            var immutableValue = value.Cast<object>().Select( TypedConstant.Create ).ToImmutableArray();
+
             var c = TypedConstant.Create( value );
 
-            Assert.Equal( c.Value, value );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ) );
+            Assert.Equal( immutableValue, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ), c.Type );
+
+            var ci = TypedConstant.Create( immutableValue, value.GetType() );
+
+            Assert.Equal( immutableValue, ci.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ), ci.Type );
         }
 
         [Fact]
@@ -94,8 +121,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var c = TypedConstant.Create( ConsoleColor.Blue );
 
-            Assert.Equal( c.Value, (int) ConsoleColor.Blue );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( typeof(ConsoleColor) ) );
+            Assert.Equal( (int) ConsoleColor.Blue, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( typeof(ConsoleColor) ), c.Type );
         }
 
         [Fact]
@@ -109,8 +136,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var c = TypedConstant.Create( typeof(int) );
 
-            Assert.Equal( c.Value, emptyCompilation.Factory.GetTypeByReflectionType( typeof(int) ) );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( typeof(Type) ) );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( typeof(int) ), c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( typeof(Type) ), c.Type );
         }
 
 #pragma warning disable SA1139
@@ -135,8 +162,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var c = TypedConstant.Create( value, type );
 
-            Assert.Equal( c.Value, value );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( type ) );
+            Assert.Equal( value, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( type ), c.Type );
         }
 
 #pragma warning disable SA1139
@@ -151,7 +178,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( (ulong) 1, typeof(ulong) )]
         [InlineData( "", typeof(string) )]
 #pragma warning restore SA1139
-        public void CreateFromValueArray( object value, Type type )
+        public void CreateFromValueSingleItemArray( object value, Type type )
         {
             using var testContext = this.CreateTestContext();
 
@@ -161,10 +188,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var array = Array.CreateInstance( type, 1 );
             array.SetValue( value, 0 );
-            var c = TypedConstant.Create( array, array.GetType() );
+            var c = TypedConstant.Create( array );
 
-            Assert.Equal( c.Value, array );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( array.GetType() ) );
+            Assert.Equal( array.Cast<object>().Select( TypedConstant.Create ).ToImmutableArray(), c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( array.GetType() ), c.Type );
         }
 
 #pragma warning disable SA1139
@@ -188,8 +215,51 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var c = TypedConstant.Create( value, type );
 
-            Assert.Equal( c.Value, value );
-            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( type ) );
+            Assert.Equal( value, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( type ), c.Type );
+        }
+
+        [Fact]
+        public void CreateFromValueDecimal()
+        {
+            using var testContext = this.CreateTestContext();
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            const decimal value = 2013.0m;
+
+            var c = TypedConstant.Create( value );
+
+            Assert.Equal( value, c.Value );
+            Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( typeof(decimal) ), c.Type );
+        }
+
+        [Fact]
+        public void CreateFromValueInvalid()
+        {
+            using var testContext = this.CreateTestContext();
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            Assert.Throws<ArgumentException>( () => TypedConstant.Create( "", typeof(object) ) );
+            Assert.Throws<ArgumentException>( () => TypedConstant.Create( new DateTime( 2023, 5, 3 ) ) );
+            Assert.Throws<ArgumentException>( () => TypedConstant.Create( new StringBuilder( "http://metalama.net" ) ) );
+        }
+
+        [Theory]
+        [InlineData( typeof(int) )]
+        [InlineData( typeof(int?) )]
+        [InlineData( typeof(int[]) )]
+        [InlineData( typeof(ConsoleColor) )]
+        [InlineData( typeof(Type) )]
+        public void CreateFromValueMismatchedType( Type type )
+        {
+            using var testContext = this.CreateTestContext();
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var ex = Assert.Throws<ArgumentException>( () => TypedConstant.Create( new(), type ) );
+            Assert.Contains( "The value should be of type", ex.Message, StringComparison.Ordinal );
         }
     }
 }

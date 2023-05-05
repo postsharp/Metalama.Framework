@@ -74,8 +74,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     AspectReferenceFlags flags = default;
 
-                    // Since most of the linker tests linking normal aspects, the default order for linker tests is Base.
-                    var order = AspectReferenceOrder.Base;
+                    // Since most of the linker tests linking normal aspects, the default order for linker tests is Previous.
+                    var order = AspectReferenceOrder.Previous;
 
                     for ( var i = 1; i < arguments.Count; i++ )
                     {
@@ -88,18 +88,18 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                                 break;
 
-                            case "self":
-                                order = AspectReferenceOrder.Self;
-
-                                break;
-
                             case "@base":
                                 order = AspectReferenceOrder.Base;
 
                                 break;
 
-                            case "original":
-                                order = AspectReferenceOrder.Original;
+                            case "previous":
+                                order = AspectReferenceOrder.Previous;
+
+                                break;
+
+                            case "current":
+                                order = AspectReferenceOrder.Current;
 
                                 break;
 

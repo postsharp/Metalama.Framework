@@ -304,7 +304,7 @@ namespace Metalama.Framework.Engine.Advising
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenIndexer );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                         }
 
                     default:

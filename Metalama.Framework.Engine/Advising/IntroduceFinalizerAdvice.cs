@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
 
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+                var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Advising
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this._template.ForIntroduction( existingFinalizer ), this.Tags );
+                            var overriddenMethod = new OverrideFinalizerTransformation( this, existingFinalizer, this._template.ForIntroduction( existingFinalizer ), this.Tags );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -138,12 +138,12 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingFinalizer;
-                            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+                            var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, this.Builder );
                         }
 
                     default:

@@ -88,9 +88,16 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    if ( semantic.Kind is IntermediateSymbolSemanticKind.Final )
                     {
-                        // Final semantic is never inlineable.
+                        // Final semantics are never inlineable.
+                        return false;
+                    }
+
+                    if ( semantic.Kind is IntermediateSymbolSemanticKind.Base
+                         && (semantic.Symbol.IsOverride || semantic.Symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ )) )
+                    {
+                        // Base semantics are not inlineable if they point to a base member.
                         return false;
                     }
 

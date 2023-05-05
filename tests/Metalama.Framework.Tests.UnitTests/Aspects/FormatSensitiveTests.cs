@@ -58,12 +58,6 @@ public class TestClass
 }
 ";
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-        var result = await this.CompileAsync( testContext, code );
-After:
-        var result = await AspectTestBase.CompileAsync( testContext, code );
-*/
         var result = await CompileAsync( testContext, code );
 
         var transformedProperty = result.Value.ResultingCompilation.SyntaxTrees.SelectAsEnumerable( x => x.Value.GetRoot() )

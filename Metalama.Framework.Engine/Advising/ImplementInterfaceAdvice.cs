@@ -301,6 +301,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
             {
+                // Collect implemented interface members and add non-observable transformations.
                 var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
                 var templateAttributeProperties = (memberSpec.Template?.AdviceAttribute as ITemplateAttribute)?.Properties;
 
@@ -328,7 +329,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     continue;
 
                                 case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy == OverrideStrategy.Override:
-
                                     if ( existingMethod.Accessibility != Accessibility.Public )
                                     {
                                         diagnostics.Report(
@@ -383,22 +383,22 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         void IntroduceMethod( bool isExplicit, bool isOverride = false )
                         {
                             var isIteratorMethod = templateMethod?.IsIteratorMethod ?? redirectionTargetMethod.AssertNotNull().IsIteratorMethod() == true;
-
                             var isVirtual = templateAttributeProperties?.IsVirtual ?? templateMethod is { Declaration.IsVirtual: true };
 
-                            var memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit, isVirtual, isOverride );
+                            var methodBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit, isVirtual, isOverride );
 
-                            CopyAttributes( interfaceMethod, memberBuilder );
+                            CopyAttributes( interfaceMethod, methodBuilder );
 
-                            interfaceMemberMap.Add( interfaceMethod, memberBuilder );
+                            addTransformation( methodBuilder.ToTransformation() );
+                            interfaceMemberMap.Add( interfaceMethod, methodBuilder );
 
                             if ( templateMethod != null )
                             {
                                 addTransformation(
                                     new OverrideMethodTransformation(
                                         this,
-                                        (IMethod) memberBuilder,
-                                        templateMethod.ForIntroduction( (IMethod) memberBuilder ),
+                                        methodBuilder,
+                                        templateMethod.ForIntroduction( methodBuilder ),
                                         mergedTags ) );
                             }
                             else
@@ -406,11 +406,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 addTransformation(
                                     new RedirectMethodTransformation(
                                         this,
-                                        (IMethod) memberBuilder,
+                                        methodBuilder,
                                         (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
                             }
-
-                            addTransformation( memberBuilder.ToTransformation() );
                         }
 
                         break;
@@ -556,6 +554,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 }
                             }
 
+                            addTransformation( propertyBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceProperty, propertyBuilder );
 
                             if ( templateProperty != null )
@@ -587,8 +586,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         propertyBuilder,
                                         redirectionTargetProperty.AssertNotNull() ) );
                             }
-
-                            addTransformation( propertyBuilder.ToTransformation() );
                         }
 
                         break;
@@ -648,6 +645,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.RemoveMethod.AssertNotNull() );
                             }
 
+                            addTransformation( eventBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceEvent, eventBuilder );
 
                             if ( templateEvent != null )
@@ -679,8 +677,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         eventBuilder,
                                         redirectionTargetEvent.AssertNotNull() ) );
                             }
-
-                            addTransformation( eventBuilder.ToTransformation() );
                         }
 
                         break;
@@ -720,7 +716,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null );
     }
 
-    private MemberBuilder GetImplMethodBuilder(
+    private MethodBuilder GetImplMethodBuilder(
         INamedType declaringType,
         IMethod interfaceMethod,
         bool isIteratorMethod,

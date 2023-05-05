@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine("This is the overridden method (1).");
             return meta.Proceed();
         }
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
         {
             // Block inlining.
             _ = meta.Proceed();
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine("This is the overridden method (2).");
             return meta.Proceed();
         }
     }

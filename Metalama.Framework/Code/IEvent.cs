@@ -44,7 +44,7 @@ namespace Metalama.Framework.Code
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
-        /// Gets the base event that is overridden or hidden by the current event.
+        /// Gets the base event that is overridden by the current event.
         /// </summary>
         IEvent? OverriddenEvent { get; }
 

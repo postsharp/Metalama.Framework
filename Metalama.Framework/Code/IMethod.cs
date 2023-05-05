@@ -35,7 +35,7 @@ namespace Metalama.Framework.Code
         IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
-        /// Gets the base method that is overridden or hidden by the current method.
+        /// Gets the base method that is overridden by the current method.
         /// </summary>
         IMethod? OverriddenMethod { get; }
 

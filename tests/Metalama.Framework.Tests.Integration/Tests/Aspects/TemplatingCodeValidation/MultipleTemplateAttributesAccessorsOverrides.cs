@@ -1,0 +1,23 @@
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.MultipleTemplateAttributesAccessorsOverrides;
+
+public class BaseAspect: TypeAspect
+{
+    [Template]
+    public virtual int P
+    {
+        get => 42;
+    }
+
+}
+
+public class Aspect : BaseAspect
+{
+    [Template]
+    public override int P
+    {
+        get => 42;
+    }
+}

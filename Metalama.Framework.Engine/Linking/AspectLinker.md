@@ -26,6 +26,18 @@ possible to produce the final compilation, which is the output of Metalama Frame
 * All of collected information results in the creation of `LinkerInjectionRegistry`, which is used during the
   analysis step.
 
+### Aspect References
+
+Aspect references are syntax nodes that reference a declaration from point of view of a particular aspect. 
+
+There are several ways to look at the target, coded by `AspectReferenceOrder` enum:
+* Base - targets the declaration as it was immediately before the current aspect. This mimicks behavior of `base.Foo()` in C#.
+* Previous - targets the previous version of the declaration. This is different from Base only if an aspect does multiple overrides. Used by `meta.Proceed`.
+* Current - targets the declaration as it is immediately after the current aspect. This is different from Base only if the aspect overrides the declaration.
+* Final - targets the declaration as it will be in the end. This mimicks the behavior of `this.Foo()` virtual call in C#.
+
+#### Expressions
+
 ## Step 2 - Analysis (`LinkerAnalysisStep` class):
 
 * Method bodies are searched for nodes with `AspectReferenceAnnotation`s, which are generated during template expansion 
@@ -47,6 +59,93 @@ possible to produce the final compilation, which is the output of Metalama Frame
   * Phase III. - Inlined semantics
     * Semantic is inlined if and only if it is inlineable and all references to it are inlineable.
     * For inlined semantics, determine inlining specifications. An inliner usually has several ways of inlining based on structure of the inlined code. See below for details.
+
+# Intermediate symbol semantic
+Symbols declared in the intermediate compilation may have different semantics that are differentiated by aspect references and become different after final linking.
+
+* Base - state of the symbol before it's introduction. Valid only for introduced symbols.
+* Default - state of the symbol as present in the intermediate compilation, i.e. it's source code.
+* Final - state of the symbol after all overrides, i.e. it's signature.
+
+Specifically for Base, following cases are recognized:
+* Newly introduced declaration => empty body / default expression.
+* Introduced method override => the base version of the method (base.Something).
+* Introduced method hiding a base method => the base class declaration (base.Something).
+
+#### Aspect reference resolution
+
+For the following consider hierarchy of classes `A`,`B`,`C`, where `B` is the current class, on which Aspects `A1`, `A2`, `A3`, `A4` are applied (in this order).
+
+`A.Foo` is a virtual method, that is overridden by `C.Foo` in the source code. `B.Bar` is unrelated method with overriddes that contain references to `Foo`.
+
+Aspects do the following transformations:
+* `A1` 
+  * Overrides `Bar` (`Bar_A1_Override1`).
+* `A2`
+  * Overrides `Bar` (`Bar_A2_Override2`).
+  * Injects override of `Foo`.
+  * Overrides `Foo` (`Foo_A2_Override3`). (NOTE: the same introduction advice as the injections)
+  * Overrides `Bar` (`Bar_A2_Override4`)
+* `A3`
+  * Overrides `Bar` (`Bar_A3_Override5`).
+  * Overrides `Foo` (`Foo_A3_Override6`).
+  * Overrides `Bar` (`Bar_A3_Override7`).
+  * Overrides `Foo` (`Foo_A3_Override8`).
+  * Overrides `Bar` (`Bar_A3_Override9`).
+* `A4`
+  * Overrides `Bar` (`Bar_A4_Override10`).
+
+References to `Foo` in above overrides are resolved based on containing declarations as follows:
+* `Bar_A1_Override1`
+  * Base => `(Foo, Base)`
+  * Previous => `(Foo, Base)`
+  * Current => `(Foo, Base)`
+  * Final => `(Foo, Final)`
+* `Bar_A2_Override2`
+  * Base => `(Foo, Base)`
+  * Previous => `(Foo, Base)`
+  * Current => `(Foo_A2_Override3, Default)`
+  * Final => `(Foo, Final)`
+* `Foo_A2_Override3` - first override of Foo
+  * Base => `(Foo, Base)`
+  * Previous => `(Foo, Base)`
+  * Current => `(Foo_A2_Override3, Default)`
+  * Final => `(Foo, Final)`
+* `Bar_A2_Override4`
+  * Base => `(Foo, Base)`
+  * Base => `(Foo, Base)`
+  * Current => `(Foo_A2_Override3, Default)`
+  * Final => `(Foo, Final)`
+* `Bar_A3_Override5`
+  * Base => `(Foo_A2_Override3, Default)`
+  * Previous => `(Foo_A2_Override3, Default)`
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
+* `Foo_A3_Override6` - second override of Foo
+  * Base => `(Foo_A2_Override3, Default)`
+  * Previous => `(Foo_A2_Override3, Default)`
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
+* `Bar_A3_Override7`
+  * Base => `(Foo_A2_Override3, Default)`
+  * Previous => `(Foo_A2_Override3, Default)`
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
+* `Foo_A3_Override8` - third override of Foo
+  * Base => `(Foo_A2_Override3, Default)`
+  * Previous => `(Foo_A3_Override6, Default)` - The only way to reference the second override.
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
+* `Bar_A3_Override9`
+  * Base => `(Foo_A2_Override3, Default)`
+  * Previous => `(Foo_A2_Override3, Default)`
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
+* `Bar_A4_Override10`
+  * Base => `(Foo_A3_Override8, Default)`
+  * Previous => `(Foo_A3_Override8, Default)`
+  * Current => `(Foo_A3_Override8, Default)`
+  * Final => `(Foo, Final)`
     
 ### Inlining
 

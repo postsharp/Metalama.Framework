@@ -111,6 +111,12 @@ namespace Metalama.Framework.Engine.Templating
                             IndexSymbol( s );
                         }
                     }
+                    else if ( symbolInfo is { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols.IsDefaultOrEmpty: false } )
+                    {
+                        // This happens for nameof(SomeMethod) (whether it has overloads or not).
+                        // Indexing the first symbol found should be enough in that case.
+                        IndexSymbol( symbolInfo.CandidateSymbols[0] );
+                    }
 
                     // Cache semanticModel.GetDeclaredSymbol
                     if ( declaredSymbol != null )

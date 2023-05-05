@@ -129,58 +129,55 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
         ExpressionSyntax GetValue( object? value, IType type )
         {
-            if ( value == null )
-            {
-                return SyntaxFactoryEx.Null;
-            }
-            else if ( value is TypedConstant innerTypedConstant )
+            if ( value is TypedConstant innerTypedConstant )
             {
                 value = innerTypedConstant.Value;
             }
 
-            if ( type is INamedType { TypeKind: TypeKind.Enum } )
+            if ( value == null )
             {
-                return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value! );
+                return SyntaxFactoryEx.Null;
             }
-            else
+
+            switch ( type )
             {
-                switch ( value )
-                {
-                    case IType typeValue:
-                        return this.TypeOfExpression( typeValue.GetSymbol() );
+                case INamedType { TypeKind: TypeKind.Enum }:
+                    return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value );
 
-                    case Type systemTypeValue:
-                        return this.TypeOfExpression( this._context.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
+                case IArrayType arrayType:
+                    return this.ArrayCreationExpression(
+                        this.Type( arrayType.ElementType.GetSymbol() ),
+                        ((ImmutableArray<TypedConstant>) value).Select( x => GetValue( x.Value, x.Type ) ) );
 
-                    default:
-                        {
-                            var literal = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+                default:
+                    switch ( value )
+                    {
+                        case IType typeValue:
+                            return this.TypeOfExpression( typeValue.GetSymbol() );
 
-                            if ( literal != null )
+                        case Type systemTypeValue:
+                            return this.TypeOfExpression( this._context.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
+
+                        default:
                             {
-                                return literal;
+                                var literal = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+
+                                if ( literal != null )
+                                {
+                                    return literal;
+                                }
+                                else
+                                {
+                                    throw new ArgumentOutOfRangeException(
+                                        nameof(value),
+                                        $"The value '{value}' cannot be converted to a custom attribute argument value." );
+                                }
                             }
-                            else
-                            {
-                                throw new ArgumentOutOfRangeException(
-                                    nameof(value),
-                                    $"The value '{value}' cannot be converted to a custom attribute argument value." );
-                            }
-                        }
-                }
+                    }
             }
         }
 
-        if ( typedConstant.Type is IArrayType arrayType )
-        {
-            return this.ArrayCreationExpression(
-                this.Type( arrayType.ElementType.GetSymbol() ),
-                typedConstant.Values.Select( x => GetValue( x.Value, arrayType.ElementType ) ) );
-        }
-        else
-        {
-            return GetValue( typedConstant.Value, typedConstant.Type );
-        }
+        return GetValue( typedConstant.Value, typedConstant.Type );
     }
 
     public TypeParameterListSyntax? TypeParameterList( IMethod method, CompilationModel compilation )

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Code
         IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; }
 
         /// <summary>
-        /// Gets the base property that is overridden or hidden by the current property.
+        /// Gets the base property that is overridden by the current property.
         /// </summary>
         IProperty? OverriddenProperty { get; }
     }

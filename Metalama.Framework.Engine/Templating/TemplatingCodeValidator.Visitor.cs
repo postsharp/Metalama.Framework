@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -35,6 +36,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly CancellationToken _cancellationToken;
             private readonly bool _hasCompileTimeCodeFast;
             private readonly ITypeSymbol _typeFabricType;
+            private readonly ITypeSymbol _iAdviceAttributeType;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -63,6 +65,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
                 this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Framework.Fabrics.TypeFabric) );
+                this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -354,10 +357,10 @@ namespace Metalama.Framework.Engine.Templating
                     node.Modifiers,
                     syntax => base.VisitAccessorDeclaration( syntax ) );
 
-            private void VisitBaseMethodOrAccessor<T>( T node, SyntaxTokenList modifiers, Action<T> visitBase )
+            private void VisitBaseMethodOrAccessor<T>( T node, SyntaxTokenList modifiers, Action<T> visitBase, ISymbol? declaredSymbol = null )
                 where T : SyntaxNode
             {
-                using ( this.WithDeclaration( node ) )
+                using ( this.WithDeclaration( node, declaredSymbol ) )
                 {
                     this.VerifyModifiers( modifiers );
 
@@ -386,6 +389,21 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     this.VerifyModifiers( node.Modifiers );
                     base.VisitPropertyDeclaration( node );
+                }
+            }
+
+            public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
+            {
+                // For e.g. int P => 42;, there is no node that declares the getter,
+                // so we have to handle it manuallly.
+                if ( node.Parent is PropertyDeclarationSyntax propertyDeclaration )
+                {
+                    var getMethod = this._semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull().GetMethod;
+                    this.VisitBaseMethodOrAccessor( node, default, base.VisitArrowExpressionClause, getMethod );
+                }
+                else
+                {
+                    base.VisitArrowExpressionClause( node );
                 }
             }
 
@@ -475,13 +493,13 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportDiagnostic( diagnostic );
             }
 
-            private Context WithDeclaration( SyntaxNode node )
+            private Context WithDeclaration( SyntaxNode node, ISymbol? declaredSymbol = null )
             {
                 // Reset deduplication.
                 this._alreadyReportedDiagnostics.Clear();
 
                 // Get the scope.
-                var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
+                declaredSymbol ??= this._semanticModel.GetDeclaredSymbol( node );
 
                 if ( declaredSymbol == null )
                 {
@@ -499,6 +517,48 @@ namespace Metalama.Framework.Engine.Templating
                         TemplatingDiagnosticDescriptors.CompileTimeTypesCannotHaveTypeFabrics.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
                             declaredSymbol ) );
+                }
+
+                // Report an error for advice attribute on an accessor.
+                if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
+                {
+                    var adviceAttribute = declaredSymbol.GetAttributes()
+                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+
+                    if ( adviceAttribute != null )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.AdviceAttributeOnAccessor.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, adviceAttribute.AttributeClass.AssertNotNull(), associatedSymbol.Kind.ToDisplayName()) ) );
+                    }
+                }
+
+                // Report an error for multiple advice attributes.
+                IEnumerable<(ISymbol Member, INamedTypeSymbol AttributeClass)> GetAdviceAttributes( ISymbol? member )
+                {
+                    if ( member is null or ITypeSymbol )
+                    {
+                        return Enumerable.Empty<(ISymbol, INamedTypeSymbol)>();
+                    }
+
+                    var selfAttributes = member.GetAttributes()
+                        .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
+                        .Select( a => (member, a.AttributeClass!) );
+
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } ? associatedSymbol : member.GetOverriddenMember();
+
+                    return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
+                }
+
+                var adviceAttributes = GetAdviceAttributes( declaredSymbol ).Distinct().Take( 2 ).ToList();
+
+                if ( adviceAttributes.Count > 1 )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.MultipleAdviceAttributes.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member, adviceAttributes[1].AttributeClass) ) );
                 }
 
                 // Get the type scope.

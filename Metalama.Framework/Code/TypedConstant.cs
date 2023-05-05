@@ -73,13 +73,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <remarks>
         /// <para>
-        /// For enum values whose type is not a compile-time type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum.
+        /// For enum values, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum.
         /// </para>
         /// <para>
-        /// For enum values whose type is compile-time, <see cref="Value"/> is of enum type.
-        /// </para>
-        /// <para>
-        /// The type <c>ImmutableArray&gt;TypedConstant&gt;</c> is used to represent an array. The <see cref="Values"/> is also set in this case.
+        /// The type <c>ImmutableArray&lt;TypedConstant&gt;</c> is used to represent an array. The <see cref="Values"/> is also set in this case.
         /// </para>
         /// </remarks>
         public object? Value
@@ -106,7 +103,26 @@ namespace Metalama.Framework.Code
             {
                 var valueType = value.GetType();
 
-                this._value = valueType.IsEnum ? Convert.ChangeType( value, valueType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture ) : value;
+                if ( valueType.IsEnum )
+                {
+                    this._value = Convert.ChangeType( value, valueType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture );
+                }
+                else if ( valueType.IsArray )
+                {
+                    var array = (Array) value;
+                    var arrayBuilder = ImmutableArray.CreateBuilder<TypedConstant>( array.Length );
+
+                    foreach ( var item in array )
+                    {
+                        arrayBuilder.Add( Create( item ) );
+                    }
+
+                    this._value = arrayBuilder.ToImmutable();
+                }
+                else
+                {
+                    this._value = value;
+                }
             }
             else
             {
@@ -124,89 +140,86 @@ namespace Metalama.Framework.Code
                 return true;
             }
 
-            if ( expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [{ } wrappedType] }
-                 && CheckAcceptableType( wrappedType, value, false, declarationFactory ) )
+            bool TypeMismatch( object? actualExpectedType = null )
             {
-                return true;
-            }
+                actualExpectedType ??= expectedType;
 
-            switch (expectedType.SpecialType, value.GetType().Name)
-            {
-                case (SpecialType.SByte, nameof(SByte)):
-                case (SpecialType.Int16, nameof(Int16)):
-                case (SpecialType.Int32, nameof(Int32)):
-                case (SpecialType.Int64, nameof(Int64)):
-                case (SpecialType.Byte, nameof(Byte)):
-                case (SpecialType.UInt16, nameof(UInt16)):
-                case (SpecialType.UInt32, nameof(UInt32)):
-                case (SpecialType.UInt64, nameof(UInt64)):
-                case (SpecialType.String, nameof(String)):
-                case (SpecialType.Double, nameof(Double)):
-                case (SpecialType.Single, nameof(Single)):
-                case (SpecialType.Boolean, nameof(Boolean)):
-                case (SpecialType.Decimal, nameof(Decimal)):
-                case (SpecialType.Object, nameof(SByte)):
-                case (SpecialType.Object, nameof(Int16)):
-                case (SpecialType.Object, nameof(Int32)):
-                case (SpecialType.Object, nameof(Int64)):
-                case (SpecialType.Object, nameof(Byte)):
-                case (SpecialType.Object, nameof(UInt16)):
-                case (SpecialType.Object, nameof(UInt32)):
-                case (SpecialType.Object, nameof(UInt64)):
-                case (SpecialType.Object, nameof(String)):
-                case (SpecialType.Object, nameof(Double)):
-                case (SpecialType.Object, nameof(Single)):
-                    return true;
-            }
-
-            if ( expectedType is INamedType { FullName: "System.Type" } )
-            {
-                if ( value is not IType )
+                if ( throwOnError )
                 {
-                    if ( throwOnError )
-                    {
-                        throw new ArgumentOutOfRangeException(
-                            nameof(value),
-                            $"The value should be of type 'IType' but is of type '{value.GetType()}'." );
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    throw new ArgumentException(
+                        nameof(value),
+                        $"The value should be of type '{actualExpectedType}' but is of type '{value.GetType()}'." );
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            bool UnsupportedType()
+            {
+                if ( throwOnError )
+                {
+                    throw new ArgumentException(
+                        nameof(value),
+                        $"The type '{expectedType}' is not supported in a TypedConstant." );
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if ( expectedType.SpecialType == SpecialType.Object )
+            {
+                return UnsupportedType();
+            }
+            else if ( expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [var wrappedType] } )
+            {
+                if ( !CheckAcceptableType( wrappedType, value, throwOnError: false, declarationFactory ) )
+                {
+                    return TypeMismatch();
+                }
+            }
+            else if ( expectedType.SpecialType is
+                     SpecialType.SByte
+                     or SpecialType.Int16
+                     or SpecialType.Int32
+                     or SpecialType.Int64
+                     or SpecialType.Byte
+                     or SpecialType.UInt16
+                     or SpecialType.UInt32
+                     or SpecialType.UInt64
+                     or SpecialType.String
+                     or SpecialType.Double
+                     or SpecialType.Single
+                     or SpecialType.Boolean
+                     or SpecialType.Decimal )
+            {
+                if ( value.GetType().Namespace != nameof( System ) || value.GetType().Name != ((INamedType) expectedType).Name )
+                {
+                    return TypeMismatch();
                 }
             }
             else if ( expectedType is IArrayType arrayType )
             {
+                if ( arrayType.Rank != 1 )
+                {
+                    return UnsupportedType();
+                }
+
                 if ( value is Array array )
                 {
                     if ( !arrayType.ElementType.Equals( declarationFactory.GetTypeByReflectionType( array.GetType().GetElementType()! ) ) )
                     {
-                        if ( throwOnError )
-                        {
-                            throw new ArgumentOutOfRangeException(
-                                nameof(value),
-                                $"The value should be of type '{expectedType}' but is of type '{value.GetType()}'." );
-                        }
-                        else
-                        {
-                            return false;
-                        }
+                        return TypeMismatch( $"ImmutableArray<TypedConstant>' or '{expectedType}" );
                     }
                 }
                 else if ( value is not ImmutableArray<TypedConstant> immutableArray )
                 {
-                    if ( throwOnError )
-                    {
-                        throw new ArgumentOutOfRangeException(
-                            nameof(value),
-                            $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value.GetType()}'." );
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return TypeMismatch( $"ImmutableArray<TypedConstant>' or '{expectedType}" );
                 }
-                else
+                else if ( arrayType.ElementType.SpecialType != SpecialType.Object )
                 {
                     foreach ( var arrayItem in immutableArray )
                     {
@@ -219,42 +232,22 @@ namespace Metalama.Framework.Code
             }
             else if ( expectedType.TypeKind == TypeKind.Enum )
             {
-                if ( !expectedType.Equals( declarationFactory.GetTypeByReflectionType( value.GetType() ) ) )
+                if ( !expectedType.Equals( declarationFactory.GetTypeByReflectionType( value.GetType() ) ) &&
+                     !CheckAcceptableType( ((INamedType) expectedType).UnderlyingType, value, throwOnError: false, declarationFactory ) )
                 {
-                    if ( !CheckAcceptableType( ((INamedType) expectedType).UnderlyingType, value, throwOnError, declarationFactory ) )
-                    {
-                        return false;
-                    }
+                    return TypeMismatch( $"{expectedType}' or '{((INamedType) expectedType).UnderlyingType}" );
                 }
             }
             else if ( expectedType is INamedType { FullName: "System.Type" } )
             {
-                if ( value is not (IType or System.Type) )
+                if ( value is not IType )
                 {
-                    if ( throwOnError )
-                    {
-                        throw new ArgumentOutOfRangeException(
-                            nameof(value),
-                            $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value.GetType()}'." );
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return TypeMismatch( $"{typeof( IType )}' or '{typeof( Type )}" );
                 }
             }
             else
             {
-                if ( throwOnError )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        $"The value should be of type '{expectedType}' but is of type '{value.GetType()}'." );
-                }
-                else
-                {
-                    return false;
-                }
+                return UnsupportedType();
             }
 
             return true;
@@ -272,7 +265,16 @@ namespace Metalama.Framework.Code
 
         public static TypedConstant Default( Type type ) => new( null, GetIType( type ) );
 
-        public static TypedConstant Create( object value ) => Create( value, value.GetType() );
+        internal static Type GetValueType( object? value )
+            => value switch
+            {
+                null => typeof(object),
+                IType => typeof(Type),
+                ImmutableArray<TypedConstant> => typeof(object[]),
+                _ => value.GetType()
+            };
+
+        public static TypedConstant Create( object? value ) => Create( value, GetValueType( value ) );
 
         public static TypedConstant Create( object? value, Type type ) => Create( value, GetIType( type ) );
 
@@ -306,7 +308,7 @@ namespace Metalama.Framework.Code
                 {
                     IType type => Create( type.ForCompilation( compilation ), this.Type.ForCompilation( compilation ) ),
                     ImmutableArray<TypedConstant> array => Create(
-                        array.Select( i => i.ForCompilation( compilation ) ),
+                        array.Select( i => i.ForCompilation( compilation ) ).ToImmutableArray(),
                         this.Type.ForCompilation( compilation ) ),
                     _ => Create( this.Value, this.Type.ForCompilation( compilation ) )
                 };

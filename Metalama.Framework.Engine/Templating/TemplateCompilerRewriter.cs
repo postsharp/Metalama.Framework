@@ -477,7 +477,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             }
         }
 
-        return this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
+        return base.TransformIdentifierName( node );
     }
 
     protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
@@ -1818,6 +1818,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 node.AttributeLists,
                 node.Condition,
                 transformedStatement );
+        }
+    }
+
+    public override SyntaxNode VisitDoStatement( DoStatementSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            // Run-time do. Just serialize to syntax.
+            return this.TransformDoStatement( node );
+        }
+        else
+        {
+            var transformedStatement = this.ToMetaStatement( node.Statement );
+
+            return DoStatement(
+                node.AttributeLists,
+                transformedStatement,
+                node.Condition );
         }
     }
 

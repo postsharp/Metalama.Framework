@@ -94,7 +94,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
         if ( attributeData == null )
         {
-            // We if we don't have a custom attribute here, we need to look at parent declarations.
+            // If we don't have a custom attribute here, we need to look at parent declarations.
 
             if ( member.IsOverride )
             {

@@ -42,6 +42,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
 
+        public static ISymbol? GetOverriddenMember( this ISymbol? symbol )
+            => symbol switch
+            {
+                IMethodSymbol method => method.OverriddenMethod,
+                IPropertySymbol property => property.OverriddenProperty,
+                IEventSymbol @event => @event.OverriddenEvent,
+                _ => null
+            };
+
         public static ITypeSymbol? GetExpressionType( this ISymbol symbol )
         {
             var type = ExpressionTypeVisitor.Instance.Visit( symbol );
