@@ -442,5 +442,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Accessor '{0}' cannot have the '{1}' attribute. Add the attribute to the containing {2} instead.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
+            = new(
+                "LAMA0263",
+                "Dynamic expressions in lambdas are not supported.",
+                "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
+                _category,
+                Error );
     }
 }
