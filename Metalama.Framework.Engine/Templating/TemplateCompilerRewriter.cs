@@ -1821,6 +1821,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
+    public override SyntaxNode VisitDoStatement( DoStatementSyntax node )
+    {
+        if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+        {
+            // Run-time do. Just serialize to syntax.
+            return this.TransformDoStatement( node );
+        }
+        else
+        {
+            var transformedStatement = this.ToMetaStatement( node.Statement );
+
+            return DoStatement(
+                node.AttributeLists,
+                transformedStatement,
+                node.Condition );
+        }
+    }
+
     public override SyntaxNode VisitForEachStatement( ForEachStatementSyntax node )
     {
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform )

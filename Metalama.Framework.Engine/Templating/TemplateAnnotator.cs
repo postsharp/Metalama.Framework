@@ -1262,8 +1262,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         this.SetLocalSymbolScope( local, forEachScope );
 
-        this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
-
         StatementSyntax annotatedStatement;
 
         using ( this.WithScopeContext( this._currentScopeContext.BreakOrContinue( forEachScope, reason ) ) )
@@ -2102,6 +2100,34 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             .AddScopeAnnotation( conditionScope );
     }
 
+    public override SyntaxNode VisitDoStatement( DoStatementSyntax node )
+    {
+        // The scope of a `do ... while` statement is determined by its condition only.
+
+        var annotatedCondition = this.Visit( node.Condition );
+        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
+
+        this.RequireLoopScope( node.Condition, conditionScope, "do" );
+
+        StatementSyntax annotatedStatement;
+
+        using ( this.WithScopeContext( this._currentScopeContext.BreakOrContinue( conditionScope, $"do ... while ( {node.Condition} )" ) ) )
+        {
+            annotatedStatement = this.Visit( node.Statement ).ReplaceScopeAnnotation( conditionScope );
+        }
+
+        return node.Update(
+                node.AttributeLists,
+                node.DoKeyword,
+                annotatedStatement.AddTargetScopeAnnotation( conditionScope ),
+                node.WhileKeyword,
+                node.OpenParenToken,
+                annotatedCondition,
+                node.CloseParenToken,
+                node.SemicolonToken )
+            .AddScopeAnnotation( conditionScope );
+    }
+
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         => base.VisitReturnStatement( node )!.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
 
@@ -2109,13 +2135,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     private void ReportUnsupportedLanguageFeature( SyntaxNodeOrToken nodeForDiagnostic, string featureName )
         => this.ReportDiagnostic( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, nodeForDiagnostic, featureName );
-
-    public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
-    {
-        this.ReportUnsupportedLanguageFeature( node.DoKeyword, "do" );
-
-        return base.VisitDoStatement( node );
-    }
 
     public override SyntaxNode? VisitUnsafeStatement( UnsafeStatementSyntax node )
     {
@@ -2475,10 +2494,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         if ( requiredScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
         {
-            // It is not allowed to have a loop in a run-time-conditional block because compile-time loops require a compile-time
+            // It is not allowed to have a do or while loop in a run-time-conditional block because compile-time loops require a compile-time
             // variable, and mutating a compile-time variable is not allowed in a run-time-conditional block. This condition may be
-            // removed in the future because the loop variable may actually not be observable from outside the block, this this
-            // is not implemented.
+            // removed in the future because the loop variable may actually not be observable from outside the block, this
+            // is not implemented. Since the iteration variable of a foreach loop cannot be mutated explicitly, this check does not apply there.
 
             this.ReportDiagnostic(
                 TemplatingDiagnosticDescriptors.CannotHaveCompileTimeLoopInRunTimeConditionalBlock,

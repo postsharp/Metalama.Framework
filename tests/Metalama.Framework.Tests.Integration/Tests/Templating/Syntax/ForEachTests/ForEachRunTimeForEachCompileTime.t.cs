@@ -1,2 +1,17 @@
-// TestTemplateCompiler.TryCompile failed.
-// Error LAMA0110 on `meta.Target.Parameters`: `The compile-time loop 'foreach' is not allowed here because it is a part of block whose execution depends on the run-time condition 'foreach ( int n in ... )'. Move the loop out of the run-time-conditional block.`
+int Method(int a, int b)
+{
+    global::System.Collections.Generic.IEnumerable<global::System.Int32> array = global::System.Linq.Enumerable.Range(1, 2);
+    foreach (int n in array)
+    {
+        if (a <= n)
+        {
+            global::System.Console.WriteLine("Oops a <= " + n);
+        }
+        if (b <= n)
+        {
+            global::System.Console.WriteLine("Oops b <= " + n);
+        }
+    }
+    var result = this.Method(a, b);
+    return (global::System.Int32)result;
+}
