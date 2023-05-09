@@ -118,8 +118,6 @@ namespace Metalama.Framework.Engine.Linking
                         symbolMemberLevelTransformations,
                         introductionMemberLevelTransformations );
 
-                    IndexTypeLevelTransformation( transformation, symbolMemberLevelTransformations, typeLevelTransformations );
-
                     IndexNodesWithModifiedAttributes( transformation, nodesWithModifiedAttributes );
                 }
             }
@@ -494,85 +492,6 @@ namespace Metalama.Framework.Engine.Linking
                     default:
                         throw new AssertionFailedException( $"Unexpected declaration: '{overriddenAutoProperty}'." );
                 }
-            }
-        }
-
-        private static void IndexTypeLevelTransformation(
-            ITransformation transformation,
-            ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-            ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
-        {
-            if ( transformation is not ITypeLevelTransformation typeLevelTransformation )
-            {
-                return;
-            }
-
-            var declarationSyntax = (TypeDeclarationSyntax?) typeLevelTransformation.TargetType.GetPrimaryDeclarationSyntax();
-
-            if ( declarationSyntax == null )
-            {
-                return;
-            }
-
-            var thisTypeLevelTransformations = typeLevelTransformations.GetOrAddNew( declarationSyntax );
-
-            switch ( transformation )
-            {
-                case AddExplicitDefaultConstructorTransformation:
-                    thisTypeLevelTransformations.AddExplicitDefaultConstructor = true;
-
-                    foreach ( var syntaxReference in typeLevelTransformation.TargetType.GetSymbol().DeclaringSyntaxReferences )
-                    {
-                        foreach ( var member in ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Members )
-                        {
-                            switch ( member )
-                            {
-                                case PropertyDeclarationSyntax propertyDeclaration:
-                                    var propertyTransformations = symbolMemberLevelTransformations.GetOrAdd(
-                                        propertyDeclaration,
-                                        _ => new MemberLevelTransformations() );
-
-                                    propertyTransformations.AddDefaultInitializer = true;
-
-                                    break;
-
-                                case FieldDeclarationSyntax fieldDeclaration:
-
-                                    foreach ( var variable in fieldDeclaration.Declaration.Variables )
-                                    {
-                                        var fieldTransformations = symbolMemberLevelTransformations.GetOrAddNew( variable );
-
-                                        fieldTransformations.AddDefaultInitializer = true;
-                                    }
-
-                                    break;
-
-                                case EventDeclarationSyntax eventDeclaration
-                                    when eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
-                                         && !eventDeclaration.GetLinkerDeclarationFlags()
-                                             .HasFlagFast( AspectLinkerDeclarationFlags.HasHiddenInitializerExpression ):
-                                    var eventTransformations = symbolMemberLevelTransformations.GetOrAddNew( eventDeclaration );
-                                    eventTransformations.AddDefaultInitializer = true;
-
-                                    break;
-
-                                case EventFieldDeclarationSyntax eventFieldDeclaration:
-
-                                    foreach ( var variable in eventFieldDeclaration.Declaration.Variables )
-                                    {
-                                        var eventFieldTransformations = symbolMemberLevelTransformations.GetOrAddNew( variable );
-                                        eventFieldTransformations.AddDefaultInitializer = true;
-                                    }
-
-                                    break;
-                            }
-                        }
-                    }
-
-                    break;
-
-                default:
-                    throw new AssertionFailedException( $"Unexpected transformation: {transformation}/" );
             }
         }
 
