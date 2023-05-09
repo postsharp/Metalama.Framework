@@ -3,11 +3,11 @@
 [Introduction]
 internal struct TargetStruct
 {
+  public int ExistingField;
+  public int ExistingProperty { get; set; }
   public TargetStruct()
   {
   }
-  public int ExistingField = default;
-  public int ExistingProperty { get; set; } = default;
   public static void Foo(global::System.Object? sender, global::System.EventArgs args)
   {
   }

@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Advising
                 addTransformation( this.Builder.ToTransformation() );
 
                 OverrideHelper.AddTransformationsForStructField(
-                    targetDeclaration,
+                    targetDeclaration.ForCompilation( compilation ),
                     this,
                     addTransformation /* We add an initializer if it does not have one */ );
 

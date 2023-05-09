@@ -1,9 +1,6 @@
 internal readonly struct TargetStruct
 {
-  public TargetStruct()
-  {
-  }
-  private readonly int _property = default;
+  private readonly int _property;
   [Override]
   public int Property
   {
@@ -18,7 +15,7 @@ internal readonly struct TargetStruct
       this._property = value;
     }
   }
-  private static int _staticProperty = default;
+  private static int _staticProperty;
   [Override]
   public static int StaticProperty
   {
@@ -33,7 +30,7 @@ internal readonly struct TargetStruct
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Struct_ReadOnly_Auto.TargetStruct._staticProperty = value;
     }
   }
-  private readonly int _propertyInitOnly = default;
+  private readonly int _propertyInitOnly;
   [Override]
   public int PropertyInitOnly
   {
@@ -48,7 +45,7 @@ internal readonly struct TargetStruct
       this._propertyInitOnly = value;
     }
   }
-  private readonly int _staticPropertyInitOnly = default;
+  private readonly int _staticPropertyInitOnly;
   [Override]
   public int StaticPropertyInitOnly
   {
@@ -62,5 +59,11 @@ internal readonly struct TargetStruct
       global::System.Console.WriteLine("This is the overridden setter.");
       this._staticPropertyInitOnly = value;
     }
+  }
+  public TargetStruct()
+  {
+    this._staticPropertyInitOnly = default;
+    this._propertyInitOnly = default;
+    this._property = default;
   }
 }

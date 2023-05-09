@@ -225,7 +225,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 // Introduced auto property.
                 addTransformation( this.Builder.ToTransformation() );
 
-                OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
+                OverrideHelper.AddTransformationsForStructField( targetDeclaration.ForCompilation( compilation ), this, addTransformation );
 
                 return AdviceImplementationResult.Success( this.Builder );
             }

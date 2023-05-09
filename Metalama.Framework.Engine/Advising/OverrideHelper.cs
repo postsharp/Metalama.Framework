@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -55,7 +56,9 @@ namespace Metalama.Framework.Engine.Advising
                 // If there is no 'this()' constructor, add one.
                 if ( type.Constructors.All( c => c.IsImplicitlyDeclared ) )
                 {
-                    addTransformation( new AddExplicitDefaultConstructorTransformation( advice, type ) );
+                    var constructorBuilder = new ConstructorBuilder( type, advice );
+
+                    addTransformation( constructorBuilder.ToTransformation() );
                 }
             }
         }

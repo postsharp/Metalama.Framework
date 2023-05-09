@@ -2,14 +2,14 @@
 [IntroduceAspect]
 public struct TargetStruct : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TargetType_Struct.IInterface
 {
-  public TargetStruct()
-  {
-  }
-  public int ExistingField = default;
-  public int ExistingProperty { get; set; } = default;
+  public int ExistingField;
+  public int ExistingProperty { get; set; }
   public void ExistingMethod()
   {
     Console.WriteLine("Original struct member");
+  }
+  public TargetStruct()
+  {
   }
   public global::System.Int32 AutoProperty { get; set; } = default;
   public global::System.Int32 Property

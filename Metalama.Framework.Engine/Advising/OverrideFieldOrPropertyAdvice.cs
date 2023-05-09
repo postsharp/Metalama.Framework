@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advising
             var promotedField = OverrideHelper.OverrideProperty(
                 serviceProvider,
                 this,
-                targetDeclaration,
+                targetDeclaration.ForCompilation( compilation ).AssertNotNull(),
                 this._getTemplate,
                 this._setTemplate,
                 this.Tags,
