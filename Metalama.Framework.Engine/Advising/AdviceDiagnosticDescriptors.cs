@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Advising
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceNewMemberWhenItAlreadyExists = new(
                 "LAMA0509",
-                "Cannot introduce a new member into a type because a member with the same signature already exists.",
+                "Cannot introduce a new member into a type because a member with the same name and signature already exists.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' with OverrideStrategy.New because the member is already declared in the type.",
                 _category,
                 Error );
