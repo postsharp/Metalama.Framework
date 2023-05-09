@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32463;
 
+#pragma warning disable CS0169
 
 public class BeforeCtorAttribute : TypeAspect
 {
