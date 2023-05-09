@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using TypeKind = Metalama.Framework.Code.TypeKind;

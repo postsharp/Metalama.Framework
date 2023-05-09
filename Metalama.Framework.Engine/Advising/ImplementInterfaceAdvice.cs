@@ -299,11 +299,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             var replaceDefaultConstructorAdded = false;
 
-            void AddTransformationNoDuplicates( ITransformation transformation)
+            void AddTransformationNoDuplicates( ITransformation transformation )
             {
-                if (transformation is ReplaceDefaultConstructorTransformation)
+                if ( transformation is ReplaceDefaultConstructorTransformation )
                 {
-                    if (!replaceDefaultConstructorAdded)
+                    if ( !replaceDefaultConstructorAdded )
                     {
                         replaceDefaultConstructorAdded = true;
                     }
