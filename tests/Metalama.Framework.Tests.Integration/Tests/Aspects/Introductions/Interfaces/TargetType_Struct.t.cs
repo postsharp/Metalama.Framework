@@ -1,2 +1,43 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `TargetStruct`: `'IntroduceAspectAttribute.BuildAspect' threw 'ArgumentException' when applied to 'TargetStruct': An element with the same key but a different value already exists. Key: 'TargetStruct.TargetStruct()'. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Warning CS0414 on `EventField`: `The field 'TargetStruct.EventField' is assigned but its value is never used`
+[IntroduceAspect]
+public struct TargetStruct : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TargetType_Struct.IInterface
+{
+  public int ExistingField;
+  public int ExistingProperty { get; set; }
+  public void ExistingMethod()
+  {
+    Console.WriteLine("Original struct member");
+  }
+  public TargetStruct()
+  {
+  }
+  public global::System.Int32 AutoProperty { get; set; } = default;
+  public global::System.Int32 Property
+  {
+    get
+    {
+      global::System.Console.WriteLine("Introduced interface member");
+      return (global::System.Int32)42;
+    }
+    set
+    {
+      global::System.Console.WriteLine("Introduced interface member");
+    }
+  }
+  public void IntroducedMethod()
+  {
+    global::System.Console.WriteLine("Introduced interface member");
+  }
+  public event global::System.EventHandler? Event
+  {
+    add
+    {
+      global::System.Console.WriteLine("Introduced interface member");
+    }
+    remove
+    {
+      global::System.Console.WriteLine("Introduced interface member");
+    }
+  }
+  public event global::System.EventHandler? EventField = default;
+}

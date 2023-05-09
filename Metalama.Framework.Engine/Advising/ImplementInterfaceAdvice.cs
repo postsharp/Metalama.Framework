@@ -297,6 +297,25 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                 skipInterfaceBaseList = false;
             }
 
+            var replaceDefaultConstructorAdded = false;
+
+            void AddTransformationNoDuplicates( ITransformation transformation)
+            {
+                if (transformation is ReplaceDefaultConstructorTransformation)
+                {
+                    if (!replaceDefaultConstructorAdded)
+                    {
+                        replaceDefaultConstructorAdded = true;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                addTransformation( transformation );
+            }
+
             var interfaceMemberMap = new Dictionary<IMember, IMember>( compilation.Comparers.Default );
 
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
@@ -341,7 +360,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                                     if ( existingMethod.DeclaringType.Equals( targetType ) )
                                     {
-                                        addTransformation(
+                                        AddTransformationNoDuplicates(
                                             new OverrideMethodTransformation(
                                                 this,
                                                 existingMethod,
@@ -389,12 +408,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
                             CopyAttributes( interfaceMethod, methodBuilder );
 
-                            addTransformation( methodBuilder.ToTransformation() );
+                            AddTransformationNoDuplicates( methodBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceMethod, methodBuilder );
 
                             if ( templateMethod != null )
                             {
-                                addTransformation(
+                                AddTransformationNoDuplicates(
                                     new OverrideMethodTransformation(
                                         this,
                                         methodBuilder,
@@ -403,7 +422,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
                             else
                             {
-                                addTransformation(
+                                AddTransformationNoDuplicates(
                                     new RedirectMethodTransformation(
                                         this,
                                         methodBuilder,
@@ -554,7 +573,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 }
                             }
 
-                            addTransformation( propertyBuilder.ToTransformation() );
+                            AddTransformationNoDuplicates( propertyBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceProperty, propertyBuilder );
 
                             if ( templateProperty != null )
@@ -563,7 +582,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     var accessorTemplates = templateProperty.GetAccessorTemplates();
 
-                                    addTransformation(
+                                    AddTransformationNoDuplicates(
                                         new OverridePropertyTransformation(
                                             this,
                                             propertyBuilder,
@@ -575,12 +594,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
 
-                                    OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
+                                    OverrideHelper.AddTransformationsForStructField( targetType.ForCompilation( compilation ), this, AddTransformationNoDuplicates );
                                 }
                             }
                             else
                             {
-                                addTransformation(
+                                AddTransformationNoDuplicates(
                                     new RedirectPropertyTransformation(
                                         this,
                                         propertyBuilder,
@@ -645,7 +664,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.RemoveMethod.AssertNotNull() );
                             }
 
-                            addTransformation( eventBuilder.ToTransformation() );
+                            AddTransformationNoDuplicates( eventBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceEvent, eventBuilder );
 
                             if ( templateEvent != null )
@@ -654,7 +673,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     var accessorTemplates = templateEvent.GetAccessorTemplates();
 
-                                    addTransformation(
+                                    AddTransformationNoDuplicates(
                                         new OverrideEventTransformation(
                                             this,
                                             eventBuilder,
@@ -666,12 +685,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     eventBuilder.InitializerTemplate = templateEvent.GetInitializerTemplate();
 
-                                    OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
+                                    OverrideHelper.AddTransformationsForStructField( targetType.ForCompilation( compilation ), this, AddTransformationNoDuplicates );
                                 }
                             }
                             else
                             {
-                                addTransformation(
+                                AddTransformationNoDuplicates(
                                     new RedirectEventTransformation(
                                         this,
                                         eventBuilder,
@@ -701,7 +720,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             if ( !skipInterfaceBaseList )
             {
-                addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
+                AddTransformationNoDuplicates( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
             }
         }
 
