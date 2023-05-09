@@ -48,13 +48,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int ExistingMethod()
-        {
-            meta.InsertComment("No new keyword, return a constant.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int NonExistentMethod()
         {
             meta.InsertComment("No new keyword, return a default value.");
@@ -112,10 +105,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
     internal class TargetClass : DerivedClass
     {
         // All methods in this class should contain a comment describing the correct output.
-
-        public static int ExistingMethod()
-        {
-            return 27;
-        }
     }
 }

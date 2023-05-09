@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenMethod = new OverrideFinalizerTransformation( this, existingFinalizer, this._template.ForIntroduction( existingFinalizer ), this.Tags );
                             addTransformation( overriddenMethod );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingFinalizer );
                         }
                         else
                         {

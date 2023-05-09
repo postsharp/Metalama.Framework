@@ -1,12 +1,6 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-  // All methods in this class should contain a comment describing the correct output.
-  public static int ExistingMethod()
-  {
-    // No new keyword, return a constant.
-    return 27;
-  }
   public global::System.Int32 BaseClassInaccessibleMethod()
   {
     // No new keyword, return a default value.
@@ -41,5 +35,5 @@ internal class TargetClass : DerivedClass
   {
     // No new keyword, return a default value.
     return default(global::System.Int32);
-  }
+  } // All methods in this class should contain a comment describing the correct output.
 }

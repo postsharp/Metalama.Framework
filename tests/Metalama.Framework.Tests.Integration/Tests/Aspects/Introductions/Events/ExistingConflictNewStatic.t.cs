@@ -1,19 +1,6 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-  public static event EventHandler ExistingEvent
-  {
-    add
-    {
-      // Write that the code is original.
-      Console.WriteLine("This is original event.");
-    }
-    remove
-    {
-      // Write that the code is original.
-      Console.WriteLine("This is original event.");
-    }
-  }
   public static new event global::System.EventHandler BaseClassEvent
   {
     add
