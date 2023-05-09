@@ -944,4 +944,73 @@ class D{version}
         }
     }
 #endif
+
+    [Fact]
+    public async Task ResumeWithErrorAsync()
+    {
+        static CSharpCompilation CreateCompilation( string statement )
+        {
+            var code = new Dictionary<string, string>
+            {
+                ["Aspect.cs"] =
+                    $$"""
+                    using Metalama.Framework.Aspects;
+                    using System;
+
+                    public class Aspect : OverrideMethodAspect
+                    {
+                        public override dynamic OverrideMethod()
+                        {
+                            {{statement}}
+                            return null;
+                        }
+                    }
+                    """,
+            };
+
+            return CreateCSharpCompilation( code, acceptErrors: true );
+        }
+
+        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics )
+            => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
+
+        using var testContext = this.CreateTestContext();
+        using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var compilation1 = CreateCompilation( "" );
+        var pipeline = pipelineFactory.CreatePipeline( compilation1 );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
+
+        // Execute with the initial valid code.
+        Assert.True( pipeline.TryExecute( compilation1, default, out _ ) );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Ready, pipeline.Status );
+
+        // Execute with incomplete/invalid statement.
+        var compilation2 = CreateCompilation( "Console" );
+        Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
+        CheckDiagnostics( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
+
+        // Resume while the code is still invalid.
+        await pipeline.ResumeAsync( AsyncExecutionContext.Get() );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
+
+        // Executing with the same code fails at this point.
+        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get(), default );
+        Assert.False( executionResult.IsSuccessful );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
+
+        // Executing with new invalid code fails and causes pausing.
+        var compilation3 = CreateCompilation( "Console.Write" );
+        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get(), default );
+        Assert.False( executionResult.IsSuccessful );
+        CheckDiagnostics( executionResult.Diagnostics );
+
+        Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
+    }
 }
