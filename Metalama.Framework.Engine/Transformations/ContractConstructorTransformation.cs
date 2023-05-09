@@ -25,7 +25,7 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
 
         // Execute the templates.
 
-        _ = advice.TryExecuteTemplates( this.TargetMember, context, ContractDirection.Input, null, out var inputFilterBodies );
+        _ = advice.TryExecuteTemplates( this.TargetMember, context, ContractDirection.Input, null, null, out var inputFilterBodies );
 
         if ( inputFilterBodies == null )
         {

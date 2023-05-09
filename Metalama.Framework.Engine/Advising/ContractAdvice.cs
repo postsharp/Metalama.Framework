@@ -56,6 +56,26 @@ namespace Metalama.Framework.Engine.Advising
 
             switch ( targetDeclaration )
             {
+                case IMethod { ContainingDeclaration: IProperty containingProperty } propertyAccessor:
+                    addTransformation( new ContractPropertyTransformation( this, containingProperty, propertyAccessor.MethodKind ) );
+
+                    return AdviceImplementationResult.Success( containingProperty );
+
+                case IProperty property:
+                    addTransformation( new ContractPropertyTransformation( this, property, null ) );
+
+                    return AdviceImplementationResult.Success( property );
+
+                case IMethod { ContainingDeclaration: IIndexer containingIndexer } indexerAccessor:
+                    addTransformation( new ContractIndexerTransformation( this, containingIndexer, indexerAccessor.MethodKind ) );
+
+                    return AdviceImplementationResult.Success( containingIndexer );
+
+                case IIndexer indexer:
+                    addTransformation( new ContractIndexerTransformation( this, indexer, null ) );
+
+                    return AdviceImplementationResult.Success( indexer );
+
                 case IMethod method:
                     addTransformation( new ContractMethodTransformation( this, method ) );
 
@@ -66,21 +86,11 @@ namespace Metalama.Framework.Engine.Advising
 
                     return AdviceImplementationResult.Success( constructor );
 
-                case IProperty property:
-                    addTransformation( new ContractPropertyTransformation( this, property ) );
-
-                    return AdviceImplementationResult.Success( property );
-
-                case IIndexer indexer:
-                    addTransformation( new ContractIndexerTransformation( this, indexer ) );
-
-                    return AdviceImplementationResult.Success( indexer );
-
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
                     addTransformation( promotedField.ToTransformation() );
                     OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
-                    addTransformation( new ContractPropertyTransformation( this, promotedField ) );
+                    addTransformation( new ContractPropertyTransformation( this, promotedField, null ) );
 
                     return AdviceImplementationResult.Success( promotedField );
 
@@ -96,29 +106,35 @@ namespace Metalama.Framework.Engine.Advising
             TransformationContext context,
             ContractDirection direction,
             string? returnValueLocalName,
+            Func<Contract, bool>? contractFilter,
             [NotNullWhen( true )] out List<StatementSyntax>? statements )
         {
             statements = null;
 
-            foreach ( var filter in this.Contracts )
+            foreach ( var contract in this.Contracts )
             {
-                if ( !filter.AppliesTo( direction ) )
+                if ( !contract.AppliesTo( direction ) )
                 {
                     continue;
                 }
 
-                var filterTarget = filter.TargetDeclaration.GetTarget( targetMember.Compilation );
+                var contractTarget = contract.TargetDeclaration.GetTarget( targetMember.Compilation );
 
-                var parameterName = filterTarget switch
+                if ( contractFilter != null && !contractFilter( contract ) )
+                {
+                    continue;
+                }
+
+                var parameterName = contractTarget switch
                 {
                     IParameter { IsReturnParameter: true } => returnValueLocalName.AssertNotNull(),
                     IParameter parameter => parameter.Name,
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Input => "value",
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Output => returnValueLocalName.AssertNotNull(),
-                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{filterTarget}'." )
+                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{contractTarget}'." )
                 };
 
-                var parameterType = ((IHasType) filterTarget).Type;
+                var parameterType = ((IHasType) contractTarget).Type;
                 ExpressionSyntax parameterExpression = SyntaxFactory.IdentifierName( parameterName );
                 parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
 
@@ -127,8 +143,8 @@ namespace Metalama.Framework.Engine.Advising
                 var metaApiProperties = new MetaApiProperties(
                     this.SourceCompilation,
                     context.DiagnosticSink,
-                    filter.Template.Cast(),
-                    filter.Tags,
+                    contract.Template.Cast(),
+                    contract.Tags,
                     this.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Aspect,
@@ -136,11 +152,11 @@ namespace Metalama.Framework.Engine.Advising
                     MetaApiStaticity.Default );
 
                 var metaApi = MetaApi.ForDeclaration(
-                    filterTarget,
+                    contractTarget,
                     metaApiProperties,
                     direction );
 
-                var boundTemplate = filter.Template.ForContract( parameterExpression, filter.TemplateArguments );
+                var boundTemplate = contract.Template.ForContract( parameterExpression, contract.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
                     context.ServiceProvider,
@@ -153,7 +169,7 @@ namespace Metalama.Framework.Engine.Advising
                     null,
                     this.AspectLayerId );
 
-                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( filter.Template.Declaration );
+                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( contract.Template.Declaration );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
                 {
