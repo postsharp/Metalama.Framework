@@ -182,7 +182,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         {
             if ( args.IsPausing && this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
-                this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
+                this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has paused." );
 
                 await this.ExecuteIfLockAvailableOrEnqueueAsync( context => this.SetStateAsync( this._currentState.Pause(), context ), executionContext );
             }
@@ -769,8 +769,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             if ( this._currentState.PipelineResult.Configuration == null )
                             {
+                                var allTreeDiagnostics = validationResult.SyntaxTreeResults.SelectMany( result => result.Value.Diagnostics ).ToImmutableArray();
+
                                 compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
-                                    ImmutableArray<Diagnostic>.Empty,
+                                    allTreeDiagnostics,
                                     "The pipeline was paused while there were compile-time errors." );
                             }
                             else

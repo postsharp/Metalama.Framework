@@ -322,7 +322,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             return newState;
 
-            // Local method called when a change is detected in compile-time code. Returns a value specifying is logging is required.
+            // Local method called when a change is detected in compile-time code.
             void OnCompileTimeChange( ILogger logger, bool requiresRebuild )
             {
                 invalidateCompilationResult = false;

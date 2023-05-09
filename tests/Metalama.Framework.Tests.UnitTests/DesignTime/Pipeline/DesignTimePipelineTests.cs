@@ -971,6 +971,9 @@ class D{version}
             return CreateCSharpCompilation( code, acceptErrors: true );
         }
 
+        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics )
+            => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
+
         using var testContext = this.CreateTestContext();
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
@@ -986,7 +989,8 @@ class D{version}
 
         // Execute with incomplete/invalid statement.
         var compilation2 = CreateCompilation( "Console" );
-        Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
+        Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
+        CheckDiagnostics( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
@@ -996,13 +1000,16 @@ class D{version}
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with the same code fails at this point.
-        Assert.False( pipeline.TryExecute( compilation2, default, out _ ) );
+        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get(), default );
+        Assert.False( executionResult.IsSuccessful );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with new invalid code fails and causes pausing.
         var compilation3 = CreateCompilation( "Console.Write" );
-        Assert.False( pipeline.TryExecute( compilation3, default, out _ ) );
+        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get(), default );
+        Assert.False( executionResult.IsSuccessful );
+        CheckDiagnostics( executionResult.Diagnostics );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
     }
