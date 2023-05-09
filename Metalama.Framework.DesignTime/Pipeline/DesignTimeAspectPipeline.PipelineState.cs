@@ -322,12 +322,12 @@ internal sealed partial class DesignTimeAspectPipeline
 
             return newState;
 
-            // Local method called when a change is detected in compile-time code. Returns a value specifying is logging is required.
+            // Local method called when a change is detected in compile-time code.
             void OnCompileTimeChange( ILogger logger, bool requiresRebuild )
             {
                 invalidateCompilationResult = false;
 
-                if ( newState.Status == DesignTimeAspectPipelineStatus.Ready )
+                if ( newState.Status is DesignTimeAspectPipelineStatus.Ready or DesignTimeAspectPipelineStatus.Default )
                 {
                     logger.Trace?.Log( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
@@ -357,11 +357,6 @@ internal sealed partial class DesignTimeAspectPipeline
                         newConfiguration = null;
                         newStatus = DesignTimeAspectPipelineStatus.Default;
                     }
-                }
-                else if ( newState.Status == DesignTimeAspectPipelineStatus.Default )
-                {
-                    // We may have cached an invalid configuration, so if we have a compile-time change, reset this.
-                    newConfiguration = null;
                 }
             }
         }
