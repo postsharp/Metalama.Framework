@@ -1,17 +1,6 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-  // All methods in this class should contain a comment describing the correct output.
-  public int ExistingMethod()
-  {
-    // No new keyword, return a constant.
-    return 27;
-  }
-  public virtual int ExistingVirtualMethod()
-  {
-    // No new keyword, return a constant.
-    return 27;
-  }
   public new global::System.Int32 BaseClassAbstractMethod()
   {
     // New keyword, call the base method of the same name.
@@ -91,5 +80,5 @@ internal class TargetClass : DerivedClass
   {
     // No new keyword, return a default value.
     return default(global::System.Int32);
-  }
+  } // All methods in this class should contain a comment describing the correct output.
 }

@@ -256,14 +256,14 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
             }
 
-            if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
+            if ( existingProperty.IsStatic != this.Builder.IsStatic )
             {
                 return
                     AdviceImplementationResult.Failed(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingDeclaration.DeclaringType) ) );
+                             existingProperty.DeclaringType) ) );
             }
             else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingProperty.Type ) )
             {
@@ -272,7 +272,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingDeclaration.DeclaringType, existingProperty.Type) ) );
+                             existingProperty.DeclaringType, existingProperty.Type) ) );
             }
 
             switch ( this.OverrideStrategy )
@@ -284,26 +284,20 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingDeclaration.DeclaringType) ) );
+                                 existingProperty.DeclaringType) ) );
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
                     return AdviceImplementationResult.Ignored;
 
                 case OverrideStrategy.New:
-                    // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                    // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
+                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingProperty.DeclaringType ) )
                     {
-                        var overriddenProperty = new OverridePropertyTransformation(
-                            this,
-                            existingProperty,
-                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
-                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
-                            this.Tags );
-
-                        addTransformation( overriddenProperty );
-
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Failed(
+                            AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.Builder, existingProperty.DeclaringType) ) );
                     }
                     else
                     {
@@ -324,7 +318,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     }
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingProperty.DeclaringType ) )
                     {
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
@@ -335,16 +329,16 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                         addTransformation( overriddenMethod );
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override, existingProperty );
                     }
-                    else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )
+                    else if ( existingProperty.IsSealed || !existingProperty.IsOverridable() )
                     {
                         return
                             AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingDeclaration.DeclaringType) ) );
+                                     existingProperty.DeclaringType) ) );
                     }
                     else
                     {

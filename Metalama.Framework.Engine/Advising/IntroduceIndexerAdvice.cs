@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Advising
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingDeclaration.DeclaringType, existingIndexer.Type) ) );
+                                 existingIndexer.DeclaringType, existingIndexer.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -226,26 +226,20 @@ namespace Metalama.Framework.Engine.Advising
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingDeclaration.DeclaringType) ) );
+                                     existingIndexer.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingIndexer.DeclaringType ) )
                         {
-                            var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                                this,
-                                existingIndexer,
-                                this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
-                                this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
-                                this.Tags );
-
-                            addTransformation( overrideIndexerTransformation );
-
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Failed(
+                                AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingIndexer.DeclaringType) ) );
                         }
                         else
                         {
@@ -266,7 +260,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingIndexer.DeclaringType ) )
                         {
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                                 this,
@@ -277,16 +271,16 @@ namespace Metalama.Framework.Engine.Advising
 
                             addTransformation( overrideIndexerTransformation );
 
-                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override, existingIndexer );
                         }
-                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )
+                        else if ( existingIndexer.IsSealed || !existingIndexer.IsOverridable() )
                         {
                             return
                                 AdviceImplementationResult.Failed(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                         existingDeclaration.DeclaringType) ) );
+                                         existingIndexer.DeclaringType) ) );
                         }
                         else
                         {

@@ -53,22 +53,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public static event EventHandler ExistingEvent
-        {
-            add
-            {
-                meta.InsertComment("Write that the code is original.");
-                meta.Proceed();
-            }
-
-            remove
-            {
-                meta.InsertComment("Write that the code is original.");
-                meta.Proceed();
-            }
-        }
-
         [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler NonExistentEvent
         {
@@ -142,17 +126,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
     [Introduction]
     internal class TargetClass : DerivedClass
     {
-        public static event EventHandler ExistingEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
     }
 }

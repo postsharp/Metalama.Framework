@@ -1,32 +1,6 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-  public event EventHandler ExistingEvent
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is introduced event.");
-      Console.WriteLine("This is original event.");
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is introduced event.");
-      Console.WriteLine("This is original event.");
-    }
-  }
-  public virtual event EventHandler ExistingVirtualEvent
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is introduced event.");
-      Console.WriteLine("This is original event.");
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is introduced event.");
-      Console.WriteLine("This is original event.");
-    }
-  }
   public new event global::System.EventHandler BaseClassAbstractEvent
   {
     add
