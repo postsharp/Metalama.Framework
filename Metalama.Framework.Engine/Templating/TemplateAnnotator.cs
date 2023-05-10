@@ -1168,6 +1168,17 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             updatedInvocation = updatedInvocation.AddScopeAnnotation( invocationScope );
         }
 
+        // To make sure the expression `meta.RunTime( compileTimeExpression )` is correctly highlighted, the parentheses need to be explicitly colored as compile-time.
+        if ( updatedInvocation.Expression is MemberAccessExpressionSyntax { Name: var invokedMemberName } && invokedMemberName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword
+            && updatedInvocation.ArgumentList.Arguments.All( arg => arg.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly ) )
+        {
+            updatedInvocation = updatedInvocation.ReplaceTokens(
+                new[] { updatedInvocation.ArgumentList.OpenParenToken, updatedInvocation.ArgumentList.CloseParenToken },
+                ( token, _ ) => token.AddColoringAnnotation( TextSpanClassification.CompileTime ) );
+
+            // Note: if there is ever a non-compile-time TemplateKeyword that has multiple arguments, ArgumentList commas might need coloring too.
+        }
+
         return updatedInvocation;
     }
 

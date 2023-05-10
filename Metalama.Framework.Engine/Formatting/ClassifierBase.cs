@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using System;
 
 namespace Metalama.Framework.Engine.Formatting
 {
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Formatting
         private readonly SourceText? _sourceText;
 
         protected ClassifierBase( ClassifiedTextSpanCollection classifiedTextSpans, SourceText? sourceText = null )
-            : base( SyntaxWalkerDepth.Trivia )
+            : base( SyntaxWalkerDepth.StructuredTrivia )
         {
             this.ClassifiedTextSpans = classifiedTextSpans;
             this._sourceText = sourceText;
@@ -27,37 +28,41 @@ namespace Metalama.Framework.Engine.Formatting
 
         private bool _isAfterEndOfLine;
 
-        private void VisitTriviaList( SyntaxTriviaList triviaList )
+        public override void VisitTrivia( SyntaxTrivia trivia )
         {
-            foreach ( var trivia in triviaList )
+            switch ( trivia.Kind() )
             {
-                switch ( trivia.Kind() )
-                {
-                    case SyntaxKind.EndOfLineTrivia:
-                        this._isAfterEndOfLine = true;
+                case SyntaxKind.EndOfLineTrivia:
+                    this._isAfterEndOfLine = true;
 
-                        break;
+                    break;
 
-                    case SyntaxKind.WhitespaceTrivia when this._isAfterEndOfLine:
-                    case SyntaxKind.MultiLineCommentTrivia:
-                    case SyntaxKind.SingleLineCommentTrivia:
-                        this.Mark( trivia.Span, TextSpanClassification.NeutralTrivia );
+                case SyntaxKind.WhitespaceTrivia when this._isAfterEndOfLine:
+                case SyntaxKind.MultiLineCommentTrivia:
+                case SyntaxKind.SingleLineCommentTrivia:
+                    this.Mark( trivia.Span, TextSpanClassification.NeutralTrivia );
 
-                        break;
-                }
+                    break;
+
+                case SyntaxKind.DocumentationCommentExteriorTrivia when this._isAfterEndOfLine:
+                    var triviaText = trivia.ToString();
+                    var nonSpaceIndex = triviaText.Length - triviaText.AsSpan().TrimStart().Length;
+                    this.Mark( new TextSpan( trivia.SpanStart, nonSpaceIndex ), TextSpanClassification.NeutralTrivia );
+
+                    break;
             }
-        }
 
-        public override void VisitLeadingTrivia( SyntaxToken token )
-        {
-            this.VisitTriviaList( token.LeadingTrivia );
+            base.VisitTrivia( trivia );
         }
 
         public override void VisitTrailingTrivia( SyntaxToken token )
         {
-            this._isAfterEndOfLine = false;
+            if ( !token.FullSpan.IsEmpty )
+            {
+                this._isAfterEndOfLine = token.IsKind( SyntaxKind.XmlTextLiteralNewLineToken );
+            }
 
-            this.VisitTriviaList( token.TrailingTrivia );
+            base.VisitTrailingTrivia( token );
         }
 
         protected void Mark( TextSpan span, TextSpanClassification classification )

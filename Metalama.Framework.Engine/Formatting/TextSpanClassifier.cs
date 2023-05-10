@@ -120,19 +120,22 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        private void VisitSimpleTypeDeclaration( SyntaxNode node )
+        private void VisitSimpleTypeDeclaration<T>( T node, Action<T> visitBase )
+            where T : SyntaxNode
         {
             var scope = node.GetScopeFromAnnotation();
 
             if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime )
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
+
+                visitBase( node );
             }
         }
 
-        public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node );
+        public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node, base.VisitDelegateDeclaration );
 
-        public override void VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node );
+        public override void VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node, base.VisitEnumDeclaration );
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -271,6 +274,12 @@ namespace Metalama.Framework.Engine.Formatting
 
         private void Mark( SyntaxToken token, TextSpanClassification classification )
         {
+            if ( token.IsKind( SyntaxKind.XmlTextLiteralNewLineToken ) )
+            {
+                // Don't highlight end-of-lines in XML comments.
+                return;
+            }
+
             this.Mark( token.Span, classification );
 
             if ( ShouldMarkTrivia( classification ) )
@@ -284,32 +293,37 @@ namespace Metalama.Framework.Engine.Formatting
         {
             foreach ( var trivia in triviaList )
             {
-                if ( trivia.IsKind( SyntaxKind.SingleLineCommentTrivia ) ||
-                     trivia.IsKind( SyntaxKind.MultiLineCommentTrivia ) )
+                if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.MultiLineCommentTrivia or SyntaxKind.EndOfLineTrivia )
                 {
-                    // Don't highlight comments.
+                    // Don't highlight comments and end-of-lines.
                     continue;
                 }
 
-                var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
-                var triviaStart = trivia.Span.Start;
-                var triviaEnd = Math.Min( trivia.Span.End, this._sourceString.Length - 1 );
+                switch ( trivia.GetStructure() )
+                {
+                    case DocumentationCommentTriviaSyntax documentationComment:
+
+                        // Mark each node of a documentation comment trivia separately.
+                        foreach ( var node in documentationComment.ChildNodes() )
+                        {
+                            this.Mark( node, classification );
+                        }
+                        continue;
+
+                    case not null:
+
+                        // Don't highlight #directives and skipped tokens.
+                        continue;
+                }
+
+                var triviaStart = trivia.FullSpan.Start;
+                var triviaEnd = Math.Min( trivia.FullSpan.End, this._sourceString.Length - 1 );
 
                 if ( triviaStart > triviaEnd )
                 {
                     // This should not happen.
                     continue;
                 }
-
-                // If we have an indenting trivia, trim the start of the span.
-                if ( previousChar is '\n' or '\r' )
-                {
-                    // Trim the trivia if it starts with an end line.
-                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
-                }
-
-                // If we end with an end-of-line or space, trim it.
-                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- ) { }
 
                 if ( triviaStart != triviaEnd )
                 {
