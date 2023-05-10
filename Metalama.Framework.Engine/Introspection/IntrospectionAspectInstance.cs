@@ -71,7 +71,7 @@ internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
     public int PredecessorDegree => this._aspectInstance.PredecessorDegree;
 
     [Memo]
-    public IDeclaration TargetDeclaration => this._aspectInstance.TargetDeclaration.GetTarget( this.Compilation );
+    public IDeclaration TargetDeclaration => this._aspectInstance.TargetDeclaration.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Predecessors
