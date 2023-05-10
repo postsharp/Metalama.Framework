@@ -262,7 +262,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public bool IsDefault => this.Target == null && this.TargetKind == DeclarationRefTargetKind.Default;
 
-        public ISymbol GetClosestSymbol( CompilationContext compilationContext ) => this.GetSymbolIgnoringKind( compilationContext );
+        public ISymbol GetClosestSymbol( CompilationContext compilationContext )
+        {
+            if ( this.Target is IDeclarationBuilder builder )
+            {
+                return builder.ContainingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertNotNull();
+            }
+
+            return this.GetSymbolIgnoringKind( compilationContext );
+        }
 
         ISymbol ISdkRef<T>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey )
             => this.GetSymbol( CompilationContextFactory.GetInstance( compilation ), ignoreAssemblyKey );
@@ -309,7 +317,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     }
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException( $"Can't get symbol for ref with target {this.Target}." );
             }
         }
 

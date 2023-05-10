@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         bool IRefImpl.IsDefault => false;
 
-        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._declaringDeclaration.GetSymbol( compilation );
+        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._declaringDeclaration.GetClosestSymbol( compilation );
 
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
