@@ -296,12 +296,9 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( replacedDeclaration )
                 {
                     case Field replacedField:
-                        var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
-
-                        if ( fieldSyntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"The field '{replacedField.Symbol}' does not have syntax." );
-                        }
+                        var fieldSyntaxReference =
+                            replacedField.Symbol.GetPrimarySyntaxReference()
+                            ?? throw new AssertionFailedException( $"The field '{replacedField.Symbol}' does not have syntax." );
 
                         var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
                         syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
