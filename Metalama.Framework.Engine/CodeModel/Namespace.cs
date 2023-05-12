@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,7 +26,10 @@ namespace Metalama.Framework.Engine.CodeModel
         private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
 
         [Memo]
-        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this._symbol.ContainingAssembly );
+        public override IAssembly DeclaringAssembly
+            => this.Compilation.Factory.GetAssembly(
+                this._symbol.ContainingAssembly
+                ?? throw new InvalidOperationException( "This namespace is a merged namespace for the whole compilation, so it has no declaring assembly." ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 

@@ -18,7 +18,8 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
             IMethodSymbol method =>
                 method switch
                 {
-                    { Name: "<Main>$", ContainingType.Name: "Program" } => false,
+                    // Metalama code model represents what can be seen from C#, so it hides "unspeakable" methods, namely Program.<Main>$ and SomeRecord.<Clone>$
+                    { MethodKind: MethodKind.Ordinary, CanBeReferencedByName: false } => false,
                     { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } => false,
                     { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } => false,
                     { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,

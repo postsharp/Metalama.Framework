@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Collections.Concurrent;
@@ -193,6 +194,22 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                 if ( positionComparison != 0 )
                 {
                     return positionComparison;
+                }
+
+                // Implicitly declared record methods have the same span, compare them by signature.
+                if ( x.TargetDeclaration is IMethod xMethod && y.TargetDeclaration is IMethod yMethod )
+                {
+                    Invariant.Assert(
+                        xMethod.DeclaringType == yMethod.DeclaringType
+                        && xMethod.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct
+                        && xMethod.IsImplicitlyDeclared && yMethod.IsImplicitlyDeclared );
+
+                    var signatureComparison = StructuralSymbolComparer.Signature.Compare( xMethod.GetSymbol(), yMethod.GetSymbol() );
+
+                    if ( signatureComparison != 0 )
+                    {
+                        return signatureComparison;
+                    }
                 }
 
                 throw new AssertionFailedException( $"The pair {x} and {y} is not ordered." );

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -75,8 +76,6 @@ internal sealed class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
             return compareByName;
         }
 
-        var compareByDisplayString = StringComparer.Ordinal.Compare( x.ToDisplayString(), y.ToDisplayString() );
-
-        return compareByDisplayString;
+        return StructuralSymbolComparer.Default.Compare( x, y );
     }
 }

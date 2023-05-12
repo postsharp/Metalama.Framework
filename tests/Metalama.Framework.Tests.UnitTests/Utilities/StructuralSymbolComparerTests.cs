@@ -26,6 +26,7 @@ class A
     public void Bar(int x) {}
     public void Quz() {}
     public T Quz<T>() => default(T);
+    public void Quz2<T>() {}
 }
 
 class B
@@ -58,6 +59,7 @@ class Z<T,U> : A
         a.Quz<long>();
         a.Quz<T>();
         a.Quz<U>();
+        a.Quz2<T>();
 
         var b = a.Quz<Z<U,T>>();
         b.Test();
