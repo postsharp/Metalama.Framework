@@ -122,8 +122,8 @@ namespace Metalama.Framework.Engine.Transformations
                 // { MethodKind: Code.MethodKind.Finalizer } =>
                 //     referenceSyntaxProvider.GetFinalizerReference(this.ParentAdvice.AspectLayerId),
                 { MethodKind: Code.MethodKind.Operator } =>
-                    referenceSyntaxProvider.GetOperatorReference( this.ParentAdvice.AspectLayerId, (IMethod)this.TargetDeclaration, generationContext.SyntaxGenerator ),
-                _ => throw new AssertionFailedException($"Unsupported method: { this.OverriddenDeclaration }."),
+                    referenceSyntaxProvider.GetOperatorReference( this.ParentAdvice.AspectLayerId, (IMethod) this.TargetDeclaration, generationContext.SyntaxGenerator ),
+                _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." ),
             };
     }
 }
