@@ -218,6 +218,7 @@ namespace Metalama.Framework.Engine.Transformations
                         }
                         else
                         {
+                            // Awaitable void-returning async method.
                             statements.Add( ReturnStatement( proceedExpression ) );
                         }
                     }
