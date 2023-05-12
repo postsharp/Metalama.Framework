@@ -112,7 +112,7 @@ internal static class ProceedHelper
             {
                 arguments = arguments.AddArguments( SyntaxFactory.Argument( SyntaxFactory.IdentifierName( cancellationTokenParameter.Name ) ) );
             }
-
+            
             var bufferExpression =
                 SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(

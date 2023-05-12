@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Transformations
                         }
                         else
                         {
-                            statements.Add( ExpressionStatement( proceedExpression ) );
+                            statements.Add( ReturnStatement( proceedExpression ) );
                         }
                     }
                     else
