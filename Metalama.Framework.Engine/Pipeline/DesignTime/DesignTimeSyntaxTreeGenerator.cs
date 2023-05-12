@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypeKind = Metalama.Framework.Code.TypeKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime
 {
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
-                    null,
+                    CreateTypeParameters( type ),
                     baseList,
                     default,
                     members ),
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                         Token( SyntaxKind.RecordKeyword ),
                         Identifier( type.Name ),
-                        null!,
+                        CreateTypeParameters( type )!,
                         null!,
                         baseList!,
                         default,
@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
-                    null,
+                    CreateTypeParameters( type ),
                     baseList,
                     default,
                     members ),
@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                         Token( SyntaxKind.RecordKeyword ),
                         Identifier( type.Name ),
-                        null!,
+                        CreateTypeParameters( type )!,
                         null!,
                         baseList!,
                         default,
@@ -198,16 +198,41 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ) )
                     .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ) )
                     .WithClassOrStructKeyword( Token( SyntaxKind.StructKeyword ) ),
-                _ => throw new ArgumentOutOfRangeException( nameof(type) )
+                TypeKind.Interface => InterfaceDeclaration(
+                    default,
+                    SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
+                    Identifier( type.Name ),
+                    CreateTypeParameters( type ),
+                    baseList,
+                    default,
+                    members ),
+                _ => throw new AssertionFailedException( $"Unknown type kind: {type.TypeKind}." )
             };
+
+        private static TypeParameterListSyntax? CreateTypeParameters( INamedType type )
+        {
+            if ( !type.IsGeneric )
+            {
+                return null;
+            }
+
+            static SyntaxKind GetVariance( VarianceKind variance )
+                => variance switch
+                {
+                    VarianceKind.None => SyntaxKind.None,
+                    VarianceKind.In => SyntaxKind.InKeyword,
+                    VarianceKind.Out => SyntaxKind.OutKeyword,
+                    _ => throw new AssertionFailedException( $"Unknown variance: {variance}." )
+                };
+
+            return TypeParameterList( SeparatedList( type.TypeParameters.SelectAsEnumerable( tp => TypeParameter( tp.Name ).WithVarianceKeyword( Token( GetVariance( tp.Variance ) ) ) ) ) );
+        }
 
         private static MemberDeclarationSyntax AddHeader( MemberDeclarationSyntax node )
             => node switch
             {
-                NamespaceDeclarationSyntax ns => ns.WithLeadingTrivia( GetHeader() ),
-                ClassDeclarationSyntax c => c.WithLeadingTrivia( GetHeader() ),
-                StructDeclarationSyntax s => s.WithLeadingTrivia( GetHeader() ),
-                RecordDeclarationSyntax r => r.WithLeadingTrivia( GetHeader() ),
+                NamespaceDeclarationSyntax or ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax or InterfaceDeclarationSyntax =>
+                    node.WithLeadingTrivia( GetHeader() ),
                 _ => node
             };
 
