@@ -120,8 +120,7 @@ namespace Metalama.Framework.Engine.Transformations
 
                 // TODO: This needs to reactivated in 2023.1.
                 // { MethodKind: Code.MethodKind.Finalizer } =>
-                //     referenceSyntaxProvider.GetFinalizerReference(this.ParentAdvice.AspectLayerId),
-                
+                //     referenceSyntaxProvider.GetFinalizerReference(this.ParentAdvice.AspectLayerId),                
                 { MethodKind: Code.MethodKind.Operator } =>
                     referenceSyntaxProvider.GetOperatorReference( this.ParentAdvice.AspectLayerId, (IMethod) this.TargetDeclaration, generationContext.SyntaxGenerator ),
                 _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." ),
