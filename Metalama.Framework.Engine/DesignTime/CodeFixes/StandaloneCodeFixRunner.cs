@@ -25,8 +25,5 @@ public sealed class StandaloneCodeFixRunner : CodeFixRunner
         GetConfigurationAsync(
             PartialCompilation compilation,
             TestableCancellationToken cancellationToken )
-    {
-        return new ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ProjectServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>(
-            (true, null, this._serviceProvider, this._domain) );
-    }
+        => new( (true, null, this._serviceProvider, this._domain) );
 }
