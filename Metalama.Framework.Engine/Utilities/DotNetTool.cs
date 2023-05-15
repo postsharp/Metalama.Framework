@@ -19,12 +19,6 @@ public sealed class DotNetTool
         this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
     }
 
-    public void Execute( string arguments, string? workingDirectory )
-    {
-        // Backward comaptibility.
-        this.Execute( arguments, workingDirectory );
-    }
-
     public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000 )
     {
         var startInfo = new ProcessStartInfo( this._platformInfo.DotNetExePath, arguments )
