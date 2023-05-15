@@ -38,23 +38,23 @@
                 <_Parameter1>ProjectDirectory</_Parameter1>
                 <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
             </AssemblyAttribute>
-            <!-- Sets up the default Xunit test framework, i.e. select according to the test host process -->
+            <!-- Sets up the default Xunit test framework, which is the custom test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='' OR '$(MetalamaTestFramework)'=='Auto'">
-                <_Parameter1>Metalama.Testing.AspectTesting.TestFrameworkSelector</_Parameter1>
+                <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
                 <_Parameter2>Metalama.Testing.AspectTesting</_Parameter2>
             </AssemblyAttribute>
-            <!-- Sets up the custom Xunit test framework-->
+            <!-- Sets up the custom Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='Custom'">
                 <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
                 <_Parameter2>Metalama.Testing.AspectTesting</_Parameter2>
             </AssemblyAttribute>
-            <!-- Sets up the original Xunit test framework-->
+            <!-- Sets up the original Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='Original'">
-                <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
-                <_Parameter2>Metalama.Testing.AspectTesting</_Parameter2>
+                <_Parameter1>Xunit.Sdk.XunitTestFramework</_Parameter1>
+                <_Parameter2>xunit.execution.dotnet</_Parameter2>
             </AssemblyAttribute>
             
             <!-- Additional attributes -->

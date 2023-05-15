@@ -183,6 +183,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                                     testMetrics.TestSkipped ) );
                         };
 
+                        testMetrics.OnTestsDiscovered( 1 );
+
                         if ( executionOptions.DisableParallelizationOrDefault() )
                         {
                             this._taskRunner.RunSynchronously(
