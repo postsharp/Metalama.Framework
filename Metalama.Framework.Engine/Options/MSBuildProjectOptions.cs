@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override string? ProjectAssetsFile => this.GetStringOption( MSBuildPropertyNames.ProjectAssetsFile );
 
-        public override int? ReferenceAssemblyRestoreTimeout => this.GetNullableInt32Option( MSBuildPropertyNames.ReferenceAssemblyRestoreTimeout );
+        public override int? ReferenceAssemblyRestoreTimeout => this.GetNullableInt32Option( MSBuildPropertyNames.MetalamaReferenceAssemblyRestoreTimeout );
 
         [Memo]
         public override string? License => this.GetStringOption( MSBuildPropertyNames.MetalamaLicense );

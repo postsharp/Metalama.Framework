@@ -9,7 +9,6 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
         private readonly IPlatformInfo _platformInfo;
         private readonly DotNetTool _dotNetTool;
-        private int _restoreTimeout;
+        private readonly int _restoreTimeout;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.

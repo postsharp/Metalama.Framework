@@ -70,7 +70,7 @@ public sealed class DotNetTool
                 // ignored
             }
 
-            throw new AssertionFailedException( $"The process '{startInfo.FileName} {startInfo.Arguments}' did not complete in 30 s." );
+            throw new AssertionFailedException( $"The process '{startInfo.FileName} {startInfo.Arguments}' did not complete in {timeout / 1000f} s." );
         }
 
         if ( process.ExitCode != 0 )
