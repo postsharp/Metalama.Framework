@@ -9,6 +9,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -36,6 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
         private readonly IPlatformInfo _platformInfo;
         private readonly DotNetTool _dotNetTool;
+        private int _restoreTimeout;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -103,6 +105,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 additionalPackageReferences = "";
                 additionalPackagesHash = "default";
             }
+
+            this._restoreTimeout = projectOptions.ReferenceAssemblyRestoreTimeout ?? 120_000;
 
             this._logger.Trace?.Log(
                 "Assembly versions: " + string.Join(
@@ -326,7 +330,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
                 var arguments = $"build -bl:msbuild_{Guid.NewGuid().ToString().ReplaceOrdinal( "-", "" )}.binlog";
 
-                this._dotNetTool.Execute( arguments, this._cacheDirectory );
+                this._logger.Trace?.Log( $"Building with restore timeout {this._restoreTimeout}." );
+
+                this._dotNetTool.Execute( arguments, this._cacheDirectory, this._restoreTimeout );
 
                 var assemblies = File.ReadAllLines( assembliesListPath );
 

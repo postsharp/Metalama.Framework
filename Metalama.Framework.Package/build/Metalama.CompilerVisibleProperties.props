@@ -22,6 +22,7 @@
         <CompilerVisibleProperty Include="MetalamaWriteHtml"/>
         <CompilerVisibleProperty Include="MetalamaWriteLicenseCreditData" /> 
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>
+        <CompilerVisibleProperty Include="ReferenceAssemblyRestoreTimeout"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
         <CompilerVisibleProperty Include="Configuration"/>
         

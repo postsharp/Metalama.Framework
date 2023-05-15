@@ -124,6 +124,11 @@ namespace Metalama.Framework.Engine.Options
         string? ProjectAssetsFile { get; }
 
         /// <summary>
+        /// Gets the timeout used when restoring reference assemblies, or <c>null</c> if the default value should be used.
+        /// </summary>
+        int? ReferenceAssemblyRestoreTimeout { get; }
+
+        /// <summary>
         /// Gets the license set for the project. In production, the value gets populated from <c>MetalamaLicense</c> MSBuild property.
         /// </summary>
         /// <remarks>

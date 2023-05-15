@@ -79,6 +79,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? ProjectAssetsFile => null;
 
+    public virtual int? ReferenceAssemblyRestoreTimeout => null;
+
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;
