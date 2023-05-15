@@ -71,9 +71,6 @@ internal sealed class Method : MethodBase, IMethodImpl
         return new Method( symbolWithGenericArguments, this.Compilation );
     }
 
-    [Obsolete]
-    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
-
     public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
     public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;

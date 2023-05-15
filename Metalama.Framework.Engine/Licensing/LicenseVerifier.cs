@@ -34,6 +34,8 @@ public sealed class LicenseVerifier : IProjectService
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
     private readonly IProjectOptions _projectOptions;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
+    private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
+    
     private readonly ITempFileManager _tempFileManager;
     private readonly string? _targetAssemblyName;
 
@@ -114,11 +116,11 @@ public sealed class LicenseVerifier : IProjectService
     private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
         => this._licenseConsumptionService.CanConsume( requirement, this._targetAssemblyName );
 
-    internal void VerifyCanAddChildAspect( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor );
+    internal void VerifyCanAddChildAspect( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor, "add an aspect" );
 
-    internal void VerifyCanAddValidator( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor );
+    internal void VerifyCanAddValidator( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor, "add a validator" );
 
-    private void VerifyFabric( in AspectPredecessor predecessor )
+    private void VerifyFabric( in AspectPredecessor predecessor, string feature )
     {
         if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
@@ -129,7 +131,7 @@ public sealed class LicenseVerifier : IProjectService
                 throw new DiagnosticException(
                     LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
                         null,
-                        (fabricInstance.Fabric.GetType().Name, "add an aspect") ) );
+                        (fabricInstance.Fabric.GetType().Name, feature) ) );
             }
         }
     }
@@ -227,13 +229,39 @@ public sealed class LicenseVerifier : IProjectService
 
             file.WriteToDirectory( directory );
         }
+
+        // Report inheritance license warning
+        if ( this._inheritableAspectsWithoutLicense.Count > 0 )
+        {
+            // Don't report aspects that have not been instantiated
+            var instantiatedInheritableAspectsWithoutLicense = aspectInstanceResults
+                .Select( r => r.AspectInstance.AspectClass )
+                .Where( ac => this._inheritableAspectsWithoutLicense.Contains( ac ) )
+                .ToArray();
+
+            if ( instantiatedInheritableAspectsWithoutLicense.Length > 0 )
+            {
+                var suffix = instantiatedInheritableAspectsWithoutLicense.Length > 1 ? "s" : "";
+
+                diagnostics.Report(
+                    LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
+                        null,
+                        $"'{string.Join( "', '", instantiatedInheritableAspectsWithoutLicense.SelectAsArray( a => a.FullName ) )}' aspect{suffix}" ) );
+            }
+        }
     }
 
-    internal void VerifyCanBeInherited( AspectClass aspectClass, IDiagnosticAdder diagnostics )
+    internal bool VerifyCanBeInherited( AspectClass aspectClass )
     {
         if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
-            diagnostics.Report( LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic( null, aspectClass.ShortName ) );
+            this._inheritableAspectsWithoutLicense.Add( aspectClass );
+
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

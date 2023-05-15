@@ -39,9 +39,6 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     // so we don't need an implementation of GenericArguments.
     public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
 
-    [Obsolete]
-    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
-
     public IMethod? OverriddenMethod { get; set; }
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );

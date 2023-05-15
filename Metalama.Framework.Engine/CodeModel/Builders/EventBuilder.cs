@@ -69,9 +69,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? RaiseMethod => null;
 
-        [Obsolete]
-        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
-
         public IEvent? OverriddenEvent { get; set; }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;

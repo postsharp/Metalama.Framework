@@ -174,11 +174,6 @@ namespace Metalama.Framework.Aspects
         [TemplateKeyword]
         public static dynamic ThisType => CurrentContext.ThisType;
 
-        /// <exclude />
-        [TemplateKeyword]
-        [Obsolete( "Renamed ThisType." )]
-        public static dynamic ThisStatic => ThisType;
-
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
         /// The <see cref="BaseType"/> property exposes the state of the target type as it is <i>before</i> the application
@@ -190,11 +185,6 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic BaseType => CurrentContext.BaseType;
-
-        /// <exclude />
-        [TemplateKeyword]
-        [Obsolete( "Renamed BaseType." )]
-        public static dynamic BaseStatic => BaseType;
 
         /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.

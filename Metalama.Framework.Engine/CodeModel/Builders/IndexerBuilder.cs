@@ -80,9 +80,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        [Obsolete]
-        IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => throw new NotSupportedException();
-
         public IIndexer? OverriddenIndexer { get; set; }
 
         public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );

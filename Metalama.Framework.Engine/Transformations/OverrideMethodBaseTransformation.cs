@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             return ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
-                this.CreateInvocationExpression( context.SyntaxGenerationContext ),
+                this.CreateInvocationExpression( context.SyntaxGenerationContext, context.AspectReferenceSyntaxProvider ),
                 templateKind,
                 this.OverriddenDeclaration );
         }
@@ -95,24 +95,35 @@ namespace Metalama.Framework.Engine.Transformations
             };
         }
 
-        private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )
-            => InvocationExpression(
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
-                ArgumentList(
-                    SeparatedList(
-                        this.OverriddenDeclaration.Parameters.SelectAsEnumerable(
-                            p =>
-                            {
-                                var refKind = p.RefKind switch
-                                {
-                                    RefKind.None => default,
-                                    RefKind.In => default,
-                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                    RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                    _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
-                                };
+        private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext, AspectReferenceSyntaxProvider referenceSyntaxProvider )
+            => this.OverriddenDeclaration switch
+            {
+                { MethodKind: Code.MethodKind.Default or Code.MethodKind.ExplicitInterfaceImplementation or Code.MethodKind.Finalizer } =>
+                    InvocationExpression(
+                        this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
+                        ArgumentList(
+                            SeparatedList(
+                                this.OverriddenDeclaration.Parameters.SelectAsEnumerable(
+                                    p =>
+                                    {
+                                        var refKind = p.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
+                                        };
 
-                                return Argument( null, refKind, IdentifierName( p.Name ) );
-                            } ) ) ) );
+                                        return Argument( null, refKind, IdentifierName( p.Name ) );
+                                    } ) ) ) ),
+
+                // TODO: This needs to reactivated in 2023.1.
+                // { MethodKind: Code.MethodKind.Finalizer } =>
+                //     referenceSyntaxProvider.GetFinalizerReference(this.ParentAdvice.AspectLayerId),                
+                { MethodKind: Code.MethodKind.Operator } =>
+                    referenceSyntaxProvider.GetOperatorReference( this.ParentAdvice.AspectLayerId, (IMethod) this.TargetDeclaration, generationContext.SyntaxGenerator ),
+                _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." ),
+            };
     }
 }

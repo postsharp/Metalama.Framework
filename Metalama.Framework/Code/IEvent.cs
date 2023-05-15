@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -36,12 +35,6 @@ namespace Metalama.Framework.Code
         /// as with a normal method.
         /// </summary>
         IMethod? RaiseMethod { get; }
-
-        /// <summary>
-        /// Gets an object that allows to add or remove a handler to or from the current event. 
-        /// </summary>
-        [Obsolete( "Use the methods of the IEventInvoker interface that this object implements.", true )]
-        IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets the base event that is overridden by the current event.
