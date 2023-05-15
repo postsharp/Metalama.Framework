@@ -143,7 +143,7 @@ class MyAspect : TypeAspect
 
 class Fabric : ProjectFabric
 {
-    public override void AmendProject( IProjectAmender amender ) => amender.With( c=>c.Types ).AddAspect<MyAspect>();
+    public override void AmendProject( IProjectAmender amender ) => amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
 } 
 ",
             ["target.cs"] = "class C {}"
@@ -181,7 +181,7 @@ class C {
 
 class Fabric : TypeFabric
 {
-    public override void AmendType( ITypeAmender amender ) => amender.With( c=>c ).AddAspect<MyAspect>();
+    public override void AmendType( ITypeAmender amender ) => amender.Outbound.AddAspect<MyAspect>();
 } 
 
 }"
@@ -218,7 +218,7 @@ namespace Ns;
 
 class Fabric : NamespaceFabric
 {
-    public override void AmendNamespace( INamespaceAmender amender ) => amender.With( c=>c.Types ).AddAspect<MyAspect>();
+    public override void AmendNamespace( INamespaceAmender amender ) => amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
 } 
 
 ",
@@ -304,8 +304,7 @@ class MyAspect : TypeAspect
             testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
-            "target.cs",
-            null );
+            "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
 
@@ -324,8 +323,7 @@ class MyAspect : TypeAspect
             testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
-            "target.cs",
-            null );
+            "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }

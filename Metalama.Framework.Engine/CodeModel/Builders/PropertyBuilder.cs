@@ -78,9 +78,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        [Obsolete]
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
-
         public IProperty? OverriddenProperty { get; set; }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;

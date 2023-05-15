@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public bool IsSkipped { get; private set; }
 
+        // When aspect inheritance is not licensed, the this.AspectClass.IsInheritable is set to false
+        // and the ((IConditionallyInheritableAspect) this.Aspect).IsInheritable is therefore not considered.
         public bool IsInheritable => this.AspectClass.IsInheritable ?? ((IConditionallyInheritableAspect) this.Aspect).IsInheritable;
 
         public ImmutableArray<IAspectInstance> SecondaryInstances => ImmutableArray<IAspectInstance>.Empty;

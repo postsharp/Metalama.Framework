@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -31,9 +30,6 @@ namespace Metalama.Framework.Engine.CodeModel
             => false;
 #endif
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
-
-        [Obsolete]
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
 
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();

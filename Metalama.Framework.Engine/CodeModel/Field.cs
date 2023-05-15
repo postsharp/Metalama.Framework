@@ -35,9 +35,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        [Obsolete]
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
-
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
@@ -87,21 +84,22 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( this.IsImplicitlyDeclared )
             {
-                throw new InvalidOperationException( $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
+                throw new InvalidOperationException(
+                    $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
             }
         }
 
         public IFieldOrPropertyInvoker With( InvokerOptions options )
         {
             this.CheckNotPropertyBackingField();
-            
+
             return new FieldOrPropertyInvoker( this, options );
         }
 
         public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
         {
             this.CheckNotPropertyBackingField();
-            
+
             return new FieldOrPropertyInvoker( this, options, target );
         }
 
@@ -110,7 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel
             get
             {
                 this.CheckNotPropertyBackingField();
-                
+
                 return ref new FieldOrPropertyInvoker( this ).Value;
             }
         }
@@ -118,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             this.CheckNotPropertyBackingField();
-            
+
             return new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
         }
 

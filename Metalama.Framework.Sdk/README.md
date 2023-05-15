@@ -4,9 +4,3 @@ Unlike Metalama.Framework, our high-level API, aspects built with Metalama.Frame
 
 To learn more visit Metalama documentation page:
 https://doc.metalama.net/sdk/sdk
-
-## Backward Compatibility Promise
-
-All public APIs are guaranteed to be backward compatible within the current major version.
-
-The promise does not apply to any preview build of this package.

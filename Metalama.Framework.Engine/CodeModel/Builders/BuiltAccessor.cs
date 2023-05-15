@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -85,9 +84,6 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._accessorBuilder.ConstructGenericInstance( typeArguments );
-
-    [Obsolete]
-    IInvokerFactory<IMethodInvoker> IMethod.Invokers => throw new NotSupportedException();
 
     public IMethod? OverriddenMethod => this._accessorBuilder.OverriddenMethod;
 

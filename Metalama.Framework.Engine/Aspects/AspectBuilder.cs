@@ -87,8 +87,6 @@ namespace Metalama.Framework.Engine.Aspects
             where TMember : class, IDeclaration
             => this.GetAspectReceiverSelector().With( selector );
 
-        IAspectReceiver<TMember> IAspectReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectReceiverSelector().With( selector );
-
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector )
             => this.GetAspectReceiverSelector().With( selector );
 

@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -36,9 +35,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
 
         public IMethod? RaiseMethod => null;
-
-        [Obsolete]
-        IInvokerFactory<IEventInvoker> IEvent.Invokers => throw new NotSupportedException();
 
         [Memo]
         public IEvent? OverriddenEvent => this.Compilation.Factory.GetDeclaration( this.EventBuilder.OverriddenEvent );

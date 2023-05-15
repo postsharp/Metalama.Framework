@@ -58,9 +58,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
-        [Obsolete]
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotSupportedException();
-
         public Writeability Writeability
         {
             get => this._writeability;
