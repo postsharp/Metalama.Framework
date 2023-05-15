@@ -53,7 +53,7 @@ public sealed class DotNetTool
 
         if ( !process.WaitForExit( timeout ) )
         {
-            // The process did not complete in 30s.
+            // The process did not complete within the given time.
 
             try
             {
