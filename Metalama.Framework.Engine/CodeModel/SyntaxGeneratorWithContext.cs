@@ -90,9 +90,16 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
             .WithLeadingTrivia( oldNode.GetLeadingTrivia() )
-            .WithTrailingTrivia( ElasticLineFeed );
+            .WithTrailingTrivia( ElasticCarriageReturnLineFeed );
 
-        SyntaxNode newNode = oldNode.Kind() switch
+        oldNode = oldNode.WithoutLeadingTrivia();
+
+        if ( attributeList.GetLeadingTrivia().LastOrDefault() is { RawKind: (int) SyntaxKind.WhitespaceTrivia } indentationTrivia )
+        {
+            oldNode = oldNode.WithLeadingTrivia( indentationTrivia );
+        }
+
+        return oldNode.Kind() switch
         {
             SyntaxKind.MethodDeclaration => ((MethodDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
             SyntaxKind.DestructorDeclaration => ((DestructorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
@@ -116,8 +123,6 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
             SyntaxKind.EventFieldDeclaration => ((EventFieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
             _ => throw new AssertionFailedException( $"Unexpected syntax kind {oldNode.Kind()} at '{oldNode.GetLocation()}'." )
         };
-
-        return newNode;
     }
 
     private ExpressionSyntax AttributeValueExpression( TypedConstant typedConstant )

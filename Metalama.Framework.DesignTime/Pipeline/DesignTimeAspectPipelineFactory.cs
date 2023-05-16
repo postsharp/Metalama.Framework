@@ -349,6 +349,20 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( ImmutableArray<Diagnostic>.Empty );
         }
 
-        return await pipeline.GetConfigurationAsync( compilation, true, executionContext, cancellationToken );
+        var configuration = await pipeline.GetConfigurationAsync( compilation, true, executionContext, cancellationToken );
+
+        if ( configuration.IsSuccessful )
+        {
+            var transitiveAspectManifestProvider = await pipeline.GetDesignTimeProjectVersionAsync( compilation.Compilation, autoResumePipeline: false, executionContext, cancellationToken );
+
+            if ( !transitiveAspectManifestProvider.IsSuccessful )
+            {
+                return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( transitiveAspectManifestProvider.Diagnostics, transitiveAspectManifestProvider.DebugReason );
+            }
+
+            configuration = configuration.Value.WithServiceProvider( configuration.Value.ServiceProvider.WithService( transitiveAspectManifestProvider.Value ) );
+        }
+
+        return configuration;
     }
 }
