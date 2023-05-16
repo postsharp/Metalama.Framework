@@ -332,16 +332,23 @@ public static partial class EligibilityExtensions
     }
 
     /// <summary>
-    /// Requires the validated object to be of a certain type. Note that this validates the object itself, not the declaration
-    /// that it represents. For instance, if the object is an <see cref="IParameter"/> and the <paramref name="type"/> parameter
-    /// is set to <c>string</c>, this method will fail with an exception no conversion exists from <see cref="IParameter"/> to <c>string</c>.
+    /// Requires the validated object to be of a certain type.
+    /// To check the type of a declaration, use code like <c>builder.Type().MustBe(typeof(string));</c> instead.
     /// </summary>
+    /// <remarks>
+    /// <para>Note that this validates the object itself, not the declaration that it represents.
+    /// For instance, if the object is an <see cref="IParameter"/> and the <paramref name="type"/> parameter is set to <c>typeof(string)</c>,
+    /// this method will fail with an exception, because no conversion exists from <see cref="IParameter"/> to <c>string</c>.</para>
+    /// <para>On the other hand, code like <c>builder.MustBeOfType(typeof(IProperty));</c> will correctly check that a declaration is a property.</para>
+    /// </remarks>
     public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
         where T : class
     {
         if ( !typeof(T).IsAssignableFrom( type ) )
         {
-            throw new ArgumentOutOfRangeException( nameof(type), $"An object of type '{typeof(T)}' can never be converted to the type '{type}'." );
+            throw new ArgumentOutOfRangeException(
+                nameof(type),
+                $"An object of type '{typeof(T)}' can never be converted to the type '{type}'. To check the type of a declaration, use code like `builder.Type().MustBe(typeof(string));` instead." );
         }
 
         eligibilityBuilder.MustSatisfy(
