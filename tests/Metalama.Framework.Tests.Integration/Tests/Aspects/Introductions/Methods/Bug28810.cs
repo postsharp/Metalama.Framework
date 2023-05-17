@@ -1,6 +1,10 @@
 using System;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810;
+
+[assembly: AspectOrder(typeof(TestAspect), typeof(DeepCloneAttribute))]
 
 #pragma warning disable CS0169, CS8618
 
@@ -17,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
                 {
                     m.Name = "Clone";
                     m.ReturnType = builder.Target;
-                } );
+                });
 
             builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }
@@ -25,9 +29,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Template]
         public virtual dynamic? CloneImpl()
         {
-            // This method does not do anything.
-            var baseMethod = meta.Target.Type.Methods.OfExactSignature( "Clone", Array.Empty<IType>() );
-
             return null;
         }
 
@@ -36,6 +37,21 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         {
             // This should call final version of introduced Clone method.
             return meta.This.Clone();
+        }
+    }
+
+    internal class TestAspect : TypeAspect
+    {
+        [Introduce]
+        public void Foo()
+        {
+            var baseMethod1 = meta.Target.Type.Methods.OfCompatibleSignature("Clone", Array.Empty<IType>(), Array.Empty<RefKind?>()).Single();
+
+            baseMethod1.Invoke();
+
+            var baseMethod2 = meta.Target.Type.Methods.OfExactSignature("Clone", Array.Empty<IType>());
+
+            baseMethod2.Invoke();
         }
     }
 
@@ -51,6 +67,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         }
 
         [DeepClone]
+        [TestAspect]
         private class BaseClass
         {
             private int a;

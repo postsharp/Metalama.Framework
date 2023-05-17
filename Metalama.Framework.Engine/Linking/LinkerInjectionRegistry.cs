@@ -247,7 +247,12 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            return this._injectedMemberLookup[annotation.Data.AssertNotNull()];
+            if ( !this._injectedMemberLookup.TryGetValue(annotation.Data.AssertNotNull(), out var injectedMember) )
+            {
+                throw new AssertionFailedException($"Unable to find injected member for {symbol}.");
+            }
+
+            return injectedMember;
         }
 
         public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
