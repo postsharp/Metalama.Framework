@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 
             baseMethod1.Invoke();
 
-            var baseMethod2 = meta.Target.Type.Methods.OfExactSignature("Clone", Array.Empty<IType>());
+            var baseMethod2 = meta.Target.Type.Methods.OfExactSignature("Clone", Array.Empty<IType>())!;
 
             baseMethod2.Invoke();
         }
