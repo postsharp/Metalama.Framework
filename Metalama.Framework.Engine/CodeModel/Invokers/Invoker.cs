@@ -152,6 +152,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 INamedType type => type,
                 IMember member => member.DeclaringType,
+                IParameter parameter => parameter.DeclaringMember.DeclaringType,
                 null => null,
                 _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
             };

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -207,7 +209,36 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    if ( this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
+                    if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
+                    {
+                        // Void returning method or void async method.
+                        if ( this.OverriddenDeclaration.IsAsync )
+                        {
+                            // Disassemble the proceed expression.
+                            switch ( proceedExpression )
+                            {
+                                case InvocationExpressionSyntax { Expression: { } invocationTarget } invocationExpression:
+                                    statements.Add(
+                                        ExpressionStatement(
+                                            AwaitExpression(
+                                                Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                                invocationExpression.WithExpression(
+                                                    InvocationExpression(
+                                                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                                                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) ) ) ) );
+
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected proceed expression {proceedExpression.Kind()}." );
+                            }
+                        }
+                        else
+                        {
+                            statements.Add( ExpressionStatement( proceedExpression ) );
+                        }
+                    }
+                    else if ( this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
                     {
                         if ( this.OverriddenDeclaration.IsAsync )
                         {

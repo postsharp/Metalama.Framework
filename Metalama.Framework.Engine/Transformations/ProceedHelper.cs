@@ -64,8 +64,9 @@ internal static class ProceedHelper
             case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
                 {
                     // The target method is an async method (but not an async iterator).
-                    // Generate (non-void): `( await BASE(ARGS) )`.
-                    //           Or (void): `await BASE(ARGS)`.
+                    // Generate (awaitable non-void): `( await BASE(ARGS) )`.
+                    //           Or (awaitable void): `await BASE(ARGS)`.
+                    //           Or (void)          : `await __LinkerInjectionHelpers__.__AsyncVoidMethod(BASE)(ARGS)`
 
                     var taskResultType = asyncInfo.ResultType;
 
