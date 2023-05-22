@@ -35,6 +35,7 @@ public static class MSBuildPropertyNames
     public const string MetalamaReferenceAssemblyRestoreTimeout = nameof(MetalamaReferenceAssemblyRestoreTimeout);
     public const string MetalamaLicense = nameof(MetalamaLicense);
     public const string MetalamaWriteLicenseCreditData = nameof(MetalamaWriteLicenseCreditData);
+    public const string MetalamaUsesPackagesConfig = nameof(MetalamaUsesPackagesConfig);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
         MetalamaBuildTouchFile,
@@ -58,5 +59,8 @@ public static class MSBuildPropertyNames
         MetalamaCompileTimePackages,
         MetalamaWriteHtml,
         ProjectAssetsFile,
-        MetalamaReferenceAssemblyRestoreTimeout );
+        MetalamaReferenceAssemblyRestoreTimeout,
+        MetalamaLicense,
+        MetalamaWriteLicenseCreditData,
+        MetalamaUsesPackagesConfig );
 }

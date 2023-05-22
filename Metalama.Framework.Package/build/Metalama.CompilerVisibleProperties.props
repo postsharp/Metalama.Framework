@@ -20,7 +20,8 @@
         <CompilerVisibleProperty Include="MetalamaCompileTimePackages"/>
         <CompilerVisibleProperty Include="MetalamaPlugInAssemblyPaths"/>
         <CompilerVisibleProperty Include="MetalamaWriteHtml"/>
-        <CompilerVisibleProperty Include="MetalamaWriteLicenseCreditData" /> 
+        <CompilerVisibleProperty Include="MetalamaWriteLicenseCreditData" />
+        <CompilerVisibleProperty Include="MetalamaUsesPackagesConfig"/>
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>
         <CompilerVisibleProperty Include="MetalamaReferenceAssemblyRestoreTimeout"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>

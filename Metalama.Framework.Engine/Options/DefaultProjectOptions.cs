@@ -75,6 +75,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool IsConcurrentBuildEnabled => false;
 
+    public virtual bool UsesPackagesConfig => false;
+
     public virtual ImmutableArray<string> CompileTimePackages => ImmutableArray<string>.Empty;
 
     public virtual string? ProjectAssetsFile => null;

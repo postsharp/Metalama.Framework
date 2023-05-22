@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Utilities
             => e switch
             {
                 OperationCanceledException => false,
-                AggregateException { InnerExceptions.Count: 0 } when e.InnerException != null => MustHandle( e.InnerException ),
+                AggregateException { InnerException: not null } => MustHandle( e.InnerException ),
                 _ => true
             };
 
