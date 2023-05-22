@@ -359,6 +359,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     accessorDeclaration
+                        .WithModifiers( TokenList( accessorDeclaration.Modifiers.Where( t => !t.IsAccessModifierKeyword() ) ) )
                         .WithBody( substitutedBody )
                         .WithExpressionBody( substitutedExpressionBody );
             }
