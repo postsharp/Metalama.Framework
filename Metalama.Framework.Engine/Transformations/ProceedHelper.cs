@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -76,22 +77,8 @@ internal static class ProceedHelper
 
                     switch ( asyncInfo )
                     {
-                        case {} when overriddenMethod.ReturnType.Is( SpecialType.Void ):
-                            if (invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } )
-                            {
-                                throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
-                            }
-
-                            return
-                                new SyntaxUserExpression(
-                                    AwaitExpression(
-                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                                        ((InvocationExpressionSyntax) invocationExpression).WithExpression(
-                                            InvocationExpression(
-                                                LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
-                                                ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) ) )
-                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
-                                    overriddenMethod.ReturnType );
+                        case { } when overriddenMethod.ReturnType.Is( SpecialType.Void ):
+                            return WrapAsyncVoid( invocationExpression, overriddenMethod, true );
 
                         case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
                             return
@@ -113,6 +100,9 @@ internal static class ProceedHelper
                                     asyncInfo.ResultType );
                     }
                 }
+
+            case TemplateKind.Async when overriddenMethod.ReturnType.Is( SpecialType.Void ):
+                return WrapAsyncVoid( invocationExpression, overriddenMethod, false );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
                 { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
@@ -158,6 +148,38 @@ internal static class ProceedHelper
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 
             return expression;
+        }
+
+        static SyntaxUserExpression WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+        {
+            if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } )
+            {
+                throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
+            }
+
+            var expression =
+                ((InvocationExpressionSyntax) invocationExpression).WithExpression(
+                    InvocationExpression(
+                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
+                .WithAdditionalAnnotations( Simplifier.Annotation );
+
+            if ( await )
+            {
+                return
+                    new SyntaxUserExpression(
+                        AwaitExpression(
+                            Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                            expression ),
+                        overriddenMethod.ReturnType );
+            }
+            else
+            {
+                return
+                    new SyntaxUserExpression(
+                        expression,
+                        overriddenMethod.ReturnType );
+            }
         }
     }
 }
