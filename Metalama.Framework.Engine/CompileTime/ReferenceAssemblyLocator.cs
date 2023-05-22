@@ -192,12 +192,16 @@ namespace Metalama.Framework.Engine.CompileTime
                 .GroupBy( s => s.Identity.Name )
                 .ToImmutableDictionary( s => s.Key, s => s.OrderByDescending( x => x.Identity.Version ).First().Identity );
 
-            var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
-            var binDirectory = Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
-            var files = Directory.GetFiles( binDirectory, "*.dll" );
+            var additionalCompileTimeAssemblies = Directory.GetFiles( this.GetAdditionalCompileTimeAssembliesDirectory(), "*.dll" );
 
             this.AdditionalCompileTimeAssemblyPaths =
-                files.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
+                additionalCompileTimeAssemblies.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
+        }
+
+        private string GetAdditionalCompileTimeAssembliesDirectory()
+        {
+            var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
+            return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
         }
 
         private static string GetAdditionalPackageReferences( IProjectOptions options )
@@ -275,7 +279,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( missingFiles.Count == 0 )
                     {
-                        return manifest;
+                        var additionalCompileTimeAssembliesDirectory = this.GetAdditionalCompileTimeAssembliesDirectory();
+
+                        if ( Directory.Exists( additionalCompileTimeAssembliesDirectory ) )
+                        {
+                            return manifest;
+                        }
+                        else
+                        {
+                            this._logger.Warning?.Log(
+                                $"The following directory did no longer exist so the reference project has to be rebuilt: {additionalCompileTimeAssembliesDirectory}." );
+                        }
                     }
                     else
                     {
@@ -319,7 +333,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 File.WriteAllText( projectFilePath, projectText );
 
                 var programFilePath = Path.Combine( this._cacheDirectory, "Program.cs" );
-                this._logger.Trace?.Log( $"Writing '{programFilePath}':" + Environment.NewLine + projectText );
+                this._logger.Trace?.Log( $"Writing '{programFilePath}'." );
 
                 File.WriteAllText( programFilePath, "System.Console.WriteLine(\"Hello, world.\");" );
 
@@ -327,7 +341,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-                var arguments = $"build -bl:msbuild_{Guid.NewGuid().ToString().ReplaceOrdinal( "-", "" )}.binlog";
+                var arguments = $"build -bl:msbuild_{Guid.NewGuid():N}.binlog";
 
                 this._logger.Trace?.Log( $"Building with restore timeout {this._restoreTimeout}." );
 
