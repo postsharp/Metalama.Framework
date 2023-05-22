@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -13,6 +14,7 @@ using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -41,13 +43,13 @@ internal static class ProceedHelper
                         // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
 
                         expression =
-                            SyntaxFactory.InvocationExpression(
-                                    SyntaxFactory.MemberAccessExpression(
+                            InvocationExpression(
+                                    MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
                                         runtimeAspectHelperType,
-                                        SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                                        IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                 .WithArgumentList(
-                                    SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
+                                    ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation );
                     }
                     else
@@ -68,22 +70,48 @@ internal static class ProceedHelper
                     //           Or (awaitable void): `await BASE(ARGS)`.
                     //           Or (void)          : `await __LinkerInjectionHelpers__.__AsyncVoidMethod(BASE)(ARGS)`
 
-                    var taskResultType = asyncInfo.ResultType;
-
-                    var awaitExpression = SyntaxFactory.AwaitExpression(
-                        SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                    var awaitExpression = AwaitExpression(
+                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
                         invocationExpression );
 
-                    ExpressionSyntax expression =
-                        taskResultType.Is( SpecialType.Void )
-                            ? awaitExpression
-                            : SyntaxFactory.ParenthesizedExpression( awaitExpression )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
+                    switch ( asyncInfo )
+                    {
+                        case {} when overriddenMethod.ReturnType.Is( SpecialType.Void ):
+                            if (invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } )
+                            {
+                                throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
+                            }
 
-                    return
-                        new SyntaxUserExpression(
-                            expression.WithAdditionalAnnotations( Simplifier.Annotation ),
-                            taskResultType );
+                            return
+                                new SyntaxUserExpression(
+                                    AwaitExpression(
+                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                                        ((InvocationExpressionSyntax) invocationExpression).WithExpression(
+                                            InvocationExpression(
+                                                LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                                                ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) ) )
+                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    overriddenMethod.ReturnType );
+
+                        case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
+                            return
+                                new SyntaxUserExpression(
+                                    AwaitExpression(
+                                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                        invocationExpression )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    resultType );
+
+                        default:
+                            return
+                                new SyntaxUserExpression(
+                                    ParenthesizedExpression(
+                                        AwaitExpression(
+                                            Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                            invocationExpression ) )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    asyncInfo.ResultType );
+                    }
                 }
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
@@ -103,7 +131,7 @@ internal static class ProceedHelper
 
         ExpressionSyntax GenerateAwaitBufferAsync()
         {
-            var arguments = SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) );
+            var arguments = ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) );
 
             var cancellationTokenParameter = overriddenMethod.Parameters
                 .OfParameterType<CancellationToken>()
@@ -111,21 +139,21 @@ internal static class ProceedHelper
 
             if ( cancellationTokenParameter != null )
             {
-                arguments = arguments.AddArguments( SyntaxFactory.Argument( SyntaxFactory.IdentifierName( cancellationTokenParameter.Name ) ) );
+                arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
             }
             
             var bufferExpression =
-                SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
+                InvocationExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             runtimeAspectHelperType,
-                            SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
+                            IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
-            var expression = SyntaxFactory.ParenthesizedExpression(
-                    SyntaxFactory.AwaitExpression(
-                        SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+            var expression = ParenthesizedExpression(
+                    AwaitExpression(
+                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
                         bufferExpression ) )
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 

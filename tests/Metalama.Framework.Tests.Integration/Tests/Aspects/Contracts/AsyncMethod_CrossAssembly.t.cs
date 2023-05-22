@@ -35,7 +35,7 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    var returnValue = await this.DoSomethingAsyncT_Source(text);
+    var returnValue = (await this.DoSomethingAsyncT_Source(text));
     if (returnValue is null)
     {
       throw new global::System.InvalidOperationException("Method returned null");

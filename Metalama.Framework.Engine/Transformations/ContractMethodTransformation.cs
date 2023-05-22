@@ -54,16 +54,14 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             var iteratorInfo = this.OverriddenDeclaration.GetIteratorInfo();
-            var asyncInfo = this.OverriddenDeclaration.GetAsyncInfo();
 
             // Determine the kind of template the transformation will simulate.
-            var templateKind = (iteratorInfo, asyncInfo) switch
+            var templateKind = iteratorInfo switch
             {
-                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable }, _) => TemplateKind.IEnumerable,
-                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator }, _) => TemplateKind.IEnumerator,
-                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }, _) => TemplateKind.IAsyncEnumerable,
-                ({ IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator }, _) => TemplateKind.IAsyncEnumerator,
-                (_, { IsAsync: true }) => TemplateKind.Async,
+                { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable } => TemplateKind.IEnumerable,
+                { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator } => TemplateKind.IEnumerator,
+                { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable } => TemplateKind.IAsyncEnumerable,
+                { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator } => TemplateKind.IAsyncEnumerator,
                 _ => TemplateKind.Default,
             };
 
@@ -77,13 +75,54 @@ namespace Metalama.Framework.Engine.Transformations
                 statements.AddRange( inputFilterBodies );
             }
 
-            if ( templateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
+            if ( outputFilterBodies is { Count: > 0 } )
             {
-                if ( outputFilterBodies is { Count: > 0 } )
+                if ( this.OverriddenDeclaration.IsAsync && this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
+                {
+                    throw new AssertionFailedException($"{this.OverriddenDeclaration} is async, does not return anything, but has output filters.");
+                }
+
+                if (templateKind!= TemplateKind.Default)
                 {
                     throw new NotImplementedException( "Contracts on return values of iterators are not yet supported." );
                 }
+
+                if ( returnValueName != null )
+                {
+                    statements.Add(
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                    IdentifierName(
+                                        Identifier(
+                                            TriviaList(),
+                                            SyntaxKind.VarKeyword,
+                                            "var",
+                                            "var",
+                                            TriviaList( ElasticSpace ) ) ) )
+                                .WithVariables(
+                                    SingletonSeparatedList(
+                                        VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
+                                            .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
+                }
                 else
+                {
+                    statements.Add( ExpressionStatement( proceedExpression ) );
+                }
+
+                statements.AddRange( outputFilterBodies );
+
+                if ( returnValueName != null )
+                {
+                    statements.Add(
+                        ReturnStatement(
+                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                            IdentifierName( returnValueName ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
+                }
+            }
+            else
+            {
+                if ( templateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
                 {
                     var returnItemName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnItem" );
 
@@ -108,14 +147,7 @@ namespace Metalama.Framework.Engine.Transformations
                                     IdentifierName( returnItemName ),
                                     Token( SyntaxKind.SemicolonToken ) ) ) ) );
                 }
-            }
-            else if ( templateKind is TemplateKind.IEnumerator or TemplateKind.IAsyncEnumerator )
-            {
-                if ( outputFilterBodies is { Count: > 0 } )
-                {
-                    throw new NotImplementedException( "Contracts on return values of iterators are not yet supported." );
-                }
-                else
+                else if ( templateKind is TemplateKind.IEnumerator or TemplateKind.IAsyncEnumerator )
                 {
                     var enumeratorName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnEnumerator" );
 
@@ -162,110 +194,14 @@ namespace Metalama.Framework.Engine.Transformations
                                         IdentifierName( "Current" ) ),
                                     Token( SyntaxKind.SemicolonToken ) ) ) ) );
                 }
-            }
-            else
-            {
-                if ( outputFilterBodies is { Count: > 0 } )
+                else if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
+                    || (this.OverriddenDeclaration.IsAsync && this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void )) )
                 {
-                    if ( returnValueName != null )
-                    {
-                        var returnValueExpression =
-                            this.OverriddenDeclaration.IsAsync
-                                ? AwaitExpression(
-                                    Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                                    proceedExpression )
-                                : proceedExpression;
-
-                        statements.Add(
-                            LocalDeclarationStatement(
-                                VariableDeclaration(
-                                        IdentifierName(
-                                            Identifier(
-                                                TriviaList(),
-                                                SyntaxKind.VarKeyword,
-                                                "var",
-                                                "var",
-                                                TriviaList( ElasticSpace ) ) ) )
-                                    .WithVariables(
-                                        SingletonSeparatedList(
-                                            VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
-                                                .WithInitializer( EqualsValueClause( returnValueExpression ) ) ) ) ) );
-                    }
-                    else
-                    {
-                        statements.Add( ExpressionStatement( proceedExpression ) );
-                    }
-
-                    statements.AddRange( outputFilterBodies );
-
-                    if ( returnValueName != null )
-                    {
-                        statements.Add(
-                            ReturnStatement(
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                IdentifierName( returnValueName ),
-                                Token( SyntaxKind.SemicolonToken ) ) );
-                    }
+                    statements.Add( ExpressionStatement( proceedExpression ) );
                 }
                 else
                 {
-                    if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
-                    {
-                        // Void returning method or void async method.
-                        if ( this.OverriddenDeclaration.IsAsync )
-                        {
-                            // Disassemble the proceed expression.
-                            switch ( proceedExpression )
-                            {
-                                case InvocationExpressionSyntax { Expression: { } invocationTarget } invocationExpression:
-                                    statements.Add(
-                                        ExpressionStatement(
-                                            AwaitExpression(
-                                                Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                                                invocationExpression.WithExpression(
-                                                    InvocationExpression(
-                                                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
-                                                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) ) ) ) );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException( $"Unexpected proceed expression {proceedExpression.Kind()}." );
-                            }
-                        }
-                        else
-                        {
-                            statements.Add( ExpressionStatement( proceedExpression ) );
-                        }
-                    }
-                    else if ( this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
-                    {
-                        if ( this.OverriddenDeclaration.IsAsync )
-                        {
-                            statements.Add(
-                                ExpressionStatement(
-                                    AwaitExpression(
-                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                                        proceedExpression ) ) );
-                        }
-                        else
-                        {
-                            // Awaitable void-returning non-async method.
-                            statements.Add( ReturnStatement( proceedExpression ) );
-                        }
-                    }
-                    else
-                    {
-                        statements.Add(
-                            ReturnStatement(
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                this.OverriddenDeclaration.IsAsync
-                                    ? AwaitExpression(
-                                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                                        proceedExpression )
-                                    : proceedExpression,
-                                Token( SyntaxKind.SemicolonToken ) ) );
-                    }
+                    statements.Add( ReturnStatement( proceedExpression ) );
                 }
             }
 
