@@ -138,9 +138,13 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     Directory.CreateDirectory( directory );
 
-                    // Mark the directory for automatic clean up when unused.
-                    var cleanupJsonFilePath = Path.Combine( directory, "cleanup.json" );
-                    File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":1}" );
+                    try
+                    {
+                        // Mark the directory for automatic clean up when unused.
+                        var cleanupJsonFilePath = Path.Combine( directory, "cleanup.json" );
+                        File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":1}" );
+                    }
+                    catch ( IOException ) { }
                 }
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
@@ -173,11 +177,14 @@ namespace Metalama.Framework.CompilerExtensions
 
                 foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
                 {
-                    try
+                    if ( !assembly.IsDynamic )
                     {
-                        exceptionText.AppendLine( assembly.Location );
+                        try
+                        {
+                            exceptionText.AppendLine( assembly.Location );
+                        }
+                        catch { }
                     }
-                    catch { }
                 }
 
                 exceptionText.AppendLine( "===== Log ===== " );
