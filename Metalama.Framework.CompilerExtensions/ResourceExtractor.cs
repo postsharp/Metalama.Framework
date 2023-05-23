@@ -35,6 +35,8 @@ namespace Metalama.Framework.CompilerExtensions
         private static volatile bool _initialized;
         private static string? _versionNumber;
 
+        private static readonly Func<string, Assembly> _loadAssembly;
+
         static ResourceExtractor()
         {
             if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "METALAMA_DEBUG_RESOURCE_EXTRACTOR" ) ) )
@@ -51,6 +53,32 @@ namespace Metalama.Framework.CompilerExtensions
                        string.Join( "", moduleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
             _snapshotDirectory = GetTempDirectory( "Extract" );
+
+            var alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
+
+            // When we're in RoslynCodeAnalysisService, we need to load extra assemblies using the same ALC as the one that's used by Roslyn for loading this assembly.
+            if ( alcType != null )
+            {
+                // Collectibe ALC meant for analyzers.
+                // We can't easily use this, because AppDomain.AssemblyResolve is called from a non-collectible ALC, so it can't return a collectible assembly.
+                var analyzerAlc = alcType.GetMethod( "GetLoadContext" ).Invoke( null, new object[] { typeof(ResourceExtractor).Assembly } );
+
+                if ( analyzerAlc != null )
+                {
+                    // Non-collectible ALC meant for the compiler.
+                    var compilerAlc = analyzerAlc.GetType().GetField( "_compilerLoadContext", BindingFlags.NonPublic | BindingFlags.Instance )?.GetValue( analyzerAlc );
+
+                    if ( compilerAlc != null )
+                    {
+                        var loadMethod = alcType.GetMethod( "LoadFromAssemblyPath" );
+
+                        _loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof(Func<string, Assembly>), compilerAlc, loadMethod );
+                    }
+                }
+            }
+
+            // On .Net Framework, use the regular Assembly.LoadFile, since ALC does not exist.
+            _loadAssembly ??= Assembly.LoadFile;
         }
 
         private static string GetTempDirectory( string purpose ) => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId );
@@ -346,7 +374,7 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
 
-                    return Assembly.LoadFile( embeddedAssembly.Path );
+                    return _loadAssembly( embeddedAssembly.Path );
                 }
                 else
                 {
