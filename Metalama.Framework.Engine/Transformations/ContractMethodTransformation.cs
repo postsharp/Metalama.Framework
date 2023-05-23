@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -79,10 +77,10 @@ namespace Metalama.Framework.Engine.Transformations
             {
                 if ( this.OverriddenDeclaration.IsAsync && this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void ) )
                 {
-                    throw new AssertionFailedException($"{this.OverriddenDeclaration} is async, does not return anything, but has output filters.");
+                    throw new AssertionFailedException( $"{this.OverriddenDeclaration} is async, does not return anything, but has output filters." );
                 }
 
-                if (templateKind!= TemplateKind.Default)
+                if ( templateKind != TemplateKind.Default )
                 {
                     throw new NotImplementedException( "Contracts on return values of iterators are not yet supported." );
                 }
@@ -195,7 +193,7 @@ namespace Metalama.Framework.Engine.Transformations
                                     Token( SyntaxKind.SemicolonToken ) ) ) ) );
                 }
                 else if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
-                    || (this.OverriddenDeclaration.IsAsync && this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void )) )
+                          || (this.OverriddenDeclaration.IsAsync && this.OverriddenDeclaration.GetAsyncInfo().ResultType.Is( SpecialType.Void )) )
                 {
                     statements.Add( ExpressionStatement( proceedExpression ) );
                 }

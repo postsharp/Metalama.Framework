@@ -13,9 +13,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using System.Runtime.InteropServices;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -71,10 +70,6 @@ internal static class ProceedHelper
                     //           Or (awaitable void): `await BASE(ARGS)`.
                     //           Or (void)          : `await __LinkerInjectionHelpers__.__AsyncVoidMethod(BASE)(ARGS)`
 
-                    var awaitExpression = AwaitExpression(
-                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                        invocationExpression );
-
                     switch ( asyncInfo )
                     {
                         case { } when overriddenMethod.ReturnType.Is( SpecialType.Void ):
@@ -84,19 +79,19 @@ internal static class ProceedHelper
                             return
                                 new SyntaxUserExpression(
                                     AwaitExpression(
-                                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                        invocationExpression )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                            Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                            invocationExpression )
+                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     resultType );
 
                         default:
                             return
                                 new SyntaxUserExpression(
                                     ParenthesizedExpression(
-                                        AwaitExpression(
-                                            Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                            invocationExpression ) )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                            AwaitExpression(
+                                                Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                                invocationExpression ) )
+                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     asyncInfo.ResultType );
                     }
                 }
@@ -152,17 +147,17 @@ internal static class ProceedHelper
 
         static SyntaxUserExpression WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
         {
-            if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } )
+            if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
             {
                 throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
             }
 
             var expression =
-                ((InvocationExpressionSyntax) invocationExpression).WithExpression(
-                    InvocationExpression(
-                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
-                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+                actualInvocationExpression.WithExpression(
+                        InvocationExpression(
+                            LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                            ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
+                    .WithAdditionalAnnotations( Simplifier.Annotation );
 
             if ( await )
             {
