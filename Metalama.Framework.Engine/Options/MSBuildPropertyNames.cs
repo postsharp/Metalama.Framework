@@ -32,6 +32,7 @@ public static class MSBuildPropertyNames
     public const string MetalamaPlugInAssemblyPaths = nameof(MetalamaPlugInAssemblyPaths);
     public const string MetalamaWriteHtml = nameof(MetalamaWriteHtml);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
+    public const string MetalamaReferenceAssemblyRestoreTimeout = nameof(MetalamaReferenceAssemblyRestoreTimeout);
     public const string MetalamaLicense = nameof(MetalamaLicense);
     public const string MetalamaWriteLicenseCreditData = nameof(MetalamaWriteLicenseCreditData);
 
@@ -56,5 +57,6 @@ public static class MSBuildPropertyNames
         MetalamaConcurrentBuildEnabled,
         MetalamaCompileTimePackages,
         MetalamaWriteHtml,
-        ProjectAssetsFile );
+        ProjectAssetsFile,
+        MetalamaReferenceAssemblyRestoreTimeout );
 }

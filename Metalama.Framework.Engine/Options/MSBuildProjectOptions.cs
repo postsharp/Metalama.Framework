@@ -112,6 +112,9 @@ namespace Metalama.Framework.Engine.Options
         public override string? ProjectAssetsFile => this.GetStringOption( MSBuildPropertyNames.ProjectAssetsFile );
 
         [Memo]
+        public override int? ReferenceAssemblyRestoreTimeout => this.GetNullableInt32Option( MSBuildPropertyNames.MetalamaReferenceAssemblyRestoreTimeout );
+
+        [Memo]
         public override string? License => this.GetStringOption( MSBuildPropertyNames.MetalamaLicense );
 
         [Memo]
@@ -142,6 +145,16 @@ namespace Metalama.Framework.Engine.Options
             if ( this._source.TryGetValue( name, out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
             {
                 return flagValue;
+            }
+
+            return null;
+        }
+
+        private int? GetNullableInt32Option( string name )
+        {
+            if ( this._source.TryGetValue( name, out var flagString ) && int.TryParse( flagString, out var value ) )
+            {
+                return value;
             }
 
             return null;

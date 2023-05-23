@@ -69,6 +69,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? ProjectAssetsFile => this.Wrapped.ProjectAssetsFile;
 
+    public virtual int? ReferenceAssemblyRestoreTimeout => this.Wrapped.ReferenceAssemblyRestoreTimeout;
+
     public virtual string? License => this.Wrapped.License;
 
     public virtual bool? WriteLicenseCreditData => this.Wrapped.WriteLicenseCreditData;
