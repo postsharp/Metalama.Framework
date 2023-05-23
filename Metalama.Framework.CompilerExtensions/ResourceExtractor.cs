@@ -64,7 +64,7 @@ namespace Metalama.Framework.CompilerExtensions
                 // Ideally, we'd want to use the analzyer ALC for loading our assemblies.
                 // But if we do that, it seems Roslyn will try to load depdendencies of the loaded assembly into its own ALC by assembly name,
                 // which triggers AppDomain.AssemblyResolve and since we would return a collectible assembly (from the analyzer ALC) from there, the whole thing fails.
-                // Instead we access a private field on the analyzer ALC to get to the compiler ALC and use that.
+                // Instead we access a private field (Microsoft.CodeAnalysis.DirectoryLoadContext._compilerLoadContext) on the analyzer ALC to get to the compiler ALC and use that.
                 var analyzerAlc = alcType.GetMethod( "GetLoadContext" ).Invoke( null, new object[] { typeof(ResourceExtractor).Assembly } );
 
                 if ( analyzerAlc != null )
