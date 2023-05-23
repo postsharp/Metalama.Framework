@@ -332,8 +332,8 @@ public static partial class EligibilityExtensions
     }
 
     /// <summary>
-    /// Requires the validated object to be of a certain type.
-    /// To check the type of a declaration, use code like <c>builder.Type().MustBe(typeof(string));</c> instead.
+    /// Requires the validated object to be of a certain type of metadata object, e.g. an <see cref="IField"/> or <see cref="IMethod"/>.
+    /// To check the type of a field, property or parameter, use code like <c>builder.Type().MustBe(typeof(string));</c> instead.
     /// </summary>
     /// <remarks>
     /// <para>Note that this validates the object itself, not the declaration that it represents.
