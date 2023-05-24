@@ -1229,7 +1229,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 node.AttributeLists,
                 node.IfKeyword,
                 node.OpenParenToken,
-                annotatedCondition.AddTargetScopeAnnotation( ifScope ),
+                annotatedCondition,
                 node.CloseParenToken,
                 annotatedStatement,
                 node.Else?.Update( node.Else.ElseKeyword, annotatedElseStatement! ).AddScopeAnnotation( ifScope ) )
@@ -1292,7 +1292,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     node.Type.AddTargetScopeAnnotation( forEachScope ),
                     node.Identifier.AddColoringAnnotation( identifierClassification ),
                     node.InKeyword,
-                    annotatedExpression.AddTargetScopeAnnotation( forEachScope ),
+                    annotatedExpression,
                     node.CloseParenToken,
                     annotatedStatement.AddTargetScopeAnnotation( forEachScope ) )
                 .AddScopeAnnotation( forEachScope )
