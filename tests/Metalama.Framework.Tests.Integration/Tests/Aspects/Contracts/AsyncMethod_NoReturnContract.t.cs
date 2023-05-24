@@ -29,7 +29,7 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return await this.DoSomethingAsyncT_Source(text);
+    return (await this.DoSomethingAsyncT_Source(text));
   }
   private async Task<string> DoSomethingAsyncT_Source(string text)
   {
