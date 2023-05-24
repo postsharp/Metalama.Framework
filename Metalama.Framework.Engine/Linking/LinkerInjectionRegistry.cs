@@ -247,9 +247,9 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( !this._injectedMemberLookup.TryGetValue(annotation.Data.AssertNotNull(), out var injectedMember) )
+            if ( !this._injectedMemberLookup.TryGetValue( annotation.Data.AssertNotNull(), out var injectedMember ) )
             {
-                throw new AssertionFailedException($"Unable to find injected member for {symbol}.");
+                throw new AssertionFailedException( $"Unable to find injected member for {symbol}." );
             }
 
             return injectedMember;

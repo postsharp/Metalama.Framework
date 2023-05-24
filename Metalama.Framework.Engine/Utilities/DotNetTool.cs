@@ -19,7 +19,7 @@ public sealed class DotNetTool
         this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
     }
 
-    public void Execute( string arguments, string? workingDirectory = null )
+    public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000 )
     {
         var startInfo = new ProcessStartInfo( this._platformInfo.DotNetExePath, arguments )
         {
@@ -51,9 +51,9 @@ public sealed class DotNetTool
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
 
-        if ( !process.WaitForExit( 30_000 ) )
+        if ( !process.WaitForExit( timeout ) )
         {
-            // The process did not complete in 30s.
+            // The process did not complete within the given time.
 
             try
             {
@@ -64,7 +64,7 @@ public sealed class DotNetTool
                 // ignored
             }
 
-            throw new AssertionFailedException( $"The process '{startInfo.FileName} {startInfo.Arguments}' did not complete in 30 s." );
+            throw new AssertionFailedException( $"The process '{startInfo.FileName} {startInfo.Arguments}' did not complete in {timeout / 1000f} s." );
         }
 
         if ( process.ExitCode != 0 )

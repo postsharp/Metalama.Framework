@@ -11,6 +11,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
+    // ReSharper disable once ClassNeverInstantiated.Local
     private sealed class MemberLevelTransformations
     {
         // TODO: this class is no longer used concurrently, and is being added in transformation order.

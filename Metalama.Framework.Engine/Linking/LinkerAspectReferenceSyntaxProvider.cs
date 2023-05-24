@@ -26,17 +26,17 @@ namespace Metalama.Framework.Engine.Linking
 
         public override ExpressionSyntax GetPropertyReference(
             AspectLayerId aspectLayer,
-            IProperty overriddenProperty,
+            IProperty targetProperty,
             AspectReferenceTargetKind targetKind,
             OurSyntaxGenerator syntaxGenerator )
         {
-            switch (targetKind, overriddenProperty)
+            switch (targetKind, targetProperty)
             {
                 case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: IPseudoDeclaration }):
                 case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: IPseudoDeclaration }):
                     // For pseudo source: __LinkerInjectionHelpers__.__Property(<property_expression>)
                     // It is important to track the <property_expression>.
-                    var symbolSourceExpression = CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
+                    var symbolSourceExpression = CreateMemberAccessExpression( targetProperty, syntaxGenerator );
 
                     return
                         InvocationExpression(
@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
                 default:
                     // Otherwise: <property_expression>
                     return
-                        CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
+                        CreateMemberAccessExpression( targetProperty, syntaxGenerator )
                             .WithAspectReferenceAnnotation(
                                 aspectLayer,
                                 AspectReferenceOrder.Previous,
@@ -62,16 +62,16 @@ namespace Metalama.Framework.Engine.Linking
 
         public override ExpressionSyntax GetIndexerReference(
             AspectLayerId aspectLayer,
-            IIndexer overriddenIndexer,
+            IIndexer targetIndexer,
             AspectReferenceTargetKind targetKind,
             OurSyntaxGenerator syntaxGenerator )
         {
             return
                 ElementAccessExpression(
-                        CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
+                        CreateIndexerAccessExpression( targetIndexer, syntaxGenerator ),
                         BracketedArgumentList(
                             SeparatedList(
-                                overriddenIndexer.Parameters.SelectAsEnumerable(
+                                targetIndexer.Parameters.SelectAsEnumerable(
                                     p =>
                                     {
                                         var refKind = p.RefKind switch
@@ -92,20 +92,20 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceFlags.Inlineable );
         }
 
-        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator )
         {
             return
                 InvocationExpression(
                     LinkerInjectionHelperProvider.GetOperatorMemberExpression(
                             syntaxGenerator,
-                            overriddenOperator.OperatorKind,
-                            overriddenOperator.ReturnType,
-                            overriddenOperator.Parameters.SelectAsEnumerable( p => p.Type ) )
+                            targetOperator.OperatorKind,
+                            targetOperator.ReturnType,
+                            targetOperator.Parameters.SelectAsEnumerable( p => p.Type ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Previous,
                             flags: AspectReferenceFlags.Inlineable ),
-                    syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
+                    syntaxGenerator.ArgumentList( targetOperator, p => IdentifierName( p.Name ) ) );
         }
 
         public override ExpressionSyntax GetEventFieldInitializerExpression( ExpressionSyntax initializerExpression )
@@ -116,13 +116,13 @@ namespace Metalama.Framework.Engine.Linking
                     ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
         }
 
-        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer overriddenIndexer, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer targetIndexer, OurSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;
 
-            if ( overriddenIndexer.IsExplicitInterfaceImplementation )
+            if ( targetIndexer.IsExplicitInterfaceImplementation )
             {
-                var implementedInterfaceMember = overriddenIndexer.GetExplicitInterfaceImplementation();
+                var implementedInterfaceMember = targetIndexer.GetExplicitInterfaceImplementation();
 
                 expression =
                     ParenthesizedExpression(
@@ -138,20 +138,20 @@ namespace Metalama.Framework.Engine.Linking
             return expression;
         }
 
-        private static ExpressionSyntax CreateMemberAccessExpression( IMember overriddenDeclaration, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateMemberAccessExpression( IMember targetDeclaration, OurSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;
 
             var memberNameString =
-                overriddenDeclaration switch
+                targetDeclaration switch
                 {
-                    { IsExplicitInterfaceImplementation: true } => overriddenDeclaration.Name.Split( '.' ).Last(),
-                    _ => overriddenDeclaration.Name
+                    { IsExplicitInterfaceImplementation: true } => targetDeclaration.Name.Split( '.' ).Last(),
+                    _ => targetDeclaration.Name
                 };
 
             SimpleNameSyntax memberName;
 
-            if ( overriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
+            if ( targetDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
             {
                 memberName = GenericName( memberNameString )
                     .WithTypeArgumentList(
@@ -162,11 +162,11 @@ namespace Metalama.Framework.Engine.Linking
                 memberName = IdentifierName( memberNameString );
             }
 
-            if ( !overriddenDeclaration.IsStatic )
+            if ( !targetDeclaration.IsStatic )
             {
-                if ( overriddenDeclaration.IsExplicitInterfaceImplementation )
+                if ( targetDeclaration.IsExplicitInterfaceImplementation )
                 {
-                    var implementedInterfaceMember = overriddenDeclaration.GetExplicitInterfaceImplementation();
+                    var implementedInterfaceMember = targetDeclaration.GetExplicitInterfaceImplementation();
 
                     expression = MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Linking
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxGenerator.Type( overriddenDeclaration.DeclaringType.GetSymbol() ),
+                        syntaxGenerator.Type( targetDeclaration.DeclaringType.GetSymbol() ),
                         memberName );
             }
 

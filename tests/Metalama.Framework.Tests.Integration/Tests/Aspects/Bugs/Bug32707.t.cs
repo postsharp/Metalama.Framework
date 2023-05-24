@@ -45,17 +45,17 @@ internal class TargetClass
   private async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_MyContractAspect([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on intParam");
-    return await this.AsyncMethod_MyOverride2Aspect(intParam, objectParam, enumParam);
+    return (await this.AsyncMethod_MyOverride2Aspect(intParam, objectParam, enumParam));
   }
   private async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_MyContractAspect1([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on objectParam");
-    return await this.AsyncMethod_MyContractAspect(intParam, objectParam, enumParam);
+    return (await this.AsyncMethod_MyContractAspect(intParam, objectParam, enumParam));
   }
   private async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_MyContractAspect2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on enumParam");
-    return await this.AsyncMethod_MyContractAspect1(intParam, objectParam, enumParam);
+    return (await this.AsyncMethod_MyContractAspect1(intParam, objectParam, enumParam));
   }
   // Overrides should not have default values, only the original declaration.
   [MyOverride1Aspect]

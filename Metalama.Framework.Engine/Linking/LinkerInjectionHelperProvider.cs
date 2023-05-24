@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Linking
         public const string HelperTypeName = "__LinkerInjectionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
         public const string PropertyMemberName = "__Property";
+        public const string AsyncVoidMethodMemberName = "__AsyncVoidMethod";
         private const string _eventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__";
         private const string _emptyCodeTypeName = "__Empty";
         private const string _sourceCodeTypeName = "__Source";
@@ -59,6 +60,15 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName( HelperTypeName ),
                     IdentifierName( PropertyMemberName ) );
+        }
+
+        public static ExpressionSyntax GetAsyncVoidMethodMemberExpression()
+        {
+            return
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName( HelperTypeName ),
+                    IdentifierName( AsyncVoidMethodMemberName ) );
         }
 
         public static ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression()
@@ -183,11 +193,19 @@ namespace Metalama.Framework.Engine.Linking
 internal class {HelperTypeName}
 {{
     public static void {FinalizeMemberName}() {{}}
-    public static ref T{suffix} {PropertyMemberName}<T>(T{suffix} value) => ref Dummy<T{suffix}>.Field;
+    public static ref T{suffix} {PropertyMemberName}<T>(T{suffix} value) => ref Dummy<T{suffix}>.Field;    
     public static void {_eventFieldInitializationExpressionMemberName}<T>(T? value) where T : System.Delegate {{}}
     {string.Join( "\n    ", binaryOperators )}
     {string.Join( "\n    ", unaryOperators )}
     {string.Join( "\n    ", conversionOperators )}
+    
+    public delegate System.Threading.Tasks.Task WrappedDelegate(params object[] args);
+
+    public static WrappedDelegate {AsyncVoidMethodMemberName}<T>(T t) where T : System.Delegate
+    {{
+        return Wrapped;
+        static System.Threading.Tasks.Task Wrapped(params object[] args) => System.Threading.Tasks.Task.CompletedTask;
+    }}
 
     public readonly struct {_emptyCodeTypeName} {{}}
     public readonly struct {_sourceCodeTypeName} {{}}

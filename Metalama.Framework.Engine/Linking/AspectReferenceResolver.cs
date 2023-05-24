@@ -122,6 +122,11 @@ namespace Metalama.Framework.Engine.Linking
             //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - aspect reference (symbol points to the special linker helper)
             //                                           ^^^^^^^^  - symbol source
             //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
+            //   4) Awaitable async-void method:
+            //     __LinkerInjectionHelpers__.__AsyncVoidMethod(this.Foo)(<args>)
+            //                                                  ^^^^^^^^  - aspect reference
+            //                                                  ^^^^^^^^  - symbol source
+            //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node            
 
             this.ResolveTarget(
                 containingSemantic.Symbol,
@@ -525,6 +530,26 @@ namespace Metalama.Framework.Engine.Linking
                 targetSymbolSource = expression;
 
                 return;
+            }
+
+            if ( expression.Parent?.Parent?.Parent?.Parent is InvocationExpressionSyntax { Expression: { } wrappingExpression }
+                 && semanticModel.GetSymbolInfo( wrappingExpression ).Symbol is IMethodSymbol { ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName } wrappingHelperMethod )
+            {
+                // Wrapping helper methods are used in special cases where the generated expression needs to be additionally wrapped.
+
+                switch ( wrappingHelperMethod )
+                {
+                    case { Name: LinkerInjectionHelperProvider.AsyncVoidMethodMemberName }:
+                        // Referencing async-void method.
+                        rootNode = wrappingExpression;
+                        targetSymbolSource = expression;
+                        targetSymbol = referencedSymbol;
+
+                        return;
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected wrapping helper method: '{wrappingHelperMethod}'." );
+                }
             }
 
             if ( referencedSymbol is IMethodSymbol { ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName } helperMethod )
