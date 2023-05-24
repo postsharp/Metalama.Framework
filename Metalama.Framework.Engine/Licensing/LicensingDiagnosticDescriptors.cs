@@ -4,7 +4,7 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Engine.Licensing;
 
-internal static class LicensingDiagnosticDescriptors
+public static class LicensingDiagnosticDescriptors
 {
     // Reserved range: 800-819
 
