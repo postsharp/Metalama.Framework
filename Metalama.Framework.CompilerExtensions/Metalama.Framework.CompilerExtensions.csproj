@@ -64,9 +64,9 @@
 		
 		<!-- Project dependencies to ensure correct build order -->
 		<ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj" ReferenceOutputAssembly="false"/>
-		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj" ReferenceOutputAssembly="false"/>
+		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj" ReferenceOutputAssembly="false" />
 		
 		<!-- Current repo: Version-neutral assemblies -->
         <AssemblyToSignAndEmbed Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" />
@@ -89,29 +89,33 @@
         
     </ItemGroup>
     
+    <ItemGroup>
+      <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyLoader.cs" Link="AssemblyLoader.cs" />
+    </ItemGroup>
+    
     <Target Name="SignAndEmbedAssemblies">
 
-        <MakeDir Directories="$(IntermediateOutputPath)signable"/>
-        <MakeDir Directories="$(IntermediateOutputPath)signed"/>
+        <MakeDir Directories="$(IntermediateOutputPath)signable" />
+        <MakeDir Directories="$(IntermediateOutputPath)signed" />
         
-        <Copy SourceFiles="@(AssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable"/>
-        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip" Overwrite="true"/> 
+        <Copy SourceFiles="@(AssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" />
+        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip" Overwrite="true" /> 
         
-        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed&quot; --nologo"/>
+        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed&quot; --nologo" />
         
-        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\signable.zip"/>
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\signable.zip" />
         
         <ItemGroup>
-            <_SignedAssembly Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\*.dll"/>
-            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="@(_SignedAssembly)"  Link="Resources\%(Filename)%(Extension)" />
+            <_SignedAssembly Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\*.dll" />
+            <EmbeddedResource Include="@(AssemblyToEmbed)" Link="Resources\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_SignedAssembly)" Link="Resources\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     
     <Target Name="EmbedUnsignedAssemblies">
         <ItemGroup>
-            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)"  Link="Resources\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToEmbed)" Link="Resources\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)" Link="Resources\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     
