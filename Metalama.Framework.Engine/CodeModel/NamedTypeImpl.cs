@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -385,7 +384,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
 
         var interfaceType = interfaceMember.DeclaringType.GetSymbol();
-        var relevantInterfaces = this.GetAllInterfaces().Where( t => t.Equals(interfaceType) || t.ConstructedFrom.Equals( interfaceType ) );
+        var relevantInterfaces = this.GetAllInterfaces().Where( t => t.Equals( interfaceType ) || t.ConstructedFrom.Equals( interfaceType ) );
 
         foreach ( var implementedInterface in relevantInterfaces )
         {
@@ -394,9 +393,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
                 if ( (candidateMember.SignatureEquals( interfaceMember )
-                        || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ) )
+                        || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ))
                      && candidateMember.SignatureEquals( typeMember ) )
-                    
+
                 {
                     return true;
                 }

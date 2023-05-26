@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class DeclarationExtensions
     {
-        public static bool SignatureEquals(this IMember declaration, IMember other )
+        public static bool SignatureEquals( this IMember declaration, IMember other )
         {
             return (declaration, other) switch
             {
