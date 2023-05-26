@@ -39,7 +39,23 @@ namespace Metalama.Framework.Engine.CodeModel
                     _ => throw new AssertionFailedException( $"Unexpected node kind {node.Kind()} at '{node.GetLocation()}'." )
                 };
 
-                name = name.TrimSuffix( "Attribute" );
+                // When the name is e.g. [RequiresAttribute], the actual attribute type could be named RequiresAttribute, or RequiresAttributeAttribute.
+                // We need to use semantics to distinguish these two cases.
+                if ( name.EndsWith( "Attribute", StringComparison.Ordinal ) )
+                {
+                    var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+
+                    var attributeConstructor = semanticModel.GetSymbolInfo( node ).Symbol;
+
+                    if ( attributeConstructor == null )
+                    {
+                        return;
+                    }
+
+                    var attributeType = attributeConstructor.ContainingType;
+
+                    name = attributeType.Name.TrimSuffix( "Attribute" );
+                }
 
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
