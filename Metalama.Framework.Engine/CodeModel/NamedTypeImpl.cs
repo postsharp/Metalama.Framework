@@ -393,9 +393,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
                 if ( (candidateMember.SignatureEquals( interfaceMember )
-                        || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ))
+                      || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ))
                      && candidateMember.SignatureEquals( typeMember ) )
-
                 {
                     return true;
                 }

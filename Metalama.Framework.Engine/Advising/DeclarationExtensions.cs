@@ -19,7 +19,6 @@ namespace Metalama.Framework.Engine.Advising
                 (IEvent x, IEvent y ) => SignatureEquals( x, y ),
                 _ => throw new AssertionFailedException( $"Not expected ({declaration.DeclarationKind}, {other.DeclarationKind})" )
             };
-            ;
         }
 
         /// <summary>
