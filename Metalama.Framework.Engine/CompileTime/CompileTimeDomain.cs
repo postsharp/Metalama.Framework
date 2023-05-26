@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -32,6 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
         private readonly ILogger _logger;
         private readonly object _sync = new();
+        private readonly AssemblyLoader _assemblyLoader;
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
         private ImmutableDictionaryOfArray<string, string> _assemblyPathsByName = ImmutableDictionaryOfArray<string, string>.Empty;
 
@@ -42,15 +44,16 @@ namespace Metalama.Framework.Engine.CompileTime
             this.Observer = serviceProvider.GetService<ICompileTimeDomainObserver>();
             this.Observer?.OnDomainCreated( this );
 
-            AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+            this._assemblyLoader = new AssemblyLoader( this.ResolveAssembly );
+
             this._logger = Logger.Domain;
         }
 
-        private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args )
+        private Assembly? ResolveAssembly( string name )
         {
-            this._logger.Trace?.Log( $"Resolving the assembly '{args.Name}' requested by '{args.RequestingAssembly}'." );
+            this._logger.Trace?.Log( $"Resolving the assembly '{name}'." );
 
-            var assemblyName = new AssemblyName( args.Name );
+            var assemblyName = new AssemblyName( name );
 
             if ( this._assembliesByName.TryGetValue( assemblyName.Name.AssertNotNull(), out var candidateAssembly )
                  && AssemblyName.ReferenceMatchesDefinition( assemblyName, candidateAssembly.Assembly.GetName() ) )
@@ -74,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            this._logger.Warning?.Log( $"Could not find the assembly '{args.Name}'." );
+            this._logger.Warning?.Log( $"Could not find the assembly '{name}'." );
 
             return null;
         }
@@ -82,15 +85,14 @@ namespace Metalama.Framework.Engine.CompileTime
         // ReSharper disable once VirtualMemberNeverOverridden.Global, 
 
         /// <summary>
-        /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
-        /// but it can be overwritten for .NET Core.
+        /// Loads an assembly in the CLR.
         /// </summary>
         [PublicAPI] // Overridden by Metalama.Try.
         public virtual Assembly LoadAssembly( string path )
         {
             try
             {
-                return Assembly.LoadFile( path );
+                return this._assemblyLoader.LoadAssembly( path );
             }
             catch ( Exception e )
             {
@@ -140,7 +142,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._assembliesByName.Clear();
 
-                AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
+                this._assemblyLoader.Dispose();
             }
         }
 
