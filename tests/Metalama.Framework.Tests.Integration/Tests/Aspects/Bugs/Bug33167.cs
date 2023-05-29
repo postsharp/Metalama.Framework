@@ -10,7 +10,7 @@ internal class TestContract : ContractAspect
 {
     public override void Validate( dynamic? value )
     {
-        ((IMethod)meta.Target.Parameter.ContainingDeclaration).Invoke(value);
+        ((IMethod)meta.Target.Parameter.ContainingDeclaration!).Invoke(value);
     }
 }
 
