@@ -83,12 +83,6 @@ public static partial class EligibilityRuleFactory
                 parameter.MustSatisfy(
                     p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );
-
-                //parameter.MustSatisfy(
-                //    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method }
-                //           && method.GetIteratorInfo().EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator ),
-                //    member
-                //        => $"{member} must not return IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }
 
             var parameterEligibilityInput =
