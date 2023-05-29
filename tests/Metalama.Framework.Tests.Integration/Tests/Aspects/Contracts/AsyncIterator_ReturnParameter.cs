@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RequireConstant(NET5_0_OR_GREATER)
+#endif
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator_ReturnParameter;
 
 using System;
