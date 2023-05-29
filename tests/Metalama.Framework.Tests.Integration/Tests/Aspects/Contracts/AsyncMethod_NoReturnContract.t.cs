@@ -10,26 +10,26 @@ public class TestClass
     Console.WriteLine("Hello");
     return null !;
   }
-  public async Task DoSomethingAsync(string text)
+  public Task DoSomethingAsync(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    await this.DoSomethingAsync_Source(text);
+    return this.DoSomethingAsync_Source(text);
   }
   private async Task DoSomethingAsync_Source(string text)
   {
     await Task.Yield();
     Console.WriteLine("Hello");
   }
-  public async Task<string> DoSomethingAsyncT(string text)
+  public Task<string> DoSomethingAsyncT(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return (await this.DoSomethingAsyncT_Source(text));
+    return this.DoSomethingAsyncT_Source(text);
   }
   private async Task<string> DoSomethingAsyncT_Source(string text)
   {

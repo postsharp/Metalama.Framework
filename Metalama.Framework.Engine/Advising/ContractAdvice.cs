@@ -6,16 +6,17 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -135,7 +136,7 @@ namespace Metalama.Framework.Engine.Advising
                 };
 
                 var parameterType = ((IHasType) contractTarget).Type;
-                ExpressionSyntax parameterExpression = SyntaxFactory.IdentifierName( parameterName );
+                ExpressionSyntax parameterExpression = IdentifierName( parameterName );
                 parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
 
                 statements ??= new List<StatementSyntax>();
@@ -179,7 +180,10 @@ namespace Metalama.Framework.Engine.Advising
                 }
                 else
                 {
-                    statements.AddRange( filterBody.Statements );
+                    // TODO: This method should not use linker's annotations.
+                    statements.Add(
+                        Block( filterBody.Statements )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
                 }
             }
 

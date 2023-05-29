@@ -22,12 +22,6 @@ public sealed class TestAttribute : TypeAspect
                     nameof(ValidateParameter),
                     args: new { parameterName = parameter.Name } );
             }
-
-            // TODO: #32616
-            //builder.Advice.AddContract(
-            //    method.ReturnParameter,
-            //    nameof(ValidateParameter),
-            //    args: new { parameterName = method.ReturnParameter.Name });
         }
     }
 

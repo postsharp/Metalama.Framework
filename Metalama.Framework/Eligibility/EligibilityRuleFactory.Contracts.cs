@@ -23,9 +23,9 @@ public static partial class EligibilityRuleFactory
             static void AddCommonGetterParameterRules( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
             {
                 builder.MustSatisfy(
-                    p => p.GetMethod?.GetIteratorInfo().EnumerableKind is EnumerableKind.None or null,
+                    p => p.GetMethod?.GetIteratorInfo().EnumerableKind is not EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator,
                     member
-                        => $"{member} must not have get accessor that returns IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+                        => $"{member} must not have get accessor that returns IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }
 
             var propertyOrIndexerEligibilityInput =
@@ -84,11 +84,11 @@ public static partial class EligibilityRuleFactory
                     p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );
 
-                parameter.MustSatisfy(
-                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method }
-                           && method.GetIteratorInfo().EnumerableKind is not EnumerableKind.None),
-                    member
-                        => $"{member} must not return IEnumerable, IEnumerator, IEnumerable<T>, IEnumerator<T>, IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
+                //parameter.MustSatisfy(
+                //    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method }
+                //           && method.GetIteratorInfo().EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator ),
+                //    member
+                //        => $"{member} must not return IAsyncEnumerable<T> or IAsyncEnumerator<T>" );
             }
 
             var parameterEligibilityInput =

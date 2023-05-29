@@ -25,10 +25,15 @@ public sealed class TestAttribute : TypeAspect
                     args: new { parameterName = parameter.Name } );
             }
 
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateMethodResult),
-                args: new { methodName = method.Name });
+            if (method.ReturnType.IsReferenceType.GetValueOrDefault()
+                && !method.ReturnType.IsNullable.GetValueOrDefault()
+                && !method.GetAsyncInfo().ResultType.Is(SpecialType.Void))
+            {
+                builder.Advice.AddContract(
+                    method.ReturnParameter,
+                    nameof(ValidateMethodResult),
+                    args: new { methodName = method.Name });
+            }
         }
     }
 
@@ -62,6 +67,13 @@ public class TestClass
         return null!;
     }
 
+    public async Task DoSomethingAsync(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
+    }
+
     public async Task<string> DoSomethingAsyncT(string text)
     {
         await Task.Yield();
@@ -69,5 +81,12 @@ public class TestClass
         Console.WriteLine("Hello");
 
         return null!;
+    }
+
+    public async void DoSomethingAsyncVoid(string text)
+    {
+        await Task.Yield();
+
+        Console.WriteLine("Hello");
     }
 }

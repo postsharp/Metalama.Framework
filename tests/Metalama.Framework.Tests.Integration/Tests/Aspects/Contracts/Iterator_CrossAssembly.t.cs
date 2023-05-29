@@ -1,35 +1,54 @@
 [Test]
 public class TestClass
 {
-  public IEnumerable<string> Enumerable(string text)
+  public IEnumerable? Enumerable(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    foreach (var returnItem in this.Enumerable_Source(text))
-    {
-      yield return returnItem;
-    }
+    return this.Enumerable_Source(text);
   }
-  private IEnumerable<string> Enumerable_Source(string text)
+  private IEnumerable? Enumerable_Source(string text)
   {
     yield return "Hello";
     yield return text;
   }
-  public IEnumerator<string> Enumerator(string text)
+  public IEnumerator Enumerator(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    var returnEnumerator = this.Enumerator_Source(text);
-    while (returnEnumerator.MoveNext())
-    {
-      yield return returnEnumerator.Current;
-    }
+    return this.Enumerator_Source(text);
   }
-  private IEnumerator<string> Enumerator_Source(string text)
+  private IEnumerator Enumerator_Source(string text)
+  {
+    yield return "Hello";
+    yield return text;
+  }
+  public IEnumerable<string> EnumerableT(string text)
+  {
+    if (text is null)
+    {
+      throw new global::System.ArgumentNullException("text");
+    }
+    return this.EnumerableT_Source(text);
+  }
+  private IEnumerable<string> EnumerableT_Source(string text)
+  {
+    yield return "Hello";
+    yield return text;
+  }
+  public IEnumerator<string> EnumeratorT(string text)
+  {
+    if (text is null)
+    {
+      throw new global::System.ArgumentNullException("text");
+    }
+    return this.EnumeratorT_Source(text);
+  }
+  private IEnumerator<string> EnumeratorT_Source(string text)
   {
     yield return "Hello";
     yield return text;
