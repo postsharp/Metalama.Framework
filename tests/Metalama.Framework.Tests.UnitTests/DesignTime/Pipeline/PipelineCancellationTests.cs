@@ -10,9 +10,12 @@ using Metalama.Framework.DesignTime.VisualStudio;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -251,6 +254,27 @@ public sealed class PipelineCancellationTests : UnitTestClass
                 return true;
             }
         }
+    }
+
+    [Fact]
+    public async Task GetConfiguration()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["Class1.cs"] = "public class Class1 { }"
+        };
+
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
+
+        var testCancellationTokenSourceFactory = new TestCancellationTokenSourceFactory( cancelOnCount: 2 );
+        var cancellationTokenSource = testCancellationTokenSourceFactory.Create();
+
+        using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+        var pipeline = pipelineFactory.CreatePipeline( compilation );
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            async () => await pipeline.GetConfigurationAsync( PartialCompilation.CreateComplete( compilation ), ignoreStatus: false, AsyncExecutionContext.Get(), cancellationTokenSource.Token ) );
     }
 
     private sealed class GetCancellationPoints : IEnumerable<object[]>
