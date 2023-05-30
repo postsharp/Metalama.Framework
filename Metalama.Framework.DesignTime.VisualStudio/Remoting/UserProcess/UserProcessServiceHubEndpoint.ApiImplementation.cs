@@ -46,7 +46,7 @@ internal sealed partial class UserProcessServiceHubEndpoint
             {
                 if ( !this._parent._registeredEndpointsByProject.TryAdd( projectKey, endpoint ) )
                 {
-                    this._parent.Logger.Info?.Log( $"The project '{projectKey}' was already registered." );
+                    this._parent.Logger.Error?.Log( $"The project '{projectKey}' was already registered." );
                 }
 
                 // Unblock waiters.

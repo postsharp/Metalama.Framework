@@ -90,9 +90,6 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool IsConcurrentBuildEnabled => this.GetBooleanOption( MSBuildPropertyNames.MetalamaConcurrentBuildEnabled, true );
 
-        [Memo]
-        public override bool UsesPackagesConfig => this.GetBooleanOption( MSBuildPropertyNames.MetalamaUsesPackagesConfig );
-
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 
         [Memo]

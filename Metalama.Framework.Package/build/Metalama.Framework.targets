@@ -64,21 +64,5 @@
         </ItemGroup>
     </Target>
 
-    <!-- For packages.config projects, it is necessary to explicitly include the analyzer as an ItemGroup. -->
-    <PropertyGroup>
-         <!--If NuGet.targets is not loaded, assume packages.config.--> 
-        <MetalamaUsesPackagesConfig Condition="'$(IsRestoreTargetsFileLoaded)'!='True'">True</MetalamaUsesPackagesConfig>
-    </PropertyGroup>
-     <!--If NuGet.targets is loaded, check for packages.config using the internal target _GetRestoreProjectStyle.--> 
-    <Target Name="CheckForPackagesConfig" Condition="'$(IsRestoreTargetsFileLoaded)'=='True'" DependsOnTargets="_GetRestoreProjectStyle" Returns="$(MetalamaUsesPackagesConfig)">
-        <PropertyGroup>
-            <MetalamaUsesPackagesConfig Condition="'$(PackageReferenceCompatibleProjectStyle)'!='True'">True</MetalamaUsesPackagesConfig>
-        </PropertyGroup>
-    </Target>
-    <Target Name="IncludeAnalyzers" DependsOnTargets="CheckForPackagesConfig" BeforeTargets="PrepareForBuild">
-        <ItemGroup>
-            <Analyzer Include="$(MSBuildThisFileDirectory)/../analyzers/dotnet/cs/*.dll" Condition="'$(MetalamaUsesPackagesConfig)'=='True'" />
-        </ItemGroup>
-    </Target>
 
 </Project>
