@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
@@ -30,14 +31,14 @@ class Implementation : IInterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t=> t.Name == "IInterface");
+        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
         var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceMethod1 = interfaceType.Methods.First();
-        var interfaceMethod2 = interfaceType.Methods.Skip(1).First();
+        var interfaceMethod2 = interfaceType.Methods.Skip( 1 ).First();
 
-        var implementationMethod1 = implementationType.Methods.OfExactSignature(interfaceMethod1);
-        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceMethod2 );
+        var implementationMethod1 = implementationType.Methods.OfExactSignature( interfaceMethod1 ).AssertNotNull();
+        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceMethod2 ).AssertNotNull();
 
         Assert.True( implementationType.IsImplementationOfInterfaceMember( implementationMethod1, interfaceMethod1 ) );
         Assert.False( implementationType.IsImplementationOfInterfaceMember( implementationMethod1, interfaceMethod2 ) );
@@ -113,11 +114,11 @@ class Implementation : Base, IInterface
         var interfaceMethod1 = interfaceType.Methods.First();
         var interfaceMethod2 = interfaceType.Methods.Skip( 1 ).First();
 
-        var baseMethod1 = baseType.Methods.OfExactSignature( interfaceMethod1 );
-        var baseMethod2 = baseType.Methods.OfExactSignature( interfaceMethod2 );
+        var baseMethod1 = baseType.Methods.OfExactSignature( interfaceMethod1 ).AssertNotNull();
+        var baseMethod2 = baseType.Methods.OfExactSignature( interfaceMethod2 ).AssertNotNull();
 
-        var implementationMethod1 = implementationType.Methods.OfExactSignature( interfaceMethod1 );
-        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceMethod2 );
+        var implementationMethod1 = implementationType.Methods.OfExactSignature( interfaceMethod1 ).AssertNotNull();
+        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceMethod2 ).AssertNotNull();
 
         Assert.True( implementationType.IsImplementationOfInterfaceMember( baseMethod1, interfaceMethod1 ) );
         Assert.False( implementationType.IsImplementationOfInterfaceMember( baseMethod1, interfaceMethod2 ) );
@@ -166,10 +167,10 @@ class Implementation : Base, ISubinterface
         var subinterfaceMethod = subinterfaceType.Methods.First();
         var interfaceMethod = interfaceType.Methods.First();
 
-        var baseMethod1 = baseType.Methods.OfExactSignature( subinterfaceMethod );
-        var baseMethod2 = baseType.Methods.OfExactSignature( interfaceMethod );
+        var baseMethod1 = baseType.Methods.OfExactSignature( subinterfaceMethod ).AssertNotNull();
+        var baseMethod2 = baseType.Methods.OfExactSignature( interfaceMethod ).AssertNotNull();
 
-        var implementationMethod = implementationType.Methods.OfExactSignature( subinterfaceMethod );
+        var implementationMethod = implementationType.Methods.OfExactSignature( subinterfaceMethod ).AssertNotNull();
 
         Assert.True( implementationType.IsImplementationOfInterfaceMember( baseMethod1, subinterfaceMethod ) );
         Assert.False( implementationType.IsImplementationOfInterfaceMember( baseMethod1, interfaceMethod ) );
@@ -209,8 +210,8 @@ class Implementation : IInterface<int>, IInterface<string>
         var interfaceInstanceType2Method = interfaceInstanceType2.Methods.Single();
         var interfaceInstanceType3Method = interfaceInstanceType3.Methods.Single();
 
-        var implementationMethod1 = implementationType.Methods.OfExactSignature( interfaceInstanceType1Method );
-        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceInstanceType2Method );
+        var implementationMethod1 = implementationType.Methods.OfExactSignature( interfaceInstanceType1Method ).AssertNotNull();
+        var implementationMethod2 = implementationType.Methods.OfExactSignature( interfaceInstanceType2Method ).AssertNotNull();
 
         Assert.True( implementationType.IsImplementationOfInterfaceMember( implementationMethod1, interfaceTypeMethod ) );
         Assert.True( implementationType.IsImplementationOfInterfaceMember( implementationMethod2, interfaceTypeMethod ) );
