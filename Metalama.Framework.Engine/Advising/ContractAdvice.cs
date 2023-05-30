@@ -180,10 +180,10 @@ namespace Metalama.Framework.Engine.Advising
                 }
                 else
                 {
-                    // TODO: This method should not use linker's annotations.
+                    // TODO: This method should not use linker annotations.
                     statements.Add(
                         Block( filterBody.Statements )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
                 }
             }
 

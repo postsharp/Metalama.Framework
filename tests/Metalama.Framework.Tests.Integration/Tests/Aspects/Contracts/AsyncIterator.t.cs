@@ -3,6 +3,7 @@ public class TestClass
 {
   public IAsyncEnumerable<string> AsyncEnumerable(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
@@ -18,6 +19,7 @@ public class TestClass
   }
   public IAsyncEnumerator<string> AsyncEnumerator(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");

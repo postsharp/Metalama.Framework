@@ -1,21 +1,23 @@
 [Test]
 public class TestClass
 {
-  public IEnumerable? Enumerable(string text)
+  public IEnumerable Enumerable(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
     return this.Enumerable_Source(text);
   }
-  private IEnumerable? Enumerable_Source(string text)
+  private IEnumerable Enumerable_Source(string text)
   {
     yield return "Hello";
     yield return text;
   }
   public IEnumerator Enumerator(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
@@ -29,6 +31,7 @@ public class TestClass
   }
   public IEnumerable<string> EnumerableT(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
@@ -42,6 +45,7 @@ public class TestClass
   }
   public IEnumerator<string> EnumeratorT(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");

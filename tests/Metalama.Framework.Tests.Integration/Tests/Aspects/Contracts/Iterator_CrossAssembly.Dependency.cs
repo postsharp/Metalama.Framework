@@ -28,6 +28,8 @@ public sealed class TestAttribute : TypeAspect
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
     {
+        Console.WriteLine($"Advice");
+
         if (value is null)
         {
             throw new ArgumentNullException( parameterName );

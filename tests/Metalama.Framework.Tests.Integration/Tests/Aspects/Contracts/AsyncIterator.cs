@@ -1,5 +1,6 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
+// @ExecuteProgram
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator;
@@ -32,9 +33,32 @@ public sealed class TestAttribute : TypeAspect
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
     {
+        Console.WriteLine($"Advice");
+
         if (value is null)
         {
             throw new ArgumentNullException( parameterName );
+        }
+    }
+}
+
+public class Program
+{
+    private static async Task TestMain()
+    {
+        const string text = "testText";
+        var test = new TestClass();
+
+        await foreach (var item in test.AsyncEnumerable(text))
+        {
+            Console.WriteLine($"{item};");
+        }
+
+        var enumerator = test.AsyncEnumerator(text);
+    
+        while(await enumerator.MoveNextAsync())
+        {
+            Console.WriteLine($"{enumerator.Current};");
         }
     }
 }

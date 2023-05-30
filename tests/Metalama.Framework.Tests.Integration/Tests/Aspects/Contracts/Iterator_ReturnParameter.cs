@@ -26,6 +26,8 @@ public sealed class TestAttribute : TypeAspect
     [Template]
     private void ValidateParameter(dynamic? value)
     {
+        Console.WriteLine($"Advice");
+
         if (meta.Target.Parameter.Type.Is(SpecialType.IEnumerable)
             || meta.Target.Parameter.Type.Is(TypeFactory.GetType(SpecialType.IEnumerable_T).WithTypeArguments(TypeFactory.GetType(SpecialType.String))))
         {
@@ -50,11 +52,44 @@ public sealed class TestAttribute : TypeAspect
     }
 }
 
+public class Program
+{
+    private static void TestMain()
+    {
+        const string text = "testText";
+        var test = new TestClass();
+
+        foreach (var item in test.Enumerable(text))
+        {
+            Console.WriteLine($"{item};");
+        }
+
+        var enumerator1 = test.Enumerator(text);
+
+        while (enumerator1.MoveNext())
+        {
+            Console.WriteLine($"{enumerator1.Current};");
+        }
+
+        foreach (var item in test.EnumerableT(text))
+        {
+            Console.WriteLine($"{item};");
+        }
+
+        var enumerator2 = test.EnumeratorT(text);
+
+        while (enumerator2.MoveNext())
+        {
+            Console.WriteLine($"{enumerator2.Current};");
+        }
+    }
+}
+
 // <target>
 [Test]
 public class TestClass
 {
-    public IEnumerable? Enumerable(string text)
+    public IEnumerable Enumerable(string text)
     {
         yield return "Hello";
         yield return text;

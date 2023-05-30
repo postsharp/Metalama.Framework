@@ -4,10 +4,18 @@ public class TestClass
   public async IAsyncEnumerable<string> AsyncEnumerable(string text)
   {
     var returnValue = this.AsyncEnumerable_Source(text);
-    global::System.Console.WriteLine($"Advice");
+    global::System.Console.WriteLine("Advice 1");
     await foreach (var item in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object?>)returnValue)
     {
       if (item is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    global::System.Console.WriteLine("Advice 2");
+    await foreach (var item_1 in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object?>)returnValue)
+    {
+      if (item_1 is null)
       {
         throw new global::System.ArgumentNullException("<return>");
       }
@@ -28,7 +36,16 @@ public class TestClass
   {
     var returnValue = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(text)));
     var contractEnumerator = returnValue;
-    global::System.Console.WriteLine($"Advice");
+    global::System.Console.WriteLine("Advice 1");
+    while (await contractEnumerator.MoveNextAsync())
+    {
+      if (contractEnumerator.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    contractEnumerator = returnValue;
+    global::System.Console.WriteLine("Advice 2");
     while (await contractEnumerator.MoveNextAsync())
     {
       if (contractEnumerator.Current is null)

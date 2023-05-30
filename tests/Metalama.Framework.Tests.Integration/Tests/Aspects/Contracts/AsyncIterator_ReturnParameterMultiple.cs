@@ -2,7 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER)
 #endif
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator_ReturnParameter;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator_ReturnParameterMultiple;
 
 using System;
 using System.Collections.Generic;
@@ -13,26 +13,32 @@ using Metalama.Framework.Code;
 
 public sealed class TestAttribute : TypeAspect
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        base.BuildAspect( builder );
+        base.BuildAspect(builder);
 
         foreach (var method in builder.Target.Methods)
         {
             builder.Advice.AddContract(
                 method.ReturnParameter,
-                nameof(ValidateParameter));
+                nameof(ValidateParameter),
+                args: new { adviceId = 1 });
+
+            builder.Advice.AddContract(
+                method.ReturnParameter,
+                nameof(ValidateParameter),
+                args: new { adviceId = 2 });
         }
     }
 
     [Template]
-    private async void ValidateParameter( dynamic? value )
+    private async void ValidateParameter(dynamic? value, [CompileTime] int adviceId)
     {
-        Console.WriteLine($"Advice");
+        Console.WriteLine($"Advice {adviceId}");
 
         if (meta.Target.Parameter.Type.Is(TypeFactory.GetType(SpecialType.IAsyncEnumerable_T).WithTypeArguments(TypeFactory.GetType(SpecialType.String))))
         {
-            await foreach(var item in (IAsyncEnumerable<object?>)value!)
+            await foreach (var item in (IAsyncEnumerable<object?>)value!)
             {
                 if (item is null)
                 {

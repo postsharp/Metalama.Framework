@@ -1,11 +1,11 @@
 [Test]
 public class TestClass
 {
-  public IEnumerable? Enumerable(string text)
+  public IEnumerable Enumerable(string text)
   {
     var returnValue = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerable_Source(text));
     global::System.Console.WriteLine("Advice 1");
-    foreach (var item in returnValue!)
+    foreach (var item in returnValue)
     {
       if (item is null)
       {
@@ -13,7 +13,7 @@ public class TestClass
       }
     }
     global::System.Console.WriteLine("Advice 2");
-    foreach (var item_1 in returnValue!)
+    foreach (var item_1 in returnValue)
     {
       if (item_1 is null)
       {
@@ -22,7 +22,7 @@ public class TestClass
     }
     return returnValue;
   }
-  private IEnumerable? Enumerable_Source(string text)
+  private IEnumerable Enumerable_Source(string text)
   {
     yield return "Hello";
     yield return text;
