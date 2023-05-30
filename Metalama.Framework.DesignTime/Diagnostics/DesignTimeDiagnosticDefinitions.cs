@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -37,12 +40,15 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
-                typeof(TemplatingDiagnosticDescriptors),
-                typeof(DesignTimeDiagnosticDescriptors),
                 typeof(GeneralDiagnosticDescriptors),
+                typeof(TemplatingDiagnosticDescriptors),
                 typeof(SerializationDiagnosticDescriptors),
+                typeof(DesignTimeDiagnosticDescriptors),
+                typeof(AttributeDeserializerDiagnostics),
                 typeof(AdviceDiagnosticDescriptors),
-                typeof(AspectLinkerDiagnosticDescriptors) )
+                typeof(AspectLinkerDiagnosticDescriptors),
+                typeof(FrameworkDiagnosticDescriptors),
+                typeof(LicensingDiagnosticDescriptors) )
             .Select( d => d.ToRoslynDescriptor() )
             .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
 

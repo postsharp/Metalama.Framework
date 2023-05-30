@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     public static class AspectLinkerDiagnosticDescriptors
     {
-        // Reserved range 600-699
+        // Reserved range 650-699
 
         private const string _category = "Metalama.Linker";
 

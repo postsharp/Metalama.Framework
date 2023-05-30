@@ -6,7 +6,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal static class AttributeDeserializerDiagnostics
+    public static class AttributeDeserializerDiagnostics
     {
         // Reserved range 400-499
 
