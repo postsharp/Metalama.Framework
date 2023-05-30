@@ -33,6 +33,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 public sealed class PipelineCancellationTests : UnitTestClass
 {
     private const int _maxCancellationPoints = 23;
+    private const int _getConfigurationMaxCancellationPoints = 2;
 
     public PipelineCancellationTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -256,30 +257,60 @@ public sealed class PipelineCancellationTests : UnitTestClass
         }
     }
 
-    [Fact]
-    public async Task GetConfiguration()
+    [Theory]
+    [ClassData( typeof(GetGetConfigurationCancellationPoints) )]
+    public async Task GetConfigurationWithCancellation( int cancelOnCancellationPointIndex )
     {
-        using var testContext = this.CreateTestContext();
+        Assert.True( await this.RunGetConfigurationTestAsync( cancelOnCancellationPointIndex ) );
+    }
 
-        var code = new Dictionary<string, string>
+    [Fact]
+    public async Task GetConfigurationWithoutCancellation()
+    {
+        Assert.False( await this.RunGetConfigurationTestAsync( _getConfigurationMaxCancellationPoints + 1 ) );
+    }
+
+    // Return value: whether the test was cancelled.
+    private async Task<bool> RunGetConfigurationTestAsync( int cancelOnCancellationPointIndex )
+    {
+        try
         {
-            ["Class1.cs"] = "public class Class1 { }"
-        };
+            using var testContext = this.CreateTestContext();
 
-        var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var code = new Dictionary<string, string>
+            {
+                ["Class1.cs"] = "public class Class1 { }"
+            };
 
-        var testCancellationTokenSourceFactory = new TestCancellationTokenSourceFactory( cancelOnCount: 2 );
-        var cancellationTokenSource = testCancellationTokenSourceFactory.Create();
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
-        using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
-        var pipeline = pipelineFactory.CreatePipeline( compilation );
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () => await pipeline.GetConfigurationAsync( PartialCompilation.CreateComplete( compilation ), ignoreStatus: false, AsyncExecutionContext.Get(), cancellationTokenSource.Token ) );
+            var testCancellationTokenSourceFactory = new TestCancellationTokenSourceFactory( cancelOnCancellationPointIndex );
+            var cancellationTokenSource = testCancellationTokenSourceFactory.Create();
+
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation );
+            var configuration = await pipeline.GetConfigurationAsync( PartialCompilation.CreateComplete( compilation ), ignoreStatus: false, AsyncExecutionContext.Get(), cancellationTokenSource.Token );
+
+            Assert.True( configuration.IsSuccessful );
+
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            return true;
+        }
     }
 
     private sealed class GetCancellationPoints : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator() => Enumerable.Range( 1, _maxCancellationPoints ).Select( i => new object[] { i } ).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+    }
+
+    private sealed class GetGetConfigurationCancellationPoints : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator() => Enumerable.Range( 1, _getConfigurationMaxCancellationPoints ).Select( i => new object[] { i } ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
