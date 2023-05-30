@@ -51,7 +51,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly IFileSystemWatcher? _fileSystemWatcher;
     private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
-    private readonly SemaphoreSlim _sync = new( 1 );
+    private readonly SemaphoreSlim _sync = new( initialCount: 1, maxCount: 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
@@ -339,24 +339,29 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
-            if ( ignoreStatus )
+            try
             {
-                await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
+                if ( ignoreStatus )
+                {
+                    await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
+                }
+
+                var state = this._currentState;
+
+                var getConfigurationResult = PipelineState.GetConfiguration(
+                    ref state,
+                    compilation.Compilation,
+                    ignoreStatus,
+                    cancellationToken );
+
+                await this.SetStateAsync( state, executionContext );
+
+                return getConfigurationResult;
             }
-
-            var state = this._currentState;
-
-            var getConfigurationResult = PipelineState.GetConfiguration(
-                ref state,
-                compilation.Compilation,
-                ignoreStatus,
-                cancellationToken );
-
-            await this.SetStateAsync( state, executionContext );
-
-            await this.ProcessJobQueueAsync( executionContext );
-
-            return getConfigurationResult;
+            finally
+            {
+                await this.ProcessJobQueueAsync( executionContext );
+            }
         }
     }
 
@@ -390,11 +395,16 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
-            await this.SetStateAsync( this._currentState.Reset(), executionContext );
+            try
+            {
+                await this.SetStateAsync( this._currentState.Reset(), executionContext );
 
-            this._eventHub.OnProjectDirty( this.ProjectKey );
-
-            await this.ProcessJobQueueAsync( executionContext );
+                this._eventHub.OnProjectDirty( this.ProjectKey );
+            }
+            finally
+            {
+                await this.ProcessJobQueueAsync( executionContext );
+            }
         }
     }
 
@@ -1050,6 +1060,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         var realTimeout = timeout < 0 ? int.MaxValue : timeout;
         var acquired = await this._sync.WaitAsync( Math.Min( 5000, realTimeout ), cancellationToken );
 
+        // Now wait more if needed.
         if ( !acquired )
         {
             this.Logger.Warning?.Log( $"Acquiring the lock on '{this.ProjectKey}' is taking a long time." + Environment.NewLine + new StackTrace() );
@@ -1060,7 +1071,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             }
         }
 
-        // Now wait more if needed.
         Action? lockDisposeAction = null;
 
         if ( acquired )
