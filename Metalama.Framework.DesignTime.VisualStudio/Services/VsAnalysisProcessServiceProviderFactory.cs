@@ -34,6 +34,8 @@ internal sealed class VsAnalysisProcessServiceProviderFactory : DesignTimeAnalys
             serviceProvider = serviceProvider.WithService( analysisProcessEndpoint );
         }
 
+        serviceProvider = serviceProvider.WithService( new VsAnalysisProcessProjectHandlerFactory( serviceProvider ) );
+
         return serviceProvider;
     }
 }

@@ -81,7 +81,7 @@ internal sealed partial class UserProcessServiceHubEndpoint
 
         public Task UnregisterAnalysisServiceProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
-            this._parent.Logger.Trace?.Log( $"Registering the project '{projectKey}'." );
+            this._parent.Logger.Trace?.Log( $"Unregistering the project '{projectKey}'." );
 
             if ( !this._parent._registeredEndpointsByProject.TryRemove( projectKey, out _ ) )
             {
