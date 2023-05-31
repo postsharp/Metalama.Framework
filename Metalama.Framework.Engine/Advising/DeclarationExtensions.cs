@@ -12,11 +12,11 @@ namespace Metalama.Framework.Engine.Advising
         {
             return (declaration, other) switch
             {
-                (IMethod x, IMethod y ) => SignatureEquals( x, y ),
-                (IIndexer x, IIndexer y ) => SignatureEquals( x, y ),
-                (IField x, IField y ) => SignatureEquals( x, y ),
-                (IProperty x, IProperty y ) => SignatureEquals( x, y ),
-                (IEvent x, IEvent y ) => SignatureEquals( x, y ),
+                (IMethod x, IMethod y) => SignatureEquals( x, y ),
+                (IIndexer x, IIndexer y) => SignatureEquals( x, y ),
+                (IField x, IField y) => SignatureEquals( x, y ),
+                (IProperty x, IProperty y) => SignatureEquals( x, y ),
+                (IEvent x, IEvent y) => SignatureEquals( x, y ),
                 _ => throw new AssertionFailedException( $"Not expected ({declaration.DeclarationKind}, {other.DeclarationKind})" )
             };
         }
