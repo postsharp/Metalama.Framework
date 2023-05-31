@@ -104,6 +104,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             // CurrentAspectLayerId may be null when we are not executing in a template execution context.
             => new( TemplateExpansionContext.CurrentAspectLayerId ?? default, this._order );
 
+        protected string GetCleanTargetMemberName()
+        {
+            var definition = this.Member.GetOriginalDefinition();
+
+            return
+                definition.IsExplicitInterfaceImplementation
+                    ? definition.GetExplicitInterfaceImplementation().Name
+                    : definition.Name;
+        }
+
         protected ReceiverTypedExpressionSyntax GetReceiverInfo()
         {
             if ( this.Target is UserReceiver receiver )

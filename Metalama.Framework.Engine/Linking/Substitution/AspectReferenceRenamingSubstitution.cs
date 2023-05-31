@@ -55,6 +55,21 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 } operatorMemberAccess when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
                     return this.SubstituteOperatorMemberAccess( operatorMemberAccess, substitutionContext );
 
+                case MemberAccessExpressionSyntax
+                {
+                    Expression: ParenthesizedExpressionSyntax { Expression: CastExpressionSyntax { Expression: { } targetExpression } }
+                } memberAccessExpression when this._aspectReference.ResolvedSemantic.Symbol.IsInterfaceMemberImplementation():
+                    if ( this._aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    {
+                        return memberAccessExpression;
+                    }
+                    else
+                    {
+                        return memberAccessExpression
+                            .WithExpression( targetExpression )
+                            .WithName( GetRewrittenName( memberAccessExpression.Name ) );
+                    }
+
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
 

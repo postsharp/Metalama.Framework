@@ -23,6 +23,8 @@ public sealed class TaskBag
     public void Run( Func<Task> asyncAction, CancellationToken cancellationToken = default )
     {
         var taskId = Interlocked.Increment( ref this._nextId );
+        var taskCompleted = false;
+        var sync = new object();
 
         var task = Task.Run(
             async () =>
@@ -37,12 +39,28 @@ public sealed class TaskBag
                 }
                 finally
                 {
-                    this._pendingTasks.TryRemove( taskId, out _ );
+                    lock ( sync )
+                    {
+                        taskCompleted = true;
+                        this._pendingTasks.TryRemove( taskId, out _ );
+                    }
                 }
             },
             cancellationToken );
 
-        this._pendingTasks.TryAdd( taskId, (task, asyncAction) );
+        Thread.MemoryBarrier();
+
+        lock ( sync )
+        {
+            if ( !taskCompleted )
+            {
+                this._pendingTasks.TryAdd( taskId, (task, asyncAction) );
+            }
+            else
+            {
+                // If we add the task, it will never be removed.
+            }
+        }
     }
 
     [PublicAPI]
@@ -73,4 +91,6 @@ public sealed class TaskBag
         }
 #pragma warning restore VSTHRD003
     }
+
+    internal bool IsEmpty => this._pendingTasks.IsEmpty;
 }
