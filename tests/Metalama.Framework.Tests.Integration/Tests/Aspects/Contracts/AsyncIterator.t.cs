@@ -1,16 +1,14 @@
 [Test]
 public class TestClass
 {
-  public async IAsyncEnumerable<string> AsyncEnumerable(string text)
+  public IAsyncEnumerable<string> AsyncEnumerable(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    await foreach (var returnItem in this.AsyncEnumerable_Source(text))
-    {
-      yield return returnItem;
-    }
+    return this.AsyncEnumerable_Source(text);
   }
   private async IAsyncEnumerable<string> AsyncEnumerable_Source(string text)
   {
@@ -19,17 +17,14 @@ public class TestClass
     await Task.Yield();
     yield return text;
   }
-  public async IAsyncEnumerator<string> AsyncEnumerator(string text)
+  public IAsyncEnumerator<string> AsyncEnumerator(string text)
   {
+    global::System.Console.WriteLine($"Advice");
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    var returnEnumerator = this.AsyncEnumerator_Source(text);
-    while (await returnEnumerator.MoveNextAsync())
-    {
-      yield return returnEnumerator.Current;
-    }
+    return this.AsyncEnumerator_Source(text);
   }
   private async IAsyncEnumerator<string> AsyncEnumerator_Source(string text)
   {

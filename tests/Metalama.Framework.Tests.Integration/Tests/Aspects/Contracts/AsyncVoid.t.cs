@@ -12,18 +12,18 @@ public class Class1
       throw new global::System.ArgumentNullException();
     return new(Task.CompletedTask);
   }
-  public async Task ExecuteAsync_Task([NotNull] Action action)
+  public Task ExecuteAsync_Task([NotNull] Action action)
   {
     if (action == null)
       throw new global::System.ArgumentNullException();
-    await this.ExecuteAsync_Task_Source(action);
+    return this.ExecuteAsync_Task_Source(action);
   }
   private async Task ExecuteAsync_Task_Source(Action action) => await Task.Yield();
-  public async ValueTask ExecuteAsync_ValueTask([NotNull] Action action)
+  public ValueTask ExecuteAsync_ValueTask([NotNull] Action action)
   {
     if (action == null)
       throw new global::System.ArgumentNullException();
-    await this.ExecuteAsync_ValueTask_Source(action);
+    return this.ExecuteAsync_ValueTask_Source(action);
   }
   private async ValueTask ExecuteAsync_ValueTask_Source(Action action) => await Task.Yield();
   public async void ExecuteAsync_Void([NotNull] Action action)

@@ -1,9 +1,8 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
-// @ExecuteProgram
 #endif
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator_ReturnParameter;
 
 using System;
 using System.Collections.Generic;
@@ -20,24 +19,36 @@ public sealed class TestAttribute : TypeAspect
 
         foreach (var method in builder.Target.Methods)
         {
-            foreach (var parameter in method.Parameters)
-            {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
-            }
+            builder.Advice.AddContract(
+                method.ReturnParameter,
+                nameof(ValidateParameter));
         }
     }
 
     [Template]
-    private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
+    private async void ValidateParameter( dynamic? value )
     {
         Console.WriteLine($"Advice");
 
-        if (value is null)
+        if (meta.Target.Parameter.Type.Is(TypeFactory.GetType(SpecialType.IAsyncEnumerable_T).WithTypeArguments(TypeFactory.GetType(SpecialType.String))))
         {
-            throw new ArgumentNullException( parameterName );
+            await foreach(var item in (IAsyncEnumerable<object?>)value!)
+            {
+                if (item is null)
+                {
+                    throw new ArgumentNullException("<return>");
+                }
+            }
+        }
+        else
+        {
+            while (await value!.MoveNextAsync())
+            {
+                if (value.Current is null)
+                {
+                    throw new ArgumentNullException("<return>");
+                }
+            }
         }
     }
 }
@@ -55,8 +66,8 @@ public class Program
         }
 
         var enumerator = test.AsyncEnumerator(text);
-    
-        while(await enumerator.MoveNextAsync())
+
+        while (await enumerator.MoveNextAsync())
         {
             Console.WriteLine($"{enumerator.Current};");
         }

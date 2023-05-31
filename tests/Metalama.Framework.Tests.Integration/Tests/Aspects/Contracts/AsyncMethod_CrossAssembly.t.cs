@@ -16,13 +16,13 @@ public class TestClass
     }
     return returnValue;
   }
-  public async Task DoSomethingAsync(string text)
+  public Task DoSomethingAsync(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    await this.DoSomethingAsync_Source(text);
+    return this.DoSomethingAsync_Source(text);
   }
   private async Task DoSomethingAsync_Source(string text)
   {

@@ -1,4 +1,4 @@
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Iterator;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Iterator_ReturnParameterMultiple;
 
 using System;
 using System.Collections;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 
 public sealed class TestAttribute : TypeAspect
 {
@@ -16,24 +17,43 @@ public sealed class TestAttribute : TypeAspect
 
         foreach (var method in builder.Target.Methods)
         {
-            foreach (var parameter in method.Parameters)
-            {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
-            }
+            builder.Advice.AddContract(
+                method.ReturnParameter,
+                nameof(ValidateParameter),
+                args: new { adviceId = 1 });
+
+            builder.Advice.AddContract(
+                method.ReturnParameter,
+                nameof(ValidateParameter),
+                args: new { adviceId = 2 });
         }
     }
 
     [Template]
-    private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
+    private void ValidateParameter( dynamic? value, [CompileTime] int adviceId )
     {
-        Console.WriteLine($"Advice");
+        Console.WriteLine($"Advice {adviceId}");
 
-        if (value is null)
+        if (meta.Target.Parameter.Type.Is(SpecialType.IEnumerable)
+            || meta.Target.Parameter.Type.Is(TypeFactory.GetType(SpecialType.IEnumerable_T).WithTypeArguments(TypeFactory.GetType(SpecialType.String))))
         {
-            throw new ArgumentNullException( parameterName );
+            foreach (var item in value!)
+            {
+                if (item is null)
+                {
+                    throw new ArgumentNullException("<return>");
+                }
+            }
+        }
+        else
+        {
+            while (value!.MoveNext())
+            {
+                if (value.Current is null)
+                {
+                    throw new ArgumentNullException("<return>");
+                }
+            }
         }
     }
 }
@@ -87,13 +107,13 @@ public class TestClass
         yield return text;
     }
 
-    public IEnumerable<string> EnumerableT( string text )
+    public IEnumerable<string> EnumerableT(string text)
     {
         yield return "Hello";
         yield return text;
     }
 
-    public IEnumerator<string> EnumeratorT(string text)
+    public IEnumerator<string> EnumeratorT( string text )
     {
         yield return "Hello";
         yield return text;

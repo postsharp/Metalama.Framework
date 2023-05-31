@@ -22,18 +22,14 @@ public sealed class TestAttribute : TypeAspect
                     nameof(ValidateParameter),
                     args: new { parameterName = parameter.Name } );
             }
-
-            // TODO: #32616
-            //builder.Advice.AddContract(
-            //    method.ReturnParameter,
-            //    nameof(ValidateParameter),
-            //    args: new { parameterName = method.ReturnParameter.Name });
         }
     }
 
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
     {
+        Console.WriteLine($"Advice");
+
         if (value is null)
         {
             throw new ArgumentNullException( parameterName );

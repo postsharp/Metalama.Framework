@@ -332,7 +332,7 @@ namespace Metalama.Testing.AspectTesting
 
             var mainMethodName = testOptions.MainMethod ?? "Main";
 
-            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == mainMethodName ).ToList();
+            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToList();
 
             switch ( programTypes.Count )
             {
@@ -361,7 +361,7 @@ namespace Metalama.Testing.AspectTesting
                     break;
 
                 default:
-                    testResult.SetFailed( "The 'Program' class can contain a single method called 'Main'." );
+                    testResult.SetFailed( $"The 'Program' class can contain a single method called '{mainMethodName}'." );
 
                     return null;
             }
@@ -370,21 +370,21 @@ namespace Metalama.Testing.AspectTesting
 
             if ( !mainMethod.IsStatic )
             {
-                testResult.SetFailed( "The 'Program.Main' method must be static." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must be static." );
 
                 return null;
             }
 
             if ( mainMethod is { IsAsync: true, ReturnType: not INamedType { Name: "Task" } } )
             {
-                testResult.SetFailed( "The 'Program.Main' method, if it is async, must be of return type 'Task'." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method, if it is async, must be of return type 'Task'." );
 
                 return null;
             }
 
             if ( mainMethod.Parameters.Count != 0 )
             {
-                testResult.SetFailed( "The 'Program.Main' method must not have parameters." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters." );
 
                 return null;
             }
@@ -402,7 +402,7 @@ namespace Metalama.Testing.AspectTesting
                 Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
 
             // Compare with expected program outputs.
-            string? expectedOutput;
+            string? expectedProgramOutput;
 
             var actualProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( testResult.ProgramOutput );
 
@@ -427,7 +427,9 @@ namespace Metalama.Testing.AspectTesting
                         "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
                 }
 
-                if ( actualProgramOutput != expectedProgramOutputPath )
+                expectedProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
+
+                if ( actualProgramOutput != expectedProgramOutput )
                 {
                     File.WriteAllText( actualProgramOutputPath, actualProgramOutput );
                 }
@@ -435,12 +437,10 @@ namespace Metalama.Testing.AspectTesting
                 this.Logger?.WriteLine( "=== ACTUAL PROGRAM OUTPUT ===" );
                 this.Logger?.WriteLine( actualProgramOutput );
                 this.Logger?.WriteLine( "=====================" );
-
-                expectedOutput = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
             }
             else
             {
-                expectedOutput = "";
+                expectedProgramOutput = "";
 
                 if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
                 {
@@ -457,8 +457,8 @@ namespace Metalama.Testing.AspectTesting
                 }
             }
 
-            state["actualProgramOutput"] = expectedOutput;
-            state["expectedProgramOutput"] = expectedOutput;
+            state["actualProgramOutput"] = actualProgramOutput;
+            state["expectedProgramOutput"] = expectedProgramOutput;
         }
 
         protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
