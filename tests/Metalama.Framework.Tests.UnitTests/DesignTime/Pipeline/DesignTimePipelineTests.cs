@@ -828,6 +828,35 @@ class C
                 return;
             }
 
+        for ( var i = 0; i < 10; i++ )
+        {
+            var hasDanglingRef = false;
+
+            if ( output.DependentCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the dependent compilation." );
+            }
+
+            if ( output.MasterCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the master compilation." );
+            }
+
+            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to a syntax tree." );
+            }
+
+            if ( !hasDanglingRef )
+            {
+                this.TestOutput.WriteLine( "No more dangling reference." );
+
+                return;
+            }
+
             this.TestOutput.WriteLine( "GC.Collect()" );
 #if NET6_0_OR_GREATER
             this.TestOutput.WriteLine( $"Finalizing queue: {GC.GetGCMemoryInfo().FinalizationPendingCount}" );

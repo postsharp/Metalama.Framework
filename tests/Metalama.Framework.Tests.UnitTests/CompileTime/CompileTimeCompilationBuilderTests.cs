@@ -1403,5 +1403,48 @@ namespace Ns
 
             Assert.Equal( warnings, diagnostics.SelectAsArray( d => d.GetMessage( CultureInfo.InvariantCulture ) ) );
         }
+
+        [Fact]
+        public void CompilationCanBeCollected()
+        {
+            using var testContext = this.CreateTestContext();
+            using var domain = testContext.Domain;
+
+            var result = CreateCompileTimeProject( testContext, domain );
+
+            GC.Collect();
+            Assert.False( result.WeakRef.IsAlive );
+        }
+
+        private static (CompileTimeProject Project, WeakReference WeakRef) CreateCompileTimeProject( TestContext testContext, CompileTimeDomain domain )
+        {
+            var code = $$"""
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+
+                namespace NS_{{Guid.NewGuid():N}};
+
+                [CompileTime]
+                class C
+                {
+                    [Template]
+                    void Template(IField field)
+                    {
+                        field.Value.M();
+                    }
+                }
+                """;
+
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );
+
+            var diagnostics = new DiagnosticBag();
+
+            var project = CompileTimeProjectRepository.Create( domain, testContext.ServiceProvider, compilation.RoslynCompilation, diagnostics )
+                .AssertNotNull()
+                .RootProject;
+
+            return (project, new WeakReference( compilation ));
+        }
     }
 }

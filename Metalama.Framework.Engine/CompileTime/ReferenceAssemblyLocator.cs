@@ -201,6 +201,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private string GetAdditionalCompileTimeAssembliesDirectory()
         {
             var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
+
             return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
         }
 
