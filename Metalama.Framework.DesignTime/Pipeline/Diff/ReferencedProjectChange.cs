@@ -10,11 +10,30 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// </summary>
 internal readonly struct ReferencedProjectChange
 {
+    private readonly WeakReference<Compilation>? _oldCompilationRef;
+
     public ReferenceChangeKind ChangeKind { get; }
 
     public Compilation? NewCompilation { get; }
 
-    public Compilation? OldCompilation { get; }
+    public Compilation? OldCompilationDangerous
+    {
+        get
+        {
+            if ( this._oldCompilationRef == null )
+            {
+                return null;
+            }
+            else if ( this._oldCompilationRef.TryGetTarget( out var oldCompilation ) )
+            {
+                return oldCompilation;
+            }
+            else
+            {
+                throw new InvalidOperationException( "The old compilation is no longer alive." );
+            }
+        }
+    }
 
     public bool HasCompileTimeCodeChange => this.ChangeKind != ReferenceChangeKind.Modified || this.Changes.AssertNotNull().HasCompileTimeCodeChange;
 
@@ -30,7 +49,7 @@ internal readonly struct ReferencedProjectChange
         ReferenceChangeKind changeKind,
         CompilationChanges? changes = null )
     {
-        this.OldCompilation = oldCompilation;
+        this._oldCompilationRef = oldCompilation == null ? null : new WeakReference<Compilation>( oldCompilation );
         this.NewCompilation = newCompilation;
         this.ChangeKind = changeKind;
         this.Changes = changes;

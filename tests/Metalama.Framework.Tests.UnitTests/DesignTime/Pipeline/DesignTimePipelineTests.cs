@@ -19,9 +19,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Compilation = Microsoft.CodeAnalysis.Compilation;
 
 #pragma warning disable IDE0079   // Remove unnecessary suppression.
 #pragma warning disable CA1307    // Specify StringComparison for clarity
@@ -106,7 +108,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
-        foreach ( var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ) )
+        foreach ( var introduction in syntaxTreeResult.Introductions )
         {
             stringBuilder.AppendLine( introduction.GeneratedSyntaxTree.ToString() );
         }
@@ -806,16 +808,55 @@ class C
                 return result;
             } );
 
-        GC.Collect();
-
-        if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
+        for ( var i = 0; i < 10; i++ )
         {
-            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+            var hasDanglingRef = false;
+
+            if ( output.DependentCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the dependent compilation." );
+            }
+
+            if ( output.MasterCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the master compilation." );
+            }
+
+            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to a syntax tree." );
+            }
+
+            if ( !hasDanglingRef )
+            {
+                this.TestOutput.WriteLine( "No more dangling reference." );
+
+                return;
+            }
+
+            this.TestOutput.WriteLine( "GC.Collect()" );
+#if NET6_0_OR_GREATER
+            this.TestOutput.WriteLine( $"Finalizing queue: {GC.GetGCMemoryInfo().FinalizationPendingCount}" );
+#endif
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
+
+        MemoryLeakHelper.CaptureMiniDumpOnce();
+        MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+
+        GC.KeepAlive( output.Configuration );
     }
 
-    private async Task<( WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration
-            Configuration)>
+    private async Task<(
+            WeakReference MasterCompilationRef,
+            WeakReference DependentCompilationRef,
+            List<WeakReference> SyntaxTreeRefs,
+            AspectPipelineConfiguration Configuration,
+            DesignTimeAspectPipeline Pipeline)>
         PipelineConfigurationDoesNotKeepReferenceToCompilationCore()
     {
         using var testContext = this.CreateTestContext();
@@ -824,6 +865,9 @@ class C
         using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
 
         var (masterCompilation, dependentCompilation) = CreateCompilations( 1 );
+        var syntaxTreeRefs = new List<WeakReference>();
+        syntaxTreeRefs.AddRange( masterCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
+        syntaxTreeRefs.AddRange( dependentCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
 
         var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, dependentCompilation )!;
 
@@ -838,7 +882,9 @@ class C
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( dependentCompilation2, true, AsyncExecutionContext.Get() );
 
-        return (new WeakReference<Compilation>( masterCompilation ), new WeakReference<Compilation>( dependentCompilation ), configuration.Value);
+        Assert.Same( pipeline.LastProjectVersion.Compilation, dependentCompilation2 );
+
+        return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
     }
 
     private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
@@ -853,7 +899,7 @@ using Metalama.Framework.Eligibility;
 using System.Linq;
 using System;
 
-public class MyAspect : OverrideMethodAspect
+public class MyAspect{version} : OverrideMethodAspect
 {{
    public override dynamic? OverrideMethod() 
    {{
@@ -865,7 +911,7 @@ public class MyAspect : OverrideMethodAspect
 
 class C{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 "
@@ -876,7 +922,7 @@ class C{version}
             ["dependent.cs"] = $@"
 class D{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 
@@ -944,149 +990,4 @@ class D{version}
         }
     }
 #endif
-
-    [Fact]
-    public async Task ResumeWithErrorAsync()
-    {
-        static CSharpCompilation CreateCompilation( string statement )
-        {
-            var code = new Dictionary<string, string>
-            {
-                ["Aspect.cs"] =
-                    $$"""
-                    using Metalama.Framework.Aspects;
-                    using System;
-
-                    public class Aspect : OverrideMethodAspect
-                    {
-                        public override dynamic OverrideMethod()
-                        {
-                            {{statement}}
-                            return null;
-                        }
-                    }
-                    """,
-            };
-
-            return CreateCSharpCompilation( code, acceptErrors: true );
-        }
-
-        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics )
-            => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
-
-        using var testContext = this.CreateTestContext();
-        using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
-
-        var compilation1 = CreateCompilation( "" );
-        var pipeline = pipelineFactory.CreatePipeline( compilation1 );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
-
-        // Execute with the initial valid code.
-        Assert.True( pipeline.TryExecute( compilation1, default, out _ ) );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Ready, pipeline.Status );
-
-        // Execute with incomplete/invalid statement.
-        var compilation2 = CreateCompilation( "Console" );
-        Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
-        CheckDiagnostics( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
-
-        // Resume while the code is still invalid.
-        await pipeline.ResumeAsync( AsyncExecutionContext.Get() );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
-
-        // Executing with the same code fails at this point.
-        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get(), default );
-        Assert.False( executionResult.IsSuccessful );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
-
-        // Executing with new invalid code fails and causes pausing.
-        var compilation3 = CreateCompilation( "Console.Write" );
-        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get(), default );
-        Assert.False( executionResult.IsSuccessful );
-        CheckDiagnostics( executionResult.Diagnostics );
-
-        Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
-    }
-
-    [Fact]
-    public void GenericTargetIntroductions()
-    {
-        using var testContext = this.CreateTestContext();
-
-        var code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-
-            public class RepositoryAspect : TypeAspect
-            {
-                [Introduce]
-                public int Id { get; set; }
-            }
-
-            [RepositoryAspect]
-            public partial class Repository<T1, T2>
-            {
-            }
-
-            [RepositoryAspect]
-            public partial interface IVariantRepository<in T>
-            {
-            }
-
-            public partial class Outer<T1>
-            {
-                [RepositoryAspect]
-                public partial class Inner<T2>
-                {
-                }                            
-            }
-            """;
-
-        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
-        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var pipeline = factory.CreatePipeline( compilation );
-
-        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
-        var dumpedResults = DumpResults( results! );
-        this.TestOutput.WriteLine( dumpedResults );
-
-        const string expectedResult = """
-            F1.cs:
-            0 diagnostic(s):
-            0 suppression(s):
-            3 introductions(s):
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial interface IVariantRepository<in T>
-            {
-                public global::System.Int32 Id { get; set; }
-            }
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial class Outer<T1>
-            {
-                partial class Inner<T2>
-                {
-                    public global::System.Int32 Id { get; set; }
-                }
-            }
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial class Repository<T1, T2>
-            {
-                public global::System.Int32 Id { get; set; }
-            }
-            """;
-
-        Assert.Equal( expectedResult.Replace( "\r\n", "\n" ), dumpedResults.Replace( "\r\n", "\n" ) );
-    }
 }

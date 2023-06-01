@@ -51,7 +51,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly IFileSystemWatcher? _fileSystemWatcher;
     private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
-    private readonly SemaphoreSlim _sync = new( initialCount: 1, maxCount: 1 );
+    private readonly SemaphoreSlim _sync = new( 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
@@ -182,7 +182,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         {
             if ( args.IsPausing && this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
-                this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has paused." );
+                this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
 
                 await this.ExecuteIfLockAvailableOrEnqueueAsync( context => this.SetStateAsync( this._currentState.Pause(), context ), executionContext );
             }
@@ -339,29 +339,24 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
-            try
+            if ( ignoreStatus )
             {
-                if ( ignoreStatus )
-                {
-                    await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
-                }
-
-                var state = this._currentState;
-
-                var getConfigurationResult = PipelineState.GetConfiguration(
-                    ref state,
-                    compilation.Compilation,
-                    ignoreStatus,
-                    cancellationToken );
-
-                await this.SetStateAsync( state, executionContext );
-
-                return getConfigurationResult;
+                await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
             }
-            finally
-            {
-                await this.ProcessJobQueueAsync( executionContext );
-            }
+
+            var state = this._currentState;
+
+            var getConfigurationResult = PipelineState.GetConfiguration(
+                ref state,
+                compilation.Compilation,
+                ignoreStatus,
+                cancellationToken );
+
+            await this.SetStateAsync( state, executionContext );
+
+            await this.ProcessJobQueueAsync( executionContext );
+
+            return getConfigurationResult;
         }
     }
 
@@ -395,16 +390,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         using ( await this.WithLockAsync( executionContext, cancellationToken ) )
         {
-            try
-            {
-                await this.SetStateAsync( this._currentState.Reset(), executionContext );
+            await this.SetStateAsync( this._currentState.Reset(), executionContext );
 
-                this._eventHub.OnProjectDirty( this.ProjectKey );
-            }
-            finally
-            {
-                await this.ProcessJobQueueAsync( executionContext );
-            }
+            this._eventHub.OnProjectDirty( this.ProjectKey );
+
+            await this.ProcessJobQueueAsync( executionContext );
         }
     }
 
@@ -570,7 +560,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 $"Cannot get configuration: {configuration.DebugReason}" );
                         }
 
-                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider, compilation );
+                        var manifest = TransitiveAspectsManifest.Deserialize(
+                            new MemoryStream( result.Manifest! ),
+                            configuration.Value.ServiceProvider,
+                            compilation );
 
                         compilationReferences.Add(
                             new DesignTimeProjectReference(
@@ -777,23 +770,12 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                         if ( this._currentState.ProjectVersion != null )
                         {
-                            if ( this._currentState.PipelineResult.Configuration == null )
-                            {
-                                var allTreeDiagnostics = validationResult.SyntaxTreeResults.SelectMany( result => result.Value.Diagnostics ).ToImmutableArray();
-
-                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
-                                    allTreeDiagnostics,
-                                    "The pipeline was paused while there were compile-time errors." );
-                            }
-                            else
-                            {
-                                compilationResult = new CompilationResult(
-                                    this._currentState.ProjectVersion,
-                                    this._currentState.PipelineResult,
-                                    validationResult,
-                                    this._currentState.Status,
-                                    this._currentState.PipelineResult.Configuration );
-                            }
+                            compilationResult = new CompilationResult(
+                                this._currentState.ProjectVersion.AssertNotNull(),
+                                this._currentState.PipelineResult,
+                                validationResult,
+                                this._currentState.Status,
+                                this._currentState.PipelineResult.Configuration.AssertNotNull() );
                         }
                         else
                         {
@@ -1060,7 +1042,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         var realTimeout = timeout < 0 ? int.MaxValue : timeout;
         var acquired = await this._sync.WaitAsync( Math.Min( 5000, realTimeout ), cancellationToken );
 
-        // Now wait more if needed.
         if ( !acquired )
         {
             this.Logger.Warning?.Log( $"Acquiring the lock on '{this.ProjectKey}' is taking a long time." + Environment.NewLine + new StackTrace() );
@@ -1071,6 +1052,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             }
         }
 
+        // Now wait more if needed.
         Action? lockDisposeAction = null;
 
         if ( acquired )
@@ -1237,4 +1219,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
+
+    internal ProjectVersion LastProjectVersion => this._currentState.ProjectVersion;
 }

@@ -38,10 +38,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             this._diagnosticSpan = diagnosticSpan;
         }
 
-        private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => diagnosticDefinition.Id == this._diagnosticId &&
-               location.SourceTree?.FilePath == this._diagnosticFilePath &&
-               location.SourceSpan.Equals( this._diagnosticSpan );
+        private protected override CodeFixFilter CodeFixFilter
+            => ( diagnosticDefinition, location )
+                => diagnosticDefinition.Id == this._diagnosticId &&
+                   location.SourceTree?.FilePath == this._diagnosticFilePath &&
+                   location.SourceSpan.Equals( this._diagnosticSpan );
 
         public async Task<FallibleResultWithDiagnostics<CodeFixPipelineResult>> ExecuteAsync(
             PartialCompilation partialCompilation,
