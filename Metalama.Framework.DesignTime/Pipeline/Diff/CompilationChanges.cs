@@ -9,14 +9,50 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
+    internal record struct CompilationChangesHandle( CompilationChanges? Value, ProjectVersion? OldProjectVersion );
+
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
     internal sealed class CompilationChanges
     {
+        private readonly WeakReference<ProjectVersion>? _oldCompilationVersionRef;
+
         public ImmutableDictionary<string, SyntaxTreeChange> SyntaxTreeChanges { get; }
 
-        public ProjectVersion? OldCompilationVersion { get; }
+        public ProjectVersion? OldProjectVersionDangerous
+        {
+            get
+            {
+                if ( this._oldCompilationVersionRef == null )
+                {
+                    return null;
+                }
+
+                if ( this._oldCompilationVersionRef.TryGetTarget( out var version ) )
+                {
+                    return version;
+                }
+
+                throw new InvalidOperationException( "The old compilation that is no longer alive." );
+            }
+        }
+
+        public CompilationChangesHandle ToHandle()
+        {
+            if ( this._oldCompilationVersionRef == null )
+            {
+                return new CompilationChangesHandle( this, null );
+            }
+            else if ( this._oldCompilationVersionRef.TryGetTarget( out var version ) )
+            {
+                return new CompilationChangesHandle( this, version );
+            }
+            else
+            {
+                return default;
+            }
+        }
 
         public ProjectVersion NewProjectVersion { get; }
 
@@ -40,8 +76,13 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             bool hasCompileTimeCodeChange,
             bool isIncremental )
         {
+            if ( isIncremental != (oldCompilationVersion != null) )
+            {
+                throw new AssertionFailedException( "IsIncremental is not consistent." );
+            }
+
             this.SyntaxTreeChanges = syntaxTreeChanges;
-            this.OldCompilationVersion = oldCompilationVersion;
+            this._oldCompilationVersionRef = oldCompilationVersion == null ? null : new WeakReference<ProjectVersion>( oldCompilationVersion );
             this.NewProjectVersion = newProjectVersion;
             this.ReferencedCompilationChanges = referencedCompilationChanges;
             this.ReferencedPortableExecutableChanges = referencedPortableExecutableChanges;

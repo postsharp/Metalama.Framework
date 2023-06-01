@@ -147,7 +147,8 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
                             {
                                 var referenceChanges = reference.Value.Changes
                                                        ?? await this.GetCompilationChangesAsync(
-                                                           reference.Value.OldCompilation.AssertNotNull(),
+                                                           reference.Value.OldCompilationDangerous
+                                                               .AssertNotNull() /* Safe because this is a dependency of a compilation that is alive. */,
                                                            reference.Value.NewCompilation.AssertNotNull(),
                                                            cancellationToken );
 

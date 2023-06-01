@@ -46,7 +46,7 @@ public sealed partial class CompilationChangesTests
 
         Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
-        Assert.True( syntaxTreeChange.OldSyntaxTreeVersion.IsDefault );
+        Assert.True( syntaxTreeChange.OldSyntaxTreeVersionDangerous.IsDefault );
         Assert.NotNull( syntaxTreeChange.NewTree );
     }
 
@@ -71,7 +71,7 @@ public sealed partial class CompilationChangesTests
 
         Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.NewlyCompileTime, syntaxTreeChange.CompileTimeChangeKind );
-        Assert.True( syntaxTreeChange.OldSyntaxTreeVersion.IsDefault );
+        Assert.True( syntaxTreeChange.OldSyntaxTreeVersionDangerous.IsDefault );
         Assert.NotNull( syntaxTreeChange.NewTree );
     }
 
@@ -148,7 +148,7 @@ public sealed partial class CompilationChangesTests
 
         Assert.Equal( SyntaxTreeChangeKind.Changed, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
-        Assert.Equal( compilation1.SyntaxTrees.Single(), syntaxTreeChange.OldSyntaxTreeVersion.SyntaxTree );
+        Assert.Equal( compilation1.SyntaxTrees.Single(), syntaxTreeChange.OldSyntaxTreeVersionDangerous.SyntaxTree );
         Assert.Equal( compilation2.SyntaxTrees.Single(), syntaxTreeChange.NewSyntaxTreeVersion.SyntaxTree );
     }
 
@@ -176,7 +176,7 @@ public sealed partial class CompilationChangesTests
         Assert.Empty( syntaxTreeChange.PartialTypeChanges );
         Assert.Equal( SyntaxTreeChangeKind.Changed, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
-        Assert.Equal( compilation1.SyntaxTrees.Single(), syntaxTreeChange.OldSyntaxTreeVersion.SyntaxTree );
+        Assert.Equal( compilation1.SyntaxTrees.Single(), syntaxTreeChange.OldSyntaxTreeVersionDangerous.SyntaxTree );
         Assert.Equal( compilation2.SyntaxTrees.Single(), syntaxTreeChange.NewSyntaxTreeVersion.SyntaxTree );
     }
 

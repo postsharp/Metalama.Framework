@@ -19,9 +19,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Compilation = Microsoft.CodeAnalysis.Compilation;
 
 #pragma warning disable IDE0079   // Remove unnecessary suppression.
 #pragma warning disable CA1307    // Specify StringComparison for clarity
@@ -806,16 +808,55 @@ class C
                 return result;
             } );
 
-        GC.Collect();
-
-        if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
+        for ( var i = 0; i < 10; i++ )
         {
-            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+            var hasDanglingRef = false;
+
+            if ( output.DependentCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the dependent compilation." );
+            }
+
+            if ( output.MasterCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the master compilation." );
+            }
+
+            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to a syntax tree." );
+            }
+
+            if ( !hasDanglingRef )
+            {
+                this.TestOutput.WriteLine( "No more dangling reference." );
+
+                return;
+            }
+
+            this.TestOutput.WriteLine( "GC.Collect()" );
+#if NET6_0_OR_GREATER
+            this.TestOutput.WriteLine( $"Finalizing queue: {GC.GetGCMemoryInfo().FinalizationPendingCount}" );
+#endif
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
+
+        MemoryLeakHelper.CaptureMiniDumpOnce();
+        MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+
+        GC.KeepAlive( output.Configuration );
     }
 
-    private async Task<( WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration
-            Configuration)>
+    private async Task<(
+            WeakReference MasterCompilationRef,
+            WeakReference DependentCompilationRef,
+            List<WeakReference> SyntaxTreeRefs,
+            AspectPipelineConfiguration Configuration,
+            DesignTimeAspectPipeline Pipeline)>
         PipelineConfigurationDoesNotKeepReferenceToCompilationCore()
     {
         using var testContext = this.CreateTestContext();
@@ -824,6 +865,9 @@ class C
         using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
 
         var (masterCompilation, dependentCompilation) = CreateCompilations( 1 );
+        var syntaxTreeRefs = new List<WeakReference>();
+        syntaxTreeRefs.AddRange( masterCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
+        syntaxTreeRefs.AddRange( dependentCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
 
         var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, dependentCompilation )!;
 
@@ -838,7 +882,9 @@ class C
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( dependentCompilation2, true, AsyncExecutionContext.Get() );
 
-        return (new WeakReference<Compilation>( masterCompilation ), new WeakReference<Compilation>( dependentCompilation ), configuration.Value);
+        Assert.Same( pipeline.LastProjectVersion.Compilation, dependentCompilation2 );
+
+        return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
     }
 
     private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
@@ -853,7 +899,7 @@ using Metalama.Framework.Eligibility;
 using System.Linq;
 using System;
 
-public class MyAspect : OverrideMethodAspect
+public class MyAspect{version} : OverrideMethodAspect
 {{
    public override dynamic? OverrideMethod() 
    {{
@@ -865,7 +911,7 @@ public class MyAspect : OverrideMethodAspect
 
 class C{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 "
@@ -876,7 +922,7 @@ class C{version}
             ["dependent.cs"] = $@"
 class D{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 

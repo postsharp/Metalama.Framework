@@ -13,6 +13,6 @@ namespace Metalama.Framework.Engine.Aspects
     {
         IAspectDriver AspectDriver { get; }
 
-        Location? DiagnosticLocation { get; }
+        Location? GetDiagnosticLocation( Compilation compilation );
     }
 }
