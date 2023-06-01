@@ -46,6 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = this.Field.Accessibility;
             this.IsStatic = this.Field.IsStatic;
             this.IsRequired = this.Field.IsRequired;
+            this.IsNew = this.Field.IsNew;
 
             this.GetMethod.AssertNotNull().Accessibility = this.Field.Accessibility;
 
