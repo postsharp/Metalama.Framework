@@ -35,20 +35,17 @@ internal abstract class TemplateMemberSymbolClassifier
             or IEventSymbol;
 
     public bool IsRunTimeTemplateParameter( IParameterSymbol parameter )
-        => IsTemplateParameter( parameter )
-           && this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+        => IsTemplateParameter( parameter ) && !this.IsCompileTimeParameter( parameter );
 
     public static bool IsTemplateTypeParameter( ITypeParameterSymbol parameter )
         => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
             or IEventSymbol;
 
     public bool IsCompileTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-        => IsTemplateTypeParameter( typeParameter ) && this.SymbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
-            == TemplatingScope.CompileTimeOnly;
+        => IsTemplateTypeParameter( typeParameter ) && this.IsCompileTimeParameter( typeParameter );
 
     public bool IsRunTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-        => IsTemplateTypeParameter( typeParameter ) && this.SymbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
-            != TemplatingScope.CompileTimeOnly;
+        => IsTemplateTypeParameter( typeParameter ) && !this.IsCompileTimeParameter( typeParameter );
 
     public bool IsCompileTimeParameter( IParameterSymbol parameter )
         => this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;

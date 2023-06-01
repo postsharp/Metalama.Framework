@@ -58,5 +58,7 @@ public static class MSBuildPropertyNames
         MetalamaCompileTimePackages,
         MetalamaWriteHtml,
         ProjectAssetsFile,
-        MetalamaReferenceAssemblyRestoreTimeout );
+        MetalamaReferenceAssemblyRestoreTimeout,
+        MetalamaLicense,
+        MetalamaWriteLicenseCreditData );
 }
