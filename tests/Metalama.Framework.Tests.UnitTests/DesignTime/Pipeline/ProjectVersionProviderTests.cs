@@ -78,7 +78,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
 
-        Assert.Null( changes1.OldCompilationVersion );
+        Assert.Null( changes1.OldProjectVersionDangerous );
         Assert.Same( compilation1, changes1.NewProjectVersion.Compilation );
         Assert.False( changes1.IsIncremental );
         Assert.Same( changes1, changes2 );
@@ -100,10 +100,10 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation3 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( compilation2, compilation3 );
 
-        Assert.Same( compilation1, changes1.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation1, changes1.OldProjectVersionDangerous!.Compilation );
         Assert.Same( compilation3, changes1.NewProjectVersion.Compilation );
         Assert.Same( compilation3, changes1.NewProjectVersion.CompilationToAnalyze );
-        Assert.Same( compilation2, changes2.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation2, changes2.OldProjectVersionDangerous!.Compilation );
         Assert.Same( compilation3, changes2.NewProjectVersion.Compilation );
     }
 
@@ -134,7 +134,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Added, referencedCompilationChange.ChangeKind );
-        Assert.Null( referencedCompilationChange.OldCompilation );
+        Assert.Null( referencedCompilationChange.OldCompilationDangerous );
         Assert.Same( masterCompilation, referencedCompilationChange.NewCompilation );
         Assert.Null( referencedCompilationChange.Changes );
         Assert.True( referencedCompilationChange.HasCompileTimeCodeChange );
@@ -169,7 +169,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Removed, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.NewCompilation );
-        Assert.Same( masterCompilation, referencedCompilationChange.OldCompilation );
+        Assert.Same( masterCompilation, referencedCompilationChange.OldCompilationDangerous );
         Assert.Null( referencedCompilationChange.Changes );
         Assert.True( referencedCompilationChange.HasCompileTimeCodeChange );
     }
@@ -216,7 +216,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         Assert.Single( changes.ReferencedCompilationChanges );
         var level3ReferencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
-        Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilation );
+        Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilationDangerous );
         Assert.Same( compilationLevel2WithLevel1Reference, level3ReferencedCompilationChange.NewCompilation );
         Assert.True( level3ReferencedCompilationChange.HasCompileTimeCodeChange );
         Assert.NotNull( level3ReferencedCompilationChange.Changes );

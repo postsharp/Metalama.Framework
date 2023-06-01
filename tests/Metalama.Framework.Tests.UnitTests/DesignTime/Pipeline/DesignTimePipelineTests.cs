@@ -19,7 +19,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -828,35 +827,6 @@ class C
                 return;
             }
 
-        for ( var i = 0; i < 10; i++ )
-        {
-            var hasDanglingRef = false;
-
-            if ( output.DependentCompilationRef.IsAlive )
-            {
-                hasDanglingRef = true;
-                this.TestOutput.WriteLine( "Reference to the dependent compilation." );
-            }
-
-            if ( output.MasterCompilationRef.IsAlive )
-            {
-                hasDanglingRef = true;
-                this.TestOutput.WriteLine( "Reference to the master compilation." );
-            }
-
-            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
-            {
-                hasDanglingRef = true;
-                this.TestOutput.WriteLine( "Reference to a syntax tree." );
-            }
-
-            if ( !hasDanglingRef )
-            {
-                this.TestOutput.WriteLine( "No more dangling reference." );
-
-                return;
-            }
-
             this.TestOutput.WriteLine( "GC.Collect()" );
 #if NET6_0_OR_GREATER
             this.TestOutput.WriteLine( $"Finalizing queue: {GC.GetGCMemoryInfo().FinalizationPendingCount}" );
@@ -993,7 +963,7 @@ class D{version}
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( compilation2, true, AsyncExecutionContext.Get() );
 
-        return (new( compilation1 ), pipeline);
+        return (new WeakReference<Compilation>( compilation1 ), pipeline);
     }
 
     [Fact]
@@ -1011,7 +981,8 @@ class D{version}
         await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
     }
 
-    private static string GetAspectRepositoryValidatorCode( string suffix ) => $$"""
+    private static string GetAspectRepositoryValidatorCode( string suffix )
+        => $$"""
         using System;
         using Metalama.Framework.Aspects;
         using Metalama.Framework.Code;

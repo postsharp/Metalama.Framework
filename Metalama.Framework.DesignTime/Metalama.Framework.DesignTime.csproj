@@ -20,7 +20,6 @@
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.DesignTime\*.cs" />
-        <Compile Remove="Pipeline\Diff\ProjectVersionProvider.Implementation.cs" />
     </ItemGroup>
 
 
