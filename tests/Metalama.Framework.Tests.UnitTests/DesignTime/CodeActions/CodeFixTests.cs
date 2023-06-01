@@ -69,7 +69,7 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        var projectKey = workspace.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
+        workspace.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
@@ -179,8 +179,8 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        var libraryProjectKey = workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["code.cs"] = libraryCode } );
-        var appProjectKey = workspace.AddOrUpdateProject( "app", new Dictionary<string, string> { ["code.cs"] = appCode }, new[] { "library" } );
+        workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["code.cs"] = libraryCode } );
+        workspace.AddOrUpdateProject( "app", new Dictionary<string, string> { ["code.cs"] = appCode }, new[] { "library" } );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );

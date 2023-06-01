@@ -870,7 +870,7 @@ class C
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( dependentCompilation2, true, AsyncExecutionContext.Get() );
 
-        Assert.Same( pipeline.LastProjectVersion.Compilation, dependentCompilation2 );
+        Assert.Same( pipeline.LastProjectVersion!.Compilation, dependentCompilation2 );
 
         return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
     }
@@ -1114,14 +1114,14 @@ class D{version}
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with the same code fails at this point.
-        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get(), default );
+        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get() );
         Assert.False( executionResult.IsSuccessful );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with new invalid code fails and causes pausing.
         var compilation3 = CreateCompilation( "Console.Write" );
-        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get(), default );
+        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get() );
         Assert.False( executionResult.IsSuccessful );
         CheckDiagnostics( executionResult.Diagnostics );
 
@@ -1133,7 +1133,7 @@ class D{version}
     {
         using var testContext = this.CreateTestContext();
 
-        var code = """
+        const string code = """
             using Metalama.Framework.Aspects;
             using Metalama.Framework.Code;
 
@@ -1164,8 +1164,7 @@ class D{version}
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var pipeline = factory.CreatePipeline( compilation );
-
+        
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
         var dumpedResults = DumpResults( results! );
         this.TestOutput.WriteLine( dumpedResults );

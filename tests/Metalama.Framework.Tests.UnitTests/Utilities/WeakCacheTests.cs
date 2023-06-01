@@ -82,7 +82,7 @@ public sealed class WeakCacheTests : UnitTestClass
     {
         var o = new object();
         var wr = new WeakReference( o );
-        var cache = new WeakCache<object, object>() { };
+        var cache = new WeakCache<object, object>();
         cache.TryAdd( o, o );
 
         return wr;

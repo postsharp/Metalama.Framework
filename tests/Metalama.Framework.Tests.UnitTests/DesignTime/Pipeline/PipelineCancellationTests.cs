@@ -15,7 +15,6 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -9,8 +9,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
-    internal record struct CompilationChangesHandle( CompilationChanges? Value, ProjectVersion? OldProjectVersion );
-
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>

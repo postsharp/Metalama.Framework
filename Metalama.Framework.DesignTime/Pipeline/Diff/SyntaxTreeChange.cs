@@ -6,8 +6,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
-    internal record struct SyntaxTreeChangeHandle( SyntaxTreeChange? Value, SyntaxTreeVersion? OldSyntaxTreeVersion );
-
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.
     /// </summary>
