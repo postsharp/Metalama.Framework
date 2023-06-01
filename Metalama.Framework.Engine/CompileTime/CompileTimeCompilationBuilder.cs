@@ -443,7 +443,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                     var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
-                    if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath, out var mapFile ) )
+                    if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetMapFile( transformedPath, out var mapFile ) )
                     {
                         var location = mapFile.GetSourceLocation( diagnostic.Location.SourceSpan );
 
@@ -780,7 +780,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             manifest,
             outputPaths.Pe,
             outputPaths.Directory,
-            TextMapFile.ReadForSource,
+            FullPathTextMapFileProvider.Instance,
             cacheableTemplateDiscoveryContextProvider );
 
         this._cache.Add( projectHash, project );
@@ -991,7 +991,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     manifest,
                     outputPaths.Pe,
                     outputPaths.Directory,
-                    name => textMapDirectory.GetByName( name ),
+                    textMapDirectory,
                     null );
 
                 this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );

@@ -69,4 +69,22 @@ public sealed class WeakCacheTests : UnitTestClass
 
         await Task.WhenAll( tasks );
     }
+
+    [Fact]
+    public void KeysAreCollected()
+    {
+        var wr = CreateCacheAndReturnWeakRef();
+        GC.Collect();
+        Assert.False( wr.IsAlive );
+    }
+
+    private static WeakReference CreateCacheAndReturnWeakRef()
+    {
+        var o = new object();
+        var wr = new WeakReference( o );
+        var cache = new WeakCache<object, object>() { };
+        cache.TryAdd( o, o );
+
+        return wr;
+    }
 }
