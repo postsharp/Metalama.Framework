@@ -795,16 +795,7 @@ class C
     [Fact]
     public async Task PipelineConfigurationDoesNotKeepReferenceToCompilation()
     {
-        var output = await Task.Run(
-            async () =>
-            {
-                var result = await
-                    this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
-
-                await Task.Yield();
-
-                return result;
-            } );
+        var output = await this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
 
         GC.Collect();
 
@@ -812,16 +803,16 @@ class C
         {
             MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
         }
+
+        GC.KeepAlive( output.Configuration );
     }
 
-    private async Task<( WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration
-            Configuration)>
+    private async Task<(WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration Configuration)>
         PipelineConfigurationDoesNotKeepReferenceToCompilationCore()
     {
         using var testContext = this.CreateTestContext();
-        var observer = new TestDesignTimePipelineObserver();
 
-        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
         var (masterCompilation, dependentCompilation) = CreateCompilations( 1 );
 
@@ -894,6 +885,86 @@ class D{version}
 
         return (masterCompilation, dependentCompilation);
     }
+
+    [Fact]
+    public async Task ValidationDoesNotLeakCompilation()
+    {
+        var output = await this.ValidationDoesNotLeakCompilationCore();
+
+        GC.Collect();
+
+        if ( output.Compilation.TryGetTarget( out _ ) )
+        {
+            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+        }
+
+        GC.KeepAlive( output.Pipeline );
+    }
+
+    private async Task<(WeakReference<Compilation> Compilation, DesignTimeAspectPipeline Pipeline)>
+        ValidationDoesNotLeakCompilationCore()
+    {
+        using var testContext = this.CreateTestContext();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "1" ) );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 )!;
+
+        await pipeline.ExecuteAsync( compilation1, true, AsyncExecutionContext.Get() );
+
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "2" ) );
+
+        // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
+        await pipeline.ExecuteAsync( compilation2, true, AsyncExecutionContext.Get() );
+
+        return (new( compilation1 ), pipeline);
+    }
+
+    [Fact]
+    public async Task ValidationCanAccessAspectRepository()
+    {
+        using var testContext = this.CreateTestContext();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "" ) );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+        // If AspectRepository didn't work, this would throw wrapped InvalidOperationException.
+        await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
+    }
+
+    private static string GetAspectRepositoryValidatorCode( string suffix ) => $$"""
+        using System;
+        using Metalama.Framework.Aspects;
+        using Metalama.Framework.Code;
+        using Metalama.Framework.Validation;
+
+        public class TheAspect : TypeAspect
+        {
+            public override void BuildAspect( IAspectBuilder<INamedType> builder )
+            {
+                builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+            }
+
+            private void ValidateReference( in ReferenceValidationContext context )
+            {
+                if ( !( (INamedType)context.ReferencedDeclaration ).Enhancements().HasAspect<TheAspect>() )
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
+
+        [TheAspect]
+        internal class C{{suffix}}
+        {
+            private C{{suffix}}? _f;
+        }
+        """;
 
 #if NET6_0_OR_GREATER
     [SkippableFact]

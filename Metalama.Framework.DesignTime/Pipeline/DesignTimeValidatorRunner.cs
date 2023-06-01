@@ -25,7 +25,7 @@ internal sealed class DesignTimeValidatorRunner
     {
         this._serviceProvider = serviceProvider;
         this._compilationResult = compilationResult;
-        this._compilation = CompilationModel.CreateInitialInstance( project, compilation );
+        this._compilation = CompilationModel.CreateInitialInstance( project, compilation, new PipelineResultBasedAspectRepository( compilationResult ) );
     }
 
     public void Validate( SemanticModel model, UserDiagnosticSink diagnosticSink, CancellationToken cancellationToken )
