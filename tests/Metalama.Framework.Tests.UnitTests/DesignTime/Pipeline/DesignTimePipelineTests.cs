@@ -22,6 +22,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Compilation = Microsoft.CodeAnalysis.Compilation;
 
 #pragma warning disable IDE0079   // Remove unnecessary suppression.
 #pragma warning disable CA1307    // Specify StringComparison for clarity
@@ -103,7 +104,6 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         }
 
         // Introductions
-
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
         foreach ( var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ) )
@@ -797,17 +797,55 @@ class C
     {
         var output = await this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
 
-        GC.Collect();
-
-        if ( output.DependentCompilation.TryGetTarget( out _ ) || output.MasterCompilation.TryGetTarget( out _ ) )
+        for ( var i = 0; i < 10; i++ )
         {
-            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
+            var hasDanglingRef = false;
+
+            if ( output.DependentCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the dependent compilation." );
+            }
+
+            if ( output.MasterCompilationRef.IsAlive )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to the master compilation." );
+            }
+
+            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
+            {
+                hasDanglingRef = true;
+                this.TestOutput.WriteLine( "Reference to a syntax tree." );
+            }
+
+            if ( !hasDanglingRef )
+            {
+                this.TestOutput.WriteLine( "No more dangling reference." );
+
+                return;
+            }
+
+            this.TestOutput.WriteLine( "GC.Collect()" );
+#if NET6_0_OR_GREATER
+            this.TestOutput.WriteLine( $"Finalizing queue: {GC.GetGCMemoryInfo().FinalizationPendingCount}" );
+#endif
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
+
+        MemoryLeakHelper.CaptureMiniDumpOnce();
+        MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
 
         GC.KeepAlive( output.Configuration );
     }
 
-    private async Task<(WeakReference<Compilation> MasterCompilation, WeakReference<Compilation> DependentCompilation, AspectPipelineConfiguration Configuration)>
+    private async Task<(
+            WeakReference MasterCompilationRef,
+            WeakReference DependentCompilationRef,
+            List<WeakReference> SyntaxTreeRefs,
+            AspectPipelineConfiguration Configuration,
+            DesignTimeAspectPipeline Pipeline)>
         PipelineConfigurationDoesNotKeepReferenceToCompilationCore()
     {
         using var testContext = this.CreateTestContext();
@@ -815,6 +853,9 @@ class C
         using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
         var (masterCompilation, dependentCompilation) = CreateCompilations( 1 );
+        var syntaxTreeRefs = new List<WeakReference>();
+        syntaxTreeRefs.AddRange( masterCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
+        syntaxTreeRefs.AddRange( dependentCompilation.SyntaxTrees.Select( x => new WeakReference( x ) ) );
 
         var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, dependentCompilation )!;
 
@@ -829,7 +870,9 @@ class C
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( dependentCompilation2, true, AsyncExecutionContext.Get() );
 
-        return (new WeakReference<Compilation>( masterCompilation ), new WeakReference<Compilation>( dependentCompilation ), configuration.Value);
+        Assert.Same( pipeline.LastProjectVersion!.Compilation, dependentCompilation2 );
+
+        return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
     }
 
     private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
@@ -844,7 +887,7 @@ using Metalama.Framework.Eligibility;
 using System.Linq;
 using System;
 
-public class MyAspect : OverrideMethodAspect
+public class MyAspect{version} : OverrideMethodAspect
 {{
    public override dynamic? OverrideMethod() 
    {{
@@ -856,7 +899,7 @@ public class MyAspect : OverrideMethodAspect
 
 class C{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 "
@@ -867,7 +910,7 @@ class C{version}
             ["dependent.cs"] = $@"
 class D{version} 
 {{
-   [MyAspect]
+   [MyAspect{version}]
    void M() {{}}
 }}
 
@@ -919,7 +962,7 @@ class D{version}
         // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
         await pipeline.ExecuteAsync( compilation2, true, AsyncExecutionContext.Get() );
 
-        return (new( compilation1 ), pipeline);
+        return (new WeakReference<Compilation>( compilation1 ), pipeline);
     }
 
     [Fact]
@@ -937,7 +980,8 @@ class D{version}
         await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
     }
 
-    private static string GetAspectRepositoryValidatorCode( string suffix ) => $$"""
+    private static string GetAspectRepositoryValidatorCode( string suffix )
+        => $$"""
         using System;
         using Metalama.Framework.Aspects;
         using Metalama.Framework.Code;
@@ -1036,14 +1080,13 @@ class D{version}
                             return null;
                         }
                     }
-                    """,
+                    """
             };
 
             return CreateCSharpCompilation( code, acceptErrors: true );
         }
 
-        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics )
-            => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
+        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics ) => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
 
         using var testContext = this.CreateTestContext();
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
@@ -1071,14 +1114,14 @@ class D{version}
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with the same code fails at this point.
-        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get(), default );
+        var executionResult = await pipeline.ExecuteAsync( compilation2, AsyncExecutionContext.Get() );
         Assert.False( executionResult.IsSuccessful );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
         // Executing with new invalid code fails and causes pausing.
         var compilation3 = CreateCompilation( "Console.Write" );
-        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get(), default );
+        executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get() );
         Assert.False( executionResult.IsSuccessful );
         CheckDiagnostics( executionResult.Diagnostics );
 
@@ -1090,7 +1133,7 @@ class D{version}
     {
         using var testContext = this.CreateTestContext();
 
-        var code = """
+        const string code = """
             using Metalama.Framework.Aspects;
             using Metalama.Framework.Code;
 
@@ -1121,8 +1164,7 @@ class D{version}
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var pipeline = factory.CreatePipeline( compilation );
-
+        
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
         var dumpedResults = DumpResults( results! );
         this.TestOutput.WriteLine( dumpedResults );

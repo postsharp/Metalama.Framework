@@ -11,6 +11,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// </summary>
     internal readonly struct SyntaxTreeChange
     {
+        private readonly WeakReference<SyntaxTree>? _oldSyntaxTreeRef;
+        private readonly SyntaxTreeVersionData _oldSyntaxTreeVersionData;
+
         /// <summary>
         /// Gets the kind of change between the old and new syntax trees.
         /// </summary>
@@ -28,7 +31,41 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public string FilePath { get; }
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public readonly SyntaxTreeVersion OldSyntaxTreeVersion;
+
+        public SyntaxTreeVersion OldSyntaxTreeVersionDangerous
+        {
+            get
+            {
+                if ( this._oldSyntaxTreeRef == null )
+                {
+                    return default;
+                }
+                else if ( this._oldSyntaxTreeRef.TryGetTarget( out var syntaxTree ) )
+                {
+                    return new SyntaxTreeVersion( syntaxTree, this._oldSyntaxTreeVersionData );
+                }
+                else
+                {
+                    throw new InvalidOperationException( "The old syntax tree is no longer alive." );
+                }
+            }
+        }
+
+        public SyntaxTreeChangeHandle ToHandle()
+        {
+            if ( this._oldSyntaxTreeRef == null )
+            {
+                return new SyntaxTreeChangeHandle( this, null );
+            }
+            else if ( this._oldSyntaxTreeRef.TryGetTarget( out var syntaxTree ) )
+            {
+                return new SyntaxTreeChangeHandle( this, new SyntaxTreeVersion( syntaxTree, this._oldSyntaxTreeVersionData ) );
+            }
+            else
+            {
+                return default;
+            }
+        }
 
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
@@ -43,7 +80,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public SyntaxTree NewTree => this.NewSyntaxTreeVersion.SyntaxTree;
 
-        public ulong OldHash => this.OldSyntaxTreeVersion.DeclarationHash;
+        public ulong OldHash => this._oldSyntaxTreeVersionData.DeclarationHash;
 
         public ulong NewHash => this.NewSyntaxTreeVersion.DeclarationHash;
 
@@ -71,7 +108,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.CompileTimeChangeKind = compileTimeChangeKind;
             this.FilePath = filePath;
             this.NewSyntaxTreeVersion = newSyntaxTreeVersion;
-            this.OldSyntaxTreeVersion = oldSyntaxTreeVersion;
+            this._oldSyntaxTreeVersionData = new SyntaxTreeVersionData( oldSyntaxTreeVersion );
+            this._oldSyntaxTreeRef = oldSyntaxTreeVersion.IsDefault ? null : new WeakReference<SyntaxTree>( oldSyntaxTreeVersion.SyntaxTree );
 
             // Detecting changes in partial types.
             this.PartialTypeChanges = ImmutableArray<PartialTypeChange>.Empty;
@@ -136,11 +174,15 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     $"Invalid CompileTimeChangeKind combination: ({this.CompileTimeChangeKind}, {newChange.CompileTimeChangeKind})." )
             };
 
+            // This is called when we are sure in the merge of the old compilation to the new compilation,
+            // so this operation is safe.
+            var oldSyntaxTreeVersion = this.OldSyntaxTreeVersionDangerous;
+
             return new SyntaxTreeChange(
                 this.FilePath,
                 newSyntaxTreeChangeKind,
                 newCompileTimeChangeKind,
-                this.OldSyntaxTreeVersion,
+                oldSyntaxTreeVersion,
                 newChange.NewSyntaxTreeVersion );
         }
     }

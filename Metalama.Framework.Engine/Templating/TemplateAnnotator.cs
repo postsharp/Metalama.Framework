@@ -820,7 +820,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var scope );
 
         if ( this._syntaxTreeAnnotationMap.GetSymbol( transformedExpression ) is ITypeParameterSymbol typeParameter
-            && this.GetNodeScope( transformedExpression ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+             && this.GetNodeScope( transformedExpression ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
         {
             this.ReportDiagnostic(
                 TemplatingDiagnosticDescriptors.StaticInterfaceMembersNotSupportedOnCompileTimeTemplateTypeParameters,
@@ -1177,8 +1177,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         // To make sure the expression `meta.RunTime( compileTimeExpression )` is correctly highlighted, the parentheses need to be explicitly colored as compile-time.
-        if ( updatedInvocation.Expression is MemberAccessExpressionSyntax { Name: var invokedMemberName } && invokedMemberName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword
-            && updatedInvocation.ArgumentList.Arguments.All( arg => arg.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly ) )
+        if ( updatedInvocation.Expression is MemberAccessExpressionSyntax { Name: var invokedMemberName }
+             && invokedMemberName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword
+             && updatedInvocation.ArgumentList.Arguments.All(
+                 arg => arg.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly ) )
         {
             updatedInvocation = updatedInvocation.ReplaceTokens(
                 new[] { updatedInvocation.ArgumentList.OpenParenToken, updatedInvocation.ArgumentList.CloseParenToken },

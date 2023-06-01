@@ -570,7 +570,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 $"Cannot get configuration: {configuration.DebugReason}" );
                         }
 
-                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider, compilation );
+                        var manifest = TransitiveAspectsManifest.Deserialize(
+                            new MemoryStream( result.Manifest! ),
+                            configuration.Value.ServiceProvider,
+                            compilation );
 
                         compilationReferences.Add(
                             new DesignTimeProjectReference(
@@ -1237,4 +1240,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
+
+    internal ProjectVersion? LastProjectVersion => this._currentState.ProjectVersion;
 }

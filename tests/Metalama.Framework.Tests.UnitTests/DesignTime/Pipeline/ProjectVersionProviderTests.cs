@@ -4,6 +4,8 @@ using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200 // Async method names must have "Async" suffix.
 
-public sealed class CompilationChangesProviderTests : DesignTimeTestBase
+public sealed class ProjectVersionProviderTests : DesignTimeTestBase
 {
     [Fact]
     public async Task DifferentCompilationWithNoChangeAsync()
@@ -76,7 +78,7 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
 
-        Assert.Null( changes1.OldCompilationVersion );
+        Assert.Null( changes1.OldProjectVersionDangerous );
         Assert.Same( compilation1, changes1.NewProjectVersion.Compilation );
         Assert.False( changes1.IsIncremental );
         Assert.Same( changes1, changes2 );
@@ -98,10 +100,10 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation3 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( compilation2, compilation3 );
 
-        Assert.Same( compilation1, changes1.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation1, changes1.OldProjectVersionDangerous!.Compilation );
         Assert.Same( compilation3, changes1.NewProjectVersion.Compilation );
         Assert.Same( compilation3, changes1.NewProjectVersion.CompilationToAnalyze );
-        Assert.Same( compilation2, changes2.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation2, changes2.OldProjectVersionDangerous!.Compilation );
         Assert.Same( compilation3, changes2.NewProjectVersion.Compilation );
     }
 
@@ -132,7 +134,7 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Added, referencedCompilationChange.ChangeKind );
-        Assert.Null( referencedCompilationChange.OldCompilation );
+        Assert.Null( referencedCompilationChange.OldCompilationDangerous );
         Assert.Same( masterCompilation, referencedCompilationChange.NewCompilation );
         Assert.Null( referencedCompilationChange.Changes );
         Assert.True( referencedCompilationChange.HasCompileTimeCodeChange );
@@ -167,7 +169,7 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Removed, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.NewCompilation );
-        Assert.Same( masterCompilation, referencedCompilationChange.OldCompilation );
+        Assert.Same( masterCompilation, referencedCompilationChange.OldCompilationDangerous );
         Assert.Null( referencedCompilationChange.Changes );
         Assert.True( referencedCompilationChange.HasCompileTimeCodeChange );
     }
@@ -214,7 +216,7 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Single( changes.ReferencedCompilationChanges );
         var level3ReferencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
-        Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilation );
+        Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilationDangerous );
         Assert.Same( compilationLevel2WithLevel1Reference, level3ReferencedCompilationChange.NewCompilation );
         Assert.True( level3ReferencedCompilationChange.HasCompileTimeCodeChange );
         Assert.NotNull( level3ReferencedCompilationChange.Changes );
@@ -223,5 +225,45 @@ public sealed class CompilationChangesProviderTests : DesignTimeTestBase
         var level2ReferencedCompilationChange = level3ReferencedCompilationChange.Changes.ReferencedCompilationChanges.Single().Value;
         Assert.Equal( ReferenceChangeKind.Added, level2ReferencedCompilationChange.ChangeKind );
         Assert.Same( compilationLevel1, level2ReferencedCompilationChange.NewCompilation );
+    }
+
+    [Fact]
+    public async Task IntermediateCompilationCanBeCollected()
+    {
+        var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
+
+        using var testContext = this.CreateTestContext();
+
+        // Create the first compilation.
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
+        var compilationChanges1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
+        Assert.Same( compilation1, compilationChanges1.NewProjectVersion.CompilationToAnalyze );
+        Assert.False( compilationChanges1.IsIncremental );
+        Assert.True( compilationChanges1.HasChange );
+        Assert.True( compilationChanges1.HasCompileTimeCodeChange );
+
+        // Create a second compilation. We only keep a weak reference to it.
+        var wr = await CreateIncrementalCompilation( code, compilation1.References, compilationVersionProvider, compilation1 );
+
+        await Task.Yield();
+
+        GC.Collect();
+        Assert.False( wr.IsAlive );
+    }
+
+    private static async Task<WeakReference> CreateIncrementalCompilation(
+        Dictionary<string, string> code,
+        IEnumerable<MetadataReference> references,
+        ProjectVersionProvider projectVersionProvider,
+        Compilation compilation1 )
+    {
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code ).WithReferences( references );
+        var compilationChanges2 = await projectVersionProvider.GetCompilationChangesAsync( compilation1, compilation2 );
+        Assert.True( compilationChanges2.IsIncremental );
+        Assert.False( compilationChanges2.HasChange );
+        Assert.False( compilationChanges2.HasCompileTimeCodeChange );
+
+        return new WeakReference( compilation2 );
     }
 }

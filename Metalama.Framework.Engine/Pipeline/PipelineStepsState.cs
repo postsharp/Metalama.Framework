@@ -175,7 +175,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                             {
                                 this._diagnostics.Report(
                                     GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
-                                        this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
+                                        this._currentStep.AspectLayer.AspectClass.GetDiagnosticLocation( this.FirstCompilation.RoslynCompilation ),
                                         (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
 
                                 continue;
@@ -193,7 +193,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                         {
                             this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
-                                    this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
+                                    this._currentStep!.AspectLayer.AspectClass.GetDiagnosticLocation( this.FirstCompilation.RoslynCompilation ),
                                     (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
 
                             continue;

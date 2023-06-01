@@ -474,7 +474,7 @@ internal sealed partial class CompileTimeProjectRepository
                 manifest,
                 assemblyPath,
                 sourceDirectory,
-                TextMapFile.ReadForSource,
+                FullPathTextMapFileProvider.Instance,
                 cacheableTemplateDiscoveryContextProvider );
 
             return true;

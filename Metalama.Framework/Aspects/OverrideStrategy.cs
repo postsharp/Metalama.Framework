@@ -31,7 +31,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// If the member already exists, the advice attempts to redefine it using <c>new</c> or fails with a compilation error if that is not possible.
         /// </summary>
-        New = 3,
+        New = 3
 
         /*
         // TODO: What happens if the there is a conflict while merging members?
