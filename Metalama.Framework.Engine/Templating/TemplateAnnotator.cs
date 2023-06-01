@@ -819,6 +819,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var transformedOperator,
             out var scope );
 
+        if ( this._syntaxTreeAnnotationMap.GetSymbol( transformedExpression ) is ITypeParameterSymbol typeParameter
+            && this.GetNodeScope( transformedExpression ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.StaticInterfaceMembersNotSupportedOnCompileTimeTemplateTypeParameters,
+                node,
+                (transformedName.ToString(), typeParameter) );
+        }
+
         return node
             .Update( transformedExpression, transformedOperator, (SimpleNameSyntax) transformedName )
             .AddScopeAnnotation( scope );
@@ -835,7 +844,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var transformedOperator,
             out var scope );
 
-        // TODO: comment
         if ( scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly && this.GetNodeScope( transformedExpression ) == TemplatingScope.CompileTimeOnly )
         {
             this.ReportDiagnostic(
@@ -1666,15 +1674,24 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( this._currentTemplateMember != null )
         {
-            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
-
-            if ( symbol != null )
+            if ( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ) is IParameterSymbol symbol )
             {
                 var scope = this.GetSymbolScope( symbol );
 
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+
+                    var parameterTypeScope = this.GetSymbolScope( symbol.Type );
+
+                    // Compile-time parameters of run-time-only types are not allowed.
+                    if ( parameterTypeScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+                    {
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CompileTimeTemplateParameterWithRunTimeType,
+                            node,
+                            (symbol.Name, symbol.Type) );
+                    }
                 }
 
                 if ( !this._isInLocalFunction )
