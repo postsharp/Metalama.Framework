@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -68,12 +69,15 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        var projectKey = workspace.AddOrUpdateProject( "project", new() { ["code.cs"] = code } );
+        var projectKey = workspace.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
         var serviceProvider = testContext.ServiceProvider.Global.WithService( factory );
-        serviceProvider = serviceProvider.WithServices( new CodeActionExecutionService( serviceProvider ), new CodeRefactoringDiscoveryService( serviceProvider ) );
+
+        serviceProvider = serviceProvider.WithServices(
+            new CodeActionExecutionService( serviceProvider ),
+            new CodeRefactoringDiscoveryService( serviceProvider ) );
 
         var project = workspace.GetProject( "project" );
         var pipeline = factory.GetOrCreatePipeline( project )!;
@@ -175,13 +179,16 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        var libraryProjectKey = workspace.AddOrUpdateProject( "library", new() { ["code.cs"] = libraryCode } );
-        var appProjectKey = workspace.AddOrUpdateProject( "app", new() { ["code.cs"] = appCode }, new[] { "library" } );
+        var libraryProjectKey = workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["code.cs"] = libraryCode } );
+        var appProjectKey = workspace.AddOrUpdateProject( "app", new Dictionary<string, string> { ["code.cs"] = appCode }, new[] { "library" } );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
         var serviceProvider = testContext.ServiceProvider.Global.WithService( factory );
-        serviceProvider = serviceProvider.WithServices( new CodeActionExecutionService( serviceProvider ), new CodeRefactoringDiscoveryService( serviceProvider ) );
+
+        serviceProvider = serviceProvider.WithServices(
+            new CodeActionExecutionService( serviceProvider ),
+            new CodeRefactoringDiscoveryService( serviceProvider ) );
 
         var project = workspace.GetProject( "app" );
         var pipeline = factory.GetOrCreatePipeline( project )!;

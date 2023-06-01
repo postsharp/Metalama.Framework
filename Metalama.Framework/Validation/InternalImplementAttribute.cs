@@ -25,7 +25,8 @@ namespace Metalama.Framework.Validation
         {
             if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
             {
-                context.Diagnostics.Report( FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments( (context.ReferencedDeclaration, context.ReferencingType) ) );
+                context.Diagnostics.Report(
+                    FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments( (context.ReferencedDeclaration, context.ReferencingType) ) );
             }
         }
     }

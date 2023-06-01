@@ -104,10 +104,9 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         }
 
         // Introductions
-
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
-        foreach ( var introduction in syntaxTreeResult.Introductions )
+        foreach ( var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ) )
         {
             stringBuilder.AppendLine( introduction.GeneratedSyntaxTree.ToString() );
         }
@@ -1081,14 +1080,13 @@ class D{version}
                             return null;
                         }
                     }
-                    """,
+                    """
             };
 
             return CreateCSharpCompilation( code, acceptErrors: true );
         }
 
-        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics )
-            => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
+        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics ) => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
 
         using var testContext = this.CreateTestContext();
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );

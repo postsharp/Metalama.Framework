@@ -26,12 +26,12 @@ namespace Metalama.Framework.Aspects
         /// The advice introduces the interface member as explicit even if the interface member was supposed to be introduced as implicit.
         /// </summary>
         MakeExplicit,
-        
+
         /// <summary>
         /// When the <see cref="OverrideStrategy"/> of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
         /// is set to <see cref="OverrideStrategy.Override"/>, does not override this member if there is already an implementation. 
         /// </summary>
-        Ignore = 3,
+        Ignore = 3
 
         // TODO: Support.
         //       The problem is that these are not really useful when the other declaration is not compatible.
