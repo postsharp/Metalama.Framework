@@ -4,13 +4,13 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
@@ -325,7 +325,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 fabricsConfiguration,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
-                this.FilterCodeFix );
+                this.CodeFixFilter );
 
             return true;
 
@@ -394,7 +394,8 @@ namespace Metalama.Framework.Engine.Pipeline
         private bool IsMetalamaEnabled( Compilation compilation )
             => this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().TryGetMetalamaVersion( compilation, out _ );
 
-        private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
+        // It's simpler to analyze memory leaks when CodeFixFilter does not reference the AspectPipeline.
+        private protected virtual CodeFixFilter CodeFixFilter => ( _, _ ) => false;
 
         // ReSharper disable UnusedParameter.Global
         private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
@@ -477,7 +478,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.
-            pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );
+            pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.CodeFixFilter );
 
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.BoundAspectClasses.Count == 0 )
             {

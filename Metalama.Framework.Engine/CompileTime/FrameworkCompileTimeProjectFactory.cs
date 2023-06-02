@@ -136,7 +136,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
             ImmutableArray<CompileTimeProject>.Empty,
             manifest,
             null,
-            _ => null,
+            null,
             null,
             null,
             _frameworkAssembly,

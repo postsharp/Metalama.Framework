@@ -78,7 +78,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
     ImmutableArray<AspectLayer> IAspectClassImpl.Layers => this.Layers;
 
-    public Location? DiagnosticLocation { get; }
+    public Location? GetDiagnosticLocation( Compilation compilation ) => compilation.GetTypeByMetadataNameSafe( this.FullName )?.GetDiagnosticLocation();
 
     public bool IsAbstract { get; }
 
@@ -115,7 +115,6 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         var attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
-        this.DiagnosticLocation = typeSymbol.GetDiagnosticLocation();
         this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );

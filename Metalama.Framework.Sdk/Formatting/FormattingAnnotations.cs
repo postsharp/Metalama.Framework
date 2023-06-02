@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Formatting
         public static T? WithGeneratedCodeAnnotation<T>( this T? node, SyntaxAnnotation annotation )
             where T : SyntaxNode
             => node?.WithAnnotationInsideBlock( annotation );
-        
+
         public static SyntaxTrivia WithGeneratedCodeAnnotation( this in SyntaxTrivia trivia, SyntaxAnnotation annotation )
             => trivia.WithAdditionalAnnotations( annotation );
 

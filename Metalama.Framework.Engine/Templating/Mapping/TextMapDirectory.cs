@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
     /// <summary>
     /// Represents a set of <see cref="TextMapFile"/>.
     /// </summary>
-    internal sealed class TextMapDirectory
+    internal sealed class TextMapDirectory : ITextMapFileProvider
     {
         public ImmutableDictionary<string, TextMapFile> FilesByTargetPath { get; }
 
@@ -69,16 +69,10 @@ namespace Metalama.Framework.Engine.Templating.Mapping
             }
         }
 
-        /// <summary>
-        /// Gets a <see cref="TextMapFile"/> given a full path on disk.
-        /// </summary>
-        public TextMapFile? GetByName( string name )
-            => this.FilesByTargetPath.Values.Where( m => name.EndsWith( m.TargetPath, StringComparison.OrdinalIgnoreCase ) )
-                .MaxByOrNull( m => m.TargetPath.Length );
-
-        public bool TryGetByName( string name, [NotNullWhen( true )] out TextMapFile? file )
+        public bool TryGetMapFile( string path, [NotNullWhen( true )] out TextMapFile? file )
         {
-            file = this.GetByName( name );
+            file = this.FilesByTargetPath.Values.Where( m => path.EndsWith( m.TargetPath, StringComparison.OrdinalIgnoreCase ) )
+                .MaxByOrNull( m => m.TargetPath.Length );
 
             return file != null;
         }

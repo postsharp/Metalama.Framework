@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -376,7 +375,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
     {
         // Some trivial checks first.
-        if ( !typeMember.Name.EndsWith( interfaceMember.Name, StringComparison.Ordinal )
+        if ( typeMember.Name != interfaceMember.Name
              || typeMember.DeclarationKind != interfaceMember.DeclarationKind
              || !(typeMember.Accessibility == Accessibility.Public || typeMember.IsExplicitInterfaceImplementation) )
         {
@@ -384,17 +383,15 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
 
         var interfaceType = interfaceMember.DeclaringType.GetSymbol();
-        var relevantInterfaces = this.GetAllInterfaces().Where( t => t.Equals( interfaceType ) || t.ConstructedFrom.Equals( interfaceType ) );
+        var relevantInterfaces = this.GetAllInterfaces().Where( t => t.ConstructedFrom.Equals( interfaceType ) );
 
         foreach ( var implementedInterface in relevantInterfaces )
         {
-            foreach ( var candidateSymbol in implementedInterface.GetMembers( interfaceMember.Name ) )
+            foreach ( var candidateSymbol in implementedInterface.GetMembers( typeMember.Name ) )
             {
                 var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
-                if ( (candidateMember.SignatureEquals( interfaceMember )
-                      || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ))
-                     && candidateMember.SignatureEquals( typeMember ) )
+                if ( this.Compilation.CompilationContext.MemberComparer.Equals( candidateMember, typeMember ) )
                 {
                     return true;
                 }

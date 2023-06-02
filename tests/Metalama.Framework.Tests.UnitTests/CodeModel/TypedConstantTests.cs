@@ -258,7 +258,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var emptyCompilation = testContext.CreateCompilationModel( "" );
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
 
-            var ex = Assert.Throws<ArgumentException>( () => TypedConstant.Create( new(), type ) );
+            var ex = Assert.Throws<ArgumentException>( () => TypedConstant.Create( new object(), type ) );
             Assert.Contains( "The value should be of type", ex.Message, StringComparison.Ordinal );
         }
     }

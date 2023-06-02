@@ -407,7 +407,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // Avoid transforming "dynamic?" into "var?".
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
-            else if ( this._templateCompileTimeTypeParameterNames.Contains( identifier.Identifier.Text ) )
+            else if ( this._templateCompileTimeTypeParameterNames.Contains( identifier.Identifier.ValueText ) )
             {
                 // Avoid transforming "T?" into e.g. "string??" or "int??".
 
@@ -1155,7 +1155,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 if ( isCompileTime )
                 {
-                    this._templateCompileTimeTypeParameterNames.Add( parameter.Identifier.Text );
+                    this._templateCompileTimeTypeParameterNames.Add( parameter.Identifier.ValueText );
 
                     templateParameters.Add( Parameter( default, default, this._templateTypeArgumentType, parameter.Identifier, null ) );
                 }
@@ -1998,7 +1998,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // When TryVisitNamespaceOrTypeName calls Transform with the result ot the syntax generator, Transform eventually
                 // calls the current method for each compile-time parameter. We need to change it to the value of the template
                 // parameter.
-                else if ( this._templateCompileTimeTypeParameterNames.Contains( node.Identifier.Text ) )
+                else if ( this._templateCompileTimeTypeParameterNames.Contains( node.Identifier.ValueText ) )
                 {
                     return MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

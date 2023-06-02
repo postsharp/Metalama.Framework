@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.Templating
             public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
             {
                 // For e.g. int P => 42;, there is no node that declares the getter,
-                // so we have to handle it manuallly.
+                // so we have to handle it manually.
                 if ( node.Parent is PropertyDeclarationSyntax propertyDeclaration )
                 {
                     var getMethod = this._semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull().GetMethod;
@@ -546,7 +546,7 @@ namespace Metalama.Framework.Engine.Templating
                         .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
                         .Select( a => (member, a.AttributeClass!) );
 
-                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } ? associatedSymbol : member.GetOverriddenMember();
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol } ? memberAssociatedSymbol : member.GetOverriddenMember();
 
                     return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }

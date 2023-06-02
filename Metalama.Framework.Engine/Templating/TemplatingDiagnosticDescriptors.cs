@@ -450,5 +450,21 @@ namespace Metalama.Framework.Engine.Templating
                 "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string, ITypeSymbol)> CompileTimeTemplateParameterWithRunTimeType
+            = new(
+                "LAMA0264",
+                "Compile-time template parameters cannot have run-time-only types.",
+                "The compile-time template parameter '{0}' cannot have the run-time-only type '{1}'.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string, ITypeParameterSymbol)> StaticInterfaceMembersNotSupportedOnCompileTimeTemplateTypeParameters
+            = new(
+                "LAMA0265",
+                "Accessing static interface members is not supported on compile-time template type parameters.",
+                "Accessing the static interface member '{0}' is not supported on compile-time template type parameter '{1}'.",
+                _category,
+                Error );
     }
 }

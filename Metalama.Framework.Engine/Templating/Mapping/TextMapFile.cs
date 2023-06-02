@@ -130,8 +130,6 @@ namespace Metalama.Framework.Engine.Templating.Mapping
             return file;
         }
 
-        public static TextMapFile? ReadForSource( string path ) => Read( Path.ChangeExtension( path, ".map" ) );
-
         private static bool TryRead( BinaryReader reader, out TextMapFile? file )
         {
             file = null;

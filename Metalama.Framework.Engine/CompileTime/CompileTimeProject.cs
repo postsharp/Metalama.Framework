@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
-        private readonly Func<string, TextMapFile?>? _getLocationMap;
+        private readonly ITextMapFileProvider? _mapFileProvider;
         private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
         private CompileTimeDomain Domain { get; }
@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             string? compiledAssemblyPath,
-            Func<string, TextMapFile?>? getLocationMap,
+            ITextMapFileProvider? mapFileProvider,
             string? directory,
             CacheableTemplateDiscoveryContextProvider? cacheableTemplateDiscoveryContextProvider,
             Assembly? assembly = null,
@@ -163,7 +163,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this.Domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
-            this._getLocationMap = getLocationMap;
+            this._mapFileProvider = mapFileProvider;
             this.Directory = directory;
             this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
             this.Manifest = manifest;
@@ -208,7 +208,7 @@ namespace Metalama.Framework.Engine.CompileTime
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
             string? sourceDirectory,
-            Func<string, TextMapFile?> getLocationMap,
+            ITextMapFileProvider? mapFileProvider,
             CacheableTemplateDiscoveryContextProvider? templateDiscoveryContextProvider )
             => new(
                 serviceProvider,
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 references,
                 manifest,
                 compiledAssemblyPath,
-                getLocationMap,
+                mapFileProvider,
                 sourceDirectory,
                 templateDiscoveryContextProvider );
 
@@ -455,7 +455,19 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets a <see cref="TextMapFile"/> given a the path of the transformed code file.
         /// </summary>
-        internal TextMapFile? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
+        internal TextMapFile? GetTextMap( string csFilePath )
+        {
+            if ( this._mapFileProvider != null )
+            {
+                this._mapFileProvider.TryGetMapFile( csFilePath, out var file );
+
+                return file;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         internal DiagnosticManifest ClosureDiagnosticManifest { get; }
 

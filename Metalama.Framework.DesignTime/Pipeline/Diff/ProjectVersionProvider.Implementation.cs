@@ -1,4 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Rpc;
@@ -17,7 +17,7 @@ internal sealed partial class ProjectVersionProvider
 {
     private sealed partial class Implementation
     {
-        private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
+        private readonly ConditionalWeakTable<Compilation, ChangeList> _cache = new();
         private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
         private readonly DiffStrategy _metalamaDiffStrategy;
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
@@ -38,16 +38,15 @@ internal sealed partial class ProjectVersionProvider
         private bool TryGetIncrementalChangesFromCache(
             Compilation oldCompilation,
             Compilation newCompilation,
-            TestableCancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationChanges? exactChanges,
-            out CompilationChanges? closestChanges )
+            out CompilationChangesHandle closestChanges )
         {
             if ( !this._cache.TryGetValue( oldCompilation, out var list ) )
             {
                 // If the old compilation is not in the cache, we cannot compute any incremental change.
 
                 exactChanges = null;
-                closestChanges = null;
+                closestChanges = default;
 
                 return false;
             }
@@ -56,30 +55,23 @@ internal sealed partial class ProjectVersionProvider
             if ( newCompilation == oldCompilation )
             {
                 exactChanges = CompilationChanges.Empty( list.ProjectVersion, list.ProjectVersion );
-                closestChanges = null;
+                closestChanges = default;
 
                 return true;
             }
 
             // Find an available incremental change in the list.
-            for ( var node = list.FirstIncrementalChange; node != null; node = node.Next )
+            if ( list.TryGetIncrementalChanges( newCompilation, out exactChanges ) )
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                closestChanges = default;
 
-                if ( node.IncrementalChanges.NewProjectVersion.Compilation == newCompilation )
-                {
-                    // The exact pair old-and-new compilation was found in the cache.
-                    exactChanges = node.IncrementalChanges;
-                    closestChanges = null;
-
-                    return true;
-                }
+                return true;
             }
 
             // We did not find the incremental changes for the pair of compilations, so we return the incremental changes
             // from the given original compilation to the last known compilation, which is hopefully very similar to the
             // new compilation because of the time correlation, as it should have just a few user edits.
-            closestChanges = list.FirstIncrementalChange?.IncrementalChanges;
+            closestChanges = list.LastChanges?.ToHandle() ?? default;
             exactChanges = null;
 
             return false;
@@ -282,7 +274,7 @@ internal sealed partial class ProjectVersionProvider
                         referencedCompilationChanges.NewPortableExecutableReferences,
                         cancellationToken );
 
-                    newList = new ChangeLinkedList( compilationVersion );
+                    newList = new ChangeList( compilationVersion );
                     this._cache.Add( newCompilation, newList );
 
                     this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
@@ -298,7 +290,6 @@ internal sealed partial class ProjectVersionProvider
                 if ( this.TryGetIncrementalChangesFromCache(
                         oldCompilation,
                         newCompilation,
-                        cancellationToken,
                         out var incrementalChanges,
                         out var closestIncrementalChanges ) )
                 {
@@ -306,19 +297,19 @@ internal sealed partial class ProjectVersionProvider
 
                     return incrementalChanges;
                 }
-                else if ( closestIncrementalChanges != null )
+                else if ( closestIncrementalChanges.Value != null )
                 {
                     // We do not have the exact pair of compilations in the cache, however we have already computed a diff from the same old
                     // compilation, so it's a good idea to compute the diff from the last known compilation instead of from the initial compilation,
                     // as it should contain fewer changes.
 
                     var references = await this.GetReferencesAsync(
-                        closestIncrementalChanges.NewProjectVersion.Compilation,
+                        closestIncrementalChanges.Value.NewProjectVersion.Compilation,
                         newCompilation,
                         cancellationToken );
 
                     var changesFromClosestCompilation = CompilationChanges.Incremental(
-                        closestIncrementalChanges.NewProjectVersion,
+                        closestIncrementalChanges.Value.NewProjectVersion,
                         newCompilation,
                         references,
                         cancellationToken );
@@ -330,12 +321,12 @@ internal sealed partial class ProjectVersionProvider
 
                     if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
                     {
-                        changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+                        changeLinkedListFromOldCompilation.Add( incrementalChanges );
                     }
 
                     if ( !this._cache.TryGetValue( newCompilation, out _ ) )
                     {
-                        this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+                        this._cache.Add( newCompilation, new ChangeList( incrementalChanges.NewProjectVersion ) );
                     }
                     else
                     {
@@ -395,7 +386,7 @@ internal sealed partial class ProjectVersionProvider
                                 oldReferences.NewPortableExecutableReferences,
                                 cancellationToken );
 
-                            changeLinkedListFromOldCompilation = new ChangeLinkedList( oldProjectVersion );
+                            changeLinkedListFromOldCompilation = new ChangeList( oldProjectVersion );
                             this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
                         }
                     }
@@ -414,7 +405,7 @@ internal sealed partial class ProjectVersionProvider
 
                     if ( !this._cache.TryGetValue( newCompilation, out _ ) )
                     {
-                        this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+                        this._cache.Add( newCompilation, new ChangeList( incrementalChanges.NewProjectVersion ) );
 
                         this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
                             new WeakReference<Compilation>( newCompilation );
@@ -425,7 +416,7 @@ internal sealed partial class ProjectVersionProvider
                         // compilation was available.
                     }
 
-                    changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+                    changeLinkedListFromOldCompilation.Add( incrementalChanges );
 
                     return incrementalChanges;
                 }
@@ -433,14 +424,20 @@ internal sealed partial class ProjectVersionProvider
         }
 
         private async ValueTask<CompilationChanges> MergeCompilationChangesAsync(
-            CompilationChanges first,
+            CompilationChangesHandle firstHandle,
             CompilationChanges second,
             TestableCancellationToken cancellationToken )
         {
-            if ( !first.HasChange || !second.IsIncremental )
+            var first = firstHandle.Value.AssertNotNull();
+
+            if ( !second.IsIncremental )
+            {
+                return second;
+            }
+            else if ( !first.HasChange || !second.IsIncremental )
             {
                 return new CompilationChanges(
-                    first.OldCompilationVersion,
+                    firstHandle.OldProjectVersion,
                     second.NewProjectVersion,
                     second.SyntaxTreeChanges,
                     second.ReferencedCompilationChanges,
@@ -451,7 +448,7 @@ internal sealed partial class ProjectVersionProvider
             else if ( !second.HasChange )
             {
                 return new CompilationChanges(
-                    first.OldCompilationVersion,
+                    firstHandle.OldProjectVersion,
                     second.NewProjectVersion,
                     first.SyntaxTreeChanges,
                     first.ReferencedCompilationChanges,
@@ -533,7 +530,7 @@ internal sealed partial class ProjectVersionProvider
                 }
 
                 return new CompilationChanges(
-                    first.OldCompilationVersion,
+                    firstHandle.OldProjectVersion,
                     second.NewProjectVersion,
                     mergedSyntaxTreeBuilder.ToImmutable(),
                     mergedReferencedCompilationBuilder.ToImmutable(),
@@ -548,6 +545,10 @@ internal sealed partial class ProjectVersionProvider
             ReferencedProjectChange second,
             TestableCancellationToken cancellationToken = default )
         {
+            // This operation is safe because it is called from the MergeCompilationChanges method
+            // where we are sure that the old compilation and all references exist.
+            var firstOldCompilation = first.OldCompilationDangerous;
+
             switch (first.ChangeKind, second.ChangeKind)
             {
                 case (_, ReferenceChangeKind.None):
@@ -559,31 +560,31 @@ internal sealed partial class ProjectVersionProvider
                 case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
                     {
                         var changes = await this.GetCompilationChangesAsyncCoreAsync(
-                            first.OldCompilation.AssertNotNull(),
+                            firstOldCompilation.AssertNotNull(),
                             second.NewCompilation.AssertNotNull(),
                             cancellationToken );
 
                         return new ReferencedProjectChange(
-                            first.OldCompilation,
+                            firstOldCompilation,
                             second.NewCompilation,
                             ReferenceChangeKind.Modified,
                             changes );
                     }
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Removed):
-                    return new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferenceChangeKind.None );
+                    return new ReferencedProjectChange( first.NewCompilation, firstOldCompilation, ReferenceChangeKind.None );
 
                 case (ReferenceChangeKind.Modified, ReferenceChangeKind.Modified):
                     {
-                        var changes = await this.MergeCompilationChangesAsync( first.Changes!, second.Changes!, cancellationToken );
+                        var changes = await this.MergeCompilationChangesAsync( first.Changes!.ToHandle(), second.Changes!, cancellationToken );
 
                         return changes.HasChange
                             ? new ReferencedProjectChange(
-                                first.OldCompilation,
+                                firstOldCompilation,
                                 first.NewCompilation,
                                 ReferenceChangeKind.Modified,
                                 changes )
-                            : new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferenceChangeKind.None );
+                            : new ReferencedProjectChange( first.NewCompilation, firstOldCompilation, ReferenceChangeKind.None );
                     }
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
