@@ -4,6 +4,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Services;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Licensing;
@@ -19,6 +20,12 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     public ProjectLicenseConsumptionService( LicensingInitializationOptions options )
     {
         this._impl = BackstageServiceFactory.CreateLicenseConsumptionService( options );
+        this._impl.Changed += this.OnChanged;
+    }
+
+    private void OnChanged()
+    {
+        this.Changed?.Invoke();
     }
 
     // This constructor is used in the compile-time scenario.
@@ -39,4 +46,6 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     public bool IsRedistributionLicense => this._impl.IsRedistributionLicense;
 
     public string? LicenseString => this._impl.LicenseString;
+
+    public event Action? Changed;
 }
