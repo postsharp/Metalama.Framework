@@ -125,6 +125,21 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
                             IdentifierName( targetMemberName ) );
 
+                case MemberAccessExpressionSyntax
+                {
+                    Expression: ParenthesizedExpressionSyntax { Expression: CastExpressionSyntax { Expression: { } targetExpression } }
+                } memberAccessExpression when this._aspectReference.ResolvedSemantic.Symbol.IsInterfaceMemberImplementation():
+                    if ( this._aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    {
+                        return memberAccessExpression;
+                    }
+                    else
+                    {
+                        return memberAccessExpression
+                            .WithExpression( targetExpression )
+                            .WithName( GetRewrittenName( memberAccessExpression.Name ) );
+                    }
+
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     // The reference expression is member access.
 
@@ -132,32 +147,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             this._aspectReference.ContainingSemantic.Symbol.ContainingType,
                             targetSymbol.ContainingType ) )
                     {
-                        if ( this._aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
+                        // This is the same type, we can just change the identifier in the expression.
+                        // TODO: Is the target always accessible?
+                        switch ( targetSymbol )
                         {
-                            return memberAccessExpression
-                                .WithExpression( ThisExpression() )
-                                .WithName( GetRewrittenName( memberAccessExpression.Name ) );
-                        }
-                        else
-                        {
-                            // This is the same type, we can just change the identifier in the expression.
-                            // TODO: Is the target always accessible?
-                            switch ( targetSymbol )
-                            {
-                                case IMethodSymbol { MethodKind: MethodKind.Destructor }:
-                                    return memberAccessExpression
-                                        .WithExpression( ThisExpression() )
-                                        .WithName( IdentifierName( targetMemberName ) );
+                            case IMethodSymbol { MethodKind: MethodKind.Destructor }:
+                                return memberAccessExpression
+                                    .WithExpression( ThisExpression() )
+                                    .WithName( IdentifierName( targetMemberName ) );
 
-                                case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion }:
-                                    return memberAccessExpression
-                                        .WithExpression( context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ) )
-                                        .WithName( IdentifierName( targetMemberName ) );
+                            case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion }:
+                                return memberAccessExpression
+                                    .WithExpression( context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ) )
+                                    .WithName( IdentifierName( targetMemberName ) );
 
-                                default:
-                                    return memberAccessExpression
-                                        .WithName( GetRewrittenName( memberAccessExpression.Name ) );
-                            }
+                            default:
+                                return memberAccessExpression
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) );
                         }
                     }
                     else

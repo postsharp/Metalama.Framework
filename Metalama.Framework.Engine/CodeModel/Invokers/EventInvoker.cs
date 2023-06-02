@@ -65,14 +65,15 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         private ExpressionSyntax CreateEventExpression( AspectReferenceTargetKind targetKind )
         {
             var receiverInfo = this.GetReceiverInfo();
+            var name = IdentifierName( this.GetCleanTargetMemberName() );
             var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
 
             var expression = receiverInfo.RequiresConditionalAccess
-                ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( IdentifierName( this.Member.Name ) ) )
+                ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )
                 : MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     receiverSyntax,
-                    IdentifierName( this.Member.Name ) );
+                    name );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
             if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )

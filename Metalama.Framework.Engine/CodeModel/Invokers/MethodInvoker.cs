@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 case MethodKind.Default:
                 case MethodKind.LocalFunction:
+                case MethodKind.ExplicitInterfaceImplementation:
                     return this.InvokeDefaultMethod( args );
 
                 case MethodKind.EventAdd:
@@ -101,13 +102,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             if ( this.Member.IsGeneric )
             {
                 name = GenericName(
-                    Identifier( this.Member.Name ),
+                    Identifier( this.GetCleanTargetMemberName() ),
                     TypeArgumentList(
                         SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
-                name = IdentifierName( this.Member.Name );
+                name = IdentifierName( this.GetCleanTargetMemberName() );
             }
 
             var compilation = this.Member.Compilation;
