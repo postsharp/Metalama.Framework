@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
-// @ExecuteProgram
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIterator;
