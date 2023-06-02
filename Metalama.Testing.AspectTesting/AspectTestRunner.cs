@@ -465,9 +465,12 @@ namespace Metalama.Testing.AspectTesting
         {
             base.ExecuteAssertions( testInput, testResult, state );
 
-            var expectedOutput = (string) state["expectedProgramOutput"]!;
-            var actualOutput = (string) state["actualProgramOutput"]!;
-            Assert.Equal( expectedOutput, actualOutput );
+            if ( testInput.Options.CompareProgramOutput ?? true )
+            {
+                var expectedOutput = (string) state["expectedProgramOutput"]!;
+                var actualOutput = (string) state["actualProgramOutput"]!;
+                Assert.Equal( expectedOutput, actualOutput );
+            }
         }
     }
 }
