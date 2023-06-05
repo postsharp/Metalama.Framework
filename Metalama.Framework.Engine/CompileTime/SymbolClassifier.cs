@@ -357,9 +357,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Fix compile-time-only symbols according to their expression type.
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
-                var expressionType = symbol.GetExpressionType();
-
-                if ( expressionType != null )
+                if ( symbol.GetExpressionType() is { } expressionType )
                 {
                     var expressionTypeScope = this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent, tracer );
 
@@ -367,6 +365,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         case TemplatingScope.RunTimeOnly:
                         case TemplatingScope.Dynamic:
+                        case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
                             scope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
                             break;
@@ -375,6 +374,12 @@ namespace Metalama.Framework.Engine.CompileTime
                             scope = TemplatingScope.CompileTimeOnlyReturningBoth;
 
                             break;
+                    }
+
+                    // If the return type is marked [CompileTime] (as in meta.CompileTime), enforce that.
+                    if ( symbol is IMethodSymbol methodSymbol && methodSymbol.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) ) )
+                    {
+                        scope = scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly ? OnConflict() : TemplatingScope.CompileTimeOnly;
                     }
                 }
                 else if ( symbol is ITypeParameterSymbol { DeclaringMethod: { } declaringMethod } && !this.GetTemplateInfo( declaringMethod ).IsNone )

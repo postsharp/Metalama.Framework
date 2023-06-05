@@ -1,9 +1,8 @@
-// Warning CS0108 on `Field`: `'TargetClass.Field' hides inherited member 'BaseClass.Field'. Use the new keyword if hiding was intended.`
 public class TargetClass : BaseClass
 {
   private static global::System.Int32 _field;
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_UserHidden_AspectOverride.OverrideAspect]
-  public static global::System.Int32 Field
+  public static new global::System.Int32 Field
   {
     get
     {

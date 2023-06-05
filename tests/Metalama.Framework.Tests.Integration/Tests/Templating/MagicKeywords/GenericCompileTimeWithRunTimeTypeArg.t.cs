@@ -1,3 +1,3 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0104 on `TargetCode`: `The expression 'TargetCode' is run-time but it is expected to be compile-time because the expression appears in a generic argument of compile-time declaration.`
-// Error LAMA0104 on `TargetCode`: `The expression 'TargetCode' is run-time but it is expected to be compile-time because the expression appears in a generic argument of compile-time declaration.`
+// Error LAMA0226 on `CompileTime<TargetCode?>`: `'meta.CompileTime<TargetCode?>(TargetCode?)' is invalid because 'TargetCode?' is run-time but 'meta' is compile-time.`
+// Error LAMA0226 on `CompileTime<TargetCode>`: `'meta.CompileTime<TargetCode>(TargetCode?)' is invalid because 'TargetCode?' is run-time but 'meta' is compile-time.`

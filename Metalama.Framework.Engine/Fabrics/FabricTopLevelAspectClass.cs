@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public IAspectDriver AspectDriver { get; }
 
-        public Location? DiagnosticLocation => null;
+        public Location? GetDiagnosticLocation( Compilation compilation ) => null;
 
         public CompileTimeProject? Project { get; }
 

@@ -196,7 +196,7 @@ namespace Metalama.Framework.Code
                      or SpecialType.Boolean
                      or SpecialType.Decimal )
             {
-                if ( value.GetType().Namespace != nameof( System ) || value.GetType().Name != ((INamedType) expectedType).Name )
+                if ( value.GetType().Namespace != nameof(System) || value.GetType().Name != ((INamedType) expectedType).Name )
                 {
                     return TypeMismatch();
                 }
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Code
             {
                 if ( value is not IType )
                 {
-                    return TypeMismatch( $"{typeof( IType )}' or '{typeof( Type )}" );
+                    return TypeMismatch( $"{typeof(IType)}' or '{typeof(Type)}" );
                 }
             }
             else

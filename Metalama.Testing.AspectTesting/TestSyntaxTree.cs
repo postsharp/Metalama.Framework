@@ -19,7 +19,7 @@ namespace Metalama.Testing.AspectTesting
     internal sealed class TestSyntaxTree
     {
         private readonly TestResult _parent;
-        
+
         public string? InputPath { get; }
 
         /// <summary>

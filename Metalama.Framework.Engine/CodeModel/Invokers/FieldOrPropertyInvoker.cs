@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,9 +28,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
             var receiverInfo = this.GetReceiverInfo();
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            var name = IdentifierName( this.Member.Name );
+            var name = IdentifierName( this.GetCleanTargetMemberName() );
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext );
 
             ExpressionSyntax expression;
 

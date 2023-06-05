@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -8,7 +7,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -38,10 +36,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             this._diagnosticSpan = diagnosticSpan;
         }
 
-        private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => diagnosticDefinition.Id == this._diagnosticId &&
-               location.SourceTree?.FilePath == this._diagnosticFilePath &&
-               location.SourceSpan.Equals( this._diagnosticSpan );
+        private protected override CodeFixFilter CodeFixFilter
+            => ( diagnosticDefinition, location )
+                => diagnosticDefinition.Id == this._diagnosticId &&
+                   location.SourceTree?.FilePath == this._diagnosticFilePath &&
+                   location.SourceSpan.Equals( this._diagnosticSpan );
 
         public async Task<FallibleResultWithDiagnostics<CodeFixPipelineResult>> ExecuteAsync(
             PartialCompilation partialCompilation,

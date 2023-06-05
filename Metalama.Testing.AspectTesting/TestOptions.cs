@@ -152,9 +152,15 @@ namespace Metalama.Testing.AspectTesting
 
         /// <summary>
         /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
-        /// To enable this option in a test, add this comment to your test file: <c>// @ExecuteProgram</c>.
+        /// To disable this option in a test, add this comment to your test file: <c>// @DisableExecuteProgram</c>.
         /// </summary>
         public bool? ExecuteProgram { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the program output should be compared to its expected value. The default value is <c>true</c>.
+        /// To disable this option in a test, add this comment to your test file: <c>// @DisableCompareProgramOutput</c>. 
+        /// </summary>
+        public bool? CompareProgramOutput { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
@@ -400,6 +406,8 @@ namespace Metalama.Testing.AspectTesting
             this.LaunchDebugger ??= baseOptions.LaunchDebugger;
 
             this.FormatCompileTimeCode ??= baseOptions.FormatCompileTimeCode;
+
+            this.CompareProgramOutput ??= baseOptions.CompareProgramOutput;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -562,8 +570,13 @@ namespace Metalama.Testing.AspectTesting
 
                         break;
 
-                    case "ExecuteProgram":
-                        this.ExecuteProgram = true;
+                    case "DisableExecuteProgram":
+                        this.ExecuteProgram = false;
+
+                        break;
+                    
+                    case "DisableCompareProgramOutput":
+                        this.CompareProgramOutput = false;
 
                         break;
 
