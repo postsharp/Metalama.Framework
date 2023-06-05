@@ -6,7 +6,6 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.Swabra
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.swabra
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.*
 
@@ -76,7 +75,7 @@ object DebugBuild : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaBackstage_ReleaseBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -89,7 +88,7 @@ object DebugBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaCompiler_ReleaseBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -150,7 +149,7 @@ object PublicBuild : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaBackstage_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -163,7 +162,7 @@ object PublicBuild : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaCompiler_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -215,7 +214,7 @@ object PublicDeployment : BuildType({
 
     dependencies {
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaBackstage_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaBackstage_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -228,7 +227,7 @@ object PublicDeployment : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaCompiler_PublicBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -241,7 +240,7 @@ object PublicDeployment : BuildType({
 
         }
 
-        dependency(AbsoluteId("Metalama_Metalama20231_MetalamaCompiler_PublicDeployment")) {
+        dependency(AbsoluteId("Metalama_Metalama20232_MetalamaCompiler_PublicDeployment")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
