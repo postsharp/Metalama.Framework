@@ -45,7 +45,10 @@ internal sealed class AssemblyLoader : IDisposable
             // Within Roslyn, the ALC used is DirectoryLoadContext, which does not respond to its Resolving event.
             // Subscribing to the event of the default ALC instead works.
             // In Rider, DirectoryLoadContext is not used, and we have to subscibe to the Resolving event of the current ALC.
-            var resolvingAlc = currentAlc.GetType().FullName == "Microsoft.CodeAnalysis.DefaultAnalyzerAssemblyLoader+DirectoryLoadContext" ? defaultAlc : currentAlc;
+
+            // The check for DirectoryLoadContext is written like this, because it can be either Microsoft.CodeAnalysis.DefaultAnalyzerAssemblyLoader+DirectoryLoadContext
+            // or Microsoft.CodeAnalysis.AnalyzerAssemblyLoader+DirectoryLoadContext, depending on Roslyn version.
+            var resolvingAlc = currentAlc.GetType() is { Namespace: "Microsoft.CodeAnalysis", Name: "DirectoryLoadContext" } ? defaultAlc : currentAlc;
 
             var addResolvingMethod = alcType.GetMethod( "add_Resolving" )!;
             addResolvingMethod.Invoke( resolvingAlc, new object[] { alcResolvingDelegate } );
