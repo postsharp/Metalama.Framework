@@ -23,6 +23,6 @@ namespace Metalama.Framework.Advising
         /// <summary>
         /// An existing class member was used for to implement the interface member.
         /// </summary>
-        UseExisting = 2,
+        UseExisting = 2
     }
 }

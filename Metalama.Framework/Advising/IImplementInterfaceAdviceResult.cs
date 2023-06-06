@@ -10,8 +10,8 @@ namespace Metalama.Framework.Advising;
 /// method.
 /// </summary>
 [CompileTime]
-public interface IImplementInterfaceAdviceResult : IAdviceResult 
-{ 
+public interface IImplementInterfaceAdviceResult : IAdviceResult
+{
     /// <summary>
     /// Gets a list of interfaces that were considered when implementing the given interface.
     /// </summary>

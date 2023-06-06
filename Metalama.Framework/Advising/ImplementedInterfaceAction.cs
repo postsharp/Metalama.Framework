@@ -18,6 +18,6 @@ namespace Metalama.Framework.Advising
         /// <summary>
         /// The interface type was ignored. Members will not appear in <see cref="IImplementInterfaceAdviceResult.InterfaceMembers"/> collection.
         /// </summary>
-        Ignore = 1,
+        Ignore = 1
     }
 }
