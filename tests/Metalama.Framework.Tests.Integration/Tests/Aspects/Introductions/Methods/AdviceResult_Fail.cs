@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 
             if (result.Outcome != Advising.AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.IntroduceMethod)

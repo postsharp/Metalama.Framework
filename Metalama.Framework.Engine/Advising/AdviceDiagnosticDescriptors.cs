@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.Advising
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
-            CannotOverrideNonPublicInterfaceMethod = new(
+            CannotOverrideNonPublicInterfaceMember = new(
                 "LAMA0528",
                 "Cannot override an interface member because it is not public.",
                 "The aspect '{0}' cannot override the member '{1}' because it is not public.",
@@ -254,7 +254,7 @@ namespace Metalama.Framework.Engine.Advising
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
-            CannotOverrideNonVirtualInterfaceMethod = new(
+            CannotOverrideNonVirtualInterfaceMember = new(
                 "LAMA0529",
                 "Cannot override an interface member because it is not virtual.",
                 "The aspect '{0}' cannot override the member '{1}' because it is not virtual.",
