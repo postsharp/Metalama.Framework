@@ -39,7 +39,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         static ResourceExtractor()
         {
-            if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "METALAMA_DEBUG_RESOURCE_EXTRACTOR" ) ) )
+            //if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "METALAMA_DEBUG_RESOURCE_EXTRACTOR" ) ) )
             {
                 Debugger.Launch();
             }

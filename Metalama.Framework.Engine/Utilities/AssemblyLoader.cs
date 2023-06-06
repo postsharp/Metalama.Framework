@@ -23,24 +23,7 @@ internal sealed class AssemblyLoader : IDisposable
 
         if ( currentAlc != null )
         {
-            // When we're in RoslynCodeAnalysisService, we need to load extra assemblies using the same ALC as the one that's used by Roslyn for loading this assembly.
-            var loadMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
-            this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof(Func<string, Assembly>), currentAlc, loadMethod );
-
-            // Use expression trees to create a delegate for the AssemblyLoadContext.Resolving event, because it involves the AssemblyLoadContext type,
-            // which cannot be statically used here.
-            // Using delegate variance instead won't work, because that fails when combining delegates of different types.
-            LambdaExpression simplifiedAlcResolvingExpression = ( AssemblyName assemblyName ) => this._resolveAssembly( assemblyName.FullName );
-
-            var alcResolvingType = typeof(Func<,,>).MakeGenericType( alcType, typeof(AssemblyName), typeof(Assembly) );
-
-            var alcResolvingExpression = Expression.Lambda(
-                alcResolvingType,
-                simplifiedAlcResolvingExpression.Body,
-                Expression.Parameter( alcType ),
-                simplifiedAlcResolvingExpression.Parameters.Single() );
-
-            var alcResolvingDelegate = alcResolvingExpression.Compile();
+            // TODO: update comments
 
             // Within Roslyn, the ALC used is DirectoryLoadContext, which does not respond to its Resolving event.
             // Subscribing to the event of the default ALC instead works.
@@ -48,23 +31,59 @@ internal sealed class AssemblyLoader : IDisposable
 
             // The check for DirectoryLoadContext is written like this, because it can be either Microsoft.CodeAnalysis.DefaultAnalyzerAssemblyLoader+DirectoryLoadContext
             // or Microsoft.CodeAnalysis.AnalyzerAssemblyLoader+DirectoryLoadContext, depending on Roslyn version.
-            var resolvingAlc = currentAlc.GetType() is { Namespace: "Microsoft.CodeAnalysis", Name: "DirectoryLoadContext" } ? defaultAlc : currentAlc;
+            if ( currentAlc.GetType() is { Namespace: "Microsoft.CodeAnalysis", Name: "DirectoryLoadContext" } directoryLoadContextType )
+            {
+                var compilerAlc = directoryLoadContextType.GetField( "_compilerLoadContext", BindingFlags.Instance | BindingFlags.NonPublic )
+                    ?.GetValue( currentAlc );
 
-            var addResolvingMethod = alcType.GetMethod( "add_Resolving" )!;
-            addResolvingMethod.Invoke( resolvingAlc, new object[] { alcResolvingDelegate } );
+                if ( !ReferenceEquals( compilerAlc, defaultAlc ) )
+                {
+#if DEBUG
+                    if ( Environment.Version.Major >= 7 )
+                    {
+                        throw new NotSupportedException( "This hack does not work on .Net 7 and newer." );
+                    }
+#endif
 
-            var removeResolvingMethod = alcType.GetMethod( "remove_Resolving" )!;
-            this._assemblyResolveUnsubscribe = () => removeResolvingMethod.Invoke( resolvingAlc, new object[] { alcResolvingDelegate } );
+                    // When we're in RoslynCodeAnalysisService, we need to load extra assemblies using the same ALC as the one that's used by Roslyn for loading this assembly.
+                    var loadMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
+                    this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof( Func<string, Assembly> ), currentAlc, loadMethod );
+
+                    // Use expression trees to create a delegate for the AssemblyLoadContext.Resolving event, because it involves the AssemblyLoadContext type,
+                    // which cannot be statically used here.
+                    // Using delegate variance instead won't work, because that fails when combining delegates of different types.
+                    LambdaExpression simplifiedAlcResolvingExpression = ( AssemblyName assemblyName ) => this._resolveAssembly( assemblyName.FullName );
+
+                    var alcResolvingType = typeof( Func<,,> ).MakeGenericType( alcType, typeof( AssemblyName ), typeof( Assembly ) );
+
+                    var alcResolvingExpression = Expression.Lambda(
+                        alcResolvingType,
+                        simplifiedAlcResolvingExpression.Body,
+                        Expression.Parameter( alcType ),
+                        simplifiedAlcResolvingExpression.Parameters.Single() );
+
+                    var alcResolvingDelegate = alcResolvingExpression.Compile();
+
+                    // ServiceLoadContext used in RoslynCodeAnalysisService hides AssemblyLoadContext.Resolving with its own event of the same name.
+                    // Since we need to use that event, we have to use the concrete type here.
+                    var addResolvingMethod = alcType.GetMethod( "add_Resolving" )!;
+                    addResolvingMethod.Invoke( defaultAlc, new object[] { alcResolvingDelegate } );
+
+                    var removeResolvingMethod = alcType.GetMethod( "remove_Resolving" )!;
+                    this._assemblyResolveUnsubscribe = () => removeResolvingMethod.Invoke( defaultAlc, new object[] { alcResolvingDelegate } );
+
+                    return;
+                }
+            }
         }
-        else
-        {
-            // On .Net Framework, use the regular Assembly.LoadFile, since ALC does not exist.
-            this._loadAssembly = Assembly.LoadFile;
 
-            AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+        // TODO: outdated comment
+        // On .Net Framework, use the regular Assembly.LoadFile, since ALC does not exist.
+        this._loadAssembly = Assembly.LoadFile;
 
-            this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
-        }
+        AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+
+        this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
     }
 
     private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args ) => this._resolveAssembly( args.Name );
