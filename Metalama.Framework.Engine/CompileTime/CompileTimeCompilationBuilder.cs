@@ -60,20 +60,31 @@ internal sealed partial class CompileTimeCompilationBuilder
 
     private static ImmutableDictionary<string, string> GetPredefinedSyntaxTrees()
     {
-        const string prefix = "Metalama.Framework.Engine._Resources_.";
+        const string prefix = "_Resources_.";
 
         var assembly = typeof(CompileTimeCompilationBuilder).Assembly;
 
-        return assembly.GetManifestResourceNames()
-            .Where( n => n.StartsWith( prefix, StringComparison.Ordinal ) )
+        // Weirdly enough the assembly prefix of the resource name is not constant; it may or may not include the Roslyn version
+        // number.
+
+        var files = assembly.GetManifestResourceNames()
+            .Where( n => n.ContainsOrdinal( prefix ) )
             .ToImmutableDictionary(
-                name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( prefix.Length ) ) + ".cs",
+                name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( name.IndexOf( prefix, StringComparison.Ordinal ) + prefix.Length ) )
+                        + ".cs",
                 name =>
                 {
                     using var reader = new StreamReader( assembly.GetManifestResourceStream( name )! );
 
                     return reader.ReadToEnd();
                 } );
+
+        if ( files.IsEmpty )
+        {
+            throw new AssertionFailedException( "Could not find the predefined syntax trees." );
+        }
+
+        return files;
     }
 
     private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
