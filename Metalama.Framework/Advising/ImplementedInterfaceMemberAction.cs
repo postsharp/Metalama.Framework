@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Advising
 {
     /// <summary>
-    /// Actions taken by the advice when implemeting an interface member.
+    /// Actions taken by the advice when implementing an interface member.
     /// </summary>
     [CompileTime]
     public enum ImplementedInterfaceMemberAction
