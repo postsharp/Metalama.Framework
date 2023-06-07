@@ -184,7 +184,7 @@ namespace Metalama.Framework.Engine.Templating
         public StatementSyntax DynamicReturnStatement( IUserExpression returnExpression, bool awaitResult )
             => this._templateExpansionContext.CreateReturnStatement( returnExpression, awaitResult );
 
-        public StatementSyntax DynamicDiscardAssignment( IUserExpression? expression, bool awaitResult )
+        public StatementSyntax DynamicLocalAssignment( IdentifierNameSyntax identifier, SyntaxKind kind, IUserExpression? expression, bool awaitResult )
         {
             if ( expression == null )
             {
@@ -205,8 +205,8 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return SyntaxFactory.ExpressionStatement(
                     SyntaxFactory.AssignmentExpression(
-                            SyntaxKind.SimpleAssignmentExpression,
-                            SyntaxFactoryEx.DiscardToken,
+                            kind,
+                            identifier,
                             awaitResult
                                 ? SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() )
                                 : expression.ToExpressionSyntax( this._syntaxGenerationContext ) )

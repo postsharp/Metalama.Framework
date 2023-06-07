@@ -7,13 +7,13 @@ public class TargetClass
   {
     get
     { // Invoke instance.Field
-      _ = this.instance.Field;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.TargetClass_DifferentInstance.TargetClass)this.instance!).Field;
       // Invoke instance?.Field
-      _ = this.instance?.Field;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.TargetClass_DifferentInstance.TargetClass)this.instance!)?.Field;
       // Invoke instance.Field
-      _ = this.instance.Field;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.TargetClass_DifferentInstance.TargetClass)this.instance!).Field;
       // Invoke instance?.Field
-      _ = this.instance?.Field;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.TargetClass_DifferentInstance.TargetClass)this.instance!)?.Field;
       return 0;
     }
     set

@@ -33,7 +33,7 @@ public interface ITemplateSyntaxFactory
 
     StatementSyntax DynamicReturnStatement( IUserExpression returnExpression, bool awaitResult );
 
-    StatementSyntax DynamicDiscardAssignment( IUserExpression? expression, bool awaitResult );
+    StatementSyntax DynamicLocalAssignment( IdentifierNameSyntax identifier, SyntaxKind kind, IUserExpression? expression, bool awaitResult );
 
     StatementSyntax DynamicLocalDeclaration(
         TypeSyntax type,

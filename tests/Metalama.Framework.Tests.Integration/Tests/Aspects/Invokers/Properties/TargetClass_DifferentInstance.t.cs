@@ -16,13 +16,13 @@ public class TargetClass
   {
     get
     { // Invoke instance.Property
-      _ = this.instance.Property;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!).Property;
       // Invoke instance?.Property
-      _ = this.instance?.Property;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!)?.Property;
       // Invoke instance.Property
-      _ = this.instance.Property;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!).Property;
       // Invoke instance?.Property
-      _ = this.instance?.Property;
+      _ = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance.TargetClass)this.instance!)?.Property;
       return 0;
     }
     set
