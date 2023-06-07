@@ -17,51 +17,74 @@ internal sealed class AssemblyLoader : IDisposable
     {
         this._resolveAssembly = resolveAssembly;
 
+        // In most cases (devenv, Rider, OmniSharp), compiler assemblies (including System.Collections.Immutable) are loaded into the default AssemblyLoadContext
+        // (or ALCs don't exist), which means loading everything using Assembly.LoadFile works (though it's also a memory leak).
+        // But in RoslynCodeAnalysisService, compiler assemblies are loaded into a separate ALC, so we have to do something different.
+        // We detect this by checking that DirectoryLoadContext is the current ALC and that its _compilerLoadContext is not Default.
+
         var alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
         var currentAlc = alcType?.GetMethod( "GetLoadContext" )!.Invoke( null, new object[] { typeof(AssemblyLoader).Assembly } );
         var defaultAlc = alcType?.GetProperty( "Default" )!.GetValue( null );
 
         if ( currentAlc != null )
         {
-            // When we're in RoslynCodeAnalysisService, we need to load extra assemblies using the same ALC as the one that's used by Roslyn for loading this assembly.
-            var loadMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
-            this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof(Func<string, Assembly>), currentAlc, loadMethod );
+            // The check for DirectoryLoadContext is written like this, because it can be either Microsoft.CodeAnalysis.DefaultAnalyzerAssemblyLoader+DirectoryLoadContext
+            // or Microsoft.CodeAnalysis.AnalyzerAssemblyLoader+DirectoryLoadContext, depending on Roslyn version.
+            if ( currentAlc.GetType() is { Namespace: "Microsoft.CodeAnalysis", Name: "DirectoryLoadContext" } directoryLoadContextType )
+            {
+                var compilerAlc = directoryLoadContextType.GetField( "_compilerLoadContext", BindingFlags.Instance | BindingFlags.NonPublic )
+                    ?.GetValue( currentAlc );
 
-            // Use expression trees to create a delegate for the AssemblyLoadContext.Resolving event, because it involves the AssemblyLoadContext type,
-            // which cannot be statically used here.
-            // Using delegate variance instead won't work, because that fails when combining delegates of different types.
-            LambdaExpression simplifiedAlcResolvingExpression = ( AssemblyName assemblyName ) => this._resolveAssembly( assemblyName.FullName );
+                if ( !ReferenceEquals( compilerAlc, defaultAlc ) )
+                {
+                    // Now we need to set up loading into the current ALC, which is DirectoryLoadContext.
+                    // DirectoryLoadContext does not respond to its Resolving event, but it does delegate to its "parent" contexts.
+                    // This means subscribing to the Resolving event of the Default ALC works, but only up to .Net 6.
+                    // .Net 7 added a new error, which means that loading into an unloadable context (like DirectoryLoadContext) through a non-unloadable context (like Default)
+                    // throws an exception.
+                    // Which means this code will stop working as soon as RoslynCodeAnalysisService starts using .Net 7 or 8.
 
-            var alcResolvingType = typeof(Func<,,>).MakeGenericType( alcType, typeof(AssemblyName), typeof(Assembly) );
+#if DEBUG
+                    if ( Environment.Version.Major >= 7 )
+                    {
+                        throw new NotSupportedException( "This hack does not work on .Net 7 and newer." );
+                    }
+#endif
 
-            var alcResolvingExpression = Expression.Lambda(
-                alcResolvingType,
-                simplifiedAlcResolvingExpression.Body,
-                Expression.Parameter( alcType ),
-                simplifiedAlcResolvingExpression.Parameters.Single() );
+                    var loadMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
+                    this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof( Func<string, Assembly> ), currentAlc, loadMethod );
 
-            var alcResolvingDelegate = alcResolvingExpression.Compile();
+                    // Use expression trees to create a delegate for the AssemblyLoadContext.Resolving event, because it involves the AssemblyLoadContext type,
+                    // which cannot be statically used here.
+                    // Using delegate variance instead won't work, because that fails when combining delegates of different types.
+                    LambdaExpression simplifiedAlcResolvingExpression = ( AssemblyName assemblyName ) => this._resolveAssembly( assemblyName.FullName );
 
-            // Within Roslyn, the ALC used is DirectoryLoadContext, which does not respond to its Resolving event.
-            // Subscribing to the event of the default ALC instead works.
-            // In Rider, DirectoryLoadContext is not used, and we have to subscibe to the Resolving event of the current ALC.
-            var resolvingAlc = currentAlc.GetType().FullName == "Microsoft.CodeAnalysis.DefaultAnalyzerAssemblyLoader+DirectoryLoadContext" ? defaultAlc : currentAlc;
+                    var alcResolvingType = typeof( Func<,,> ).MakeGenericType( alcType, typeof( AssemblyName ), typeof( Assembly ) );
 
-            var addResolvingMethod = alcType.GetMethod( "add_Resolving" )!;
-            addResolvingMethod.Invoke( resolvingAlc, new object[] { alcResolvingDelegate } );
+                    var alcResolvingExpression = Expression.Lambda(
+                        alcResolvingType,
+                        simplifiedAlcResolvingExpression.Body,
+                        Expression.Parameter( alcType ),
+                        simplifiedAlcResolvingExpression.Parameters.Single() );
 
-            var removeResolvingMethod = alcType.GetMethod( "remove_Resolving" )!;
-            this._assemblyResolveUnsubscribe = () => removeResolvingMethod.Invoke( resolvingAlc, new object[] { alcResolvingDelegate } );
+                    var alcResolvingDelegate = alcResolvingExpression.Compile();
+
+                    var addResolvingMethod = alcType.GetMethod( "add_Resolving" )!;
+                    addResolvingMethod.Invoke( defaultAlc, new object[] { alcResolvingDelegate } );
+
+                    var removeResolvingMethod = alcType.GetMethod( "remove_Resolving" )!;
+                    this._assemblyResolveUnsubscribe = () => removeResolvingMethod.Invoke( defaultAlc, new object[] { alcResolvingDelegate } );
+
+                    return;
+                }
+            }
         }
-        else
-        {
-            // On .Net Framework, use the regular Assembly.LoadFile, since ALC does not exist.
-            this._loadAssembly = Assembly.LoadFile;
 
-            AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+        this._loadAssembly = Assembly.LoadFile;
 
-            this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
-        }
+        AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+
+        this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
     }
 
     private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args ) => this._resolveAssembly( args.Name );
