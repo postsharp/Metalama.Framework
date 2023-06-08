@@ -1618,8 +1618,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 AdviceOutcome.Default,
                 this._state.AspectBuilder.AssertNotNull(),
                 advice.AdviceKind,
-                Array.Empty<ImplementedInterface>(),
-                Array.Empty<ImplementedInterfaceMember>() );
+                Array.Empty<InterfaceImplementationResult>(),
+                Array.Empty<InterfaceMemberImplementationResult>() );
         }
 
         // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.

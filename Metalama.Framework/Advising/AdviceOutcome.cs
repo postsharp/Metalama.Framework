@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 
 namespace Metalama.Framework.Advising;
 
@@ -25,11 +26,14 @@ public enum AdviceOutcome
     /// There was a conflict and the advice was successfully applied and the new advice hides the previous declaration with the <c>new</c> keyword.
     /// </summary>
     New,
-
+    
     /// <summary>
     /// There was a conflict and the advice was ignored.
     /// </summary>
-    Ignored,
+    Ignore,
+    
+    [Obsolete]
+    Ignored = Ignore,
 
     /// <summary>
     /// There was a conflict or another error. The advice was ignored and the whole aspect was disabled using <see cref="IAspectBuilder.SkipAspect"/>.

@@ -9,24 +9,24 @@ namespace Metalama.Framework.Advising
     /// Describes an interface type implemented by <see cref="IAdviceFactory.ImplementInterface(INamedType, INamedType, OverrideStrategy, object?)"/>.
     /// </summary>
     [CompileTime]
-    public class ImplementedInterface
+    public sealed class InterfaceImplementationResult
     {
-        internal ImplementedInterface(
-            IRef<INamedType> @interface,
-            ImplementedInterfaceAction action )
+        internal InterfaceImplementationResult(
+            INamedType @interface,
+            InterfaceImplementationOutcome outcome )
         {
             this.Interface = @interface;
-            this.Action = action;
+            this.Outcome = outcome;
         }
 
         /// <summary>
         /// Gets an interface type that was considered by the advice.
         /// </summary>
-        public IRef<INamedType> Interface { get; }
+        public INamedType Interface { get; }
 
         /// <summary>
         /// Gets a value indicating the action taken to implement the interface type.
         /// </summary>
-        public ImplementedInterfaceAction Action { get; }
+        public InterfaceImplementationOutcome Outcome { get; }
     }
 }

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Advising
     /// Actions taken by the advice when implementing an interface member.
     /// </summary>
     [CompileTime]
-    public enum ImplementedInterfaceMemberAction
+    public enum InterfaceMemberImplementationOutcome
     {
         /// <summary>
         /// Interface member was introduced as a new declaration.

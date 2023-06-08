@@ -259,8 +259,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
         var diagnostics = new DiagnosticBag();
-        var implementedInterfaces = new List<ImplementedInterface>();
-        var implementedInterfaceMembers = new List<ImplementedInterfaceMember>();
+        var implementedInterfaces = new List<InterfaceImplementationResult>();
+        var implementedInterfaceMembers = new List<InterfaceMemberImplementationResult>();
 
         foreach ( var interfaceSpecification in this._interfaceSpecifications )
         {
@@ -275,7 +275,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.Ignore:
-                        implementedInterfaces.Add( new ImplementedInterface( interfaceSpecification.InterfaceType.ToTypedRef(), ImplementedInterfaceAction.Ignore ) );
+                        implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
 
                         continue;
 
@@ -288,7 +288,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         continue;
 
                     case OverrideStrategy.Override:
-                        implementedInterfaces.Add( new ImplementedInterface( interfaceSpecification.InterfaceType.ToTypedRef(), ImplementedInterfaceAction.Implement ) );
+                        implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
                         skipInterfaceBaseList = true;
 
                         break;
@@ -299,7 +299,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             }
             else
             {
-                implementedInterfaces.Add( new ImplementedInterface( interfaceSpecification.InterfaceType.ToTypedRef(), ImplementedInterfaceAction.Implement ) );
+                implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
 
                 skipInterfaceBaseList = false;
             }
@@ -354,10 +354,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new ImplementedInterfaceMember(
-                                            memberSpec.InterfaceMember.ToTypedRef(),
-                                            ImplementedInterfaceMemberAction.UseExisting,
-                                            existingMethod.ToTypedRef() ) );
+                                        new InterfaceMemberImplementationResult(
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingMethod ) );
 
                                     continue;
 
@@ -382,10 +382,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new ImplementedInterfaceMember(
-                                                memberSpec.InterfaceMember.ToTypedRef(),
-                                                ImplementedInterfaceMemberAction.Override,
-                                                existingMethod.ToTypedRef() ) );
+                                            new InterfaceMemberImplementationResult(
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingMethod ) );
                                     }
                                     else
                                     {
@@ -450,10 +450,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new ImplementedInterfaceMember(
-                                    memberSpec.InterfaceMember.ToTypedRef(),
-                                    ImplementedInterfaceMemberAction.Introduce,
-                                    methodBuilder.ToTypedRef() ) );
+                                new InterfaceMemberImplementationResult(
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    methodBuilder ) );
                         }
 
                         break;
@@ -500,10 +500,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new ImplementedInterfaceMember(
-                                                memberSpec.InterfaceMember.ToTypedRef(),
-                                                ImplementedInterfaceMemberAction.Override,
-                                                existingProperty.ToTypedRef() ) );
+                                            new InterfaceMemberImplementationResult(
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingProperty ) );
                                     }
                                     else
                                     {
@@ -530,10 +530,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new ImplementedInterfaceMember(
-                                            memberSpec.InterfaceMember.ToTypedRef(),
-                                            ImplementedInterfaceMemberAction.UseExisting,
-                                            existingProperty.ToTypedRef() ) );
+                                        new InterfaceMemberImplementationResult(
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingProperty ) );
 
                                     continue;
 
@@ -686,10 +686,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new ImplementedInterfaceMember(
-                                    memberSpec.InterfaceMember.ToTypedRef(),
-                                    ImplementedInterfaceMemberAction.Introduce,
-                                    propertyBuilder.ToTypedRef() ) );
+                                new InterfaceMemberImplementationResult(
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    propertyBuilder ) );
                         }
 
                         break;
@@ -740,10 +740,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new ImplementedInterfaceMember(
-                                                memberSpec.InterfaceMember.ToTypedRef(),
-                                                ImplementedInterfaceMemberAction.Override,
-                                                existingEvent.ToTypedRef() ) );
+                                            new InterfaceMemberImplementationResult(
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingEvent ) );
                                     }
                                     else
                                     {
@@ -770,10 +770,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new ImplementedInterfaceMember(
-                                            memberSpec.InterfaceMember.ToTypedRef(),
-                                            ImplementedInterfaceMemberAction.UseExisting,
-                                            existingEvent.ToTypedRef() ) );
+                                        new InterfaceMemberImplementationResult(
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingEvent ) );
 
                                     continue;
 
@@ -834,10 +834,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new ImplementedInterfaceMember(
-                                    memberSpec.InterfaceMember.ToTypedRef(),
-                                    ImplementedInterfaceMemberAction.Introduce,
-                                    eventBuilder.ToTypedRef() ) );
+                                new InterfaceMemberImplementationResult(
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    eventBuilder ) );
                         }
 
                         break;
