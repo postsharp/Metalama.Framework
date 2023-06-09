@@ -2,6 +2,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
@@ -102,7 +103,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._projectOptions = serviceProvider.GetService<IProjectOptions>();
         this._compilationContextFactory = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
-        this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
+        this._tempFileManager = serviceProvider.Underlying.GetRequiredBackstageService<ITempFileManager>();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
         this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
         this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();

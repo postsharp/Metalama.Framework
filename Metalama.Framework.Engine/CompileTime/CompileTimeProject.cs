@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
@@ -273,6 +274,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            var projectHash = hash.Digest();
+
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
 
             // Ignore collectible assemblies now, as they are not considered later when resolving.
@@ -280,23 +283,23 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( assembly == null )
             {
-                var tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
+                var tempFileManager = serviceProvider.Underlying.GetRequiredBackstageService<ITempFileManager>();
                 var outputPathHelper = new OutputPathHelper( tempFileManager );
-                var outputDirectory = outputPathHelper.GetOutputPaths( assemblyIdentity.Name, targetFramework: null, hash.Digest() ).Directory;
+                var outputDirectory = outputPathHelper.GetOutputPaths( assemblyIdentity.Name, targetFramework: null, projectHash ).Directory;
 
                 var outputPath = Path.Combine( outputDirectory, Path.GetFileName( assemblyPath ) );
 
-                using ( MutexHelper.WithGlobalLock( outputPath ) )
-                {
-                    RetryHelper.Retry(
-                        () =>
+                RetryHelper.Retry(
+                    () =>
+                    {
+                        if ( !File.Exists( outputPath ) )
                         {
-                            if ( !File.Exists( outputPath ) )
+                            using ( MutexHelper.WithGlobalLock( outputPath ) )
                             {
                                 File.Copy( assemblyPath, outputPath );
                             }
-                        } );
-                }
+                        }
+                    } );
 
                 assembly = domain.LoadAssembly( outputPath );
             }
@@ -330,7 +333,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 TemplateProjectManifest.Empty,
                 null,
-                hash.Digest(),
+                projectHash,
                 Array.Empty<CompileTimeFileManifest>(),
                 Array.Empty<CompileTimeDiagnosticManifest>() );
 
