@@ -316,6 +316,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
                             <OutputType>Exe</OutputType>
                             <LangVersion>latest</LangVersion>
+                            <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
+                            <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+                            <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
                           </PropertyGroup>
                           <ItemGroup>
                             <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
