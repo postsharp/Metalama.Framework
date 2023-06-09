@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.Utilities;
 
 internal sealed class AssemblyLoader : IDisposable
 {
+    private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+
     private readonly Func<string, Assembly?> _resolveAssembly;
     private readonly Func<string, Assembly> _loadAssembly;
     private readonly Action _assemblyResolveUnsubscribe;
@@ -90,6 +92,9 @@ internal sealed class AssemblyLoader : IDisposable
     private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args ) => this._resolveAssembly( args.Name );
 
     public Assembly LoadAssembly( string assemblyPath ) => this._loadAssembly( assemblyPath );
+
+    // .NET 5.0 has collectible assemblies, but collectible assemblies cannot be returned to AppDomain.AssemblyResolve.
+    internal static bool IsCollectible( Assembly assembly ) => _isCollectibleProperty == null || (bool) _isCollectibleProperty.GetValue( assembly )!;
 
     public void Dispose() => this._assemblyResolveUnsubscribe();
 }

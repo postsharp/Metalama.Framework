@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -34,7 +36,7 @@ namespace Metalama.Framework.Engine.CompileTime
         internal CompileTimeProjectManifest? Manifest { get; }
 
         private readonly string? _compiledAssemblyPath;
-        private readonly AssemblyIdentity? _compileTimeIdentity;
+        private readonly AssemblyIdentity _compileTimeIdentity;
         private readonly ITextMapFileProvider? _mapFileProvider;
         private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
@@ -256,12 +258,43 @@ namespace Metalama.Framework.Engine.CompileTime
             CacheableTemplateDiscoveryContextProvider? templateDiscoveryContextProvider,
             [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
+            // Compute a unique hash based on the binary. 
+            XXH64 hash = new();
+            var buffer = new byte[1024];
+
+            using ( var file = File.OpenRead( assemblyPath ) )
+            {
+                int read;
+
+                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
+                {
+                    hash.Update( buffer, 0, read );
+                }
+            }
+
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
-            var assembly = AppDomainUtility.GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
+
+            // Ignore collectible assemblies now, as they are not considered later when resolving.
+            var assembly = AppDomainUtility.GetLoadedAssemblies( a => !AssemblyLoader.IsCollectible( a ) && AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
 
             if ( assembly == null )
             {
-                assembly = domain.LoadAssembly( assemblyPath );
+                var tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
+                var outputPathHelper = new OutputPathHelper( tempFileManager );
+                var outputDirectory = outputPathHelper.GetOutputPaths( assemblyIdentity.Name, targetFramework: null, hash.Digest() ).Directory;
+
+                var outputPath = Path.Combine( outputDirectory, Path.GetFileName( assemblyPath ) );
+
+                RetryHelper.Retry(
+                    () =>
+                    {
+                        if ( !File.Exists( outputPath ) )
+                        {
+                            File.Copy( assemblyPath, outputPath );
+                        }
+                    } );
+
+                assembly = domain.LoadAssembly( outputPath );
             }
 
             // Find interesting types.
@@ -279,20 +312,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var templateProviders =
                 assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
-
-            // Compute a unique hash based on the binary. 
-            XXH64 hash = new();
-            var buffer = new byte[1024];
-
-            using ( var file = File.OpenRead( assemblyPath ) )
-            {
-                int read;
-
-                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
-                {
-                    hash.Update( buffer, 0, read );
-                }
-            }
 
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(
@@ -446,7 +465,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
+                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this._compiledAssemblyPath! );
             }
         }
 
