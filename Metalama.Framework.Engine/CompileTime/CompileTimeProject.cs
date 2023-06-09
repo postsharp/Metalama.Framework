@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -285,14 +286,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var outputPath = Path.Combine( outputDirectory, Path.GetFileName( assemblyPath ) );
 
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( !File.Exists( outputPath ) )
+                using ( MutexHelper.WithGlobalLock( outputPath ) )
+                {
+                    RetryHelper.Retry(
+                        () =>
                         {
-                            File.Copy( assemblyPath, outputPath );
-                        }
-                    } );
+                            if ( !File.Exists( outputPath ) )
+                            {
+                                File.Copy( assemblyPath, outputPath );
+                            }
+                        } );
+                }
 
                 assembly = domain.LoadAssembly( outputPath );
             }
