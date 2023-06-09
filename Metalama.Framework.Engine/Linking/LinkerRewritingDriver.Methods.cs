@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -75,6 +75,16 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+            }
+            else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
+            {
+                Invariant.Assert( symbol.IsOverride );
+
+                return new[]
+                {
+                    GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
+                };
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
@@ -249,8 +259,10 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
+            Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
+            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol.IsOverride );
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return method
@@ -268,7 +280,7 @@ namespace Metalama.Framework.Engine.Linking
                         ArgumentList(
                             SeparatedList( method.ParameterList.Parameters.SelectAsEnumerable( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
 
-                if ( !targetSymbol.ReturnsVoid )
+                if ( !targetSemantic.Symbol.ReturnsVoid )
                 {
                     return SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
@@ -283,13 +295,25 @@ namespace Metalama.Framework.Engine.Linking
 
                 ExpressionSyntax GetInvocationTarget()
                 {
-                    if ( targetSymbol.IsStatic )
+                    if ( targetSemantic.Symbol.IsStatic )
                     {
-                        return IdentifierName( targetSymbol.Name );
+                        return GetTargetName();
                     }
                     else
                     {
-                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
+                    }
+                }
+
+                IdentifierNameSyntax GetTargetName()
+                {
+                    if (targetSemantic.Kind is IntermediateSymbolSemanticKind.Base)
+                    {
+                        return IdentifierName( GetOriginalImplMemberName( targetSemantic.Symbol ) );
+                    }
+                    else
+                    {
+                        return IdentifierName( targetSemantic.Symbol.Name );
                     }
                 }
             }

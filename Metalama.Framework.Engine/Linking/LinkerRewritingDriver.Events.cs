@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
                 }
 
                 if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
@@ -59,19 +59,28 @@ namespace Metalama.Framework.Engine.Linking
 
                 return members;
             }
-            else
+            else if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
             {
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-                {
-                    // Event field indicates explicit interface implementation with event field template.
+                // Event field indicates explicit interface implementation with event field template.
 
-                    return new MemberDeclarationSyntax[]
-                    {
+                return new MemberDeclarationSyntax[]
+                {
                         GetEventBackingField( eventDeclaration, symbol ),
                         GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
-                    };
-                }
+                };
+            }
+            else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
+            {
+                Invariant.Assert( symbol.IsOverride );
 
+                return new[]
+                {
+                    GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext )
+                };
+            }
+            else
+            {
                 if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
@@ -341,8 +350,11 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IEventSymbol targetSymbol )
+        private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IntermediateSymbolSemantic<IEventSymbol> targetSemantic )
         {
+            Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
+            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol.IsOverride );
+
             var addAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.AddAccessorDeclaration );
             var removeAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.RemoveAccessorDeclaration );
 
@@ -381,13 +393,25 @@ namespace Metalama.Framework.Engine.Linking
 
             ExpressionSyntax GetInvocationTarget()
             {
-                if ( targetSymbol.IsStatic )
+                if ( targetSemantic.Symbol.IsStatic )
                 {
-                    return IdentifierName( targetSymbol.Name );
+                    return GetTargetName();
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
+                }
+            }
+
+            IdentifierNameSyntax GetTargetName()
+            {
+                if ( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base )
+                {
+                    return IdentifierName( GetOriginalImplMemberName( targetSemantic.Symbol ) );
+                }
+                else
+                {
+                    return IdentifierName( targetSemantic.Symbol.Name );
                 }
             }
         }
