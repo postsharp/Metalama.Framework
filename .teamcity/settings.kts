@@ -6,6 +6,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.Swabra
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.swabra
+import jetbrains.buildServer.configs.kotlin.v2019_2.failureConditions.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.*
 
@@ -28,8 +29,7 @@ object DebugBuild : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-
-        }
+    }
 
     steps {
         // Step to kill all dotnet or VBCSCompiler processes that might be locking files we delete in during cleanup.
@@ -59,6 +59,19 @@ object DebugBuild : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "tools kill")
             executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
@@ -124,8 +137,7 @@ object PublicBuild : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-
-        }
+    }
 
     steps {
         // Step to kill all dotnet or VBCSCompiler processes that might be locking files we delete in during cleanup.
@@ -155,6 +167,19 @@ object PublicBuild : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "tools kill")
             executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
@@ -209,8 +234,7 @@ object PublicDeployment : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-
-        }
+    }
 
     steps {
         powerShell {
@@ -231,6 +255,19 @@ object PublicDeployment : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "tools kill")
             executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
@@ -306,8 +343,7 @@ object VersionBump : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-
-        }
+    }
 
     steps {
         powerShell {
@@ -328,6 +364,19 @@ object VersionBump : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "tools kill")
             executionMode = BuildStep.ExecutionMode.ALWAYS
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            threshold = 300
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
         }
     }
 
