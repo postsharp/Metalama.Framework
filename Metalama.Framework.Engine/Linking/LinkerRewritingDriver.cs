@@ -453,7 +453,7 @@ namespace Metalama.Framework.Engine.Linking
                 return true;
             }
 
-            if (this.AnalysisRegistry.HasBaseSemanticReferences(symbol))
+            if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
             {
                 // Override member with no aspect override that has it's base semantic referenced. 
                 return true;

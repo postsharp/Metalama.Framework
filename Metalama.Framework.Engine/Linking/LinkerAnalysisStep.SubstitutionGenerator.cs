@@ -344,7 +344,7 @@ namespace Metalama.Framework.Engine.Linking
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
 
-                void AddSubstitutionsForNonInlinedReference(ResolvedAspectReference nonInlinedReference, InliningContextIdentifier context )
+                void AddSubstitutionsForNonInlinedReference( ResolvedAspectReference nonInlinedReference, InliningContextIdentifier context )
                 {
                     switch ( nonInlinedReference.ResolvedSemantic )
                     {
@@ -361,11 +361,11 @@ namespace Metalama.Framework.Engine.Linking
 
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
                             when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
-                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsOverride: true } }
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol.IsOverride: true }
                             when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var potentiallyHidingSymbol }
                             when potentiallyHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ )
-                                && this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                                 && this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                             // Base reference to a virtual member of the parent that is not overridden.
                             // Base references to new slot or override members are rewritten to the base member call.
                             AddSubstitution(
@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.Linking
                             when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                         case { Kind: IntermediateSymbolSemanticKind.Default }
                             when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
-                            // Base references to non-overidden override member is rewritten to "source" member call.
+                            // Base references to non-overridden override member is rewritten to "source" member call.
                             // Default reference to override target is rewritten to "source" member call.
                             AddSubstitution(
                                 context,

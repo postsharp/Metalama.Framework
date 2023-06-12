@@ -18,7 +18,8 @@ internal class AspectReferenceSourceSubstitution : AspectReferenceRenamingSubsti
         // Support only base semantics.
         Invariant.Assert(
             aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Default
-            || (aspectReference.ResolvedSemantic is { Symbol: { IsOverride: true, IsSealed: false } or { IsVirtual: true }, Kind: IntermediateSymbolSemanticKind.Base }) );
+            || aspectReference.ResolvedSemantic is
+                { Symbol: { IsOverride: true, IsSealed: false } or { IsVirtual: true }, Kind: IntermediateSymbolSemanticKind.Base } );
 
         // Auto properties and event field default semantics should not get here.
         Invariant.AssertNot(

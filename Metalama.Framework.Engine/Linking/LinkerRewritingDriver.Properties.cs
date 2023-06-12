@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) );
+                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
                 }
 
                 if ( !propertyDeclaration.IsAutoPropertyDeclaration()
@@ -90,7 +90,6 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-
                     return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
                 }
                 else
@@ -106,13 +105,13 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
                     this.GetOriginalImplProperty(
-                            symbol,
-                            FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
-                            propertyDeclaration.Type,
-                            propertyDeclaration.Initializer,
-                            propertyDeclaration.AccessorList,
-                            propertyDeclaration.ExpressionBody,
-                            generationContext )
+                        symbol,
+                        FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
+                        propertyDeclaration.Type,
+                        propertyDeclaration.Initializer,
+                        propertyDeclaration.AccessorList,
+                        propertyDeclaration.ExpressionBody,
+                        generationContext )
                 };
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )

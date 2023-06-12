@@ -64,7 +64,6 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-
                     return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
                 }
                 else

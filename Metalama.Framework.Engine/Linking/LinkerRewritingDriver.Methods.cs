@@ -71,7 +71,6 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-
                     return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
                 }
                 else
@@ -262,10 +261,14 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
+        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
             Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
-            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol is { IsOverride: true } or { IsVirtual:true } );
+
+            Invariant.Implies(
+                targetSemantic.Kind is IntermediateSymbolSemanticKind.Base,
+                targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
+            
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return method
@@ -310,7 +313,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 IdentifierNameSyntax GetTargetName()
                 {
-                    if (targetSemantic.Kind is IntermediateSymbolSemanticKind.Base)
+                    if ( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base )
                     {
                         return IdentifierName( GetOriginalImplMemberName( targetSemantic.Symbol ) );
                     }

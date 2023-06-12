@@ -77,7 +77,6 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
         private readonly SafeSymbolComparer _comparer;
-        private readonly CompilationContext _intermediateCompilationContext;
 
         public AspectReferenceResolver(
             LinkerInjectionRegistry injectionRegistry,
@@ -97,7 +96,6 @@ namespace Metalama.Framework.Engine.Linking
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
             this._comparer = intermediateCompilationContext.SymbolComparer;
-            this._intermediateCompilationContext = intermediateCompilationContext;
         }
 
         public ResolvedAspectReference Resolve(

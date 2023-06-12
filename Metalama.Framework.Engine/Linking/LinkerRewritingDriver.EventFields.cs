@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -50,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                throw new AssertionFailedException("Event field cannot be an override.");
+                throw new AssertionFailedException( "Event field cannot be an override." );
             }
             else
             {
