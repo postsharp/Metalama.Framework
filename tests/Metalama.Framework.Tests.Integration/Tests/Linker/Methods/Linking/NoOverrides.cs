@@ -100,20 +100,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOv
             // Should invoke this.
             link(_this.BaseVirtualMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualOverriddenMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualOverriddenMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualOverriddenMethod, current)();
             // Should invoke this.
             link(_this.BaseVirtualOverriddenMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualHiddenMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualHiddenMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.BaseVirtualHiddenMethod, current)();
             // Should invoke this.
             link(_this.BaseVirtualHiddenMethod, final)();
@@ -145,11 +145,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.NoOv
             // Should invoke this.
             link(_this.LocalMethod, final)();
 
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.LocalVirtualMethod, @base)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.LocalVirtualMethod, previous)();
-            // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+            // Should invoke _Source.
             link(_this.LocalVirtualMethod, current)();
             // Should invoke this.
             link(_this.LocalVirtualMethod, final)();

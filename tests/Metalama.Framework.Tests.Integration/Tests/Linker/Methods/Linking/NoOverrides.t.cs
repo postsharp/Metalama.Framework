@@ -2,8 +2,16 @@ public class Target : Base
 {
   public override void BaseVirtualOverriddenMethod()
   {
+    this.BaseVirtualOverriddenMethod_Source();
+  }
+  private void BaseVirtualOverriddenMethod_Source()
+  {
   }
   public new virtual void BaseVirtualHiddenMethod()
+  {
+    this.BaseVirtualHiddenMethod_Source();
+  }
+  private void BaseVirtualHiddenMethod_Source()
   {
   }
   public new void BaseHiddenMethod()
@@ -16,6 +24,10 @@ public class Target : Base
   {
   }
   public virtual void LocalVirtualMethod()
+  {
+    this.LocalVirtualMethod_Source();
+  }
+  private void LocalVirtualMethod_Source()
   {
   }
   public static void LocalStaticMethod()
@@ -47,20 +59,20 @@ public class Target : Base
     base.BaseVirtualMethod();
     // Should invoke this.
     this.BaseVirtualMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualOverriddenMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualOverriddenMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualOverriddenMethod();
+    // Should invoke _Source.
+    this.BaseVirtualOverriddenMethod_Source();
+    // Should invoke _Source.
+    this.BaseVirtualOverriddenMethod_Source();
+    // Should invoke _Source.
+    this.BaseVirtualOverriddenMethod_Source();
     // Should invoke this.
     this.BaseVirtualOverriddenMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualHiddenMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualHiddenMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.BaseVirtualHiddenMethod();
+    // Should invoke _Source.
+    this.BaseVirtualHiddenMethod_Source();
+    // Should invoke _Source.
+    this.BaseVirtualHiddenMethod_Source();
+    // Should invoke _Source.
+    this.BaseVirtualHiddenMethod_Source();
     // Should invoke this.
     this.BaseVirtualHiddenMethod();
     // Should invoke this.
@@ -87,12 +99,12 @@ public class Target : Base
     this.LocalMethod();
     // Should invoke this.
     this.LocalMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.LocalVirtualMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.LocalVirtualMethod();
-    // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
-    this.LocalVirtualMethod();
+    // Should invoke _Source.
+    this.LocalVirtualMethod_Source();
+    // Should invoke _Source.
+    this.LocalVirtualMethod_Source();
+    // Should invoke _Source.
+    this.LocalVirtualMethod_Source();
     // Should invoke this.
     this.LocalVirtualMethod();
     // Should invoke current type.

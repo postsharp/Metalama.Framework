@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) );
                 }
 
                 if ( !propertyDeclaration.IsAutoPropertyDeclaration()
@@ -87,13 +87,33 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                {
+
+                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                }
+                else
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
+            }
+            else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
+            {
+                Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return new[]
+                {
+                    GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetOriginalImplProperty(
+                            symbol,
+                            FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
+                            propertyDeclaration.Type,
+                            propertyDeclaration.Initializer,
+                            propertyDeclaration.AccessorList,
+                            propertyDeclaration.ExpressionBody,
+                            generationContext )
+                };
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
@@ -476,7 +496,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static PropertyDeclarationSyntax GetTrampolineForProperty( PropertyDeclarationSyntax property, IPropertySymbol targetSymbol )
+        private static PropertyDeclarationSyntax GetTrampolineForProperty( PropertyDeclarationSyntax property, IntermediateSymbolSemantic<IPropertySymbol> targetSymbol )
         {
             var getAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
             var setAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
@@ -518,13 +538,13 @@ namespace Metalama.Framework.Engine.Linking
 
             ExpressionSyntax GetInvocationTarget()
             {
-                if ( targetSymbol.IsStatic )
+                if ( targetSymbol.Symbol.IsStatic )
                 {
-                    return IdentifierName( targetSymbol.Name );
+                    return IdentifierName( targetSymbol.Symbol.Name );
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Symbol.Name ) );
                 }
             }
         }

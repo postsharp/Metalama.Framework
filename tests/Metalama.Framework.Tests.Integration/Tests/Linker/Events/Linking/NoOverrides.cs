@@ -197,20 +197,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.NoOve
                 // Should invoke this.
                 link[_this.BaseVirtualMethod.add, final] += value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.add, @base] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.add, previous] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.add, current] += value;
                 // Should invoke this.
                 link[_this.BaseVirtualOverriddenMethod.add, final] += value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.add, @base] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.add, previous] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.add, current] += value;
                 // Should invoke this.
                 link[_this.BaseVirtualHiddenMethod.add, final] += value;
@@ -242,11 +242,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.NoOve
                 // Should invoke this.
                 link[_this.LocalMethod.add, final] += value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.add, @base] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.add, previous] += value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.add, current] += value;
                 // Should invoke this.
                 link[_this.LocalVirtualMethod.add, final] += value;
@@ -290,20 +290,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.NoOve
                 // Should invoke this.
                 link[_this.BaseVirtualMethod.remove, final] -= value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.remove, @base] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.remove, previous] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualOverriddenMethod.remove, current] -= value;
                 // Should invoke this.
                 link[_this.BaseVirtualOverriddenMethod.remove, final] -= value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.remove, @base] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.remove, previous] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.BaseVirtualHiddenMethod.remove, current] -= value;
                 // Should invoke this.
                 link[_this.BaseVirtualHiddenMethod.remove, final] -= value;
@@ -335,11 +335,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.NoOve
                 // Should invoke this.
                 link[_this.LocalMethod.remove, final] -= value;
 
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.remove, @base] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.remove, previous] -= value;
-                // Should invoke _Source (#32906 - linker should create _Source declaration and target it).
+                // Should invoke _Source.
                 link[_this.LocalVirtualMethod.remove, current] -= value;
                 // Should invoke this.
                 link[_this.LocalVirtualMethod.remove, final] -= value;

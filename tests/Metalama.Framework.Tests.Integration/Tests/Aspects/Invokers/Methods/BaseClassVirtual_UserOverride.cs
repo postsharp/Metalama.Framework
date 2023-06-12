@@ -24,9 +24,9 @@ public class InvokerAspect : MethodAspect
     {
         meta.InsertComment("Invoke this.Method");
         target.Invoke();
-        meta.InsertComment("Invoke this.Method");
+        meta.InsertComment("Invoke this.Method_Source");
         target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method");
+        meta.InsertComment("Invoke this.Method_Source");
         target.With(InvokerOptions.Current).Invoke();
         meta.InsertComment("Invoke this.Method");
         target.With(InvokerOptions.Final).Invoke();

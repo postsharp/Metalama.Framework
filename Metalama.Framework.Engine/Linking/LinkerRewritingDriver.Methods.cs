@@ -68,17 +68,20 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                {
+
+                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+                }
+                else
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
-
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
             {
-                Invariant.Assert( symbol.IsOverride );
+                Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
                 return new[]
                 {
@@ -259,10 +262,10 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
+        private MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
             Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
-            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol.IsOverride );
+            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol is { IsOverride: true } or { IsVirtual:true } );
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return method

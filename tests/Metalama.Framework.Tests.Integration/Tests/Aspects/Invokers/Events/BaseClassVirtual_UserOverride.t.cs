@@ -4,6 +4,17 @@ public class TargetClass : BaseClass
   {
     add
     {
+      this.Event_Source += value;
+    }
+    remove
+    {
+      this.Event_Source -= value;
+    }
+  }
+  private event System.EventHandler Event_Source
+  {
+    add
+    {
     }
     remove
     {
@@ -15,20 +26,20 @@ public class TargetClass : BaseClass
     add
     { // Invoke this.Event
       this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
-      // Invoke this.Event
-      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
-      // Invoke this.Event
-      this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
+      // Invoke this.Event_Source
+      this.Event_Source += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
+      // Invoke this.Event_Source
+      this.Event_Source += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
       // Invoke this.Event
       this.Event += global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
     }
     remove
     { // Invoke this.Event
       this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
-      // Invoke this.Event
-      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
-      // Invoke this.Event
-      this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
+      // Invoke this.Event_Source
+      this.Event_Source -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
+      // Invoke this.Event_Source
+      this.Event_Source -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
       // Invoke this.Event
       this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
     }

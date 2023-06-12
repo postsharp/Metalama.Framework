@@ -4,6 +4,17 @@ public class TargetClass : BaseClass
   {
     get
     {
+      return this.Property;
+    }
+    set
+    {
+      this.Property = value;
+    }
+  }
+  private int Property_Source
+  {
+    get
+    {
       return 0;
     }
     set
@@ -16,10 +27,10 @@ public class TargetClass : BaseClass
     get
     { // Invoke this.Property
       _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
-      // Invoke this.Property
-      _ = this.Property;
+      // Invoke this.Property_Source
+      _ = this.Property_Source;
+      // Invoke this.Property_Source
+      _ = this.Property_Source;
       // Invoke this.Property
       _ = this.Property;
       return 0;
@@ -27,10 +38,10 @@ public class TargetClass : BaseClass
     set
     { // Invoke this.Property
       this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
-      // Invoke this.Property
-      this.Property = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = 42;
+      // Invoke this.Property_Source
+      this.Property_Source = 42;
       // Invoke this.Property
       this.Property = 42;
     }
