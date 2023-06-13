@@ -29,13 +29,13 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
             // We're using a named AppDomain data slot for this. We have to synchronize access using a named semaphore.
 
-            using var semaphore = new Semaphore( 1, 1, _appDomainDataName );
+            using var mutex = new Mutex( initiallyOwned: false, $@"Global\{_appDomainDataName}" );
 
             try
             {
                 try
                 {
-                    semaphore.WaitOne();
+                    mutex.WaitOne();
                 }
                 catch ( AbandonedMutexException ) { }
 
@@ -54,7 +54,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             }
             finally
             {
-                semaphore.Release();
+                mutex.ReleaseMutex();
             }
         }
 
