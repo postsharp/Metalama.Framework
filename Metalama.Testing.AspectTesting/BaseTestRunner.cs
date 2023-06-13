@@ -84,7 +84,7 @@ internal abstract partial class BaseTestRunner
             collectibleExecutionContext = null;
         }
 
-        using ( collectibleExecutionContext )
+        try
         {
             try
             {
@@ -97,6 +97,27 @@ internal abstract partial class BaseTestRunner
                 // have references to the objects that are in the scope of the test.
                 await Task.Yield();
             }
+        }
+        catch ( Exception ex1 )
+        {
+            // If the test throws an exception due to a bug, it may also prevent unloading.
+            // In that case, throw both the exception from the test and the unloading exception, wrapped in AggregateException.
+            try
+            {
+                collectibleExecutionContext?.Dispose();
+                collectibleExecutionContext = null;
+            }
+            catch ( Exception ex2 )
+            {
+                collectibleExecutionContext = null;
+                throw new AggregateException( ex1, ex2 );
+            }
+
+            throw;
+        }
+        finally
+        {
+            collectibleExecutionContext?.Dispose();
         }
     }
 

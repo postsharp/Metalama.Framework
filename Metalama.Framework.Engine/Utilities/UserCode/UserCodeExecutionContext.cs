@@ -40,8 +40,15 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         internal static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
-            => Current.CompilationContext.CompileTimeTypeFactory
-                .Get( new SerializableTypeId( id ), substitutions );
+        {
+            if ( Current._compilationServices == null )
+            {
+                throw new InvalidOperationException( "Using typeof for run-time types is not possible here." );
+            }
+
+            return Current._compilationServices.CompileTimeTypeFactory
+                        .Get( new SerializableTypeId( id ), substitutions );
+        }
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -160,7 +167,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
 
-        private CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
+        private CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException( "Compilation context is currently not available" );
 
         internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
