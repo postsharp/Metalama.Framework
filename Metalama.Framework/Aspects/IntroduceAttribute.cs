@@ -203,40 +203,33 @@ namespace Metalama.Framework.Aspects
 
         private static bool HasInheritedIntroductionAttribute(IMemberOrNamedType templateMember)
         {
-            if (templateMember is IMethod { OverriddenMethod: { } overriddenMethod } )
-            {
-                return Determine( overriddenMethod );
-            }
-            else if ( templateMember is IProperty { OverriddenProperty: { } overriddenProperty } )
-            {
-                return Determine( overriddenProperty );
-            }
-            else if ( templateMember is IEvent { OverriddenEvent: { } overriddenEvent } )
-            {
-                return Determine( overriddenEvent );
-            }
-            else
-            {
-                return false;
-            }
+            return GetNoAttributeCheck( templateMember );
 
-            static bool Determine(IMemberOrNamedType templateMember )
+            static bool Get( IMemberOrNamedType templateMember )
             {
                 if ( templateMember.Attributes.OfAttributeType(typeof(IntroduceAttribute)).Any())
                 {
                     return true;
                 }
-                else if ( templateMember is IMethod { OverriddenMethod: { } overriddenMethod } )
+                else
                 {
-                    return Determine( overriddenMethod );
+                    return GetNoAttributeCheck( templateMember );
+                }
+            }
+
+            static bool GetNoAttributeCheck(IMemberOrNamedType templateMember)
+            {
+                if ( templateMember is IMethod { OverriddenMethod: { } overriddenMethod } )
+                {
+                    return Get( overriddenMethod );
                 }
                 else if ( templateMember is IProperty { OverriddenProperty: { } overriddenProperty } )
                 {
-                    return Determine( overriddenProperty );
+                    return Get( overriddenProperty );
                 }
                 else if ( templateMember is IEvent { OverriddenEvent: { } overriddenEvent } )
                 {
-                    return Determine( overriddenEvent );
+                    return Get( overriddenEvent );
                 }
                 else
                 {
