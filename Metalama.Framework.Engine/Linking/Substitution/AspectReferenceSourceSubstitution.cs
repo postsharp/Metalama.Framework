@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// <summary>
 /// Substitutes an aspect reference that points to the default semantic that points to the original source.
 /// </summary>
-internal sealed AspectReferenceSourceSubstitution : AspectReferenceRenamingSubstitution
+internal sealed class AspectReferenceSourceSubstitution : AspectReferenceRenamingSubstitution
 {
     public AspectReferenceSourceSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext, aspectReference )
     {
