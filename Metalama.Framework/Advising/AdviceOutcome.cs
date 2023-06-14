@@ -26,12 +26,12 @@ public enum AdviceOutcome
     /// There was a conflict and the advice was successfully applied and the new advice hides the previous declaration with the <c>new</c> keyword.
     /// </summary>
     New,
-    
+
     /// <summary>
     /// There was a conflict and the advice was ignored.
     /// </summary>
     Ignore,
-    
+
     [Obsolete]
     Ignored = Ignore,
 
