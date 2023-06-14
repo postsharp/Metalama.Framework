@@ -7,6 +7,7 @@ using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -125,7 +126,7 @@ class TheAspect : OverrideMethodAspect
         analyzer.AnalyzeSemanticModel( analysisContext1 );
         var diagnostic1 = Assert.Single( analysisContext1.ReportedDiagnostics );
 
-        Assert.Equal( string.Format( DesignTimeDiagnosticDescriptors.UserError.MessageFormat, "MLTEST", "Error!" ), diagnostic1.GetLocalizedMessage() );
+        Assert.Equal( string.Format( CultureInfo.InvariantCulture, DesignTimeDiagnosticDescriptors.UserError.MessageFormat, "MLTEST", "Error!" ), diagnostic1.GetLocalizedMessage() );
 
         workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = getCode( "// whatever" ) } );
         var compilation2 = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
@@ -136,13 +137,13 @@ class TheAspect : OverrideMethodAspect
         analyzer.AnalyzeSemanticModel( analysisContext2 );
         var diagnostic2 = Assert.Single( analysisContext2.ReportedDiagnostics );
 
-        Assert.Equal( string.Format( DesignTimeDiagnosticDescriptors.UserError.MessageFormat, "MLTEST", "Error!" ), diagnostic2.GetLocalizedMessage() );
+        Assert.Equal( string.Format( CultureInfo.InvariantCulture, DesignTimeDiagnosticDescriptors.UserError.MessageFormat, "MLTEST", "Error!" ), diagnostic2.GetLocalizedMessage() );
 
         Assert.Equal( diagnostic1.Id, diagnostic2.Id );
         Assert.Equal( diagnostic1.Descriptor.Id, diagnostic2.Descriptor.Id );
         Assert.Equal( diagnostic1.Descriptor.Title, diagnostic2.Descriptor.Title );
         Assert.Equal( diagnostic1.Descriptor.HelpLinkUri, diagnostic2.Descriptor.HelpLinkUri );
-        Assert.Equal( diagnostic1.Descriptor.MessageFormat.ToString(), diagnostic2.Descriptor.MessageFormat.ToString() );
+        Assert.Equal( diagnostic1.Descriptor.MessageFormat.ToString( CultureInfo.InvariantCulture ), diagnostic2.Descriptor.MessageFormat.ToString( CultureInfo.InvariantCulture ) );
         Assert.Equal( diagnostic1.Descriptor.Category, diagnostic2.Descriptor.Category );
         Assert.Equal( diagnostic1.Descriptor.DefaultSeverity, diagnostic2.Descriptor.DefaultSeverity );
         Assert.Equal( diagnostic1.Descriptor.IsEnabledByDefault, diagnostic2.Descriptor.IsEnabledByDefault );
