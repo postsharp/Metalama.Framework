@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
@@ -162,6 +163,12 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
+            if ( HasInheritedIntroductionAttribute( templateMember ) )
+            {
+                // All members that are overrides of introduced members have to be skipped - the template will be selected correctly when binding.
+                return;
+            }
+
             switch ( templateMember.DeclarationKind )
             {
                 case DeclarationKind.Method:
@@ -193,5 +200,42 @@ namespace Metalama.Framework.Aspects
         }
 
         TemplateAttributeProperties ITemplateAttribute.Properties => this._properties;
+
+        private static bool HasInheritedIntroductionAttribute(IMemberOrNamedType templateMember)
+        {
+            return GetNoAttributeCheck( templateMember );
+
+            static bool Get( IMemberOrNamedType templateMember )
+            {
+                if ( templateMember.Attributes.OfAttributeType(typeof(IntroduceAttribute)).Any())
+                {
+                    return true;
+                }
+                else
+                {
+                    return GetNoAttributeCheck( templateMember );
+                }
+            }
+
+            static bool GetNoAttributeCheck(IMemberOrNamedType templateMember)
+            {
+                if ( templateMember is IMethod { OverriddenMethod: { } overriddenMethod } )
+                {
+                    return Get( overriddenMethod );
+                }
+                else if ( templateMember is IProperty { OverriddenProperty: { } overriddenProperty } )
+                {
+                    return Get( overriddenProperty );
+                }
+                else if ( templateMember is IEvent { OverriddenEvent: { } overriddenEvent } )
+                {
+                    return Get( overriddenEvent );
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
     }
 }
