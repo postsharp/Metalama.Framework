@@ -841,45 +841,41 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
     {
-        switch ( node.Expression )
+        if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax identifier } assignment )
         {
-            case AssignmentExpressionSyntax { Left: IdentifierNameSyntax identifier } assignment:
+            var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( identifier );
 
-                var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( identifier );
-
-                if ( this.IsLocalSymbol( identifierSymbol ) || identifier is { Identifier.Text: "_" } )
+            if ( this.IsLocalSymbol( identifierSymbol ) || identifierSymbol is IDiscardSymbol )
+            {
+                if ( this.IsCompileTimeDynamic( assignment.Right ) )
                 {
-                    if ( this.IsCompileTimeDynamic( assignment.Right ) )
-                    {
-                        // Process the statement "<local_or_discard> = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+                    // Process the statement "<local_or_discard> = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
-                        var invocationExpression = InvocationExpression(
-                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
-                            .AddArgumentListArguments(
-                                Argument( this.Transform( identifier ) ),
-                                Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
-                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( assignment.Right ).AssertNotNull() ) ),
-                                Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
+                    var invocationExpression = InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.DynamicLocalAssignment ) ) )
+                        .AddArgumentListArguments(
+                            Argument( this.Transform( identifier ) ),
+                            Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
+                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( assignment.Right ).AssertNotNull() ) ),
+                            Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
 
-                        return this.WithCallToAddSimplifierAnnotation( invocationExpression );
-                    }
-                    else if ( assignment.Right is AwaitExpressionSyntax awaitExpression && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
-                    {
-                        // Process the statement "<local_or_discard> = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
-
-                        var invocationExpression = InvocationExpression(
-                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
-                            .AddArgumentListArguments(
-                                Argument( this.Transform( identifier ) ),
-                                Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
-                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( awaitExpression.Expression ).AssertNotNull() ) ),
-                                Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
-
-                        return this.WithCallToAddSimplifierAnnotation( invocationExpression );
-                    }
+                    return this.WithCallToAddSimplifierAnnotation( invocationExpression );
                 }
+                else if ( assignment.Right is AwaitExpressionSyntax awaitExpression && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
+                {
+                    // Process the statement "<local_or_discard> = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
-                break;
+                    var invocationExpression = InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.DynamicLocalAssignment ) ) )
+                        .AddArgumentListArguments(
+                            Argument( this.Transform( identifier ) ),
+                            Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
+                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( awaitExpression.Expression ).AssertNotNull() ) ),
+                            Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
+
+                    return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                }
+            }
         }
 
         var expression = this.Transform( node.Expression );

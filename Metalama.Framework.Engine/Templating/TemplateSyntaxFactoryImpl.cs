@@ -192,6 +192,13 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( expression.Type.Equals( SpecialType.Void ) )
             {
+                if ( kind != SyntaxKind.SimpleAssignmentExpression )
+                {
+                    throw new InvalidOperationException( 
+                        $"Templates using context-dependent compound assignments (e.g. 'x += meta.Proceed()') cannot be expanded when the right side " +
+                        $"expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead." );
+                }
+
                 return SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
             }
             else if ( awaitResult && expression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )

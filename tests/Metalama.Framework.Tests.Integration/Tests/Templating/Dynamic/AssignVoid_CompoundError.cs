@@ -1,23 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTask
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignVoid_CompoundError
 {
     class Aspect
     {
         [TestTemplate]
-        async Task<dynamic?> Template()
+        dynamic? Template()
         {
             dynamic? x = TypeFactory.GetType(SpecialType.Int32).DefaultValue();
 
-            x = await meta.ProceedAsync();
-            x += await meta.ProceedAsync();
-            x *= await meta.ProceedAsync();
+            x += meta.Proceed();
+            x *= meta.Proceed();
 
             return default;
         }
@@ -25,9 +23,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTas
 
     class TargetCode
     {
-        async Task Method(int a)
+        void Method(int a)
         {
-            await Task.Yield();
             Console.WriteLine("Hello, world.");
         }
         

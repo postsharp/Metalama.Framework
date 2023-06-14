@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignSimpleVoid
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignVoid
 {
     class Aspect
     {
@@ -15,8 +15,6 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignSimpleVo
             dynamic? x = TypeFactory.GetType(SpecialType.Int32).DefaultValue();
 
             x = meta.Proceed();
-            x += meta.Proceed();
-            x *= meta.Proceed();
 
             return default;
         }

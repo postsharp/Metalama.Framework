@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignSimple
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
 {
     class Aspect
     {
