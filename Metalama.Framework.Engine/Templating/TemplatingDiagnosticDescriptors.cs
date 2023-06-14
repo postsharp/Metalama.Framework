@@ -466,5 +466,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Accessing the static interface member '{0}' is not supported on compile-time template type parameter '{1}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol, INamedTypeSymbol)> TemplatesInStaticTypeNotSupported
+            = new(
+                "LAMA0266",
+                "Templates in static types are not supported.",
+                "The template '{0}' is containined within the static type '{1}', which is not useful and not supported.",
+                _category,
+                Error );
     }
 }
