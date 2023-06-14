@@ -74,6 +74,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             var currentType = symbol.ContainingType.BaseType;
 
+            if ( symbol.IsOverride )
+            {
+                // Override symbol never hides anything.
+                hiddenSymbol = null;
+                return false;
+            }
+
             while ( currentType != null )
             {
                 var matchingSymbol = currentType.GetMembers()

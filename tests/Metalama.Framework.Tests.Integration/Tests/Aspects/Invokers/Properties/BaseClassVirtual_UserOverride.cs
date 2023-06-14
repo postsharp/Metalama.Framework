@@ -25,9 +25,9 @@ public class InvokerAspect : PropertyAspect
     {
         meta.InsertComment("Invoke this.Property");
         _ = target.Value;
-        meta.InsertComment("Invoke this.Property");
+        meta.InsertComment("Invoke this.Property_Source");
         _ = target.With(InvokerOptions.Base).Value;
-        meta.InsertComment("Invoke this.Property");
+        meta.InsertComment("Invoke this.Property_Source");
         _ = target.With(InvokerOptions.Current).Value;
         meta.InsertComment("Invoke this.Property");
         _ = target.With(InvokerOptions.Final).Value;
@@ -40,9 +40,9 @@ public class InvokerAspect : PropertyAspect
     {
         meta.InsertComment("Invoke this.Property");
         target.Value = 42;
-        meta.InsertComment("Invoke this.Property");
+        meta.InsertComment("Invoke this.Property_Source");
         target.With(InvokerOptions.Base).Value = 42;
-        meta.InsertComment("Invoke this.Property");
+        meta.InsertComment("Invoke this.Property_Source");
         target.With(InvokerOptions.Current).Value = 42;
         meta.InsertComment("Invoke this.Property");
         target.With(InvokerOptions.Final).Value = 42;

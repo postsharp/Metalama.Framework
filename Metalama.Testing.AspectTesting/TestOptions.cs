@@ -155,7 +155,7 @@ namespace Metalama.Testing.AspectTesting
         /// To disable this option in a test, add this comment to your test file: <c>// @DisableExecuteProgram</c>.
         /// </summary>
         public bool? ExecuteProgram { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the program output should be compared to its expected value. The default value is <c>true</c>.
         /// To disable this option in a test, add this comment to your test file: <c>// @DisableCompareProgramOutput</c>. 
@@ -574,7 +574,7 @@ namespace Metalama.Testing.AspectTesting
                         this.ExecuteProgram = false;
 
                         break;
-                    
+
                     case "DisableCompareProgramOutput":
                         this.CompareProgramOutput = false;
 

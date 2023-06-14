@@ -20,6 +20,7 @@ internal class VsAnalysisProcessProjectHandlerFactory : IGlobalService
 
     public VsAnalysisProcessProjectHandler GetOrCreateProjectHandler( IProjectOptions projectOptions, ProjectKey projectKey )
         => this._handlers.GetOrAdd(
-            projectKey,
-            new Lazy<VsAnalysisProcessProjectHandler>( () => new VsAnalysisProcessProjectHandler( this._serviceProvider, projectOptions, projectKey ) ) ).Value;
+                projectKey,
+                new Lazy<VsAnalysisProcessProjectHandler>( () => new VsAnalysisProcessProjectHandler( this._serviceProvider, projectOptions, projectKey ) ) )
+            .Value;
 }

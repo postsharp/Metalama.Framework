@@ -132,65 +132,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( nonInlinedReference.ResolvedSemantic )
-                            {
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
-                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget( property ):
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
-                                    when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
-                                    // For default semantic of auto properties and event fields that have overrides, generate substitution that redirects to the backing field.
-                                    // Take care to include interface event fields that are containing initializer expressions.
-                                    AddSubstitution( context, new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
-                                    when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var overrideOrHidingSymbol }
-                                    when overrideOrHidingSymbol.IsOverride || overrideOrHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
-                                    // Base reference to a virtual member of the parent that is not overridden.
-                                    // Base references to new slot or override members are rewritten to the base member call.
-                                    AddSubstitution(
-                                        context,
-                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
-                                    // Indexers (and in future constructors), adds aspect parameter to the target.
-                                    // TODO: Currently unused because indexer inlining is not supported. See AspectReferenceParameterSubstitution in history.
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Base }:
-                                    // Base references to other members are rewritten to "empty" member call.
-                                    AddSubstitution(
-                                        context,
-                                        new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Default }
-                                    when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
-                                    // Base references to other members are rewritten to "source" member call.
-                                    AddSubstitution(
-                                        context,
-                                        new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Default }
-                                    when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
-                                         && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
-                                    // Default semantics that are not override targets need no substitutions.
-                                    break;
-
-                                default:
-                                    // Everything else targets the override.
-                                    AddSubstitution( context, new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-                            }
+                            AddSubstitutionsForNonInlinedReference( nonInlinedReference, context );
                         }
                     }
 
@@ -319,79 +261,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            switch ( nonInlinedReference.ResolvedSemantic )
-                            {
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
-                                    when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget( property ):
-                                case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
-                                    when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
-                                    // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-                                    
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
-                                    when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var overrideOrHidingSymbol }
-                                    when overrideOrHidingSymbol.IsOverride || overrideOrHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ ):
-                                    // Base reference to a virtual member of the parent that is not overridden.
-                                    // Base references to new slot or override members are rewritten to the base member call.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
-                                    // Indexers (and in future constructors), adds aspect parameter to the target.
-                                    // TODO: Currently unused because indexer inlining is not supported. See AspectReferenceParameterSubstitution in history.
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                                    when !this._compilationContext.SymbolComparer.Is(
-                                        nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
-                                        symbol.ContainingType ):
-                                    // Base references to a declaration in another type mean base member call.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Base }:
-                                    // Base references to other members are rewritten to "empty" member call.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Default }
-                                    when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
-                                    // Base references to other members are rewritten to "source" member call.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-
-                                case { Kind: IntermediateSymbolSemanticKind.Default }
-                                    when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
-                                         && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
-                                    // Default non-inlined semantics that are not override targets need no substitutions.
-                                    break;
-
-                                default:
-                                    // Everything else targets the override.
-                                    AddSubstitution(
-                                        inliningSpecification.ContextIdentifier,
-                                        new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
-
-                                    break;
-                            }
+                            AddSubstitutionsForNonInlinedReference( nonInlinedReference, inliningSpecification.ContextIdentifier );
                         }
                     }
 
@@ -473,6 +343,89 @@ namespace Metalama.Framework.Engine.Linking
 
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
+
+                void AddSubstitutionsForNonInlinedReference( ResolvedAspectReference nonInlinedReference, InliningContextIdentifier context )
+                {
+                    switch ( nonInlinedReference.ResolvedSemantic )
+                    {
+                        case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IPropertySymbol property }
+                            when property.IsAutoProperty() == true && this._injectionRegistry.IsOverrideTarget( property ):
+                        case { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
+                            when @event.IsEventFieldIntroduction() && this._injectionRegistry.IsOverrideTarget( @event ):
+                            // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
+                            when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol.IsOverride: true }
+                            when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var potentiallyHidingSymbol }
+                            when potentiallyHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ )
+                                 && this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                            // Base reference to a virtual member of the parent that is not overridden.
+                            // Base references to new slot or override members are rewritten to the base member call.
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+
+                        case { Symbol: IPropertySymbol { Parameters.Length: > 0 } }:
+                            // Indexers (and in future constructors), adds aspect parameter to the target.
+                            // TODO: Currently unused because indexer inlining is not supported. See AspectReferenceParameterSubstitution in history.
+
+                            break;
+
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
+                            when !this._compilationContext.SymbolComparer.Is(
+                                nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
+                                symbol.ContainingType ):
+                            // Base references to a declaration in another type mean base member call.
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+
+                        case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsOverride: true, IsSealed: false } or { IsVirtual: true } }
+                            when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                        case { Kind: IntermediateSymbolSemanticKind.Default }
+                            when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
+                            // Base references to non-overridden override member is rewritten to "source" member call.
+                            // Default reference to override target is rewritten to "source" member call.
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+
+                        case { Kind: IntermediateSymbolSemanticKind.Default }
+                            when !this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol )
+                                 && !this._injectionRegistry.IsOverride( nonInlinedReference.ResolvedSemantic.Symbol ):
+                            // Default non-inlined semantics that are not override targets need no substitutions.
+                            break;
+
+                        case { Kind: IntermediateSymbolSemanticKind.Base }:
+                            // Base references to other members are rewritten to "empty" member call.
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+
+                        default:
+                            // Everything else targets the override.
+                            AddSubstitution(
+                                context,
+                                new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
+
+                            break;
+                    }
+                }
 
                 void AddSubstitution( InliningContextIdentifier inliningContextId, SyntaxNodeSubstitution substitution )
                 {

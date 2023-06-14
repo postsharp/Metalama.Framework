@@ -26,9 +26,9 @@ public class InvokerAspect : EventAspect
     {
         meta.InsertComment("Invoke this.Event");
         target.Add(meta.RunTime(TargetClass.StaticTarget));
-        meta.InsertComment("Invoke this.Event");
+        meta.InsertComment("Invoke this.Event_Source");
         target.With(InvokerOptions.Base).Add(meta.RunTime(TargetClass.StaticTarget));
-        meta.InsertComment("Invoke this.Event");
+        meta.InsertComment("Invoke this.Event_Source");
         target.With(InvokerOptions.Current).Add(meta.RunTime(TargetClass.StaticTarget));
         meta.InsertComment("Invoke this.Event");
         target.With(InvokerOptions.Final).Add(meta.RunTime(TargetClass.StaticTarget));
@@ -41,9 +41,9 @@ public class InvokerAspect : EventAspect
     {
         meta.InsertComment("Invoke this.Event");
         target.Remove(meta.RunTime(TargetClass.StaticTarget));
-        meta.InsertComment("Invoke this.Event");
+        meta.InsertComment("Invoke this.Event_Source");
         target.With(InvokerOptions.Base).Remove(meta.RunTime(TargetClass.StaticTarget));
-        meta.InsertComment("Invoke this.Event");
+        meta.InsertComment("Invoke this.Event_Source");
         target.With(InvokerOptions.Current).Remove(meta.RunTime(TargetClass.StaticTarget));
         meta.InsertComment("Invoke this.Event");
         target.With(InvokerOptions.Final).Remove(meta.RunTime(TargetClass.StaticTarget));

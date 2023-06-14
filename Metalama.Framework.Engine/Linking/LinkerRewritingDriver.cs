@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
             var rewrittenBody = RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
             var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
 
-            // Add the SourceCode annotation, if it is source code.
+            // Add the SourceCode annotation, if it is the source code.
             if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 rewrittenBlock = rewrittenBlock.WithSourceCodeAnnotation();
@@ -450,6 +450,12 @@ namespace Metalama.Framework.Engine.Linking
             if ( this.InjectionRegistry.IsIntroduced( symbol ) )
             {
                 // Introduced declarations need to be rewritten.
+                return true;
+            }
+
+            if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
+            {
+                // Override member with no aspect override that has it's base semantic referenced. 
                 return true;
             }
 

@@ -198,9 +198,11 @@ namespace Metalama.Framework.Engine.Linking
                          && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
                 {
                     // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
+                    var declaredInCurrentType = this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType );
+
                     var targetSemantic =
-                        !this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType )
-                        && resolvedReferencedSymbol.IsVirtual
+                        (!declaredInCurrentType && resolvedReferencedSymbol.IsVirtual)
+                        || (declaredInCurrentType && resolvedReferencedSymbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } && overrideIndices.Count == 0)
                             ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
                             : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 

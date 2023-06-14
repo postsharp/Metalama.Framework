@@ -47,6 +47,10 @@ namespace Metalama.Framework.Engine.Linking
 
                 return members;
             }
+            else if ( this.InjectionRegistry.IsOverride( symbol ) )
+            {
+                throw new AssertionFailedException( "Event field cannot be an override." );
+            }
             else
             {
                 var members = new List<MemberDeclarationSyntax>();

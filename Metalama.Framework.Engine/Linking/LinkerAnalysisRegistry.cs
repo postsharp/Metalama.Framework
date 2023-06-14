@@ -75,5 +75,10 @@ namespace Metalama.Framework.Engine.Linking
                     return false;
             }
         }
+
+        public bool HasBaseSemanticReferences( ISymbol symbol )
+        {
+            return this.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) );
+        }
     }
 }

@@ -61,6 +61,17 @@ internal class TargetClass
       this._event?.Invoke(this, new EventArgs());
     }
   }
+  public event EventHandler? Quz
+  {
+    add
+    {
+      this._event?.Invoke(this, new EventArgs());
+    }
+    remove
+    {
+      this._event?.Invoke(this, new EventArgs());
+    }
+  }
   public static explicit operator int (TargetClass targetClass)
   {
     _staticEvent?.Invoke(null, new EventArgs());
