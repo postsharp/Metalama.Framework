@@ -1,0 +1,2 @@
+// The compiled template failed.
+// Error LAMA0041 on `Method`: `'Aspect.Template()' threw 'InvalidOperationException' when applied to 'TargetCode.Method(int)': Templates using context-dependent compound assignments (e.g. 'x += meta.Proceed()') cannot be expanded when the right side expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
