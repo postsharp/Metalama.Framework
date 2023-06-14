@@ -21,9 +21,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             var result = aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface), OverrideStrategy.Ignore );
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignored)
+            if (result.Outcome != Advising.AdviceOutcome.Ignore)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignore.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.ImplementInterface)

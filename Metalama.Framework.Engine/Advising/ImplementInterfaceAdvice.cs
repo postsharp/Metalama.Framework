@@ -259,8 +259,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
         var diagnostics = new DiagnosticBag();
-        var implementedInterfaces = new List<InterfaceImplementationResult>();
-        var implementedInterfaceMembers = new List<InterfaceMemberImplementationResult>();
+        var implementedInterfaces = new List<ImplementationResult>();
+        var implementedInterfaceMembers = new List<MemberImplementationResult>();
 
         foreach ( var interfaceSpecification in this._interfaceSpecifications )
         {
@@ -275,7 +275,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.Ignore:
-                        implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
+                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
 
                         continue;
 
@@ -288,7 +288,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         continue;
 
                     case OverrideStrategy.Override:
-                        implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
+                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
                         skipInterfaceBaseList = true;
 
                         break;
@@ -299,7 +299,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             }
             else
             {
-                implementedInterfaces.Add( new InterfaceImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
+                implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
 
                 skipInterfaceBaseList = false;
             }
@@ -354,7 +354,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new InterfaceMemberImplementationResult(
+                                        new MemberImplementationResult(
+                                            compilation,
                                             memberSpec.InterfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingMethod ) );
@@ -382,7 +383,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new InterfaceMemberImplementationResult(
+                                            new MemberImplementationResult(
+                                                compilation,
                                                 memberSpec.InterfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingMethod ) );
@@ -450,7 +452,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new InterfaceMemberImplementationResult(
+                                new MemberImplementationResult(
+                                    compilation,
                                     memberSpec.InterfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     methodBuilder ) );
@@ -500,7 +503,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new InterfaceMemberImplementationResult(
+                                            new MemberImplementationResult(
+                                                compilation,
                                                 memberSpec.InterfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingProperty ) );
@@ -530,7 +534,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new InterfaceMemberImplementationResult(
+                                        new MemberImplementationResult(
+                                            compilation,
                                             memberSpec.InterfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingProperty ) );
@@ -686,7 +691,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new InterfaceMemberImplementationResult(
+                                new MemberImplementationResult(
+                                    compilation,
                                     memberSpec.InterfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     propertyBuilder ) );
@@ -740,7 +746,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
-                                            new InterfaceMemberImplementationResult(
+                                            new MemberImplementationResult(
+                                                compilation,
                                                 memberSpec.InterfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingEvent ) );
@@ -770,7 +777,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
-                                        new InterfaceMemberImplementationResult(
+                                        new MemberImplementationResult(
+                                            compilation,
                                             memberSpec.InterfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingEvent ) );
@@ -834,7 +842,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             }
 
                             implementedInterfaceMembers.Add(
-                                new InterfaceMemberImplementationResult(
+                                new MemberImplementationResult(
+                                    compilation,
                                     memberSpec.InterfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     eventBuilder ) );

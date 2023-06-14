@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public class AdviceResultTemplates : ITemplateProvider
     {
         [Template]
-        public void WitnessTemplate([CompileTime] IReadOnlyCollection<InterfaceImplementationResult> types, [CompileTime] IReadOnlyCollection<InterfaceMemberImplementationResult> members)
+        public void WitnessTemplate([CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types, [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members)
         {
             foreach (var type in types)
             {

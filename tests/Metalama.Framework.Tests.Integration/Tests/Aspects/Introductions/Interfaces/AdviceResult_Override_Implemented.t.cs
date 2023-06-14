@@ -60,10 +60,10 @@ public class TargetClass : IInterface
     global::System.Console.WriteLine("Interface: IInterface, Action: Implement");
     global::System.Console.WriteLine("Interface: IBaseInterface, Action: Implement");
     global::System.Console.WriteLine("Member: IInterface.Method(), Action: Override, Target: TargetClass.Method()");
-    global::System.Console.WriteLine("Member: IInterface.Property, Action: Override, Target: TargetClass.Property");
+    global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property, Action: Override, Target: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Override_Implemented.TargetClass.Property");
     global::System.Console.WriteLine("Member: IInterface.Event, Action: Override, Target: TargetClass.Event");
     global::System.Console.WriteLine("Member: IBaseInterface.BaseMethod(), Action: Override, Target: TargetClass.BaseMethod()");
-    global::System.Console.WriteLine("Member: IBaseInterface.BaseProperty, Action: Override, Target: TargetClass.BaseProperty");
+    global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseProperty, Action: Override, Target: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Override_Implemented.TargetClass.BaseProperty");
     global::System.Console.WriteLine("Member: IBaseInterface.BaseEvent, Action: Override, Target: TargetClass.BaseEvent");
   }
 }

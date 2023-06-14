@@ -260,7 +260,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
                 break;
 
-            case AdviceOutcome.Ignored:
+            case AdviceOutcome.Ignore:
                 break;
 
             default:
@@ -1618,8 +1618,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 AdviceOutcome.Default,
                 this._state.AspectBuilder.AssertNotNull(),
                 advice.AdviceKind,
-                Array.Empty<InterfaceImplementationResult>(),
-                Array.Empty<InterfaceMemberImplementationResult>() );
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
         }
 
         // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.

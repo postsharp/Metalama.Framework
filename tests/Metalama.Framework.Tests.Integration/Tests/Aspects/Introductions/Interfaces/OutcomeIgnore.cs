@@ -9,7 +9,7 @@ public class TheAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        if (builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Ignore ).Outcome != AdviceOutcome.Ignored)
+        if (builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Ignore ).Outcome != AdviceOutcome.Ignore)
         {
             // We should not get there.
             throw new InvalidOperationException();

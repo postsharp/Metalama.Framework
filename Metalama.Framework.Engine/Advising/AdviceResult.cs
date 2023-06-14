@@ -37,11 +37,11 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
 
     public IAspectBuilder AspectBuilder { get; }
 
-    public IReadOnlyCollection<InterfaceImplementationResult> Interfaces { get; }
+    public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
 
-    public IReadOnlyCollection<InterfaceMemberImplementationResult> InterfaceMembers { get; }
+    public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
-    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind, IReadOnlyCollection<InterfaceImplementationResult> interfaces, IReadOnlyCollection<InterfaceMemberImplementationResult> interfaceMembers )
+    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind, IReadOnlyCollection<IInterfaceImplementationResult> interfaces, IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
     {
         this._declaration = declaration;
         this._compilation = compilation.Assert( c => c.IsMutable );

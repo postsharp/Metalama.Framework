@@ -112,7 +112,7 @@ internal sealed class AspectDriver : IAspectDriver
                 // The aspect instance was skipped from a previous layer.
                 return new AspectInstanceResult(
                     aspectInstance,
-                    AdviceOutcome.Ignored,
+                    AdviceOutcome.Ignore,
                     ImmutableUserDiagnosticList.Empty,
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,

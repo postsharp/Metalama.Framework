@@ -104,7 +104,7 @@ public class TrackChangesAttribute : TypeAspect
 
         // If the type already implements IChangeTracking, it must have a protected method called OnChanged, without parameters, otherwise
         // this is a contract violation, so we report an error.
-        if (implementInterfaceResult.Outcome == AdviceOutcome.Ignored)
+        if (implementInterfaceResult.Outcome == AdviceOutcome.Ignore)
         {
             var onChangeMethod = builder.Target.AllMethods.OfName( nameof(OnChange) ).Where( m => m.Parameters.Count == 0 ).SingleOrDefault();
 

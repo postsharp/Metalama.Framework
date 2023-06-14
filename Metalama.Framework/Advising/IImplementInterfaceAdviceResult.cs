@@ -18,7 +18,7 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     /// <remarks>
     /// This property contains an empty list if the advice was completely ignored.
     /// </remarks>
-    IReadOnlyCollection<InterfaceImplementationResult> Interfaces { get; }
+    IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
 
     /// <summary>
     /// Gets a list of interface members that were considered when implementing the given interface.
@@ -26,5 +26,5 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     /// <remarks>
     /// This property contains only members of interfaces that were implemented. Members of interfaces that were ignored are not included in the list.
     /// </remarks>
-    IReadOnlyCollection<InterfaceMemberImplementationResult> InterfaceMembers { get; }
+    IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 }
