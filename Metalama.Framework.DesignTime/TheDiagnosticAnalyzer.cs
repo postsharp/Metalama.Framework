@@ -276,11 +276,11 @@ namespace Metalama.Framework.DesignTime
                         Diagnostic.Create(
                             designTimeDiagnostic.Id,
                             designTimeDiagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetLocalizedMessage() ),
+                            new NonLocalizedString( designTimeDiagnostic.GetLocalizedMessage() ),
                             designTimeDiagnostic.Severity,
                             designTimeDiagnostic.DefaultSeverity,
-                            true,
-                            diagnostic.WarningLevel,
+                            isEnabledByDefault: true,
+                            designTimeDiagnostic.WarningLevel,
                             location: newLocation,
                             properties: designTimeDiagnostic.Properties );
 
