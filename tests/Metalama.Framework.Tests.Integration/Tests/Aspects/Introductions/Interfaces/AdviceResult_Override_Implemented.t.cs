@@ -57,8 +57,8 @@ public class TargetClass : IInterface
   }
   public void Witness()
   {
-    global::System.Console.WriteLine("Interface: IInterface, Action: Implement");
-    global::System.Console.WriteLine("Interface: IBaseInterface, Action: Implement");
+    global::System.Console.WriteLine("InterfaceType: IInterface, Action: Implement");
+    global::System.Console.WriteLine("InterfaceType: IBaseInterface, Action: Implement");
     global::System.Console.WriteLine("Member: IInterface.Method(), Action: Override, Target: TargetClass.Method()");
     global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property, Action: Override, Target: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Override_Implemented.TargetClass.Property");
     global::System.Console.WriteLine("Member: IInterface.Event, Action: Override, Target: TargetClass.Event");
