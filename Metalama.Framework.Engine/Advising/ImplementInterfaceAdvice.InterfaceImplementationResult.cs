@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed partial class ImplementInterfaceAdvice
 {
-    public sealed record ImplementationResult( INamedType Interface, InterfaceImplementationOutcome Outcome ) : IInterfaceImplementationResult;
+    public sealed record ImplementationResult( INamedType InterfaceType, InterfaceImplementationOutcome Outcome ) : IInterfaceImplementationResult;
 }

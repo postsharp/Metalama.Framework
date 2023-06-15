@@ -14,7 +14,7 @@ namespace Metalama.Framework.Advising
         /// <summary>
         /// Gets an interface type that was considered by the advice.
         /// </summary>
-        INamedType Interface { get; }
+        INamedType InterfaceType { get; }
 
         /// <summary>
         /// Gets a value indicating the action taken to implement the interface type.

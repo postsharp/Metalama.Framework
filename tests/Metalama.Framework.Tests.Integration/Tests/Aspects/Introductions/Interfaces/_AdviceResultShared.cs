@@ -34,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             foreach (var type in types)
             {
-                Console.WriteLine($"Interface: {type.Interface}, Action: {type.Outcome}");
+                Console.WriteLine($"InterfaceType: {type.InterfaceType}, Action: {type.Outcome}");
             }
 
             foreach (var member in members)
