@@ -16,9 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
         {
             var result = builder.Advice.IntroduceEvent(builder.Target, nameof(Event), whenExists: OverrideStrategy.Ignore);
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignored)
+            if (result.Outcome != Advising.AdviceOutcome.Ignore)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignore.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.IntroduceEvent)

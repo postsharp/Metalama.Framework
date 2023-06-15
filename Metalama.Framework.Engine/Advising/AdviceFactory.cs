@@ -260,7 +260,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
                 break;
 
-            case AdviceOutcome.Ignored:
+            case AdviceOutcome.Ignore:
                 break;
 
             default:
@@ -279,7 +279,9 @@ internal sealed class AdviceFactory : IAdviceFactory
             this._state.CurrentCompilation,
             result.Outcome,
             this._state.AspectBuilder.AssertNotNull(),
-            advice.AdviceKind );
+            advice.AdviceKind,
+            result.Interfaces,
+            result.InterfaceMembers );
     }
 
     private TemplateMemberRef? SelectGetterTemplate(
@@ -1615,7 +1617,9 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.CurrentCompilation,
                 AdviceOutcome.Default,
                 this._state.AspectBuilder.AssertNotNull(),
-                advice.AdviceKind );
+                advice.AdviceKind,
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
         }
 
         // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.

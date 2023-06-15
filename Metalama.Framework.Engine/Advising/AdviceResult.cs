@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -36,12 +37,18 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
 
     public IAspectBuilder AspectBuilder { get; }
 
-    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind )
+    public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
+
+    public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
+
+    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind, IReadOnlyCollection<IInterfaceImplementationResult> interfaces, IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
     {
         this._declaration = declaration;
         this._compilation = compilation.Assert( c => c.IsMutable );
         this.Outcome = outcome;
         this.AspectBuilder = aspectBuilder;
         this.AdviceKind = adviceKind;
+        this.Interfaces = interfaces;
+        this.InterfaceMembers = interfaceMembers;
     }
 }

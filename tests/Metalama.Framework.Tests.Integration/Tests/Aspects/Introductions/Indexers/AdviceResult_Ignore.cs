@@ -16,9 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
         {
             var result = builder.Advice.IntroduceIndexer(builder.Target, typeof(int), nameof(GetTemplate), nameof(SetTemplate), whenExists: OverrideStrategy.Ignore);
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignored)
+            if (result.Outcome != Advising.AdviceOutcome.Ignore)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignore.");
             }
 
             if (result.AdviceKind != Advising.AdviceKind.IntroduceIndexer)

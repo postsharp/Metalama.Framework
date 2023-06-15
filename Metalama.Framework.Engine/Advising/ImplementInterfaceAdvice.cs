@@ -259,6 +259,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
         var diagnostics = new DiagnosticBag();
+        var implementedInterfaces = new List<ImplementationResult>();
+        var implementedInterfaceMembers = new List<MemberImplementationResult>();
 
         foreach ( var interfaceSpecification in this._interfaceSpecifications )
         {
@@ -273,6 +275,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.Ignore:
+                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
+
                         continue;
 
                     case OverrideStrategy.Fail:
@@ -284,6 +288,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         continue;
 
                     case OverrideStrategy.Override:
+                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
                         skipInterfaceBaseList = true;
 
                         break;
@@ -294,6 +299,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             }
             else
             {
+                implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
+
                 skipInterfaceBaseList = false;
             }
 
@@ -345,13 +352,21 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     continue;
 
                                 case InterfaceMemberOverrideStrategy.Ignore:
+
+                                    implementedInterfaceMembers.Add(
+                                        new MemberImplementationResult(
+                                            compilation,
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingMethod ) );
+
                                     continue;
 
                                 case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy == OverrideStrategy.Override:
                                     if ( existingMethod.Accessibility != Accessibility.Public )
                                     {
                                         diagnostics.Report(
-                                            AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMethod.CreateRoslynDiagnostic(
+                                            AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, existingMethod) ) );
 
@@ -366,13 +381,20 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                                 existingMethod,
                                                 templateMethod.AssertNotNull().ForOverride( existingMethod ),
                                                 mergedTags ) );
+
+                                        implementedInterfaceMembers.Add(
+                                            new MemberImplementationResult(
+                                                compilation,
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingMethod ) );
                                     }
                                     else
                                     {
                                         if ( !existingMethod.IsVirtual || existingMethod.IsSealed )
                                         {
                                             diagnostics.Report(
-                                                AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMethod.CreateRoslynDiagnostic(
+                                                AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
                                                     (this.Aspect.AspectClass.ShortName, existingMethod) ) );
 
@@ -385,7 +407,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     break;
 
                                 case InterfaceMemberOverrideStrategy.MakeExplicit:
-                                    IntroduceMethod( true );
+                                    IntroduceMethod( true, false );
 
                                     break;
 
@@ -396,10 +418,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         }
                         else
                         {
-                            IntroduceMethod( memberSpec.IsExplicit );
+                            IntroduceMethod( memberSpec.IsExplicit, false );
                         }
 
-                        void IntroduceMethod( bool isExplicit, bool isOverride = false )
+                        void IntroduceMethod( bool isExplicit, bool isOverride )
                         {
                             var isIteratorMethod = templateMethod?.IsIteratorMethod ?? redirectionTargetMethod.AssertNotNull().IsIteratorMethod() == true;
                             var isVirtual = templateAttributeProperties?.IsVirtual ?? templateMethod is { Declaration.IsVirtual: true };
@@ -428,6 +450,13 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         methodBuilder,
                                         (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
                             }
+
+                            implementedInterfaceMembers.Add(
+                                new MemberImplementationResult(
+                                    compilation,
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    methodBuilder ) );
                         }
 
                         break;
@@ -451,14 +480,66 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     continue;
 
                                 case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy == OverrideStrategy.Override:
-                                    throw new NotImplementedException( "Overriding interface properties is not yet implemented." );
+                                    if ( existingProperty.Accessibility != Accessibility.Public )
+                                    {
+                                        diagnostics.Report(
+                                            AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
+                                                targetType.GetDiagnosticLocation(),
+                                                (this.Aspect.AspectClass.ShortName, existingProperty) ) );
+
+                                        continue;
+                                    }
+
+                                    if ( existingProperty.DeclaringType.Equals( targetType ) )
+                                    {
+                                        var accessorTemplates = templateProperty.GetAccessorTemplates();
+
+                                        AddTransformationNoDuplicates(
+                                            new OverridePropertyTransformation(
+                                                this,
+                                                existingProperty,
+                                                existingProperty.GetMethod != null ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod ) : null,
+                                                existingProperty.SetMethod != null ? accessorTemplates.Set?.ForOverride( existingProperty.SetMethod ) : null,
+                                                mergedTags ) );
+
+                                        implementedInterfaceMembers.Add(
+                                            new MemberImplementationResult(
+                                                compilation,
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingProperty ) );
+                                    }
+                                    else
+                                    {
+                                        if ( !existingProperty.IsVirtual || existingProperty.IsSealed )
+                                        {
+                                            diagnostics.Report(
+                                                AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
+                                                    targetType.GetDiagnosticLocation(),
+                                                    (this.Aspect.AspectClass.ShortName, existingProperty) ) );
+
+                                            continue;
+                                        }
+
+                                        IntroduceProperty( false, true );
+                                    }
+
+                                    break;
 
                                 case InterfaceMemberOverrideStrategy.MakeExplicit:
-                                    IntroduceProperty( true );
+                                    IntroduceProperty( true, false );
 
                                     break;
 
                                 case InterfaceMemberOverrideStrategy.Ignore:
+
+                                    implementedInterfaceMembers.Add(
+                                        new MemberImplementationResult(
+                                            compilation,
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingProperty ) );
+
                                     continue;
 
                                 default:
@@ -467,12 +548,13 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         }
                         else
                         {
-                            IntroduceProperty( memberSpec.IsExplicit );
+                            IntroduceProperty( memberSpec.IsExplicit, false );
                         }
 
-                        void IntroduceProperty( bool isExplicit )
+                        void IntroduceProperty( bool isExplicit, bool isOverride )
                         {
                             var isAutoProperty = templateProperty?.Declaration.IsAutoPropertyOrField == true;
+                            var isVirtual = templateAttributeProperties?.IsVirtual ?? templateProperty is { Declaration.IsVirtual: true };
 
                             var getAccessibility =
                                 templateProperty?.GetAccessorAccessibility ?? Accessibility.Public;
@@ -551,6 +633,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 hasSetter,
                                 isAutoProperty,
                                 isExplicit,
+                                isVirtual,
+                                isOverride,
                                 hasImplicitSetter,
                                 mergedTags );
 
@@ -605,6 +689,13 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         propertyBuilder,
                                         redirectionTargetProperty.AssertNotNull() ) );
                             }
+
+                            implementedInterfaceMembers.Add(
+                                new MemberImplementationResult(
+                                    compilation,
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    propertyBuilder ) );
                         }
 
                         break;
@@ -632,14 +723,66 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     continue;
 
                                 case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy == OverrideStrategy.Override:
-                                    throw new NotImplementedException( "Overriding interface events is not yet implemented." );
+                                    if ( existingEvent.Accessibility != Accessibility.Public )
+                                    {
+                                        diagnostics.Report(
+                                            AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
+                                                targetType.GetDiagnosticLocation(),
+                                                (this.Aspect.AspectClass.ShortName, existingEvent) ) );
+
+                                        continue;
+                                    }
+
+                                    if ( existingEvent.DeclaringType.Equals( targetType ) )
+                                    {
+                                        var accessorTemplates = templateEvent.GetAccessorTemplates();
+
+                                        AddTransformationNoDuplicates(
+                                            new OverrideEventTransformation(
+                                                this,
+                                                existingEvent,
+                                                accessorTemplates.Add?.ForOverride( existingEvent.AddMethod ),
+                                                accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod ),
+                                                mergedTags ) );
+
+                                        implementedInterfaceMembers.Add(
+                                            new MemberImplementationResult(
+                                                compilation,
+                                                memberSpec.InterfaceMember,
+                                                InterfaceMemberImplementationOutcome.Override,
+                                                existingEvent ) );
+                                    }
+                                    else
+                                    {
+                                        if ( !existingEvent.IsVirtual || existingEvent.IsSealed )
+                                        {
+                                            diagnostics.Report(
+                                                AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
+                                                    targetType.GetDiagnosticLocation(),
+                                                    (this.Aspect.AspectClass.ShortName, existingEvent) ) );
+
+                                            continue;
+                                        }
+
+                                        IntroduceEvent( false, true );
+                                    }
+
+                                    break;
 
                                 case InterfaceMemberOverrideStrategy.MakeExplicit:
-                                    IntroduceEvent( true );
+                                    IntroduceEvent( true, false );
 
                                     break;
 
                                 case InterfaceMemberOverrideStrategy.Ignore:
+
+                                    implementedInterfaceMembers.Add(
+                                        new MemberImplementationResult(
+                                            compilation,
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingEvent ) );
+
                                     continue;
 
                                 default:
@@ -648,14 +791,15 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         }
                         else
                         {
-                            IntroduceEvent( memberSpec.IsExplicit );
+                            IntroduceEvent( memberSpec.IsExplicit, false );
                         }
 
-                        void IntroduceEvent( bool isExplicit )
+                        void IntroduceEvent( bool isExplicit, bool isOverride )
                         {
                             var isEventField = templateEvent?.Declaration.IsEventField() ?? false;
+                            var isVirtual = templateAttributeProperties?.IsVirtual ?? templateEvent is { Declaration.IsVirtual: true };
 
-                            var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
+                            var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, isVirtual, isOverride, mergedTags );
 
                             if ( templateEvent != null )
                             {
@@ -696,6 +840,13 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         eventBuilder,
                                         redirectionTargetEvent.AssertNotNull() ) );
                             }
+
+                            implementedInterfaceMembers.Add(
+                                new MemberImplementationResult(
+                                    compilation,
+                                    memberSpec.InterfaceMember,
+                                    InterfaceMemberImplementationOutcome.Introduce,
+                                    eventBuilder ) );
                         }
 
                         break;
@@ -732,7 +883,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         return AdviceImplementationResult.Success(
             AdviceOutcome.Default,
             this.TargetDeclaration.As<IDeclaration>(),
-            diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null );
+            diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null,
+            implementedInterfaces,
+            implementedInterfaceMembers );
     }
 
     private MethodBuilder GetImplMethodBuilder(
@@ -805,6 +958,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         bool hasSetter,
         bool isAutoProperty,
         bool isExplicit,
+        bool isVirtual,
+        bool isOverride,
         bool hasImplicitSetter,
         IObjectReader tags )
     {
@@ -855,12 +1010,21 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             }
         }
 
+        if ( isOverride )
+        {
+            propertyBuilder.IsOverride = true;
+        }
+        else if ( isVirtual )
+        {
+            propertyBuilder.IsVirtual = true;
+        }
+
         return propertyBuilder;
     }
 
     private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
 
-    private EventBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, IObjectReader tags )
+    private EventBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, bool isVirtual, bool isOverride, IObjectReader tags )
     {
         var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
@@ -873,6 +1037,15 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         else
         {
             eventBuilder.Accessibility = Accessibility.Public;
+        }
+
+        if ( isOverride )
+        {
+            eventBuilder.IsOverride = true;
+        }
+        else if ( isVirtual )
+        {
+            eventBuilder.IsVirtual = true;
         }
 
         return eventBuilder;

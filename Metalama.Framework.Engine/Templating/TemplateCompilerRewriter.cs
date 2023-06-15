@@ -281,11 +281,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // in this case we initialize tuple with explicit names.
         var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
 
+#pragma warning disable IDE0270 // Use coalesce expression
         if ( tupleType == null )
         {
             // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
             throw new AssertionFailedException( $"Cannot get the type of tuple '{node}'." );
         }
+#pragma warning restore IDE0270 // Use coalesce expression
 
         var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 

@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
                     OperatorKind.Addition, 
                     whenExists: OverrideStrategy.Ignore);
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignored)
+            if (result.Outcome != Advising.AdviceOutcome.Ignore)
             {
                 throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
             }

@@ -113,7 +113,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             switch ( aspectResult.Outcome )
             {
                 case AdviceOutcome.Error:
-                case AdviceOutcome.Ignored:
+                case AdviceOutcome.Ignore:
                     // We roll back the changes done to the compilation model.
                     break;
 

@@ -56,7 +56,7 @@ internal sealed class AspectBuilderState
 
     internal AspectInstanceResult ToResult()
     {
-        var outcome = this.Diagnostics.ErrorCount == 0 ? this.IsAspectSkipped ? AdviceOutcome.Ignored : AdviceOutcome.Default : AdviceOutcome.Error;
+        var outcome = this.Diagnostics.ErrorCount == 0 ? this.IsAspectSkipped ? AdviceOutcome.Ignore : AdviceOutcome.Default : AdviceOutcome.Error;
 
         return outcome == AdviceOutcome.Default
             ? new AspectInstanceResult(

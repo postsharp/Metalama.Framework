@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
         {
             var result = builder.Advice.IntroduceProperty(builder.Target, nameof(Property), whenExists: OverrideStrategy.Ignore);
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignored)
+            if (result.Outcome != Advising.AdviceOutcome.Ignore)
             {
                 throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
             }
