@@ -572,15 +572,27 @@ namespace Metalama.Framework.Engine.Templating
                     templateInfo = this._classifier.GetTemplateInfo( declaredSymbol );
                 }
 
-                if ( templateInfo.AttributeType != TemplateAttributeType.None
-                     && !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                if ( !templateInfo.IsNone )
                 {
-                    this.Report(
-                        TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
-                            declaredSymbol ) );
+                    if ( !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                declaredSymbol ) );
 
-                    return default;
+                        return default;
+                    }
+
+                    if ( declaredSymbol.ContainingType?.IsStatic == true )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.TemplatesInStaticTypeNotSupported.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, declaredSymbol.ContainingType) ) );
+
+                        return default;
+                    }
                 }
 
                 // Report error on conflict scope.
@@ -592,7 +604,7 @@ namespace Metalama.Framework.Engine.Templating
                 // Report error when we have compile-time code but no namespace import for fast detection.
                 if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
                                                           && !SystemTypeDetector.IsSystemType(
-                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
+                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType! ) )
                 {
                     var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
 
@@ -609,7 +621,7 @@ namespace Metalama.Framework.Engine.Templating
                     this.Report(
                         TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            (declaredSymbol, declaredSymbol.ContainingType, typeScope!.Value) ) );
+                            (declaredSymbol, declaredSymbol.ContainingType!, typeScope!.Value) ) );
                 }
 
                 // Check that run-time members are contained in run-time types.
