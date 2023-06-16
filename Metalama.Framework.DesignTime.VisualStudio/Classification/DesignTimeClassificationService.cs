@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts.Classification;
-using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -22,10 +21,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
 
     private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
 
-    public DesignTimeClassificationService() : this(
-        DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeUserProcessServiceProviderFactory>() ) { }
-
-    private DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
+    public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();

@@ -187,6 +187,12 @@ namespace Metalama.Framework.Engine.Templating.Mapping
                 return null;
             }
 
+            if ( startMapping.Source.Character > endMapping.Source.Character || startMapping.Source.LinePosition > endMapping.Source.LinePosition )
+            {
+                // Inconsistent mapping: return null location instead of throwing.
+                return null;
+            }
+
             return Location.Create(
                 this.SourcePath,
                 TextSpan.FromBounds( startMapping.Source.Character, endMapping.Source.Character ),
