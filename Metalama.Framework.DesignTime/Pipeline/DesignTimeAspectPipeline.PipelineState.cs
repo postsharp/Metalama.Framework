@@ -341,9 +341,9 @@ internal sealed partial class DesignTimeAspectPipeline
 
                         if ( pipeline.ProjectOptions.BuildTouchFile != null && File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
                         {
-                            using ( MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile ) )
+                            if ( File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
                             {
-                                if ( File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
+                                using ( MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile ) )
                                 {
                                     File.Delete( pipeline.ProjectOptions.BuildTouchFile );
                                 }

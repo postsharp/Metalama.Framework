@@ -20,7 +20,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Services
         protected override ICompilerService? GetServiceCore( string name )
             => name switch
             {
-                nameof(IClassificationService) => new DesignTimeClassificationService(),
+                nameof(IClassificationService) => new DesignTimeClassificationService( this.ServiceProvider ),
                 nameof(ITransformationPreviewService) => new UserProcessTransformationPreviewService( this.ServiceProvider ),
                 nameof(ICompileTimeEditingStatusService) => new CompileTimeEditingStatusService( this.ServiceProvider ),
                 nameof(ICodeLensService) => new CodeLensService( this.ServiceProvider ),
