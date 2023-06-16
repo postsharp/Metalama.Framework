@@ -471,7 +471,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0266",
                 "Templates in static types are not supported.",
-                "The template '{0}' is containined within the static type '{1}', which is not useful and not supported.",
+                "The template '{0}' is contained within the static type '{1}', which is not supported.",
                 _category,
                 Error );
     }
