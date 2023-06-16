@@ -107,8 +107,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where T : class, ICompilationElement
             => new( symbolKey );
 
-        public static Ref<T> FromSerializedId<T>( SerializableDeclarationId id )
+        public static Ref<T> FromDeclarationId<T>( SerializableDeclarationId id )
             where T : class, ICompilationElement
+            => new( id.Id );
+
+        public static Ref<T> FromTypeId<T>( SerializableTypeId id )
+            where T : class, IType
             => new( id.Id );
 
         /// <summary>
@@ -193,7 +197,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 return declaration.GetSerializableId( this.TargetKind );
             }
 
-            if ( this.Target is string id && IsSerializableId( id ) && this.TargetKind == DeclarationRefTargetKind.Default )
+            if ( this.Target is string id && IsDeclarationId( id ) && this.TargetKind == DeclarationRefTargetKind.Default )
             {
                 return new( id );
             }
@@ -208,7 +212,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol.GetSerializableId( this.TargetKind );
         }
 
-        private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';
+        private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';
+
+        private static bool IsTypeId( string id ) => id.StartsWith( "typeof(", StringComparison.Ordinal );
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, true )!;
 
@@ -292,9 +298,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         ISymbol? symbol;
 
-                        if ( IsSerializableId( id ) )
+                        if ( IsDeclarationId( id ) )
                         {
                             symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilationContext.Compilation );
+                        }
+                        else if ( IsTypeId( id ) )
+                        {
+                            symbol = compilationContext.SerializableTypeIdResolver.ResolveId( new( id ) );
                         }
                         else
                         {
@@ -398,7 +408,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                 case string id:
                     {
-                        if ( IsSerializableId( id ) )
+                        if ( IsDeclarationId( id ) )
                         {
                             var declaration = new SerializableDeclarationId( id ).ResolveToDeclaration( compilation )
                                               ?? (throwIfMissing ? throw new SymbolNotFoundException( id, compilation.RoslynCompilation ) : null);
@@ -409,6 +419,26 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             }
 
                             return Convert( declaration );
+                        }
+                        else if ( IsTypeId( id ) )
+                        {
+                            try
+                            {
+                                var type = new SerializableTypeId( id ).Resolve( compilation );
+
+                                return Convert( type );
+                            }
+                            catch ( InvalidOperationException ex )
+                            {
+                                if ( throwIfMissing )
+                                {
+                                    throw new SymbolNotFoundException( id, compilation.RoslynCompilation, ex );
+                                }
+                                else
+                                {
+                                    return null;
+                                }
+                            }
                         }
                         else
                         {

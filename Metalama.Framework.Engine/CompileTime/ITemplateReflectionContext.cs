@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CompileTime;
@@ -10,8 +9,6 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal interface ITemplateReflectionContext
 {
     Compilation Compilation { get; }
-
-    CompilationContext CompilationContext { get; }
 
     CompilationModel GetCompilationModel( ICompilation sourceCompilation );
 

@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
-        internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
+        internal static Type ResolveCompileTimeTypeOf( string typeId, IReadOnlyDictionary<string, IType>? substitutions = null )
         {
             if ( Current._compilationServices == null )
             {
@@ -47,8 +47,12 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
 
             return Current._compilationServices.CompileTimeTypeFactory
-                        .Get( new SerializableTypeId( id ), substitutions );
+                .Get( new SerializableTypeId( typeId ), substitutions );
         }
+
+        internal static Type ResolveCompileTimeTypeOf( string typeId, string? ns, string name, string fullName, string toString )
+            => Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SerializableTypeId( typeId ), new( ns, name, fullName, toString ) );
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -166,8 +170,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             CompilationModel? compilationModel,
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
-
-        private CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException( "Compilation context is currently not available" );
 
         internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );

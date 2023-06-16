@@ -8,6 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal sealed class SymbolNotFoundException : Exception
 {
-    public SymbolNotFoundException( string symbolId, Compilation compilation ) : base(
-        $"Cannot resolve the symbol '{symbolId}' in '{compilation.AssemblyName}' for '{compilation.GetTargetFramework()}'." ) { }
+    public SymbolNotFoundException( string symbolId, Compilation compilation, Exception? innerException = null ) : base(
+        $"Cannot resolve the symbol '{symbolId}' in '{compilation.AssemblyName}' for '{compilation.GetTargetFramework()}'.", innerException )
+    { }
 }

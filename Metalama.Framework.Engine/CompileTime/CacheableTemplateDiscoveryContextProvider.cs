@@ -75,8 +75,6 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
 
         public Compilation Compilation { get; }
 
-        public CompilationContext CompilationContext => this._compilationModel.Value.CompilationContext;
-
         public CompilationModel GetCompilationModel( ICompilation sourceCompilation ) => this._compilationModel.Value;
 
         public bool IsCacheable => true;

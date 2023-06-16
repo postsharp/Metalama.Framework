@@ -671,46 +671,47 @@ public class ReferencedClass
         [Fact]
         public void RewriteTypeOf()
         {
-            const string code = @"
-using System;
-using Metalama.Framework.Aspects;
+            const string code = """
+                using System;
+                using Metalama.Framework.Aspects;
 
-[CompileTime]
-public class CompileTimeOnlyClass
-{
-   static Type Type1 = typeof(RunTimeOnlyClass);
-   static Type Type2 = typeof(CompileTimeOnlyClass);
-   static string Name1 = nameof(RunTimeOnlyClass);
-   static string Name2 = nameof(CompileTimeOnlyClass);
+                [CompileTime]
+                public class CompileTimeOnlyClass
+                {
+                   static Type Type1 = typeof(RunTimeOnlyClass);
+                   static Type Type2 = typeof(CompileTimeOnlyClass);
+                   static string Name1 = nameof(RunTimeOnlyClass);
+                   static string Name2 = nameof(CompileTimeOnlyClass);
 
-   void Method() { var t = typeof(RunTimeOnlyClass); }
-   string Property => nameof(RunTimeOnlyClass);
-}
+                   void Method() { var t = typeof(RunTimeOnlyClass); }
+                   string Property => nameof(RunTimeOnlyClass);
+                }
 
-public class RunTimeOnlyClass
-{
-   static Type Type1 = typeof(RunTimeOnlyClass);
-   static Type Type3 = typeof(CompileTimeOnlyClass);
+                public class RunTimeOnlyClass
+                {
+                   static Type Type1 = typeof(RunTimeOnlyClass);
+                   static Type Type3 = typeof(CompileTimeOnlyClass);
 
-}
-";
+                }
+                """;
 
-            const string expected = @"
-using global::System;
-using global::Metalama.Framework.Aspects;
+            const string expected = """
+                using global::System;
+                using global::Metalama.Framework.Aspects;
 
-[CompileTime]
-public class CompileTimeOnlyClass
-{
-   static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve(""typeof(global::RunTimeOnlyClass)"",null);
-   static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
-   static string Name1 = ""RunTimeOnlyClass"";
-   static string Name2 = ""CompileTimeOnlyClass"";
+                [CompileTime]
+                public class CompileTimeOnlyClass
+                {
+                   static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass");
+                   static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
+                   static string Name1 = "RunTimeOnlyClass";
+                   static string Name2 = "CompileTimeOnlyClass";
 
-   void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve(""typeof(global::RunTimeOnlyClass)"",null); }
-   string Property => ""RunTimeOnlyClass"";
-}
-";
+                   void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass"); }
+                   string Property => "RunTimeOnlyClass";
+                }
+
+                """;
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 

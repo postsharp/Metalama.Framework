@@ -9,7 +9,7 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.TypeOfRunTimeTypeInConstructor;
 
-class TestAspect : MethodAspect
+class TestAspect : TypeAspect
 {
     public TestAspect()
     {
@@ -20,8 +20,5 @@ class TestAspect : MethodAspect
 class RunTimeClass { }
 
 // <target>
-public partial class TargetClass
-{
-    [TestAspect]
-    void M() { }
-}
+[TestAspect]
+class TargetClass { }

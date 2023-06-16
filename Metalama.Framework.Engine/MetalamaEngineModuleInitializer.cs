@@ -15,7 +15,8 @@ public static class MetalamaEngineModuleInitializer
 {
     static MetalamaEngineModuleInitializer()
     {
-        TypeOfResolver.Resolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
+        TypeOfResolver.TypeIdResolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
+        TypeOfResolver.DeclarationIdResolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
         FormattingAnnotations.Initialize( Simplifier.Annotation );
         MetalamaStringFormatter.Initialize( new MetalamaStringFormatterImpl() );
     }

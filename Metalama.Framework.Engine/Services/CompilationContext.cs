@@ -29,8 +29,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     public Compilation Compilation { get; }
 
-    CompilationContext ITemplateReflectionContext.CompilationContext => this;
-
     CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
     {
         // When the current CompilationContext is used for reflecting the template code

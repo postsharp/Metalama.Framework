@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CompileTime;
@@ -37,16 +38,26 @@ internal sealed class TypeOfRewriter
                 this._compileTimeTypeName,
                 IdentifierName( nameof(TypeOfResolver.Resolve) ) );
 
-        var invocation = InvocationExpression(
-            memberAccess,
-            ArgumentList(
-                SeparatedList(
+        if ( substitutions == null )
+        {
+            return InvocationExpression( memberAccess )
+                .AddArgumentListArguments(
                     new[]
-                    {
-                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSerializableTypeId().ToString() ) ),
-                        Argument( substitutions ?? SyntaxFactoryEx.Null )
-                    } ) ) );
-
-        return invocation;
+                        {
+                            typeSymbol.GetSerializableTypeId().Id,
+                            typeSymbol.ContainingNamespace.GetFullName(),
+                            typeSymbol.GetReflectionName(),
+                            typeSymbol.GetReflectionFullName(),
+                            typeSymbol.GetReflectionToStringName()
+                        }
+                        .SelectAsArray( s => Argument( SyntaxFactoryEx.LiteralExpression( s ) ) ) );
+        }
+        else
+        {
+            return InvocationExpression( memberAccess )
+                .AddArgumentListArguments(
+                    Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSerializableTypeId().Id ) ),
+                    Argument( substitutions ) );
+        }
     }
 }

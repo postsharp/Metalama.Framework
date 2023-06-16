@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
@@ -7,65 +6,98 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf;
-
-class TestAspect : MethodAspect
+namespace Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    class TestAspect : MethodAspect
     {
+        public override void BuildAspect(IAspectBuilder<IMethod> builder) { }
+
+        public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        {
+            var runTimeClass = typeof(RunTimeClass);
+            builder.MustSatisfy(
+                method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == runTimeClass.Name),
+                method => $"{method} must have a an attribute with {runTimeClass} argument");
+
+            var runTimeOrCompileTimeClass = typeof(RunTimeOrCompileTimeClass);
+            builder.MustSatisfy(
+                method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == runTimeOrCompileTimeClass.Name),
+                method => $"{method} must have a an attribute with {runTimeOrCompileTimeClass} argument");
+
+            var compileTimeClass = typeof(CompileTimeClass);
+            builder.MustSatisfy(
+                method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == compileTimeClass.Name),
+                method => $"{method} must have a an attribute with {compileTimeClass} argument");
+
+            AssertEqual("CompileTimeType", typeof(RunTimeClass).GetType().Name);
+            AssertEqual("RunTimeClass", typeof(RunTimeClass).Name);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf", typeof(RunTimeClass).Namespace);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.RunTimeClass", typeof(RunTimeClass).FullName);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.RunTimeClass", typeof(RunTimeClass).ToString());
+
+            AssertEqual("CompileTimeType", typeof(GlobalNamespaceRuntimeClass).GetType().Name);
+            AssertEqual("GlobalNamespaceRuntimeClass", typeof(GlobalNamespaceRuntimeClass).Name);
+            AssertEqual(null, typeof(GlobalNamespaceRuntimeClass).Namespace);
+            AssertEqual("GlobalNamespaceRuntimeClass", typeof(GlobalNamespaceRuntimeClass).FullName);
+            AssertEqual("GlobalNamespaceRuntimeClass", typeof(GlobalNamespaceRuntimeClass).ToString());
+
+            AssertEqual("CompileTimeType", typeof(GenericRunTimeClass<>).GetType().Name);
+            AssertEqual("GenericRunTimeClass`1", typeof(GenericRunTimeClass<>).Name);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf", typeof(GenericRunTimeClass<>).Namespace);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.GenericRunTimeClass`1", typeof(GenericRunTimeClass<>).FullName);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.GenericRunTimeClass`1[T]", typeof(GenericRunTimeClass<>).ToString());
+
+            AssertEqual("CompileTimeType", typeof(GenericRunTimeClass<int>).GetType().Name);
+            AssertEqual("GenericRunTimeClass`1", typeof(GenericRunTimeClass<int>).Name);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf", typeof(GenericRunTimeClass<int>).Namespace);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.GenericRunTimeClass`1[System.Int32]", typeof(GenericRunTimeClass<int>).FullName);
+            AssertEqual("Metalama.Framework.Tests.Integration.Aspects.Eligibility.TypeOf.GenericRunTimeClass`1[System.Int32]", typeof(GenericRunTimeClass<int>).ToString());
+
+            void AssertEqual(string? expected, string? actual)
+            {
+                if (expected != actual)
+                    throw new InvalidOperationException($"{expected} != {actual}");
+            }
+        }
     }
 
-    public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+    class GenericRunTimeClass<T> { }
+
+    class RunTimeClass { }
+
+    [RunTimeOrCompileTime]
+    class RunTimeOrCompileTimeClass { }
+
+    [CompileTime]
+    class CompileTimeClass { }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    class TypeAttribute : Attribute
     {
-        var runTimeClass = typeof(RunTimeClass);
-        builder.MustSatisfy(
-            method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == runTimeClass.Name),
-            method => $"{method} must have a an attribute with {runTimeClass} argument");
+        public TypeAttribute(string type) { }
+    }
 
-        var runTimeOrCompileTimeClass = typeof(RunTimeOrCompileTimeClass);
-        builder.MustSatisfy(
-            method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == runTimeOrCompileTimeClass.Name),
-            method => $"{method} must have a an attribute with {runTimeOrCompileTimeClass} argument");
+    // <target>
+    public partial class TargetClass
+    {
+        [TestAspect]
+        [Type(nameof(RunTimeClass))]
+        [Type(nameof(RunTimeOrCompileTimeClass))]
+        [Type(nameof(CompileTimeClass))]
+        void M1() { }
 
-        var compileTimeClass = typeof(CompileTimeClass);
-        builder.MustSatisfy(
-            method => method.Attributes.Any(a => a.ConstructorArguments is { Length: 1 } && a.ConstructorArguments.Single().Value as string == compileTimeClass.Name),
-            method => $"{method} must have a an attribute with {compileTimeClass} argument");
+        [TestAspect]
+        [Type(nameof(RunTimeClass))]
+        [Type(nameof(RunTimeOrCompileTimeClass))]
+        void M2() { }
+
+        [TestAspect]
+        [Type(nameof(RunTimeClass))]
+        void M3() { }
+
+        [TestAspect]
+        void M4() { }
     }
 }
 
-class RunTimeClass { }
-
-[RunTimeOrCompileTime]
-class RunTimeOrCompileTimeClass { }
-
-[CompileTime]
-class CompileTimeClass { }
-
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-class TypeAttribute : Attribute
-{
-    public TypeAttribute(string type) { }
-}
-
-// <target>
-public partial class TargetClass
-{
-    [TestAspect]
-    [Type(nameof(RunTimeClass))]
-    [Type(nameof(RunTimeOrCompileTimeClass))]
-    [Type(nameof(CompileTimeClass))]
-    void M1() { }
-
-    [TestAspect]
-    [Type(nameof(RunTimeClass))]
-    [Type(nameof(RunTimeOrCompileTimeClass))]
-    void M2() { }
-
-    [TestAspect]
-    [Type(nameof(RunTimeClass))]
-    void M3() { }
-
-    [TestAspect]
-    void M4() { }
-}
+class GlobalNamespaceRuntimeClass { }

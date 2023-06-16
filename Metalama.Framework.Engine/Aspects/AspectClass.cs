@@ -226,7 +226,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         }
     }
 
-    private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory, CompilationContext compilationContext )
+    private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )
     {
         if ( this.HasError )
         {
@@ -265,7 +265,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
                 eligibilitySuccess &= (bool)
                     _tryInitializeEligibilityMethod.MakeGenericMethod( declarationInterface )
-                        .Invoke( this, new object[] { diagnosticAdder, eligibilityRules, compilationContext } )!;
+                        .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } )!;
             }
 
             if ( !eligibilitySuccess )
@@ -286,7 +286,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         return true;
     }
 
-    private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> rules, CompilationContext compilationContext )
+    private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> rules )
         where T : class, IDeclaration
     {
         if ( this._prototypeAspectInstance is IEligible<T> eligible )
@@ -296,8 +296,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             var executionContext = new UserCodeExecutionContext(
                 this.ServiceProvider,
                 diagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<IEligibilityBuilder<T>>( eligible.BuildEligibility ) ),
-                compilationServices: compilationContext );
+                UserCodeMemberInfo.FromDelegate( new Action<IEligibilityBuilder<T>>( eligible.BuildEligibility ) ) );
 
             if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
             {
@@ -383,7 +382,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             diagnosticAdder,
             templateReflectionContext );
 
-        if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory, templateReflectionContext.CompilationContext ) )
+        if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
         {
             aspectClass = null;
 
@@ -459,7 +458,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
         // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
         // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext( this.ServiceProvider, compilationModel: obj.GetCompilationModel() );
+        var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
@@ -509,7 +508,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
         // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
         // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext( this.ServiceProvider, compilationModel: targetDeclaration.GetCompilationModel() );
+        var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
 
         return this._userCodeInvoker.Invoke(
             () =>
