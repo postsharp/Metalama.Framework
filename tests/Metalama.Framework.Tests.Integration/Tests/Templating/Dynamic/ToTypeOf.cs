@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Misc.ToTypeOf
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.ToTypeOf
 {
     class Aspect
     {

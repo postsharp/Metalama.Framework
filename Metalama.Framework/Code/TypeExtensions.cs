@@ -91,4 +91,3 @@ namespace Metalama.Framework.Code
         public static IExpression ToTypeOf( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.ToTypeOf( type );
     }
 }
-}
