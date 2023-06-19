@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.Templating
         private const string _noIndentAnnotationKind = "Metalama_NoIndent";
         private const string _colorAnnotationKind = "Metalama_Color";
         private const string _templateAnnotationKind = "Metalama_Template";
+        private const string _metaVariableAnnotationKind = "Metalama_MetaVariable";
         private const string _scopeMismatchKind = nameof(TemplatingScope.Conflict);
         private const string _buildTimeAnnotationData = nameof(TemplatingScope.CompileTimeOnly);
         private const string _runTimeAnnotationData = nameof(TemplatingScope.RunTimeOnly);
@@ -48,6 +49,7 @@ namespace Metalama.Framework.Engine.Templating
         private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, _unknownAnnotationData );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
+        private static readonly SyntaxAnnotation _metaVariableAnnotation = new( _metaVariableAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
         private static readonly SyntaxAnnotation _runTimeTemplateParameterAnnotation = new( _scopeAnnotationKind, _runTimeTemplateParameterAnnotationData );
         private static readonly SyntaxAnnotation _typeOfRunTimeTypeAnnotation = new( _scopeAnnotationKind, _typeOfRunTimeTypeAnnotationData );
@@ -356,6 +358,11 @@ namespace Metalama.Framework.Engine.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
+        public static SyntaxToken AddMetaVariableAnnotation( this SyntaxToken token )
+            => token.WithAdditionalAnnotations( _metaVariableAnnotation );
+
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
+
+        public static bool HasMetaVariableAnnotation( this SyntaxToken token ) => token.HasAnnotation( _metaVariableAnnotation );
     }
 }

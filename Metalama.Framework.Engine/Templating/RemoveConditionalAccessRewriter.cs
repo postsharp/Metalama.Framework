@@ -36,13 +36,15 @@ internal sealed class RemoveConditionalAccessRewriter : SafeSyntaxRewriter
     {
         this._done = true;
 
-        return SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._expression, node.Name );
+        return SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._expression, node.Name )
+            .WithSymbolAnnotationsFrom( node );
     }
 
     public override SyntaxNode VisitElementBindingExpression( ElementBindingExpressionSyntax node )
     {
         this._done = true;
 
-        return SyntaxFactory.ElementAccessExpression( this._expression, node.ArgumentList );
+        return SyntaxFactory.ElementAccessExpression( this._expression, node.ArgumentList )
+            .WithSymbolAnnotationsFrom( node );
     }
 }

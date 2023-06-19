@@ -474,5 +474,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The template '{0}' is contained within the static type '{1}', which is not supported.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<IMethodSymbol> ExtensionMethodMethodGroupConversion
+            = new(
+                "LAMA0267",
+                "Method group conversion for extension methods is not supported.",
+                "Converting extension method '{0}' to a delegate using a method group coversion is currently not supported.",
+                _category,
+                Error );
     }
 }

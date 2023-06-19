@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public string GetUniqueIdentifier( string hint )
         {
-            if ( !this._sourceSymbols.Contains( hint ) && this._newSymbols.Add( hint ) )
+            if ( SyntaxFacts.GetKeywordKind( hint ) == SyntaxKind.None && !this._sourceSymbols.Contains( hint ) && this._newSymbols.Add( hint ) )
             {
                 return hint;
             }
