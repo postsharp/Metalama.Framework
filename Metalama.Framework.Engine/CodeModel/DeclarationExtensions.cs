@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Elfie.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -467,10 +466,11 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 // Override symbol never hides anything.
                 hiddenDeclaration = null;
+
                 return false;
             }
 
-            var currentType = declaration.DeclaringType.BaseType;
+            var currentType = declaration.DeclaringType?.BaseType;
 
             while ( currentType != null )
             {
@@ -485,20 +485,23 @@ namespace Metalama.Framework.Engine.CodeModel
                             ?? currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault()
                             ?? (IMemberOrNamedType?) currentType.Methods.OfName( declaration.Name ).FirstOrDefault();
 
-                        if ( candidateMember != null)
+                        if ( candidateMember != null )
                         {
                             hiddenDeclaration = candidateMember;
+
                             return true;
                         }
+
                         break;
 
                     case IIndexer indexer:
                         // Indexers are matched by signature.
                         var candidateIndexer = currentType.Indexers.OfExactSignature( indexer );
 
-                        if (candidateIndexer != null)
+                        if ( candidateIndexer != null )
                         {
                             hiddenDeclaration = candidateIndexer;
+
                             return true;
                         }
 
@@ -513,6 +516,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         if ( candidateMethod != null )
                         {
                             hiddenDeclaration = candidateMethod;
+
                             return true;
                         }
 
@@ -525,6 +529,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         if ( candidateNonMethod != null )
                         {
                             hiddenDeclaration = candidateNonMethod;
+
                             return true;
                         }
 
@@ -538,6 +543,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             hiddenDeclaration = null;
+
             return false;
         }
 

@@ -181,7 +181,6 @@ class D : C
             Assert.True( derivedMethod.TryGetHiddenDeclaration( out var hiddenField ) );
 
             Assert.Equal( baseField, hiddenField );
-
         }
 
         [Fact]
@@ -211,7 +210,6 @@ class D : C
             Assert.True( derivedType.TryGetHiddenDeclaration( out var hiddenType ) );
 
             Assert.Equal( baseType, hiddenType );
-
         }
 
         [Fact]

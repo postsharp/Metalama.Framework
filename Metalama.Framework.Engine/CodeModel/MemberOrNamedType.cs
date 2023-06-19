@@ -1,14 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -26,39 +22,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 // TODO: This is quite expensive (looks at all member collections in all ancestor types) and would likely need an optimization structure in NamedType.
                 return this.TryGetHiddenDeclaration( out _ );
-
-                //var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
-
-                //if ( syntaxReference == null )
-                //{
-                //    return false;
-                //}
-
-                //var syntaxNode = syntaxReference.GetSyntax();
-
-                //switch ( syntaxNode )
-                //{
-                //    case MemberDeclarationSyntax memberDeclaration:
-                //        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
-
-                //    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax eventFieldDeclaration }:
-                //        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
-
-                //    case VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax fieldDeclaration }:
-                //        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
-
-                //    case LocalFunctionStatementSyntax:
-                //        return false;
-
-                //    case ParameterSyntax: // Record positional properties.
-                //        return false;
-
-                //    case CompilationUnitSyntax:
-                //        return false;
-
-                //    default:
-                //        throw new AssertionFailedException( $"Unexpected declaration node kind {syntaxNode.Kind()} at '{syntaxNode.GetLocation()}'." );
-                //}
             }
         }
 
