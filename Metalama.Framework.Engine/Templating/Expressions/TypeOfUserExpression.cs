@@ -33,6 +33,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                                         TypeArgumentList(
                                             SeparatedList<TypeSyntax>(
                                                 genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ) ),
+                            
                             // Type<T,...>
                             GenericNameSyntax genericName =>
                                 genericName.WithTypeArgumentList(
