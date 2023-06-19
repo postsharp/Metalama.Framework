@@ -72,6 +72,13 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>Hidden symbol or null.</returns>
         public static bool TryGetHiddenSymbol( this ISymbol symbol, Compilation compilation, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {
+            if ( symbol is not (IMethodSymbol or IEventSymbol or IPropertySymbol) )
+            {
+                // Types never hide anything.
+                hiddenSymbol = null;
+                return false;
+            }
+
             var currentType = symbol.ContainingType.BaseType;
 
             if ( symbol.IsOverride )

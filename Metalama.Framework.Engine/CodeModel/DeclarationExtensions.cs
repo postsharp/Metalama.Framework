@@ -13,9 +13,11 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Elfie.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -457,6 +459,86 @@ namespace Metalama.Framework.Engine.CodeModel
                         return true;
                 }
             }
+        }
+
+        internal static bool TryGetHiddenDeclaration( this IMemberOrNamedType declaration, [NotNullWhen( true )] out IMemberOrNamedType? hiddenDeclaration )
+        {
+            if ( declaration is IMember { IsOverride: true } )
+            {
+                // Override symbol never hides anything.
+                hiddenDeclaration = null;
+                return false;
+            }
+
+            var currentType = declaration.DeclaringType.BaseType;
+
+            while ( currentType != null )
+            {
+                switch ( declaration )
+                {
+                    case IFieldOrProperty or IEvent or INamedType:
+                        // Field/properties/events are matched by name. When a base method is hidden, we ignore it (as it may be still accessible).
+                        var candidateMember =
+                            currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
+                            ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
+                            ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
+                            ?? currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault()
+                            ?? (IMemberOrNamedType?) currentType.Methods.OfName( declaration.Name ).FirstOrDefault();
+
+                        if ( candidateMember != null)
+                        {
+                            hiddenDeclaration = candidateMember;
+                            return true;
+                        }
+                        break;
+
+                    case IIndexer indexer:
+                        // Indexers are matched by signature.
+                        var candidateIndexer = currentType.Indexers.OfExactSignature( indexer );
+
+                        if (candidateIndexer != null)
+                        {
+                            hiddenDeclaration = candidateIndexer;
+                            return true;
+                        }
+
+                        // No need to look for other declaration types as indexers cannot hide them.
+
+                        break;
+
+                    case IMethod method:
+                        // Methods are matched by signature.
+                        var candidateMethod = currentType.Methods.OfExactSignature( method );
+
+                        if ( candidateMethod != null )
+                        {
+                            hiddenDeclaration = candidateMethod;
+                            return true;
+                        }
+
+                        var candidateNonMethod =
+                            currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
+                            ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
+                            ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
+                            ?? (IMemberOrNamedType?) currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault();
+
+                        if ( candidateNonMethod != null )
+                        {
+                            hiddenDeclaration = candidateNonMethod;
+                            return true;
+                        }
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unsupported declaration: {declaration}" );
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            hiddenDeclaration = null;
+            return false;
         }
 
         internal static bool IsImplicitInstanceConstructor( this IConstructor ctor )

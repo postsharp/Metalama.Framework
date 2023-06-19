@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -23,35 +24,41 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this.OnUsingDeclaration();
 
-                var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
+                // TODO: This is quite expensive (looks at all member collections in all ancestor types) and would likely need an optimization structure in NamedType.
+                return this.TryGetHiddenDeclaration( out _ );
 
-                if ( syntaxReference == null )
-                {
-                    return false;
-                }
+                //var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
 
-                var syntaxNode = syntaxReference.GetSyntax();
+                //if ( syntaxReference == null )
+                //{
+                //    return false;
+                //}
 
-                switch ( syntaxNode )
-                {
-                    case MemberDeclarationSyntax memberDeclaration:
-                        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                //var syntaxNode = syntaxReference.GetSyntax();
 
-                    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax eventFieldDeclaration }:
-                        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                //switch ( syntaxNode )
+                //{
+                //    case MemberDeclarationSyntax memberDeclaration:
+                //        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
-                    case VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax fieldDeclaration }:
-                        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                //    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax eventFieldDeclaration }:
+                //        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
-                    case LocalFunctionStatementSyntax:
-                        return false;
+                //    case VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax fieldDeclaration }:
+                //        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
-                    case ParameterSyntax: // Record positional properties.
-                        return false;
+                //    case LocalFunctionStatementSyntax:
+                //        return false;
 
-                    default:
-                        throw new AssertionFailedException( $"Unexpected declaration node kind {syntaxNode.Kind()} at '{syntaxNode.GetLocation()}'." );
-                }
+                //    case ParameterSyntax: // Record positional properties.
+                //        return false;
+
+                //    case CompilationUnitSyntax:
+                //        return false;
+
+                //    default:
+                //        throw new AssertionFailedException( $"Unexpected declaration node kind {syntaxNode.Kind()} at '{syntaxNode.GetLocation()}'." );
+                //}
             }
         }
 
