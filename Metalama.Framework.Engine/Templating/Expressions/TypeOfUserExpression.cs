@@ -22,15 +22,18 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             var typeExpression =
                 this._type switch
                 {
+                    // Generic type definition has to have omitted arguments in "typeof".
                     INamedType { IsCanonicalGenericInstance: true, IsGeneric: true } =>
                         syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ) switch
                         {
+                            // [alias::]Namespace.Type<T,...>
                             QualifiedNameSyntax { Right: GenericNameSyntax genericName } qualifiedName =>
                                 qualifiedName.WithRight(
                                     genericName.WithTypeArgumentList(
                                         TypeArgumentList(
                                             SeparatedList<TypeSyntax>(
                                                 genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ) ),
+                            // Type<T,...>
                             GenericNameSyntax genericName =>
                                 genericName.WithTypeArgumentList(
                                     TypeArgumentList(
