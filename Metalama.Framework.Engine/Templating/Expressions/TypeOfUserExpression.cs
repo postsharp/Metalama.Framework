@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -13,7 +12,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     {
         private readonly IType _type;
 
-        public TypeOfUserExpression( IType type)
+        public TypeOfUserExpression( IType type )
         {
             this._type = type;
         }
@@ -23,21 +22,21 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             var typeExpression =
                 this._type switch
                 {
-                    INamedType { IsCanonicalGenericInstance: true, IsGeneric: true } => 
+                    INamedType { IsCanonicalGenericInstance: true, IsGeneric: true } =>
                         syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ) switch
                         {
-                            QualifiedNameSyntax { Right: GenericNameSyntax { } genericName } qualifiedName =>
+                            QualifiedNameSyntax { Right: GenericNameSyntax genericName } qualifiedName =>
                                 qualifiedName.WithRight(
                                     genericName.WithTypeArgumentList(
                                         TypeArgumentList(
                                             SeparatedList<TypeSyntax>(
                                                 genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ) ),
-                            GenericNameSyntax genericName => 
-                                genericName.WithTypeArgumentList( 
+                            GenericNameSyntax genericName =>
+                                genericName.WithTypeArgumentList(
                                     TypeArgumentList(
                                         SeparatedList<TypeSyntax>(
                                             genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ),
-                            var x => throw new AssertionFailedException($"Unsupported canonical generic instance syntax {x}."),
+                            var x => throw new AssertionFailedException( $"Unsupported canonical generic instance syntax {x}." ),
                         },
                     _ => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
                 };
@@ -47,6 +46,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override bool CanBeNull => false;
 
-        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof( System.Type ) );
+        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof(System.Type) );
     }
 }
