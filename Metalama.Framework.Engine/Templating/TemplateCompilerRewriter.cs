@@ -1169,7 +1169,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 MetaSyntaxFactoryImpl.Type( method.ContainingType ),
-                                IdentifierName( method.Name ) ),
+                                memberAccessExpression.Name ),
                             ArgumentList( SeparatedList( arguments ) ) )
                         .WithSymbolAnnotationsFrom( node )
                         .WithTemplateAnnotationsFrom( node );
