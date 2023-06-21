@@ -261,5 +261,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             return typeName.ReplaceOrdinal( ",", "\\," ) + ", " + assemblyName;
         }
+
+        /// <summary>
+        /// Returns any method (static, instance, any accessibility) from the given type or its base types.
+        /// </summary>
+        public static MethodInfo? GetAnyMethod(this Type type, string name)
+        {
+            return type.GetMethod( name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
+                ?? type.BaseType?.GetAnyMethod( name );
+        }
     }
 }

@@ -93,12 +93,8 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-            var compiledTemplateMethodInfo = this.Type.GetMethod( templateName );
-
-            if ( compiledTemplateMethodInfo == null )
-            {
-                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
-            }
+            var compiledTemplateMethodInfo = this.Type.GetAnyMethod( templateName )
+                ?? throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
 
             templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
 
