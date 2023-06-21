@@ -31,7 +31,9 @@ class D : C
             var derivedField = compilation.Types.OfName( "D" ).Single().Fields.Single();
 
             Assert.False( baseField.IsNew );
+            Assert.False( ((IFieldImpl) baseField).HasNewKeyword );
             Assert.True( derivedField.IsNew );
+            Assert.True( ((IFieldImpl) derivedField).HasNewKeyword );
 
             Assert.True( derivedField.TryGetHiddenDeclaration( out var hiddenField ) );
 
@@ -60,7 +62,9 @@ class D : C
             var derivedProperty = compilation.Types.OfName( "D" ).Single().Properties.Single();
 
             Assert.False( baseProperty.IsNew );
+            Assert.False( ((IPropertyImpl) baseProperty).HasNewKeyword );
             Assert.True( derivedProperty.IsNew );
+            Assert.True( ((IPropertyImpl) derivedProperty).HasNewKeyword );
 
             Assert.True( derivedProperty.TryGetHiddenDeclaration( out var hiddenProperty ) );
 
@@ -89,7 +93,9 @@ class D : C
             var derivedEvent = compilation.Types.OfName( "D" ).Single().Events.Single();
 
             Assert.False( baseEvent.IsNew );
+            Assert.False( ((IEventImpl)baseEvent).HasNewKeyword );
             Assert.True( derivedEvent.IsNew );
+            Assert.True( ((IEventImpl) derivedEvent).HasNewKeyword );
 
             Assert.True( derivedEvent.TryGetHiddenDeclaration( out var hiddenEvent ) );
 
@@ -118,7 +124,9 @@ class D : C
             var derivedIndexer = compilation.Types.OfName( "D" ).Single().Indexers.Single();
 
             Assert.False( baseIndexer.IsNew );
+            Assert.False( ((IIndexerImpl)baseIndexer).HasNewKeyword );
             Assert.True( derivedIndexer.IsNew );
+            Assert.True( ((IIndexerImpl) derivedIndexer).HasNewKeyword );
 
             Assert.True( derivedIndexer.TryGetHiddenDeclaration( out var hiddenIndexer ) );
 
@@ -147,7 +155,9 @@ class D : C
             var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
 
             Assert.False( baseMethod.IsNew );
+            Assert.False( ((IMethodImpl)baseMethod).HasNewKeyword);
             Assert.True( derivedMethod.IsNew );
+            Assert.True( ((IMethodImpl)derivedMethod).HasNewKeyword);
 
             Assert.True( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
 
@@ -176,7 +186,9 @@ class D : C
             var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
 
             Assert.False( baseField.IsNew );
+            Assert.False( ((IFieldImpl) baseField).HasNewKeyword );
             Assert.True( derivedMethod.IsNew );
+            Assert.True( ((IMethodImpl) derivedMethod).HasNewKeyword );
 
             Assert.True( derivedMethod.TryGetHiddenDeclaration( out var hiddenField ) );
 
@@ -205,7 +217,9 @@ class D : C
             var derivedType = compilation.Types.OfName( "D" ).Single().NestedTypes.Single();
 
             Assert.False( baseType.IsNew );
+            Assert.False( ((INamedTypeImpl) baseType).HasNewKeyword );
             Assert.True( derivedType.IsNew );
+            Assert.True( ((INamedTypeImpl) derivedType).HasNewKeyword );
 
             Assert.True( derivedType.TryGetHiddenDeclaration( out var hiddenType ) );
 
@@ -234,7 +248,102 @@ class D : C
             var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
 
             Assert.False( baseMethod.IsNew );
+            Assert.False( ((IMethodImpl) baseMethod).HasNewKeyword );
             Assert.False( derivedMethod.IsNew );
+            Assert.False( ((IMethodImpl) derivedMethod).HasNewKeyword );
+
+            Assert.False( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
+
+            Assert.Null( hiddenMethod );
+        }
+
+        [Fact]
+        public void NonHiddenMethod()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C
+{
+    public void X(int x) {}
+}
+
+class D : C
+{
+    public void X() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var baseMethod = compilation.Types.OfName( "C" ).Single().Methods.Single();
+            var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
+
+            Assert.False( baseMethod.IsNew );
+            Assert.False( ((IMethodImpl) baseMethod).HasNewKeyword );
+            Assert.False( derivedMethod.IsNew );
+            Assert.False( ((IMethodImpl) derivedMethod).HasNewKeyword );
+
+            Assert.False( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
+
+            Assert.Null( hiddenMethod );
+        }
+
+        [Fact]
+        public void ImplicitlyHiddenMethod()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C
+{
+    public void X() {}
+}
+
+class D : C
+{
+    public void X() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var baseMethod = compilation.Types.OfName( "C" ).Single().Methods.Single();
+            var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
+
+            Assert.False( baseMethod.IsNew );
+            Assert.False( ((IMethodImpl) baseMethod).HasNewKeyword );
+            Assert.True( derivedMethod.IsNew );
+            Assert.False( ((IMethodImpl) derivedMethod).HasNewKeyword );
+
+            Assert.True( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
+
+            Assert.Equal( baseMethod, hiddenMethod );
+        }
+
+        [Fact]
+        public void NonHiddenNewMethod()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C
+{
+    public void X(int x) {}
+}
+
+class D : C
+{
+    public new void X() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var baseMethod = compilation.Types.OfName( "C" ).Single().Methods.Single();
+            var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
+
+            Assert.False( baseMethod.IsNew );
+            Assert.False( ((IMethodImpl) baseMethod).HasNewKeyword );
+            Assert.False( derivedMethod.IsNew );
+            Assert.True( ((IMethodImpl) derivedMethod).HasNewKeyword );
 
             Assert.False( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
 

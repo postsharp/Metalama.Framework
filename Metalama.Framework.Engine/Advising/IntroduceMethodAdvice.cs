@@ -152,7 +152,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
             this.Builder.IsOverride = false;
-            this.Builder.IsNew = false;
+            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
 
             addTransformation( this.Builder.ToTransformation() );
             addTransformation( overriddenMethod );
@@ -209,7 +209,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     }
                     else
                     {
-                        this.Builder.IsNew = true;
+                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                         this.Builder.IsOverride = false;
                         this.Builder.OverriddenMethod = existingMethod;
 
@@ -242,7 +242,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     else
                     {
                         this.Builder.IsOverride = true;
-                        this.Builder.IsNew = false;
+                        this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                         this.Builder.OverriddenMethod = existingMethod;
                         var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 

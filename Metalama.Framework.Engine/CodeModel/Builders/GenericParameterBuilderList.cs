@@ -4,15 +4,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal sealed class GenericParameterBuilderList : List<TypeParameterBuilder>, IGenericParameterList
 {
-    internal sealed class GenericParameterBuilderList : List<TypeParameterBuilder>, IGenericParameterList
-    {
-        IEnumerator<ITypeParameter> IEnumerable<ITypeParameter>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<ITypeParameter> IEnumerable<ITypeParameter>.GetEnumerator() => this.GetEnumerator();
 
-        ITypeParameter IReadOnlyList<ITypeParameter>.this[ int index ] => this[index];
+    ITypeParameter IReadOnlyList<ITypeParameter>.this[ int index ] => this[index];
 
-        // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
-        public IList<TypeParameterBuilder> AsBuilderList => this;
-    }
+    // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
+    public IList<TypeParameterBuilder> AsBuilderList => this;
 }

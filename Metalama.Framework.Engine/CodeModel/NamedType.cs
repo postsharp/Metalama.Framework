@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// This class exists because it needs to add a dependency context check before each member access, which makes
     /// it hard to use [Memo].
     /// </summary>
-    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal, INamedTypeImpl
     {
         public NamedTypeImpl Implementation { get; }
 

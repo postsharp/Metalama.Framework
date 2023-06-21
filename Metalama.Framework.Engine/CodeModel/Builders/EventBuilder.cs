@@ -15,142 +15,141 @@ using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 {
-    internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
+    private readonly List<IAttributeData> _fieldAttributes;
+    private INamedType _type;
+
+    public IObjectReader InitializerTags { get; }
+
+    public bool IsEventField { get; }
+
+    public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
+
+    public EventBuilder(
+        Advice advice,
+        INamedType targetType,
+        string name,
+        bool isEventField,
+        IObjectReader initializerTags )
+        : base( targetType, name, advice )
     {
-        private readonly List<IAttributeData> _fieldAttributes;
-        private INamedType _type;
+        this.InitializerTags = initializerTags;
+        this.IsEventField = isEventField;
+        this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
+        this._fieldAttributes = new List<IAttributeData>();
+    }
 
-        public IObjectReader InitializerTags { get; }
+    public void AddFieldAttribute( IAttributeData attributeData )
+    {
+        this._fieldAttributes.Add( attributeData );
+    }
 
-        public bool IsEventField { get; }
+    public INamedType Type
+    {
+        get => this._type;
+        set => this._type = this.Translate( value );
+    }
 
-        public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
+    public RefKind RefKind
+    {
+        get => RefKind.None;
+        set => throw new NotSupportedException();
+    }
 
-        public EventBuilder(
-            Advice advice,
-            INamedType targetType,
-            string name,
-            bool isEventField,
-            IObjectReader initializerTags )
-            : base( targetType, name, advice )
+    public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
+
+    [Memo]
+    public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
+
+    [Memo]
+    public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
+
+    public IMethodBuilder? RaiseMethod => null;
+
+    public IEvent? OverriddenEvent { get; set; }
+
+    public override DeclarationKind DeclarationKind => DeclarationKind.Event;
+
+    IType IHasType.Type => this.Type;
+
+    IType IHasTypeBuilder.Type
+    {
+        get => this.Type;
+
+        set
         {
-            this.InitializerTags = initializerTags;
-            this.IsEventField = isEventField;
-            this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
-            this._fieldAttributes = new List<IAttributeData>();
-        }
-
-        public void AddFieldAttribute( IAttributeData attributeData )
-        {
-            this._fieldAttributes.Add( attributeData );
-        }
-
-        public INamedType Type
-        {
-            get => this._type;
-            set => this._type = this.Translate( value );
-        }
-
-        public RefKind RefKind
-        {
-            get => RefKind.None;
-            set => throw new NotSupportedException();
-        }
-
-        public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
-
-        [Memo]
-        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
-
-        [Memo]
-        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
-
-        public IMethodBuilder? RaiseMethod => null;
-
-        public IEvent? OverriddenEvent { get; set; }
-
-        public override DeclarationKind DeclarationKind => DeclarationKind.Event;
-
-        IType IHasType.Type => this.Type;
-
-        IType IHasTypeBuilder.Type
-        {
-            get => this.Type;
-
-            set
+            switch ( value )
             {
-                switch ( value )
-                {
-                    case INamedType namedType:
-                        this.Type = this.Translate( namedType );
+                case INamedType namedType:
+                    this.Type = this.Translate( namedType );
 
-                        break;
+                    break;
 
-                    default:
-                        throw new InvalidOperationException( "IEventBuilder.Type cannot be set to a value that does not implement INamedType." );
-                }
+                default:
+                    throw new InvalidOperationException( "IEventBuilder.Type cannot be set to a value that does not implement INamedType." );
             }
         }
+    }
 
-        RefKind IHasType.RefKind => this.RefKind;
+    RefKind IHasType.RefKind => this.RefKind;
 
-        IMethod IEvent.AddMethod => this.AddMethod;
+    IMethod IEvent.AddMethod => this.AddMethod;
 
-        IMethod IEvent.RemoveMethod => this.RemoveMethod;
+    IMethod IEvent.RemoveMethod => this.RemoveMethod;
 
-        IMethod? IEvent.RaiseMethod => this.RaiseMethod;
+    IMethod? IEvent.RaiseMethod => this.RaiseMethod;
 
-        // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IEvent>();
+    // TODO: When an interface is introduced, explicit implementation should appear here.
+    public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IEvent>();
 
-        public IExpression? InitializerExpression { get; set; }
+    public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IEvent>? InitializerTemplate { get; set; }
+    public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
-        public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
+    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
-        public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
+    public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
-        public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
+    public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
 
-        public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
+    public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 
-        public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
+    public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
 
-        public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
+    public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
-        public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
+    public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
-        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
+    public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-        public override IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+    public override IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
-        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+    public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors
+    public IEnumerable<IMethod> Accessors
+    {
+        get
         {
-            get
-            {
-                yield return this.AddMethod;
-                yield return this.RemoveMethod;
+            yield return this.AddMethod;
+            yield return this.RemoveMethod;
 
-                if ( this.RaiseMethod != null )
-                {
-                    yield return this.RaiseMethod;
-                }
+            if ( this.RaiseMethod != null )
+            {
+                yield return this.RaiseMethod;
             }
         }
+    }
 
-        public override void Freeze()
-        {
-            base.Freeze();
+    public override void Freeze()
+    {
+        base.Freeze();
 
-            ((DeclarationBuilder?) this.AddMethod)?.Freeze();
-            ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
-        }
+        ((DeclarationBuilder?) this.AddMethod)?.Freeze();
+        ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
     }
 }

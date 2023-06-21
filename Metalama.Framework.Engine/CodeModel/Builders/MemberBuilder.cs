@@ -17,196 +17,195 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
 {
-    internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
+    private bool _isVirtual;
+    private bool _isAsync;
+    private bool _isOverride;
+
+    protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
+
+    public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
+
+    public override string ToString() => this.DeclaringType + "." + this.Name;
+
+    public abstract bool IsExplicitInterfaceImplementation { get; }
+
+    public bool IsVirtual
     {
-        private bool _isVirtual;
-        private bool _isAsync;
-        private bool _isOverride;
-
-        protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
-
-        public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
-
-        public override string ToString() => this.DeclaringType + "." + this.Name;
-
-        public abstract bool IsExplicitInterfaceImplementation { get; }
-
-        public bool IsVirtual
+        get => this._isVirtual;
+        set
         {
-            get => this._isVirtual;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isVirtual = value;
-            }
+            this._isVirtual = value;
         }
+    }
 
-        public bool IsAsync
+    public bool IsAsync
+    {
+        get => this._isAsync;
+        set
         {
-            get => this._isAsync;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isAsync = value;
-            }
+            this._isAsync = value;
         }
+    }
 
-        public bool IsOverride
+    public bool IsOverride
+    {
+        get => this._isOverride;
+        set
         {
-            get => this._isOverride;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isOverride = value;
-            }
+            this._isOverride = value;
         }
+    }
 
-        public bool IsDesignTime => !this.IsOverride && !this.IsNew;
+    public bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
+    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
 
-        public abstract IMember? OverriddenMember { get; }
+    public abstract IMember? OverriddenMember { get; }
 
-        public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+    public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-        public abstract IInjectMemberTransformation ToTransformation();
+    public abstract IInjectMemberTransformation ToTransformation();
 
-        private bool TryExpandInitializerTemplate<T>(
-            Advice advice,
-            MemberInjectionContext context,
-            TemplateMember<T> initializerTemplate,
-            IObjectReader tags,
-            [NotNullWhen( true )] out BlockSyntax? expression )
-            where T : class, IMember
-        {
-            var metaApi = MetaApi.ForInitializer(
-                this,
-                new MetaApiProperties(
-                    advice.SourceCompilation,
-                    context.DiagnosticSink,
-                    initializerTemplate.Cast(),
-                    tags,
-                    advice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    advice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
-                advice.TemplateInstance.Instance,
-                metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+    private bool TryExpandInitializerTemplate<T>(
+        Advice advice,
+        MemberInjectionContext context,
+        TemplateMember<T> initializerTemplate,
+        IObjectReader tags,
+        [NotNullWhen( true )] out BlockSyntax? expression )
+        where T : class, IMember
+    {
+        var metaApi = MetaApi.ForInitializer(
+            this,
+            new MetaApiProperties(
+                advice.SourceCompilation,
+                context.DiagnosticSink,
+                initializerTemplate.Cast(),
+                tags,
+                advice.AspectLayerId,
                 context.SyntaxGenerationContext,
-                default,
-                null,
-                advice.AspectLayerId );
+                advice.Aspect,
+                context.ServiceProvider,
+                MetaApiStaticity.Default ) );
 
-            var templateDriver = advice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
+        var expansionContext = new TemplateExpansionContext(
+            context.ServiceProvider,
+            advice.TemplateInstance.Instance,
+            metaApi,
+            context.LexicalScopeProvider.GetLexicalScope( this ),
+            context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+            context.SyntaxGenerationContext,
+            default,
+            null,
+            advice.AspectLayerId );
 
-            return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
+        var templateDriver = advice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
+
+        return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
+    }
+
+    internal bool GetInitializerExpressionOrMethod<T>(
+        Advice advice,
+        in MemberInjectionContext context,
+        IType targetType,
+        IExpression? initializerExpression,
+        TemplateMember<T>? initializerTemplate,
+        IObjectReader tags,
+        out ExpressionSyntax? initializerExpressionSyntax,
+        out MethodDeclarationSyntax? initializerMethodSyntax )
+        where T : class, IMember
+    {
+        if ( context is null )
+        {
+            throw new ArgumentNullException( nameof(context) );
         }
 
-        internal bool GetInitializerExpressionOrMethod<T>(
-            Advice advice,
-            in MemberInjectionContext context,
-            IType targetType,
-            IExpression? initializerExpression,
-            TemplateMember<T>? initializerTemplate,
-            IObjectReader tags,
-            out ExpressionSyntax? initializerExpressionSyntax,
-            out MethodDeclarationSyntax? initializerMethodSyntax )
-            where T : class, IMember
+        if ( targetType is null )
         {
-            if ( context is null )
+            throw new ArgumentNullException( nameof(targetType) );
+        }
+
+        if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate != null) )
+        {
+            // At design time when generating the partial code for source generators, we do not expand templates.
+            // This may cause warnings in the constructor (because some fields will not be initialized)
+            // but we will add that later. The main point is that we should not execute the template here.
+
+            initializerMethodSyntax = null;
+            initializerExpressionSyntax = null;
+
+            return true;
+        }
+
+        if ( initializerExpression != null )
+        {
+            // TODO: Error about the expression type?
+            initializerMethodSyntax = null;
+
+            using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
             {
-                throw new ArgumentNullException( nameof(context) );
+                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
             }
 
-            if ( targetType is null )
+            return true;
+        }
+        else if ( initializerTemplate != null )
+        {
+            if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
             {
-                throw new ArgumentNullException( nameof(targetType) );
-            }
-
-            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate != null) )
-            {
-                // At design time when generating the partial code for source generators, we do not expand templates.
-                // This may cause warnings in the constructor (because some fields will not be initialized)
-                // but we will add that later. The main point is that we should not execute the template here.
-
+                // Template expansion error.
                 initializerMethodSyntax = null;
                 initializerExpressionSyntax = null;
 
-                return true;
+                return false;
             }
 
-            if ( initializerExpression != null )
-            {
-                // TODO: Error about the expression type?
-                initializerMethodSyntax = null;
-
-                using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
-                {
-                    initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
-                }
-
-                return true;
-            }
-            else if ( initializerTemplate != null )
-            {
-                if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
-                {
-                    // Template expansion error.
-                    initializerMethodSyntax = null;
-                    initializerExpressionSyntax = null;
-
-                    return false;
-                }
-
-                // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements is [ReturnStatementSyntax { Expression: not null } returnStatement] )
-                {
-                    initializerMethodSyntax = null;
-                    initializerExpressionSyntax = returnStatement.Expression;
-
-                    return true;
-                }
-
-                var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
-
-                initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
-
-                initializerMethodSyntax =
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(
-                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                        context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
-                        null,
-                        Identifier( initializerName ),
-                        null,
-                        ParameterList(),
-                        List<TypeParameterConstraintClauseSyntax>(),
-                        initializerBlock,
-                        null );
-
-                return true;
-            }
-            else
+            // If the initializer block contains only a single return statement, 
+            if ( initializerBlock.Statements is [ReturnStatementSyntax { Expression: not null } returnStatement] )
             {
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = null;
+                initializerExpressionSyntax = returnStatement.Expression;
 
                 return true;
             }
+
+            var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
+
+            initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
+
+            initializerMethodSyntax =
+                MethodDeclaration(
+                    List<AttributeListSyntax>(),
+                    TokenList(
+                        Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                        Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                    context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
+                    null,
+                    Identifier( initializerName ),
+                    null,
+                    ParameterList(),
+                    List<TypeParameterConstraintClauseSyntax>(),
+                    initializerBlock,
+                    null );
+
+            return true;
+        }
+        else
+        {
+            initializerMethodSyntax = null;
+            initializerExpressionSyntax = null;
+
+            return true;
         }
     }
 }

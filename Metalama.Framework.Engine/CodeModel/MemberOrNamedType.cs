@@ -4,13 +4,16 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class MemberOrNamedType : Declaration, IMemberOrNamedType
+    internal abstract class MemberOrNamedType : Declaration, IMemberOrNamedTypeImpl
     {
         public bool IsSealed => this.Symbol.IsSealed;
 
@@ -20,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this.OnUsingDeclaration();
 
-                // TODO: This is quite expensive (looks at all member collections in all ancestor types) and would likely need an optimization structure in NamedType.
+                // TODO: This is quite expensive (looks at all member collections with the same name in all ancestor types) and would likely need an optimization structure in NamedType to prevent too many allocations.
                 return this.TryGetHiddenDeclaration( out _ );
             }
         }
@@ -122,6 +125,42 @@ namespace Metalama.Framework.Engine.CodeModel
                 else
                 {
                     return null;
+                }
+            }
+        }
+
+        public bool? HasNewKeyword
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
+
+                if ( syntaxReference == null )
+                {
+                    // There is no information available (declaration has no source).
+                    return null;
+                }
+
+                var syntaxNode = syntaxReference.GetSyntax();
+
+                switch ( syntaxNode )
+                {
+                    case MemberDeclarationSyntax memberDeclaration:
+                        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax eventFieldDeclaration }:
+                        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                    case VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax fieldDeclaration }:
+                        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
+                    case LocalFunctionStatementSyntax:
+                        return false;
+                    case ParameterSyntax: // Record positional properties.
+                        return false;
+                    case CompilationUnitSyntax: // Program class generated from global statements and its members.
+                        return false;
+                    default:
+                        throw new AssertionFailedException( $"Unexpected declaration node kind {syntaxNode.Kind()} at '{syntaxNode.GetLocation()}'." );
                 }
             }
         }

@@ -80,6 +80,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public bool IsNew => this.DeclaringMember.IsNew;
 
+    public bool? HasNewKeyword => this.DeclaringMember != null ? false : null;
+
     public bool IsAsync => false;
 
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;

@@ -24,7 +24,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
+internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal, INamedTypeImpl
 {
     private readonly NamedType _facade;
 

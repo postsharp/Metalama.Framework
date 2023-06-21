@@ -7,94 +7,106 @@ using System;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberOrNamedTypeImpl
 {
-    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder
+    private Accessibility _accessibility;
+    private string _name;
+    private bool _isSealed;
+    private bool _isNew;
+    private bool _usesNewKeyword;
+    private bool _isAbstract;
+    private bool _isStatic;
+
+    public bool IsSealed
     {
-        private Accessibility _accessibility;
-        private string _name;
-        private bool _isSealed;
-        private bool _isNew;
-        private bool _isAbstract;
-        private bool _isStatic;
-
-        public bool IsSealed
+        get => this._isSealed;
+        set
         {
-            get => this._isSealed;
-            set
-            {
-                this.CheckNotFrozen();
-                this._isSealed = value;
-            }
+            this.CheckNotFrozen();
+            this._isSealed = value;
         }
+    }
 
-        public bool IsNew
+    public bool IsNew
+    {
+        get => this._isNew;
+        set
         {
-            get => this._isNew;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isNew = value;
-            }
+            this._isNew = value;
         }
+    }
 
-        public INamedType DeclaringType { get; }
-
-        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
-
-        public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
-
-        public Accessibility Accessibility
+    public bool? HasNewKeyword
+    {
+        get => this._usesNewKeyword;
+        set
         {
-            get => this._accessibility;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._accessibility = value;
-            }
+            this._usesNewKeyword = value.AssertNotNull();
         }
+    }
 
-        public virtual string Name
+    public INamedType DeclaringType { get; }
+
+    public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+
+    public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
+
+    public Accessibility Accessibility
+    {
+        get => this._accessibility;
+        set
         {
-            get => this._name;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._name = value;
-            }
+            this._accessibility = value;
         }
+    }
 
-        public bool IsAbstract
+    public virtual string Name
+    {
+        get => this._name;
+        set
         {
-            get => this._isAbstract;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isAbstract = value;
-            }
+            this._name = value;
         }
+    }
 
-        public bool IsStatic
+    public bool IsAbstract
+    {
+        get => this._isAbstract;
+        set
         {
-            get => this._isStatic;
-            set
-            {
-                this.CheckNotFrozen();
+            this.CheckNotFrozen();
 
-                this._isStatic = value;
-            }
+            this._isAbstract = value;
         }
+    }
 
-        public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
-
-        protected MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
+    public bool IsStatic
+    {
+        get => this._isStatic;
+        set
         {
-            this.DeclaringType = declaringType;
-            this._name = name;
+            this.CheckNotFrozen();
+
+            this._isStatic = value;
         }
+    }
+
+    public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
+
+    protected MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
+    {
+        this.DeclaringType = declaringType;
+        this._name = name;
+        this._usesNewKeyword = false;
     }
 }
