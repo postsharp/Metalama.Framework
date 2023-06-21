@@ -33,8 +33,24 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
+        private CompileTimeType( ISdkRef<IType> targetRef, CompileTimeTypeMetadata metadata )
+        {
+            this.Namespace = metadata.Namespace;
+            this.Name = metadata.Name;
+            this.FullName = metadata.FullName;
+            this._toStringName = metadata.ToStringName;
+
+            this.Target = targetRef;
+        }
+
         internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata )
             => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata );
+
+        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, ITypeSymbol symbolForMetadata )
+            => new( Ref.FromTypeId<IType>( typeId ), symbolForMetadata );
+
+        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, CompileTimeTypeMetadata metadata )
+            => new( Ref.FromTypeId<IType>( typeId ), metadata );
 
         // For test only.
         internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().CompilationContext );
