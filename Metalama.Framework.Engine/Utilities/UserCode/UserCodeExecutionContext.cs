@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             if ( Current._compilationServices == null )
             {
-                throw new InvalidOperationException( "Using typeof for run-time types is not possible here." );
+                throw new InvalidOperationException( "Cannot use typeof for run-time types in the current execution context." );
             }
 
             return Current._compilationServices.CompileTimeTypeFactory
