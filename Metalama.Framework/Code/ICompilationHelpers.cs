@@ -16,6 +16,8 @@ namespace Metalama.Framework.Code
 
         SerializableTypeId GetSerializableId( IType type );
 
+        IExpression ToTypeOfExpression( IType type );
+
         bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default );
     }
 }
