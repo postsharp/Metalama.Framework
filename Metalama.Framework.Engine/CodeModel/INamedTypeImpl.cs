@@ -4,6 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface INamedTypeImpl : INamedType, IMemberOrNamedTypeImpl
-{
-}
+internal interface INamedTypeImpl : INamedType, IMemberOrNamedTypeImpl { }

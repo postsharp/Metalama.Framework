@@ -93,7 +93,7 @@ class D : C
             var derivedEvent = compilation.Types.OfName( "D" ).Single().Events.Single();
 
             Assert.False( baseEvent.IsNew );
-            Assert.False( ((IEventImpl)baseEvent).HasNewKeyword );
+            Assert.False( ((IEventImpl) baseEvent).HasNewKeyword );
             Assert.True( derivedEvent.IsNew );
             Assert.True( ((IEventImpl) derivedEvent).HasNewKeyword );
 
@@ -124,7 +124,7 @@ class D : C
             var derivedIndexer = compilation.Types.OfName( "D" ).Single().Indexers.Single();
 
             Assert.False( baseIndexer.IsNew );
-            Assert.False( ((IIndexerImpl)baseIndexer).HasNewKeyword );
+            Assert.False( ((IIndexerImpl) baseIndexer).HasNewKeyword );
             Assert.True( derivedIndexer.IsNew );
             Assert.True( ((IIndexerImpl) derivedIndexer).HasNewKeyword );
 
@@ -155,9 +155,9 @@ class D : C
             var derivedMethod = compilation.Types.OfName( "D" ).Single().Methods.Single();
 
             Assert.False( baseMethod.IsNew );
-            Assert.False( ((IMethodImpl)baseMethod).HasNewKeyword);
+            Assert.False( ((IMethodImpl) baseMethod).HasNewKeyword );
             Assert.True( derivedMethod.IsNew );
-            Assert.True( ((IMethodImpl)derivedMethod).HasNewKeyword);
+            Assert.True( ((IMethodImpl) derivedMethod).HasNewKeyword );
 
             Assert.True( derivedMethod.TryGetHiddenDeclaration( out var hiddenMethod ) );
 
