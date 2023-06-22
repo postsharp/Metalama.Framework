@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
 
-        public IExpression ToTypeOf( IType type ) => new TypeOfUserExpression( type );
+        public IExpression ToTypeOfExpression( IType type ) => new TypeOfUserExpression( type );
 
         public bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
         {

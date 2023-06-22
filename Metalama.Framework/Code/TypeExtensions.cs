@@ -88,6 +88,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an <see cref="IExpression"/> representing 'typeof' expression for the given type.
         /// </summary>
-        public static IExpression ToTypeOf( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.ToTypeOf( type );
+        public static IExpression ToTypeOfExpression( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.ToTypeOfExpression( type );
     }
 }
