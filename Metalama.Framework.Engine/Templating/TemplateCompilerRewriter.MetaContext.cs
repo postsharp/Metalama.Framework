@@ -146,6 +146,12 @@ namespace Metalama.Framework.Engine.Templating
                     return value;
                 }
             }
+
+            public SyntaxToken GetTemplateVariableName( string hint )
+            {
+                var name = this._templateUniqueNames.GetUniqueIdentifier( hint + "Name" );
+                return SyntaxFactory.Identifier( name );
+            }
         }
     }
 }
