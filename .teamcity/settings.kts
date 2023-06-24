@@ -6,7 +6,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.Swabra
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.swabra
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.perfmon
+import jetbrains.buildServer.configs.kotlin.v2019_2.failureConditions.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.*
 
@@ -18,7 +18,8 @@ project {
    buildType(PublicBuild)
    buildType(PublicDeployment)
    buildType(VersionBump)
-   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump)
+   buildType(DownstreamMerge)
+   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump,DownstreamMerge)
 }
 
 object DebugBuild : BuildType({
@@ -27,6 +28,11 @@ object DebugBuild : BuildType({
 
     artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:artifacts/testResults/**/*=>artifacts/testResults\n+:artifacts/logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/AssemblyLocator/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTime/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTimeTroubleshooting/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -47,7 +53,20 @@ object DebugBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
+            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -60,10 +79,6 @@ object DebugBuild : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
-
-        // Temporarily collect performance metrics.
-        perfmon {
-          }
     }
 
     triggers {
@@ -115,6 +130,11 @@ object PublicBuild : BuildType({
 
     artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:artifacts/testResults/**/*=>artifacts/testResults\n+:artifacts/logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/AssemblyLocator/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTime/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTimeTroubleshooting/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Logs/**/*=>logs"
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -135,7 +155,20 @@ object PublicBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
+            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -188,6 +221,11 @@ object PublicDeployment : BuildType({
 
     type = Type.DEPLOYMENT
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -199,7 +237,20 @@ object PublicDeployment : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "publish --configuration Public")
+            param("jetbrains_powershell_scriptArguments", "publish --configuration Public %BuildArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -271,8 +322,11 @@ object VersionBump : BuildType({
 
     name = "Version Bump"
 
-    type = Type.DEPLOYMENT
-
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -284,7 +338,20 @@ object VersionBump : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "bump")
+            param("jetbrains_powershell_scriptArguments", "bump %BuildArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -298,6 +365,79 @@ object VersionBump : BuildType({
             verbose = true
         }
     }
+
+})
+
+object DownstreamMerge : BuildType({
+
+    name = "Downstream Merge"
+
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    steps {
+        powerShell {
+            name = "Downstream Merge"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools git merge-downstream %BuildArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
+        }
+    }
+
+    requirements {
+        equals("env.BuildAgentType", "caravela04")
+    }
+
+    features {
+        swabra {
+            lockingProcesses = Swabra.LockingProcessPolicy.KILL
+            verbose = true
+        }
+    }
+
+    triggers {
+
+        vcs {
+            watchChangesInDependencies = true
+            branchFilter = "+:<default>"
+            // Build will not trigger automatically if the commit message contains comment value.
+            triggerRules = "-:comment=<<VERSION_BUMP>>|<<DEPENDENCIES_UPDATED>>:**"
+        }        
+
+    }
+
+    dependencies {
+
+        dependency(DebugBuild) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+
+        }
+
+     }
 
 })
 
