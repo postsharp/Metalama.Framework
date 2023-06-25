@@ -12,7 +12,7 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.18</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.22</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion></MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- This is the minimal version of the Roslyn AI we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->

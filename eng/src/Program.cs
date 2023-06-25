@@ -53,7 +53,7 @@ var product = new Product( MetalamaDependencies.Metalama )
     Configurations = Product.DefaultConfigurations
         .WithValue( 
             BuildConfiguration.Debug,
-            Product.DefaultConfigurations.Debug with
+            c => c with
             {
                 AdditionalArtifactRules = new[]
                 {
