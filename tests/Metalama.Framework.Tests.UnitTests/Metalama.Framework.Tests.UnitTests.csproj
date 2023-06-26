@@ -21,7 +21,6 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="Metalama.Backstage.Testing" Version="$(MetalamaBackstageVersion)" />
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableMaxVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
         <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
