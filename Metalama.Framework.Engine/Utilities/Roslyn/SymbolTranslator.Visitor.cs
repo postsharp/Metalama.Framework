@@ -61,7 +61,7 @@ internal sealed partial class SymbolTranslator
             }
 
             var candidates = namedType.GetMembers( symbol.Name )
-                .Where( m => m.Kind == symbol.Kind && StructuralSymbolComparer.Signature.Equals( m, symbol ) )
+                .Where( m => m.Kind == symbol.Kind && StructuralSymbolComparer.ContainingDeclarationOblivious.Equals( m, symbol ) )
                 .ToList();
 
             if ( candidates.Count == 1 )
