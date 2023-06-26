@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -97,7 +98,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
-                if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
+                if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
                     return TemplateMemberFactory.Create(
                         fieldTemplate.Declaration,
@@ -125,7 +126,7 @@ namespace Metalama.Framework.Engine.Advising
                 // Initializer template is compiled into a template for event.
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
-                if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
+                if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
                     return TemplateMemberFactory.Create(
                         eventFieldTemplate.Declaration,
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Engine.Advising
                 // Initializer template is compiled into a template for property.
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
-                if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
+                if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
                     return TemplateMemberFactory.Create(
                         propertyTemplate.Declaration,

@@ -225,7 +225,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
 
                 var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
-                var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
+                var compiledTemplateMethod = compiledAspectType.GetAnyMethod( compiledTemplateMethodName );
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( serviceProvider, compiledTemplateMethod );

@@ -1269,7 +1269,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 isVoid );
         }
 
-        var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ) );
+        var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ) );
 
         this.Unindent( 3 );
 
@@ -1377,12 +1377,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null )
+    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null, IEnumerable<SyntaxToken>? accessibilityModifiers = null )
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
             .WithParameterList( parameters ?? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) ) )
-            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ) )
+            .WithModifiers( TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } ) )
             .NormalizeWhitespace()
             .WithBody( body )
             .WithLeadingTrivia( node.GetLeadingTrivia() )

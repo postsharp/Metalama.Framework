@@ -239,15 +239,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-#pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
         /// Gets a properly-escaped assembly-qualified type name from its components.
         /// </summary>
         /// <param name="typeName">The type name.</param>
         /// <param name="assemblyName">The assembly name.</param>
-        /// <returns>A string of the form <code>TypeName, AssemblyName</code>, where commas in <paramref name="typeName"/> have been properly escaped.</returns>
+        /// <returns>A string of the form <c>TypeName, AssemblyName</c>, where commas in <paramref name="typeName"/> have been properly escaped.</returns>
         public static string GetAssemblyQualifiedTypeName( string typeName, string assemblyName )
-#pragma warning restore SA1629 // Documentation text should end with a period
         {
             if ( typeName == null )
             {
@@ -260,6 +258,15 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
 
             return typeName.ReplaceOrdinal( ",", "\\," ) + ", " + assemblyName;
+        }
+
+        /// <summary>
+        /// Returns any method (static, instance, any accessibility) from the given type or its base types.
+        /// </summary>
+        public static MethodInfo? GetAnyMethod( this Type type, string name )
+        {
+            return type.GetMethod( name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
+                ?? type.BaseType?.GetAnyMethod( name );
         }
     }
 }
