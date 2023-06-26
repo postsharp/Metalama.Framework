@@ -21,9 +21,17 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         /// </summary>
         private AttributeCollection() { }
 
-        public IEnumerable<IAttribute> OfAttributeType( INamedType type ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type ) );
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( INamedType type ) => this.OfAttributeType( type );
 
-        public IEnumerable<IAttribute> OfAttributeType( Type type )
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( INamedType type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
+
+        public IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type, conversionKind ) );
+
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
+
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
+
+        public IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             if ( this.ContainingDeclaration == null )
             {
@@ -31,12 +39,20 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 return Enumerable.Empty<IAttribute>();
             }
 
-            return this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
+            return this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ), conversionKind );
         }
 
-        public bool Any( INamedType type ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type ) );
+        bool IAttributeCollection.Any( INamedType type ) => this.Any( type );
 
-        public bool Any( Type type )
+        bool IAttributeCollection.Any( INamedType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
+
+        public bool Any( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type, conversionKind ) );
+
+        bool IAttributeCollection.Any( Type type ) => this.Any( type );
+
+        bool IAttributeCollection.Any( Type type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
+
+        public bool Any( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             if ( this.ContainingDeclaration == null )
             {
@@ -44,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 return false;
             }
 
-            return this.Any( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
+            return this.Any( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ), conversionKind );
         }
     }
 }

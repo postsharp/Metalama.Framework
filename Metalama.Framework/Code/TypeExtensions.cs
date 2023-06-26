@@ -37,8 +37,9 @@ namespace Metalama.Framework.Code
         public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
             => kind switch
             {
-                ConversionKind.Implicit => left.SpecialType == right,
-                ConversionKind.ImplicitReference => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
+                ConversionKind.IgnoreTypeArguments => false,
+                ConversionKind.Default => left.SpecialType == right,
+                ConversionKind.DenyBoxing => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
                 _ => throw new ArgumentOutOfRangeException( nameof(kind) )
             };
 

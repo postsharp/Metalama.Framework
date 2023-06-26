@@ -173,7 +173,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
             else if ( !compilation.Comparers.Default.Is(
                          this.Builder.ReturnType,
                          existingMethod.ReturnType,
-                         ConversionKind.ImplicitReference ) )
+                         ConversionKind.DenyBoxing ) )
             {
                 return
                     AdviceImplementationResult.Failed(

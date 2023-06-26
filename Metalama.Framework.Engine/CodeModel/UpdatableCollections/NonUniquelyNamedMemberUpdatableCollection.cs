@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUniquelyNamedUpdatableCollection<T>
     where T : class, IMemberOrNamedType
 {
-    protected override IEnumerable<ISymbol> GetSymbols( string name )
+    protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
         => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
     protected override IEnumerable<ISymbol> GetSymbols()

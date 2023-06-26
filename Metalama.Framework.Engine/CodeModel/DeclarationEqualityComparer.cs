@@ -7,6 +7,8 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Linq;
+using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -45,9 +47,29 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
     public bool DerivesFrom( INamedType childType, INamedType baseType, DerivedTypesOptions options = DerivedTypesOptions.Default ) => throw new NotImplementedException();
 
-    private bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
+    internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {
+        // TODO: Does not take introduced interfaces into account (requires a lot of changes).
+
         left.ThrowIfBelongsToDifferentCompilationThan( right );
+
+        if ( kind == ConversionKind.IgnoreTypeArguments )
+        {
+            // Cannot use Roslyn for this kind of conversion.
+
+            if ( right is not INamedTypeSymbol { IsUnboundGenericType: true } rightNamedType )
+            {
+                throw new ArgumentException( "ConversionKind.IgnoreTypeArguments can only be used with unbound generic type on the right side." );
+            }
+
+            switch (left)
+            {
+                case INamedTypeSymbol { IsGenericType: true } leftNamedType:
+                    return IsOfTypeDefinition( leftNamedType, rightNamedType );
+                default:
+                    return false;
+            }
+        }
 
         if ( left == right )
         {
@@ -58,14 +80,51 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
         switch ( kind )
         {
-            case ConversionKind.Implicit:
+            case ConversionKind.Default:
                 return conversion.IsImplicit;
 
-            case ConversionKind.ImplicitReference:
+            case ConversionKind.DenyBoxing:
                 return conversion is { IsImplicit: true, IsBoxing: false } and { IsUserDefined: false, IsDynamic: false };
 
             default:
-                throw new ArgumentOutOfRangeException( nameof(kind) );
+                throw new ArgumentOutOfRangeException( nameof( kind ) );
         }
+
+    }
+
+    private static bool IsOfTypeDefinition( INamedTypeSymbol type, INamedTypeSymbol typeDefinition )
+    {
+        // TODO: This can be optimized (e.g. when searching for interface definition, classes don't have to be checked for symbol equality).
+
+        // Evaluate the current type.
+        if ( type.IsGenericType )
+        {
+            if ( type.IsUnboundGenericType )
+            {
+                if ( SymbolEqualityComparer.Default.Equals( type, typeDefinition ) )
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if ( SymbolEqualityComparer.Default.Equals( type.OriginalDefinition, typeDefinition ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        if ( typeDefinition is { TypeKind: RoslynTypeKind.Interface } )
+        {
+            // When searching for an interface, we should consider interfaces defined by the evaluated type.
+            if ( type.Interfaces.Any( i => IsOfTypeDefinition( i, typeDefinition ) ) )
+            {
+                // The type implements interface that has the same definition.
+                return true;
+            }
+        }
+
+        return type.BaseType != null && IsOfTypeDefinition( type.BaseType, typeDefinition );
     }
 }

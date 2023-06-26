@@ -11,7 +11,10 @@ namespace Metalama.Framework.Code.Collections
     /// <remarks>
     ///  <para>The order of items in this list is undetermined and may change between versions.</para>
     /// </remarks>
-    public interface INamedTypeCollection : IMemberOrNamedTypeCollection<INamedType> { }
+    public interface INamedTypeCollection : IMemberOrNamedTypeCollection<INamedType>
+    {
+        IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition );
+    }
 
     [CompileTime]
     public interface IAssemblyCollection : IReadOnlyCollection<IAssembly>
