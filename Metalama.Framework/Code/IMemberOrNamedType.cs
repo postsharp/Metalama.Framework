@@ -30,7 +30,7 @@ namespace Metalama.Framework.Code
         bool IsSealed { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the member hides another member defined in base types. When <c>true</c>, this is equivalent to <c>new</c> keyword being expected in the source code.
+        /// Gets a value indicating whether the member hides another member defined in base types. When <c>true</c>, this is equivalent to <c>new</c> keyword being <i>expected</i> in the source code although this property will return <c>true</c> even when the <c>new</c> keyword is not present but expected.
         /// </summary>
         bool IsNew { get; }
 
