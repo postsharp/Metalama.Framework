@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Project>
 
     <!-- Set the default version -->
@@ -13,7 +13,7 @@
     <!-- Versions of dependencies -->
     <PropertyGroup>
         <PostSharpEngineeringVersion>2023.2.24</PostSharpEngineeringVersion>
-        <MetalamaCompilerVersion></MetalamaCompilerVersion>
+        <MetalamaCompilerVersion>2023.2.1-preview</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- This is the minimal version of the Roslyn AI we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
         <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
