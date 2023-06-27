@@ -17,25 +17,25 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( declaration )
             {
-                case IMethod accessor when accessor.IsAccessor():
+                case IMethodImpl accessor when accessor.IsAccessor():
                     return GetAccessorSyntaxModifierList( accessor, categories );
 
-                case IMethod method:
+                case IMethodImpl method:
                     return GetMemberSyntaxModifierList( method, categories );
 
-                case IProperty property:
+                case IPropertyImpl property:
                     return GetMemberSyntaxModifierList( property, categories );
 
-                case IIndexer indexer:
+                case IIndexerImpl indexer:
                     return GetMemberSyntaxModifierList( indexer, categories );
 
-                case IEvent @event:
+                case IEventImpl @event:
                     return GetMemberSyntaxModifierList( @event, categories );
 
-                case IParameter parameter:
+                case IParameterImpl parameter:
                     return GetParameterSyntaxModifierList( parameter );
 
-                case IField field:
+                case IFieldImpl field:
                     return GetMemberSyntaxModifierList( field, categories );
 
                 default:
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return TokenList( tokens );
         }
 
-        private static SyntaxTokenList GetMemberSyntaxModifierList( IMember member, ModifierCategories categories )
+        private static SyntaxTokenList GetMemberSyntaxModifierList( IMemberImpl member, ModifierCategories categories )
         {
             // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
             var tokens = new List<SyntaxToken>();
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
-                if ( member.IsNew )
+                if ( member.HasNewKeyword == true )
                 {
                     AddToken( SyntaxKind.NewKeyword );
                 }

@@ -17,103 +17,102 @@ using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 {
-    internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+    private IType _type;
+    private Writeability _writeability;
+
+    public IObjectReader InitializerTags { get; }
+
+    public override DeclarationKind DeclarationKind => DeclarationKind.Field;
+
+    public IType Type
     {
-        private IType _type;
-        private Writeability _writeability;
-
-        public IObjectReader InitializerTags { get; }
-
-        public override DeclarationKind DeclarationKind => DeclarationKind.Field;
-
-        public IType Type
-        {
-            get => this._type;
-            set => this._type = this.Translate( value );
-        }
-
-        public RefKind RefKind
-        {
-            get => RefKind.None;
-            set
-            {
-                if ( value != RefKind.None )
-                {
-                    throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property is not supported." );
-                }
-            }
-        }
-
-        [Memo]
-        public IMethod GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
-
-        [Memo]
-        public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
-
-        public override bool IsExplicitInterfaceImplementation => false;
-
-        public override IMember? OverriddenMember => null;
-
-        public override IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
-
-        public Writeability Writeability
-        {
-            get => this._writeability;
-            set
-            {
-                if ( value == Writeability.InitOnly )
-                {
-                    throw new InvalidOperationException( $"Writeability for fields can only be set to {Writeability.All} (no modifier), {Writeability.ConstructorOnly} (readonly) or {Writeability.None} (const)." );
-                }
-
-                this._writeability = value;
-            }
-        }
-
-        public bool? IsAutoPropertyOrField => true;
-
-        public IExpression? InitializerExpression { get; set; }
-
-        public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
-
-        public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
-
-        public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
-
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
-
-        public TemplateMember<IField>? InitializerTemplate { get; set; }
-
-        public FieldBuilder( Advice advice, INamedType targetType, string name, IObjectReader initializerTags )
-            : base( targetType, name, advice )
-        {
-            this.InitializerTags = initializerTags;
-            this._type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
-        }
-
-        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
-
-        public IEnumerable<IMethod> Accessors
-        {
-            get
-            {
-                yield return this.GetMethod;
-                yield return this.SetMethod;
-            }
-        }
-
-        public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
-
-        // TODO: If we support introducing const fields, implement ConstantValue.
-        public TypedConstant? ConstantValue => null;
-
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
-
-        public bool IsRequired { get; set; }
-
-        bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+        get => this._type;
+        set => this._type = this.Translate( value );
     }
+
+    public RefKind RefKind
+    {
+        get => RefKind.None;
+        set
+        {
+            if ( value != RefKind.None )
+            {
+                throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property is not supported." );
+            }
+        }
+    }
+
+    [Memo]
+    public IMethod GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+
+    [Memo]
+    public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
+
+    public override bool IsExplicitInterfaceImplementation => false;
+
+    public override IMember? OverriddenMember => null;
+
+    public override IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
+
+    public Writeability Writeability
+    {
+        get => this._writeability;
+        set
+        {
+            if ( value == Writeability.InitOnly )
+            {
+                throw new InvalidOperationException( $"Writeability for fields can only be set to {Writeability.All} (no modifier), {Writeability.ConstructorOnly} (readonly) or {Writeability.None} (const)." );
+            }
+
+            this._writeability = value;
+        }
+    }
+
+    public bool? IsAutoPropertyOrField => true;
+
+    public IExpression? InitializerExpression { get; set; }
+
+    public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
+
+    public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
+
+    public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
+
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
+
+    public TemplateMember<IField>? InitializerTemplate { get; set; }
+
+    public FieldBuilder( Advice advice, INamedType targetType, string name, IObjectReader initializerTags )
+        : base( targetType, name, advice )
+    {
+        this.InitializerTags = initializerTags;
+        this._type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
+    }
+
+    public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+
+    public IEnumerable<IMethod> Accessors
+    {
+        get
+        {
+            yield return this.GetMethod;
+            yield return this.SetMethod;
+        }
+    }
+
+    public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
+
+    // TODO: If we support introducing const fields, implement ConstantValue.
+    public TypedConstant? ConstantValue => null;
+
+    public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
+    public bool IsRequired { get; set; }
+
+    bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 }

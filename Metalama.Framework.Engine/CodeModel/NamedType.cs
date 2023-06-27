@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// This class exists because it needs to add a dependency context check before each member access, which makes
     /// it hard to use [Memo].
     /// </summary>
-    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeImpl
     {
         public NamedTypeImpl Implementation { get; }
 
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
-        public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
         {
@@ -465,7 +465,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.IsImplementationOfInterfaceMember( typeMember, interfaceMember );
         }
 
-        internal ITypeInternal WithTypeArguments( ImmutableArray<IType> types )
+        internal ITypeImpl WithTypeArguments( ImmutableArray<IType> types )
         {
             var hasDifference = false;
 
@@ -493,7 +493,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );
 
-            return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+            return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
         }
 
         public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;

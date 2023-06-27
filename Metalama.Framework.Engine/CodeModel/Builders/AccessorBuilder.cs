@@ -209,6 +209,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public bool IsNew => this.ContainingMember.IsNew;
 
+    public bool? HasNewKeyword => false;
+
     public bool IsAsync => false;
 
     public INamedType DeclaringType => this.ContainingMember.DeclaringType;

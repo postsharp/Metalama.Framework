@@ -926,7 +926,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // Process the statement "<local_or_discard> = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                     var invocationExpression = InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.DynamicLocalAssignment ) ) )
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
                         .AddArgumentListArguments(
                             Argument( this.Transform( identifier ) ),
                             Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
@@ -940,7 +940,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // Process the statement "<local_or_discard> = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                     var invocationExpression = InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.DynamicLocalAssignment ) ) )
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
                         .AddArgumentListArguments(
                             Argument( this.Transform( identifier ) ),
                             Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),

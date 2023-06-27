@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
                         else
                         {
-                            this.Builder.IsNew = true;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                             this.Builder.IsOverride = false;
 
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Advising
                         else
                         {
                             this.Builder.IsOverride = true;
-                            this.Builder.IsNew = false;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingOperator;
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 

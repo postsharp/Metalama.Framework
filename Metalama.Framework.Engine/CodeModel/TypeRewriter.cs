@@ -13,20 +13,20 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         protected static TypeRewriter Null { get; } = new NullRewriter();
 
-        internal virtual ITypeInternal Visit( ArrayType arrayType ) => arrayType.WithElementType( this.Visit( arrayType.ElementType ) );
+        internal virtual ITypeImpl Visit( ArrayType arrayType ) => arrayType.WithElementType( this.Visit( arrayType.ElementType ) );
 
-        public virtual ITypeInternal Visit( IType elementType ) => ((ITypeInternal) elementType).Accept( this );
+        public virtual ITypeImpl Visit( IType elementType ) => ((ITypeImpl) elementType).Accept( this );
 
-        internal virtual ITypeInternal Visit( DynamicType dynamicType ) => dynamicType;
+        internal virtual ITypeImpl Visit( DynamicType dynamicType ) => dynamicType;
 
-        internal virtual ITypeInternal Visit( PointerType pointerType ) => pointerType.WithPointedAtType( this.Visit( pointerType.PointedAtType ) );
+        internal virtual ITypeImpl Visit( PointerType pointerType ) => pointerType.WithPointedAtType( this.Visit( pointerType.PointedAtType ) );
 
-        internal virtual ITypeInternal Visit( FunctionPointerType functionPointerType )
+        internal virtual ITypeImpl Visit( FunctionPointerType functionPointerType )
         {
             throw new NotImplementedException( "Function pointers are not fully supported." );
         }
 
-        internal virtual ITypeInternal Visit( NamedType namedType )
+        internal virtual ITypeImpl Visit( NamedType namedType )
         {
             if ( namedType.TypeArguments.Count == 0 )
             {
@@ -45,23 +45,23 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal virtual ITypeInternal Visit( TypeParameter typeParameter ) => typeParameter;
+        internal virtual ITypeImpl Visit( TypeParameter typeParameter ) => typeParameter;
 
         private sealed class NullRewriter : TypeRewriter
         {
-            public override ITypeInternal Visit( IType elementType ) => (ITypeInternal) elementType;
+            public override ITypeImpl Visit( IType elementType ) => (ITypeImpl) elementType;
 
-            internal override ITypeInternal Visit( ArrayType arrayType ) => arrayType;
+            internal override ITypeImpl Visit( ArrayType arrayType ) => arrayType;
 
-            internal override ITypeInternal Visit( DynamicType dynamicType ) => dynamicType;
+            internal override ITypeImpl Visit( DynamicType dynamicType ) => dynamicType;
 
-            internal override ITypeInternal Visit( PointerType pointerType ) => pointerType;
+            internal override ITypeImpl Visit( PointerType pointerType ) => pointerType;
 
-            internal override ITypeInternal Visit( NamedType namedType ) => namedType;
+            internal override ITypeImpl Visit( NamedType namedType ) => namedType;
 
-            internal override ITypeInternal Visit( TypeParameter typeParameter ) => typeParameter;
+            internal override ITypeImpl Visit( TypeParameter typeParameter ) => typeParameter;
 
-            internal override ITypeInternal Visit( FunctionPointerType functionPointerType ) => functionPointerType;
+            internal override ITypeImpl Visit( FunctionPointerType functionPointerType ) => functionPointerType;
         }
     }
 }

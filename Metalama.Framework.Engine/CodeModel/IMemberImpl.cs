@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface IMemberImpl : IDeclarationImpl, IMember
+internal interface IMemberImpl : IMemberOrNamedTypeImpl, IMember
 {
     IMember? OverriddenMember { get; }
 }

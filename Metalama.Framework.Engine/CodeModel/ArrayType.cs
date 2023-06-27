@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
-        internal ITypeInternal WithElementType( ITypeInternal elementType )
+        internal ITypeImpl WithElementType( ITypeImpl elementType )
         {
             if ( elementType == this.ElementType )
             {
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var symbol = this.GetCompilationModel().RoslynCompilation.CreateArrayTypeSymbol( elementType.GetSymbol(), this.Rank );
 
-                return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
             }
         }
 
@@ -33,6 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Rank => this.Symbol.Rank;
 
-        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

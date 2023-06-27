@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
                         else
                         {
-                            this.Builder.IsNew = true;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                             addTransformation( this.Builder.ToTransformation() );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );

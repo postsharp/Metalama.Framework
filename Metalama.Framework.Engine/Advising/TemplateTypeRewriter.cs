@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Advising
                 ? Null
                 : new TemplateTypeRewriter( template );
 
-        internal override ITypeInternal Visit( TypeParameter typeParameter )
+        internal override ITypeImpl Visit( TypeParameter typeParameter )
         {
             if ( this._template.TemplateMember.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
                  && templateParameter.IsCompileTime )
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advising
                 var index = templateParameter.TemplateIndex!.Value - this._template.TemplateMember.TemplateClassMember.Parameters.Length;
                 var value = (TemplateTypeArgument) this._template.TypeArguments[index]!;
 
-                return (ITypeInternal) value.Type;
+                return (ITypeImpl) value.Type;
             }
             else
             {

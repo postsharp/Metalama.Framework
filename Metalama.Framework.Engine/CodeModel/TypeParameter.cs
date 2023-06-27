@@ -15,7 +15,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeInternal
+    internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeImpl
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 
-        public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
     }

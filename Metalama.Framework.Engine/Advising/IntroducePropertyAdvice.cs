@@ -301,7 +301,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     }
                     else
                     {
-                        this.Builder.IsNew = true;
+                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                         this.Builder.OverriddenProperty = existingProperty;
 
                         var overriddenProperty = new OverridePropertyTransformation(

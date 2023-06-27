@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             foreach ( var derivedType in self.Compilation.GetDerivedTypes( self.DeclaringType, options ) )
             {
-                foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( self ) )
+                foreach ( var member in ((INamedTypeImpl) derivedType).GetOverridingMembers( self ) )
                 {
                     yield return member;
                 }

@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
                         else
                         {
-                            this.Builder.IsNew = true;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                             this.Builder.OverriddenIndexer = existingIndexer;
 
                             var overrideIndexerTransformation = new OverrideIndexerTransformation(
@@ -285,7 +285,7 @@ namespace Metalama.Framework.Engine.Advising
                         else
                         {
                             this.Builder.IsOverride = true;
-                            this.Builder.IsNew = false;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                             this.Builder.OverriddenIndexer = existingIndexer;
 
                             var overriddenIndexer = new OverrideIndexerTransformation(
