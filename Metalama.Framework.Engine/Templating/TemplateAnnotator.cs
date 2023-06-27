@@ -1210,7 +1210,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         StatementSyntax? annotatedElseStatement;
         ScopeContext? scopeContext;
 
-        if ( conditionScope.GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        if ( conditionScope.GetExpressionValueScope( preferCompileTime: true ) is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime )
         {
             // We have an if statement where the condition is a compile-time expression. Add annotations
             // to the if and else statements but not to the blocks themselves.
