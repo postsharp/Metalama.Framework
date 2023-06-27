@@ -52,5 +52,29 @@ class D
 
             Assert.Equal( new[] { type }, types );
         }
+
+        [Fact]
+        public void GenericBase()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C<T>
+{
+}
+
+class D : C<int>
+{
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var baseType = compilation.Types.Single( t => t.Name == "C" );
+            var type = compilation.Types.Single( t => t.Name == "D" );
+
+            var types = compilation.Types.OfTypeDefinition( baseType );
+
+            Assert.Equal( new[] { type }, types );
+        }
     }
 }

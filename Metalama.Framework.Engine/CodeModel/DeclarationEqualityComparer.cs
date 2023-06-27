@@ -57,12 +57,12 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         {
             // Cannot use Roslyn for this kind of conversion.
 
-            if ( right is not INamedTypeSymbol { IsUnboundGenericType: true } rightNamedType )
+            if ( right is not INamedTypeSymbol rightNamedType || !SymbolEqualityComparer.Default.Equals( rightNamedType, rightNamedType.ConstructedFrom ) )
             {
                 throw new ArgumentException( "ConversionKind.IgnoreTypeArguments can only be used with unbound generic type on the right side." );
             }
 
-            switch (left)
+            switch ( left )
             {
                 case INamedTypeSymbol { IsGenericType: true } leftNamedType:
                     return IsOfTypeDefinition( leftNamedType, rightNamedType );
@@ -99,7 +99,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         // Evaluate the current type.
         if ( type.IsGenericType )
         {
-            if ( type.IsUnboundGenericType )
+            if ( SymbolEqualityComparer.Default.Equals(type, type.ConstructedFrom) )
             {
                 if ( SymbolEqualityComparer.Default.Equals( type, typeDefinition ) )
                 {
@@ -108,7 +108,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
             }
             else
             {
-                if ( SymbolEqualityComparer.Default.Equals( type.OriginalDefinition, typeDefinition ) )
+                if ( SymbolEqualityComparer.Default.Equals( type.ConstructedFrom, typeDefinition ) )
                 {
                     return true;
                 }

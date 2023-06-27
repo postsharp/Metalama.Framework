@@ -67,7 +67,9 @@ internal sealed class ExternalAssemblyTypeCollection : INamedTypeCollection
         => this.GetContent().Where( t => t.Name == name ).Select( x => this._compilation.Factory.GetNamedType( x ) );
 
     public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
-        => this.GetContent().Where( t => ((DeclarationEqualityComparer) this._compilation.Comparers.Default).Is( t, typeDefinition.GetSymbol().AssertNotNull(), ConversionKind.IgnoreTypeArguments ) ).Select( x => this._compilation.Factory.GetNamedType( x ) );
+        => this.GetContent()
+           .Where( t => ((DeclarationEqualityComparer) this._compilation.Comparers.Default).Is( t, typeDefinition.GetSymbol().AssertNotNull(), ConversionKind.IgnoreTypeArguments ) )
+           .Select( x => this._compilation.Factory.GetNamedType( x ) );
 
     public IEnumerator<INamedType> GetEnumerator()
     {
