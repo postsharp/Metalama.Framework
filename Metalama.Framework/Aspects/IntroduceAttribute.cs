@@ -201,13 +201,13 @@ namespace Metalama.Framework.Aspects
 
         TemplateAttributeProperties ITemplateAttribute.Properties => this._properties;
 
-        private static bool HasInheritedIntroductionAttribute(IMemberOrNamedType templateMember)
+        private static bool HasInheritedIntroductionAttribute( IMemberOrNamedType templateMember )
         {
             return GetNoAttributeCheck( templateMember );
 
             static bool Get( IMemberOrNamedType templateMember )
             {
-                if ( templateMember.Attributes.OfAttributeType(typeof(IntroduceAttribute)).Any())
+                if ( templateMember.Attributes.OfAttributeType( typeof(IntroduceAttribute) ).Any() )
                 {
                     return true;
                 }
@@ -217,7 +217,7 @@ namespace Metalama.Framework.Aspects
                 }
             }
 
-            static bool GetNoAttributeCheck(IMemberOrNamedType templateMember)
+            static bool GetNoAttributeCheck( IMemberOrNamedType templateMember )
             {
                 if ( templateMember is IMethod { OverriddenMethod: { } overriddenMethod } )
                 {

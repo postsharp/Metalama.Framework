@@ -16,11 +16,11 @@ internal partial class ResolvingCompileTimeTypeFactory
             this._substitutions = substitutions;
         }
 
-        internal override ITypeInternal Visit( TypeParameter typeParameter )
+        internal override ITypeImpl Visit( TypeParameter typeParameter )
         {
             if ( this._substitutions.TryGetValue( typeParameter.Name, out var substitution ) )
             {
-                return (ITypeInternal) substitution;
+                return (ITypeImpl) substitution;
             }
             else
             {

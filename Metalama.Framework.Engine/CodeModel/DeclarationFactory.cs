@@ -592,13 +592,13 @@ public sealed class DeclarationFactory : IDeclarationFactory
             return type;
         }
 
-        if ( type is ITypeInternal typeInternal )
+        if ( type is ITypeImpl typeInternal )
         {
             return this.GetIType( typeInternal.TypeSymbol.AssertNotNull() );
         }
 
         // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-        return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
+        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertNotNull() );
     }
 
     [return: NotNullIfNotNull( "declaration" )]

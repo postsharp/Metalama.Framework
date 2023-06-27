@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
                         else
                         {
-                            this.Builder.IsNew = true;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                             this.Builder.OverriddenEvent = existingEvent;
 
                             if ( hasNoOverrideSemantics )

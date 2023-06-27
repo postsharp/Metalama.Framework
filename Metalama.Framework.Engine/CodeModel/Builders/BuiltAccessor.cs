@@ -46,6 +46,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsNew => this._accessorBuilder.IsNew;
 
+    public bool? HasNewKeyword => false;
+
     public bool IsAsync => this._accessorBuilder.IsAsync;
 
     [Memo]

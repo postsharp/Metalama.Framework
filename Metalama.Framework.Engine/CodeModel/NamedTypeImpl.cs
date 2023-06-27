@@ -24,7 +24,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
+internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 {
     private readonly NamedType _facade;
 
@@ -351,7 +351,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         {
             if ( isInterfaceMember )
             {
-                if ( ((INamedTypeInternal) candidate.DeclaringType).IsImplementationOfInterfaceMember( candidate, member ) )
+                if ( ((INamedTypeImpl) candidate.DeclaringType).IsImplementationOfInterfaceMember( candidate, member ) )
                 {
                     overridingMembers.Add( candidate );
                 }
@@ -552,7 +552,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         return builder.ToImmutable();
     }
 
-    ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
+    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

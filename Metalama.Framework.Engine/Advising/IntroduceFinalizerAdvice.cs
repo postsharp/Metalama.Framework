@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Advising
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
                 this.Builder.IsOverride = false;
-                this.Builder.IsNew = false;
+                this.Builder.HasNewKeyword = this.Builder.IsNew = false;
 
                 addTransformation( this.Builder.ToTransformation() );
                 addTransformation( overriddenMethod );
@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.Advising
                         else
                         {
                             this.Builder.IsOverride = true;
-                            this.Builder.IsNew = false;
+                            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingFinalizer;
                             var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 

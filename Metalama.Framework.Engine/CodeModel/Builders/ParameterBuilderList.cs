@@ -8,30 +8,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders;
+
+internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
 {
-    internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
-    {
-        public static readonly ParameterBuilderList Empty = new( Array.Empty<BaseParameterBuilder>() );
+    public static readonly ParameterBuilderList Empty = new( Array.Empty<BaseParameterBuilder>() );
 
-        public ParameterBuilderList() { }
+    public ParameterBuilderList() { }
 
-        public ParameterBuilderList( IEnumerable<BaseParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }
+    public ParameterBuilderList( IEnumerable<BaseParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }
 
-        IEnumerator<IParameterBuilder> IEnumerable<IParameterBuilder>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<IParameterBuilder> IEnumerable<IParameterBuilder>.GetEnumerator() => this.GetEnumerator();
 
-        IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
 
-        IParameterBuilder IReadOnlyList<IParameterBuilder>.this[ int index ] => this[index];
+    IParameterBuilder IReadOnlyList<IParameterBuilder>.this[ int index ] => this[index];
 
-        public IParameterBuilder this[ string name ] => this.Single<IParameterBuilder>( p => p.Name == name );
+    public IParameterBuilder this[ string name ] => this.Single<IParameterBuilder>( p => p.Name == name );
 
-        public object ToValueArray() => new ValueArrayExpression( this );
+    public object ToValueArray() => new ValueArrayExpression( this );
 
-        int IReadOnlyCollection<IParameter>.Count => this.Count;
+    int IReadOnlyCollection<IParameter>.Count => this.Count;
 
-        IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
+    IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
-        IParameter IParameterList.this[ string name ] => this[name];
-    }
+    IParameter IParameterList.this[ string name ] => this[name];
 }

@@ -11,7 +11,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class RoslynType<T> : ITypeInternal
+    internal abstract class RoslynType<T> : ITypeImpl
         where T : ITypeSymbol
     {
         protected CompilationModel Compilation { get; }
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 
-        public abstract ITypeInternal Accept( TypeRewriter visitor );
+        public abstract ITypeImpl Accept( TypeRewriter visitor );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
     }
