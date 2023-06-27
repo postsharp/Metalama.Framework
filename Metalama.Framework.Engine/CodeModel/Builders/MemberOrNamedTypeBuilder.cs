@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -40,6 +41,7 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
+    [DisallowNull]
     public bool? HasNewKeyword
     {
         get => this._usesNewKeyword;

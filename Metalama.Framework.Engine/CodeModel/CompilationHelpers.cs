@@ -15,9 +15,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public AsyncInfo GetAsyncInfo( IType type ) => type.GetAsyncInfoImpl();
 
-        public string GetMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeInternal) type).TypeSymbol).GetReflectionName();
+        public string GetMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionName();
 
-        public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeInternal) type).TypeSymbol).GetReflectionFullName();
+        public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionFullName();
 
         public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
 

@@ -12,5 +12,5 @@ internal sealed class FunctionPointerType : RoslynType<IFunctionPointerTypeSymbo
 
     public override TypeKind TypeKind => TypeKind.FunctionPointer;
 
-    public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+    public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 }

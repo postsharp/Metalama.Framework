@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.IsStatic = this.Field.IsStatic;
             this.IsRequired = this.Field.IsRequired;
             this.IsNew = this.Field.IsNew;
-            this.HasNewKeyword = this.Field.HasNewKeyword;
+            this.HasNewKeyword = this.Field.HasNewKeyword.AssertNotNull();
 
             this.GetMethod.AssertNotNull().Accessibility = this.Field.Accessibility;
 

@@ -17,9 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
 
-        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        internal ITypeInternal WithPointedAtType( ITypeInternal pointedAtType )
+        internal ITypeImpl WithPointedAtType( ITypeImpl pointedAtType )
         {
             if ( pointedAtType == this.PointedAtType )
             {
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var symbol = this.GetCompilationModel().RoslynCompilation.CreatePointerTypeSymbol( pointedAtType.GetSymbol() );
 
-                return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
             }
         }
     }
