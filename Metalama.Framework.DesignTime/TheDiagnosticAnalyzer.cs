@@ -280,6 +280,7 @@ namespace Metalama.Framework.DesignTime
                             designTimeDiagnostic.DefaultSeverity,
                             isEnabledByDefault: true,
                             designTimeDiagnostic.WarningLevel,
+                            designTimeDiagnostic.Descriptor.Title,
                             location: newLocation,
                             properties: designTimeDiagnostic.Properties );
 
