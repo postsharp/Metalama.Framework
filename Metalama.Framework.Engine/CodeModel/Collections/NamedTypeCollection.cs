@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System.Collections.Generic;
-using System.Xml.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {

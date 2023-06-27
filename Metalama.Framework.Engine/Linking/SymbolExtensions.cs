@@ -78,6 +78,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Override symbol never hides anything.
                 hiddenSymbol = null;
+
                 return false;
             }
 

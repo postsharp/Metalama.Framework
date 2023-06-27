@@ -20,6 +20,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 class C
 {
     public void Foo()
+    {
+    }
 
     public void Foo(int x)
     {

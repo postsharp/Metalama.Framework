@@ -31,5 +31,6 @@ public static class TypeOfResolver
     }
 
     internal static Func<string, IReadOnlyDictionary<string, IType>?, Type>? TypeIdResolver { get; set; }
+    
     internal static Func<string, string?, string, string, string, Type>? DeclarationIdResolver { get; set; }
 }

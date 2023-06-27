@@ -64,8 +64,9 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
             switch ( left )
             {
-                case INamedTypeSymbol { IsGenericType: true } leftNamedType:
+                case INamedTypeSymbol leftNamedType:
                     return IsOfTypeDefinition( leftNamedType, rightNamedType );
+
                 default:
                     return false;
             }
@@ -87,9 +88,8 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
                 return conversion is { IsImplicit: true, IsBoxing: false } and { IsUserDefined: false, IsDynamic: false };
 
             default:
-                throw new ArgumentOutOfRangeException( nameof( kind ) );
+                throw new ArgumentOutOfRangeException( nameof(kind) );
         }
-
     }
 
     private static bool IsOfTypeDefinition( INamedTypeSymbol type, INamedTypeSymbol typeDefinition )
@@ -97,22 +97,10 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         // TODO: This can be optimized (e.g. when searching for interface definition, classes don't have to be checked for symbol equality).
 
         // Evaluate the current type.
-        if ( type.IsGenericType )
+
+        if ( SymbolEqualityComparer.Default.Equals( type.ConstructedFrom, typeDefinition ) )
         {
-            if ( SymbolEqualityComparer.Default.Equals(type, type.ConstructedFrom) )
-            {
-                if ( SymbolEqualityComparer.Default.Equals( type, typeDefinition ) )
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                if ( SymbolEqualityComparer.Default.Equals( type.ConstructedFrom, typeDefinition ) )
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
         if ( typeDefinition is { TypeKind: RoslynTypeKind.Interface } )
