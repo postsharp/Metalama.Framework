@@ -716,7 +716,7 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             var firstPropertyLetter = name.Substring( 0, 1 );
-            var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (name.Length > 1 ? name.Substring( 1 ) : "");
+            var camelCasePropertyName = name.ToCamelCase();
 
             if ( symbol.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
             {

@@ -62,14 +62,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) );
 
         internal static bool IsAccessModifierKeyword( this SyntaxToken token )
-            => token.Kind() switch
-            {
-                SyntaxKind.PrivateKeyword => true,
-                SyntaxKind.ProtectedKeyword => true,
-                SyntaxKind.InternalKeyword => true,
-                SyntaxKind.PublicKeyword => true,
-                _ => false
-            };
+            => SyntaxFacts.IsAccessibilityModifier( token.Kind() );
 
         internal static ExpressionSyntax RemoveParenthesis( this ExpressionSyntax node )
             => node switch

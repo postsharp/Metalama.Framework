@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -53,5 +54,25 @@ namespace Metalama.Framework.Engine.Utilities
 #else
             => s.GetHashCode();
 #endif
+
+        public static string ToCamelCase( this string s )
+        {
+            var firstLetter = s[..1];
+            return firstLetter.ToLowerInvariant() + (s.Length > 1 ? s[1..] : "");
+        }
+
+        private static readonly Regex _invalidIdentifierCharacters = new( "[^_0-9a-zA-Z]", RegexOptions.Compiled );
+
+        public static string ToIdentifier( this string s )
+        {
+            s = _invalidIdentifierCharacters.Replace( s, string.Empty );
+
+            if ( s == string.Empty || !(char.IsLetter( s[0] ) || s[0] == '_') )
+            {
+                s = '_' + s;
+            }
+
+            return s;
+        }
     }
 }

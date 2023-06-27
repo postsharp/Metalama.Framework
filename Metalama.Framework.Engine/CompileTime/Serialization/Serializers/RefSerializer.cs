@@ -16,6 +16,6 @@ internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
     {
         var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
 
-        return Ref.FromSerializedId<T>( new SerializableDeclarationId( id ) );
+        return Ref.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
     }
 }

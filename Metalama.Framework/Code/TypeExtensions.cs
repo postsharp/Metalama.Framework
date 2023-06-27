@@ -85,5 +85,10 @@ namespace Metalama.Framework.Code
         /// Gets a <see cref="SerializableTypeId"/> for the type.
         /// </summary>
         public static SerializableTypeId ToSerializableId( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetSerializableId( type );
+
+        /// <summary>
+        /// Gets an <see cref="IExpression"/> representing 'typeof' expression for the given type.
+        /// </summary>
+        public static IExpression ToTypeOfExpression( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.ToTypeOfExpression( type );
     }
 }

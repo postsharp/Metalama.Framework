@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -142,7 +143,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         var metaVariableIdentifier = this._currentMetaContext!.GetTemplateVariableName( symbol );
 
-        var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( symbol.Name );
+        this.DeclareMetaVariable( symbol.Name, metaVariableIdentifier );
+
+        return IdentifierName( metaVariableIdentifier );
+    }
+
+    private IdentifierNameSyntax ReserveRunTimeVariableName( string name )
+    {
+        var metaVariableIdentifier = this._currentMetaContext!.GetTemplateVariableName( name );
+
+        this.DeclareMetaVariable( name, metaVariableIdentifier );
+
+        return IdentifierName( metaVariableIdentifier.AddMetaVariableAnnotation() );
+    }
+
+    private void DeclareMetaVariable( string hint, SyntaxToken metaVariableIdentifier )
+    {
+        var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( hint );
 
         var localDeclaration =
             LocalDeclarationStatement(
@@ -154,8 +171,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 .NormalizeWhitespace();
 
         this._currentMetaContext!.Statements.Add( localDeclaration );
-
-        return IdentifierName( metaVariableIdentifier );
     }
 
     /// <summary>
@@ -327,7 +342,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             var identifierSymbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-            if ( this.IsLocalSymbol( identifierSymbol! ) )
+            if ( this.IsLocalSymbol( identifierSymbol ) )
             {
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
@@ -338,6 +353,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
 
                 return IdentifierName( declaredSymbolNameLocal.Text );
+            }
+            else if ( token.HasMetaVariableAnnotation() )
+            {
+                return IdentifierName( token );
             }
             else
             {
@@ -450,7 +469,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
         var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
-        if ( this.IsLocalSymbol( identifierSymbol! ) )
+        if ( this.IsLocalSymbol( identifierSymbol ) )
         {
             if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
             {
@@ -477,6 +496,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 this.Success = false;
             }
+        }
+        else if ( node.Identifier.HasMetaVariableAnnotation() )
+        {
+            return this.MetaSyntaxFactory.IdentifierName( node );
         }
 
         return base.TransformIdentifierName( node );
@@ -778,20 +801,29 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var transformationKind = this.GetTransformationKind( node.Expression );
 
-        // Cast to dynamic expressions.
-        if ( transformationKind != TransformationKind.Transform &&
-             this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol &&
-             !this._templateMemberClassifier.IsTemplateParameter( node.Expression ) )
+        if ( transformationKind == TransformationKind.Transform )
         {
-            return InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicMemberAccessExpression) ),
-                ArgumentList(
-                    SeparatedList(
-                        new[]
-                        {
+            if ( this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol { ReducedFrom: not null } method )
+            {
+                this.Report( TemplatingDiagnosticDescriptors.ExtensionMethodMethodGroupConversion.CreateRoslynDiagnostic( node.GetDiagnosticLocation(), method ) );
+            }
+        }
+        else
+        {
+            // Cast to dynamic expressions.
+            if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol &&
+                 !this._templateMemberClassifier.IsTemplateParameter( node.Expression ) )
+            {
+                return InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicMemberAccessExpression) ),
+                    ArgumentList(
+                        SeparatedList(
+                            new[]
+                            {
                             Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                             Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
-                        } ) ) );
+                            } ) ) );
+            }
         }
 
         return base.VisitMemberAccessExpression( node );
@@ -809,7 +841,47 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 ArgumentList( SeparatedList( new[] { Argument( this.Transform( node.Expression ) ), Argument( this.Transform( node.WhenNotNull ) ) } ) ) );
         }
 
+        // Expand extension methods.
+        if ( this.ProcessConditionalAccessExtensionMethod( node ) is { } expressions )
+        {
+            // Turns e.g. `a?.Foo()` into `a is {} x ? x.Foo() : null`. 
+            var result = ConditionalExpression( expressions.Condition, expressions.Invocation, SyntaxFactoryEx.Null );
+
+            return this.TransformConditionalExpression( result );
+        }
+
         return base.TransformConditionalAccessExpression( node );
+    }
+
+    private (ExpressionSyntax Condition, ExpressionSyntax Invocation)? ProcessConditionalAccessExtensionMethod( ConditionalAccessExpressionSyntax conditionalAccessExpression )
+    {
+        var memberBinding = conditionalAccessExpression.DescendantNodes().OfType<MemberBindingExpressionSyntax>().FirstOrDefault();
+        var symbol = memberBinding == null ? null : this._syntaxTreeAnnotationMap.GetSymbol( memberBinding );
+
+        if ( symbol is not IMethodSymbol { IsExtensionMethod: true } )
+        {
+            return null;
+        }
+
+        var name = this._syntaxTreeAnnotationMap.GetExpressionType( conditionalAccessExpression.Expression )?.Name;
+
+        if ( string.IsNullOrEmpty( name ) )
+        {
+            name = conditionalAccessExpression.Expression.ToString();
+        }
+
+        var variable = this.ReserveRunTimeVariableName( name.ToIdentifier().ToCamelCase() );
+
+        var whenNotNull = (ExpressionSyntax) new RemoveConditionalAccessRewriter( variable ).Visit( conditionalAccessExpression.WhenNotNull ).AssertNotNull();
+
+        // For e.g. `a?.Foo()` returns `a is {} x` and `x.Foo()`.
+        return (IsPatternExpression(
+                        conditionalAccessExpression.Expression,
+                        RecursivePattern()
+                            .WithPropertyPatternClause( PropertyPatternClause() )
+                            .WithDesignation( SingleVariableDesignation( variable.Identifier ) ) )
+                    .AddScopeAnnotation( TemplatingScope.RunTimeOnly ),
+                whenNotNull);
     }
 
     public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
@@ -878,6 +950,16 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     return this.WithCallToAddSimplifierAnnotation( invocationExpression );
                 }
             }
+        }
+
+        // Expand conditional access extension methods.
+        if ( node.Expression is ConditionalAccessExpressionSyntax conditionalAccessExpression
+             && this.ProcessConditionalAccessExtensionMethod( conditionalAccessExpression ) is { } expressions )
+        {
+            // Turns e.g. `a?.Foo();` into `if (a is {} x) x.Foo();`. 
+            var result = IfStatement( expressions.Condition, ExpressionStatement( expressions.Invocation ).AddScopeAnnotation( TemplatingScope.RunTimeOnly ) );
+
+            return this.TransformIfStatement( result );
         }
 
         var expression = this.Transform( node.Expression );
@@ -1072,13 +1154,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
 
-            if ( symbol is IMethodSymbol { IsExtensionMethod: true } method )
+            if ( symbol is IMethodSymbol { ReducedFrom: not null } method )
             {
-                var receiver = ((MemberAccessExpressionSyntax) node.Expression).Expression;
-                var receiverSymbol = this._syntaxTreeAnnotationMap.GetSymbol( receiver );
-
-                if ( receiverSymbol is not ITypeSymbol )
+                if ( node.Expression is MemberAccessExpressionSyntax memberAccessExpression )
                 {
+                    var receiver = memberAccessExpression.Expression;
+
                     List<ArgumentSyntax> arguments =
                         new( node.ArgumentList.Arguments.Count + 1 ) { Argument( receiver ).WithTemplateAnnotationsFrom( receiver ) };
 
@@ -1088,18 +1169,16 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 MetaSyntaxFactoryImpl.Type( method.ContainingType ),
-                                IdentifierName( method.Name ) ),
+                                memberAccessExpression.Name ),
                             ArgumentList( SeparatedList( arguments ) ) )
                         .WithSymbolAnnotationsFrom( node )
                         .WithTemplateAnnotationsFrom( node );
 
-                    var result = this.VisitInvocationExpression( replacementNode );
-
-                    return result;
+                    return this.VisitInvocationExpression( replacementNode );
                 }
                 else
                 {
-                    // The extension method is called as a plain method.
+                    throw new AssertionFailedException( $"Unexpected expression type {node.Expression.GetType()} when processing extension methods." );
                 }
             }
         }
@@ -1190,7 +1269,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 isVoid );
         }
 
-        var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ) );
+        var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ) );
 
         this.Unindent( 3 );
 
@@ -1298,12 +1377,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null )
+    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null, IEnumerable<SyntaxToken>? accessibilityModifiers = null )
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
             .WithParameterList( parameters ?? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) ) )
-            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ) )
+            .WithModifiers( TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } ) )
             .NormalizeWhitespace()
             .WithBody( body )
             .WithLeadingTrivia( node.GetLeadingTrivia() )

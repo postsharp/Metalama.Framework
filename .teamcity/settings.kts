@@ -27,6 +27,11 @@ object DebugBuild : BuildType({
 
     artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:artifacts/testResults/**/*=>artifacts/testResults\n+:artifacts/logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/AssemblyLocator/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTime/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTimeTroubleshooting/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -47,31 +52,20 @@ object DebugBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
-        }
-
-        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
-        powerShell {
-            name = "Kill background processes after build"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-            executionMode = BuildStep.ExecutionMode.ALWAYS
+            param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
         }
     }
 
     failureConditions {
         failOnMetricChange {
             metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
-            threshold = 300
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.MORE
             compareTo = build {
                 buildRule = lastSuccessful()
             }
             stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -135,6 +129,12 @@ object PublicBuild : BuildType({
 
     artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:artifacts/testResults/**/*=>artifacts/testResults\n+:artifacts/logs/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/AssemblyLocator/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTime/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CompileTimeTroubleshooting/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Logs/**/*=>logs"
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("UpstreamCheckArguments", "", label = "Upstream Check Arguments", description = "Arguments to append to the upstream check command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -150,36 +150,33 @@ object PublicBuild : BuildType({
             param("jetbrains_powershell_scriptArguments", "tools kill")
         }
         powerShell {
+            name = "Check pending upstream changes"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools git check-upstream %UpstreamCheckArguments%")
+        }
+        powerShell {
             name = "Build [Public]"
             scriptMode = file {
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id%")
-        }
-
-        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
-        powerShell {
-            name = "Kill background processes after build"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-            executionMode = BuildStep.ExecutionMode.ALWAYS
+            param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
         }
     }
 
     failureConditions {
         failOnMetricChange {
             metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
-            threshold = 300
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.MORE
             compareTo = build {
                 buildRule = lastSuccessful()
             }
             stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -232,6 +229,11 @@ object PublicDeployment : BuildType({
 
     type = Type.DEPLOYMENT
 
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -243,31 +245,20 @@ object PublicDeployment : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "publish --configuration Public")
-        }
-
-        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
-        powerShell {
-            name = "Kill background processes after build"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-            executionMode = BuildStep.ExecutionMode.ALWAYS
+            param("jetbrains_powershell_scriptArguments", "publish --configuration Public %BuildArguments%")
         }
     }
 
     failureConditions {
         failOnMetricChange {
             metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
-            threshold = 300
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.MORE
             compareTo = build {
                 buildRule = lastSuccessful()
             }
             stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 
@@ -339,8 +330,11 @@ object VersionBump : BuildType({
 
     name = "Version Bump"
 
-    type = Type.DEPLOYMENT
-
+    params {
+        text("BuildArguments", "", label = "Build Arguments", description = "Arguments to append to the engineering command.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.",
+              regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
     vcs {
         root(DslContext.settingsRoot)
     }
@@ -352,31 +346,20 @@ object VersionBump : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "bump")
-        }
-
-        // Step to kill all dotnet or VBCSCompiler processes that might be locking files that Swabra deletes in the beginning of another build.
-        powerShell {
-            name = "Kill background processes after build"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-            executionMode = BuildStep.ExecutionMode.ALWAYS
+            param("jetbrains_powershell_scriptArguments", "bump %BuildArguments%")
         }
     }
 
     failureConditions {
         failOnMetricChange {
             metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
-            threshold = 300
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.MORE
             compareTo = build {
                 buildRule = lastSuccessful()
             }
             stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
         }
     }
 

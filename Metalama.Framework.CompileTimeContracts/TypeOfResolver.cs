@@ -10,15 +10,26 @@ namespace Metalama.Framework.CompileTimeContracts;
 [PublicAPI]
 public static class TypeOfResolver
 {
-    public static Type Resolve( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
+    public static Type Resolve( string typeId, IReadOnlyDictionary<string, IType>? substitutions = null )
     {
-        if ( Resolver == null )
+        if ( TypeIdResolver == null )
         {
             throw new InvalidOperationException( "The service is not properly initialized." );
         }
 
-        return Resolver( id, substitutions );
+        return TypeIdResolver( typeId, substitutions );
     }
 
-    internal static Func<string, IReadOnlyDictionary<string, IType>?, Type>? Resolver { get; set; }
+    public static Type Resolve( string typeId, string? ns, string name, string fullName, string toString )
+    {
+        if ( DeclarationIdResolver == null )
+        {
+            throw new InvalidOperationException( "The service is not properly initialized." );
+        }
+
+        return DeclarationIdResolver( typeId, ns, name, fullName, toString );
+    }
+
+    internal static Func<string, IReadOnlyDictionary<string, IType>?, Type>? TypeIdResolver { get; set; }
+    internal static Func<string, string?, string, string, string, Type>? DeclarationIdResolver { get; set; }
 }

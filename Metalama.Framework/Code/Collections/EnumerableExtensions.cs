@@ -244,5 +244,9 @@ namespace Metalama.Framework.Code.Collections
         public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
             where T : class
             => items.Where( i => i != null )!;
+
+        // These exist, so that IAttributeCollection.Any overloads don't prevent usage of the Enumerable.Any overloads.
+        public static bool Any( this IAttributeCollection attributes ) => Enumerable.Any( attributes );
+        public static bool Any( this IAttributeCollection attributes, Func<IAttribute, bool> predicate ) => Enumerable.Any( attributes, predicate );
     }
 }
