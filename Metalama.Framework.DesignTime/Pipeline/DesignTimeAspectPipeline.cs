@@ -341,26 +341,26 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         {
             try
             {
-            if ( ignoreStatus )
-            {
-                await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
-            }
+                if ( ignoreStatus )
+                {
+                    await this.InvalidateCacheAsync( compilation.Compilation, executionContext, cancellationToken );
+                }
 
-            var state = this._currentState;
+                var state = this._currentState;
 
-            var getConfigurationResult = PipelineState.GetConfiguration(
-                ref state,
-                compilation.Compilation,
-                ignoreStatus,
-                cancellationToken );
+                var getConfigurationResult = PipelineState.GetConfiguration(
+                    ref state,
+                    compilation.Compilation,
+                    ignoreStatus,
+                    cancellationToken );
 
-            await this.SetStateAsync( state, executionContext );
+                await this.SetStateAsync( state, executionContext );
 
                 return getConfigurationResult;
             }
             finally
             {
-            await this.ProcessJobQueueAsync( executionContext );
+                await this.ProcessJobQueueAsync( executionContext );
             }
         }
     }
@@ -397,15 +397,15 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         {
             try
             {
-            await this.SetStateAsync( this._currentState.Reset(), executionContext );
+                await this.SetStateAsync( this._currentState.Reset(), executionContext );
 
-            this._eventHub.OnProjectDirty( this.ProjectKey );
+                this._eventHub.OnProjectDirty( this.ProjectKey );
             }
             finally
             {
-            await this.ProcessJobQueueAsync( executionContext );
+                await this.ProcessJobQueueAsync( executionContext );
+            }
         }
-    }
     }
 
     private async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecutePartialAsync(
@@ -790,11 +790,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                             }
                             else
                             {
-                            compilationResult = new CompilationResult(
+                                compilationResult = new CompilationResult(
                                     this._currentState.ProjectVersion,
-                                this._currentState.PipelineResult,
-                                validationResult,
-                                this._currentState.Status,
+                                    this._currentState.PipelineResult,
+                                    validationResult,
+                                    this._currentState.Status,
                                     this._currentState.PipelineResult.Configuration );
                             }
                         }
@@ -1241,5 +1241,5 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
 
-    internal ProjectVersion LastProjectVersion => this._currentState.ProjectVersion;
+    internal ProjectVersion? LastProjectVersion => this._currentState.ProjectVersion;
 }

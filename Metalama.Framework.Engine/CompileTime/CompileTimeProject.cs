@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -10,6 +13,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -34,7 +38,7 @@ namespace Metalama.Framework.Engine.CompileTime
         internal CompileTimeProjectManifest? Manifest { get; }
 
         private readonly string? _compiledAssemblyPath;
-        private readonly AssemblyIdentity? _compileTimeIdentity;
+        private readonly AssemblyIdentity _compileTimeIdentity;
         private readonly ITextMapFileProvider? _mapFileProvider;
         private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
@@ -256,12 +260,48 @@ namespace Metalama.Framework.Engine.CompileTime
             CacheableTemplateDiscoveryContextProvider? templateDiscoveryContextProvider,
             [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
+            // Compute a unique hash based on the binary. 
+            XXH64 hash = new();
+            var buffer = new byte[1024];
+
+            using ( var file = File.OpenRead( assemblyPath ) )
+            {
+                int read;
+
+                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
+                {
+                    hash.Update( buffer, 0, read );
+                }
+            }
+
+            var projectHash = hash.Digest();
+
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
-            var assembly = AppDomainUtility.GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
+
+            // Ignore collectible assemblies now, as they are not considered later when resolving.
+            var assembly = AppDomainUtility.GetLoadedAssemblies( a => !AssemblyLoader.IsCollectible( a ) && AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
 
             if ( assembly == null )
             {
-                assembly = domain.LoadAssembly( assemblyPath );
+                var tempFileManager = serviceProvider.Underlying.GetRequiredBackstageService<ITempFileManager>();
+                var outputPathHelper = new OutputPathHelper( tempFileManager );
+                var outputDirectory = outputPathHelper.GetOutputPaths( assemblyIdentity.Name, targetFramework: null, projectHash ).Directory;
+
+                var outputPath = Path.Combine( outputDirectory, Path.GetFileName( assemblyPath ) );
+
+                RetryHelper.Retry(
+                    () =>
+                    {
+                        if ( !File.Exists( outputPath ) )
+                        {
+                            using ( MutexHelper.WithGlobalLock( outputPath ) )
+                            {
+                                File.Copy( assemblyPath, outputPath );
+                            }
+                        }
+                    } );
+
+                assembly = domain.LoadAssembly( outputPath );
             }
 
             // Find interesting types.
@@ -280,20 +320,6 @@ namespace Metalama.Framework.Engine.CompileTime
             var templateProviders =
                 assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
 
-            // Compute a unique hash based on the binary. 
-            XXH64 hash = new();
-            var buffer = new byte[1024];
-
-            using ( var file = File.OpenRead( assemblyPath ) )
-            {
-                int read;
-
-                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
-                {
-                    hash.Update( buffer, 0, read );
-                }
-            }
-
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(
                 assemblyIdentity.ToString(),
@@ -307,7 +333,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 TemplateProjectManifest.Empty,
                 null,
-                hash.Digest(),
+                projectHash,
                 Array.Empty<CompileTimeFileManifest>(),
                 Array.Empty<CompileTimeDiagnosticManifest>() );
 
@@ -446,7 +472,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
+                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this._compiledAssemblyPath! );
             }
         }
 

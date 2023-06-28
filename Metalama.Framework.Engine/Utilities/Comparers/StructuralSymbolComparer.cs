@@ -31,6 +31,14 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterModifiers |
                 StructuralSymbolComparerOptions.Nullability );
 
+        public static readonly StructuralSymbolComparer ContainingDeclarationOblivious =
+            new(
+                StructuralSymbolComparerOptions.Name |
+                StructuralSymbolComparerOptions.GenericParameterCount |
+                StructuralSymbolComparerOptions.GenericArguments |
+                StructuralSymbolComparerOptions.ParameterTypes |
+                StructuralSymbolComparerOptions.ParameterModifiers );
+
         public static readonly StructuralSymbolComparer Signature =
             new(
                 StructuralSymbolComparerOptions.Name |
@@ -38,7 +46,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers );
 
-        internal static readonly StructuralSymbolComparer NameObliviousComparer = new(
+        internal static readonly StructuralSymbolComparer NameOblivious = new(
             StructuralSymbolComparerOptions.GenericArguments |
             StructuralSymbolComparerOptions.GenericParameterCount |
             StructuralSymbolComparerOptions.ParameterModifiers |

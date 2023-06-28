@@ -308,6 +308,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             this.Mark( node, classification );
                         }
+
                         continue;
 
                     case not null:

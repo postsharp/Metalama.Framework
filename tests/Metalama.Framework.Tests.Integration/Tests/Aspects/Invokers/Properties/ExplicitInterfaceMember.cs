@@ -1,0 +1,36 @@
+
+using System;
+using System.Linq;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.ExplicitInterfaceMember;
+
+[Inheritable]
+public sealed class TestAspect : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        _ = meta.Target.Type.Properties.Single().Value;
+        meta.Target.Type.Properties.Single().Value = 42;
+        return meta.Proceed();
+    }
+}
+
+public interface ITestInterface
+{
+    int Bar { get; set; }
+}
+
+// <target>
+public partial class TestClass : ITestInterface
+{
+    int ITestInterface.Bar { get; set; }
+
+    [TestAspect]
+    public void Foo()
+    {
+    }
+}
+

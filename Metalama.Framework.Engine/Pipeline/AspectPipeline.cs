@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;

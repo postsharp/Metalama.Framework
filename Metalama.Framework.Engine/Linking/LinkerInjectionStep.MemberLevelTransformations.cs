@@ -70,7 +70,7 @@ internal sealed partial class LinkerInjectionStep
         public void Add( IntroduceConstructorInitializerArgumentTransformation argument )
             => LazyInitializer.EnsureInitialized( ref this._unorderedArguments ).Add( argument );
 
-        public bool AddDefaultInitializer { get; set; }
+        public bool AddDefaultInitializer { get; }
     }
 
     // ReSharper disable once ClassNeverInstantiated.Local

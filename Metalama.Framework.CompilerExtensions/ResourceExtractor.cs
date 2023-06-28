@@ -32,7 +32,6 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static readonly string _snapshotDirectory;
         private static readonly string _buildId;
-        private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
         private static volatile bool _initialized;
         private static string? _versionNumber;
         private static AssemblyLoader? _assemblyLoader;
@@ -56,9 +55,6 @@ namespace Metalama.Framework.CompilerExtensions
         }
 
         private static string GetTempDirectory( string purpose ) => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId );
-
-        // .NET 5.0 has collectible assemblies, but collectible assemblies cannot be returned to AppDomain.AssemblyResolve.
-        private static bool IsCollectible( Assembly assembly ) => _isCollectibleProperty == null || (bool) _isCollectibleProperty.GetValue( assembly );
 
         private static void Initialize()
         {
@@ -381,7 +377,7 @@ namespace Metalama.Framework.CompilerExtensions
             // assemblies than what we have. In this case, we will return any matching assembly.
 
             var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault( x => !IsCollectible( x ) && matchFunc( requestedAssemblyName, x.GetName() ) );
+                .FirstOrDefault( x => !AssemblyLoader.IsCollectible( x ) && matchFunc( requestedAssemblyName, x.GetName() ) );
 
             if ( existingAssembly != null )
             {

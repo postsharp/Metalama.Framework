@@ -15,7 +15,6 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -277,10 +276,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
         {
             using var testContext = this.CreateTestContext();
 
-            var code = new Dictionary<string, string>
-            {
-                ["Class1.cs"] = "public class Class1 { }"
-            };
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }" };
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
@@ -289,13 +285,18 @@ public sealed class PipelineCancellationTests : UnitTestClass
 
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
             var pipeline = pipelineFactory.CreatePipeline( compilation );
-            var configuration = await pipeline.GetConfigurationAsync( PartialCompilation.CreateComplete( compilation ), ignoreStatus: false, AsyncExecutionContext.Get(), cancellationTokenSource.Token );
+
+            var configuration = await pipeline.GetConfigurationAsync(
+                PartialCompilation.CreateComplete( compilation ),
+                ignoreStatus: false,
+                AsyncExecutionContext.Get(),
+                cancellationTokenSource.Token );
 
             Assert.True( configuration.IsSuccessful );
 
             return false;
         }
-        catch (OperationCanceledException)
+        catch ( OperationCanceledException )
         {
             return true;
         }
@@ -310,7 +311,8 @@ public sealed class PipelineCancellationTests : UnitTestClass
 
     private sealed class GetGetConfigurationCancellationPoints : IEnumerable<object[]>
     {
-        public IEnumerator<object[]> GetEnumerator() => Enumerable.Range( 1, _getConfigurationMaxCancellationPoints ).Select( i => new object[] { i } ).GetEnumerator();
+        public IEnumerator<object[]> GetEnumerator()
+            => Enumerable.Range( 1, _getConfigurationMaxCancellationPoints ).Select( i => new object[] { i } ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }

@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
-using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
@@ -194,7 +193,7 @@ namespace Metalama.Framework.DesignTime
             {
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || DesignTimeDiagnosticDefinitions.GetInstance().SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
+                if ( !wrapUnknownDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }

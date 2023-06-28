@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.Templating
             public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
             {
                 // For e.g. int P => 42;, there is no node that declares the getter,
-                // so we have to handle it manuallly.
+                // so we have to handle it manually.
                 if ( node.Parent is PropertyDeclarationSyntax propertyDeclaration )
                 {
                     var getMethod = this._semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull().GetMethod;
@@ -546,7 +546,7 @@ namespace Metalama.Framework.Engine.Templating
                         .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
                         .Select( a => (member, a.AttributeClass!) );
 
-                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } ? associatedSymbol : member.GetOverriddenMember();
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol } ? memberAssociatedSymbol : member.GetOverriddenMember();
 
                     return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }
@@ -572,15 +572,27 @@ namespace Metalama.Framework.Engine.Templating
                     templateInfo = this._classifier.GetTemplateInfo( declaredSymbol );
                 }
 
-                if ( templateInfo.AttributeType != TemplateAttributeType.None
-                     && !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                if ( !templateInfo.IsNone )
                 {
-                    this.Report(
-                        TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
-                            declaredSymbol ) );
+                    if ( !IsSupportedTemplateDeclaration( declaredSymbol ) )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                declaredSymbol ) );
 
-                    return default;
+                        return default;
+                    }
+
+                    if ( declaredSymbol.ContainingType?.IsStatic == true )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.TemplatesInStaticTypeNotSupported.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, declaredSymbol.ContainingType) ) );
+
+                        return default;
+                    }
                 }
 
                 // Report error on conflict scope.
@@ -592,7 +604,7 @@ namespace Metalama.Framework.Engine.Templating
                 // Report error when we have compile-time code but no namespace import for fast detection.
                 if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
                                                           && !SystemTypeDetector.IsSystemType(
-                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
+                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType! ) )
                 {
                     var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
 
@@ -609,7 +621,7 @@ namespace Metalama.Framework.Engine.Templating
                     this.Report(
                         TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            (declaredSymbol, declaredSymbol.ContainingType, typeScope!.Value) ) );
+                            (declaredSymbol, declaredSymbol.ContainingType!, typeScope!.Value) ) );
                 }
 
                 // Check that run-time members are contained in run-time types.
