@@ -200,9 +200,16 @@ class Implementation : IInterface<int>, IInterface<string>
         var compilation = testContext.CreateCompilationModel( code );
 
         var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var interfaceInstanceType1 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Int32 ) } );
-        var interfaceInstanceType2 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.String ) } );
-        var interfaceInstanceType3 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Decimal ) } );
+
+        var interfaceInstanceType1 =
+            (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Int32 ) } );
+
+        var interfaceInstanceType2 =
+            (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.String ) } );
+
+        var interfaceInstanceType3 =
+            (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Decimal ) } );
+
         var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceTypeMethod = interfaceType.Methods.Single();
