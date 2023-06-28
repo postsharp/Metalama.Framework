@@ -87,6 +87,54 @@ class E
         }
 
         [Fact]
+        public void GenericBaseArity()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C
+{
+}
+
+class C<T>
+{
+}
+
+class C<T,U>
+{
+}
+
+class D : C
+{
+}
+
+class E : C<int>
+{
+}
+
+class F : C<int,int>
+{
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var baseType0 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 0 );
+            var baseType1 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 1 );
+            var baseType2 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 2 );
+            var type0 = compilation.Types.Single( t => t.Name == "D" );
+            var type1 = compilation.Types.Single( t => t.Name == "E" );
+            var type2 = compilation.Types.Single( t => t.Name == "F" );
+
+            var types0 = compilation.Types.OfTypeDefinition( baseType0 ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types1 = compilation.Types.OfTypeDefinition( baseType1 ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types2 = compilation.Types.OfTypeDefinition( baseType2 ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+
+            Assert.Equal( new[] { baseType0, type0 }, types0 );
+            Assert.Equal( new[] { baseType1, type1 }, types1 );
+            Assert.Equal( new[] { baseType2, type2 }, types2 );
+        }
+
+        [Fact]
         public void GenericBaseBase()
         {
             using var testContext = this.CreateTestContext();
