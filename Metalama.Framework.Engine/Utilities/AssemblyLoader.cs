@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities;
 
 internal sealed class AssemblyLoader : IDisposable
 {
-    private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+    private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
 
     private readonly Func<string, Assembly?> _resolveAssembly;
     private readonly Func<string, Assembly> _loadAssembly;
@@ -54,14 +54,14 @@ internal sealed class AssemblyLoader : IDisposable
 #endif
 
                     var loadMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
-                    this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof( Func<string, Assembly> ), currentAlc, loadMethod );
+                    this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof(Func<string, Assembly>), currentAlc, loadMethod );
 
                     // Use expression trees to create a delegate for the AssemblyLoadContext.Resolving event, because it involves the AssemblyLoadContext type,
                     // which cannot be statically used here.
                     // Using delegate variance instead won't work, because that fails when combining delegates of different types.
                     LambdaExpression simplifiedAlcResolvingExpression = ( AssemblyName assemblyName ) => this._resolveAssembly( assemblyName.FullName );
 
-                    var alcResolvingType = typeof( Func<,,> ).MakeGenericType( alcType, typeof( AssemblyName ), typeof( Assembly ) );
+                    var alcResolvingType = typeof(Func<,,>).MakeGenericType( alcType, typeof(AssemblyName), typeof(Assembly) );
 
                     var alcResolvingExpression = Expression.Lambda(
                         alcResolvingType,

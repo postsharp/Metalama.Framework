@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
+using RefKind = Microsoft.CodeAnalysis.RefKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
@@ -20,19 +22,19 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
             var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
 
-            Assert.Equal( "typeof(void)", GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Void ) ) );
+            Assert.Equal( "typeof(void)", GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Void ) ) );
 
             Assert.Equal(
                 "typeof(global::System.Int32)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ) ) );
 
             Assert.Equal(
                 "typeof(global::System.Object)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Object ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Object ) ) );
 
             Assert.Equal(
                 "typeof(global::System.String)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.String ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.String ) ) );
         }
 
         [Fact]
@@ -44,7 +46,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             Assert.Equal(
                 "typeof(global::System.Int32*)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ).MakePointerType() ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakePointerType() ) );
         }
 
         [Fact]
@@ -56,11 +58,11 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             Assert.Equal(
                 "typeof(global::System.Int32[])",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ).MakeArrayType() ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType() ) );
 
             Assert.Equal(
                 "typeof(global::System.Int32[,])",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ).MakeArrayType( 2 ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType( 2 ) ) );
         }
 
         [Fact]
@@ -72,10 +74,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var functionPointerTypeSymbol = compilation.GetRoslynCompilation()
                 .CreateFunctionPointerTypeSymbol(
-                    compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ).GetSymbol(),
-                    Microsoft.CodeAnalysis.RefKind.None,
-                    ImmutableArray.Create( (ITypeSymbol) compilation.Factory.GetSpecialType( Code.SpecialType.Int32 ).GetSymbol() ),
-                    ImmutableArray.Create( Microsoft.CodeAnalysis.RefKind.None ) );
+                    compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol(),
+                    RefKind.None,
+                    ImmutableArray.Create( (ITypeSymbol) compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol() ),
+                    ImmutableArray.Create( RefKind.None ) );
 
             var functionPointerType = new FunctionPointerType( functionPointerTypeSymbol, compilation );
 
@@ -101,7 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             Assert.Equal(
                 "typeof(global::System.Collections.Generic.List<>)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.List_T ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ) ) );
 
             Assert.Equal( "typeof(global::N.A<,,>)", GetSyntaxString( syntaxGenerationContext, compilation.Types.OfName( "A" ).Single() ) );
         }
@@ -112,11 +114,11 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "namespace N { class A<T,U,V> { } }" );
             var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
-            var argumentType = compilation.Factory.GetSpecialType( Code.SpecialType.Int32 );
+            var argumentType = compilation.Factory.GetSpecialType( SpecialType.Int32 );
 
             Assert.Equal(
                 "typeof(global::System.Collections.Generic.List<global::System.Int32>)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( Code.SpecialType.List_T ).WithTypeArguments( argumentType ) ) );
+                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ).WithTypeArguments( argumentType ) ) );
 
             Assert.Equal(
                 "typeof(global::N.A<global::System.Int32,global::System.Int32,global::System.Int32>)",
