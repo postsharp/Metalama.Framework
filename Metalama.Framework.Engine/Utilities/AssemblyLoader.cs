@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities;
 
 internal sealed class AssemblyLoader : IDisposable
 {
-    private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+    private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
 
     private readonly Func<string, Assembly?> _resolveAssembly;
     private readonly Func<string, Assembly> _loadAssembly;

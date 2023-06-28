@@ -1164,7 +1164,7 @@ class D{version}
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        
+
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
         var dumpedResults = DumpResults( results! );
         this.TestOutput.WriteLine( dumpedResults );
