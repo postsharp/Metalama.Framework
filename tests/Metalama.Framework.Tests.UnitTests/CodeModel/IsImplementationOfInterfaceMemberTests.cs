@@ -31,8 +31,8 @@ class Implementation : IInterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
+        var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
+        var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceMethod1 = interfaceType.Methods.First();
         var interfaceMethod2 = interfaceType.Methods.Skip( 1 ).First();
@@ -66,8 +66,8 @@ class Implementation : IInterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
+        var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
+        var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceMethod1 = interfaceType.Methods.Single( m => m.Parameters.Count == 0 );
         var interfaceMethod2 = interfaceType.Methods.Single( m => m.Parameters.Count == 1 );
@@ -107,9 +107,9 @@ class Implementation : Base, IInterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var baseType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Base" );
-        var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
+        var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
+        var baseType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Base" );
+        var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceMethod1 = interfaceType.Methods.First();
         var interfaceMethod2 = interfaceType.Methods.Skip( 1 ).First();
@@ -159,10 +159,10 @@ class Implementation : Base, ISubinterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var subinterfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "ISubinterface" );
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var baseType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Base" );
-        var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
+        var subinterfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "ISubinterface" );
+        var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
+        var baseType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Base" );
+        var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var subinterfaceMethod = subinterfaceType.Methods.First();
         var interfaceMethod = interfaceType.Methods.First();
@@ -199,11 +199,11 @@ class Implementation : IInterface<int>, IInterface<string>
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
-        var interfaceInstanceType1 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Int32 ) } );
-        var interfaceInstanceType2 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.String ) } );
-        var interfaceInstanceType3 = (INamedTypeInternal) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Decimal ) } );
-        var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
+        var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
+        var interfaceInstanceType1 = (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Int32 ) } );
+        var interfaceInstanceType2 = (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.String ) } );
+        var interfaceInstanceType3 = (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Decimal ) } );
+        var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
         var interfaceTypeMethod = interfaceType.Methods.Single();
         var interfaceInstanceType1Method = interfaceInstanceType1.Methods.Single();
