@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -102,6 +103,12 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
             }
             else
             {
+                if ( this._workspace.CurrentSolution.Projects.SelectMany( p => p.Documents ).Any( d => d.FilePath == file.Key ) )
+                {
+                    // See https://github.com/dotnet/roslyn/issues/68814.
+                    throw new InvalidOperationException( $"Could not add document with name '{file.Key}', because a document with this path already exists in a different project." );
+                }
+
                 var loader = TextLoader.From( TextAndVersion.Create( SourceText.From( file.Value ), VersionStamp.Create() ) );
 
                 var documentInfo = DocumentInfo.Create(
