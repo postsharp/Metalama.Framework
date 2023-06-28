@@ -110,6 +110,7 @@ internal abstract partial class BaseTestRunner
             catch ( Exception ex2 )
             {
                 collectibleExecutionContext = null;
+
                 throw new AggregateException( ex1, ex2 );
             }
 

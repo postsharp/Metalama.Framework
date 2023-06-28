@@ -171,7 +171,11 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             Assert.Single( output.Suppressions );
         }
 
-        private UserDiagnosticsConfiguration GetUserDiagnosticsFileContent( string aspectCode, string targetCode, string? dependentCode = null, Action<InMemoryConfigurationManager, ConfigurationFile>? configurationFileChanged = null )
+        private UserDiagnosticsConfiguration GetUserDiagnosticsFileContent(
+            string aspectCode,
+            string targetCode,
+            string? dependentCode = null,
+            Action<InMemoryConfigurationManager, ConfigurationFile>? configurationFileChanged = null )
         {
             using var testContext = this.CreateTestContext();
 
