@@ -88,6 +88,32 @@ class TheAspect : OverrideMethodAspect
     }
 
     [Fact]
+    public async Task TemplateAnnotatorDiagnosticsAreReported()
+    {
+        const string code = """
+using Metalama.Framework.Aspects;
+
+class TheAspect : OverrideMethodAspect 
+{ 
+   public override dynamic? OverrideMethod()
+   {
+      // The following line is an error.
+      AnotherTemplate();
+
+      return null;
+   }
+
+   [Template]
+   void AnotherTemplate() {}
+}
+""";
+
+        var diagnostics = await this.RunAnalyzer( code );
+
+        Assert.Equal( TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate.Id, Assert.Single( diagnostics ).Id );
+    }
+
+    [Fact]
     public async Task UserError()
     {
         var getCode = (string extraCode) => $$"""
