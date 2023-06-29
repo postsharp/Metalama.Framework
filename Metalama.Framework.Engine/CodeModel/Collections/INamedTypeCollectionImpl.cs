@@ -10,4 +10,3 @@ internal interface INamedTypeCollectionImpl
 {
     IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition );
 }
-
