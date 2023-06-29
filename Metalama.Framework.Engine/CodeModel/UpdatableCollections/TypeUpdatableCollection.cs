@@ -51,7 +51,7 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
         => this.DeclaringTypeOrNamespace.GetTypeMembers()
             .Where( this.IsSymbolIncluded );
 
-    public ImmutableArray<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
+    public IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
     {
         var comparer = (DeclarationEqualityComparer) this.Compilation.Comparers.GetTypeComparer( TypeComparison.Default );
 

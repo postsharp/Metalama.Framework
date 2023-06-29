@@ -35,12 +35,13 @@ namespace Metalama.Framework.Code
         /// <param name="left"></param>
         /// <param name="right">Another type.</param>
         public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
-            => kind switch
+            => (right, kind) switch
             {
-                ConversionKind.IgnoreTypeArguments => false,
-                ConversionKind.Default => left.SpecialType == right,
-                ConversionKind.DenyBoxing => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
-                _ => throw new ArgumentOutOfRangeException( nameof(kind) )
+                // Using SpecialType.None is not valid.
+                (SpecialType.None, _ ) => throw new ArgumentException( $"SpecialType.None cannot be used as argument of this method.", nameof( right ) ),
+                // Safe optimization.
+                (SpecialType.Void, _ ) => left.SpecialType == SpecialType.Void,
+                _ => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
             };
 
         /// <summary>
