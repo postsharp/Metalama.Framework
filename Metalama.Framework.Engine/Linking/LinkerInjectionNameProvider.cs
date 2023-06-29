@@ -115,38 +115,37 @@ namespace Metalama.Framework.Engine.Linking
 
         private string FindUniqueName( INamedType containingType, string hint )
         {
-            if ( CheckName( hint ) )
-            {
-                AddName( hint );
+            int? hintIndex = null;
 
-                return hint;
-            }
-            else
+            while (true)
             {
-                for ( var i = 1; /* Nothing */; i++ )
+                if ( hintIndex == null )
                 {
-                    var candidate = hint + i;
-
-                    if ( CheckName( candidate ) )
+                    if ( CheckAndAddName( hint ) )
                     {
-                        AddName( candidate );
+                        return hint;
+                    }
+                    else
+                    {
+                        hintIndex = 1;
+                    }
+                }
+                else
+                {
+                    var candidate = hint + hintIndex.Value;
 
+                    if ( CheckAndAddName( candidate ) )
+                    {
                         return candidate;
+                    }
+                    else
+                    {
+                        hintIndex++;
                     }
                 }
             }
 
-            void AddName( string name )
-            {
-                var names = this._injectedMemberNames.GetOrAddNew( containingType );
-
-                if ( !names.Add( name ) )
-                {
-                    throw new AssertionFailedException( $"The name '{name}' is not unique." );
-                }
-            }
-
-            bool CheckName( string name )
+            bool CheckAndAddName( string name )
             {
                 if ( containingType.FieldsAndProperties.OfName( name ).Any() )
                 {
@@ -168,13 +167,9 @@ namespace Metalama.Framework.Engine.Linking
                     return false;
                 }
 
-                if ( this._injectedMemberNames.TryGetValue( containingType, out var names )
-                     && names.Contains( name ) )
-                {
-                    return false;
-                }
+                var injectedNames = this._injectedMemberNames.GetOrAddNew( containingType );
 
-                return true;
+                return injectedNames.Add( name );
             }
         }
     }
