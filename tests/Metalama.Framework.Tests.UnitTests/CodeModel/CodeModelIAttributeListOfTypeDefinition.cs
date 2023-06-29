@@ -31,7 +31,10 @@ class C
             var attributeType = compilation.Types.Single( t => t.Name == "A" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments ).Select( x => x.Type.TypeDefinition ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+                .Select( x => x.Type.TypeDefinition )
+                .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
+                .ToArray();
 
             Assert.Equal( new[] { attributeType }, types );
         }
@@ -56,7 +59,10 @@ class C
             var attributeType = compilation.Types.Single( t => t.Name == "A" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments ).Select( x => x.Type.TypeDefinition ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+                .Select( x => x.Type.TypeDefinition )
+                .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
+                .ToArray();
 
             Assert.Equal( new[] { attributeType }, types );
         }
@@ -86,7 +92,10 @@ class C
             var usedType = compilation.Types.Single( t => t.Name == "B" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments ).Select( x => x.Type.TypeDefinition ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+                .Select( x => x.Type.TypeDefinition )
+                .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
+                .ToArray();
 
             Assert.Equal( new[] { usedType }, types );
         }
@@ -116,7 +125,10 @@ class C
             var usedType = compilation.Types.Single( t => t.Name == "B" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( interfaceType, ConversionKind.IgnoreTypeArguments ).Select( x => x.Type.TypeDefinition ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
+            var types = type.Attributes.OfAttributeType( interfaceType, ConversionKind.IgnoreTypeArguments )
+                .Select( x => x.Type.TypeDefinition )
+                .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
+                .ToArray();
 
             Assert.Equal( new[] { usedType }, types );
         }

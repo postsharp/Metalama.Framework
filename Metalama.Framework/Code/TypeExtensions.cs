@@ -38,10 +38,11 @@ namespace Metalama.Framework.Code
             => (right, kind) switch
             {
                 // Using SpecialType.None is not valid.
-                (SpecialType.None, _ ) => throw new ArgumentException( $"SpecialType.None cannot be used as argument of this method.", nameof( right ) ),
+                (SpecialType.None, _) => throw new ArgumentException( $"SpecialType.None cannot be used as argument of this method.", nameof(right) ),
+
                 // Safe optimization.
-                (SpecialType.Void, _ ) => left.SpecialType == SpecialType.Void,
-                _ => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
+                (SpecialType.Void, _) => left.SpecialType == SpecialType.Void,
+                _ => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind )
             };
 
         /// <summary>

@@ -28,6 +28,6 @@ namespace Metalama.Framework.Code
         ImplicitReference = DenyBoxing,
 
         [Obsolete( "Use Default.", true )]
-        Implicit = Default,
+        Implicit = Default
     }
 }
