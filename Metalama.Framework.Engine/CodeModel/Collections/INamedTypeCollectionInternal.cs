@@ -4,10 +4,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.CodeModel.Collections
+namespace Metalama.Framework.Engine.CodeModel.Collections;
+
+internal interface INamedTypeCollectionImpl
 {
-    internal interface INamedTypeCollectionImpl
-    {
-        IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition );
-    }
+    IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition );
 }
+

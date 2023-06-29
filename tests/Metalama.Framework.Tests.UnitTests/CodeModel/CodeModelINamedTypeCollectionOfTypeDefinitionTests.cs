@@ -118,9 +118,9 @@ class F : C<int,int>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            var baseType0 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 0 );
-            var baseType1 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 1 );
-            var baseType2 = compilation.Types.Single( t => t.Name == "C" && t.TypeParameters.Count == 2 );
+            var baseType0 = compilation.Types.Single( t => t is { Name: "C", TypeParameters.Count: 0 } );
+            var baseType1 = compilation.Types.Single( t => t is { Name: "C", TypeParameters.Count: 1 } );
+            var baseType2 = compilation.Types.Single( t => t is { Name: "C", TypeParameters.Count: 2 } );
             var type0 = compilation.Types.Single( t => t.Name == "D" );
             var type1 = compilation.Types.Single( t => t.Name == "E" );
             var type2 = compilation.Types.Single( t => t.Name == "F" );
@@ -212,11 +212,10 @@ class D
 
             var compilation = testContext.CreateCompilationModel( code );
             var interfaceType = compilation.Types.Single( t => t.Name == "I" );
-            var type = compilation.Types.Single( t => t.Name == "D" );
 
             var types = compilation.Types.OfTypeDefinition( interfaceType ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
 
-            Assert.Equal( new[] {  interfaceType }, types );
+            Assert.Equal( new[] { interfaceType }, types );
         }
 
         [Fact]

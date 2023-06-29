@@ -18,7 +18,7 @@ namespace Metalama.Framework.Code
         None,
 
         /// <summary>
-        /// <see cref="void" />.
+        /// <see cref="System.Void" />.
         /// </summary>
         Void,
 
@@ -27,79 +27,65 @@ namespace Metalama.Framework.Code
         /// </summary>
         Object,
 
-
         /// <summary>
         /// <see cref="byte" />.
         /// </summary>
         Byte,
-
 
         /// <summary>
         /// <see cref="sbyte" />.
         /// </summary>
         SByte,
 
-
         /// <summary>
         /// <see cref="short" />.
         /// </summary>
         Int16,
-
 
         /// <summary>
         /// <see cref="ushort" />.
         /// </summary>
         UInt16,
 
-
         /// <summary>
         /// <see cref="int" />.
         /// </summary>
         Int32,
-
 
         /// <summary>
         /// <see cref="uint" />.
         /// </summary>
         UInt32,
 
-
         /// <summary>
         /// <see cref="long" />.
         /// </summary>
         Int64,
-
 
         /// <summary>
         /// <see cref="ulong" />.
         /// </summary>
         UInt64,
 
-
         /// <summary>
         /// <see cref="string" />.
         /// </summary>
         String,
 
-
         /// <summary>
         /// <see cref="decimal" />.
         /// </summary>
-
         Decimal,
-
 
         /// <summary>
         /// <see cref="float" />.
         /// </summary>
         Single,
 
-
         /// <summary>
         /// <see cref="double" />.
         /// </summary>
         Double,
-
 
         /// <summary>
         /// <see cref="bool" />.
