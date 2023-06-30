@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @Skipped
-#endif
-
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;

@@ -10,9 +10,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.InvalidCode.Inva
         public override dynamic? OverrideMethod()
         {
             var methodSignatureBuilder = new InterpolatedStringBuilder();
-            
+
+#if TESTRUNNER
             // The next line has an intentional syntax error.
             methodSignatureBuilder.AddText(""(');
+#endif
             
             return meta.Proceed();
         }
