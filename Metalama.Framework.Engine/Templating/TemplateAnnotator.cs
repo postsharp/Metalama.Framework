@@ -1217,6 +1217,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             scopeContext = null;
             ifScope = TemplatingScope.CompileTimeOnly;
+
+            annotatedCondition = annotatedCondition.ReplaceWithCompileTimeOnlyAnnotationIfUndetermined();
         }
         else
         {
@@ -1230,9 +1232,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         using ( this.WithScopeContext( scopeContext ) )
         {
             // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
-            // will look at the scope in the parent node, which is here incorrect.
-            annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfUndetermined();
-            annotatedElseStatement = this.Visit( node.Else?.Statement )?.AddRunTimeOnlyAnnotationIfUndetermined();
+            // will look at the scope in the parent node, which is incorrect here.
+            annotatedStatement = this.Visit( node.Statement ).ReplaceScopeAnnotationIfUndetermined( ifScope );
+            annotatedElseStatement = this.Visit( node.Else?.Statement )?.ReplaceScopeAnnotationIfUndetermined( ifScope );
         }
 
         return node.Update(
@@ -1272,7 +1274,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( node.AwaitKeyword.IsKind( SyntaxKind.None ) )
         {
-            forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( true ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( preferCompileTime: true ).ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
             reason = $"foreach ( {node.Type} {node.Identifier} in ... )";
         }
         else
@@ -1281,6 +1283,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             reason = $"await foreach ( {node.Type} {node.Identifier} in ... )";
         }
 
+        annotatedExpression = annotatedExpression.ReplaceScopeAnnotationIfUndetermined( forEachScope );
+
         this.SetLocalSymbolScope( local, forEachScope );
 
         StatementSyntax annotatedStatement;
@@ -1288,8 +1292,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         using ( this.WithScopeContext( this._currentScopeContext.BreakOrContinue( forEachScope, reason ) ) )
         {
             // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
-            // will look at the scope in the parent node, which is here incorrect.
-            annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfUndetermined();
+            // will look at the scope in the parent node, which is incorrect here.
+            annotatedStatement = this.Visit( node.Statement ).ReplaceScopeAnnotationIfUndetermined( forEachScope );
         }
 
         var identifierClassification = forEachScope == TemplatingScope.CompileTimeOnly ? TextSpanClassification.CompileTimeVariable : default;
@@ -2108,8 +2112,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         // The scope of a `while` statement is determined by its condition only.
 
-        var annotatedCondition = this.Visit( node.Condition );
-        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
+        var annotatedCondition = this.Visit( node.Condition ).ReplaceWithCompileTimeOnlyAnnotationIfUndetermined();
+        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope();
 
         this.RequireLoopScope( node.Condition, conditionScope, "while" );
 
@@ -2134,8 +2138,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         // The scope of a `do ... while` statement is determined by its condition only.
 
-        var annotatedCondition = this.Visit( node.Condition );
-        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
+        var annotatedCondition = this.Visit( node.Condition ).ReplaceWithCompileTimeOnlyAnnotationIfUndetermined();
+        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope();
 
         this.RequireLoopScope( node.Condition, conditionScope, "do" );
 
@@ -2444,7 +2448,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                transformedStatements = section.Statements.SelectAsArray( s => this.Visit( s ).AddRunTimeOnlyAnnotationIfUndetermined() );
+                transformedStatements = section.Statements.SelectAsArray( s => this.Visit( s ).ReplaceWithCompileTimeOnlyAnnotationIfUndetermined() );
             }
 
             transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( switchScope );

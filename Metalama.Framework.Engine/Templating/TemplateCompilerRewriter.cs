@@ -214,7 +214,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         bool GetFromParent()
         {
-            // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
+            // Look for annotation on the parent, but stop at 'if', 'foreach', and similar statements,
             // which have special interpretation.
             var parent = node.Parent;
 
@@ -228,10 +228,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     return false;
 
                 case IfStatementSyntax:
-                case ForEachStatementSyntax:
                 case ElseClauseSyntax:
-                case WhileStatementSyntax:
                 case SwitchSectionSyntax:
+                case ForEachStatementSyntax:
+                case WhileStatementSyntax:
+                case DoStatementSyntax:
                     throw new AssertionFailedException( $"The node '{node}' must be annotated." );
 
                 default:

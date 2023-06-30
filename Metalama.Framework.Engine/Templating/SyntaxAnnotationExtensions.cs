@@ -230,15 +230,25 @@ namespace Metalama.Framework.Engine.Templating
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( actualScope );
         }
 
-        public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
+        public static T ReplaceWithCompileTimeOnlyAnnotationIfUndetermined<T>( this T node )
+            where T : SyntaxNode
+            => ReplaceScopeAnnotationIfUndetermined( node, TemplatingScope.CompileTimeOnly );
+
+        public static T ReplaceScopeAnnotationIfUndetermined<T>( this T node, TemplatingScope scope )
+            where T : SyntaxNode
         {
-            if ( statement.GetScopeFromAnnotation().GetValueOrDefault().IsUndetermined() )
+            if ( scope.IsUndetermined() )
             {
-                return statement.ReplaceScopeAnnotation( TemplatingScope.RunTimeOnly );
+                throw new ArgumentException( $"Can't replace undetermined scope with undetermined scope.", nameof(scope) );
+            }
+
+            if ( node.GetScopeFromAnnotation().GetValueOrDefault().IsUndetermined() )
+            {
+                return node.ReplaceScopeAnnotation( scope );
             }
             else
             {
-                return statement;
+                return node;
             }
         }
 
