@@ -3,7 +3,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_TwoAdvices
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing_TwoAdvices_ImplicitConstructor
 {
     public class Aspect : TypeAspect
     {
@@ -24,13 +24,6 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     [Aspect]
     public class TargetCode
     {
-        public TargetCode() { }
-
-        public TargetCode( int x ) { }
-
-        private int Method( int a )
-        {
-            return a;
-        }
+        public static int Foo = 42;
     }
 }
