@@ -3,13 +3,13 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_TwoAdvices
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing_TwoAdvices
 {
     public class Aspect : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, tags: new { name = "first" } );
+            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeTypeConstructor, tags: new { name = "first" } );
             builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, tags: new { name = "second" } );
         }
 
@@ -24,13 +24,6 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     [Aspect]
     public class TargetCode
     {
-        public TargetCode() { }
-
-        public TargetCode( int x ) { }
-
-        private int Method( int a )
-        {
-            return a;
-        }
+        static TargetCode() { }
     }
 }

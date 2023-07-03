@@ -54,7 +54,7 @@ internal abstract class InitializeAdvice : Advice
         {
             staticConstructor = containingType.StaticConstructor;
 
-            if ( staticConstructor == null )
+            if ( staticConstructor == null || staticConstructor.IsImplicitlyDeclared )
             {
                 var staticConstructorBuilder = new ConstructorBuilder( containingType, this ) { IsStatic = true };
                 staticConstructor = staticConstructorBuilder;
