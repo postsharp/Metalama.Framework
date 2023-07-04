@@ -6,10 +6,12 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -102,8 +104,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             SimpleNameSyntax name;
 
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
             var receiverInfo = this.GetReceiverInfo();
 
             if ( this.Member.IsGeneric )
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this.GetCleanTargetMemberName() ),
                     TypeArgumentList(
-                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => this.GenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
@@ -120,24 +120,67 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var compilation = this.Member.Compilation;
 
-            var argumentsObjectSyntax = TypedExpressionSyntaxImpl.FromValue( argsObject, compilation, generationContext );
+            var argumentsObjectSyntax = TypedExpressionSyntaxImpl.FromValue( argsObject, compilation, this.GenerationContext );
+
+            TypedExpressionSyntaxImpl[] argumentExpressions;
 
             // TODO: create a local variable for the arguments object?
             // TODO: test methods optional parameters and short array (it won't work)
             // TODO: formatting or refactoring
-            var argumentExpressions = argumentsObjectSyntax.ExpressionType switch
+            switch ( argumentsObjectSyntax.ExpressionType )
             {
-                IArrayTypeSymbol arrayType when arrayType.IsSZArray =>
-                    Enumerable.Range( 0, this.Member.Parameters.Count ).Select( i => new TypedExpressionSyntaxImpl( ElementAccessExpression( argumentsObjectSyntax.Syntax ).AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( i ) ) ), arrayType.ElementType, generationContext, isReferenceable: true ) ),
-                INamedTypeSymbol namedType when namedType.IsTupleType =>
-                    namedType.TupleElements.Select(e => new TypedExpressionSyntaxImpl( MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, argumentsObjectSyntax.Syntax, IdentifierName(e.Name) ), e.Type, generationContext, isReferenceable: true)),
-                _ => throw new InvalidOperationException($"Type {argumentsObjectSyntax.ExpressionType} is not a supported argument object type. Only single-dimensional arrays and tuples are allowed.")
-            };
+                case IArrayTypeSymbol arrayType when arrayType.IsSZArray:
+
+                    var parametersCount = this.Member.Parameters.Count;
+
+                    argumentExpressions = new TypedExpressionSyntaxImpl[parametersCount];
+
+                    for (var i = 0; i < parametersCount; i++ )
+                    {
+                        var parameter = this.Member.Parameters[i];
+                        if ( parameter.IsParams )
+                        {
+                            // args.Skip(parametersCount-1).Cast<ParamsParamElementType>().ToArray()
+
+                            var enumerableTypeSyntax = this.GenerationContext.SyntaxGenerator.Type( this.GenerationContext.ReflectionMapper.GetTypeSymbol( typeof(Enumerable) ) );
+
+                            // Don't skip if there's nothing to skip.
+                            var skip = i == 0 ? argumentsObjectSyntax.Syntax : InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, enumerableTypeSyntax, IdentifierName( nameof(Enumerable.Skip) ) ) )
+                                .AddArgumentListArguments(
+                                    Argument(argumentsObjectSyntax.Syntax),
+                                    Argument( SyntaxFactoryEx.LiteralExpression( i ) ) );
+
+                            var parameterTypeSymbol = parameter.Type.GetSymbol();
+                            var elementTypeSymbol = ((IArrayTypeSymbol) parameterTypeSymbol).ElementType;
+
+                            // Don't cast if there's nothing to cast.
+                            var cast = this.GenerationContext.CompilationContext.SymbolComparer.Equals( arrayType, parameterTypeSymbol ) ? skip : InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, enumerableTypeSyntax, GenericName( nameof(Enumerable.Cast) ).AddTypeArgumentListArguments(this.GenerationContext.SyntaxGenerator.Type( elementTypeSymbol ) ) ) )
+                                .AddArgumentListArguments( Argument( skip ) );
+
+                            // Don't call ToArray() if the result is already an array.
+                            var toArray = cast == argumentsObjectSyntax.Syntax ? cast : InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, enumerableTypeSyntax, IdentifierName( nameof(Enumerable.ToArray) ) ) )
+                                .AddArgumentListArguments( Argument( cast ) );
+
+                            argumentExpressions[i] = new TypedExpressionSyntaxImpl( toArray, parameterTypeSymbol, this.GenerationContext );
+                        }
+                        else
+                        {
+                            argumentExpressions[i] = new TypedExpressionSyntaxImpl( ElementAccessExpression( argumentsObjectSyntax.Syntax ).AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( i ) ) ), arrayType.ElementType, this.GenerationContext, isReferenceable: true );
+                        }
+                    }
+
+                    break;
+                case INamedTypeSymbol namedType when namedType.IsTupleType:
+                    argumentExpressions = namedType.TupleElements.SelectAsArray( e => new TypedExpressionSyntaxImpl( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, argumentsObjectSyntax.Syntax, IdentifierName( e.Name ) ), e.Type, this.GenerationContext, isReferenceable: true ) );
+                    break;
+                default:
+                    throw new InvalidOperationException( $"Type {argumentsObjectSyntax.ExpressionType} is not a supported argument object type. Only single-dimensional arrays and tuples are allowed." );
+            }
 
             var arguments = this.Member.GetArguments(
                 this.Member.Parameters,
-                argumentExpressions.ToArray(),
-                generationContext );
+                argumentExpressions,
+                this.GenerationContext );
 
             if ( this.Member.MethodKind == MethodKind.LocalFunction )
             {
@@ -150,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext ) );
+                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext ) );
 
                 return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
             }
@@ -160,8 +203,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             SimpleNameSyntax name;
 
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
             var receiverInfo = this.GetReceiverInfo();
 
             if ( this.Member.IsGeneric )
@@ -169,7 +210,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this.GetCleanTargetMemberName() ),
                     TypeArgumentList(
-                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => this.GenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
@@ -180,8 +221,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments(
                 this.Member.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, compilation, generationContext ),
-                generationContext );
+                TypedExpressionSyntaxImpl.FromValues( args, compilation, this.GenerationContext ),
+                this.GenerationContext );
 
             if ( this.Member.MethodKind == MethodKind.LocalFunction )
             {
@@ -194,7 +235,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext ) );
+                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext ) );
 
                 return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
             }

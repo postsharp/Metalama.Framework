@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
