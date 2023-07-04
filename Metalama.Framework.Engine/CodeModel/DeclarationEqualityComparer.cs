@@ -53,13 +53,13 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
         left.ThrowIfBelongsToDifferentCompilationThan( right );
 
-        if ( kind == ConversionKind.IgnoreTypeArguments )
+        if ( kind == ConversionKind.TypeDefinition )
         {
             // Cannot use Roslyn for this kind of conversion.
 
             if ( right is not INamedTypeSymbol rightNamedType || !SymbolEqualityComparer.Default.Equals( rightNamedType, rightNamedType.ConstructedFrom ) )
             {
-                throw new ArgumentException( "ConversionKind.IgnoreTypeArguments can only be used with unbound generic type on the right side." );
+                throw new ArgumentException( $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with unbound generic type on the right side." );
             }
 
             switch ( left )
@@ -82,13 +82,16 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         switch ( kind )
         {
             case ConversionKind.Default:
-                return conversion.IsImplicit;
+                return conversion is { IsIdentity: true } or { IsImplicit: true };
 
-            case ConversionKind.DenyBoxing:
-                return conversion is { IsImplicit: true, IsBoxing: false } and { IsUserDefined: false, IsDynamic: false };
+            case ConversionKind.Reference:
+                return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true };
+
+            case ConversionKind.ReferenceOrBoxing:
+                return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true } or { IsImplicit: true, IsBoxing: true };
 
             default:
-                throw new ArgumentOutOfRangeException( nameof(kind) );
+                throw new ArgumentOutOfRangeException( nameof( kind ) );
         }
     }
 

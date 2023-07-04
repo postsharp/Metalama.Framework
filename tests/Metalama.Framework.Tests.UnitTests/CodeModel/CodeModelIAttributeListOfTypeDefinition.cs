@@ -31,7 +31,7 @@ class C
             var attributeType = compilation.Types.Single( t => t.Name == "A" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.TypeDefinition )
                 .Select( x => x.Type.TypeDefinition )
                 .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
                 .ToArray();
@@ -59,7 +59,7 @@ class C
             var attributeType = compilation.Types.Single( t => t.Name == "A" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.TypeDefinition )
                 .Select( x => x.Type.TypeDefinition )
                 .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
                 .ToArray();
@@ -92,7 +92,7 @@ class C
             var usedType = compilation.Types.Single( t => t.Name == "B" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.IgnoreTypeArguments )
+            var types = type.Attributes.OfAttributeType( attributeType, ConversionKind.TypeDefinition )
                 .Select( x => x.Type.TypeDefinition )
                 .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
                 .ToArray();
@@ -125,7 +125,7 @@ class C
             var usedType = compilation.Types.Single( t => t.Name == "B" );
             var type = compilation.Types.Single( t => t.Name == "C" );
 
-            var types = type.Attributes.OfAttributeType( interfaceType, ConversionKind.IgnoreTypeArguments )
+            var types = type.Attributes.OfAttributeType( interfaceType, ConversionKind.TypeDefinition )
                 .Select( x => x.Type.TypeDefinition )
                 .OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default )
                 .ToArray();

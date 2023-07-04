@@ -10,22 +10,32 @@ namespace Metalama.Framework.Code
     public enum ConversionKind
     {
         /// <summary>
-        /// Accepts implicit conversion, including boxing and custom implicit operators, as does the C# <c>is</c> operator. 
+        /// Accepts any value implicitly convertible to the given type, including boxing and user-defined implicit operators. 
         /// </summary>
         Default,
 
         /// <summary>
-        /// Accepts any type-compatible value without boxing (unlike the C# <c>is</c> operator).
+        /// Accepts any value that is reference-compatible with the given type (unlike the C# <c>is</c> operator).
         /// </summary>
-        DenyBoxing,
+        Reference,
 
         /// <summary>
-        /// Accepts any value with the same generic type definition.
+        /// Accepts any value that is reference-compatible or can be boxed, including boxing (behavior of C# <c>is</c> operator).
         /// </summary>
-        IgnoreTypeArguments,
+        ReferenceOrBoxing,
 
-        [Obsolete( "Use DenyBoxing.", true )]
-        ImplicitReference = DenyBoxing,
+        /// <summary>
+        /// Accepts any value, which extends or implements a type which is of the same type definition as the given type definition.
+        /// </summary>
+        /// <remarks>
+        /// For non-generic types behaves like <see cref="Reference"/>. For generic types, ignores all type arguments and tests that 
+        /// the given type definition is equal to type definition of the value, type definition of any base type, or type definition of
+        /// any implemented interface (by type itself or by any base type, including base interfaces).
+        /// </remarks>
+        TypeDefinition,
+
+        [Obsolete( "Use Reference.", true )]
+        ImplicitReference = Reference,
 
         [Obsolete( "Use Default.", true )]
         Implicit = Default

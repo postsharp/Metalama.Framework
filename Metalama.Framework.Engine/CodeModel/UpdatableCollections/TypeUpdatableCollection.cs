@@ -57,7 +57,7 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
 
         return
             this.GetSymbols()
-                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol(), ConversionKind.IgnoreTypeArguments ) )
+                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol(), ConversionKind.TypeDefinition ) )
                 .Where( this.IsSymbolIncluded )
                 .Select( x => new MemberRef<INamedType>( x, this.Compilation.CompilationContext ) )
                 .ToImmutableArray();

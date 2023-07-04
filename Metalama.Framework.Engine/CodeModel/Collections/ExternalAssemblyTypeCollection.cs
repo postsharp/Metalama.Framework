@@ -72,7 +72,7 @@ internal sealed class ExternalAssemblyTypeCollection : INamedTypeCollection
                 t => ((DeclarationEqualityComparer) this._compilation.Comparers.Default).Is(
                     t,
                     typeDefinition.GetSymbol().AssertNotNull(),
-                    ConversionKind.IgnoreTypeArguments ) )
+                    ConversionKind.TypeDefinition ) )
             .Select( x => this._compilation.Factory.GetNamedType( x ) );
 
     public IEnumerator<INamedType> GetEnumerator()
