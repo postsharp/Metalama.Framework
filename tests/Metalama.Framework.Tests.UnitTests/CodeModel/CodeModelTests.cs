@@ -1123,7 +1123,7 @@ namespace System { class MySystemClass {} }
             var compilation = testContext.CreateCompilationModel( "" );
             var fromType = compilation.Factory.GetSpecialType( @from );
             var toType = compilation.Factory.GetSpecialType( to );
-            var result = fromType.Is( toType );
+            var result = fromType.Is( toType, ConversionKind.Implicit );
 
             Assert.Equal( expectedResult, result );
         }

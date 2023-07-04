@@ -13,12 +13,12 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
     where T : class, IMemberOrNamedType
 {
-    private ImmutableDictionary<string, UpdatableMemberRefArray<T>>? _dictionary;
+    private ImmutableDictionary<string, UpdatableMemberRefArray<T>>? _byNameDictionary;
 
     protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedDictionary()
-        => this._dictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
+    private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedByNameDictionary()
+        => this._byNameDictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
 
     protected bool IsVisible( ISymbol symbol )
     {
@@ -27,16 +27,16 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
     public override ImmutableArray<MemberRef<T>> OfName( string name )
     {
-        var dictionary = this.GetInitializedDictionary();
+        var byName = this.GetInitializedByNameDictionary();
 
-        if ( dictionary.TryGetValue( name, out var updatableArray ) )
+        if ( byName.TryGetValue( name, out var updatableArray ) )
         {
             return updatableArray.Array;
         }
         else if ( !this.IsComplete )
         {
-            var members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( name ), this.Compilation, this.MemberRefComparer );
-            this._dictionary = dictionary.SetItem( name, members );
+            var members = new UpdatableMemberRefArray<T>( this.GetMemberRefsOfName( name ), this.Compilation, this.MemberRefComparer );
+            this._byNameDictionary = byName.SetItem( name, members );
 
             return members.Array;
         }
@@ -48,11 +48,11 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
     protected override void PopulateAllItems( Action<Ref<T>> action )
     {
-        var dictionary = this.GetInitializedDictionary();
-        var dictionaryBuilder = dictionary.ToBuilder();
+        var byNameDictionary = this.GetInitializedByNameDictionary();
+        var byNameDictionaryBuilder = byNameDictionary.ToBuilder();
 
         // Add all items that already been discovered in a name-specific operation.
-        foreach ( var array in dictionary.Values )
+        foreach ( var array in byNameDictionary.Values )
         {
             foreach ( var item in array.Array )
             {
@@ -65,17 +65,17 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         {
             // We intentionally look in the initial dictionary (not the builder). If there is no value for this name, it means
             // that the collection was not built for that name, and we need to create it now.
-            if ( !dictionary.ContainsKey( symbol.Name ) )
+            if ( !byNameDictionary.ContainsKey( symbol.Name ) )
             {
                 var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
 
                 action( memberRef.ToRef() );
 
-                if ( !dictionaryBuilder.TryGetValue( memberRef.Name, out var members ) )
+                if ( !byNameDictionaryBuilder.TryGetValue( memberRef.Name, out var members ) )
                 {
                     // This is the first time this method processes a member of that name.
                     members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( memberRef ), this.Compilation, this.MemberRefComparer );
-                    dictionaryBuilder[memberRef.Name] = members;
+                    byNameDictionaryBuilder[memberRef.Name] = members;
                 }
                 else
                 {
@@ -85,19 +85,19 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             }
         }
 
-        this._dictionary = dictionaryBuilder.ToImmutable();
+        this._byNameDictionary = byNameDictionaryBuilder.ToImmutable();
     }
 
     public void Add( MemberRef<T> member )
     {
-        var dictionary = this.GetInitializedDictionary();
+        var byNameDictionary = this.GetInitializedByNameDictionary();
 
-        if ( !dictionary.TryGetValue( member.Name, out var members ) )
+        if ( !byNameDictionary.TryGetValue( member.Name, out var members ) )
         {
             if ( !this.IsComplete )
             {
                 // The collection has not been populated yet, so do it now, and add the new member.
-                members = new UpdatableMemberRefArray<T>( this.GetMemberRefs( member.Name ).Add( member ), this.Compilation, this.MemberRefComparer );
+                members = new UpdatableMemberRefArray<T>( this.GetMemberRefsOfName( member.Name ).Add( member ), this.Compilation, this.MemberRefComparer );
             }
             else
             {
@@ -105,7 +105,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( member ), this.Compilation, this.MemberRefComparer );
             }
 
-            this._dictionary = dictionary.SetItem( member.Name, members );
+            this._byNameDictionary = byNameDictionary.SetItem( member.Name, members );
         }
         else
         {
@@ -118,7 +118,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
                 members = new UpdatableMemberRefArray<T>( members.Array.Add( member ), this.Compilation, this.MemberRefComparer );
-                this._dictionary = dictionary.SetItem( member.Name, members );
+                this._byNameDictionary = byNameDictionary.SetItem( member.Name, members );
             }
         }
 
@@ -132,14 +132,14 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
     public void Remove( MemberRef<T> member )
     {
-        var dictionary = this.GetInitializedDictionary();
+        var byNameDictionary = this.GetInitializedByNameDictionary();
 
-        if ( !dictionary.TryGetValue( member.Name, out var members ) )
+        if ( !byNameDictionary.TryGetValue( member.Name, out var members ) )
         {
             if ( !this.IsComplete )
             {
                 // The collection has not been populated yet, so do it now, and add the new member.
-                var sourceMembers = this.GetMemberRefs( member.Name );
+                var sourceMembers = this.GetMemberRefsOfName( member.Name );
 
                 var index = sourceMembers.IndexOf( member, this.MemberRefComparer );
 
@@ -155,7 +155,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 throw new AssertionFailedException( $"The collection was populated, but it did not contain the item '{member}'." );
             }
 
-            this._dictionary = dictionary.SetItem( member.Name, members );
+            this._byNameDictionary = byNameDictionary.SetItem( member.Name, members );
         }
         else
         {
@@ -175,19 +175,19 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 }
 
                 members = new UpdatableMemberRefArray<T>( members.Array.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
-                this._dictionary = dictionary.SetItem( member.Name, members );
+                this._byNameDictionary = byNameDictionary.SetItem( member.Name, members );
             }
         }
 
         this.RemoveItem( member.ToRef() );
     }
 
-    protected abstract IEnumerable<ISymbol> GetSymbols( string name );
+    protected abstract IEnumerable<ISymbol> GetSymbolsOfName( string name );
 
     protected abstract IEnumerable<ISymbol> GetSymbols();
 
-    private ImmutableArray<MemberRef<T>> GetMemberRefs( string name )
-        => this.GetSymbols( name )
+    private ImmutableArray<MemberRef<T>> GetMemberRefsOfName( string name )
+        => this.GetSymbolsOfName( name )
             .Select( x => new MemberRef<T>( x, this.Compilation.CompilationContext ) )
             .ToImmutableArray();
 }

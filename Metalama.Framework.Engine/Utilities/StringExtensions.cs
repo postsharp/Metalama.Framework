@@ -58,6 +58,7 @@ namespace Metalama.Framework.Engine.Utilities
         public static string ToCamelCase( this string s )
         {
             var firstLetter = s[..1];
+
             return firstLetter.ToLowerInvariant() + (s.Length > 1 ? s[1..] : "");
         }
 
