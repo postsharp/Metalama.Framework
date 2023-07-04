@@ -1,9 +1,13 @@
-[Aspect]
 class C
 {
-    private void M()
+    [Aspect]
+    int M(int i) => 42;
+    public global::System.Func<global::System.Object?, global::System.Object?[], global::System.Object?> GetOriginalMethodInvoker()
     {
-        Log("foo");
-        void Log(string instance) => global::System.Console.WriteLine(instance);
+        return (global::System.Func<global::System.Object?, global::System.Object?[], global::System.Object?>)Invoke;
+        object? Invoke(object? instance, object?[] args)
+        {
+            return ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.LocalFunctions.Parameter.C)instance).M((global::System.Int32)args[0]!);
+        }
     }
 }

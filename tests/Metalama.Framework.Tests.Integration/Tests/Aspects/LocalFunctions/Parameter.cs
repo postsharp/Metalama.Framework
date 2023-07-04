@@ -5,22 +5,37 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LocalFunctions.Parameter;
 
-class Aspect : TypeAspect
+class Aspect : MethodAspect
 {
     [Template]
-    void M()
+    public Func<object?, object?[], object?> GetOriginalMethodInvoker(IMethod method)
     {
-        Log("foo");
+        return Invoke;
 
-        void Log(string instance) => Console.WriteLine(instance);
+        object? Invoke(object? instance, object?[] args)
+        {
+            if (method.IsStatic)
+            {
+                return method.Invoke(args[0]!);
+            }
+            else
+            {
+                return method.With(instance).Invoke(args[0]!);
+            }
+        }
     }
-
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect(IAspectBuilder<IMethod> builder)
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(M));
+        builder.Advice.IntroduceMethod(
+            builder.Target.DeclaringType,
+            nameof(GetOriginalMethodInvoker),
+            args: new { method = builder.Target });
     }
 }
 
 // <target>
-[Aspect]
-class C { }
+class C
+{
+    [Aspect]
+    int M(int i) => 42;
+}

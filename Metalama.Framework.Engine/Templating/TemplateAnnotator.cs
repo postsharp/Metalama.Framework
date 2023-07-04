@@ -217,6 +217,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( symbol is IParameterSymbol )
         {
+            // TODO: explain and update comment below
+            if ( symbol.ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
+            {
+                return TemplatingScope.RunTimeOnly;
+            }
+
             // Until we support template parameters and local functions, all parameters are parameters
             // of expression lambdas, which are of unknown scope.
             return TemplatingScope.LateBound;
