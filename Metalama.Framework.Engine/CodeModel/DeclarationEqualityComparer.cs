@@ -81,13 +81,13 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
         switch ( kind )
         {
-            case ConversionKind.Default:
+            case ConversionKind.Implicit:
                 return conversion is { IsIdentity: true } or { IsImplicit: true };
 
             case ConversionKind.Reference:
                 return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true };
 
-            case ConversionKind.ReferenceOrBoxing:
+            case ConversionKind.Default:
                 return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true } or { IsImplicit: true, IsBoxing: true };
 
             default:

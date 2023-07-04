@@ -30,17 +30,35 @@ class B : A, I
             var typeB = compilation.Types.OfName( "B" ).Single();
             var typeI = compilation.Types.OfName( "I" ).Single();
 
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int) ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool) ) );
-            Assert.True( compilation.Comparers.Default.Is( typeB, typeof(int) ) );
-            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeB ) );
-            Assert.True( compilation.Comparers.Default.Is( typeB, typeA ) );
-            Assert.False( compilation.Comparers.Default.Is( typeI, typeB ) );
-            Assert.True( compilation.Comparers.Default.Is( typeB, typeI ) );
-            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object) ) );
-            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long) ) );
-            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int) ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( int ), ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( bool ), ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( typeB, typeof( int ), ConversionKind.Default ) );
+
+            Assert.False(
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeB, ConversionKind.Default ) );
+
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Default ) );
+            Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.Default ) );
+            Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.Default ) );
+
+            Assert.True(
+                compilation.Comparers.Default.Is(
+                    compilation.Factory.GetTypeByReflectionType( typeof( int ) ),
+                    typeof( object ),
+                    ConversionKind.Default ) );
+
+            Assert.False(
+                compilation.Comparers.Default.Is(
+                    compilation.Factory.GetTypeByReflectionType( typeof( int ) ),
+                    typeof( long ),
+                    ConversionKind.Default ) );
+
+            Assert.False(
+                compilation.Comparers.Default.Is(
+                    compilation.Factory.GetTypeByReflectionType( typeof( long ) ),
+                    typeof( int ),
+                    ConversionKind.Default ) );
         }
 
         [Fact]
@@ -64,27 +82,27 @@ class B : A, I
             var typeB = compilation.Types.OfName( "B" ).Single();
             var typeI = compilation.Types.OfName( "I" ).Single();
 
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( int ), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( bool ), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeB, typeof( int ), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeB, ConversionKind.Reference ) );
             Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Reference ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Reference ) );
             Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.Reference ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeof( object ), ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeof( long ), ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( long ) ), typeof( int ), ConversionKind.Reference ) );
         }
 
         [Fact]
-        public void ConversionKindReferenceOrBoxing()
+        public void ConversionKindImplicit()
         {
             using var testContext = this.CreateTestContext();
 
@@ -104,35 +122,17 @@ class B : A, I
             var typeB = compilation.Types.OfName( "B" ).Single();
             var typeI = compilation.Types.OfName( "I" ).Single();
 
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int), ConversionKind.ReferenceOrBoxing ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.ReferenceOrBoxing ) );
-            Assert.False( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.ReferenceOrBoxing ) );
-
-            Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.ReferenceOrBoxing ) );
-
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.ReferenceOrBoxing ) );
-            Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.ReferenceOrBoxing ) );
-            Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.ReferenceOrBoxing ) );
-            Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.ReferenceOrBoxing ) );
-
-            Assert.True(
-                compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
-                    typeof(object),
-                    ConversionKind.ReferenceOrBoxing ) );
-
-            Assert.False(
-                compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
-                    typeof(long),
-                    ConversionKind.ReferenceOrBoxing ) );
-
-            Assert.False(
-                compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof(long) ),
-                    typeof(int),
-                    ConversionKind.ReferenceOrBoxing ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int), ConversionKind.Implicit ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.Implicit ) );
+            Assert.True( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.Implicit ) );
+            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Implicit ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Implicit ) );
+            Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Implicit ) );
+            Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.Implicit ) );
+            Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.Implicit ) );
+            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit ) );
+            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Implicit ) );
+            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Implicit ) );
         }
 
         [Fact]
