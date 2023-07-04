@@ -5,6 +5,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using System;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance_Base_Error;
@@ -17,10 +18,16 @@ public class InvokerAspect : MethodAspect
 {
     public override void BuildAspect(IAspectBuilder<IMethod> builder)
     {
+        var anotherMethod = builder.Target.DeclaringType!.Methods.OfName("Method").Single();
+
+        builder.Advice.Override(
+            anotherMethod,
+            nameof(AnotherMethodTemplate));
+
         builder.Advice.Override(
             builder.Target,
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.Methods.OfName("Method").Single() });
+            new { target = anotherMethod });
     }
 
     [Template]
@@ -29,6 +36,12 @@ public class InvokerAspect : MethodAspect
         target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base).Invoke();
 
         return meta.Proceed();
+    }
+
+    [Template]
+    public void AnotherMethodTemplate()
+    {
+        Console.WriteLine();
     }
 }
 

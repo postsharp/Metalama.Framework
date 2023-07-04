@@ -1,2 +1,16 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `Invoker`: `'InvokerAspect.Template(IMethod)' threw 'ArgumentOutOfRangeException' when applied to 'TargetClass.Invoker(TargetClass)': Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current. (Parameter 'target'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+public class TargetClass
+{
+    public void Method()
+    {
+        global::System.Console.WriteLine();
+    }
+    private void Method_Source()
+    {
+    }
+    [InvokerAspect]
+    public void Invoker(TargetClass instance)
+    {
+        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance_Base_Error.TargetClass)instance).Method_Source();
+        return;
+    }
+}

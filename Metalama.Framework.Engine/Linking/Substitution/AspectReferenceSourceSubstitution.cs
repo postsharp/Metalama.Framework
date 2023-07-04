@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution;
 
@@ -42,10 +41,10 @@ internal sealed class AspectReferenceSourceSubstitution : AspectReferenceRenamin
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
-        ExpressionSyntax expression =
+        var expression =
             targetSymbol.IsStatic
                 ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
-                : ThisExpression();
+                : currentNode.Expression;
 
         return currentNode
             .WithExpression(

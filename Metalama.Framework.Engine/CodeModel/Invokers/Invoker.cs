@@ -29,12 +29,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
 
-            if ( orderOptions is InvokerOptions.Base or InvokerOptions.Current && !isSelfTarget )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(target),
-                    "Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current." );
-            }
+            //if ( orderOptions is InvokerOptions.Base or InvokerOptions.Current && !isSelfTarget )
+            //{
+            //    throw new ArgumentOutOfRangeException(
+            //        nameof(target),
+            //        "Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current." );
+            //}
 
             var otherFlags = options.Value & ~InvokerOptions.OrderMask;
 
