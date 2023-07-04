@@ -112,6 +112,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
+    public object? InvokeWithArgumentsObject( object argsObject ) => new MethodInvoker( this ).InvokeWithArgumentsObject( argsObject );
+
     public ICompilation Compilation => this.DeclaringMember.Compilation;
 
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     internal sealed class TypedExpressionSyntaxImpl : ITypedExpressionSyntaxImpl
     {
         /// <summary>
-        /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
+        /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression, or if the type is not known.
         /// </summary>
-        private ITypeSymbol? ExpressionType { get; }
+        public ITypeSymbol? ExpressionType { get; }
 
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             bool isReferenceable = false )
             : this(
                 syntax,
-                (ITypeSymbol) null!,
+                (ITypeSymbol?) null,
                 syntaxGenerationContext,
                 isReferenceable ) { }
 

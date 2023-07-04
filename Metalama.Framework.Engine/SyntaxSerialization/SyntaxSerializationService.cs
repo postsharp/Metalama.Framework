@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -275,6 +277,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             {
                 expression = serializer.Serialize( o, serializationContext );
             }
+
+            expression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( expression, serializationContext.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(T) ) );
 
             return true;
         }

@@ -150,6 +150,8 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
+    public object? InvokeWithArgumentsObject( object argsObject ) => new MethodInvoker( this ).InvokeWithArgumentsObject( argsObject );
+
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
     public bool? IsIteratorMethod => this._isIteratorMethod;

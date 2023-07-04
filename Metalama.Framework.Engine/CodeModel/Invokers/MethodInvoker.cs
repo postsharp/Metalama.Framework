@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -87,6 +88,71 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 default:
                     throw new NotImplementedException(
                         $"Cannot generate syntax to invoke the this.Declaration '{this.Member}' because this.Declaration kind {this.Member.MethodKind} is not implemented." );
+            }
+        }
+
+        public object? InvokeWithArgumentsObject( object argsObject )
+        {
+            if (this.Member.MethodKind != MethodKind.Default)
+            {
+                throw new NotImplementedException();
+            }
+
+            // TODO: somehow merge the code that's shared with InvokeDefaultMethod
+
+            SimpleNameSyntax name;
+
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
+            var receiverInfo = this.GetReceiverInfo();
+
+            if ( this.Member.IsGeneric )
+            {
+                name = GenericName(
+                    Identifier( this.GetCleanTargetMemberName() ),
+                    TypeArgumentList(
+                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+            }
+            else
+            {
+                name = IdentifierName( this.GetCleanTargetMemberName() );
+            }
+
+            var compilation = this.Member.Compilation;
+
+            var argumentsObjectSyntax = TypedExpressionSyntaxImpl.FromValue( argsObject, compilation, generationContext );
+
+            // TODO: create a local variable for the arguments object?
+            // TODO: test methods optional parameters and short array (it won't work)
+            // TODO: formatting or refactoring
+            var argumentExpressions = argumentsObjectSyntax.ExpressionType switch
+            {
+                IArrayTypeSymbol arrayType when arrayType.IsSZArray =>
+                    Enumerable.Range( 0, this.Member.Parameters.Count ).Select( i => new TypedExpressionSyntaxImpl( ElementAccessExpression( argumentsObjectSyntax.Syntax ).AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( i ) ) ), arrayType.ElementType, generationContext, isReferenceable: true ) ),
+                INamedTypeSymbol namedType when namedType.IsTupleType =>
+                    namedType.TupleElements.Select(e => new TypedExpressionSyntaxImpl( MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, argumentsObjectSyntax.Syntax, IdentifierName(e.Name) ), e.Type, generationContext, isReferenceable: true)),
+                _ => throw new InvalidOperationException($"Type {argumentsObjectSyntax.ExpressionType} is not a supported argument object type. Only single-dimensional arrays and tuples are allowed.")
+            };
+
+            var arguments = this.Member.GetArguments(
+                this.Member.Parameters,
+                argumentExpressions.ToArray(),
+                generationContext );
+
+            if ( this.Member.MethodKind == MethodKind.LocalFunction )
+            {
+                if ( receiverInfo.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
+                {
+                    throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
+                }
+
+                return this.CreateInvocationExpression( receiverInfo.ToReceiverExpressionSyntax(), name, arguments, AspectReferenceTargetKind.Self );
+            }
+            else
+            {
+                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext ) );
+
+                return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
             }
         }
 

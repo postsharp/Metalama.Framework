@@ -18,6 +18,8 @@ namespace Metalama.Framework.Code.Invokers
         /// </summary>
         dynamic? Invoke( params dynamic?[] args );
 
+        dynamic? InvokeWithArgumentsObject( dynamic argsObject );
+
         /// <summary>
         /// Gets an <see cref="IMethodInvoker"/> for the same method and target with different options.
         /// </summary>
