@@ -7,6 +7,7 @@ using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -26,8 +27,18 @@ namespace Metalama.Framework.Engine.CodeModel
                 IDynamicTypeSymbol => throw new AssertionFailedException( "Cannot get a System.Type for the 'dynamic' type." ),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(
                     "Cannot get a System.Type for the 'dynamic[]' type." ),
-                _ => this.Get( symbol is ITypeParameterSymbol ? symbol.GetSymbolId().Id : symbol.GetSerializableTypeId().Id, symbol )
+                _ => this.Get( ContainsTypeParameters( symbol ) ? symbol.GetSymbolId().Id : symbol.GetSerializableTypeId().Id, symbol )
             };
+
+        private static bool ContainsTypeParameters( ITypeSymbol symbol ) => symbol switch
+        {
+            ITypeParameterSymbol => true,
+            IDynamicTypeSymbol => false,
+            INamedTypeSymbol namedType => namedType.TypeParameters.Any( ContainsTypeParameters ),
+            IArrayTypeSymbol arrayType => ContainsTypeParameters( arrayType.ElementType ),
+            IPointerTypeSymbol pointerType => ContainsTypeParameters( pointerType.PointedAtType ),
+            _ => throw new AssertionFailedException( $"Unexpected symbol {symbol} of type {symbol?.GetType()}." )
+        };
 
         private CompileTimeType Get( string id, ITypeSymbol symbolForMetadata )
         {
