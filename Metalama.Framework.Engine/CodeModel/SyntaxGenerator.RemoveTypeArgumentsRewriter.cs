@@ -10,25 +10,19 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
+        // TODO: rename?
         private sealed class RemoveTypeArgumentsRewriter : SafeSyntaxRewriter
         {
             public override SyntaxNode VisitGenericName( GenericNameSyntax node )
             {
                 // We intentionally don't visit type arguments, because we don't want remove the nested type arguments.
 
-                // Remove the list of type arguments.
-                if ( node.TypeArgumentList.Arguments.Count == 1 )
-                {
-                    return SyntaxFactory.GenericName( node.Identifier );
-                }
-                else
-                {
-                    return SyntaxFactory.GenericName( node.Identifier )
-                        .WithTypeArgumentList(
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SeparatedList<TypeSyntax>(
-                                    node.TypeArgumentList.Arguments.SelectAsImmutableArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
-                }
+                // Replace type arguments with OmittedTypeArgument.
+                return SyntaxFactory.GenericName( node.Identifier )
+                    .WithTypeArgumentList(
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SeparatedList<TypeSyntax>(
+                                node.TypeArgumentList.Arguments.SelectAsImmutableArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
             }
         }
     }
