@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -111,14 +112,25 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return new TypedExpressionSyntaxImpl( syntax, generationContext );
 
                 default:
-                    var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+                    var compilationModel = compilation.GetCompilationModel();
+                    var syntaxSerializationService = compilationModel.Project.ServiceProvider.GetRequiredService<SyntaxSerializationService>();
 
-                    if ( expression != null )
+                    if ( syntaxSerializationService.TrySerialize( value, new SyntaxSerializationContext( compilationModel, generationContext ), out var expression ) )
                     {
-                        return new TypedExpressionSyntaxImpl(
-                            expression,
-                            compilation.GetCompilationModel().Factory.GetTypeByReflectionType( value.GetType() ),
-                            generationContext );
+                        var declarationFactory = compilation.GetCompilationModel().Factory;
+                        IType expressionType;
+
+                        // TODO: figure out something better
+                        try
+                        {
+                            expressionType = declarationFactory.GetTypeByReflectionType( value.GetType() );
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            expressionType = declarationFactory.GetSpecialType( SpecialType.Object );
+                        }
+
+                        return new TypedExpressionSyntaxImpl( expression, expressionType, generationContext );
                     }
                     else
                     {
