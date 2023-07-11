@@ -186,6 +186,8 @@ namespace Metalama.Framework.Engine.Templating
 
         public StatementSyntax DynamicLocalAssignment( IdentifierNameSyntax identifier, SyntaxKind kind, IUserExpression? expression, bool awaitResult )
         {
+            // TODO: do we need awaitResult here? couldn't expression just include the await?
+
             if ( expression == null )
             {
                 return SyntaxFactoryEx.EmptyStatement;

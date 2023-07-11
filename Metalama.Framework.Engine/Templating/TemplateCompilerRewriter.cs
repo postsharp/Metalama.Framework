@@ -921,31 +921,36 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( this.IsLocalSymbol( identifierSymbol ) || identifierSymbol is IDiscardSymbol )
             {
-                if ( this.IsCompileTimeDynamic( assignment.Right ) )
+                var valueExpression = assignment.Right;
+                var await = false;
+
+                if (valueExpression is AwaitExpressionSyntax awaitExpression)
                 {
-                    // Process the statement "<local_or_discard> = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
-
-                    var invocationExpression = InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
-                        .AddArgumentListArguments(
-                            Argument( this.Transform( identifier ) ),
-                            Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
-                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( assignment.Right ).AssertNotNull() ) ),
-                            Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
-
-                    return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                    valueExpression = awaitExpression.Expression;
+                    await = true;
                 }
-                else if ( assignment.Right is AwaitExpressionSyntax awaitExpression && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
+
+                ExpressionSyntax? processedValueExpression = null;
+                if ( this.IsCompileTimeDynamic( valueExpression ) )
                 {
-                    // Process the statement "<local_or_discard> = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+                    processedValueExpression = this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( valueExpression ).AssertNotNull() );
+                }
+                else if ( valueExpression.GetScopeFromAnnotation() == TemplatingScope.Dynamic )
+                {
+                    processedValueExpression = this.ToUserExpression( valueExpression );
+                }
+
+                if ( processedValueExpression != null )
+                {
+                    // Process the statement "<local_or_discard> = xxx;", where "xxx" is dynamic.
 
                     var invocationExpression = InvocationExpression(
                             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalAssignment) ) )
                         .AddArgumentListArguments(
                             Argument( this.Transform( identifier ) ),
                             Argument( this.MetaSyntaxFactory.Kind( assignment.Kind() ) ),
-                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( awaitExpression.Expression ).AssertNotNull() ) ),
-                            Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
+                            Argument( processedValueExpression ),
+                            Argument( SyntaxFactoryEx.LiteralExpression( await ) ) );
 
                     return this.WithCallToAddSimplifierAnnotation( invocationExpression );
                 }
@@ -2275,30 +2280,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( targetType is INamedTypeSymbol { Name: nameof(IExpression) } )
             {
-                var transformedExpression = this.Transform( node.Expression );
-
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression )
-                                     ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
-
-                var createRuntimeExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
-                    .AddArgumentListArguments(
-                        Argument( transformedExpression ),
-                        Argument(
-                            LiteralExpression(
-                                SyntaxKind.StringLiteralExpression,
-                                Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
-
-                return
-                    InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                createRuntimeExpression,
-                                IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
-                            ArgumentList(
-                                SingletonSeparatedList(
-                                    Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) )
-                        .WithAdditionalAnnotations( _userExpressionAnnotation );
+                return this.ToUserExpression( node.Expression )
+                    .WithAdditionalAnnotations( _userExpressionAnnotation );
             }
         }
 
@@ -2320,33 +2303,38 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( leftType is INamedTypeSymbol { Name: nameof(IExpression) } )
             {
-                var transformedRight = this.Transform( node.Right );
-
-                var rightType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Right )
-                                ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
-
-                var runtimeExpressionInvocation = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
-                    .AddArgumentListArguments(
-                        Argument( transformedRight ),
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( rightType.GetSerializableTypeId().Id ) ) ) );
-
-                var userExpressionInvocation = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        runtimeExpressionInvocation,
-                        IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) );
+                var userExpression = this.ToUserExpression( node.Right );
 
                 var transformedLeft = (ExpressionSyntax) this.Visit( node.Left ).AssertNotNull();
 
-                return AssignmentExpression( node.Kind(), transformedLeft, userExpressionInvocation );
+                return AssignmentExpression( node.Kind(), transformedLeft, userExpression );
             }
         }
 
         // Fallback to the default implementation.
         return base.VisitAssignmentExpression( node );
+    }
+
+    private ExpressionSyntax ToUserExpression( ExpressionSyntax expression )
+    {
+        var transformedExpression = this.Transform( expression );
+
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )
+                        ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+
+        var runtimeExpressionInvocation = InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+            .AddArgumentListArguments(
+                Argument( transformedExpression ),
+                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
+        return InvocationExpression(
+            MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                runtimeExpressionInvocation,
+                IdentifierName( nameof(TypedExpressionSyntax.ToUserExpression) ) ),
+            ArgumentList(
+                SingletonSeparatedList(
+                    Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Compilation) ) ) ) ) );
     }
 }
