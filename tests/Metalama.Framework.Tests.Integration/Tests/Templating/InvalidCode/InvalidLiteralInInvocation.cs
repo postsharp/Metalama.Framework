@@ -4,19 +4,19 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.InvalidCode.InvalidLiteralInInvocation
 {
-
-public class EnrichExceptionAttribute : OverrideMethodAspect
-{
-    public override dynamic? OverrideMethod()
+   
+    public class EnrichExceptionAttribute : OverrideMethodAspect
     {
-        var methodSignatureBuilder = new InterpolatedStringBuilder();
+        public override dynamic? OverrideMethod()
+        {
+            var methodSignatureBuilder = new InterpolatedStringBuilder();
 
 #if TESTRUNNER
-        // The next line has an intentional syntax error.
-        methodSignatureBuilder.AddText(""(');
+            // The next line has an intentional syntax error.
+            methodSignatureBuilder.AddText(""(');
 #endif
-        
-        return meta.Proceed();
+            
+            return meta.Proceed();
+        }
     }
-}
 }

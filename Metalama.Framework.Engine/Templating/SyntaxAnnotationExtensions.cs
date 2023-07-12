@@ -230,10 +230,6 @@ namespace Metalama.Framework.Engine.Templating
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( actualScope );
         }
 
-        public static T ReplaceWithCompileTimeOnlyAnnotationIfUndetermined<T>( this T node )
-            where T : SyntaxNode
-            => ReplaceScopeAnnotationIfUndetermined( node, TemplatingScope.CompileTimeOnly );
-
         public static T ReplaceScopeAnnotationIfUndetermined<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {

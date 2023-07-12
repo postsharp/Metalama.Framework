@@ -2,6 +2,8 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
+#pragma warning disable CS0162 // Unreachable code detected
+
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.RunTimeOrCompileTimeOldSwitch;
 
 [RunTimeOrCompileTime]
@@ -16,9 +18,7 @@ class Aspect
     [TestTemplate]
     dynamic? Template()
     {
-        var i = meta.CompileTime(SwitchEnum.one);
-
-        switch (i)
+        switch (SwitchEnum.one)
         {
             case SwitchEnum.one:
                 Console.WriteLine("1");

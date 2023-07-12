@@ -373,7 +373,9 @@ namespace Metalama.Framework.Engine.Formatting
 
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );
+                this.VisitToken( node.OpenParenToken );
                 this.Visit( node.Expression );
+                this.VisitToken( node.CloseParenToken );
                 this.Visit( node.Statement );
             }
             else
@@ -389,14 +391,14 @@ namespace Metalama.Framework.Engine.Formatting
                 this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
                 this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
 
-                // Mark indentation
                 this.VisitToken( node.OpenBraceToken );
-                this.VisitToken( node.CloseBraceToken );
 
                 foreach ( var statement in node.Statements )
                 {
                     this.Visit( statement );
                 }
+
+                this.VisitToken( node.CloseBraceToken );
             }
             else
             {
