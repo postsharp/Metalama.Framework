@@ -362,22 +362,33 @@ internal static class TemplateBindingHelper
         {
             return true;
         }
-        else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
+        else if ( fromType is INamedType fromNamedType && toType is INamedType toNamedType )
         {
             var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
+            var toTypeAsyncInfo = toType.GetAsyncInfo();
 
             if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
                  && fromNamedType.TypeArguments[0].TypeKind == TypeKind.Dynamic )
             {
                 // We accept Task<dynamic> for any awaitable.
 
-                if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
+                if ( toType.SpecialType == SpecialType.Void || toTypeAsyncInfo.IsAwaitable ||
                      toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
                 {
                     return true;
                 }
             }
-            else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
+            else if ( fromOriginalDefinition.SpecialType == SpecialType.Task )
+            {
+                // We accept Task for any void awaitable.
+
+                if ( toTypeAsyncInfo.IsAwaitable && toTypeAsyncInfo.ResultType.SpecialType == SpecialType.Void )
+                {
+                    return true;
+                }
+            }
+            else if ( fromNamedType.TypeArguments.Count > 0 &&
+                      fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
                       VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
             {
                 return true;
