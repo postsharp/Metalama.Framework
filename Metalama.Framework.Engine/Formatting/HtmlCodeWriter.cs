@@ -147,19 +147,22 @@ namespace Metalama.Framework.Engine.Formatting
                 var line = sourceText.Lines.GetLineFromPosition( span.Start );
                 var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
+                // Moved to a local function due to Roslyn bug that results in assertion failure in Metalama.Compier debug build: https://github.com/dotnet/roslyn/issues/69015
                 var members = node.AncestorsAndSelf()
-                    .Select(
-                        n => n switch
-                        {
-                            MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
-                            BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
-                            EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
-                            BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
-                            PropertyDeclarationSyntax property => (property, property.Identifier.Text),
-                            _ => (null, null)
-                        } )
+                    .Select( GetMemberTextPair )
                     .Where( x => x.Node != null )
                     .ToList();
+
+                (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
+                    => n switch
+                    {
+                        MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
+                        BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
+                        EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
+                        BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
+                        PropertyDeclarationSyntax property => (property, property.Identifier.Text),
+                        _ => (null, null)
+                    };
 
                 finalBuilder.AppendInvariant( $"<span class='line-number'" );
 
