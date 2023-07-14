@@ -18,6 +18,6 @@ internal static class DesignTimeServices
         // We don't initialize licensing because it depends on the project license key, which is not known at that time.
 
         BackstageServiceFactoryInitializer.Initialize(
-            new BackstageInitializationOptions( new MetalamaDesignTimeApplicationInfo() ) { AddSupportServices = true, OpenWelcomePage = true } );
+            new BackstageInitializationOptions( new MetalamaDesignTimeApplicationInfo() ) { AddSupportServices = true } );
     }
 }
