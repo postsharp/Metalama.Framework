@@ -561,33 +561,44 @@ internal sealed partial class CompileTimeCompilationBuilder
                 // Try to delete with lock detection first to get a better error message.
                 if ( Directory.Exists( outputDirectory ) )
                 {
-                    var files = Directory.GetFiles( outputDirectory );
-                    var deletedDirectory = Path.Combine( Path.GetDirectoryName( outputDirectory )!, Path.GetFileName( outputDirectory ) + ".del" );
+                    string? deletedDirectory = null;
 
-                    RetryHelper.RetryWithLockDetection(
-                        files,
-                        () =>
-                        {
-                            if ( Directory.Exists( outputDirectory ) )
+                    using ( MutexHelper.WithGlobalLock( outputDirectory, this._logger ) )
+                    {
+                        var files = Directory.GetFiles( outputDirectory );
+
+                        RetryHelper.RetryWithLockDetection(
+                            files,
+                            () =>
                             {
-                                // To delete the directory atomically, rename it.
-                                Directory.Move( outputDirectory, deletedDirectory );
-                                Directory.Delete( deletedDirectory, true );
-                            }
-                        },
+                                if ( Directory.Exists( outputDirectory ) )
+                                {
+                                    // Find a unique directory name transactional deletion.
+                                    var deletedIndex = 0;
+
+                                    do
+                                    {
+                                        deletedIndex++;
+
+                                        deletedDirectory = Path.Combine(
+                                            Path.GetDirectoryName( outputDirectory )!,
+                                            Path.GetFileName( outputDirectory ) + $".del{deletedIndex}" );
+                                    }
+                                    while ( Directory.Exists( deletedDirectory ) );
+
+                                    // To delete the directory atomically, rename it.
+                                    Directory.Move( outputDirectory, deletedDirectory );
+                                }
+                            },
+                            this._serviceProvider.Underlying );
+                    }
+
+                    // Delete the moved directory. There could also be a lock due to anti-virus programs.
+                    RetryHelper.RetryWithLockDetection(
+                        Directory.GetFiles( deletedDirectory! ),
+                        () => Directory.Delete( deletedDirectory!, true ),
                         this._serviceProvider.Underlying );
                 }
-
-                // Then delete the directory itself. At this point, we should no longer have locks. 
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( Directory.Exists( outputDirectory ) )
-                        {
-                            Directory.Delete( outputDirectory, true );
-                        }
-                    },
-                    logger: this._logger );
             }
             catch ( Exception e )
             {
