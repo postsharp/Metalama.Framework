@@ -21,7 +21,7 @@ namespace Metalama.Framework.RunTime
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public AsyncEnumerator GetAsyncEnumerator( CancellationToken cancellationToken = default ) => new( this.GetEnumerator(), cancellationToken );
+        public AsyncEnumerator GetAsyncEnumerator( CancellationToken cancellationToken = default ) => new( this, cancellationToken );
 
         /// <summary>
         /// Implementation of <see cref="IAsyncEnumerator{T}"/>.
@@ -31,11 +31,14 @@ namespace Metalama.Framework.RunTime
             private readonly CancellationToken _cancellationToken;
             private Enumerator _enumerator;
 
-            public AsyncEnumerator( in Enumerator enumerator, CancellationToken cancellationToken )
+            public AsyncEnumerator( AsyncEnumerableList<T> parent, CancellationToken cancellationToken )
             {
-                this._enumerator = enumerator;
+                this.Parent = parent;
+                this._enumerator = parent.GetEnumerator();
                 this._cancellationToken = cancellationToken;
             }
+
+            public AsyncEnumerableList<T> Parent { get; }
 
             public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
