@@ -222,7 +222,7 @@ interface I<T>
             Assert.Equal( "M2", m2.Name );
 
             CheckParameterData( m2.ReturnParameter, m2, "int", "<return>", -1 );
-            Assert.Equal( 0, m2.Parameters.Count );
+            Assert.Empty( m2.Parameters );
 
             static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string name, int index )
             {

@@ -29,7 +29,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 using Document = Microsoft.CodeAnalysis.Document;
 
 // ReSharper disable MethodHasAsyncOverload
