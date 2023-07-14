@@ -147,23 +147,22 @@ namespace Metalama.Framework.Engine.Formatting
                 var line = sourceText.Lines.GetLineFromPosition( span.Start );
                 var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
-                // Suppression due to Roslyn bug (happens only with debug Metalama.Compiler): https://github.com/dotnet/roslyn/issues/69015
-#pragma warning disable IDE0004, CS8123
-                // Resharper disable once RedundantCast
+                // Moved to a local function due to Roslyn bug that results in assertion failure in Metalama.Compier debug build: https://github.com/dotnet/roslyn/issues/69015
                 var members = node.AncestorsAndSelf()
-                    .Select(
-                        n => n switch
-                        {
-                            MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
-                            BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
-                            EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
-                            BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
-                            PropertyDeclarationSyntax property => (property, property.Identifier.Text),
-                            _ => ( Node: (SyntaxNode?)null, Text: (string?)null )
-                        } )
+                    .Select( GetMemberTextPair )
                     .Where( x => x.Node != null )
                     .ToList();
-#pragma warning restore IDE0004, CS8123
+
+                (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
+                    => n switch
+                    {
+                        MethodDeclarationSyntax method => (Node: (SyntaxNode?) method, Text: (string?) method.Identifier.Text),
+                        BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
+                        EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
+                        BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
+                        PropertyDeclarationSyntax property => (property, property.Identifier.Text),
+                        _ => (null, null)
+                    };
 
                 finalBuilder.AppendInvariant( $"<span class='line-number'" );
 
