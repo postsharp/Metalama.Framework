@@ -1,4 +1,4 @@
-
+﻿
 <Project>
 
     <!-- Set the default version -->
@@ -34,9 +34,9 @@
         <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
         <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
-        <xUnitVersion>2.4.1</xUnitVersion>
-        <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+        <xUnitVersion>2.5.0</xUnitVersion>
+        <xUnitAbstractionsVersion>2.5.0</xUnitAbstractionsVersion>
+		<XUnitRunnerVisualStudioVersion>2.5.0</XUnitRunnerVisualStudioVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DiffPlexVersion>1.7.1</DiffPlexVersion>
 

@@ -158,7 +158,7 @@ internal abstract partial class BaseTestRunner
 
         if ( testInput.Options.ExpectedException != null )
         {
-            throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
+            throw new AssertionFailedException( $"The expected exception {testInput.Options.ExpectedException} has not been thrown." );
         }
     }
 
