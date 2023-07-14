@@ -148,7 +148,8 @@ namespace Metalama.Framework.Engine.Formatting
                 var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
                 // Suppression due to Roslyn bug (happens only with debug Metalama.Compiler): https://github.com/dotnet/roslyn/issues/69015
-#pragma warning disable IDE0004
+#pragma warning disable IDE0004, CS8123
+                // Resharper disable once RedundantCast
                 var members = node.AncestorsAndSelf()
                     .Select(
                         n => n switch
@@ -158,11 +159,11 @@ namespace Metalama.Framework.Engine.Formatting
                             EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
                             BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
                             PropertyDeclarationSyntax property => (property, property.Identifier.Text),
-                            _ => (Node: (SyntaxNode?)null, Text: (string?)null)
+                            _ => ( Node: (SyntaxNode?)null, Text: (string?)null )
                         } )
                     .Where( x => x.Node != null )
                     .ToList();
-#pragma warning restore
+#pragma warning restore IDE0004, CS8123
 
                 finalBuilder.AppendInvariant( $"<span class='line-number'" );
 
