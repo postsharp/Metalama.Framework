@@ -179,7 +179,7 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["code.cs"] = libraryCode } );
+        workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["library-code.cs"] = libraryCode } );
         workspace.AddOrUpdateProject( "app", new Dictionary<string, string> { ["code.cs"] = appCode }, new[] { "library" } );
 
         // Execute the pipeline to get diagnostics.
