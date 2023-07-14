@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 var runtimeExpression = (IExpression) testCode()!;
                 _ = runtimeExpression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-                Assert.False( true, "Exception InvalidUserCodeException was not received." );
+                Assert.Fail( "Exception InvalidUserCodeException was not received." );
             }
             catch ( DiagnosticException e )
             {

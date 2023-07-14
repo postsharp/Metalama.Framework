@@ -64,12 +64,14 @@ public sealed class PipelineCancellationTests : UnitTestClass
             if ( !await this.RunTestAsync( i ) )
             {
                 this.TestOutput.WriteLine( $"The correct value for {nameof(_maxCancellationPoints)} is {i - 1}." );
+#pragma warning disable xUnit2000
                 Assert.Equal( i - 1, _maxCancellationPoints );
+#pragma warning restore xUnit2000
             }
         }
 
         // Not enough iterations.
-        Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
+        Assert.Fail( "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
     [Fact]
@@ -240,7 +242,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
                 }
                 catch ( OperationCanceledException )
                 {
-                    Assert.False( true, "The source was not published in due time." );
+                    Assert.Fail( "The source was not published in due time." );
                 }
 
                 return false;
