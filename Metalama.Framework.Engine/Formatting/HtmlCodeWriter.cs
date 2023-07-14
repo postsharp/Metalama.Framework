@@ -147,6 +147,8 @@ namespace Metalama.Framework.Engine.Formatting
                 var line = sourceText.Lines.GetLineFromPosition( span.Start );
                 var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
+                // Suppression due to Roslyn bug (happens only with debug Metalama.Compiler): https://github.com/dotnet/roslyn/issues/69015
+#pragma warning disable IDE0004
                 var members = node.AncestorsAndSelf()
                     .Select(
                         n => n switch
@@ -156,10 +158,11 @@ namespace Metalama.Framework.Engine.Formatting
                             EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
                             BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
                             PropertyDeclarationSyntax property => (property, property.Identifier.Text),
-                            _ => (null, null)
+                            _ => (Node: (SyntaxNode?)null, Text: (string?)null)
                         } )
                     .Where( x => x.Node != null )
                     .ToList();
+#pragma warning restore
 
                 finalBuilder.AppendInvariant( $"<span class='line-number'" );
 
