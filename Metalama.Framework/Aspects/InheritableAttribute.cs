@@ -11,6 +11,7 @@ namespace Metalama.Framework.Aspects
     /// from interface methods to method implementations, and so on. 
     /// </summary>
     [AttributeUsage( AttributeTargets.Class )]
+    [CompileTime]
     [PublicAPI]
     public sealed class InheritableAttribute : Attribute { }
 }
