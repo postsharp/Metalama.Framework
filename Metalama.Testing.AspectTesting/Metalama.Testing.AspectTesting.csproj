@@ -12,9 +12,9 @@
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
-        <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
-        <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
-        <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.assert" Version="$(xUnitApiVersion)" />
+        <PackageReference Include="xunit.extensibility.core" Version="$(xUnitApiVersion)" />
+        <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitApiVersion)" />
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
         
         <!-- Validate that we do not expose internal APIs -->
