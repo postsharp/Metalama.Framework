@@ -952,7 +952,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
                 var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
-                var aspectTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var aspectTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
@@ -961,20 +961,23 @@ internal sealed partial class CompileTimeCompilationBuilder
                     .Where(
                         t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
                              !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                    .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var transitiveFabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                var fabricTypeNames = fabricTypes
+                    .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
+
+                var transitiveFabricTypeNames = compileTimeCompilation.Assembly.GetTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                    .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var compilerPlugInTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var compilerPlugInTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var otherTemplateTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var otherTemplateTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
@@ -993,11 +996,11 @@ internal sealed partial class CompileTimeCompilationBuilder
                     runTimeCompilation.Assembly.Identity.ToString(),
                     compileTimeCompilation.AssemblyName!,
                     runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
-                    aspectTypes,
-                    compilerPlugInTypes,
-                    fabricTypes,
-                    transitiveFabricTypes,
-                    otherTemplateTypes,
+                    aspectTypeNames,
+                    compilerPlugInTypeNames,
+                    fabricTypeNames,
+                    transitiveFabricTypeNames,
+                    otherTemplateTypeNames,
                     referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
                     compilationResultManifest,
                     projectLicenseInfo?.RedistributionLicenseKey,
