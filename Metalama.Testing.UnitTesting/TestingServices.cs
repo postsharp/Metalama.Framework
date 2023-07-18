@@ -11,7 +11,6 @@ internal static class TestingServices
     {
         // We don't initialize licensing because it depends on the project license key, which is not known at that time.
 
-        BackstageServiceFactoryInitializer.Initialize(
-            new BackstageInitializationOptions( new TestApiApplicationInfo() ) { AddSupportServices = true } );
+        BackstageServiceFactoryInitializer.Initialize( new BackstageInitializationOptions( new TestApiApplicationInfo() ) { AddSupportServices = true } );
     }
 }

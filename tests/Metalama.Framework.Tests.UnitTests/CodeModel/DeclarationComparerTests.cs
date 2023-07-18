@@ -35,8 +35,7 @@ class B : A, I
             Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.Default ) );
             Assert.False( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.Default ) );
 
-            Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Default ) );
 
             Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Default ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Default ) );
