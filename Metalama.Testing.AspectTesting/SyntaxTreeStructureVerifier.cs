@@ -23,14 +23,14 @@ namespace Metalama.Testing.AspectTesting
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation, serviceProvider );
+                var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation );
 
                 var parsedFromText = CSharpSyntaxTree.ParseText(
                         syntaxTree.GetRoot().ToString(),
                         encoding: Encoding.UTF8,
                         options: SupportedCSharpVersions.DefaultParseOptions )
                     .GetRoot()
-                    .ToSyntaxFactoryDebug( compilation, serviceProvider );
+                    .ToSyntaxFactoryDebug( compilation );
 
                 if ( parsedFromText != actualSyntaxFactory )
                 {

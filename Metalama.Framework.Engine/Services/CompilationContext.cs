@@ -58,7 +58,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     public SafeSymbolComparer SymbolComparer => new( this );
 
     [Memo]
-    public IEqualityComparer<ISymbol> SymbolComparerIncludingNullability => new SafeSymbolComparer( this, SymbolEqualityComparer.IncludeNullability );
+    internal IEqualityComparer<ISymbol> SymbolComparerIncludingNullability => new SafeSymbolComparer( this, SymbolEqualityComparer.IncludeNullability );
 
     [Memo]
 
@@ -85,9 +85,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
-
-    [Memo]
-    internal IEqualityComparer<IMember> MemberComparer => new MemberComparer<IMember>( this.SymbolComparer );
 
     [Memo]
     internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );

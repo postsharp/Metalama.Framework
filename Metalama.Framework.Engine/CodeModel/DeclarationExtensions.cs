@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
@@ -431,12 +430,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal static bool IsCompilerGenerated( this IDeclaration declaration )
-        {
-            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
-                   == true;
-        }
-
         internal static bool IsFullyBound( this INamedType type )
         {
             return DoesNotContainGenericParameters( type );
@@ -446,7 +439,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 switch ( type )
                 {
                     case INamedType namedType:
-                        return namedType.TypeArguments.All( ta => DoesNotContainGenericParameters( ta ) );
+                        return namedType.TypeArguments.All( DoesNotContainGenericParameters );
 
                     case IArrayType array:
                         return DoesNotContainGenericParameters( array.ElementType );

@@ -17,7 +17,7 @@ public static class ImmutableHashSetExtensions
         return hashSet;
     }
 
-    public static void AddRange<T>( this ImmutableHashSet<T>.Builder hashSetBuilder, IEnumerable<T> items )
+    internal static void AddRange<T>( this ImmutableHashSet<T>.Builder hashSetBuilder, IEnumerable<T> items )
     {
         foreach ( var item in items )
         {

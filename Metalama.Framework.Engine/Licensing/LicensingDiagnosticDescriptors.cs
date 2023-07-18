@@ -50,7 +50,7 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Metalama SDK not available." );
 
-    public static readonly DiagnosticDefinition<(string Title, string Origin)>
+    internal static readonly DiagnosticDefinition<(string Title, string Origin)>
         CodeActionNotAvailable
             = new(
                 "LAMA0805",

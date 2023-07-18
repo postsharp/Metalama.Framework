@@ -89,13 +89,12 @@ namespace Metalama.Testing.UnitTesting
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
-        public void AddFileLocker()
+        private void AddFileLocker()
         {
             Interlocked.Increment( ref this._fileLockers );
         }
 
-        // Resharper disable once UnusedMember.Global
-        public void RemoveFileLocker()
+        private void RemoveFileLocker()
         {
             if ( Interlocked.Decrement( ref this._fileLockers ) == 0 )
             {

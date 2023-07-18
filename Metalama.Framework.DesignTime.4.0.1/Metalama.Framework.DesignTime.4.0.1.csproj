@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\bin\**\*.cs;..\Metalama.Framework.DesignTime\obj\**\*.cs" />
-        <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'"  />
+        <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
 
 </Project>

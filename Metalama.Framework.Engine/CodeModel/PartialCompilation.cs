@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
             => CreateComplete( CompilationContextFactory.GetInstance( compilation ), resources );
 
-        public static PartialCompilation CreateComplete( CompilationContext compilationContext, ImmutableArray<ManagedResource> resources = default )
+        private static PartialCompilation CreateComplete( CompilationContext compilationContext, ImmutableArray<ManagedResource> resources = default )
             => new CompleteImpl( compilationContext, GetDerivedTypeIndex( compilationContext.Compilation ), resources );
 
         /// <summary>

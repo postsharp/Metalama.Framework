@@ -46,7 +46,7 @@ public class C {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
+            Assert.False( compilationResult1.TransformationResult.Validators.IsEmpty );
             Assert.Single( compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
         }
 
@@ -95,7 +95,7 @@ public class Aspect2 : TypeAspect
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
+            Assert.False( compilationResult1.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1" },
@@ -110,7 +110,7 @@ public class Aspect2 : TypeAspect
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
-            Assert.False( compilationResult2!.TransformationResult.Validators.IsEmpty );
+            Assert.False( compilationResult2.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
@@ -123,7 +123,7 @@ public class Aspect2 : TypeAspect
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs", options: SupportedCSharpVersions.DefaultParseOptions );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
-            Assert.False( compilationResult3!.TransformationResult.Validators.IsEmpty );
+            Assert.False( compilationResult3.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect2" },

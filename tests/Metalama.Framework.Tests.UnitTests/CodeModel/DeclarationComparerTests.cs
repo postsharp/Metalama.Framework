@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class DeclarationComparerTests : UnitTestClass
+    public sealed class DeclarationComparerTests : UnitTestClass
     {
         [Fact]
         public void ConversionKindDefault()
@@ -30,12 +30,13 @@ class B : A, I
             var typeB = compilation.Types.OfName( "B" ).Single();
             var typeI = compilation.Types.OfName( "I" ).Single();
 
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( int ), ConversionKind.Default ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( bool ), ConversionKind.Default ) );
-            Assert.False( compilation.Comparers.Default.Is( typeB, typeof( int ), ConversionKind.Default ) );
+            // ReSharper disable RedundantArgumentDefaultValue
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int), ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.Default ) );
+            Assert.False( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.Default ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeB, ConversionKind.Default ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Default ) );
 
             Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Default ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Default ) );
@@ -44,21 +45,23 @@ class B : A, I
 
             Assert.True(
                 compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof( int ) ),
-                    typeof( object ),
+                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                    typeof(object),
                     ConversionKind.Default ) );
 
             Assert.False(
                 compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof( int ) ),
-                    typeof( long ),
+                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                    typeof(long),
                     ConversionKind.Default ) );
 
             Assert.False(
                 compilation.Comparers.Default.Is(
-                    compilation.Factory.GetTypeByReflectionType( typeof( long ) ),
-                    typeof( int ),
+                    compilation.Factory.GetTypeByReflectionType( typeof(long) ),
+                    typeof(int),
                     ConversionKind.Default ) );
+
+            // ReSharper restore RedundantArgumentDefaultValue
         }
 
         [Fact]
@@ -82,23 +85,23 @@ class B : A, I
             var typeB = compilation.Types.OfName( "B" ).Single();
             var typeI = compilation.Types.OfName( "I" ).Single();
 
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( int ), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( typeA, typeof( bool ), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( typeB, typeof( int ), ConversionKind.Reference ) );
-            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeB, ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(int), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeA, typeof(bool), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( typeB, typeof(int), ConversionKind.Reference ) );
+            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Reference ) );
             Assert.False( compilation.Comparers.Default.Is( typeA, typeB, ConversionKind.Reference ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Reference ) );
             Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.Reference ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeof( object ), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeof( long ), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Reference ) );
 
             Assert.False(
-                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof( long ) ), typeof( int ), ConversionKind.Reference ) );
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Reference ) );
         }
 
         [Fact]

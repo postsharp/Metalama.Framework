@@ -11,7 +11,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="Ref{T}"/>.
     /// The comparison is compilation-independent.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal sealed class MemberRefEqualityComparer<T> : IEqualityComparer<MemberRef<T>>
         where T : class, IMemberOrNamedType
     {
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private static ISymbol? GetSymbol( MemberRef<T> reference ) => reference.Target as ISymbol;
 
-        public bool Equals( in MemberRef<T> x, in MemberRef<T> y )
+        bool IEqualityComparer<MemberRef<T>>.Equals( MemberRef<T> x, MemberRef<T> y )
         {
             var xSymbol = GetSymbol( x );
 
@@ -38,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        public int GetHashCode( in MemberRef<T> obj )
+        int IEqualityComparer<MemberRef<T>>.GetHashCode( MemberRef<T> obj )
         {
             if ( obj.IsDefault )
             {
@@ -55,9 +54,5 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 return targetHashCode;
             }
         }
-
-        bool IEqualityComparer<MemberRef<T>>.Equals( MemberRef<T> x, MemberRef<T> y ) => this.Equals( x, y );
-
-        int IEqualityComparer<MemberRef<T>>.GetHashCode( MemberRef<T> obj ) => this.GetHashCode( obj );
     }
 }

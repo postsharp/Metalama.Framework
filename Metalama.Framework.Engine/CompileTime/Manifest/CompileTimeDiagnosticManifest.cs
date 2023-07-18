@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime.Manifest;
 
+[JsonObject]
 internal sealed class CompileTimeDiagnosticManifest
 {
     public string Id { get; set; }

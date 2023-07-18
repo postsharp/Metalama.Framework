@@ -87,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ) );
             Assert.Empty( diagnostics );
 
-            return sortedAspects!;
+            return sortedAspects;
         }
 
         [Fact]

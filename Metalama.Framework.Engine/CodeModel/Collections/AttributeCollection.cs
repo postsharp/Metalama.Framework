@@ -25,13 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( INamedType type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
 
-        public IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type, conversionKind ) );
+        private IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type, conversionKind ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
 
-        public IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
+        private IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             if ( this.ContainingDeclaration == null )
             {
@@ -46,13 +46,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         bool IAttributeCollection.Any( INamedType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
-        public bool Any( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type, conversionKind ) );
+        private bool Any( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type, conversionKind ) );
 
         bool IAttributeCollection.Any( Type type ) => this.Any( type );
 
         bool IAttributeCollection.Any( Type type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
-        public bool Any( Type type, ConversionKind conversionKind = ConversionKind.Default )
+        private bool Any( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             if ( this.ContainingDeclaration == null )
             {

@@ -29,7 +29,7 @@ class C
 
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of methods.
         Assert.Empty( type.Methods );
@@ -60,7 +60,7 @@ class C
 
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of methods.
         Assert.Empty( type.Methods.OfName( "M" ) );
@@ -89,7 +89,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
@@ -115,7 +115,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
@@ -142,7 +142,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -163,7 +163,7 @@ void M(int p){}
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
@@ -187,7 +187,7 @@ void M(int p){}
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of methods.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -213,7 +213,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of fields.
         Assert.Empty( type.Fields );
@@ -239,7 +239,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
@@ -262,7 +262,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of fields.
         Assert.Empty( type.Fields.OfName( "F" ) );
@@ -288,7 +288,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
 
-        var type = Assert.Single( compilation.Types )!;
+        var type = Assert.Single( compilation.Types );
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
