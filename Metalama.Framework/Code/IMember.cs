@@ -30,6 +30,11 @@ namespace Metalama.Framework.Code
         bool IsExplicitInterfaceImplementation { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the member has an implementation or is only a definition without a body.
+        /// </summary>
+        bool HasImplementation { get; }
+
+        /// <summary>
         /// Gets the type containing the current member.
         /// </summary>
         new INamedType DeclaringType { get; }

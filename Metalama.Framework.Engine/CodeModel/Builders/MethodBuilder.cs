@@ -142,6 +142,8 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     IMethod IMethod.MethodDefinition => this;
 
+    bool IMethod.IsPartial => false;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );

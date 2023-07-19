@@ -28,6 +28,11 @@ internal sealed class Method : MethodBase, IMethodImpl
         {
             throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
         }
+
+        if (symbol.PartialDefinitionPart != null)
+        {
+            throw new ArgumentOutOfRangeException( nameof( symbol ), "Cannot use partial implementation to instantiate the Method class." );
+        }
     }
 
     [Memo]
@@ -53,6 +58,8 @@ internal sealed class Method : MethodBase, IMethodImpl
     [Memo]
     public IMethod MethodDefinition
         => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
+
+    public bool IsPartial => this.MethodSymbol.IsPartialDefinition || this.MethodSymbol.PartialDefinitionPart != null;
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 

@@ -1517,6 +1517,145 @@ class C {}
             Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
         }
 
+        [Fact]
+        public void IsPartialMethod()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+public partial class C
+{
+    public void NonPartial() {}
+    public partial void PartialVoid_NoImpl();
+    public partial void PartialVoid_Impl();
+    public partial int PartialNonVoid();
+}
+
+public partial class C
+{
+    public partial void PartialVoid_Impl() {}
+    public partial int PartialNonVoid() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var nonPartial = compilation.Types.ElementAt( 0 ).Methods.OfName( "NonPartial" ).Single();
+            var partialVoidNoImpl = compilation.Types.ElementAt( 0 ).Methods.OfName( "PartialVoid_NoImpl" ).Single();
+            var partialVoidImpl = compilation.Types.ElementAt( 0 ).Methods.OfName( "PartialVoid_Impl" ).Single();
+            var partialNonVoid = compilation.Types.ElementAt( 0 ).Methods.OfName( "PartialNonVoid" ).Single();
+
+            Assert.False( nonPartial.IsPartial );
+            Assert.True( partialVoidNoImpl.IsPartial );
+            Assert.True( partialVoidImpl.IsPartial );
+            Assert.True( partialNonVoid.IsPartial );
+        }
+
+        [Fact]
+        public void HasImplementation()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+public interface I
+{
+    void Method();
+    int Property { get; set; }
+    event System.EventHandler Event;
+" +
+#if NET6_0_OR_GREATER
+@"
+    virtual void VirtualMethod() {}
+    virtual int VirtualProperty {
+        get => 42;
+        set {}
+    }
+    virtual event System.EventHandler VirtualEvent {
+        add {}
+        remove {}
+    }
+" +
+#endif
+@"
+}
+
+public abstract class A
+{
+    public const int Const = 42;
+    public int Field;
+
+    public A() {}
+    static A() {}
+
+    public void Method() {}
+    public abstract void AbstractMethod();  
+
+    public int Property { get;set; }
+    public abstract int AbstractProperty { get; set;}
+
+    public event System.EventHandler Event;
+    public abstract event System.EventHandler AbstractEvent;
+
+    public static void StaticMethod() {}
+    public static extern void StaticExternMethod();
+}
+
+public partial class B
+{
+    public int Field = 42;
+    public static int StaticField = 42;
+    partial void PartialVoid_NoImpl();
+    public partial void PartialVoid_Impl();
+    public partial int Partial();
+}
+
+public partial class B
+{
+    public partial void PartialVoid_Impl() {}
+    public partial int Partial() => 42;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var typeI = compilation.Types.OfName( "I" ).Single();
+            var typeA = compilation.Types.OfName( "A" ).Single();
+            var typeB = compilation.Types.OfName( "B" ).Single();
+
+            Assert.False( GetForMethod( typeI, "Method" ) );
+            Assert.False( GetForProperty( typeI, "Property" ) );
+            Assert.False( GetForEvent( typeI, "Event" ) );
+#if NET6_0_OR_GREATER
+            Assert.True( GetForMethod( typeI, "VirtualMethod" ) );
+            Assert.True( GetForProperty( typeI, "VirtualProperty" ) );
+            Assert.True( GetForEvent( typeI, "VirtualEvent" ) );
+#endif
+
+            Assert.True( GetForField( typeA, "Field" ) );
+            Assert.False( GetForField( typeA, "Const" ) );
+            Assert.True( GetForConstructor( typeA ) );
+            Assert.True( GetForStaticConstructor( typeA ) );
+            Assert.True( GetForMethod( typeA, "Method" ) );
+            Assert.True( GetForProperty( typeA, "Property" ) );
+            Assert.True( GetForEvent( typeA, "Event" ) );
+            Assert.False( GetForMethod( typeA, "AbstractMethod" ) );
+            Assert.False( GetForProperty( typeA, "AbstractProperty" ) );
+            Assert.False( GetForEvent( typeA, "AbstractEvent" ) );
+            Assert.True( GetForMethod( typeA, "StaticMethod" ) );
+            Assert.False( GetForMethod( typeA, "StaticExternMethod" ) );
+
+            Assert.False( GetForMethod( typeB, "PartialVoid_NoImpl" ) );
+            Assert.True( GetForConstructor( typeB ) );
+            Assert.True( GetForStaticConstructor( typeB ) );
+            Assert.True( GetForMethod( typeB, "PartialVoid_Impl" ) );
+            Assert.True( GetForMethod( typeB, "Partial" ) );
+
+            bool GetForMethod( INamedType type, string name ) => type.Methods.OfName( name ).Single().HasImplementation;
+            bool GetForProperty( INamedType type, string name ) => type.Properties.OfName( name ).Single().HasImplementation;
+            bool GetForEvent( INamedType type, string name ) => type.Events.OfName( name ).Single().HasImplementation;
+            bool GetForConstructor( INamedType type ) => type.Constructors.Single().HasImplementation;
+            bool GetForStaticConstructor( INamedType type ) => type.StaticConstructor.AssertNotNull().HasImplementation;
+            bool GetForField( INamedType type, string name ) => type.Fields.OfName( name ).Single().HasImplementation;
+        }
+
         /*
         [Fact]
         public void ExternalInternalAutomaticProperty()

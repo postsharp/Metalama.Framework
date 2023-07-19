@@ -66,6 +66,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
+        public bool HasImplementation => true;
+
         public bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

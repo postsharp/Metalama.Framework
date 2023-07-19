@@ -30,6 +30,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public string Name => this._accessorBuilder.Name;
 
+    public bool IsPartial => this._accessorBuilder.IsPartial;
+
+    public bool HasImplementation => this._accessorBuilder.HasImplementation;
+
     public bool IsAbstract => this._accessorBuilder.IsAbstract;
 
     public bool IsStatic => this._accessorBuilder.IsStatic;

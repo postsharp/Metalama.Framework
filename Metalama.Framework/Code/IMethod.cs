@@ -13,6 +13,11 @@ namespace Metalama.Framework.Code
     public interface IMethod : IMethodBase, IGeneric, IMethodInvoker
     {
         /// <summary>
+        /// Gets a value indicating whether the method is marked as <c>partial</c> in source code. 
+        /// </summary>
+        bool IsPartial { get; }
+
+        /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
         /// </summary>
         MethodKind MethodKind { get; }

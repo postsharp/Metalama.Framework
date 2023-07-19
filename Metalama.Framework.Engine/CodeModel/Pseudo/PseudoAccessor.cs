@@ -64,6 +64,10 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public abstract string Name { get; }
 
+    public bool IsPartial => false;
+
+    public bool HasImplementation => true;
+
     public bool IsAbstract => false;
 
     public bool IsStatic => this.DeclaringMember.IsStatic;
