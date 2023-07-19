@@ -54,10 +54,9 @@ public class C {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1.AspectPipelineResult.ReferenceValidators.IsEmpty );
+            Assert.False( compilationResult1.Result.ReferenceValidators.IsEmpty );
 
-            Assert.Single(
-                compilationResult1.AspectPipelineResult.ReferenceValidators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
+            Assert.Single( compilationResult1.Result.ReferenceValidators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
         }
 
         [Fact]
@@ -105,11 +104,11 @@ public class Aspect2 : TypeAspect
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1.AspectPipelineResult.ReferenceValidators.IsEmpty );
+            Assert.False( compilationResult1.Result.ReferenceValidators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1" },
-                compilationResult1.AspectPipelineResult.ReferenceValidators.GetValidatorsForSymbol( classC )
+                compilationResult1.Result.ReferenceValidators.GetValidatorsForSymbol( classC )
                     .SelectAsImmutableArray( v => v.Implementation.Implementation.GetType().Name ) );
 
             // Add a constraint.
@@ -120,11 +119,11 @@ public class Aspect2 : TypeAspect
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
-            Assert.False( compilationResult2.AspectPipelineResult.ReferenceValidators.IsEmpty );
+            Assert.False( compilationResult2.Result.ReferenceValidators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
-                compilationResult2.AspectPipelineResult.ReferenceValidators.GetValidatorsForSymbol( classC )
+                compilationResult2.Result.ReferenceValidators.GetValidatorsForSymbol( classC )
                     .SelectAsEnumerable( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
@@ -133,11 +132,11 @@ public class Aspect2 : TypeAspect
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs", options: SupportedCSharpVersions.DefaultParseOptions );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
-            Assert.False( compilationResult3.AspectPipelineResult.ReferenceValidators.IsEmpty );
+            Assert.False( compilationResult3.Result.ReferenceValidators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect2" },
-                compilationResult3.AspectPipelineResult.ReferenceValidators.GetValidatorsForSymbol( classC )
+                compilationResult3.Result.ReferenceValidators.GetValidatorsForSymbol( classC )
                     .SelectAsImmutableArray( v => v.Implementation.Implementation.GetType().Name ) );
         }
 
@@ -379,7 +378,7 @@ class C
                 return compilation.SyntaxTrees
                     .SelectMany(
                         t => DesignTimeReferenceValidatorRunner.Validate(
-                                compilationResult.Value.AspectPipelineConfiguration.ServiceProvider,
+                                compilationResult.Value.Configuration.ServiceProvider,
                                 compilation.GetSemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
@@ -443,7 +442,7 @@ class C
             var diagnostics = compilation.SyntaxTrees
                 .SelectMany(
                     t => DesignTimeReferenceValidatorRunner.Validate(
-                            compilationResult.Value.AspectPipelineConfiguration.ServiceProvider,
+                            compilationResult.Value.Configuration.ServiceProvider,
                             compilation.GetSemanticModel( t ),
                             compilationResult.Value )
                         .ReportedDiagnostics )

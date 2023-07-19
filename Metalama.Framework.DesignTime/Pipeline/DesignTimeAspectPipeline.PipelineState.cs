@@ -443,7 +443,7 @@ internal sealed partial class DesignTimeAspectPipeline
         /// <summary>
         /// Executes the pipeline.
         /// </summary>
-        public static async Task<( FallibleResultWithDiagnostics<CompilationResult> CompilationResult, PipelineState NewState)> ExecuteAsync(
+        public static async Task<( FallibleResultWithDiagnostics<AspectPipelineResultAndState> CompilationResult, PipelineState NewState)> ExecuteAsync(
             PipelineState state,
             PartialCompilation compilation,
             DesignTimeProjectVersion projectVersion,
@@ -474,7 +474,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 state = new PipelineState( state, getConfigurationResult, DesignTimeAspectPipelineStatus.Default );
 
-                return (FallibleResultWithDiagnostics<CompilationResult>.Failed( getConfigurationResult.Diagnostics ), state);
+                return (FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
             }
 
             var configuration = getConfigurationResult.Value;
@@ -553,7 +553,7 @@ internal sealed partial class DesignTimeAspectPipeline
             // in case of cancellation. From our point of view, this is a safe place to commit.
             state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
-            return (new CompilationResult(
+            return (new AspectPipelineResultAndState(
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
                         state.Status,

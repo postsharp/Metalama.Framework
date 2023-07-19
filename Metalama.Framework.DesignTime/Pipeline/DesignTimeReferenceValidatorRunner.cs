@@ -18,27 +18,27 @@ internal static class DesignTimeReferenceValidatorRunner
     public static ImmutableUserDiagnosticList Validate(
         ProjectServiceProvider serviceProvider,
         SemanticModel model,
-        CompilationResult compilationResult,
+        AspectPipelineResultAndState aspectPipelineResultAndState,
         CancellationToken cancellationToken = default )
     {
-        if ( !compilationResult.AspectPipelineResult.ReferenceValidators.IsEmpty )
+        if ( !aspectPipelineResultAndState.Result.ReferenceValidators.IsEmpty )
         {
             var compilationModel = _compilationModelCache.GetOrAdd(
                 model.Compilation,
                 c => CompilationModel.CreateInitialInstance(
-                    compilationResult.AspectPipelineConfiguration.ProjectModel,
+                    aspectPipelineResultAndState.Configuration.ProjectModel,
                     c,
-                    aspectRepository: new PipelineResultBasedAspectRepository( compilationResult.AspectPipelineResult ) ) );
+                    aspectRepository: new PipelineResultBasedAspectRepository( aspectPipelineResultAndState.Result ) ) );
 
             var validatorCache = new ConcurrentDictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>>();
-            var userDiagnosticSink = new UserDiagnosticSink( compilationResult.AspectPipelineConfiguration.ClosureDiagnosticManifest );
+            var userDiagnosticSink = new UserDiagnosticSink( aspectPipelineResultAndState.Configuration.ClosureDiagnosticManifest );
 
             using var visitor = new ReferenceValidationVisitor(
                 serviceProvider,
                 userDiagnosticSink,
                 s => validatorCache.GetOrAdd(
                     s,
-                    symbol => compilationResult.AspectPipelineResult.ReferenceValidators.GetValidatorsForSymbol( symbol )
+                    symbol => aspectPipelineResultAndState.Result.ReferenceValidators.GetValidatorsForSymbol( symbol )
                         .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( compilationModel ) ) ),
                 compilationModel,
                 cancellationToken );

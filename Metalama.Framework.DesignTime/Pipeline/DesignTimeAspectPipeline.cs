@@ -47,7 +47,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 {
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
-    private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
+    private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<AspectPipelineResultAndState>> _compilationResultCache = new();
     private readonly IFileSystemWatcher? _fileSystemWatcher;
     private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
@@ -408,7 +408,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    private async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecutePartialAsync(
+    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecutePartialAsync(
         PartialCompilation partialCompilation,
         DesignTimeProjectVersion projectVersion,
         AsyncExecutionContext executionContext,
@@ -422,22 +422,24 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         if ( !result.CompilationResult.IsSuccessful )
         {
-            return FallibleResultWithDiagnostics<CompilationResult>.Failed( result.CompilationResult.Diagnostics );
+            return FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( result.CompilationResult.Diagnostics );
         }
         else
         {
-            return FallibleResultWithDiagnostics<CompilationResult>.Succeeded( result.CompilationResult.Value, result.CompilationResult.Diagnostics );
+            return FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Succeeded(
+                result.CompilationResult.Value,
+                result.CompilationResult.Diagnostics );
         }
     }
 
-    public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, TestableCancellationToken cancellationToken = default )
+    public FallibleResultWithDiagnostics<AspectPipelineResultAndState> Execute( Compilation compilation, TestableCancellationToken cancellationToken = default )
         => this._taskRunner.RunSynchronously( () => this.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken ), cancellationToken );
 
     // This method is for testing only.
     public bool TryExecute(
         Compilation compilation,
         TestableCancellationToken cancellationToken,
-        [NotNullWhen( true )] out CompilationResult? compilationResult )
+        [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult )
     {
         var result = this._taskRunner.RunSynchronously(
             () => this.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken ),
@@ -498,9 +500,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     compilationReferences.Add(
                         new DesignTimeProjectReference(
                             referenceResult.Value.ProjectVersion.ProjectKey,
-                            referenceResult.Value.AspectPipelineResult ) );
+                            referenceResult.Value.Result ) );
 
-                    if ( referenceResult.Value.AspectPipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                    if ( referenceResult.Value.Status == DesignTimeAspectPipelineStatus.Paused )
                     {
                         pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
                     }
@@ -600,13 +602,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return new DesignTimeProjectVersion( compilationVersion, compilationReferences, pipelineStatus );
     }
 
-    public ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    public ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    public async ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,
@@ -648,7 +650,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         // A dependency could not be compiled.
                         this.Logger.Warning?.Log( $"ExecuteAsync('{this.ProjectKey}'): cannot compile a referenced project." );
 
-                        return FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                        return FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed(
                             projectVersion.Diagnostics,
                             $"Cannot compile a referenced project: {projectVersion.DebugReason}" );
                     }
@@ -727,7 +729,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                             if ( !executionResult.IsSuccessful )
                             {
-                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
+                                compilationResult = FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( executionResult.Diagnostics );
 
                                 if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                                 {
@@ -748,7 +750,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         }
 
                         // Return the result from the cache.
-                        compilationResult = new CompilationResult(
+                        compilationResult = new AspectPipelineResultAndState(
                             this._currentState.ProjectVersion.AssertNotNull(),
                             this._currentState.PipelineResult,
                             this._currentState.Status,
@@ -774,13 +776,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             if ( this._currentState.PipelineResult.Configuration == null )
                             {
-                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                                compilationResult = FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed(
                                     ImmutableArray<Diagnostic>.Empty,
                                     "The pipeline was paused while there were compile-time errors." );
                             }
                             else
                             {
-                                compilationResult = new CompilationResult(
+                                compilationResult = new AspectPipelineResultAndState(
                                     this._currentState.ProjectVersion,
                                     this._currentState.PipelineResult,
                                     this._currentState.Status,
@@ -790,7 +792,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         else
                         {
                             // The pipeline was paused before being first executed.
-                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
+                            compilationResult = FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed(
                                 ImmutableArray<Diagnostic>.Empty,
                                 "The pipeline was paused in the middle of execution." );
                         }

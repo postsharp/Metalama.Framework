@@ -154,7 +154,7 @@ namespace Metalama.Framework.DesignTime
                 if ( pipelineResult.IsSuccessful )
                 {
                     var validationResults = DesignTimeReferenceValidatorRunner.Validate(
-                        pipelineResult.Value.AspectPipelineConfiguration.ServiceProvider,
+                        pipelineResult.Value.Configuration.ServiceProvider,
                         context.SemanticModel,
                         pipelineResult.Value,
                         context.CancellationToken );

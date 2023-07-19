@@ -111,13 +111,13 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         }
     }
 
-    private static string DumpResults( CompilationResult results )
+    private static string DumpResults( AspectPipelineResultAndState results )
     {
         StringBuilder stringBuilder = new();
 
         var i = 0;
 
-        foreach ( var result in results.AspectPipelineResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
+        foreach ( var result in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
         {
             if ( i > 0 )
             {
@@ -658,7 +658,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field1'",
-            results1!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results1!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Second compilation with a different master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -676,7 +676,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2'",
-            results2!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results2!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Third compilation. Add a syntax tree with a partial type.
         var masterCode3 = new Dictionary<string, string>()
@@ -699,7 +699,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2,Field3'",
-            results3!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results3!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
     }
 
     [Fact]
@@ -971,7 +971,7 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netFrameworkCompilation, default, out _ ) );
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netCompilation, default, out var result ) );
 
-        foreach ( var (_, treeResult) in result!.AspectPipelineResult.SyntaxTreeResults )
+        foreach ( var (_, treeResult) in result!.Result.SyntaxTreeResults )
         {
             Assert.Empty( treeResult.Diagnostics );
         }

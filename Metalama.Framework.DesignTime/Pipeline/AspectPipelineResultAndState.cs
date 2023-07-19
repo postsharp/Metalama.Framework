@@ -7,31 +7,31 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class CompilationResult
+internal sealed class AspectPipelineResultAndState
 {
-    public AspectPipelineResult AspectPipelineResult { get; }
+    public AspectPipelineResult Result { get; }
 
-    public AspectPipelineConfiguration AspectPipelineConfiguration { get; }
+    public AspectPipelineConfiguration Configuration { get; }
 
     public ProjectVersion ProjectVersion { get; }
 
-    public DesignTimeAspectPipelineStatus AspectPipelineStatus { get; }
+    public DesignTimeAspectPipelineStatus Status { get; }
 
-    internal CompilationResult(
+    internal AspectPipelineResultAndState(
         ProjectVersion projectVersion,
-        AspectPipelineResult aspectPipelineResult,
-        DesignTimeAspectPipelineStatus aspectPipelineStatus,
-        AspectPipelineConfiguration aspectPipelineConfiguration )
+        AspectPipelineResult result,
+        DesignTimeAspectPipelineStatus status,
+        AspectPipelineConfiguration configuration )
     {
-        this.AspectPipelineStatus = aspectPipelineStatus;
-        this.AspectPipelineConfiguration = aspectPipelineConfiguration;
-        this.AspectPipelineResult = aspectPipelineResult;
+        this.Status = status;
+        this.Configuration = configuration;
+        this.Result = result;
         this.ProjectVersion = projectVersion;
     }
 
     internal ImmutableArray<Diagnostic> GetAllDiagnostics( string path )
     {
-        if ( this.AspectPipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
             return syntaxTreeResults.Diagnostics;
         }
@@ -43,7 +43,7 @@ internal sealed class CompilationResult
 
     internal ImmutableArray<CacheableScopedSuppression> GetSuppressionOnSyntaxTree( string path )
     {
-        if ( this.AspectPipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
             return syntaxTreeResults.Suppressions;
         }
@@ -55,7 +55,7 @@ internal sealed class CompilationResult
 
     internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
     {
-        var fromPipeline = this.AspectPipelineResult.GetDiagnosticsOnSyntaxTree( path );
+        var fromPipeline = this.Result.GetDiagnosticsOnSyntaxTree( path );
 
         return (fromPipeline.Diagnostics, fromPipeline.Suppressions);
     }

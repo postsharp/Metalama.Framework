@@ -70,11 +70,11 @@ partial class C : BaseClass
         // ReSharper disable once AccessToDisposedClosure
         factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
 
-        Assert.Single( results1!.AspectPipelineResult.IntroducedSyntaxTrees );
+        Assert.Single( results1!.Result.IntroducedSyntaxTrees );
 
         Assert.Contains(
             "Field1Plus",
-            results1.AspectPipelineResult.IntroducedSyntaxTrees.Single().Value.GeneratedSyntaxTree.ToString(),
+            results1.Result.IntroducedSyntaxTrees.Single().Value.GeneratedSyntaxTree.ToString(),
             StringComparison.Ordinal );
 
         // Second compilation of the master compilation.
