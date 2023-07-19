@@ -103,7 +103,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
             DesignTimeReferenceValidatorCollection.Builder? validatorsBuilder = null;
 
-            foreach ( var result in resultsByTree )
+            foreach ( var result in resultsByTree.SyntaxTreeResults )
             {
                 var filePath = result.SyntaxTree.FilePath;
 
@@ -190,6 +190,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 syntaxTreeResultBuilder[filePath] = result;
             }
 
+            // Process external validators.
+            if ( resultsByTree.ExternalValidators.Count > 0 )
+            {
+                validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
+
+                foreach ( var validator in resultsByTree.ExternalValidators )
+                {
+                    Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): adding external validator." );
+                    validatorsBuilder.Add( validator );
+                }
+            }
+
+            // Make immutable and return.
             var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this.IntroducedSyntaxTrees;
             var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
             var validators = validatorsBuilder?.ToImmutable() ?? this.ReferenceValidators;
@@ -207,13 +220,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// Splits a <see cref="DesignTimePipelineExecutionResult"/>, which includes data for several syntax trees, into
         /// a list of <see cref="SyntaxTreePipelineResult"/> which each have information related to a single syntax tree.
         /// </summary>
-        private static IEnumerable<SyntaxTreePipelineResult> SplitResultsByTree(
-            PartialCompilation compilation,
-            DesignTimePipelineExecutionResult pipelineResults )
+        private static ( IEnumerable<SyntaxTreePipelineResult> SyntaxTreeResults, IReadOnlyList<DesignTimeReferenceValidatorInstance> ExternalValidators )
+            SplitResultsByTree(
+                PartialCompilation compilation,
+                DesignTimePipelineExecutionResult pipelineResults )
         {
             var resultBuilders = pipelineResults
                 .InputSyntaxTrees
                 .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
+
+            List<DesignTimeReferenceValidatorInstance>? externalValidators = null;
 
             // Split diagnostic by syntax tree.
             foreach ( var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics )
@@ -305,19 +321,28 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 var filePath = syntaxTree.FilePath;
-                var builder = resultBuilders[filePath];
-                builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeReferenceValidatorInstance>();
 
                 var validatedDeclarationSymbol = validator.ValidatedDeclaration.GetSymbol();
 
                 if ( validatedDeclarationSymbol != null )
                 {
-                    builder.Validators.Add(
-                        new DesignTimeReferenceValidatorInstance(
-                            validatedDeclarationSymbol,
-                            validator.ReferenceKinds,
-                            validator.Driver,
-                            validator.Implementation ) );
+                    var designTimeValidator = new DesignTimeReferenceValidatorInstance(
+                        validatedDeclarationSymbol,
+                        validator.ReferenceKinds,
+                        validator.Driver,
+                        validator.Implementation );
+
+                    if ( resultBuilders.TryGetValue( filePath, out var builder ) )
+                    {
+                        builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeReferenceValidatorInstance>();
+                        builder.Validators.Add( designTimeValidator );
+                    }
+                    else
+                    {
+                        // This happens with cross-project validators i.e. validator
+                        externalValidators ??= new List<DesignTimeReferenceValidatorInstance>();
+                        externalValidators.Add( designTimeValidator );
+                    }
                 }
                 else
                 {
@@ -381,8 +406,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
             }
 
-            // Return an immutable copy.
-            return resultBuilders.SelectAsEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return (resultBuilders.SelectAsEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) ),
+                    externalValidators ?? (IReadOnlyList<DesignTimeReferenceValidatorInstance>) Array.Empty<DesignTimeReferenceValidatorInstance>());
         }
 
         public Invalidator ToInvalidator() => new( this );
@@ -405,9 +430,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType ) => this._inheritableAspects[aspectType];
 
-        // The design-time implementation of validators does not use this property but GetValidatorsForSymbol.
-        // (and cross-project design-time validators are not implemented)
-        ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.Validators => ImmutableArray<TransitiveValidatorInstance>.Empty;
+        ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.Validators => this.ReferenceValidators.ToTransitiveValidatorInstances();
 
         public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider, Compilation compilation )
         {

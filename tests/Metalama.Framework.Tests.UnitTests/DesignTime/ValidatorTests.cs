@@ -271,6 +271,7 @@ public interface I {}
         public async Task SourceCodeModifications()
         {
             using var testContext = this.CreateTestContext();
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string aspectCode = """
 using System;
@@ -301,8 +302,6 @@ class A {}
 
 class B {}
 """;
-
-            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string changingCodeFilename = "changingCode.cs";
 
@@ -370,7 +369,10 @@ class C
             {
                 var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
+                // ReSharper disable AccessToDisposedClosure
                 var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+                // ReSharper restore AccessToDisposedClosure
 
                 var compilationResult = await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
 
@@ -383,6 +385,71 @@ class C
                             .ReportedDiagnostics )
                     .ToList();
             }
+        }
+
+        [Fact]
+        public async Task CrossProject()
+        {
+            using var testContext = this.CreateTestContext();
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+            const string dependentCode = """
+using System;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
+
+public class Fabric : ProjectFabric
+{
+    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+    public override void AmendProject( IProjectAmender amender )
+    {
+        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+    }
+
+    private void ValidateReference( in ReferenceValidationContext context )
+    {
+        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+    }
+}
+
+public class A {}
+
+public class B {}
+
+""";
+
+            const string referencingCode = """
+class C
+{
+   void M()
+   {
+     A a;
+     B b;
+   }
+}
+
+""";
+
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( referencingCode, dependentCode: dependentCode );
+
+            var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+            // ReSharper restore AccessToDisposedClosure
+
+            var compilationResult = await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
+
+            var diagnostics = compilation.SyntaxTrees
+                .SelectMany(
+                    t => DesignTimeReferenceValidatorRunner.Validate(
+                            compilationResult.Value.AspectPipelineConfiguration.ServiceProvider,
+                            compilation.GetSemanticModel( t ),
+                            compilationResult.Value )
+                        .ReportedDiagnostics )
+                .ToList();
+
+            Assert.Equal( 2, diagnostics.Count );
         }
     }
 }
