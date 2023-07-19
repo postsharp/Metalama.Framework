@@ -26,7 +26,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public SerializableDeclarationId DeclarationId { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> struct.
+        /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> class.
         /// </summary>
         /// <param name="suppression"></param>
         public CacheableScopedSuppression( in ScopedSuppression suppression )
