@@ -1004,8 +1004,6 @@ class D{version}
             return CreateCSharpCompilation( code, acceptErrors: true );
         }
 
-        static void CheckDiagnostics( IEnumerable<Diagnostic> diagnostics ) => Assert.Equal( new[] { "LAMA0118" }, diagnostics.Select( d => d.Id ) );
-
         using var testContext = this.CreateTestContext();
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
@@ -1022,7 +1020,9 @@ class D{version}
         // Execute with incomplete/invalid statement.
         var compilation2 = CreateCompilation( "Console" );
         Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
-        CheckDiagnostics( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
+
+        // Note that LAMA0118 is no longer reported by the pipeline but by the analyzer.
+        Assert.Empty( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
@@ -1041,7 +1041,9 @@ class D{version}
         var compilation3 = CreateCompilation( "Console.Write" );
         executionResult = await pipeline.ExecuteAsync( compilation3, AsyncExecutionContext.Get() );
         Assert.False( executionResult.IsSuccessful );
-        CheckDiagnostics( executionResult.Diagnostics );
+
+        // Note that LAMA0118 is no longer reported by the pipeline but by the analyzer.
+        Assert.Empty( executionResult.Diagnostics );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
     }
