@@ -107,6 +107,7 @@ namespace Metalama.Framework.DesignTime
                     if ( !reportedDiagnostics.Add( diagnostic ) )
                     {
                         this._logger.Trace?.Log( $"Not reporting {FormatDiagnostic( diagnostic )} again." );
+
                         return;
                     }
 
@@ -117,18 +118,9 @@ namespace Metalama.Framework.DesignTime
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                // Execute the analyses that are not performed in the pipeline.
-                TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
-                    context.SemanticModel,
-                    ReportDiagnostic,
-                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
-                    true,
-                    cancellationToken );
-
                 // Run the pipeline.
                 IEnumerable<Diagnostic> diagnostics;
-                IEnumerable<CacheableScopedSuppression> suppressions;
+                IEnumerable<IScopedSuppression> suppressions;
 
                 var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
@@ -140,12 +132,35 @@ namespace Metalama.Framework.DesignTime
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
 
                     diagnostics = filteredPipelineDiagnostics;
-                    suppressions = Enumerable.Empty<CacheableScopedSuppression>();
+                    suppressions = Enumerable.Empty<IScopedSuppression>();
                 }
                 else
                 {
                     diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
                     suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
+                }
+
+                // Execute the analyses that are not performed in the pipeline.
+                // We execute this after the pipeline so we allow it to get to paused state in case of compile-time change.
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    context.SemanticModel,
+                    ReportDiagnostic,
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                // Execute the reference validators.
+                if ( pipelineResult.IsSuccessful )
+                {
+                    var validationResults = DesignTimeReferenceValidatorRunner.Validate(
+                        pipelineResult.Value.AspectPipelineConfiguration.ServiceProvider,
+                        context.SemanticModel,
+                        pipelineResult.Value,
+                        context.CancellationToken );
+
+                    diagnostics = diagnostics.Concat( validationResults.ReportedDiagnostics );
+                    suppressions = suppressions.Concat( validationResults.DiagnosticSuppressions );
                 }
 
                 // Report diagnostics.
@@ -159,7 +174,7 @@ namespace Metalama.Framework.DesignTime
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    var symbol = suppression.DeclarationId.ResolveToSymbolOrNull( compilation );
+                    var symbol = suppression.GetScopeSymbolOrNull( compilation );
 
                     if ( symbol != null )
                     {

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Observers
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Observers
         /// <summary>
         /// Method called by <see cref="CompileTimeCompilationBuilder.TryCreateCompileTimeCompilation"/>.
         /// </summary>
-        void OnCompileTimeCompilation( Compilation compilation );
+        void OnCompileTimeCompilation( Compilation compilation, IReadOnlyDictionary<string, string> compileTimeToSourceMap );
 
         void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics );
     }

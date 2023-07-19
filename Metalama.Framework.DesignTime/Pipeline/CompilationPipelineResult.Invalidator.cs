@@ -5,15 +5,15 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed partial class CompilationPipelineResult
+internal sealed partial class AspectPipelineResult
 {
     public sealed class Invalidator
     {
-        private readonly CompilationPipelineResult _parent;
+        private readonly AspectPipelineResult _parent;
         private readonly ImmutableDictionary<string, SyntaxTreePipelineResult>.Builder _syntaxTreeBuilders;
         private readonly ImmutableDictionary<string, SyntaxTreePipelineResult>.Builder _invalidSyntaxTreeBuilders;
 
-        public Invalidator( CompilationPipelineResult parent )
+        public Invalidator( AspectPipelineResult parent )
         {
             this._parent = parent;
             this._syntaxTreeBuilders = parent.SyntaxTreeResults.ToBuilder();
@@ -32,14 +32,14 @@ internal sealed partial class CompilationPipelineResult
             }
         }
 
-        public CompilationPipelineResult ToImmutable()
+        public AspectPipelineResult ToImmutable()
         {
-            return new CompilationPipelineResult(
+            return new AspectPipelineResult(
                 this._syntaxTreeBuilders.ToImmutable(),
                 this._invalidSyntaxTreeBuilders.ToImmutable(),
                 this._parent.IntroducedSyntaxTrees,
                 this._parent._inheritableAspects,
-                this._parent.Validators,
+                this._parent.ReferenceValidators,
                 this._parent.Configuration );
         }
     }

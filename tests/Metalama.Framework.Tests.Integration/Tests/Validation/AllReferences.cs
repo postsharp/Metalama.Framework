@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -92,8 +93,17 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     {
         private void ReferencingMethod()
         {
+            // Local variable.
             ValidatedClass variable;
+
+            // Typeof.
             ValidatedClass.Method( typeof(ValidatedClass) );
+
+            // Type argument of generic type.
+            List<ValidatedClass> list = new();
+
+            // Type argument of generic method.
+            _ = new object[0].OfType<ValidatedClass>();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
         ImmutableUserDiagnosticList Diagnostics,
         IReadOnlyList<InheritableAspectInstance> InheritableAspects,
-        ImmutableArray<ReferenceValidatorInstance> Validators,
+        ImmutableArray<ReferenceValidatorInstance> ReferenceValidators,
         ImmutableArray<IAspectInstance> AspectInstances,
         IReadOnlyCollection<ITransformationBase> Transformations );
 }

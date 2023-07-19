@@ -46,11 +46,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             TestableCancellationToken cancellationToken )
         {
             // Run the validators.
-            var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
+            var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources );
             var initialCompilation = pipelineStepsResult.FirstCompilation;
             var finalCompilation = pipelineStepsResult.LastCompilation;
 
-            var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
+            var validationResult = await validationRunner.RunAllAsync( initialCompilation, finalCompilation, cancellationToken );
 
             // Run the linker.
             var linker = new AspectLinker(

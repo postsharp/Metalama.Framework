@@ -42,12 +42,12 @@ internal sealed class TransitiveCompilationService : ITransitiveCompilationServi
         }
         else
         {
-            var pipelineConfiguration = pipelineResult.Value.PipelineConfiguration;
+            var pipelineConfiguration = pipelineResult.Value.AspectPipelineConfiguration;
             var projectServiceProvider = pipelineConfiguration.ServiceProvider;
 
             result[0] = TransitiveCompilationResult.Success(
-                pipelineResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused,
-                pipelineResult.Value.TransformationResult.GetSerializedTransitiveAspectManifest( projectServiceProvider, compilation ) );
+                pipelineResult.Value.AspectPipelineStatus == DesignTimeAspectPipelineStatus.Paused,
+                pipelineResult.Value.AspectPipelineResult.GetSerializedTransitiveAspectManifest( projectServiceProvider, compilation ) );
         }
     }
 }

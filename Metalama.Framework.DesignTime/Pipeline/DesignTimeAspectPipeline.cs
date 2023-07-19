@@ -498,9 +498,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     compilationReferences.Add(
                         new DesignTimeProjectReference(
                             referenceResult.Value.ProjectVersion.ProjectKey,
-                            referenceResult.Value.TransformationResult ) );
+                            referenceResult.Value.AspectPipelineResult ) );
 
-                    if ( referenceResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                    if ( referenceResult.Value.AspectPipelineStatus == DesignTimeAspectPipelineStatus.Paused )
                     {
                         pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
                     }
@@ -751,7 +751,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         compilationResult = new CompilationResult(
                             this._currentState.ProjectVersion.AssertNotNull(),
                             this._currentState.PipelineResult,
-                            this._currentState.ValidationResult,
                             this._currentState.Status,
                             this._currentState.Configuration!.Value.Value );
 
@@ -770,22 +769,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                             + $"the pipeline is paused, returning from cache only." );
 
                         // If the pipeline is paused, we only serve pipeline results from the cache.
-                        // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
-                        // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
-                        // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
-
-                        var compilationContext = CompilationContextFactory.GetInstance( compilation );
-
-                        var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
 
                         if ( this._currentState.ProjectVersion != null )
                         {
                             if ( this._currentState.PipelineResult.Configuration == null )
                             {
-                                var allTreeDiagnostics = validationResult.SyntaxTreeResults.SelectMany( result => result.Value.Diagnostics ).ToImmutableArray();
-
                                 compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed(
-                                    allTreeDiagnostics,
+                                    ImmutableArray<Diagnostic>.Empty,
                                     "The pipeline was paused while there were compile-time errors." );
                             }
                             else
@@ -793,7 +783,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 compilationResult = new CompilationResult(
                                     this._currentState.ProjectVersion,
                                     this._currentState.PipelineResult,
-                                    validationResult,
                                     this._currentState.Status,
                                     this._currentState.PipelineResult.Configuration );
                             }
@@ -822,60 +811,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             throw;
         }
-    }
-
-    private CompilationValidationResult ValidateWithPausedPipeline(
-        ProjectServiceProvider serviceProvider,
-        CompilationContext compilationContext,
-        DesignTimeAspectPipeline pipeline,
-        CancellationToken cancellationToken )
-    {
-        var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
-        var diagnostics = new List<Diagnostic>();
-        var semanticModelProvider = compilationContext.SemanticModelProvider;
-
-        foreach ( var syntaxTree in compilationContext.Compilation.SyntaxTrees )
-        {
-            diagnostics.Clear();
-
-            var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
-
-            var pipelineMustReportPausedPipelineAsErrors =
-                pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );
-
-            if ( pipelineMustReportPausedPipelineAsErrors )
-            {
-                this.Logger.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
-            }
-
-            TemplatingCodeValidator.Validate(
-                serviceProvider,
-                compilationContext.Compilation,
-                semanticModel,
-                diagnostics.Add,
-                pipelineMustReportPausedPipelineAsErrors,
-                true,
-                cancellationToken );
-
-            ImmutableArray<CacheableScopedSuppression> suppressions;
-
-            // Take the cached suppressions so we don't submerge the user with warnings (although these are only validation suppressions, not aspect suppressions).
-            if ( this._currentState.ValidationResult.SyntaxTreeResults.TryGetValue( syntaxTree.FilePath, out var syntaxTreeResult ) )
-            {
-                suppressions = syntaxTreeResult.Suppressions;
-            }
-            else
-            {
-                suppressions = ImmutableArray<CacheableScopedSuppression>.Empty;
-            }
-
-            if ( diagnostics.Count > 0 || !suppressions.IsEmpty )
-            {
-                resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( diagnostics.ToImmutableArray(), suppressions );
-            }
-        }
-
-        return new CompilationValidationResult( resultBuilder.ToImmutable(), DesignTimeValidatorCollectionEqualityKey.Empty );
     }
 
     private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
@@ -1211,7 +1146,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public CompilationPipelineResult CompilationPipelineResult => this._currentState.PipelineResult;
+    public AspectPipelineResult AspectPipelineResult => this._currentState.PipelineResult;
 
     protected override bool TryInitialize(
         IDiagnosticAdder diagnosticAdder,

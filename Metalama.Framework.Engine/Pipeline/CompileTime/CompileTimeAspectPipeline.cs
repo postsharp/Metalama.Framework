@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 var resultPartialCompilation = result.Value.Compilation;
 
                 // Execute validators.
-                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml )

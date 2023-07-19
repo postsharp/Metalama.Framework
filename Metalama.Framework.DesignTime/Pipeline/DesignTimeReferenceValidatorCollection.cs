@@ -9,23 +9,24 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class DesignTimeValidatorCollection
+internal sealed class DesignTimeReferenceValidatorCollection
 {
-    public static DesignTimeValidatorCollection Empty { get; } = new( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Empty );
+    public static DesignTimeReferenceValidatorCollection Empty { get; } =
+        new( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty );
 
     public bool IsEmpty => this._dictionary.IsEmpty;
 
     public DesignTimeValidatorCollectionEqualityKey EqualityKey { get; }
 
-    private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance> _dictionary;
+    private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _dictionary;
 
-    private DesignTimeValidatorCollection( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance> dictionary )
+    private DesignTimeReferenceValidatorCollection( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> dictionary )
     {
         this._dictionary = dictionary;
         this.EqualityKey = ComputeValidatorHash( dictionary );
     }
 
-    internal ImmutableHashSet<DesignTimeValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
+    internal ImmutableHashSet<DesignTimeReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
     {
         var symbolKey = SymbolDictionaryKey.CreateLookupKey( symbol );
 
@@ -33,7 +34,7 @@ internal sealed class DesignTimeValidatorCollection
     }
 
     private static DesignTimeValidatorCollectionEqualityKey ComputeValidatorHash(
-        ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance> validators )
+        ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> validators )
     {
         XXH64 hasher = new();
         ulong combined = 0;
@@ -74,17 +75,17 @@ internal sealed class DesignTimeValidatorCollection
 
     public sealed class Builder
     {
-        private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Builder _builder;
+        private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder _builder;
 
-        public Builder( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Builder builder )
+        public Builder( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder builder )
         {
             this._builder = builder;
         }
 
-        public void Remove( DesignTimeValidatorInstance validator ) => this._builder.Remove( validator.ValidatedDeclaration, validator );
+        public void Remove( DesignTimeReferenceValidatorInstance validator ) => this._builder.Remove( validator.ValidatedDeclaration, validator );
 
-        public void Add( DesignTimeValidatorInstance validator ) => this._builder.Add( validator.ValidatedDeclaration, validator );
+        public void Add( DesignTimeReferenceValidatorInstance validator ) => this._builder.Add( validator.ValidatedDeclaration, validator );
 
-        public DesignTimeValidatorCollection ToImmutable() => new( this._builder.ToImmutable() );
+        public DesignTimeReferenceValidatorCollection ToImmutable() => new( this._builder.ToImmutable() );
     }
 }

@@ -22,7 +22,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Compilation = Microsoft.CodeAnalysis.Compilation;
 
 #pragma warning disable IDE0079   // Remove unnecessary suppression.
 #pragma warning disable CA1307    // Specify StringComparison for clarity
@@ -118,7 +117,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         var i = 0;
 
-        foreach ( var result in results.TransformationResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
+        foreach ( var result in results.AspectPipelineResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
         {
             if ( i > 0 )
             {
@@ -659,7 +658,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field1'",
-            results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results1!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Second compilation with a different master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -677,7 +676,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2'",
-            results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results2!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Third compilation. Add a syntax tree with a partial type.
         var masterCode3 = new Dictionary<string, string>()
@@ -700,7 +699,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2,Field3'",
-            results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results3!.AspectPipelineResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
     }
 
     [Fact]
@@ -929,87 +928,6 @@ class D{version}
         return (masterCompilation, dependentCompilation);
     }
 
-    [Fact]
-    public async Task ValidationDoesNotLeakCompilation()
-    {
-        var output = await this.ValidationDoesNotLeakCompilationCore();
-
-        GC.Collect();
-
-        if ( output.Compilation.TryGetTarget( out _ ) )
-        {
-            MemoryLeakHelper.CaptureDotMemoryDumpAndThrow();
-        }
-
-        GC.KeepAlive( output.Pipeline );
-    }
-
-    private async Task<(WeakReference<Compilation> Compilation, DesignTimeAspectPipeline Pipeline)>
-        ValidationDoesNotLeakCompilationCore()
-    {
-        using var testContext = this.CreateTestContext();
-
-        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
-
-        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "1" ) );
-
-        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 )!;
-
-        await pipeline.ExecuteAsync( compilation1, true, AsyncExecutionContext.Get() );
-
-        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "2" ) );
-
-        // This is to make sure that the first compilation is not the last one, because it's ok to hold a reference to the last-seen compilation.
-        await pipeline.ExecuteAsync( compilation2, true, AsyncExecutionContext.Get() );
-
-        return (new WeakReference<Compilation>( compilation1 ), pipeline);
-    }
-
-    [Fact]
-    public async Task ValidationCanAccessAspectRepository()
-    {
-        using var testContext = this.CreateTestContext();
-
-        using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
-
-        var compilation = TestCompilationFactory.CreateCSharpCompilation( GetAspectRepositoryValidatorCode( "" ) );
-
-        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
-
-        // If AspectRepository didn't work, this would throw wrapped InvalidOperationException.
-        await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
-    }
-
-    private static string GetAspectRepositoryValidatorCode( string suffix )
-        => $$"""
-        using System;
-        using Metalama.Framework.Aspects;
-        using Metalama.Framework.Code;
-        using Metalama.Framework.Validation;
-
-        public class TheAspect : TypeAspect
-        {
-            public override void BuildAspect( IAspectBuilder<INamedType> builder )
-            {
-                builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
-            }
-
-            private void ValidateReference( in ReferenceValidationContext context )
-            {
-                if ( !( (INamedType)context.ReferencedDeclaration ).Enhancements().HasAspect<TheAspect>() )
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
-
-        [TheAspect]
-        internal class C{{suffix}}
-        {
-            private C{{suffix}}? _f;
-        }
-        """;
-
 #if NET6_0_OR_GREATER
     [SkippableFact]
     public void OverrideMethodWithMultipleTargetFrameworks()
@@ -1053,7 +971,7 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netFrameworkCompilation, default, out _ ) );
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netCompilation, default, out var result ) );
 
-        foreach ( var (_, treeResult) in result!.TransformationResult.SyntaxTreeResults )
+        foreach ( var (_, treeResult) in result!.AspectPipelineResult.SyntaxTreeResults )
         {
             Assert.Empty( treeResult.Diagnostics );
         }

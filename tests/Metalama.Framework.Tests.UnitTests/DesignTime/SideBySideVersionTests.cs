@@ -80,6 +80,6 @@ public class TheClass : TheInterface
 
         var result = await currentVersionPipelineFactory.ExecuteAsync( dependentCompilation!, AsyncExecutionContext.Get() );
 
-        Assert.Single( result.Value.TransformationResult.SyntaxTreeResults.Single().Value.AspectInstances );
+        Assert.Single( result.Value.AspectPipelineResult.SyntaxTreeResults.Single().Value.AspectInstances );
     }
 }

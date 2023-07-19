@@ -131,7 +131,7 @@ internal sealed class TestResult : IDisposable
         return string.Join( Environment.NewLine, lines.Where( l => l != "<>" ) );
     }
 
-    internal async Task SetCompileTimeCompilationAsync( Compilation compilation )
+    internal async Task SetCompileTimeCompilationAsync( Compilation compilation, IReadOnlyDictionary<string, string> compileTimeToSourceMap )
     {
         if ( this.InputCompilation == null ||
              this.TestInput == null ||
@@ -153,11 +153,16 @@ internal sealed class TestResult : IDisposable
             var syntaxNode = await syntaxTree.GetRootAsync();
 
             // Format the output code.
-            var annotation = syntaxNode.GetAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ).SingleOrDefault();
 
-            if ( annotation != null )
+            if ( compileTimeToSourceMap.TryGetValue( syntaxTree.FilePath, out var sourcePath ) )
             {
-                var testTree = this.SyntaxTrees.SingleOrDefault( t => Path.GetFileName( t.InputPath ) == Path.GetFileName( annotation.Data ) );
+                var testTree = this.SyntaxTrees.SingleOrDefault(
+                    t =>
+                    {
+                        var sourceFileName = Path.GetFileName( sourcePath );
+
+                        return Path.GetFileName( t.InputPath ) == sourceFileName;
+                    } );
 
                 testTree?.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
             }

@@ -30,6 +30,12 @@ namespace Metalama.Framework.Engine.Diagnostics
         private ConcurrentLinkedList<Diagnostic>? _diagnostics;
         private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
         private ConcurrentLinkedList<CodeFixInstance>? _codeFixes;
+        private int _diagnosticCount;
+        private int _errorCount;
+
+        internal int DiagnosticCount => this._diagnosticCount;
+
+        internal int ErrorCount => this._errorCount;
 
         public bool IsEmpty
         {
@@ -89,15 +95,15 @@ namespace Metalama.Framework.Engine.Diagnostics
             this._codeFixes = null;
         }
 
-        internal int ErrorCount { get; private set; }
-
         public void Report( Diagnostic diagnostic )
         {
             LazyInitializer.EnsureInitialized( ref this._diagnostics ).Add( diagnostic );
 
+            Interlocked.Increment( ref this._diagnosticCount );
+
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
-                this.ErrorCount++;
+                Interlocked.Increment( ref this._errorCount );
             }
         }
 

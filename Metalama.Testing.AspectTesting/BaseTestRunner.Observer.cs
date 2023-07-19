@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
@@ -27,8 +28,8 @@ namespace Metalama.Testing.AspectTesting
                 this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
             }
 
-            public void OnCompileTimeCompilation( Compilation compilation )
-                => this._taskRunner.RunSynchronously( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
+            public void OnCompileTimeCompilation( Compilation compilation, IReadOnlyDictionary<string, string> compileTimeToSourceMap )
+                => this._taskRunner.RunSynchronously( () => this._testResult.SetCompileTimeCompilationAsync( compilation, compileTimeToSourceMap ) );
 
             public void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics )
                 => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );

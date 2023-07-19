@@ -6,11 +6,13 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -18,38 +20,42 @@ internal sealed class ValidationRunner
 {
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<IValidatorSource> _sources;
-    private readonly CancellationToken _cancellationToken;
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
-    public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources, CancellationToken cancellationToken )
+    public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources )
     {
         this._configuration = configuration;
         this._sources = sources;
         this._serviceProvider = configuration.ServiceProvider;
         this._userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
-        this._cancellationToken = cancellationToken;
+        this._concurrentTaskRunner = this._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
     }
 
     /// <summary>
     /// Runs both declaration and reference validators.
     /// </summary>
-    public ValidationResult RunAll( CompilationModel initialCompilation, CompilationModel finalCompilation )
+    public async Task<ValidationResult> RunAllAsync(
+        CompilationModel initialCompilation,
+        CompilationModel finalCompilation,
+        CancellationToken cancellationToken )
     {
         var initialCompilationWithEnhancements = initialCompilation.WithAspectRepository( finalCompilation.AspectRepository, "With final aspect repository" );
 
         var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
-        this.RunDeclarationValidators( initialCompilationWithEnhancements, finalCompilation, userDiagnosticSink );
 
-        var transitiveValidators = this.RunReferenceValidators( initialCompilationWithEnhancements, userDiagnosticSink );
+        var declarationValidatorsTask = this.RunDeclarationValidatorsAsync(
+            initialCompilationWithEnhancements,
+            finalCompilation,
+            userDiagnosticSink,
+            cancellationToken );
 
-        return new ValidationResult( transitiveValidators, userDiagnosticSink.ToImmutable() );
-    }
+        var referenceValidatorsTask = this.RunReferenceValidatorsAsync( initialCompilationWithEnhancements, userDiagnosticSink, cancellationToken );
 
-    public void RunDeclarationValidators( CompilationModel initialCompilation, CompilationModel finalCompilation, UserDiagnosticSink diagnosticAdder )
-    {
-        this.RunDeclarationValidators( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder );
-        this.RunDeclarationValidators( finalCompilation, CompilationModelVersion.Final, diagnosticAdder );
+        await Task.WhenAll( declarationValidatorsTask, referenceValidatorsTask );
+
+        return new ValidationResult( await referenceValidatorsTask, userDiagnosticSink.ToImmutable() );
     }
 
     public void RunDeclarationValidators( CompilationModel compilation, CompilationModelVersion version, UserDiagnosticSink diagnosticAdder )
@@ -71,7 +77,47 @@ internal sealed class ValidationRunner
         }
     }
 
-    private ImmutableArray<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, UserDiagnosticSink diagnosticAdder )
+    public async Task RunDeclarationValidatorsAsync(
+        CompilationModel initialCompilation,
+        CompilationModel finalCompilation,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
+    {
+        var task1 = this.RunDeclarationValidatorsAsync( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder, cancellationToken );
+        var task2 = this.RunDeclarationValidatorsAsync( finalCompilation, CompilationModelVersion.Final, diagnosticAdder, cancellationToken );
+
+        await Task.WhenAll( task1, task2 );
+    }
+
+    private async Task RunDeclarationValidatorsAsync(
+        CompilationModel compilation,
+        CompilationModelVersion version,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
+    {
+        var validators = this._sources
+            .SelectMany( s => s.GetValidators( ValidatorKind.Definition, version, compilation, diagnosticAdder ) )
+            .Cast<DeclarationValidatorInstance>();
+
+        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
+
+        await this._concurrentTaskRunner.RunInParallelAsync( validators, RunValidator, cancellationToken );
+
+        void RunValidator( DeclarationValidatorInstance validator )
+        {
+            using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
+            {
+                userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+
+                validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
+            }
+        }
+    }
+
+    private async Task<ImmutableArray<ReferenceValidatorInstance>> RunReferenceValidatorsAsync(
+        CompilationModel initialCompilation,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
     {
         var validators = this.GetReferenceValidators( initialCompilation, diagnosticAdder );
 
@@ -85,18 +131,16 @@ internal sealed class ValidationRunner
             return ImmutableArray<ReferenceValidatorInstance>.Empty;
         }
 
-        using ( var visitor = new ReferenceValidationVisitor(
-                   this._serviceProvider,
-                   diagnosticAdder,
-                   s => validatorsBySymbol[s],
-                   initialCompilation,
-                   this._cancellationToken ) )
-        {
-            foreach ( var syntaxTree in initialCompilation.PartialCompilation.SyntaxTrees )
-            {
-                visitor.Visit( syntaxTree.Value );
-            }
-        }
+        await this._concurrentTaskRunner.RunInParallelAsync(
+            initialCompilation.PartialCompilation.SyntaxTrees.Values,
+            ( syntaxTree, visitor ) => visitor.Visit( syntaxTree ),
+            () => new ReferenceValidationVisitor(
+                this._serviceProvider,
+                diagnosticAdder,
+                s => validatorsBySymbol[s],
+                initialCompilation,
+                cancellationToken ),
+            cancellationToken );
 
         return validatorsBySymbol.Where( s => s.Key.GetResultingAccessibility() != AccessibilityFlags.SameType )
             .SelectMany( s => s )
