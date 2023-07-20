@@ -125,42 +125,42 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( returnStatement )
                             {
                                 case { Parent: BlockSyntax parentBlock }:
-                                    AddIfExitFlowing( parentBlock, false );
+                                    AddIfExitFlowing( parentBlock, false, parentBlock.Statements.Last() != returnStatement );
 
                                     break;
 
                                 case { Parent: IfStatementSyntax ifStatement }:
-                                    AddIfExitFlowing( ifStatement, false );
+                                    AddIfExitFlowing( ifStatement, false, false );
 
                                     break;
 
                                 case { Parent: ElseClauseSyntax { Parent: IfStatementSyntax ifStatement } }:
-                                    AddIfExitFlowing( ifStatement, false );
+                                    AddIfExitFlowing( ifStatement, false, false );
 
                                     break;
 
-                                case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } }:
-                                    AddIfExitFlowing( switchStatement, true );
+                                case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } switchSection }:
+                                    AddIfExitFlowing( switchStatement, true, switchSection.Statements.Last() != returnStatement );
 
                                     break;
 
                                 case { Parent: LockStatementSyntax lockStatement }:
-                                    AddIfExitFlowing( lockStatement, false );
+                                    AddIfExitFlowing( lockStatement, false, false );
 
                                     break;
 
                                 case { Parent: FixedStatementSyntax fixedStatement }:
-                                    AddIfExitFlowing( fixedStatement, false );
+                                    AddIfExitFlowing( fixedStatement, false, false );
 
                                     break;
 
                                 case { Parent: LabeledStatementSyntax labeledStatement }:
-                                    AddIfExitFlowing( labeledStatement, false );
+                                    AddIfExitFlowing( labeledStatement, false, false );
 
                                     break;
 
                                 case { Parent: UsingStatementSyntax usingStatement }:
-                                    AddIfExitFlowing( usingStatement, false );
+                                    AddIfExitFlowing( usingStatement, false, false );
 
                                     break;
 
@@ -170,12 +170,11 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
                             }
 
-                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted )
+                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted, bool followedByCode)
                             {
                                 if ( exitFlowingStatements.Contains( controlStatement ) )
                                 {
-                                    // Return statement is in blockless IfStatement that is exit-flowing.
-                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( true, replaceByBreakIfOmitted ) );
+                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( !followedByCode, replaceByBreakIfOmitted ) );
                                 }
                                 else
                                 {
