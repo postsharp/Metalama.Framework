@@ -1563,7 +1563,7 @@ public interface I
     event System.EventHandler Event;
 " +
 #if NET6_0_OR_GREATER
-@"
+                                @"
     virtual void VirtualMethod() {}
     virtual int VirtualProperty {
         get => 42;
@@ -1575,7 +1575,7 @@ public interface I
     }
 " +
 #endif
-@"
+                                @"
 }
 
 public abstract class A
@@ -1648,12 +1648,17 @@ public partial class B
             Assert.True( GetForMethod( typeB, "PartialVoid_Impl" ) );
             Assert.True( GetForMethod( typeB, "Partial" ) );
 
-            bool GetForMethod( INamedType type, string name ) => type.Methods.OfName( name ).Single().HasImplementation;
-            bool GetForProperty( INamedType type, string name ) => type.Properties.OfName( name ).Single().HasImplementation;
-            bool GetForEvent( INamedType type, string name ) => type.Events.OfName( name ).Single().HasImplementation;
-            bool GetForConstructor( INamedType type ) => type.Constructors.Single().HasImplementation;
-            bool GetForStaticConstructor( INamedType type ) => type.StaticConstructor.AssertNotNull().HasImplementation;
-            bool GetForField( INamedType type, string name ) => type.Fields.OfName( name ).Single().HasImplementation;
+            static bool GetForMethod( INamedType type, string name ) => type.Methods.OfName( name ).Single().HasImplementation;
+
+            static bool GetForProperty( INamedType type, string name ) => type.Properties.OfName( name ).Single().HasImplementation;
+
+            static bool GetForEvent( INamedType type, string name ) => type.Events.OfName( name ).Single().HasImplementation;
+
+            static bool GetForConstructor( INamedType type ) => type.Constructors.Single().HasImplementation;
+
+            static bool GetForStaticConstructor( INamedType type ) => type.StaticConstructor.AssertNotNull().HasImplementation;
+
+            static bool GetForField( INamedType type, string name ) => type.Fields.OfName( name ).Single().HasImplementation;
         }
 
         /*

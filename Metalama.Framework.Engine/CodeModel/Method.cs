@@ -29,10 +29,13 @@ internal sealed class Method : MethodBase, IMethodImpl
             throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
         }
 
-        if (symbol.PartialDefinitionPart != null)
+        // This is intentionally debug-only to not break existing code. Should be non-conditional on the next non-RC version.
+#if DEBUG
+        if ( symbol.PartialDefinitionPart != null )
         {
-            throw new ArgumentOutOfRangeException( nameof( symbol ), "Cannot use partial implementation to instantiate the Method class." );
+            throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use partial implementation to instantiate the Method class." );
         }
+#endif
     }
 
     [Memo]

@@ -22,8 +22,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsOverride => this.Symbol.IsOverride;
 
-        public bool HasImplementation =>
-            this.Symbol switch {
+        public bool HasImplementation
+            => this.Symbol switch
+            {
                 IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null } => false,
                 IFieldSymbol { IsConst: true } => false,
                 { IsAbstract: true } => false,
