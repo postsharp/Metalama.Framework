@@ -107,17 +107,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 // Otherwise, we have to check references.
 
-                ISymbol? referencedSymbol;
-                //try
-                //{
-                    referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
-                //}
-                //catch (NullReferenceException) 
-                //{
-                //    // Temporary fix for a Roslyn bug, which occurs when this is a call of file-scoped extension method and
-                //    // there is another file-scoped extension method defined in another file.
-                //    referencedSymbol = null;
-                //}
+                var referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
 
                 if ( referencedSymbol is { } and not ITypeParameterSymbol )
                 {
