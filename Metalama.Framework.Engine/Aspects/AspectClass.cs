@@ -78,7 +78,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
     ImmutableArray<AspectLayer> IAspectClassImpl.Layers => this.Layers;
 
-    public Location? GetDiagnosticLocation( Compilation compilation ) => compilation.GetTypeByMetadataNameSafe( this.FullName )?.GetDiagnosticLocation();
+    public Location? GetDiagnosticLocation( Compilation compilation ) => compilation.GetTypeByMetadataNameSafe( this.FullName ).GetDiagnosticLocation();
 
     public bool IsAbstract { get; }
 

@@ -14,7 +14,7 @@ public sealed class IsImplementationOfInterfaceMemberTests : UnitTestClass
     [Fact]
     public void ImplicitImplementation()
     {
-        var code = """
+        const string code = """
 interface IInterface
 {
     int Foo();
@@ -49,7 +49,7 @@ class Implementation : IInterface
     [Fact]
     public void ExplicitImplementation()
     {
-        var code = """
+        const string code = """
 interface IInterface
 {
     int Foo();
@@ -84,7 +84,7 @@ class Implementation : IInterface
     [Fact]
     public void Reimplementation()
     {
-        var code = """
+        const string code = """
 interface IInterface
 {
     int Foo();
@@ -131,15 +131,15 @@ class Implementation : Base, IInterface
     }
 
     [Fact]
-    public void SubinterfaceReimplementation()
+    public void SubInterfaceReimplementation()
     {
-        var code = """
-interface ISubinterface
+        const string code = """
+interface ISubInterface
 {
     int Foo();
 }
 
-interface IInterface : ISubinterface
+interface IInterface : ISubInterface
 {
     int Foo(int value);
 }
@@ -150,7 +150,7 @@ class Base : IInterface
     public int Foo(int value) { return 42; }
 }
 
-class Implementation : Base, ISubinterface
+class Implementation : Base, ISubInterface
 {
     public new int Foo() { return 42; }
 }
@@ -159,31 +159,31 @@ class Implementation : Base, ISubinterface
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        var subinterfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "ISubinterface" );
+        var subInterfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "ISubInterface" );
         var interfaceType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "IInterface" );
         var baseType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Base" );
         var implementationType = (INamedTypeInternal) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 
-        var subinterfaceMethod = subinterfaceType.Methods.First();
+        var subInterfaceMethod = subInterfaceType.Methods.First();
         var interfaceMethod = interfaceType.Methods.First();
 
-        var baseMethod1 = baseType.Methods.OfExactSignature( subinterfaceMethod ).AssertNotNull();
+        var baseMethod1 = baseType.Methods.OfExactSignature( subInterfaceMethod ).AssertNotNull();
         var baseMethod2 = baseType.Methods.OfExactSignature( interfaceMethod ).AssertNotNull();
 
-        var implementationMethod = implementationType.Methods.OfExactSignature( subinterfaceMethod ).AssertNotNull();
+        var implementationMethod = implementationType.Methods.OfExactSignature( subInterfaceMethod ).AssertNotNull();
 
-        Assert.True( implementationType.IsImplementationOfInterfaceMember( baseMethod1, subinterfaceMethod ) );
+        Assert.True( implementationType.IsImplementationOfInterfaceMember( baseMethod1, subInterfaceMethod ) );
         Assert.False( implementationType.IsImplementationOfInterfaceMember( baseMethod1, interfaceMethod ) );
-        Assert.False( implementationType.IsImplementationOfInterfaceMember( baseMethod2, subinterfaceMethod ) );
+        Assert.False( implementationType.IsImplementationOfInterfaceMember( baseMethod2, subInterfaceMethod ) );
         Assert.True( implementationType.IsImplementationOfInterfaceMember( baseMethod2, interfaceMethod ) );
-        Assert.True( implementationType.IsImplementationOfInterfaceMember( implementationMethod, subinterfaceMethod ) );
+        Assert.True( implementationType.IsImplementationOfInterfaceMember( implementationMethod, subInterfaceMethod ) );
         Assert.False( implementationType.IsImplementationOfInterfaceMember( implementationMethod, interfaceMethod ) );
     }
 
     [Fact]
     public void GenericImplementation()
     {
-        var code = """
+        const string code = """
 interface IInterface<T>
 {
     int Foo(T param);

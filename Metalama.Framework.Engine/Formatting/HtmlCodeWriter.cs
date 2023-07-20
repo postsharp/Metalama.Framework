@@ -147,6 +147,7 @@ namespace Metalama.Framework.Engine.Formatting
                 var line = sourceText.Lines.GetLineFromPosition( span.Start );
                 var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
+#pragma warning disable CS8123
                 var members = node.AncestorsAndSelf()
                     .Select(
                         n => n switch
@@ -160,6 +161,7 @@ namespace Metalama.Framework.Engine.Formatting
                         } )
                     .Where( x => x.Node != null )
                     .ToList();
+#pragma warning restore CS8123
 
                 finalBuilder.AppendInvariant( $"<span class='line-number'" );
 

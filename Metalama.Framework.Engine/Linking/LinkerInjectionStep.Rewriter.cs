@@ -646,20 +646,7 @@ internal sealed partial class LinkerInjectionStep
                         continue;
                     }
 
-                    var finalVariable = variable;
-
-                    if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
-                         && transformations.AddDefaultInitializer )
-                    {
-                        finalVariable =
-                            finalVariable.WithInitializer(
-                                EqualsValueClause(
-                                    LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) );
-                    }
-
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                     var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
@@ -688,21 +675,7 @@ internal sealed partial class LinkerInjectionStep
                         continue;
                     }
 
-                    if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
-                    {
-                        anyChangeToVariables = true;
-
-                        rewrittenVariables.Add(
-                            variable.WithInitializer(
-                                EqualsValueClause(
-                                    LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) ) );
-                    }
-                    else
-                    {
-                        rewrittenVariables.Add( variable );
-                    }
+                    rewrittenVariables.Add( variable );
                 }
 
                 if ( anyChangeToVariables )
@@ -799,25 +772,6 @@ internal sealed partial class LinkerInjectionStep
                 node = node.WithSynthesizedSetter();
             }
 
-            if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
-                 && transformations.AddDefaultInitializer )
-            {
-                node =
-                    node.Update(
-                        node.AttributeLists,
-                        node.Modifiers,
-                        node.Type,
-                        node.ExplicitInterfaceSpecifier,
-                        node.Identifier,
-                        node.AccessorList,
-                        node.ExpressionBody,
-                        EqualsValueClause(
-                            LiteralExpression(
-                                SyntaxKind.DefaultLiteralExpression,
-                                Token( SyntaxKind.DefaultKeyword ) ) ),
-                        Token( SyntaxKind.SemicolonToken ) );
-            }
-
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
             {
                 var existingFlags = node.GetLinkerDeclarationFlags();
@@ -848,17 +802,6 @@ internal sealed partial class LinkerInjectionStep
             var originalNode = node;
             node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
 
-            // Represents the event field that cannot be otherwise expressed (explicit interface implementation).
-            if ( node.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-            {
-                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
-                     && transformations.AddDefaultInitializer )
-                {
-                    node = node.WithLinkerDeclarationFlags(
-                        AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasDefaultInitializerExpression );
-                }
-            }
-
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
             node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
@@ -879,20 +822,7 @@ internal sealed partial class LinkerInjectionStep
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
                 {
-                    var finalVariable = variable;
-
-                    if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
-                         && transformations.AddDefaultInitializer )
-                    {
-                        finalVariable =
-                            finalVariable.WithInitializer(
-                                EqualsValueClause(
-                                    LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) );
-                    }
-
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
 
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
@@ -915,36 +845,7 @@ internal sealed partial class LinkerInjectionStep
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                var anyChange = false;
-                var rewrittenVariables = new List<VariableDeclaratorSyntax>();
-
-                foreach ( var variable in originalNode.Declaration.Variables )
-                {
-                    if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
-                    {
-                        anyChange = true;
-
-                        rewrittenVariables.Add(
-                            variable.WithInitializer(
-                                EqualsValueClause(
-                                    LiteralExpression(
-                                        SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) ) );
-                    }
-                    else
-                    {
-                        rewrittenVariables.Add( variable );
-                    }
-                }
-
-                if ( anyChange )
-                {
-                    return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
-                }
-                else
-                {
-                    return new[] { node };
-                }
+                return new[] { node };
             }
         }
 
