@@ -1526,15 +1526,15 @@ class C {}
 public partial class C
 {
     public void NonPartial() {}
-    public partial void PartialVoid_NoImpl();
-    public partial void PartialVoid_Impl();
+    partial void PartialVoid_NoImpl();
+    partial void PartialVoid_Impl();
     public partial int PartialNonVoid();
 }
 
 public partial class C
 {
-    public partial void PartialVoid_Impl() {}
-    public partial int PartialNonVoid() {}
+    partial void PartialVoid_Impl() {}
+    public partial int PartialNonVoid() => 42;
 }
 ";
 
