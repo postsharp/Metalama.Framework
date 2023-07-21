@@ -69,7 +69,7 @@ namespace Metalama.Testing.AspectTesting
 
         /// <summary>
         /// Gets the list of source code files that should be included in the compilation.
-        /// To enable this option in a test, add this comment to your test file: <c>// @IncludedFiles(relativePath)</c>. 
+        /// To enable this option in a test, add this comment to your test file: <c>// @Include(relativePath)</c>. 
         /// </summary>
         public List<string> IncludedFiles { get; } = new();
 
