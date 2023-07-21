@@ -24,7 +24,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal sealed class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent, IDiagnosticSource
+    internal sealed class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;

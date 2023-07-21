@@ -44,123 +44,106 @@ namespace Metalama.Framework.Code.Collections
         // NOTE: The next method is not public because it pollutes Intellisense and the documentation for all objects.
 
         /// <summary>
-        /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
+        /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method cannot be
+        /// called with a cyclic graph, otherwise a infinite cycle happens.
         /// </summary>
-        /// <param name="item">The initial item.</param>
-        /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
-        /// <param name="includeThis">A value indicating whether <paramref name="item"/> itself should be included in the result set.</param>
-        /// <param name="deduplicate">
-        ///     <c>true</c> if duplicates should be removed from the result.
-        ///     When <c>false</c>, duplicates throw in Debug build, and are not checked (causing infinite loops) in Release build.
-        /// </param>
+        /// <param name="root">The initial item.</param>
+        /// <param name="getChildren">A function that returns the set of all nodes connected to a given node.</param>
+        /// <param name="includeRoot">A value indicating whether <paramref name="root"/> itself should be included in the result set.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        internal static IReadOnlyCollection<T> SelectManyRecursive<T>(
-            this T item,
-            Func<T, IEnumerable<T>?> getItems,
-            bool includeThis = false,
-            bool deduplicate = false )
+        internal static List<T> SelectManyRecursive<T>(
+            this T root,
+            Func<T, IEnumerable<T>?> getChildren,
+            bool includeRoot = false )
             where T : class
         {
             var recursionCheck = 0;
 
-#if DEBUG
+            // Create a list for the results.
+            List<T> results = new();
 
-            // ReSharper disable once ConvertToConstant.Local
-            var useDictionary = true;
-#else
-            var useDictionary = deduplicate;
-#endif
-
-            if ( useDictionary )
+            if ( includeRoot )
             {
-                // Create a dictionary for the results. The key is the item, the value is the order of insertion.
-                Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
+                results.Add( root );
+            }
 
-                if ( includeThis )
+            VisitMany( getChildren( root ), getChildren, results, ref recursionCheck );
+
+            return results;
+        }
+
+        public static List<T> SelectManyRecursive<T>(
+            this IEnumerable<T> roots,
+            Func<T, IEnumerable<T>?> getChildren,
+            bool includeRoot = false )
+            where T : class
+        {
+            var recursionCheck = 0;
+
+            // Create a list for the results.
+            List<T> results = new();
+
+            foreach ( var item in roots )
+            {
+                if ( includeRoot )
                 {
-                    results.Add( item, 0 );
+                    results.Add( item );
                 }
 
-                VisitMany( getItems( item ), getItems, results, deduplicate, ref recursionCheck );
-
-                return results.Keys;
+                VisitMany( getChildren( item ), getChildren, results, ref recursionCheck );
             }
-            else
-            {
-                // Create a list for the results.
-                List<T> results = new();
 
-                if ( includeThis )
+            return results;
+        }
+
+        internal static HashSet<T> SelectManyRecursiveDistinct<T>(
+            this T root,
+            Func<T, IEnumerable<T>?> getChildren,
+            bool includeRoots = false )
+            where T : class
+        {
+            var recursionCheck = 0;
+
+            HashSet<T> results = new( ReferenceEqualityComparer<T>.Instance );
+
+            if ( includeRoots )
+            {
+                results.Add( root );
+            }
+
+            VisitMany( getChildren( root ), getChildren, results, ref recursionCheck );
+
+            return results;
+        }
+
+        public static HashSet<T> SelectManyRecursiveDistinct<T>(
+            this IEnumerable<T> roots,
+            Func<T, IEnumerable<T>?> getItems,
+            bool includeRoots = false )
+            where T : class
+        {
+            var recursionCheck = 0;
+
+            HashSet<T> results = new( ReferenceEqualityComparer<T>.Instance );
+
+            foreach ( var item in roots )
+            {
+                if ( includeRoots )
                 {
                     results.Add( item );
                 }
 
                 VisitMany( getItems( item ), getItems, results, ref recursionCheck );
-
-                return results;
             }
-        }
 
-        /// <summary>
-        /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
-        /// </summary>
-        /// <param name="collection">The initial collection of items.</param>
-        /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
-        /// <param name="deduplicate">
-        ///     <c>true</c> if duplicates should be removed from the result.
-        ///     When <c>false</c>, duplicates throw in Debug build, and are not checked (causing infinite loops) in Release build.
-        /// </param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static IReadOnlyCollection<T> SelectManyRecursive<T>(
-            this IEnumerable<T> collection,
-            Func<T, IEnumerable<T>?> getItems,
-            bool deduplicate = false )
-            where T : class, ICompilationElement
-            => SelectManyRecursiveInternal( collection, getItems, deduplicate );
-
-        internal static IReadOnlyCollection<T> SelectManyRecursiveInternal<T>(
-            this IEnumerable<T> collection,
-            Func<T, IEnumerable<T>?> getItems,
-            bool deduplicate = false )
-            where T : class
-        {
-            var recursionCheck = 0;
-
-#if DEBUG
-
-            // ReSharper disable once ConvertToConstant.Local
-            var useDictionary = true;
-#else
-            var useDictionary = deduplicate;
-#endif
-
-            if ( useDictionary )
-            {
-                // Create a dictionary for the results. The key is the item, the value is the order of insertion.
-                Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
-
-                VisitMany( collection, getItems, results, deduplicate, ref recursionCheck );
-
-                return results.Keys;
-            }
-            else
-            {
-                // Create a list for the results.
-                List<T> results = new();
-
-                VisitMany( collection, getItems, results, ref recursionCheck );
-
-                return results;
-            }
+            return results;
         }
 
         private static void VisitMany<T>(
             IEnumerable<T>? collection,
             Func<T, IEnumerable<T>?> getItems,
-            Dictionary<T, int> results,
-            bool deduplicate,
+            HashSet<T> results,
             ref int recursionCheck )
             where T : class
         {
@@ -180,25 +163,10 @@ namespace Metalama.Framework.Code.Collections
 
                 foreach ( var item in collection )
                 {
-                    if ( results.ContainsKey( item ) )
+                    if ( results.Add( item ) )
                     {
-                        // We are in a cycle.
-
-                        if ( !deduplicate )
-                        {
-                            throw new InvalidOperationException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        VisitMany( getItems( item ), getItems, results, ref recursionCheck );
                     }
-                    else
-                    {
-                        results.Add( item, results.Count );
-                    }
-
-                    VisitMany( getItems( item ), getItems, results, deduplicate, ref recursionCheck );
                 }
             }
             finally

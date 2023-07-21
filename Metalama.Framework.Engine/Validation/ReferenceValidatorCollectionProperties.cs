@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -78,6 +79,8 @@ public sealed class ReferenceValidatorCollectionProperties
             }
         }
     }
+
+    public static ReferenceValidatorCollectionProperties Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
     internal bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
 

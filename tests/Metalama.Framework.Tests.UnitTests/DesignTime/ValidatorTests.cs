@@ -472,7 +472,7 @@ class A {}
         }
 
         [Fact]
-        public async Task ModificationInAttributeConstruction_CrossProject()
+        public async Task CrossProject_ModificationInAttributeConstruction()
         {
             using var testContext = this.CreateTestContext();
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
@@ -601,6 +601,91 @@ class C
 """;
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( referencingCode, dependentCode: dependentCode );
+
+            var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+            // ReSharper restore AccessToDisposedClosure
+
+            var compilationResult = await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
+
+            var diagnostics = compilation.SyntaxTrees
+                .SelectMany(
+                    t => DesignTimeReferenceValidatorRunner.Validate(
+                            compilationResult.Value.Configuration.ServiceProvider,
+                            compilation.GetSemanticModel( t ),
+                            compilationResult.Value )
+                        .ReportedDiagnostics )
+                .ToList();
+
+            Assert.Equal( 2, diagnostics.Count );
+        }
+
+        [Fact]
+        public async Task CrossProject_Diamond()
+        {
+            // This tests that we do not get duplicate validators when a project indirectly references the same project
+            // several times.
+
+            using var testContext = this.CreateTestContext();
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+            const string dependentCode = """
+using System;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
+
+public class Fabric : ProjectFabric
+{
+    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+    public override void AmendProject( IProjectAmender amender )
+    {
+        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+    }
+
+    private void ValidateReference( in ReferenceValidationContext context )
+    {
+        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+    }
+}
+
+public class A {}
+
+public class B {}
+
+""";
+
+            const string referencingCode = """
+class C
+{
+   void M()
+   {
+     A a;
+     B b;
+   }
+}
+
+""";
+
+            var dependentCompilation = TestCompilationFactory.CreateCSharpCompilation( dependentCode );
+
+            var intermediateCompilation1 = TestCompilationFactory.CreateCSharpCompilation(
+                referencingCode,
+                additionalReferences: new[] { dependentCompilation.ToMetadataReference() } );
+
+            var intermediateCompilation2 = TestCompilationFactory.CreateCSharpCompilation(
+                referencingCode,
+                additionalReferences: new[] { dependentCompilation.ToMetadataReference() } );
+
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
+                referencingCode,
+                additionalReferences: new[]
+                {
+                    intermediateCompilation1.ToMetadataReference(),
+                    intermediateCompilation2.ToMetadataReference(),
+                    dependentCompilation.ToMetadataReference()
+                } );
 
             var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
 

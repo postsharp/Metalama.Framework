@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -11,87 +12,64 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class DesignTimeReferenceValidatorCollection
 {
-    private readonly ImmutableArray<DesignTimeReferenceValidatorCollection> _childCollections;
     private readonly ReferenceValidatorCollectionProperties _ownProperties;
+    private readonly ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _ownValidators;
+    private readonly ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _allValidators;
+    private readonly HashSet<DesignTimeReferenceValidatorCollection> _validatorCollectionsFromProjectReferences;
+
+    public bool IsEmpty => this._allValidators.IsEmpty;
 
     public static DesignTimeReferenceValidatorCollection Empty { get; } =
         new(
-            ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty,
+            ReferenceValidatorCollectionProperties.Empty,
+            ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty,
             ImmutableArray<DesignTimeReferenceValidatorCollection>.Empty );
-
-    public bool IsEmpty => this._dictionary.IsEmpty && this._childCollections.Length == 0;
-
-    private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _dictionary;
 
     public ReferenceValidatorCollectionProperties Properties { get; }
 
     private DesignTimeReferenceValidatorCollection(
-        ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> dictionary,
-        IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
+        ReferenceValidatorCollectionProperties ownProperties,
+        ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> ownValidators,
+        IEnumerable<DesignTimeReferenceValidatorCollection> validatorsFromProjectReferences )
     {
-        this._dictionary = dictionary;
-        this._childCollections = childCollections.Where( c => !c.IsEmpty ).ToImmutableArray();
-        this._ownProperties = new ReferenceValidatorCollectionProperties( dictionary.SelectMany( x => x ) );
-        this.Properties = new ReferenceValidatorCollectionProperties( this._childCollections.Select( x => x.Properties ).Concat( this._ownProperties ) );
-    }
+        this._ownProperties = ownProperties;
+        this._ownValidators = ownValidators;
 
-    private DesignTimeReferenceValidatorCollection(
-        DesignTimeReferenceValidatorCollection prototype,
-        IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
-    {
-        this._dictionary = prototype._dictionary;
-        this._ownProperties = prototype._ownProperties;
-        this._childCollections = childCollections.Where( c => !c.IsEmpty ).ToImmutableArray();
-        this.Properties = new ReferenceValidatorCollectionProperties( this._childCollections.Select( x => x.Properties ).Concat( this._ownProperties ) );
+        this._validatorCollectionsFromProjectReferences =
+            validatorsFromProjectReferences.SelectManyRecursiveDistinct( x => x._validatorCollectionsFromProjectReferences, includeRoots: true );
+
+        this._allValidators = this._ownValidators.Merge( this._validatorCollectionsFromProjectReferences.Select( x => x._ownValidators ) );
+
+        this.Properties = new ReferenceValidatorCollectionProperties(
+            this._validatorCollectionsFromProjectReferences.Select( x => x.Properties ).Concat( this._ownProperties ) );
     }
 
     public DesignTimeReferenceValidatorCollection WithChildCollections( IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
-        => new( this, childCollections );
+        => new( this._ownProperties, this._ownValidators, childCollections );
 
     internal IReadOnlyCollection<DesignTimeReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
     {
         var symbolKey = SymbolDictionaryKey.CreateLookupKey( symbol );
-        var result = (IReadOnlyCollection<DesignTimeReferenceValidatorInstance>) this._dictionary[symbolKey];
-        List<DesignTimeReferenceValidatorInstance>? mergedList = null;
 
-        foreach ( var childCollection in this._childCollections )
+        var validators = this._allValidators[symbolKey];
+
+        if ( validators.IsDefault )
         {
-            var childResult = childCollection.GetValidatorsForSymbol( symbol );
-
-            if ( childResult.Count > 0 )
-            {
-                if ( result.Count == 0 )
-                {
-                    result = childResult;
-                }
-                else
-                {
-                    // It should be unlikely that several projects add validation to the same declaration.
-                    // When this happens, we use a lightweight strategy to merge the collections.
-
-                    if ( mergedList == null )
-                    {
-                        mergedList = new List<DesignTimeReferenceValidatorInstance>();
-                        mergedList.AddRange( result );
-                    }
-
-                    mergedList.AddRange( childResult );
-                }
-            }
+            throw new AssertionFailedException();
         }
 
-        return mergedList ?? result;
+        return validators;
     }
 
-    public Builder ToBuilder() => new( this._dictionary.ToBuilder() );
+    public Builder ToBuilder() => new( this._ownValidators.ToBuilder() );
 
     public ImmutableArray<TransitiveValidatorInstance> ToTransitiveValidatorInstances()
     {
         var builder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
 
-        foreach ( var key in this._dictionary.Keys )
+        foreach ( var key in this._ownValidators.Keys )
         {
-            foreach ( var validator in this._dictionary[key] )
+            foreach ( var validator in this._ownValidators[key] )
             {
                 builder.Add( validator.ToTransitiveValidatorInstance() );
             }
@@ -102,9 +80,9 @@ internal sealed class DesignTimeReferenceValidatorCollection
 
     public sealed class Builder
     {
-        private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder _builder;
+        private readonly ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder _builder;
 
-        public Builder( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder builder )
+        public Builder( ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Builder builder )
         {
             this._builder = builder;
         }
@@ -122,6 +100,13 @@ internal sealed class DesignTimeReferenceValidatorCollection
         public void Add( DesignTimeReferenceValidatorInstance validator ) => this._builder.Add( validator.ValidatedDeclaration, validator );
 
         public DesignTimeReferenceValidatorCollection ToImmutable( IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
-            => new( this._builder.ToImmutable(), childCollections );
+        {
+            var ownValidators = this._builder.ToImmutable();
+
+            return new DesignTimeReferenceValidatorCollection(
+                new ReferenceValidatorCollectionProperties( ownValidators.SelectMany( x => x ) ),
+                ownValidators,
+                childCollections );
+        }
     }
 }

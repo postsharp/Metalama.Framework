@@ -28,10 +28,10 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             Node c = new( a, b );
             Node d = new( c, b );
 
-            Assert.Equal( new[] { a, b, c }, d.SelectManyRecursive( n => n.Children, deduplicate: true ).OrderBy( o => o.Id ) );
-            Assert.Equal( new[] { a, b, c, d }, d.SelectManyRecursive( n => n.Children, includeThis: true, deduplicate: true ).OrderBy( o => o.Id ) );
+            Assert.Equal( new[] { a, b, c }, d.SelectManyRecursiveDistinct( n => n.Children ).OrderBy( o => o.Id ) );
+            Assert.Equal( new[] { a, b, c, d }, d.SelectManyRecursiveDistinct( n => n.Children, includeRoots: true ).OrderBy( o => o.Id ) );
 #if DEBUG
-            Assert.Throws<InvalidOperationException>( () => d.SelectManyRecursive( n => n.Children, deduplicate: false ) );
+            Assert.Throws<InvalidOperationException>( () => d.SelectManyRecursiveDistinct( n => n.Children ) );
 #endif
         }
 
@@ -44,9 +44,9 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             Node d = new( c, b );
             var list = new[] { d, a };
 
-            Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursiveInternal( n => n.Children, deduplicate: true ).OrderBy( o => o.Id ) );
+            Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursiveDistinct( n => n.Children ).OrderBy( o => o.Id ) );
 #if DEBUG
-            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursiveInternal( n => n.Children, deduplicate: false ) );
+            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursive( n => n.Children ) );
 #endif
         }
 

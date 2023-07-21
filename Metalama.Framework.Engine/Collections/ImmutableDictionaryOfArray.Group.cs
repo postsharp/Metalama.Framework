@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -15,6 +16,13 @@ namespace Metalama.Framework.Engine.Collections
 
             public Group( TKey key, ImmutableArray<TValue> items )
             {
+#if DEBUG
+                if ( items.IsDefault )
+                {
+                    throw new ArgumentNullException( nameof(items) );
+                }
+#endif
+
                 this.Key = key;
                 this.Items = items;
             }

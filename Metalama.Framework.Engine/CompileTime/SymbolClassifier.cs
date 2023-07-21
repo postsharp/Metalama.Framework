@@ -70,13 +70,13 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private static readonly ImmutableDictionary<(string Type, string Member), (string Namespace, TemplatingScope? Scope)> _wellKnownMembers =
             new (Type Type, string[] MemberNames, TemplatingScope? Scope)[]
-            {
-                (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
-                (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
-            }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
-            .ToImmutableDictionary(
-                t => (t.Type.Name.AssertNotNull(), t.MemberName),
-                t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
+                {
+                    (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
+                    (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
+                }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
+                .ToImmutableDictionary(
+                    t => (t.Type.Name.AssertNotNull(), t.MemberName),
+                    t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
 
         public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             _ = this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, tracer );
 
-            var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeThis: true )
+            var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeRoot: true )
                 .Where( t => t.Result is TemplatingScope.Conflict )
                 .MaxByOrNull( t => t.Depth );
 
@@ -390,7 +390,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
 
                     // If the return type is marked [CompileTime] (as in meta.CompileTime), enforce that.
-                    if ( symbol is IMethodSymbol methodSymbol && methodSymbol.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) ) )
+                    if ( symbol is IMethodSymbol methodSymbol
+                         && methodSymbol.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) ) )
                     {
                         scope = scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly ? OnConflict() : TemplatingScope.CompileTimeOnly;
                     }
@@ -1021,7 +1022,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         // Check well-known members.
                         if ( _wellKnownMembers.TryGetValue( (namedType.MetadataName, symbol.MetadataName), out var config ) &&
-                            config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
