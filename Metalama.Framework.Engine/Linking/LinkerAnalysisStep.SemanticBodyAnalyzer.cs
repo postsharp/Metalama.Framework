@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( returnStatement )
                             {
                                 case { Parent: BlockSyntax parentBlock }:
-                                    AddIfExitFlowing( parentBlock, false, parentBlock.Statements.Last() != returnStatement );
+                                    AddIfExitFlowing( parentBlock, false, GetLastFlowStatement( parentBlock.Statements ) != returnStatement );
 
                                     break;
 
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
 
                                 case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } switchSection }:
-                                    AddIfExitFlowing( switchStatement, true, switchSection.Statements.Last() != returnStatement );
+                                    AddIfExitFlowing( switchStatement, true, GetLastFlowStatement( switchSection.Statements ) != returnStatement );
 
                                     break;
 
@@ -372,6 +372,23 @@ namespace Metalama.Framework.Engine.Linking
                         ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                         _ => throw new AssertionFailedException( $"Unexpected node: {CSharpExtensions.Kind( declaration )}." )
                     };
+            }
+
+            private static StatementSyntax? GetLastFlowStatement( SyntaxList<StatementSyntax> statements )
+            {
+                for ( var i = statements.Count - 1; i >= 0; i-- )
+                {
+                    switch ( statements[i] )
+                    {
+                        case LocalFunctionStatementSyntax:
+                            // Local function statement does not affect flow, so we ignore it.
+                            continue;
+                        default:
+                            return statements[i];
+                    }
+                }
+
+                return null;
             }
 
             private static IReadOnlyList<BlockSyntax> GetBlocksWithReturnBeforeUsingLocal( BlockSyntax rootBlock, IReadOnlyList<SyntaxNode> returnStatements )
