@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Diagnostics;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;

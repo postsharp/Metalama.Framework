@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 

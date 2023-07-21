@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
-using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Diagnostics
 {

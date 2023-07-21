@@ -158,7 +158,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                             ValidatorImplementation.Create( v.Object, v.State ),
                             v.ReferenceKinds,
                             v.IncludeDerivedTypes,
-                            v.Description );
+                            v.DiagnosticSourceDescription );
                     } )
                 .WhereNotNull();
         }

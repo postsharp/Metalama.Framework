@@ -175,7 +175,7 @@ namespace Metalama.Testing.UnitTesting
 
         public static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
-            IReadOnlyDictionary<string, string> dependentCode,
+            IReadOnlyDictionary<string, string>? dependentCode,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
