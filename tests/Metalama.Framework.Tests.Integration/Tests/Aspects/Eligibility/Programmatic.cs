@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmat
             builder.MustNotHaveRefOrOutParameter();
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

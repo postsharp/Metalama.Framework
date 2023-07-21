@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Static
             builder.MustBeStatic();
         }
  
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

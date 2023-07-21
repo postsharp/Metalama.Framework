@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.SkippedWeaverAndRegul
 
     internal class RegularAspect1 : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("Added by regular aspect #1.");
 
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.SkippedWeaverAndRegul
 
     internal class RegularAspect2 : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("Added by regular aspect #2.");
 

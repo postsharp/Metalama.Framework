@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
             builder.Diagnostics.Report( _hidden );
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException( "This code should not be emitted." );
         }

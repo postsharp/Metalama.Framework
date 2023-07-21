@@ -17,7 +17,7 @@ public sealed class TestContract : ContractAspect
 [Inheritable]
 public sealed class TestOverride : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine("Should be applied only on Bar(int) method.");
         return meta.Proceed();

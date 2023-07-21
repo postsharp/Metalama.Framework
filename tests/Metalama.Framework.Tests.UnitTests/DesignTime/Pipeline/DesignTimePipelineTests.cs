@@ -157,7 +157,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         var code = new Dictionary<string, string>
         {
             ["Aspect.cs"] =
-                "public class Aspect : Metalama.Framework.Aspects.OverrideMethodAspect { public override dynamic OverrideMethod() { return null; } }",
+                "public class Aspect : Metalama.Framework.Aspects.OverrideMethodAspect { public override dynamic? OverrideMethod() { return null; } }",
             ["Class1.cs"] = "public class Class1 { }",
             ["Class2.cs"] = "public class Class2 { [Aspect]  void Method() {} }"
         };
@@ -1074,7 +1074,7 @@ class D{version}
 
                     public class Aspect : OverrideMethodAspect
                     {
-                        public override dynamic OverrideMethod()
+                        public override dynamic? OverrideMethod()
                         {
                             {{statement}}
                             return null;

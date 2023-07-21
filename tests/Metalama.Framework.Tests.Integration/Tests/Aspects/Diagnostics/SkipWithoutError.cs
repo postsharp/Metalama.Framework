@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutEr
             builder.SkipAspect();
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException("This code should not be emitted.");
         }

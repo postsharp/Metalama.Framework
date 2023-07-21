@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.Inli
 {
     internal class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotSupportedException();
         }

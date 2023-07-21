@@ -57,7 +57,7 @@ public class IntroductionAspect : TypeAspect
 
 public class OverrideAspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine( "Overridden" );
 
