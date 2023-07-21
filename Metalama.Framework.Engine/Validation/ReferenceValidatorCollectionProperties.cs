@@ -28,7 +28,7 @@ public sealed class ReferenceValidatorCollectionProperties
     {
         foreach ( var validator in validators )
         {
-            if ( validator.IncludeDerivedTypes )
+            if ( validator is { IncludeDerivedTypes: true, ValidatedDeclarationKind: DeclarationKind.NamedType } )
             {
                 this._kindsRequiringDescentIntoBaseTypes |= validator.ReferenceKinds;
             }

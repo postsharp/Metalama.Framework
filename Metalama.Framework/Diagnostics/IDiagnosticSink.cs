@@ -34,10 +34,4 @@ namespace Metalama.Framework.Diagnostics
         /// <param name="source"></param>
         void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source );
     }
-
-    [CompileTime]
-    public interface IDiagnosticSource
-    {
-        string DiagnosticSourceDescription { get; }
-    }
 }

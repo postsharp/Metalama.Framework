@@ -195,7 +195,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location, IDiagnosticSource source )
+        void IDiagnosticSink.Report( IDiagnostic diagnostic, IDiagnosticLocation? location, IDiagnosticSource source )
         {
             this.ValidateUserReport( diagnostic.Definition );
 
@@ -205,13 +205,13 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
         }
 
-        public void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
+        void IDiagnosticSink.Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
         {
             this.ValidateUserSuppression( suppression );
             this.Suppress( new ScopedSuppression( suppression, scope ) );
         }
 
-        public void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source )
+        void IDiagnosticSink.Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
