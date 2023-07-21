@@ -364,5 +364,47 @@ class C  {
 
             Assert.Equal( TemplatingDiagnosticDescriptors.TemplatingScopeConflict.Id, diagnostic.Id );
         }
+
+        [Fact]
+        public void SystemTypes()
+        {
+            const string code = """
+                using System;
+
+                class C
+                {
+                    void M()
+                    {
+                        Console.WriteLine();
+
+                        _ = DateTime.Now;
+
+                        Math.Abs(0);
+                    }
+                }
+                """;
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+            var nodes = syntaxTree.GetRoot().DescendantNodes();
+
+            AssertScope( "Console", TemplatingScope.RunTimeOnly );
+            AssertScope( "WriteLine", TemplatingScope.RunTimeOnly );
+            AssertScope( "DateTime", TemplatingScope.RunTimeOrCompileTime );
+            AssertScope( "Now", TemplatingScope.RunTimeOnly );
+            AssertScope( "Math", TemplatingScope.RunTimeOrCompileTime );
+            AssertScope( "Abs", TemplatingScope.RunTimeOrCompileTime );
+
+            void AssertScope( string text, TemplatingScope scope )
+            {
+                var node = nodes.Single( n => n.ToString() == text );
+                var symbol = semanticModel.GetSymbolInfo( node ).Symbol!;
+
+                this.AssertScope( compilation.RoslynCompilation, symbol, scope );
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@ internal class ReturnNumbers : OverrideMethodAspect
     {
         var numbers = meta.CompileTime(new int[] { 42 });
 
-        switch (meta.RunTime(DateTime.Today.DayOfWeek))
+        switch (DateTime.Today.DayOfWeek)
         {
             case DayOfWeek.Monday:
                 return numbers?.ToList();
