@@ -32,38 +32,51 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         /// <summary>
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
-        /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope? Scope, bool MembersOnly)> _wellKnownTypes =
-            new (Type ReflectionType, TemplatingScope? Scope, bool MembersOnly)[]
+        private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope? Scope)> _wellKnownTypes =
+            new (Type ReflectionType, TemplatingScope? Scope)[]
                 {
                     // We don't want users to interact with a few classes so we mark then RunTimeOnly.
                     // However, we can't make Debugger run-time-only because it's the only way to debug compile-time code at the moment.
-                    (typeof(Console), TemplatingScope.RunTimeOnly, false),
-                    (typeof(GC), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Debug), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Trace), TemplatingScope.RunTimeOnly, false),
-                    (typeof(GCCollectionMode), TemplatingScope.RunTimeOnly, false),
-                    (typeof(GCNotificationStatus), TemplatingScope.RunTimeOnly, false),
-                    (typeof(STAThreadAttribute), TemplatingScope.RunTimeOnly, false),
-                    (typeof(AppDomain), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Process), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Thread), TemplatingScope.RunTimeOnly, false),
-                    (typeof(ExecutionContext), TemplatingScope.RunTimeOnly, false),
-                    (typeof(SynchronizationContext), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Environment), TemplatingScope.RunTimeOnly, false),
-                    (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly, false),
-                    (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false),
-                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly, false),
-                    (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false),
-                    (typeof(Range), TemplatingScope.RunTimeOrCompileTime, false)
+                    (typeof(Console), TemplatingScope.RunTimeOnly),
+                    (typeof(GC), TemplatingScope.RunTimeOnly),
+                    (typeof(Debug), TemplatingScope.RunTimeOnly),
+                    (typeof(Trace), TemplatingScope.RunTimeOnly),
+                    (typeof(GCCollectionMode), TemplatingScope.RunTimeOnly),
+                    (typeof(GCNotificationStatus), TemplatingScope.RunTimeOnly),
+                    (typeof(STAThreadAttribute), TemplatingScope.RunTimeOnly),
+                    (typeof(AppDomain), TemplatingScope.RunTimeOnly),
+                    (typeof(Process), TemplatingScope.RunTimeOnly),
+                    (typeof(Thread), TemplatingScope.RunTimeOnly),
+                    (typeof(ExecutionContext), TemplatingScope.RunTimeOnly),
+                    (typeof(SynchronizationContext), TemplatingScope.RunTimeOnly),
+                    (typeof(Environment), TemplatingScope.RunTimeOnly),
+                    (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly),
+                    (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly),
+                    (typeof(Marshal), TemplatingScope.RunTimeOnly),
+                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly),
+                    (typeof(Index), TemplatingScope.RunTimeOrCompileTime),
+                    (typeof(Range), TemplatingScope.RunTimeOrCompileTime)
                 }.ToImmutableDictionary(
                     t => t.ReflectionType.Name.AssertNotNull(),
-                    t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
+                    t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope) )
 
-                // This system type is .NET-only but does not affect the scope.
-                .Add( "_Attribute", ("System.Runtime.InteropServices", null, false) );
+                // This system type is .NET Framework-only but does not affect the scope.
+                .Add( "_Attribute", ("System.Runtime.InteropServices", null) );
+
+        /// <summary>
+        /// List of well-known members, for which the scope is overriden (i.e. this list takes precedence over any other rule, including well-known types).
+        /// Matching of members is currently only done by name.
+        /// </summary>
+        private static readonly ImmutableDictionary<(string Type, string Member), (string Namespace, TemplatingScope? Scope)> _wellKnownMembers =
+            new (Type Type, string[] MemberNames, TemplatingScope? Scope)[]
+            {
+                (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
+                (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
+            }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
+            .ToImmutableDictionary(
+                t => (t.Type.Name.AssertNotNull(), t.MemberName),
+                t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
 
         public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
@@ -977,8 +990,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.GetFullName() &&
-                             (!config.MembersOnly || isMember) )
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
@@ -1006,7 +1018,18 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
 
                 case { ContainingType: { } namedType }:
-                    return this.TryGetWellKnownScope( namedType, options, true, out scope );
+                    {
+                        // Check well-known members.
+                        if ( _wellKnownMembers.TryGetValue( (namedType.MetadataName, symbol.MetadataName), out var config ) &&
+                            config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                        {
+                            scope = config.Scope;
+
+                            return true;
+                        }
+
+                        return this.TryGetWellKnownScope( namedType, options, true, out scope );
+                    }
 
                 default:
                     return false;
