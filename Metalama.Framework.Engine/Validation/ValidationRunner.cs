@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -131,13 +132,15 @@ internal sealed class ValidationRunner
             return ImmutableArray<ReferenceValidatorInstance>.Empty;
         }
 
+        var referenceValidatorProvider = new ValidatorProvider( validatorsBySymbol );
+
         await this._concurrentTaskRunner.RunInParallelAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,
             ( syntaxTree, visitor ) => visitor.Visit( syntaxTree ),
             () => new ReferenceValidationVisitor(
                 this._serviceProvider,
                 diagnosticAdder,
-                s => validatorsBySymbol[s],
+                referenceValidatorProvider,
                 initialCompilation,
                 cancellationToken ),
             cancellationToken );
@@ -151,4 +154,19 @@ internal sealed class ValidationRunner
         => this._sources
             .SelectMany( s => s.GetValidators( ValidatorKind.Reference, CompilationModelVersion.Current, initialCompilation, diagnosticAdder ) )
             .Cast<ReferenceValidatorInstance>();
+
+    private sealed class ValidatorProvider : IReferenceValidatorProvider
+    {
+        private readonly ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> _validatorsBySymbol;
+
+        public ValidatorProvider( ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol )
+        {
+            this._validatorsBySymbol = validatorsBySymbol;
+            this.Properties = new ReferenceValidatorCollectionProperties( validatorsBySymbol.SelectMany( x => x ) );
+        }
+
+        public ReferenceValidatorCollectionProperties Properties { get; }
+
+        public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol ) => this._validatorsBySymbol[symbol];
+    }
 }

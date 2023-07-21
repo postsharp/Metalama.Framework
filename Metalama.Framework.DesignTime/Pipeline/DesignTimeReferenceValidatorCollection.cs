@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using K4os.Hash.xxHash;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
@@ -11,49 +11,76 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class DesignTimeReferenceValidatorCollection
 {
+    private readonly ImmutableArray<DesignTimeReferenceValidatorCollection> _childCollections;
+    private readonly ReferenceValidatorCollectionProperties _ownProperties;
+
     public static DesignTimeReferenceValidatorCollection Empty { get; } =
-        new( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty );
+        new(
+            ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty,
+            ImmutableArray<DesignTimeReferenceValidatorCollection>.Empty );
 
-    public bool IsEmpty => this._dictionary.IsEmpty;
-
-    public DesignTimeValidatorCollectionEqualityKey EqualityKey { get; }
+    public bool IsEmpty => this._dictionary.IsEmpty && this._childCollections.Length == 0;
 
     private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _dictionary;
 
-    private DesignTimeReferenceValidatorCollection( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> dictionary )
+    public ReferenceValidatorCollectionProperties Properties { get; }
+
+    private DesignTimeReferenceValidatorCollection(
+        ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> dictionary,
+        IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
     {
         this._dictionary = dictionary;
-        this.EqualityKey = ComputeValidatorHash( dictionary );
+        this._childCollections = childCollections.Where( c => !c.IsEmpty ).ToImmutableArray();
+        this._ownProperties = new ReferenceValidatorCollectionProperties( dictionary.SelectMany( x => x ) );
+        this.Properties = new ReferenceValidatorCollectionProperties( this._childCollections.Select( x => x.Properties ).Concat( this._ownProperties ) );
     }
 
-    internal ImmutableHashSet<DesignTimeReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
+    private DesignTimeReferenceValidatorCollection(
+        DesignTimeReferenceValidatorCollection prototype,
+        IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
+    {
+        this._dictionary = prototype._dictionary;
+        this._ownProperties = prototype._ownProperties;
+        this._childCollections = childCollections.Where( c => !c.IsEmpty ).ToImmutableArray();
+        this.Properties = new ReferenceValidatorCollectionProperties( this._childCollections.Select( x => x.Properties ).Concat( this._ownProperties ) );
+    }
+
+    public DesignTimeReferenceValidatorCollection WithChildCollections( IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
+        => new( this, childCollections );
+
+    internal IReadOnlyCollection<DesignTimeReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
     {
         var symbolKey = SymbolDictionaryKey.CreateLookupKey( symbol );
+        var result = (IReadOnlyCollection<DesignTimeReferenceValidatorInstance>) this._dictionary[symbolKey];
+        List<DesignTimeReferenceValidatorInstance>? mergedList = null;
 
-        return this._dictionary[symbolKey];
-    }
-
-    private static DesignTimeValidatorCollectionEqualityKey ComputeValidatorHash(
-        ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> validators )
-    {
-        XXH64 hasher = new();
-        ulong combined = 0;
-
-        foreach ( var group in validators )
+        foreach ( var childCollection in this._childCollections )
         {
-            foreach ( var validator in group )
-            {
-                hasher.Reset();
-                var digest = validator.GetLongHashCode( hasher );
+            var childResult = childCollection.GetValidatorsForSymbol( symbol );
 
-                // XOR is a poor hashing function but, to compute `combined`, we must have a _commutative_ hashing function
-                // because our input is unordered. Ordering the input would increase significantly increase the computation time
-                // and we would loose the benefit of a hash over structural equality comparison.
-                combined ^= digest;
+            if ( childResult.Count > 0 )
+            {
+                if ( result.Count == 0 )
+                {
+                    result = childResult;
+                }
+                else
+                {
+                    // It should be unlikely that several projects add validation to the same declaration.
+                    // When this happens, we use a lightweight strategy to merge the collections.
+
+                    if ( mergedList == null )
+                    {
+                        mergedList = new List<DesignTimeReferenceValidatorInstance>();
+                        mergedList.AddRange( result );
+                    }
+
+                    mergedList.AddRange( childResult );
+                }
             }
         }
 
-        return new DesignTimeValidatorCollectionEqualityKey( combined );
+        return mergedList ?? result;
     }
 
     public Builder ToBuilder() => new( this._dictionary.ToBuilder() );
@@ -82,10 +109,19 @@ internal sealed class DesignTimeReferenceValidatorCollection
             this._builder = builder;
         }
 
-        public void Remove( DesignTimeReferenceValidatorInstance validator ) => this._builder.Remove( validator.ValidatedDeclaration, validator );
+        public void Remove( DesignTimeReferenceValidatorInstance validator )
+        {
+            if ( !this._builder.Remove( validator.ValidatedDeclaration, validator ) )
+            {
+#if DEBUG
+                throw new AssertionFailedException( "Cannot remove validator." );
+#endif
+            }
+        }
 
         public void Add( DesignTimeReferenceValidatorInstance validator ) => this._builder.Add( validator.ValidatedDeclaration, validator );
 
-        public DesignTimeReferenceValidatorCollection ToImmutable() => new( this._builder.ToImmutable() );
+        public DesignTimeReferenceValidatorCollection ToImmutable( IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
+            => new( this._builder.ToImmutable(), childCollections );
     }
 }

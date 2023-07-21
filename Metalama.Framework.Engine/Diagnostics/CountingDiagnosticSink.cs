@@ -20,13 +20,14 @@ internal sealed class CountingDiagnosticSink : IDiagnosticSink
 
     public int DiagnosticCount { get; private set; }
 
-    public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location )
+    public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location, IDiagnosticSource source )
     {
         this.DiagnosticCount++;
-        this._underlying.Report( diagnostic, location );
+        this._underlying.Report( diagnostic, location, source );
     }
 
-    public void Suppress( SuppressionDefinition suppression, IDeclaration scope ) => this._underlying.Suppress( suppression, scope );
+    public void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
+        => this._underlying.Suppress( suppression, scope, source );
 
-    public void Suggest( CodeFix codeFix, IDiagnosticLocation location ) => this._underlying.Suggest( codeFix, location );
+    public void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source ) => this._underlying.Suggest( codeFix, location, source );
 }

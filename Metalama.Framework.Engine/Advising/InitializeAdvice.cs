@@ -45,7 +45,8 @@ internal abstract class InitializeAdvice : Advice
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotAddInitializerToRecord.CreateRoslynDiagnostic(
                     containingType.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, containingType) ) );
+                    (this.Aspect.AspectClass.ShortName, containingType),
+                    this ) );
         }
 
         IConstructor? staticConstructor;

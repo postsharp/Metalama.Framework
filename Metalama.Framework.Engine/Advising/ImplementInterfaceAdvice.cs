@@ -63,7 +63,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     AdviceDiagnosticDescriptors.InterfaceUnsupportedOverrideStrategy.CreateRoslynDiagnostic(
                         this.GetDiagnosticLocation(),
                         (this.Aspect.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
-                         this._overrideStrategy) ) );
+                         this._overrideStrategy),
+                        this ) );
 
                 break;
         }
@@ -73,7 +74,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(
                     this.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )) ) );
+                    (this.Aspect.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )),
+                    this ) );
 
             // No other diagnostics should be reported after this.
             return;
@@ -117,7 +119,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
-                             interfaceMember) ) );
+                             interfaceMember),
+                            this ) );
                 }
                 else if ( !membersMatch( memberTemplate.Declaration ) )
                 {
@@ -126,7 +129,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             this.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), InterfaceType: this._interfaceType,
                              memberTemplate.Declaration,
-                             interfaceMember) ) );
+                             interfaceMember),
+                            this ) );
                 }
                 else
                 {
@@ -152,7 +156,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.ImplicitInterfaceImplementationHasToBePublic.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this._interfaceType, memberTemplate.Declaration) ) );
+                                (this.Aspect.AspectClass.ShortName, this._interfaceType, memberTemplate.Declaration),
+                                this ) );
                     }
                     else
                     {
@@ -283,7 +288,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         diagnostics.Report(
                             AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
                                 targetType.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType),
+                                this ) );
 
                         continue;
 
@@ -347,7 +353,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     diagnostics.Report(
                                         AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
-                                            (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
+                                            (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod),
+                                            this ) );
 
                                     continue;
 
@@ -368,7 +375,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         diagnostics.Report(
                                             AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, existingMethod) ) );
+                                                (this.Aspect.AspectClass.ShortName, existingMethod),
+                                                this ) );
 
                                         continue;
                                     }
@@ -396,7 +404,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                             diagnostics.Report(
                                                 AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, existingMethod) ) );
+                                                    (this.Aspect.AspectClass.ShortName, existingMethod),
+                                                    this ) );
 
                                             continue;
                                         }
@@ -475,7 +484,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     diagnostics.Report(
                                         AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
-                                            (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
+                                            (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty),
+                                            this ) );
 
                                     continue;
 
@@ -485,7 +495,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         diagnostics.Report(
                                             AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, existingProperty) ) );
+                                                (this.Aspect.AspectClass.ShortName, existingProperty),
+                                                this ) );
 
                                         continue;
                                     }
@@ -516,7 +527,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                             diagnostics.Report(
                                                 AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, existingProperty) ) );
+                                                    (this.Aspect.AspectClass.ShortName, existingProperty),
+                                                    this ) );
 
                                             continue;
                                         }
@@ -596,7 +608,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         AdviceDiagnosticDescriptors.InterfacePropertyIsMissingAccessor.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
                                             (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration,
-                                             missingAccessor) ) );
+                                             missingAccessor),
+                                            this ) );
 
                                     return;
                                 }
@@ -616,7 +629,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         AdviceDiagnosticDescriptors.ExplicitInterfacePropertyHasSuperficialAccessor.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
                                             (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, templateProperty.Declaration,
-                                             unexpectedAccessor) ) );
+                                             unexpectedAccessor),
+                                            this ) );
 
                                     return;
                                 }
@@ -678,7 +692,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
 
-                                    OverrideHelper.AddTransformationsForStructField( targetType.ForCompilation( compilation ), this, AddTransformationNoDuplicates );
+                                    OverrideHelper.AddTransformationsForStructField(
+                                        targetType.ForCompilation( compilation ),
+                                        this,
+                                        AddTransformationNoDuplicates );
                                 }
                             }
                             else
@@ -718,7 +735,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     diagnostics.Report(
                                         AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
-                                            (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
+                                            (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent),
+                                            this ) );
 
                                     continue;
 
@@ -728,7 +746,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                         diagnostics.Report(
                                             AdviceDiagnosticDescriptors.CannotOverrideNonPublicInterfaceMember.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, existingEvent) ) );
+                                                (this.Aspect.AspectClass.ShortName, existingEvent),
+                                                this ) );
 
                                         continue;
                                     }
@@ -759,7 +778,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                             diagnostics.Report(
                                                 AdviceDiagnosticDescriptors.CannotOverrideNonVirtualInterfaceMember.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, existingEvent) ) );
+                                                    (this.Aspect.AspectClass.ShortName, existingEvent),
+                                                    this ) );
 
                                             continue;
                                         }
@@ -799,7 +819,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                             var isEventField = templateEvent?.Declaration.IsEventField() ?? false;
                             var isVirtual = templateAttributeProperties?.IsVirtual ?? templateEvent is { Declaration.IsVirtual: true };
 
-                            var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, isVirtual, isOverride, mergedTags );
+                            var eventBuilder = this.GetImplEventBuilder(
+                                targetType,
+                                interfaceEvent,
+                                isEventField,
+                                isExplicit,
+                                isVirtual,
+                                isOverride,
+                                mergedTags );
 
                             if ( templateEvent != null )
                             {
@@ -829,7 +856,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                 {
                                     eventBuilder.InitializerTemplate = templateEvent.GetInitializerTemplate();
 
-                                    OverrideHelper.AddTransformationsForStructField( targetType.ForCompilation( compilation ), this, AddTransformationNoDuplicates );
+                                    OverrideHelper.AddTransformationsForStructField(
+                                        targetType.ForCompilation( compilation ),
+                                        this,
+                                        AddTransformationNoDuplicates );
                                 }
                             }
                             else
@@ -871,7 +901,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             if ( !skipInterfaceBaseList )
             {
-                AddTransformationNoDuplicates( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
+                AddTransformationNoDuplicates(
+                    new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
             }
         }
 
@@ -1024,7 +1055,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
     private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
 
-    private EventBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, bool isVirtual, bool isOverride, IObjectReader tags )
+    private EventBuilder GetImplEventBuilder(
+        INamedType declaringType,
+        IEvent interfaceEvent,
+        bool isEventField,
+        bool isExplicit,
+        bool isVirtual,
+        bool isOverride,
+        IObjectReader tags )
     {
         var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 

@@ -163,6 +163,25 @@ namespace Metalama.Testing.UnitTesting
             bool addMetalamaReferences = true,
             IEnumerable<string>? preprocessorSymbols = null,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+            => CreateCSharpCompilation(
+                code,
+                dependentCode == null ? null : ImmutableDictionary.Create<string, string>().Add( "dependent.cs", dependentCode ),
+                ignoreErrors,
+                additionalReferences,
+                name,
+                addMetalamaReferences,
+                preprocessorSymbols,
+                outputKind );
+
+        public static CSharpCompilation CreateCSharpCompilation(
+            IReadOnlyDictionary<string, string> code,
+            IReadOnlyDictionary<string, string> dependentCode,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null,
+            string? name = null,
+            bool addMetalamaReferences = true,
+            IEnumerable<string>? preprocessorSymbols = null,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
             var additionalAssemblies = new[] { typeof(UnitTestClass).Assembly };
 
@@ -174,7 +193,7 @@ namespace Metalama.Testing.UnitTesting
             if ( dependentCode != null )
             {
                 var dependentCompilation = CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
-                    .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode, parseOptions ) );
+                    .AddSyntaxTrees( dependentCode.SelectAsEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }

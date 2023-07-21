@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// A base class for <see cref="AspectClass"/> and <see cref="FabricTemplateClass"/>. Represents an aspect, but does not
     /// assume the class implements the <see cref="IAspect"/> semantic.
     /// </summary>
-    public abstract class TemplateClass
+    public abstract class TemplateClass : IDiagnosticSource
     {
         protected ProjectServiceProvider ServiceProvider { get; }
 
@@ -190,7 +191,10 @@ namespace Metalama.Framework.Engine.Aspects
                             if ( method.RefKind != RefKind.None )
                             {
                                 diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic(
+                                        method.GetDiagnosticLocation(),
+                                        method,
+                                        this ) );
 
                                 this.HasError = true;
                             }
@@ -243,7 +247,10 @@ namespace Metalama.Framework.Engine.Aspects
                         if ( property.RefKind != RefKind.None )
                         {
                             diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic(
+                                    property.GetDiagnosticLocation(),
+                                    property,
+                                    this ) );
 
                             this.HasError = true;
                         }
@@ -261,7 +268,7 @@ namespace Metalama.Framework.Engine.Aspects
                         if ( field.RefKind != RefKind.None )
                         {
                             diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field, this ) );
 
                             this.HasError = true;
                         }
@@ -305,7 +312,8 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
+                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name),
+                                this ) );
 
                         this.HasError = true;
 
@@ -384,5 +392,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
             => this._templateReflectionContext ?? compilationContext;
+
+        string IDiagnosticSource.DiagnosticSourceDescription => this.ShortName;
     }
 }

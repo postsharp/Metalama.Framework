@@ -147,7 +147,8 @@ internal sealed class AspectDriver : IAspectDriver
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
+                        (AspectType: this._aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType),
+                        aspectInstance );
 
                 return CreateResultForError( diagnostic );
             }

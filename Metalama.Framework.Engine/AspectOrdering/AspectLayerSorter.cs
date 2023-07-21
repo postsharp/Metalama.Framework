@@ -175,6 +175,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     GeneralDiagnosticDescriptors.CycleInAspectOrdering.CreateRoslynDiagnostic(
                         mainLocation,
                         cycleNodesString,
+                        null,
                         additionalLocations );
 
                 diagnosticAdder.Report( diagnostic );

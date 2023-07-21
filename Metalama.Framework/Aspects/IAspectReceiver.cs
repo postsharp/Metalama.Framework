@@ -90,7 +90,7 @@ namespace Metalama.Framework.Aspects
         /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
         /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
         /// <see cref="IValidatorReceiver.Validate"/>
-        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
         /// </summary>
         new IAspectReceiver<TMember> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration;
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
         /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
-        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
         /// </summary>
         new IAspectReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
             where TMember : class, IDeclaration;

@@ -267,7 +267,7 @@ public interface I {}
         """;
 
         [Fact]
-        public async Task SourceCodeModifications()
+        public async Task SourceCodeModificationsWithFabric()
         {
             using var testContext = this.CreateTestContext();
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
@@ -367,6 +367,175 @@ class C
             async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
             {
                 var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
+
+                // ReSharper disable AccessToDisposedClosure
+                var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+                // ReSharper restore AccessToDisposedClosure
+
+                var compilationResult = await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
+
+                return compilation.SyntaxTrees
+                    .SelectMany(
+                        t => DesignTimeReferenceValidatorRunner.Validate(
+                                compilationResult.Value.Configuration.ServiceProvider,
+                                compilation.GetSemanticModel( t ),
+                                compilationResult.Value )
+                            .ReportedDiagnostics )
+                    .ToList();
+            }
+        }
+
+        [Fact]
+        public async Task ModificationInAttributeConstruction()
+        {
+            using var testContext = this.CreateTestContext();
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+            const string aspectCode = """
+using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
+
+public class TheAspect : TypeAspect
+{
+    string _name;
+
+    public TheAspect( string name )
+    {
+        this._name = name;
+    }
+
+    static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
+
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    {
+        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+    }
+
+    private void ValidateReference( in ReferenceValidationContext context )
+    {
+        context.Diagnostics.Report( _warning.WithArguments( this._name ) );
+    }
+}
+
+""";
+
+            const string validatedCodeTemplate = """
+[TheAspect("<<name>>")]
+class A {}
+""";
+
+            var baseCode = ImmutableDictionary.Create<string, string>()
+                .Add( "aspectCode.cs", aspectCode )
+                .Add( "userCode.cs", "class B : A {}" );
+
+            // Step 1.
+            var code1 = baseCode
+                .Add( "validatedCode.cs", validatedCodeTemplate.ReplaceOrdinal( "<<name>>", "VERSION1" ) );
+
+            var result1 = await ValidateCompilationAsync( code1 );
+            Assert.Single( result1 );
+            Assert.Contains( "VERSION1", result1[0].ToString(), StringComparison.Ordinal );
+
+            // Step 2. Changing the custom attribute.
+            var code2 = baseCode
+                .Add( "validatedCode.cs", validatedCodeTemplate.ReplaceOrdinal( "<<name>>", "VERSION2" ) );
+
+            var result2 = await ValidateCompilationAsync( code2 );
+            Assert.Single( result2 );
+            Assert.Contains( "VERSION2", result2[0].ToString(), StringComparison.Ordinal );
+
+            // Local function that executes the pipeline and the validators.
+            async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
+            {
+                var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
+
+                // ReSharper disable AccessToDisposedClosure
+                var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;
+
+                // ReSharper restore AccessToDisposedClosure
+
+                var compilationResult = await pipeline.ExecuteAsync( compilation, true, AsyncExecutionContext.Get() );
+
+                return compilation.SyntaxTrees
+                    .SelectMany(
+                        t => DesignTimeReferenceValidatorRunner.Validate(
+                                compilationResult.Value.Configuration.ServiceProvider,
+                                compilation.GetSemanticModel( t ),
+                                compilationResult.Value )
+                            .ReportedDiagnostics )
+                    .ToList();
+            }
+        }
+
+        [Fact]
+        public async Task ModificationInAttributeConstruction_CrossProject()
+        {
+            using var testContext = this.CreateTestContext();
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
+
+            const string aspectCode = """
+using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
+
+public class TheAspect : TypeAspect
+{
+    string _name;
+
+    public TheAspect( string name )
+    {
+        this._name = name;
+    }
+
+    static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
+
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    {
+        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+    }
+
+    private void ValidateReference( in ReferenceValidationContext context )
+    {
+        context.Diagnostics.Report( _warning.WithArguments( this._name ) );
+    }
+}
+
+""";
+
+            const string validatedCodeTemplate = """
+[TheAspect("<<name>>")]
+public class A {}
+""";
+
+            // Step 1.
+            var dependentCode1 = ImmutableDictionary.Create<string, string>()
+                .Add( "aspectCode.cs", aspectCode )
+                .Add( "validatedCode.cs", validatedCodeTemplate.ReplaceOrdinal( "<<name>>", "VERSION1" ) );
+
+            var result1 = await ValidateCompilationAsync( dependentCode1 );
+            Assert.Single( result1 );
+            Assert.Contains( "VERSION1", result1[0].ToString(), StringComparison.Ordinal );
+
+            // Step 2. Changing the custom attribute.
+            var code2 = dependentCode1
+                .SetItem( "validatedCode.cs", validatedCodeTemplate.ReplaceOrdinal( "<<name>>", "VERSION2" ) );
+
+            var result2 = await ValidateCompilationAsync( code2 );
+            Assert.Single( result2 );
+            Assert.Contains( "VERSION2", result2[0].ToString(), StringComparison.Ordinal );
+
+            // Local function that executes the pipeline and the validators.
+            async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> dependentCode )
+            {
+                var mainCode = ImmutableDictionary.Create<string, string>().Add( "code.cs", "class B : A {}" );
+
+                var compilation = TestCompilationFactory.CreateCSharpCompilation( mainCode, dependentCode: dependentCode, name: "test" );
 
                 // ReSharper disable AccessToDisposedClosure
                 var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation )!;

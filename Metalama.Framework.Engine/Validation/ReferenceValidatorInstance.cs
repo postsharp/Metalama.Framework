@@ -9,20 +9,27 @@ using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceValidatorInstance : ValidatorInstance
+public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceValidatorProperties
 {
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,
         ValidatorDriver driver,
         ValidatorImplementation implementation,
-        ReferenceKinds referenceKinds ) : base( validatedDeclaration, driver, implementation )
+        ReferenceKinds referenceKinds,
+        bool includeDerivedTypes,
+        string description ) : base( validatedDeclaration, driver, implementation, description )
     {
         this.ReferenceKinds = referenceKinds;
+        this.IncludeDerivedTypes = includeDerivedTypes;
     }
 
     // Aspect or fabric.
 
     public ReferenceKinds ReferenceKinds { get; }
+
+    public bool IncludeDerivedTypes { get; }
+
+    public DeclarationKind ValidatedDeclarationKind => this.ValidatedDeclaration.DeclarationKind;
 
     internal void Validate(
         IDeclaration referencingDeclaration,
@@ -38,6 +45,7 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance
             new SyntaxReference( node, this ),
             this.Implementation.State,
             diagnosticAdder,
+            this,
             referenceKind );
 
         ((ValidatorDriver<ReferenceValidationContext>) this.Driver).Validate(

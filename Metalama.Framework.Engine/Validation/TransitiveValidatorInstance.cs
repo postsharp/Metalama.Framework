@@ -15,6 +15,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = instance.ReferenceKinds;
+        this.IncludeDerivedTypes = instance.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;
         this.Object = instance.Implementation.Implementation;
         this.State = instance.Implementation.State;
@@ -23,15 +24,19 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     public TransitiveValidatorInstance(
         IRef<IDeclaration> validatedDeclaration,
         ReferenceKinds referenceKinds,
+        bool includeDerivedTypes,
         object obj,
         IAspectState? state,
-        string? methodName )
+        string? methodName,
+        string description )
     {
         this.ValidatedDeclaration = validatedDeclaration;
+        this.IncludeDerivedTypes = includeDerivedTypes;
         this.ReferenceKinds = referenceKinds;
         this.Object = obj;
         this.State = state;
         this.MethodName = methodName;
+        this.Description = description;
     }
 
     private TransitiveValidatorInstance()
@@ -41,17 +46,22 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.ReferenceKinds = default;
         this.MethodName = null!;
         this.Object = null!;
+        this.Description = null!;
     }
 
     public IRef<IDeclaration> ValidatedDeclaration { get; private set; }
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
+    public bool IncludeDerivedTypes { get; private set; }
+
     public object Object { get; private set; }
 
     public IAspectState? State { get; private set; }
 
     public string? MethodName { get; private set; }
+
+    public string Description { get; private set; }
 
     internal ValidatorDriver GetReferenceValidatorDriver()
     {

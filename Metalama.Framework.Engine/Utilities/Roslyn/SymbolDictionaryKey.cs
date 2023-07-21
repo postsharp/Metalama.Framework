@@ -66,15 +66,5 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
 
     public static bool operator !=( SymbolDictionaryKey left, SymbolDictionaryKey right ) => !left.Equals( right );
 
-    public void UpdateHash( XXH64 hasher )
-    {
-        if ( this._identity is not string id )
-        {
-            // We should not compute a hash of lookup keys, only of persistent keys.
-
-            throw new InvalidOperationException();
-        }
-
-        hasher.Update( id );
-    }
+    public override string ToString() => this._identity?.ToString() ?? "null";
 }

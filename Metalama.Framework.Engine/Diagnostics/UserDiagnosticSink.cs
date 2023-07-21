@@ -30,10 +30,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         private ConcurrentLinkedList<Diagnostic>? _diagnostics;
         private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
         private ConcurrentLinkedList<CodeFixInstance>? _codeFixes;
-        private int _diagnosticCount;
         private int _errorCount;
-
-        internal int DiagnosticCount => this._diagnosticCount;
 
         internal int ErrorCount => this._errorCount;
 
@@ -98,8 +95,6 @@ namespace Metalama.Framework.Engine.Diagnostics
         public void Report( Diagnostic diagnostic )
         {
             LazyInitializer.EnsureInitialized( ref this._diagnostics ).Add( diagnostic );
-
-            Interlocked.Increment( ref this._diagnosticCount );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -200,29 +195,29 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location )
+        public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location, IDiagnosticSource source )
         {
             this.ValidateUserReport( diagnostic.Definition );
 
             var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( diagnostic.Definition.CreateRoslynDiagnosticImpl( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
         }
 
-        public void Suppress( SuppressionDefinition suppression, IDeclaration scope )
+        public void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
         {
             this.ValidateUserSuppression( suppression );
             this.Suppress( new ScopedSuppression( suppression, scope ) );
         }
 
-        public void Suggest( CodeFix codeFix, IDiagnosticLocation location )
+        public void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
             var codeFixes = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
-            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, codeFixes: codeFixes ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, source, codeFixes: codeFixes ) );
         }
 
         internal void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

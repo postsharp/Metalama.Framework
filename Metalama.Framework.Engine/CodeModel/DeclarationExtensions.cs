@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public static class DeclarationExtensions
     {
-        internal static DeclarationKind GetDeclarationKind( this ISymbol symbol )
+        public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
             => symbol switch
             {
                 INamespaceSymbol => DeclarationKind.Namespace,

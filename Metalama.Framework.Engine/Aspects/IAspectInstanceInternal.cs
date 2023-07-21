@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal interface IAspectInstanceInternal : IAspectInstance, IAspectPredecessorImpl
+internal interface IAspectInstanceInternal : IAspectInstance, IAspectPredecessorImpl, IDiagnosticSource
 {
     new Ref<IDeclaration> TargetDeclaration { get; }
 

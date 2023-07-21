@@ -8,4 +8,6 @@ namespace Metalama.Framework.Validation;
 public abstract class ReferenceValidator : Validator<ReferenceValidationContext>
 {
     public virtual ReferenceKinds ValidatedReferenceKinds => ReferenceKinds.All;
+
+    public virtual bool IncludeDerivedTypes => true;
 }

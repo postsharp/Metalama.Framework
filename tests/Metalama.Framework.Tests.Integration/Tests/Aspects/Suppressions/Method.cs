@@ -3,6 +3,7 @@
 #endif
 
 #if !TESTRUNNER
+
 // Disable the warning in the main build, not during tests.
 #pragma warning disable CS0219
 #endif

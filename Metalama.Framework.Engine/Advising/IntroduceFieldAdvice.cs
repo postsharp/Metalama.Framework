@@ -95,7 +95,8 @@ namespace Metalama.Framework.Engine.Advising
                         AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                                this ) );
                 }
 
                 if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
@@ -105,7 +106,8 @@ namespace Metalama.Framework.Engine.Advising
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingDeclaration.DeclaringType) ) );
+                                 existingDeclaration.DeclaringType),
+                                this ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -117,7 +119,8 @@ namespace Metalama.Framework.Engine.Advising
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingDeclaration.DeclaringType) ) );
+                                     existingDeclaration.DeclaringType),
+                                    this ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -130,7 +133,8 @@ namespace Metalama.Framework.Engine.Advising
                             return AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingDeclaration.DeclaringType) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingDeclaration.DeclaringType),
+                                    this ) );
                         }
                         else
                         {

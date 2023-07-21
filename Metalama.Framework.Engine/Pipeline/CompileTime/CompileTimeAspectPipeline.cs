@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // Report error if the compilation does not have the METALAMA preprocessor symbol.
             if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
             {
-                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, null ) );
 
                 return default;
             }

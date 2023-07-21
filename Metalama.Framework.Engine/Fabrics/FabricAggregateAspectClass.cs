@@ -26,8 +26,12 @@ namespace Metalama.Framework.Engine.Fabrics
             this.Project = project;
             this.TemplateClasses = templateClasses;
 
+            var description = "fabric " + string.Join( " or ", templateClasses.Select( x => x.FullName ) );
+
             this.GeneratedCodeAnnotation =
-                MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( "fabric " + string.Join( " or ", templateClasses.Select( x => x.FullName ) ) );
+                MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( description );
+
+            this.DiagnosticSourceDescription = description;
         }
 
         public string FullName => FabricTopLevelAspectClass.FabricAspectName;
@@ -67,5 +71,7 @@ namespace Metalama.Framework.Engine.Fabrics
             EligibleScenarios requestedEligibility,
             IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This method should not be called because it is always eligible." );
+
+        public string DiagnosticSourceDescription { get; }
     }
 }

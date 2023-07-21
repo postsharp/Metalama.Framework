@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Licensing;
@@ -85,5 +86,7 @@ internal abstract partial class FabricDriver
 
         [Memo]
         public IAspectReceiver<T> Outbound => this.GetAspectTargetSelector().With( t => t );
+
+        string IDiagnosticSource.DiagnosticSourceDescription => $"fabric {this._fabricInstance.Fabric.GetType().FullName}";
     }
 }

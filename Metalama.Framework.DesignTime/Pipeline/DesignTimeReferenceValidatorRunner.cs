@@ -30,16 +30,12 @@ internal static class DesignTimeReferenceValidatorRunner
                     c,
                     aspectRepository: new PipelineResultBasedAspectRepository( aspectPipelineResultAndState.Result ) ) );
 
-            var validatorCache = new ConcurrentDictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>>();
             var userDiagnosticSink = new UserDiagnosticSink( aspectPipelineResultAndState.Configuration.ClosureDiagnosticManifest );
 
             using var visitor = new ReferenceValidationVisitor(
                 serviceProvider,
                 userDiagnosticSink,
-                s => validatorCache.GetOrAdd(
-                    s,
-                    symbol => aspectPipelineResultAndState.Result.ReferenceValidators.GetValidatorsForSymbol( symbol )
-                        .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( compilationModel ) ) ),
+                new ValidatorProvider( aspectPipelineResultAndState.Result.ReferenceValidators, compilationModel ),
                 compilationModel,
                 cancellationToken );
 
@@ -51,5 +47,26 @@ internal static class DesignTimeReferenceValidatorRunner
         {
             return ImmutableUserDiagnosticList.Empty;
         }
+    }
+
+    private sealed class ValidatorProvider : IReferenceValidatorProvider
+    {
+        private readonly DesignTimeReferenceValidatorCollection _validators;
+        private readonly ConcurrentDictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validatorCache = new();
+        private readonly CompilationModel _compilationModel;
+
+        public ValidatorProvider( DesignTimeReferenceValidatorCollection validators, CompilationModel compilationModel )
+        {
+            this._validators = validators;
+            this._compilationModel = compilationModel;
+        }
+
+        public ReferenceValidatorCollectionProperties Properties => this._validators.Properties;
+
+        public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol )
+            => this._validatorCache.GetOrAdd(
+                symbol,
+                s => this._validators.GetValidatorsForSymbol( s )
+                    .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( this._compilationModel ) ) );
     }
 }

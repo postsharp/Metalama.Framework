@@ -168,12 +168,15 @@ namespace Metalama.Framework.DesignTime
                     diagnostics,
                     compilation,
                     ReportDiagnostic,
-                    true );
+                    true,
+                    cancellationToken );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var symbol = suppression.GetScopeSymbolOrNull( compilation );
 
                     if ( symbol != null )
@@ -211,10 +214,13 @@ namespace Metalama.Framework.DesignTime
             IEnumerable<Diagnostic> diagnostics,
             Compilation compilation,
             Action<Diagnostic> reportDiagnostic,
-            bool wrapUnknownDiagnostics )
+            bool wrapUnknownDiagnostics,
+            CancellationToken cancellationToken )
         {
             foreach ( var diagnostic in diagnostics )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 Diagnostic designTimeDiagnostic;
 
                 if ( !wrapUnknownDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )

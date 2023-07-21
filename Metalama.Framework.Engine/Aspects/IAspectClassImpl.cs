@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Exposes the semantics of an aspect class used by the implementation of the aspect.
     /// </summary>
-    internal interface IAspectClassImpl : IAspectClass, IEligibilityRule<IDeclaration>
+    internal interface IAspectClassImpl : IAspectClass, IEligibilityRule<IDeclaration>, IDiagnosticSource
     {
         CompileTimeProject? Project { get; }
 

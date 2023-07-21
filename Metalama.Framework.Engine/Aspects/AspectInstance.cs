@@ -6,6 +6,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -153,7 +154,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             // Compare by declaration depth of the root attribute or fabric. Higher depths takes precedence.
-            int GetMaxRootDepth( IAspectPredecessor aspectInstance )
+            static int GetMaxRootDepth( IAspectPredecessor aspectInstance )
                 => aspectInstance.GetRoots()
                     .Max( p => ((IAspectPredecessorImpl) p).TargetDeclarationDepth );
 
@@ -165,7 +166,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             // Order ChildAspect before RequireAspect.
-            int GetKindOrder2( AspectInstance aspectInstance )
+            static int GetKindOrder2( AspectInstance aspectInstance )
                 => aspectInstance.Predecessors.IsDefaultOrEmpty
                     ? -1
                     : aspectInstance.Predecessors.Min(
@@ -199,5 +200,8 @@ namespace Metalama.Framework.Engine.Aspects
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
 
         public int PredecessorDegree => this.Predecessors.IsDefaultOrEmpty ? 0 : this.Predecessors.Min( p => p.Instance.PredecessorDegree ) + 1;
+
+        [Memo]
+        public string DiagnosticSourceDescription => MetalamaStringFormatter.Format( $"aspect [{this.Aspect}] applied to '{this.TargetDeclaration}'" );
     }
 }

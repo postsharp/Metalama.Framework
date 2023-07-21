@@ -567,7 +567,7 @@ internal sealed partial class DesignTimeAspectPipeline
             DesignTimeProjectVersion projectVersion,
             AspectPipelineConfiguration configuration )
         {
-            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult, configuration );
+            var compilationResult = this.PipelineResult.Update( compilation, projectVersion, pipelineResult, configuration );
 
             return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }

@@ -12,26 +12,33 @@ namespace Metalama.Framework.Diagnostics
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTime]
-    [InternalImplement]
-    public interface IDiagnosticSink
+    internal interface IDiagnosticSink
     {
         /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
         /// </summary>
-        void Report( IDiagnostic diagnostic, IDiagnosticLocation? location );
+        void Report( IDiagnostic diagnostic, IDiagnosticLocation? location, IDiagnosticSource source );
 
         /// <summary>
         /// Suppresses a diagnostic by specifying the declaration in which the suppression must be effective.
         /// </summary>
         /// <param name="suppression">The suppression definition, which must be defined as a static field or property.</param>
         /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
-        void Suppress( SuppressionDefinition suppression, IDeclaration scope );
+        /// <param name="source"></param>
+        void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source );
 
         /// <summary>
         /// Suggest a code fix without reporting a diagnostic.
         /// </summary>
         /// <param name="codeFix">The <see cref="CodeFix"/>.</param>
         /// <param name="location">The code location for which the code fix should be suggested, typically an <see cref="IDeclaration"/>.</param>
-        void Suggest( CodeFix codeFix, IDiagnosticLocation location );
+        /// <param name="source"></param>
+        void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source );
+    }
+
+    [CompileTime]
+    public interface IDiagnosticSource
+    {
+        string DiagnosticSourceDescription { get; }
     }
 }
