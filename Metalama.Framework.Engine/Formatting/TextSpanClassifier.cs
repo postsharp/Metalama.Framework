@@ -347,14 +347,16 @@ namespace Metalama.Framework.Engine.Formatting
             if ( this._isInTemplate && TemplateCompilerRewriter.IsCompileTimeCode( node ) )
             {
                 this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
+                this.VisitToken( node.OpenParenToken );
                 this.Visit( node.Condition );
-                this.VisitCompileTimeStatementNode( node.Statement );
+                this.VisitToken( node.CloseParenToken );
+                this.Visit( node.Statement );
 
                 if ( node.Else != null )
                 {
                     this.Mark( node.Else.ElseKeyword, TextSpanClassification.CompileTime );
                     this.VisitToken( node.Else.ElseKeyword );
-                    this.VisitCompileTimeStatementNode( node.Else.Statement );
+                    this.Visit( node.Else.Statement );
                 }
             }
             else
@@ -371,8 +373,10 @@ namespace Metalama.Framework.Engine.Formatting
 
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );
+                this.VisitToken( node.OpenParenToken );
                 this.Visit( node.Expression );
-                this.VisitCompileTimeStatementNode( node.Statement );
+                this.VisitToken( node.CloseParenToken );
+                this.Visit( node.Statement );
             }
             else
             {
@@ -380,19 +384,26 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        private void VisitCompileTimeStatementNode( StatementSyntax statement )
+        public override void VisitBlock( BlockSyntax node )
         {
-            if ( statement is BlockSyntax block )
+            if ( this._isInTemplate && TemplateCompilerRewriter.IsCompileTimeCode( node ) )
             {
-                this.Mark( block.OpenBraceToken, TextSpanClassification.CompileTime );
-                this.Mark( block.CloseBraceToken, TextSpanClassification.CompileTime );
+                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
+                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
 
-                // Mark indentation
-                this.VisitToken( block.OpenBraceToken );
-                this.VisitToken( block.CloseBraceToken );
+                this.VisitToken( node.OpenBraceToken );
+
+                foreach ( var statement in node.Statements )
+                {
+                    this.Visit( statement );
+                }
+
+                this.VisitToken( node.CloseBraceToken );
             }
-
-            this.Visit( statement );
+            else
+            {
+                base.VisitBlock( node );
+            }
         }
     }
 }
