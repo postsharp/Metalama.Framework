@@ -425,7 +425,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType ) => this._inheritableAspects[aspectType];
 
         // At design time, cross-project reference validators are not added to the main pipeline. Instead, the validator provider recursively includes
-        // the providers of referenced projects.
+        // the providers of referenced projects. However cross-project references are still used for PE references.
         ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.ReferenceValidators => ImmutableArray<TransitiveValidatorInstance>.Empty;
 
         public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider, Compilation compilation )
