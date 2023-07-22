@@ -56,7 +56,7 @@ namespace Metalama.Framework.Workspaces
         /// Gets the set of types defined in the project, including nested types.
         /// </summary>
         [Memo]
-        public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes ).ToImmutableArray();
+        public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes, includeRoot: true ).ToImmutableArray();
 
         /// <summary>
         /// Gets the output of Metalama for this project.

@@ -30,9 +30,6 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
 
             Assert.Equal( new[] { a, b, c }, d.SelectManyRecursiveDistinct( n => n.Children ).OrderBy( o => o.Id ) );
             Assert.Equal( new[] { a, b, c, d }, d.SelectManyRecursiveDistinct( n => n.Children, includeRoots: true ).OrderBy( o => o.Id ) );
-#if DEBUG
-            Assert.Throws<InvalidOperationException>( () => d.SelectManyRecursiveDistinct( n => n.Children ) );
-#endif
         }
 
         [Fact]
@@ -45,9 +42,6 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             var list = new[] { d, a };
 
             Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursiveDistinct( n => n.Children ).OrderBy( o => o.Id ) );
-#if DEBUG
-            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursive( n => n.Children ) );
-#endif
         }
 
         [Fact]

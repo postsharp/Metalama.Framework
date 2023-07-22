@@ -100,7 +100,7 @@ namespace Metalama.Framework.Code.Collections
         internal static HashSet<T> SelectManyRecursiveDistinct<T>(
             this T root,
             Func<T, IEnumerable<T>?> getChildren,
-            bool includeRoots = false )
+            bool includeRoots = true )
             where T : class
         {
             var recursionCheck = 0;
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Code.Collections
         public static HashSet<T> SelectManyRecursiveDistinct<T>(
             this IEnumerable<T> roots,
             Func<T, IEnumerable<T>?> getItems,
-            bool includeRoots = false )
+            bool includeRoots = true )
             where T : class
         {
             var recursionCheck = 0;
