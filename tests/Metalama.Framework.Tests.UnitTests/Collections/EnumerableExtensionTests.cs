@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             Node c = new( a, b );
             Node d = new( c, b );
 
-            Assert.Equal( new[] { a, b, c }, d.SelectManyRecursiveDistinct( n => n.Children ).OrderBy( o => o.Id ) );
+            Assert.Equal( new[] { a, b, c }, d.SelectManyRecursiveDistinct( n => n.Children, includeRoots: false ).OrderBy( o => o.Id ) );
             Assert.Equal( new[] { a, b, c, d }, d.SelectManyRecursiveDistinct( n => n.Children, includeRoots: true ).OrderBy( o => o.Id ) );
         }
 
