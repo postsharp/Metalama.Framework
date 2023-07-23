@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
@@ -11,6 +12,12 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 public class DistributedDesignTimeTestBase : UnitTestClass
 {
     protected DistributedDesignTimeTestBase( ITestOutputHelper? logger = null ) : base( logger ) { }
+
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
+    {
+        base.ConfigureServices( services );
+        services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
+    }
 
     protected override TestContext CreateTestContextCore( TestContextOptions projectOptions, IAdditionalServiceCollection services )
     {
