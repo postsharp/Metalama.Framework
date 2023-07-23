@@ -6,6 +6,7 @@ using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.DesignTime
         public TheDiagnosticAnalyzer() : this(
             DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
-        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -168,7 +169,6 @@ namespace Metalama.Framework.DesignTime
                     diagnostics,
                     compilation,
                     ReportDiagnostic,
-                    true,
                     cancellationToken );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
@@ -209,12 +209,10 @@ namespace Metalama.Framework.DesignTime
         /// <param name="diagnostics">List of diagnostics to be reported.</param>
         /// <param name="compilation">The compilation in which diagnostics must be reported.</param>
         /// <param name="reportDiagnostic">The delegate to call to report a diagnostic.</param>
-        /// <param name="wrapUnknownDiagnostics">Determines whether unknown diagnostics should be wrapped into known diagnostics.</param>
         private void ReportDiagnostics(
             IEnumerable<Diagnostic> diagnostics,
             Compilation compilation,
             Action<Diagnostic> reportDiagnostic,
-            bool wrapUnknownDiagnostics,
             CancellationToken cancellationToken )
         {
             foreach ( var diagnostic in diagnostics )
@@ -223,7 +221,7 @@ namespace Metalama.Framework.DesignTime
 
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
+                if ( !this.ShouldWrapUnsupportedDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }
@@ -238,7 +236,7 @@ namespace Metalama.Framework.DesignTime
                             DiagnosticSeverity.Hidden => DesignTimeDiagnosticDescriptors.UserHidden,
                             DiagnosticSeverity.Warning => DesignTimeDiagnosticDescriptors.UserWarning,
                             DiagnosticSeverity.Info => DesignTimeDiagnosticDescriptors.UserInfo,
-                            _ => throw new NotImplementedException()
+                            _ => throw new AssertionFailedException( $"Unexpected severity: {diagnostic.Severity}." )
                         };
 
                     designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(

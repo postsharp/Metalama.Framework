@@ -57,7 +57,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ITaskRunner _taskRunner;
     private readonly ProjectVersionProvider _projectVersionProvider;
-    private readonly UserDiagnosticRegistrationService? _userDiagnosticsRegistrationService;
+    private readonly IUserDiagnosticRegistrationService? _userDiagnosticsRegistrationService;
 
     private bool _mustProcessQueue;
 
@@ -105,7 +105,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
         this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
-        this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<UserDiagnosticRegistrationService>();
+        this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<IUserDiagnosticRegistrationService>();
 
         if ( this._userDiagnosticsRegistrationService == null )
         {

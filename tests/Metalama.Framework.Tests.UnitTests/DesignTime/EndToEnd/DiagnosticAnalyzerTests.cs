@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -19,7 +21,9 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
 {
     private async Task<List<Diagnostic>> RunAnalyzer( string code )
     {
-        using var testContext = this.CreateTestContext();
+        var additionalServices = new AdditionalServiceCollection();
+        additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
+        using var testContext = this.CreateTestContext( additionalServices );
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
@@ -136,7 +140,9 @@ class TheAspect : OverrideMethodAspect
             class C {}
             """;
 
-        using var testContext = this.CreateTestContext();
+        var additionalServices = new AdditionalServiceCollection();
+        additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( true ) );
+        using var testContext = this.CreateTestContext( additionalServices );
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
