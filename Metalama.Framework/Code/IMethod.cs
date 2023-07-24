@@ -15,6 +15,9 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the method is marked as <c>partial</c> in source code. 
         /// </summary>
+        /// <remarks>
+        /// To check whether a partial method has an implementation, check the <see cref="IMember.HasImplementation"/> property.
+        /// </remarks>
         bool IsPartial { get; }
 
         /// <summary>

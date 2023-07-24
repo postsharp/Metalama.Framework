@@ -48,9 +48,6 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.
         /// </summary>
-        /// <remarks>
-        /// To check whether a partial method has an implementation, check the <see cref="IMember.HasImplementation"/> property.
-        /// </remarks>
         bool IsPartial { get; }
     }
 }
