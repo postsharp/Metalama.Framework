@@ -25,6 +25,8 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     public bool IsOverride => this.MemberBuilder.IsOverride;
 
+        public bool HasImplementation => this.MemberBuilder.HasImplementation;
+
     [Memo]
     public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
 
