@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             validatedMethod.DeclaringMember!,
                             driver,
                             implementation,
-                            referenceKinds & ~ReferenceKinds.Assignment,
+                            ReferenceKinds.Default,
                             includeDerivedTypes,
                             description );
 

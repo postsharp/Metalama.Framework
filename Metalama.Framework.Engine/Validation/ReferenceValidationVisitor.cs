@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -77,11 +78,46 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this.Validate( node, ReferenceKinds.None );
     }
 
+    public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
+    {
+        this.Validate( node, ReferenceKinds.Default );
+    }
+
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
 
-        this.Validate( node.Left, ReferenceKinds.Assignment );
+        var symbol = this._semanticModel!.GetSymbolInfo( node.Left ).Symbol;
+
+        if ( symbol != null )
+        {
+            if ( !this.ValidateSymbol( node.Left, symbol, ReferenceKinds.Assignment ) )
+            {
+                // If we have no report on the assignment itself, we still need to analyze the children of the left
+                // part with a default ReferenceKind. However we cannot analyze the rightmost member of the expression
+                // because this one is being assigned.
+                switch ( node.Left )
+                {
+                    case MemberAccessExpressionSyntax memberAccess:
+                        this.Visit( memberAccess.Expression );
+                        break;
+
+                    case ElementAccessExpressionSyntax elementAccess:
+                        this.Visit( elementAccess.Expression );
+                        this.Visit( elementAccess.ArgumentList);
+                        break;
+
+                    case IdentifierNameSyntax:
+                        // If we just have an identifer, we have nothing to visit.
+                        break;
+
+                    default:
+                        // Other cases are possible but we don't implement them.
+                        // For instance, we can assign the return value of a ref method.
+                        break;                
+                }               
+            }
+        }
     }
 
     private void VisitChildren( SyntaxNode node )
