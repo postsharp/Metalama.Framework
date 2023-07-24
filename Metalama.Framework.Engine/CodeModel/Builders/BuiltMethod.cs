@@ -74,6 +74,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     IMethod IMethod.MethodDefinition => this;
 
+    bool IMethod.IsPartial => false;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
