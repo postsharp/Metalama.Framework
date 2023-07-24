@@ -41,7 +41,7 @@ public partial class DerivedTypeIndex
                 return;
             }
 
-            if ( type.BaseType != null )
+            if ( type.BaseType != null && type.BaseType.Kind != SymbolKind.ErrorType )
             {
                 var baseType = type.BaseType.OriginalDefinition;
                 this._relationships.Add( baseType, type );
@@ -50,6 +50,11 @@ public partial class DerivedTypeIndex
 
             foreach ( var interfaceImpl in type.Interfaces )
             {
+                if ( interfaceImpl.TypeKind == TypeKind.Error )
+                {
+                    continue;
+                }
+                
                 var interfaceType = interfaceImpl.OriginalDefinition;
                 this._relationships.Add( interfaceType, type );
                 this.AnalyzeType( interfaceType );

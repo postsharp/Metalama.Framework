@@ -71,6 +71,24 @@ class C : TypeAspect
         }
 
         [Fact]
+        public void ErrorTypes()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C : ErrorType { }
+
+class D : C { }
+
+class E { ErrorType X; }
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.RunTimeOnly );
+            this.AssertScope( compilation.Types.OfName( "D" ).Single(), TemplatingScope.RunTimeOnly );
+        }
+
+        [Fact]
         public void DefaultCode()
         {
             using var testContext = this.CreateTestContext();

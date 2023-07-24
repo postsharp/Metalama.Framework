@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @ExpectedException(System.Exception)
+#endif
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Eligibility;
