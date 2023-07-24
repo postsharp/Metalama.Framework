@@ -170,7 +170,7 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
                             }
 
-                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted, bool followedByCode)
+                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted, bool followedByCode )
                             {
                                 if ( exitFlowingStatements.Contains( controlStatement ) )
                                 {
@@ -383,6 +383,7 @@ namespace Metalama.Framework.Engine.Linking
                         case LocalFunctionStatementSyntax:
                             // Local function statement does not affect flow, so we ignore it.
                             continue;
+                        
                         default:
                             return statements[i];
                     }
