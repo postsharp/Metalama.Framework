@@ -71,7 +71,7 @@ internal sealed class ValidationRunner
         {
             foreach ( var validator in validators )
             {
-                userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+                userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
                 validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
             }
@@ -108,7 +108,7 @@ internal sealed class ValidationRunner
         {
             using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
             {
-                userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+                userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
                 validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
             }

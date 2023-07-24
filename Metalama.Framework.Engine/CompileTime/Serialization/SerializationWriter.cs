@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly Queue<SerializationQueueItem<object>> _serializationQueue = new();
 
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeSerializer _formatter;
         private readonly bool _shouldReportExceptionCause;
 
@@ -29,15 +30,14 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
         private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly UserCodeExecutionContext _userCodeExecutionContext;
 
         public SerializationWriter( ProjectServiceProvider serviceProvider, Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
         {
+            this._serviceProvider = serviceProvider;
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
             this._binaryWriter = new SerializationBinaryWriter( new BinaryWriter( stream ) );
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-            this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );
         }
 
         public void Serialize( object? obj )
@@ -106,9 +106,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             try
             {
+                var context = new UserCodeExecutionContext( this._serviceProvider, UserCodeDescription.Create( "deserializing the {0}", obj.GetType() ) );
+
                 this._userCodeInvoker.Invoke(
                     () => serializer.SerializeObject( obj, constructorArguments, initializationArguments ),
-                    this._userCodeExecutionContext );
+                    context );
             }
             catch ( Exception exception )
             {

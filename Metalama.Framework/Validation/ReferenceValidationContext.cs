@@ -19,7 +19,8 @@ namespace Metalama.Framework.Validation
     public readonly struct ReferenceValidationContext
     {
         private readonly IDiagnosticSink _diagnosticSink;
-        private readonly IDiagnosticSource _diagnosticSource;
+
+        internal IDiagnosticSource DiagnosticSource { get; }
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public SyntaxReference Syntax { get; }
 
-        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this._diagnosticSource, this.DiagnosticLocation, this.ReferencedDeclaration );
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this.DiagnosticSource, this.DiagnosticLocation, this.ReferencedDeclaration );
 
         internal ReferenceValidationContext(
             IDeclaration referencedDeclaration,
@@ -73,7 +74,7 @@ namespace Metalama.Framework.Validation
         {
             this.AspectState = aspectState;
             this._diagnosticSink = diagnosticSink;
-            this._diagnosticSource = diagnosticSource;
+            this.DiagnosticSource = diagnosticSource;
             this.ReferencedDeclaration = referencedDeclaration;
             this.ReferencingDeclaration = referencingDeclaration;
             this.ReferenceKinds = referenceKinds;

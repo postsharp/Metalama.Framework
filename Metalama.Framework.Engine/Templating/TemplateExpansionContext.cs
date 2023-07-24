@@ -115,7 +115,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeMemberInfo.FromSymbol( template?.TemplateMember.Declaration.GetSymbol() ),
+        UserCodeDescription.Create( "executing the template method {0}", template?.TemplateMember.Declaration.GetSymbol() ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,

@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -100,22 +99,22 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                 {
                     case MemberAccessExpressionSyntax memberAccess:
                         this.Visit( memberAccess.Expression );
+
                         break;
 
                     case ElementAccessExpressionSyntax elementAccess:
                         this.Visit( elementAccess.Expression );
-                        this.Visit( elementAccess.ArgumentList);
+                        this.Visit( elementAccess.ArgumentList );
+
                         break;
 
                     case IdentifierNameSyntax:
-                        // If we just have an identifer, we have nothing to visit.
+                        // If we just have an identifier, we have nothing to visit.
                         break;
 
-                    default:
-                        // Other cases are possible but we don't implement them.
-                        // For instance, we can assign the return value of a ref method.
-                        break;                
-                }               
+                    // Other cases are possible but we don't implement them.
+                    // For instance, we can assign the return value of a ref method.
+                }
             }
         }
     }
@@ -669,7 +668,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                 continue;
             }
 
-            this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+            this._userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
             var diagnosticsCountBefore = this._diagnosticAdder.DiagnosticCount;
             validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
             reportedAnyDiagnostic |= diagnosticsCountBefore != this._diagnosticAdder.DiagnosticCount;
