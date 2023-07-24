@@ -3,10 +3,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
@@ -28,13 +28,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var isSelfTarget = target is null or ThisInstanceUserReceiver or ThisTypeUserReceiver;
 
             var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
-
-            if ( orderOptions is InvokerOptions.Base or InvokerOptions.Current && !isSelfTarget )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(target),
-                    "Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current." );
-            }
 
             var otherFlags = options.Value & ~InvokerOptions.OrderMask;
 
@@ -102,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
 
             // CurrentAspectLayerId may be null when we are not executing in a template execution context.
-            => new( TemplateExpansionContext.CurrentAspectLayerId ?? default, this._order );
+            => new( TemplateExpansionContext.CurrentAspectLayerId ?? default, this._order, flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );
 
         protected string GetCleanTargetMemberName()
         {
@@ -166,6 +159,17 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 null => null,
                 _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
             };
+        }
+
+        protected void CheckInvocationOptionsAndTarget()
+        {
+            // Specifying Base or Current option with non-default target is only allowed when the method is in the inheritance hierarchy of the template target.
+            if ( this.Target != null && (this.Options & InvokerOptions.OrderMask) is InvokerOptions.Base or InvokerOptions.Current &&
+                 !(GetTargetType()?.Is( this.Member.DeclaringType ) ?? false) )
+            {
+                throw GeneralDiagnosticDescriptors.CantInvokeBaseOrCurrentOutsideTargetType.CreateException(
+                    (this.Member, GetTargetType()!, this.Options & InvokerOptions.OrderMask) );
+            }
         }
     }
 }

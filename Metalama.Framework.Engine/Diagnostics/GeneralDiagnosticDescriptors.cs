@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -339,6 +340,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                     Error,
                     "References to the {0} '{1}' cannot be validated by '{2}' because the {0} is not a real source code declaration.",
                     "References to the declaration cannot be validated because it is not a real source code declaration.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<(IMember Member, INamedType TargetType, InvokerOptions InvokerOptions)>
+            CantInvokeBaseOrCurrentOutsideTargetType =
+                new(
+                    "LAMA0063",
+                    Error,
+                    "Cannot invoke member '{0}' when specifying InvokerOptions.{2} here, because it does not belong to the template target type '{1}'.",
+                    "Cannot invoke a member that does not belong to the template target type when specifying InvokerOptions.Base or InvokerOptions.Current.",
                     _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
