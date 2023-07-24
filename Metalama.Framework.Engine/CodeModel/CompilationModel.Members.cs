@@ -47,9 +47,9 @@ public sealed partial class CompilationModel
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
         => (this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors )
-                && constructors.Contains( constructorBuilder.ToTypedRef<IConstructor>() ))
-        || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var staticConstructors )
-                && staticConstructors == constructorBuilder);
+            && constructors.Contains( constructorBuilder.ToTypedRef<IConstructor>() ))
+           || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var staticConstructors )
+               && staticConstructors == constructorBuilder);
 
     internal bool Contains( EventBuilder eventBuilder )
         => this._events.TryGetValue( eventBuilder.DeclaringType.GetSymbol(), out var events ) && events.Contains( eventBuilder.ToTypedRef<IEvent>() );

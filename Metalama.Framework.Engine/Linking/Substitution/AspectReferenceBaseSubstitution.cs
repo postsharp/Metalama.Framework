@@ -44,7 +44,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         return targetSymbol.Name;
     }
 
-    protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
     {
         return
             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
@@ -80,7 +80,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         }
     }
 
-    protected override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+    protected override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
     {
         return currentNode
             .WithExpression(

@@ -26,5 +26,8 @@ internal sealed class CodeFixContextAdapter : ICodeFixContext
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
     public void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics )
-        => this._context.RegisterCodeFix( action, diagnostics );
+    {
+        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+        this._context.RegisterCodeFix( action, diagnostics );
+    }
 }

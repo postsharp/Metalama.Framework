@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-internal class VsAnalysisProcessProjectHandlerFactory : IGlobalService
+internal sealed class VsAnalysisProcessProjectHandlerFactory : IGlobalService
 {
     private readonly GlobalServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<ProjectKey, Lazy<VsAnalysisProcessProjectHandler>> _handlers = new();

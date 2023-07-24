@@ -363,7 +363,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var propertyNames = type.Properties.SelectAsImmutableArray( p => p.Name );
 
@@ -405,7 +405,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var fieldNames = type.Fields.Where( f => !f.IsImplicitlyDeclared ).Select( p => p.Name );
 
@@ -446,7 +446,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var refKinds = type.Properties.SelectAsImmutableArray( p => p.RefKind );
 
@@ -474,7 +474,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var eventNames = type.Events.SelectAsImmutableArray( p => p.Name );
 
@@ -506,7 +506,7 @@ class C : IDisposable
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             Assert.Equal( new[] { Default, ExplicitInterfaceImplementation, Operator, Operator }, type.Methods.SelectAsImmutableArray( m => m.MethodKind ) );
 
@@ -528,7 +528,7 @@ class C : IDisposable
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
             var constructor = type.Constructors.Single();
             Assert.True( constructor.IsImplicitlyDeclared );
             Assert.Null( type.StaticConstructor );
@@ -577,7 +577,7 @@ class C<T>
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
@@ -623,7 +623,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.SelectAsImmutableArray( p => p.RefKind ) );
             Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.SelectAsImmutableArray( m => m.ReturnParameter.RefKind ) );
@@ -644,7 +644,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var method = type.Methods.First();
 
@@ -706,7 +706,7 @@ class C<T>
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var fieldTypes = type.Fields.SelectAsImmutableArray( p => (INamedType) p.Type );
 
@@ -757,7 +757,7 @@ class C<TC>
             var compilation = testContext.CreateCompilationModel( code );
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
 
-            var type = Assert.Single( compilation.Types )!;
+            var type = Assert.Single( compilation.Types );
 
             var openMethod = type.Methods.First();
             var closedType = type.WithTypeArguments( typeof(string) );
@@ -832,7 +832,7 @@ class Parent<TParent>
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
-            var openParentType = Assert.Single( compilation.Types )!;
+            var openParentType = Assert.Single( compilation.Types );
 
             var genericNestedTypeOnOpenGenericParent = openParentType.NestedTypes.OfName( "NestedGeneric" ).Single();
             var genericMethodOnOpenGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "GenericMethod" ).Single();

@@ -60,6 +60,7 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
                 if ( member is IFieldSymbol field && field.ContainingType.TypeKind == TypeKind.Enum )
                 {
                     var enumType = this.Type.GetCompilationModel().Factory.GetTypeByReflectionName( field.ContainingType.GetReflectionFullName() );
+
                     return TypedConstant.Create( field.ConstantValue, enumType );
                 }
                 else

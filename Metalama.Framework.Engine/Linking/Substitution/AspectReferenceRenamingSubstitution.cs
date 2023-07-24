@@ -46,23 +46,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
                     Name.Identifier.Text: LinkerInjectionHelperProvider.FinalizeMemberName
                 } finalizerMemberAccess:
-                    return this.SubstituteFinalizerMemberAccess( finalizerMemberAccess, substitutionContext );
+                    return this.SubstituteFinalizerMemberAccess( finalizerMemberAccess );
 
                 case MemberAccessExpressionSyntax
                 {
                     Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
                     Name.Identifier.Text: var operatorName
-                } operatorMemberAccess when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
-                    return this.SubstituteOperatorMemberAccess( operatorMemberAccess, substitutionContext );
+                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
+                    return this.SubstituteOperatorMemberAccess( substitutionContext );
 
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
 
                 case ElementAccessExpressionSyntax elementAccessExpression:
-                    return this.SubstituteElementAccess( elementAccessExpression, substitutionContext );
+                    return this.SubstituteElementAccess( elementAccessExpression );
 
                 case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-                    return this.SubstituteConditionalAccess( conditionalAccessExpression, substitutionContext );
+                    return this.SubstituteConditionalAccess( conditionalAccessExpression );
 
                 default:
                     throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         protected abstract string GetTargetMemberName();
 
-        protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
         {
             return
                 MemberAccessExpression(
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     IdentifierName( this.GetTargetMemberName() ) );
         }
 
-        protected SyntaxNode SubstituteOperatorMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        private SyntaxNode SubstituteOperatorMemberAccess( SubstitutionContext substitutionContext )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
@@ -93,10 +93,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         protected abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
 
-        protected virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        protected virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
             => throw new NotSupportedException( $"Element access is not supported by {this.GetType().Name}" );
 
-        protected virtual SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
+        private SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode )
         {
             var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 

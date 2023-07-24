@@ -24,5 +24,6 @@ internal sealed class SuppressionAnalysisContextAdapter : ISuppressionAnalysisCo
 
     public ImmutableArray<Diagnostic> ReportedDiagnostics => this._context.ReportedDiagnostics;
 
+    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
     public void ReportSuppression( Suppression suppression ) => this._context.ReportSuppression( suppression );
 }

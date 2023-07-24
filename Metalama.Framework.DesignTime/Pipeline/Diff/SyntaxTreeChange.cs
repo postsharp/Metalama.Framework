@@ -51,22 +51,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             }
         }
 
-        public SyntaxTreeChangeHandle ToHandle()
-        {
-            if ( this._oldSyntaxTreeRef == null )
-            {
-                return new SyntaxTreeChangeHandle( this, null );
-            }
-            else if ( this._oldSyntaxTreeRef.TryGetTarget( out var syntaxTree ) )
-            {
-                return new SyntaxTreeChangeHandle( this, new SyntaxTreeVersion( syntaxTree, this._oldSyntaxTreeVersionData ) );
-            }
-            else
-            {
-                return default;
-            }
-        }
-
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
 

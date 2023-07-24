@@ -13,7 +13,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
     private readonly SymbolEqualityComparer _underlying;
     private readonly CompilationContext _compilationContext;
 
-    public SafeSymbolComparer( CompilationContext compilationContext, SymbolEqualityComparer? underlying = null )
+    internal SafeSymbolComparer( CompilationContext compilationContext, SymbolEqualityComparer? underlying = null )
     {
         this._underlying = underlying ?? SymbolEqualityComparer.Default;
         this._compilationContext = compilationContext;

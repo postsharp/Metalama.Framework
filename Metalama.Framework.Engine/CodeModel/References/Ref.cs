@@ -281,7 +281,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol ISdkRef<T>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey )
             => this.GetSymbol( CompilationContextFactory.GetInstance( compilation ), ignoreAssemblyKey );
 
-        public ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+        private ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
             => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilationContext, ignoreAssemblyKey ) );
 
         private ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )

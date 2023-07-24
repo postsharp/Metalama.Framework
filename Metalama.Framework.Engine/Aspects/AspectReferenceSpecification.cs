@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Gets the aspect layer which created the syntax node.
         /// </summary>
-        public AspectLayerId AspectLayerId { get; }
+        private AspectLayerId AspectLayerId { get; }
 
         /// <summary>
         /// Gets a value indicating which version of the target semantic in relation to the aspect layer is referenced.

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 _ => throw new AssertionFailedException( $"Unexpected Severity: {severity}." )
             };
 
-        public static Severity ToOurSeverity( this DiagnosticSeverity severity )
+        internal static Severity ToOurSeverity( this DiagnosticSeverity severity )
             => severity switch
             {
                 DiagnosticSeverity.Error => Severity.Error,

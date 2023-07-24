@@ -43,6 +43,7 @@ namespace Metalama.Framework.Aspects
         [TemplateKeyword]
         public static IMetaTarget Target => CurrentContext.Target;
 
+        // ReSharper disable once ReturnTypeCanBeNotNullable
         /// <summary>
         /// Invokes the logic that has been overwritten. For instance, in an <see cref="OverrideMethodAspect"/>,
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        public static dynamic Proceed() => throw CreateException();
+        public static dynamic? Proceed() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.

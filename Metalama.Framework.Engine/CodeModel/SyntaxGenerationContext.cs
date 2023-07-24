@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class SyntaxGenerationContext : ISyntaxGenerationContext
     {
-        internal Compilation Compilation => this.CompilationContext.Compilation;
+        private Compilation Compilation => this.CompilationContext.Compilation;
 
         internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
 

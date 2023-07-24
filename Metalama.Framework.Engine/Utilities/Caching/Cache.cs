@@ -247,6 +247,7 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
         }
     }
 
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public bool TryRemove( TKey key )
     {
         var caches = this._caches;
