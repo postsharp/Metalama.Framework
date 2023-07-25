@@ -53,7 +53,7 @@ namespace Metalama.Framework.Aspects
         /// or throws an exception if the advice does not target a method or accessor.
         /// </summary>
         /// <remarks>
-        /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
+        /// To invoke the method, use <see cref="IMethodInvoker.Invoke(dynamic?[])"/>,
         /// e.g. <c>meta.Target.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
         IMethod Method { get; }

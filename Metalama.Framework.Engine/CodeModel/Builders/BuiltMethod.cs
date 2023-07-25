@@ -82,5 +82,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
 
+    public object? Invoke( IEnumerable<IExpression> args ) => this._methodBuilder.Invoke( args );
+
     public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

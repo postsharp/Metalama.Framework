@@ -150,6 +150,8 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
+
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
     public bool? IsIteratorMethod => this._isIteratorMethod;
@@ -191,9 +193,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     {
         StringBuilder stringBuilder = new();
         stringBuilder.Append( this.DeclaringType.ToDisplayString( format, context ) );
-        stringBuilder.Append( "." );
+        stringBuilder.Append( '.' );
         stringBuilder.Append( this.Name );
-        stringBuilder.Append( "(" );
+        stringBuilder.Append( '(' );
 
         foreach ( var parameter in this.Parameters )
         {
@@ -205,7 +207,7 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
             stringBuilder.Append( parameter.Type.ToDisplayString( format, context ) );
         }
 
-        stringBuilder.Append( ")" );
+        stringBuilder.Append( ')' );
 
         return stringBuilder.ToString();
     }

@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.Argument_TypedConstant;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Argument_TypedConstant;
 
 public class TestAttribute : OverrideMethodAspect
 {
