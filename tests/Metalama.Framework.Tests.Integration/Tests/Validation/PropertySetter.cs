@@ -1,4 +1,4 @@
-﻿#if TEST_OPTIONS
+#if TEST_OPTIONS
 // @RemoveOutputCode
 #endif
 
@@ -58,6 +58,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Validation.PropertySetter
             // There should be a match in the next line.
             c.P = "";
             c[5] = "";
+            _ = new C { P = "" };
         }
     }
 
