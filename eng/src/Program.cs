@@ -65,7 +65,6 @@ var product = new Product( MetalamaDependencies.Metalama )
                     $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
                 }
             } )
-        .WithValue( BuildConfiguration.Release, c => c with { ExportsToTeamCityBuild = true } )
 };
 
         
