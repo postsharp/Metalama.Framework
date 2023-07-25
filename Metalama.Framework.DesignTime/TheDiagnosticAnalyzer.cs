@@ -310,7 +310,7 @@ namespace Metalama.Framework.DesignTime
             }
         }
 
-        private bool TryMapLocation( Location location, Compilation compilation, out Location? mappedLocation, ref bool hasChange )
+        private bool TryMapLocation( Location location, Compilation compilation, [NotNullWhen( true )] out Location? mappedLocation, ref bool hasChange )
         {
             var reportSourceTree = location.SourceTree;
 
