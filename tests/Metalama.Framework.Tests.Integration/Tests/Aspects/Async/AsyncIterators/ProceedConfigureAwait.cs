@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
 
 class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod() => throw new NotSupportedException();
+    public override dynamic? OverrideMethod() => throw new NotSupportedException();
 
     public override async IAsyncEnumerable<dynamic?> OverrideAsyncEnumerableMethod()
     {

@@ -26,7 +26,7 @@ public class TestAspect : OverrideMethodAspect
         SerializedValue = new DerivedType(z);
     }
 
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine(meta.CompileTime(SerializedValue.Value));
         return meta.Proceed();

@@ -22,5 +22,6 @@ internal sealed class CodeRefactoringContextAdapter : ICodeRefactoringContext
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
+    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
     public void RegisterRefactoring( CodeAction action ) => this._context.RegisterRefactoring( action );
 }

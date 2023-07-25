@@ -45,8 +45,6 @@ internal abstract partial class BaseTestRunner
     private readonly TestProjectReferences _references;
     private readonly IFileSystem _fileSystem;
 
-    protected GlobalServiceProvider ServiceProvider { get; }
-
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
@@ -54,7 +52,6 @@ internal abstract partial class BaseTestRunner
         ITestOutputHelper? logger )
     {
         this._references = references;
-        this.ServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
         this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();

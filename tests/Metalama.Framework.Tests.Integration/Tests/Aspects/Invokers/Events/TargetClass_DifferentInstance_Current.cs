@@ -1,18 +1,14 @@
-﻿#if TEST_OPTIONS
-// @RequiredConstant(NET5_0_OR_GREATER)
-#endif
-
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
 
 #pragma warning disable CS0169
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.TargetClass_DifferentInstance_Current_Error;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.TargetClass_DifferentInstance_Current;
 
 /*
- * Tests that current invoker targeting a event declared in a different class produces an error.
+ * Tests current invoker targeting an event from a different isntance.
  */
 
 public class InvokerAspect : EventAspect

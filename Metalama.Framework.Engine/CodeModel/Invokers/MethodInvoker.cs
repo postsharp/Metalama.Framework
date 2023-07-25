@@ -38,6 +38,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this.Member, parametersCount, args.Length) );
             }
 
+            this.CheckInvocationOptionsAndTarget();
+
             switch ( this.Member.MethodKind )
             {
                 case MethodKind.Default:
@@ -150,7 +152,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 ExpressionSyntax memberAccessExpression =
                     MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
 
-                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
+                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
                 if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
                 {
                     memberAccessExpression =
@@ -180,7 +182,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                             receiverTypedExpressionSyntax.Syntax,
                             InvocationExpression( MemberBindingExpression( name ) ) );
 
-                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
+                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
                 if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
                 {
                     expression = expression.WithAspectReferenceAnnotation(

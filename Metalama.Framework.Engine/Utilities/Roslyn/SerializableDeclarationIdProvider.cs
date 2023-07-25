@@ -90,7 +90,7 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    public static SerializableDeclarationId GetSerializableId( this IDeclaration declaration )
+    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration )
         => declaration.GetSerializableId( DeclarationRefTargetKind.Default );
 
     internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration, DeclarationRefTargetKind targetKind )

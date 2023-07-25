@@ -120,7 +120,8 @@ class TheAspect : OverrideMethodAspect
     [Fact]
     public async Task UserError()
     {
-        var getCode = ( string extraCode ) => $$"""
+        static string GetCode( string extraCode )
+            => $$"""
             using Metalama.Framework.Aspects;
             using Metalama.Framework.Code;
             using Metalama.Framework.Diagnostics;
@@ -147,7 +148,7 @@ class TheAspect : OverrideMethodAspect
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
         var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
-        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = getCode( "" ) } );
+        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = GetCode( "" ) } );
         var compilation1 = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
         var syntaxTree1 = await workspaceProvider.GetDocument( "project", "code.cs" ).GetSyntaxTreeAsync();
         var semanticModel1 = compilation1!.GetSemanticModel( syntaxTree1! );
@@ -162,7 +163,7 @@ class TheAspect : OverrideMethodAspect
             string.Format( CultureInfo.InvariantCulture, DesignTimeDiagnosticDescriptors.UserError.MessageFormat, "MLTEST", "Error!" ),
             diagnostic1.GetLocalizedMessage() );
 
-        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = getCode( "// whatever" ) } );
+        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = GetCode( "// whatever" ) } );
         var compilation2 = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
         var syntaxTree2 = await workspaceProvider.GetDocument( "project", "code.cs" ).GetSyntaxTreeAsync();
         var semanticModel2 = compilation2!.GetSemanticModel( syntaxTree2! );

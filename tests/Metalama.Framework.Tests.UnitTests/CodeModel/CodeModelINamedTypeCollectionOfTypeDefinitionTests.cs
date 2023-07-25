@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelINamedTypeCollectionOfTypeDefinitionTests : UnitTestClass
+    public sealed class CodeModelINamedTypeCollectionOfTypeDefinitionTests : UnitTestClass
     {
         [Fact]
         public void NonGeneric()

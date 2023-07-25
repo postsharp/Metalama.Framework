@@ -101,14 +101,19 @@ namespace Metalama.Framework.Engine.Linking
         public SyntaxNode SymbolSourceNode { get; }
 
         /// <summary>
+        /// Gets the target kind of the aspect reference.
+        /// </summary>
+        public AspectReferenceTargetKind TargetKind { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the reference is inlineable.
         /// </summary>
         public bool IsInlineable { get; }
 
         /// <summary>
-        /// Gets the target kind of the aspect reference.
+        /// Gets a value indicating whether the reference has a custom receiver expression.
         /// </summary>
-        public AspectReferenceTargetKind TargetKind { get; }
+        public bool HasCustomReceiver { get; }
 
         public ResolvedAspectReference(
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
@@ -119,7 +124,8 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxNode rootNode,
             SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
-            bool isInlineable )
+            bool isInlineable,
+            bool hasCustomReceiver )
         {
             Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && symbolSourceNode is not ExpressionSyntax );
 
@@ -139,8 +145,9 @@ namespace Metalama.Framework.Engine.Linking
 #endif
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
-            this.IsInlineable = isInlineable;
             this.TargetKind = targetKind;
+            this.IsInlineable = isInlineable;
+            this.HasCustomReceiver = hasCustomReceiver;
         }
 
         public override string ToString()

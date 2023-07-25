@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicRun
 
 internal class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         var nn = meta.CompileTime("foo");
 

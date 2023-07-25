@@ -70,8 +70,7 @@ namespace Metalama.Framework.Engine.Aspects
             AspectReferenceFlags flags = AspectReferenceFlags.None )
             where T : SyntaxNode
         {
-            return node.WithAdditionalAnnotations(
-                new SyntaxAnnotation( AnnotationKind, new AspectReferenceSpecification( aspectLayerId, order, targetKind, flags ).ToString() ) );
+            return node.WithAspectReferenceAnnotation( new AspectReferenceSpecification( aspectLayerId, order, targetKind, flags ) );
         }
     }
 }

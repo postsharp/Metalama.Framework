@@ -57,13 +57,9 @@ internal abstract partial class FabricDriver
 
         public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
-        public IAspectReceiver<TChild> With<TChild>( Func<T, IEnumerable<TChild>> selector )
-            where TChild : class, IDeclaration
-            => this.GetAspectTargetSelector().With( selector );
-
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
 
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.GetAspectTargetSelector().With( selector );
 
         ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 

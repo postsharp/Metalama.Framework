@@ -19,7 +19,7 @@ public enum TestEnum
 
 public class MyOverride1Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine($"Override1");
         _ = meta.Proceed();
@@ -29,7 +29,7 @@ public class MyOverride1Aspect : OverrideMethodAspect
 
 public class MyOverride2Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine($"Override2");
         _ = meta.Proceed();

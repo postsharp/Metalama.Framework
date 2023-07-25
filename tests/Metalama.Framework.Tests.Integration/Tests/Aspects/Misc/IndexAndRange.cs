@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
 {
     public class UseIndexAndRangeAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             var collection = meta.Target.Method.DeclaringType.BaseType!.TypeArguments.Select(ta => ta.ToDisplayString()).ToArray();
             var compileTimeCollection = collection.AsSpan();

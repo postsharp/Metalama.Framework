@@ -128,15 +128,6 @@ internal static partial class SyntaxFactoryEx
         => SyntaxFactory.ExpressionStatement( EmptyExpression )
             .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
-    public static IdentifierNameSyntax DiscardToken
-        => SyntaxFactory.IdentifierName(
-            SyntaxFactory.Identifier(
-                default,
-                SyntaxKind.UnderscoreToken,
-                "_",
-                "_",
-                default ) );
-
     public static CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
         var requiresParenthesis = syntax switch

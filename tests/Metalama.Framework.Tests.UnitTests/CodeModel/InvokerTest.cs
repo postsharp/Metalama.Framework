@@ -301,7 +301,7 @@ class TargetCode
                 Assert.Equal( advisedParameterList[0], advisedParameterList["i"] );
                 Assert.Equal( advisedParameterList[1], advisedParameterList["j"] );
 
-                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is( typeof(int) ) ) )!.Name );
+                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is( typeof(int) ) ) ).Name );
             }
         }
 

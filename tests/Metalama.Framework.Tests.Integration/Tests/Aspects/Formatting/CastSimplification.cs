@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.CastSimp
 
 internal class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         var clone = meta.Cast( meta.Target.Type, meta.Base.MemberwiseClone() );
 

@@ -6,7 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.L
 {
     public class OverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("This is overridden method.");
 

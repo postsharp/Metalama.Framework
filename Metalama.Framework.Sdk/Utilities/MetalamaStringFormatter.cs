@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using System;
 using System.Globalization;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -24,20 +23,6 @@ namespace Metalama.Framework.Engine.Utilities
         public override object? GetFormat( Type? formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
 
         public static string Format( FormattableString message ) => message.ToString( Instance );
-
-        public static string Format( FormattableString message, params FormattableString[] concatenatedMessages )
-        {
-            var sb = new StringBuilder();
-
-            sb.Append( message.ToString( Instance ) );
-
-            foreach ( var concatenatedMessage in concatenatedMessages )
-            {
-                sb.Append( concatenatedMessage.ToString( Instance ) );
-            }
-
-            return sb.ToString();
-        }
 
         public abstract string Format( string format, object arg, IFormatProvider? formatProvider );
     }

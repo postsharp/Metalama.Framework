@@ -37,6 +37,6 @@ namespace Metalama.Framework.Code
         TypeDefinition,
 
         [Obsolete( "Use Reference.", true )]
-        ImplicitReference = Reference,
+        ImplicitReference = Reference
     }
 }

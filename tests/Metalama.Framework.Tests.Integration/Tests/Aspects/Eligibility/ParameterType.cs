@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.ParameterT
             builder.Parameter( 0 ).Type().MustBe( typeof(string) );
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

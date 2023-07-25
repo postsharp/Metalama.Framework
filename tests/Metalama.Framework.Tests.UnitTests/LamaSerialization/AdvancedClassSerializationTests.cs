@@ -58,7 +58,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var deserializedObject = (Child?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( brother.Name, deserializedObject!.Name );
+            Assert.Equal( brother.Name, deserializedObject.Name );
             Assert.Equal( brother.Sibling.Length, deserializedObject.Sibling!.Length );
             Assert.Equal( sister.Sibling.Length, deserializedObject.Sibling![0].Sibling!.Length );
 
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var deserializedObject = (Child[]?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( children.Length, deserializedObject!.Length );
+            Assert.Equal( children.Length, deserializedObject.Length );
             Assert.Equal( children[0].Name, deserializedObject[0].Name );
             Assert.Equal( children[1].Name, deserializedObject[1].Name );
             Assert.Equal( brother.Sibling.Length, deserializedObject[0].Sibling!.Length );
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.NotNull( deserializedObject!.Spouse );
+            Assert.NotNull( deserializedObject.Spouse );
             Assert.Equal( spouse1.Name, deserializedObject.Name );
             Assert.Equal( spouse1.Name, deserializedObject.Spouse!.Name );
             Assert.Same( deserializedObject, deserializedObject.Spouse );
