@@ -18,7 +18,7 @@ internal class Fabric : ProjectFabric
 
 public class LogAttribute : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine($"{meta.Target.Method} started.");
 

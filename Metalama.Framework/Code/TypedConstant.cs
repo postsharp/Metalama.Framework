@@ -265,7 +265,7 @@ namespace Metalama.Framework.Code
 
         public static TypedConstant Default( Type type ) => new( null, GetIType( type ) );
 
-        internal static Type GetValueType( object? value )
+        private static Type GetValueType( object? value )
             => value switch
             {
                 null => typeof(object),

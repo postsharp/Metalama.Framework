@@ -106,7 +106,8 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
                 if ( this._workspace.CurrentSolution.Projects.SelectMany( p => p.Documents ).Any( d => d.FilePath == file.Key ) )
                 {
                     // See https://github.com/dotnet/roslyn/issues/68814.
-                    throw new InvalidOperationException( $"Could not add document with name '{file.Key}', because a document with this path already exists in a different project." );
+                    throw new InvalidOperationException(
+                        $"Could not add document with name '{file.Key}', because a document with this path already exists in a different project." );
                 }
 
                 var loader = TextLoader.From( TextAndVersion.Create( SourceText.From( file.Value ), VersionStamp.Create() ) );

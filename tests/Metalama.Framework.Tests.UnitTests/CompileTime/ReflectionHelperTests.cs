@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Xunit;
 
-// ReSharper disable UnusedTypeParameter
+// ReSharper disable UnusedTypeParameter, MemberCanBePrivate.Global, ClassNeverInstantiated.Global, MemberCanBeInternal, ClassCanBeSealed.Global
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 

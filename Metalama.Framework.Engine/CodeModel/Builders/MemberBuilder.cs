@@ -74,8 +74,6 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-    public abstract IInjectMemberTransformation ToTransformation();
-
     private bool TryExpandInitializerTemplate<T>(
         Advice advice,
         MemberInjectionContext context,

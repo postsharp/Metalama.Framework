@@ -37,6 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
         private ImmutableDictionaryOfArray<string, string> _assemblyPathsByName = ImmutableDictionaryOfArray<string, string>.Empty;
 
+        [UsedImplicitly]
         protected ICompileTimeDomainObserver? Observer { get; }
 
         public CompileTimeDomain( GlobalServiceProvider serviceProvider )

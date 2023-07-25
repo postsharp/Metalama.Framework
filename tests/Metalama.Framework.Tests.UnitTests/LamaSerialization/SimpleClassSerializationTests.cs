@@ -278,7 +278,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 (SimpleExplicitlySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( 2, deserializedObject!.Length );
+            Assert.Equal( 2, deserializedObject.Length );
             Assert.Equal( serializedClass, deserializedObject[0] );
             Assert.Equal( anotherSerializedClass, deserializedObject[1] );
         }

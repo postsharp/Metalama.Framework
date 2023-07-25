@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -44,14 +45,6 @@ namespace Metalama.Framework.Engine.Diagnostics
         internal static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)>
             MemberRequiresAtLeastNArguments =
                 new( "LAMA0013", _category, "Member '{0}' requires at least {1} arguments but received {2}.", Error, "Member requires more arguments." );
-
-        internal static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
-            new(
-                "LAMA0015",
-                _category,
-                "Member {0} is not static, but has been used with a null instance.",
-                Error,
-                "Has to provide instance for an instance member." );
 
         internal static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForLocalFunction =
             new(
@@ -321,13 +314,13 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "The referenced assembly must be recompiled with a more recent version of Metalama.",
                     _category );
 
-        internal static readonly DiagnosticDefinition<(DeclarationKind DeclarationKind, IDeclaration Declaration, string Validator)>
-            InvalidTargetForValidator =
+        internal static readonly DiagnosticDefinition<(IMember Member, INamedType TargetType, InvokerOptions InvokerOptions)>
+            CantInvokeBaseOrCurrentOutsideTargetType =
                 new(
-                    "LAMA0062",
+                    "LAMA0063",
                     Error,
-                    "References to the {0} '{1}' cannot be validated by '{2}' because the {0} is not a real source code declaration.",
-                    "References to the declaration cannot be validated because it is not a real source code declaration.",
+                    "Cannot invoke member '{0}' when specifying InvokerOptions.{2} here, because it does not belong to the template target type '{1}'.",
+                    "Cannot invoke a member that does not belong to the template target type when specifying InvokerOptions.Base or InvokerOptions.Current.",
                     _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).

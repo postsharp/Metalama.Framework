@@ -16,8 +16,13 @@ namespace Metalama.Framework.Engine.Aspects
         None = 0,
 
         /// <summary>
-        /// The reference is not inlineable.
+        /// The reference is inlineable.
         /// </summary>
-        Inlineable = 1
+        Inlineable = 1,
+
+        /// <summary>
+        /// The reference has a custom receiver (i.e. it cannot be substituted with <c>this</c> or <c>base</c>).
+        /// </summary>
+        CustomReceiver = 2
     }
 }

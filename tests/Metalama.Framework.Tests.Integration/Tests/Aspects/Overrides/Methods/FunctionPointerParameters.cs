@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.F
 {
     internal class MyAspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

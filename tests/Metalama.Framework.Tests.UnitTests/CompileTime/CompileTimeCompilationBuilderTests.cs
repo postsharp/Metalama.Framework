@@ -665,7 +665,7 @@ public class ReferencedClass
                     out var compileTimeProject ) );
 
             Assert.NotNull( compileTimeProject );
-            Assert.Single( compileTimeProject!.References.Where( r => !r.IsFramework ) );
+            Assert.Single( compileTimeProject.References.Where( r => !r.IsFramework ) );
         }
 
         [Fact]
@@ -806,7 +806,7 @@ public class SomeRunTimeClass
                     out var project ) );
 
             Assert.NotNull( project );
-            Assert.Single( project!.References );
+            Assert.Single( project.References );
             Assert.True( project.References[0].IsFramework );
         }
 
@@ -864,7 +864,7 @@ public class MyAspect : OverrideMethodAspect
                     out var project ) );
 
             Assert.NotNull( project );
-            Assert.NotNull( project!.Directory );
+            Assert.NotNull( project.Directory );
 
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
             var files = Directory

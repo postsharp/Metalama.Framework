@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.VarError;
 
 public class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         var varDeclaration = meta.RunTime(meta.Target.Declaration);
 

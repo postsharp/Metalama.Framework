@@ -50,8 +50,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._serviceProvider,
                 input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
-                input.AnalysisRegistry,
-                input.DiagnosticSink );
+                input.AnalysisRegistry );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();
 

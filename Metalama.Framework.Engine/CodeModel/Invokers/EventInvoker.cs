@@ -63,6 +63,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         private ExpressionSyntax CreateEventExpression( AspectReferenceTargetKind targetKind )
         {
+            this.CheckInvocationOptionsAndTarget();
+
             var receiverInfo = this.GetReceiverInfo();
             var name = IdentifierName( this.GetCleanTargetMemberName() );
             var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );

@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Advising
         /// <summary>
         /// Determines whether the field's signature is equal to the signature of the given property.
         /// </summary>
-        public static bool SignatureEquals( this IField field, IField other )
+        private static bool SignatureEquals( this IField field, IField other )
         {
             return field.Name == other.Name;
         }
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Advising
         /// <summary>
         /// Determines whether the method's signature is equal to the signature of the given method.
         /// </summary>
-        public static bool SignatureEquals( this IIndexer indexer, IIndexer other )
+        private static bool SignatureEquals( this IIndexer indexer, IIndexer other )
         {
             // TODO: Custom modifiers.
             return indexer.Parameters.Count == other.Parameters.Count

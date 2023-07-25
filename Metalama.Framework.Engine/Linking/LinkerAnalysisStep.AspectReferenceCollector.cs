@@ -146,7 +146,8 @@ namespace Metalama.Framework.Engine.Linking
                                 sourceNode,
                                 sourceNode,
                                 targetKind,
-                                isInlineable: true );
+                                isInlineable: true,
+                                hasCustomReceiver: true );
 
                         list.Add( resolvedReference );
                     }

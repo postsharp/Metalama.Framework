@@ -821,8 +821,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         SeparatedList(
                             new[]
                             {
-                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
-                            Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
+                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                                Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
                             } ) ) );
             }
         }

@@ -415,7 +415,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // From well-known types.
 
-                if ( this.TryGetWellKnownScope( symbol, options, false, out var scopeFromWellKnown ) )
+                if ( this.TryGetWellKnownScope( symbol, options, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;
                 }
@@ -976,7 +976,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return scopeFromAttributes;
         }
 
-        private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, bool isMember, out TemplatingScope? scope )
+        private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, out TemplatingScope? scope )
         {
             scope = null;
 
@@ -1030,7 +1030,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return true;
                         }
 
-                        return this.TryGetWellKnownScope( namedType, options, true, out scope );
+                        return this.TryGetWellKnownScope( namedType, options, out scope );
                     }
 
                 default:

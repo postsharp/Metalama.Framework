@@ -23,7 +23,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     protected CompilationContext CompilationContext => this.DeclaringType.Compilation.CompilationContext;
 
-    internal NamedType DeclaringType { get; }
+    private NamedType DeclaringType { get; }
 
     public IEnumerable<T> OfName( string name ) => this.GetItemsCore( name ).Keys;
 

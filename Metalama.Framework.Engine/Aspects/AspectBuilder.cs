@@ -83,14 +83,11 @@ namespace Metalama.Framework.Engine.Aspects
         private AspectReceiverSelector<T> GetAspectReceiverSelector()
             => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this, CompilationModelVersion.Current );
 
-        public IAspectReceiver<TMember> With<TMember>( Func<T, IEnumerable<TMember>> selector )
-            where TMember : class, IDeclaration
-            => this.GetAspectReceiverSelector().With( selector );
-
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector )
             => this.GetAspectReceiverSelector().With( selector );
 
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector )
+            => this.GetAspectReceiverSelector().With( selector );
 
         IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 

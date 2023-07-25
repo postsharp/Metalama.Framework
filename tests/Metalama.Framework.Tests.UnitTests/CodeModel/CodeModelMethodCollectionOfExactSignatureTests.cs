@@ -242,7 +242,7 @@ class A : System.Collections.Generic.List<int> { }
             var matchedMethod1 = typeA.AllMethods.OfExactSignature( "Add", new[] { intType } );
 
             Assert.NotNull( matchedMethod1 );
-            Assert.Equal( "List", matchedMethod1!.DeclaringType.Name );
+            Assert.Equal( "List", matchedMethod1.DeclaringType.Name );
         }
 
         [Fact]

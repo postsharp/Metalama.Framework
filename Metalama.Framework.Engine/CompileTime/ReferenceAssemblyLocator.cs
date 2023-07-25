@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the full path of reference system assemblies (.NET Standard and Roslyn). 
         /// </summary>
-        public ImmutableArray<string> SystemReferenceAssemblyPaths { get; }
+        private ImmutableArray<string> SystemReferenceAssemblyPaths { get; }
 
         /// <summary>
         /// Gets the full path of executable system assemblies for the current platform.

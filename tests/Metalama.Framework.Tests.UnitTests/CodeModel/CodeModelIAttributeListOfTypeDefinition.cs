@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelIAttributeListOfTypeDefinition : UnitTestClass
+    public sealed class CodeModelIAttributeListOfTypeDefinition : UnitTestClass
     {
         [Fact]
         public void NonGeneric()

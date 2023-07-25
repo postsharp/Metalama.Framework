@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
             Console.WriteLine( "This is introduced method." );
             yield return 42;
 
-            foreach(var x in meta.Proceed())
+            foreach(var x in meta.Proceed()!)
             {
                 yield return x;
             }
@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
             Console.WriteLine("This is introduced method.");
             yield return 42;
 
-            var enumerator = meta.Proceed();
+            var enumerator = meta.Proceed()!;
 
             while(enumerator.MoveNext())
             {

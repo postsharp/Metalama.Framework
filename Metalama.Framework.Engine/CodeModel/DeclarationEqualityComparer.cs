@@ -45,8 +45,6 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
 
-    public bool DerivesFrom( INamedType childType, INamedType baseType, DerivedTypesOptions options = DerivedTypesOptions.Default ) => throw new NotImplementedException();
-
     internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {
         // TODO: Does not take introduced interfaces into account (requires a lot of changes).
@@ -91,7 +89,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
                 return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true } or { IsImplicit: true, IsBoxing: true };
 
             default:
-                throw new ArgumentOutOfRangeException( nameof( kind ) );
+                throw new ArgumentOutOfRangeException( nameof(kind) );
         }
     }
 

@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private CompileTimeDomain Domain { get; }
 
-        public DiagnosticManifest DiagnosticManifest { get; }
+        private DiagnosticManifest DiagnosticManifest { get; }
 
         private Assembly? _assembly;
 

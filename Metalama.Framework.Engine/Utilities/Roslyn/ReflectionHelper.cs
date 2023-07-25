@@ -109,11 +109,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
         /// </summary>
-        public static string GetReflectionToStringName( this INamedTypeSymbol s ) => ((INamespaceOrTypeSymbol) s).GetReflectionToStringName();
-
-        /// <summary>
-        /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
-        /// </summary>
         public static string GetReflectionToStringName( this INamespaceOrTypeSymbol s )
             => _reflectionToStringNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.ToString ) );
 
@@ -264,9 +259,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Returns any method (static, instance, any accessibility) from the given type or its base types.
         /// </summary>
         public static MethodInfo? GetAnyMethod( this Type type, string name )
-        {
-            return type.GetMethod( name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
-                ?? type.BaseType?.GetAnyMethod( name );
-        }
+            => type.GetMethod( name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
+               ?? type.BaseType?.GetAnyMethod( name );
     }
 }

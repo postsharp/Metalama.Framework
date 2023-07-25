@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.NoStruct
             builder.DeclaringType().MustSatisfy( t => t.TypeKind != Metalama.Framework.Code.TypeKind.Struct, t => $"{t} cannot be a struct" );
         }
  
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

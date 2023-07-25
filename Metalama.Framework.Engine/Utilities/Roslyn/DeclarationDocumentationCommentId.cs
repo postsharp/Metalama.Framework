@@ -1277,13 +1277,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private static bool ParameterMatches( IParameter parameter, ParameterInfo parameterInfo )
             {
-                // same ref'ness?
-#pragma warning disable IDE0047 // Remove unnecessary parentheses
-                if ( parameter.RefKind == RefKind.None == parameterInfo.IsRefOrOut )
+                // both by ref or both not by ref
+                var isRefOrOut = parameter.RefKind != RefKind.None;
+
+                if ( isRefOrOut != parameterInfo.IsRefOrOut )
                 {
                     return false;
                 }
-#pragma warning restore IDE0047 // Remove unnecessary parentheses
 
                 return parameter.Type.Equals( parameterInfo.Type, TypeComparison.Default );
             }

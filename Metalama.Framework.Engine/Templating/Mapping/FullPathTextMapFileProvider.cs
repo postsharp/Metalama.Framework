@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping;
 /// An implementation of <see cref="ITextMapFileProvider"/> that loads the <c>.map</c>
 /// file in the same directory as the <c>.cs</c> file.
 /// </summary>
-internal class FullPathTextMapFileProvider : ITextMapFileProvider
+internal sealed class FullPathTextMapFileProvider : ITextMapFileProvider
 {
     public static FullPathTextMapFileProvider Instance { get; } = new();
 

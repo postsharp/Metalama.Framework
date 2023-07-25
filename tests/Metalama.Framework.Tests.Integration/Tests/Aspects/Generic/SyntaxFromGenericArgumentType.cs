@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Generic.SyntaxFromGeneric
 
 internal class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine(meta.Target.Method.ReturnType.ToType());
 

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.RunTimeOrCompile
 
 public class Aspect : OverrideMethodAspect
 {
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         if (true)
         {
