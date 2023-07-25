@@ -46,14 +46,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             MemberRequiresAtLeastNArguments =
                 new( "LAMA0013", _category, "Member '{0}' requires at least {1} arguments but received {2}.", Error, "Member requires more arguments." );
 
-        internal static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
-            new(
-                "LAMA0015",
-                _category,
-                "Member {0} is not static, but has been used with a null instance.",
-                Error,
-                "Has to provide instance for an instance member." );
-
         internal static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForLocalFunction =
             new(
                 "LAMA0018",
@@ -331,15 +323,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "The referenced assembly '{0}' has been compiled with Metalama {1}. It must be recompiled with the current version because " +
                     "backward compatibility of compiled assemblies has been broken.",
                     "The referenced assembly must be recompiled with a more recent version of Metalama.",
-                    _category );
-
-        internal static readonly DiagnosticDefinition<(DeclarationKind DeclarationKind, IDeclaration Declaration, string Validator)>
-            InvalidTargetForValidator =
-                new(
-                    "LAMA0062",
-                    Error,
-                    "References to the {0} '{1}' cannot be validated by '{2}' because the {0} is not a real source code declaration.",
-                    "References to the declaration cannot be validated because it is not a real source code declaration.",
                     _category );
 
         internal static readonly DiagnosticDefinition<(IMember Member, INamedType TargetType, InvokerOptions InvokerOptions)>

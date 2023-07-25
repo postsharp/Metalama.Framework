@@ -87,7 +87,7 @@ class C<T> : object
 
             Assert.NotNull( location );
 
-            var actualText = location!.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
+            var actualText = location.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
 
             Assert.Equal( expectedText, actualText );
         }

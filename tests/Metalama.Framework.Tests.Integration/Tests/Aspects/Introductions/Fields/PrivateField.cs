@@ -8,7 +8,7 @@ public class IntroducePrivateFieldAttribute : OverrideMethodAspect
     [Introduce]
     private readonly string _text = "a text";
 
-    public override dynamic OverrideMethod()
+    public override dynamic? OverrideMethod()
     {
         Console.WriteLine(_text);
 

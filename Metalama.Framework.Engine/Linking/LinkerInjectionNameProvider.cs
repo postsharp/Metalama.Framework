@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             int? hintIndex = null;
 
-            while (true)
+            while ( true )
             {
                 if ( hintIndex == null )
                 {

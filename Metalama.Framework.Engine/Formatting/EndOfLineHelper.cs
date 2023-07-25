@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             if ( chars.Length >= 1 )
             {
-                if ( chars.Length >= 2 && chars[^2] == '\r' && chars[^1] == '\n' )
+                if ( chars.EndsWith( "\r\n".AsSpan() ) )
                 {
                     return EndOfLineStyle.Windows;
                 }

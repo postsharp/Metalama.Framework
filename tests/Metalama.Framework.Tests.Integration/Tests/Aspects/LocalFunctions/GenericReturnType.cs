@@ -16,7 +16,7 @@ public class Override : MethodAspect
     {
         T LocalFunction()
         {
-            return meta.Proceed();
+            return meta.Proceed()!;
         }
 
         return LocalFunction();

@@ -107,6 +107,7 @@ namespace Metalama.Framework.DesignTime
                     if ( !reportedDiagnostics.Add( diagnostic ) )
                     {
                         this._logger.Trace?.Log( $"Not reporting {FormatDiagnostic( diagnostic )} again." );
+
                         return;
                     }
 

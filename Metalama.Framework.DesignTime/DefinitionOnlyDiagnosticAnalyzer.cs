@@ -10,16 +10,16 @@ namespace Metalama.Framework.DesignTime;
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types 
 
-public class DefinitionOnlyDiagnosticAnalyzer : DiagnosticAnalyzer
+public abstract class DefinitionOnlyDiagnosticAnalyzer : DiagnosticAnalyzer
 {
     private protected DesignTimeDiagnosticDefinitions DiagnosticDefinitions { get; }
 
-    public DefinitionOnlyDiagnosticAnalyzer( DesignTimeDiagnosticDefinitions diagnosticDefinitions )
+    protected DefinitionOnlyDiagnosticAnalyzer( DesignTimeDiagnosticDefinitions diagnosticDefinitions )
     {
         this.DiagnosticDefinitions = diagnosticDefinitions;
     }
 
-    public DefinitionOnlyDiagnosticAnalyzer() : this( DesignTimeDiagnosticDefinitions.GetInstance() ) { }
+    protected DefinitionOnlyDiagnosticAnalyzer() : this( DesignTimeDiagnosticDefinitions.GetInstance() ) { }
 
     static DefinitionOnlyDiagnosticAnalyzer()
     {

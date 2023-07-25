@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <param name="RedistributionLicenseKey"></param>
 public sealed record ProjectLicenseInfo( string? RedistributionLicenseKey )
 {
-    public static ProjectLicenseInfo Empty { get; } = new( default(string) );
+    internal static ProjectLicenseInfo Empty { get; } = new( default(string) );
 
     public static ProjectLicenseInfo Get( ILicenseConsumptionService? licenseConsumptionService ) 
         => licenseConsumptionService?.IsRedistributionLicense == true ? new ProjectLicenseInfo( licenseConsumptionService.LicenseString ) : Empty;

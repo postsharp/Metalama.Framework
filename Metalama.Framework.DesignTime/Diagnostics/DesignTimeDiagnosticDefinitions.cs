@@ -22,14 +22,14 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// <summary>
         /// Gets the set of <see cref="DiagnosticDescriptor"/> that are supported in the current design-time session.
         /// </summary>
-        public ImmutableDictionary<string, DiagnosticDescriptor> SupportedDiagnosticDescriptors { get; }
+        internal ImmutableDictionary<string, DiagnosticDescriptor> SupportedDiagnosticDescriptors { get; }
 
-        public ImmutableDictionary<string, DiagnosticDescriptor> UserDiagnosticDescriptors { get; }
+        internal ImmutableDictionary<string, DiagnosticDescriptor> UserDiagnosticDescriptors { get; }
 
         /// <summary>
         /// Gets the set of <see cref="SuppressionDescriptor"/> that are supported the current design-time session.
         /// </summary>
-        public ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; }
+        internal ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         public static DesignTimeDiagnosticDefinitions GetInstance()
@@ -38,7 +38,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// <summary>
         /// Gets the set of <see cref="DiagnosticDescriptor"/> that are defined by Metalama itself.
         /// </summary>
-        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
+        internal static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
                 typeof(GeneralDiagnosticDescriptors),
                 typeof(TemplatingDiagnosticDescriptors),

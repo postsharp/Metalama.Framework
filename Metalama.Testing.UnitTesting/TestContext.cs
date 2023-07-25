@@ -291,14 +291,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
-#pragma warning disable CA1821
     ~TestContext()
     {
         this.Dispose( false );
 
         throw new InvalidOperationException( $"The TestContext allocated at the following call stack was not disposed:\n{this._stackTrace}\n------" );
     }
-#pragma warning restore CA1821
 
     public void Dispose() => this.Dispose( true );
 

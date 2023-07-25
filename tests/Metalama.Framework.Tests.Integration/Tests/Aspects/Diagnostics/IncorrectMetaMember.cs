@@ -23,7 +23,7 @@ abstract class AspectBase : Aspect, IAspect<IFieldOrPropertyOrIndexer>
     protected abstract string TargetName { get; }
 
     [Template]
-    dynamic Template()
+    dynamic? Template()
     {
         Console.WriteLine(TargetName);
 

@@ -479,7 +479,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0267",
                 "Method group conversion for extension methods is not supported.",
-                "Converting extension method '{0}' to a delegate using a method group coversion is currently not supported.",
+                "Converting extension method '{0}' to a delegate using a method group conversion is currently not supported.",
                 _category,
                 Error );
 

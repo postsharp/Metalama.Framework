@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880
 {
     internal class TestMethodAspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod() => throw new NotSupportedException();
+        public override dynamic? OverrideMethod() => throw new NotSupportedException();
     }
 
     internal class TestPropertyAspect : OverrideFieldOrPropertyAspect

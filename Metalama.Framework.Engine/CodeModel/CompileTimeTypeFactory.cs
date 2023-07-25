@@ -30,15 +30,16 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => this.Get( ContainsTypeParameters( symbol ) ? symbol.GetSymbolId().Id : symbol.GetSerializableTypeId().Id, symbol )
             };
 
-        private static bool ContainsTypeParameters( ITypeSymbol symbol ) => symbol switch
-        {
-            ITypeParameterSymbol => true,
-            IDynamicTypeSymbol => false,
-            INamedTypeSymbol namedType => namedType.TypeParameters.Any( ContainsTypeParameters ),
-            IArrayTypeSymbol arrayType => ContainsTypeParameters( arrayType.ElementType ),
-            IPointerTypeSymbol pointerType => ContainsTypeParameters( pointerType.PointedAtType ),
-            _ => throw new AssertionFailedException( $"Unexpected symbol {symbol} of type {symbol?.GetType()}." )
-        };
+        private static bool ContainsTypeParameters( ITypeSymbol symbol )
+            => symbol switch
+            {
+                ITypeParameterSymbol => true,
+                IDynamicTypeSymbol => false,
+                INamedTypeSymbol namedType => namedType.TypeParameters.Any( ContainsTypeParameters ),
+                IArrayTypeSymbol arrayType => ContainsTypeParameters( arrayType.ElementType ),
+                IPointerTypeSymbol pointerType => ContainsTypeParameters( pointerType.PointedAtType ),
+                _ => throw new AssertionFailedException( $"Unexpected symbol {symbol} of type {symbol.GetType()}." )
+            };
 
         private CompileTimeType Get( string id, ITypeSymbol symbolForMetadata )
         {

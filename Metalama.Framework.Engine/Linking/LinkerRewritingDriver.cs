@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
@@ -30,9 +29,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private ProjectServiceProvider ServiceProvider { get; }
 
-        public LinkerInjectionRegistry InjectionRegistry { get; }
-
-        public UserDiagnosticSink DiagnosticSink { get; }
+        private LinkerInjectionRegistry InjectionRegistry { get; }
 
         private CompilationContext IntermediateCompilationContext { get; }
 
@@ -42,13 +39,11 @@ namespace Metalama.Framework.Engine.Linking
             ProjectServiceProvider serviceProvider,
             CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
-            LinkerAnalysisRegistry analysisRegistry,
-            UserDiagnosticSink diagnosticSink )
+            LinkerAnalysisRegistry analysisRegistry )
         {
             this.ServiceProvider = serviceProvider;
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
-            this.DiagnosticSink = diagnosticSink;
             this.IntermediateCompilationContext = intermediateCompilationContext;
         }
 

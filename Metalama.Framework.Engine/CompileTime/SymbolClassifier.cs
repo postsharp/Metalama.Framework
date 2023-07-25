@@ -70,13 +70,13 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private static readonly ImmutableDictionary<(string Type, string Member), (string Namespace, TemplatingScope? Scope)> _wellKnownMembers =
             new (Type Type, string[] MemberNames, TemplatingScope? Scope)[]
-            {
-                (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
-                (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
-            }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
-            .ToImmutableDictionary(
-                t => (t.Type.Name.AssertNotNull(), t.MemberName),
-                t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
+                {
+                    (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
+                    (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
+                }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
+                .ToImmutableDictionary(
+                    t => (t.Type.Name.AssertNotNull(), t.MemberName),
+                    t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
 
         public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
@@ -414,7 +414,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // From well-known types.
 
-                if ( this.TryGetWellKnownScope( symbol, options, false, out var scopeFromWellKnown ) )
+                if ( this.TryGetWellKnownScope( symbol, options, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;
                 }
@@ -974,7 +974,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return scopeFromAttributes;
         }
 
-        private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, bool isMember, out TemplatingScope? scope )
+        private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, out TemplatingScope? scope )
         {
             scope = null;
 
@@ -1021,14 +1021,14 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         // Check well-known members.
                         if ( _wellKnownMembers.TryGetValue( (namedType.MetadataName, symbol.MetadataName), out var config ) &&
-                            config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
                             return true;
                         }
 
-                        return this.TryGetWellKnownScope( namedType, options, true, out scope );
+                        return this.TryGetWellKnownScope( namedType, options, out scope );
                     }
 
                 default:

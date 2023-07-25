@@ -21,5 +21,6 @@ internal sealed class SemanticModelAnalysisContextAdapter : ISemanticModelAnalys
 
     public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
 
+    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
     public void ReportDiagnostic( Diagnostic diagnostic ) => this._context.ReportDiagnostic( diagnostic );
 }

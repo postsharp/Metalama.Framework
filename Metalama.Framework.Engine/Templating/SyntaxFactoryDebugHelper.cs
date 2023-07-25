@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -12,7 +11,7 @@ public static partial class SyntaxFactoryDebugHelper
     /// Generates a string that contains C# code that instantiates the given node
     /// using SyntaxFactory. Used for debugging.
     /// </summary>
-    public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation, ProjectServiceProvider serviceProvider )
+    public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
     {
         MetaSyntaxRewriter rewriter = new( compilation, RoslynApiVersion.Current );
 
