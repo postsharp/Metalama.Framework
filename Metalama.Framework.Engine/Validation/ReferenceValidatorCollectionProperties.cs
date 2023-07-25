@@ -76,6 +76,7 @@ public sealed class ReferenceValidatorCollectionProperties
                 this._kindsRequiringDescentIntoReferencedAssembly |= childCollectionProperty._kindsRequiringDescentIntoReferencedAssembly;
                 this._kindsRequiringDescentIntoReferencedNamespace |= childCollectionProperty._kindsRequiringDescentIntoReferencedNamespace;
                 this._kindsRequiringDescentIntoReferencedDeclaringType |= childCollectionProperty._kindsRequiringDescentIntoReferencedDeclaringType;
+                this._kindsRequiringDescentIntoBaseTypes |= childCollectionProperty._kindsRequiringDescentIntoBaseTypes;
             }
         }
     }
