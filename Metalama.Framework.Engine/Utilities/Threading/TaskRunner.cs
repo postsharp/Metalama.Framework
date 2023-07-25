@@ -32,7 +32,12 @@ internal sealed class TaskRunner : ITaskRunner
         }
         else
         {
-            func().GetAwaiter().GetResult();
+            var valueTask = func();
+
+            if ( !valueTask.IsCompleted )
+            {
+                valueTask.AsTask().Wait( cancellationToken );
+            }
         }
     }
 
@@ -40,11 +45,21 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            return Task.Run( func, cancellationToken ).Result;
+            var task = Task.Run( func, cancellationToken );
+            task.Wait( cancellationToken );
+
+            return task.Result;
         }
         else
         {
-            return func().Result;
+            var task = func();
+
+            if ( !task.IsCompleted )
+            {
+                task.Wait( cancellationToken );
+            }
+
+            return task.Result;
         }
     }
 
@@ -52,11 +67,27 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            return Task.Run( () => func().AsTask(), cancellationToken ).Result;
+            var task = Task.Run( () => func().AsTask(), cancellationToken );
+
+            task.Wait( cancellationToken );
+
+            return task.Result;
         }
         else
         {
-            return func().GetAwaiter().GetResult();
+            var valueTask = func();
+
+            if ( valueTask.IsCompleted )
+            {
+                return valueTask.Result;
+            }
+            else
+            {
+                var task = valueTask.AsTask();
+                task.Wait( cancellationToken );
+
+                return task.Result;
+            }
         }
     }
 }

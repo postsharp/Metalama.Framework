@@ -40,7 +40,6 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
-        <Compile Remove="Utilities\UserCode\UserCodeMemberInfo.cs" />
     </ItemGroup>
 
     <ItemGroup>

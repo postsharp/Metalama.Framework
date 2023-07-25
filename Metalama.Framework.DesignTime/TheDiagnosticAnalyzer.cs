@@ -245,60 +245,48 @@ namespace Metalama.Framework.DesignTime
                         properties: diagnostic.Properties );
                 }
 
-                var reportSourceTree = designTimeDiagnostic.Location.SourceTree;
+                var wasAnyLocationRemapped = false;
 
-                if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
+                // Map the diagnostic locations to the compilation.
+                if ( !this.TryMapLocation( diagnostic.Location, compilation, out var mappedLocation, ref wasAnyLocationRemapped ) )
                 {
-                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}" );
-                    reportDiagnostic( designTimeDiagnostic );
+                    this._logger.Warning?.Log( $"Cannot report {diagnostic}." );
+
+                    continue;
+                }
+
+                IReadOnlyList<Location> mappedAdditionalLocations;
+
+                if ( diagnostic.AdditionalLocations.Any( d => d.SourceTree != null && !compilation.ContainsSyntaxTree( d.SourceTree ) ) )
+                {
+                    var mappedAdditionalLocationsList = new List<Location>( diagnostic.AdditionalLocations.Count );
+                    mappedAdditionalLocations = mappedAdditionalLocationsList;
+
+                    foreach ( var t in diagnostic.AdditionalLocations )
+                    {
+                        if ( !this.TryMapLocation(
+                                t,
+                                compilation,
+                                out var mappedAdditionalLocation,
+                                ref wasAnyLocationRemapped ) )
+                        {
+                            // If we can't mapped an additional location, we just skip the location
+                            // but not the whole diagnostic.
+                            continue;
+                        }
+
+                        mappedAdditionalLocationsList.Add( mappedAdditionalLocation );
+                    }
                 }
                 else
                 {
-                    this._logger.Trace?.Log( "Finding the source tree." );
+                    mappedAdditionalLocations = diagnostic.AdditionalLocations;
+                }
 
-                    // Find the new syntax tree in the compilation.
+                this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
 
-                    // TODO: Optimize the indexation of the syntax trees of a compilation. We're doing that many times in many methods and we
-                    // could have a weak dictionary mapping a compilation to an index of syntax trees.
-                    var newSyntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == reportSourceTree.FilePath );
-
-                    // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
-                    var oldNode = reportSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan, getInnermostNodeForTie: true );
-
-                    if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
-                    {
-                        // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
-                        this._logger.Warning?.Log( $"Cannot find the source node for {FormatDiagnostic( diagnostic )}." );
-
-                        continue;
-                    }
-
-                    Location newLocation;
-
-                    // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
-                    var oldToken = oldNode.FindToken( diagnostic.Location.SourceSpan.Start );
-                    var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
-
-                    if ( newToken.IsKind( SyntaxKind.None ) )
-                    {
-                        // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
-                        this._logger.Warning?.Log( $"Cannot find the source token for {FormatDiagnostic( diagnostic )}." );
-
-                        continue;
-                    }
-
-                    if ( newToken.Span.Length == diagnostic.Location.SourceSpan.Length )
-                    {
-                        // The diagnostic was reported to the exact token we found, so we can report it precisely.
-                        newLocation = newToken.GetLocation();
-                    }
-                    else
-                    {
-                        // The diagnostic was reported on the syntax node we found, but not to an exact token. Report the
-                        // diagnostic to the whole node instead.
-                        newLocation = newNode.GetLocation();
-                    }
-
+                if ( wasAnyLocationRemapped )
+                {
                     var relocatedDiagnostic =
                         Diagnostic.Create(
                             designTimeDiagnostic.Id,
@@ -309,12 +297,84 @@ namespace Metalama.Framework.DesignTime
                             isEnabledByDefault: true,
                             designTimeDiagnostic.WarningLevel,
                             designTimeDiagnostic.Descriptor.Title,
-                            location: newLocation,
-                            properties: designTimeDiagnostic.Properties );
+                            location: mappedLocation,
+                            properties: designTimeDiagnostic.Properties,
+                            additionalLocations: mappedAdditionalLocations );
 
-                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
                     reportDiagnostic( relocatedDiagnostic );
                 }
+                else
+                {
+                    reportDiagnostic( diagnostic );
+                }
+            }
+        }
+
+        private bool TryMapLocation( Location location, Compilation compilation, out Location? mappedLocation, ref bool hasChange )
+        {
+            var reportSourceTree = location.SourceTree;
+
+            if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
+            {
+                mappedLocation = location;
+
+                return true;
+            }
+            else
+            {
+                hasChange = true;
+
+                this._logger.Trace?.Log( "Finding the source tree." );
+
+                // Find the new syntax tree in the compilation.
+
+                if ( !compilation.GetIndexedSyntaxTrees().TryGetValue( reportSourceTree.FilePath, out var newSyntaxTree ) )
+                {
+                    mappedLocation = Location.Create( reportSourceTree.FilePath, location.SourceSpan, location.GetLineSpan().Span );
+
+                    return true;
+                }
+
+                // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
+                var oldNode = reportSourceTree.GetRoot().FindNode( location.SourceSpan, getInnermostNodeForTie: true );
+
+                if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
+                {
+                    // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
+                    this._logger.Warning?.Log( $"Cannot find the source node for location {location}." );
+
+                    mappedLocation = null;
+
+                    return false;
+                }
+
+                // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
+                var oldToken = oldNode.FindToken( location.SourceSpan.Start );
+                var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
+
+                if ( newToken.IsKind( SyntaxKind.None ) )
+                {
+                    // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
+                    this._logger.Warning?.Log( $"Cannot find the source token for location {location}." );
+
+                    mappedLocation = null;
+
+                    return false;
+                }
+
+                if ( newToken.Span.Length == location.SourceSpan.Length )
+                {
+                    // The diagnostic was reported to the exact token we found, so we can report it precisely.
+                    mappedLocation = newToken.GetLocation();
+                }
+                else
+                {
+                    // The diagnostic was reported on the syntax node we found, but not to an exact token. Report the
+                    // diagnostic to the whole node instead.
+                    mappedLocation = newNode.GetLocation();
+                }
+
+                return true;
             }
         }
 
