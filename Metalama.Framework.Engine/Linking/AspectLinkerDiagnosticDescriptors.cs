@@ -4,8 +4,6 @@ using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 
-// ReSharper disable SA1118
-
 namespace Metalama.Framework.Engine.Linking
 {
     public static class AspectLinkerDiagnosticDescriptors
@@ -13,6 +11,14 @@ namespace Metalama.Framework.Engine.Linking
         // Reserved range 650-699
 
         private const string _category = "Metalama.Linker";
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            CantInvokeAnotherInstanceBaseRequired = new(
+                "LAMA0650",
+                "Can't invoke member, because correct invocation would require a base call on an instance other than this.",
+                "Can't invoke member '{0}', because correct invocation would require a base call on an instance other than this.",
+                _category,
+                Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             DeclarationMustBeInlined = new(

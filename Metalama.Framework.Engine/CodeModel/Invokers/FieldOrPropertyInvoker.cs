@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
+            this.CheckInvocationOptionsAndTarget();
+
             var receiverInfo = this.GetReceiverInfo();
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 

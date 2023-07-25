@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,6 +36,11 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         Invariant.AssertNot(
             aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
             && @event.IsEventField() == true );
+
+        if ( aspectReference.HasCustomReceiver && !aspectReference.ResolvedSemantic.Symbol.IsStatic )
+        {
+            throw AspectLinkerDiagnosticDescriptors.CantInvokeAnotherInstanceBaseRequired.CreateException( aspectReference.OriginalSymbol );
+        }
     }
 
     protected override string GetTargetMemberName()

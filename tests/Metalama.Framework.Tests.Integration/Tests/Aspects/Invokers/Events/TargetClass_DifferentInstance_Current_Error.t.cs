@@ -1,2 +1,0 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `add`: `'InvokerAspect.AddTemplate(IEvent)' threw 'ArgumentOutOfRangeException' when applied to 'TargetClass.Invoker.add': Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current. (Parameter 'target'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

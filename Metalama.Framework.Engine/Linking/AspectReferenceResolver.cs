@@ -143,6 +143,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
+            var hasCustomReceiver = (referenceSpecification.Flags & AspectReferenceFlags.CustomReceiver) != 0;
 
             if ( targetKind == AspectReferenceTargetKind.Self && resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
             {
@@ -206,30 +207,12 @@ namespace Metalama.Framework.Engine.Linking
                             ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
                             : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
-                    return new ResolvedAspectReference(
-                        containingSemantic,
-                        containingLocalFunction,
-                        resolvedReferencedSymbol,
-                        targetSemantic,
-                        expression,
-                        resolvedRootNode,
-                        resolvedReferencedSymbolSourceNode,
-                        targetKind,
-                        isInlineable );
+                    return CreateResolved( targetSemantic );
                 }
                 else
                 {
                     // There is an introduction and this reference points to a state before that introduction.
-                    return new ResolvedAspectReference(
-                        containingSemantic,
-                        containingLocalFunction,
-                        resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
-                        expression,
-                        resolvedRootNode,
-                        resolvedReferencedSymbolSourceNode,
-                        targetKind,
-                        isInlineable );
+                    return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) );
                 }
             }
             else if ( targetIntroductionInjectedMember != null && resolvedIndex < targetIntroductionIndex )
@@ -240,16 +223,7 @@ namespace Metalama.Framework.Engine.Linking
                      && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() == null )
                 {
                     // This is the same as targeting the property.
-                    return new ResolvedAspectReference(
-                        containingSemantic,
-                        containingLocalFunction,
-                        resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                        expression,
-                        resolvedRootNode,
-                        resolvedReferencedSymbolSourceNode,
-                        targetKind,
-                        isInlineable );
+                    return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                 }
                 else
                 {
@@ -264,16 +238,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
-                    return new ResolvedAspectReference(
-                        containingSemantic,
-                        containingLocalFunction,
-                        resolvedReferencedSymbol,
-                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                        expression,
-                        resolvedRootNode,
-                        resolvedReferencedSymbolSourceNode,
-                        targetKind,
-                        isInlineable );
+                    return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                 }
                 else
                 {
@@ -284,17 +249,9 @@ namespace Metalama.Framework.Engine.Linking
             else if ( resolvedIndex < new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
             {
                 // One particular override.
-                return new ResolvedAspectReference(
-                    containingSemantic,
-                    containingLocalFunction,
-                    resolvedReferencedSymbol,
+                return CreateResolved(
                     this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
-                        .ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                    expression,
-                    resolvedRootNode,
-                    resolvedReferencedSymbolSourceNode,
-                    targetKind,
-                    isInlineable );
+                        .ToSemantic( IntermediateSymbolSemanticKind.Default ) );
             }
             else if ( resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
             {
@@ -304,21 +261,25 @@ namespace Metalama.Framework.Engine.Linking
                         : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
                 // The version after all aspects.
-                return new ResolvedAspectReference(
-                    containingSemantic,
-                    containingLocalFunction,
-                    resolvedReferencedSymbol,
-                    targetSemantic,
-                    expression,
-                    resolvedRootNode,
-                    resolvedReferencedSymbolSourceNode,
-                    targetKind,
-                    isInlineable );
+                return CreateResolved( targetSemantic );
             }
             else
             {
                 throw new AssertionFailedException( $"Resolving {resolvedReferencedSymbol} aspect reference to {resolvedIndex} is not supported." );
             }
+
+            ResolvedAspectReference CreateResolved( IntermediateSymbolSemantic resolvedSemantic )
+                => new(
+                    containingSemantic,
+                    containingLocalFunction,
+                    resolvedReferencedSymbol,
+                    resolvedSemantic,
+                    expression,
+                    resolvedRootNode,
+                    resolvedReferencedSymbolSourceNode,
+                    targetKind,
+                    isInlineable,
+                    hasCustomReceiver );
         }
 
         private void ResolveLayerIndex(

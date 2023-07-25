@@ -366,7 +366,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 throw new InvalidOperationException( MetalamaStringFormatter.Format( $"The target declaration is not in the current compilation." ) );
             }
 
-            // Check that the advised target is under the current the aspect target.
+            // Check that the advised target is under the aspect target.
             if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
             {
                 throw new InvalidOperationException(

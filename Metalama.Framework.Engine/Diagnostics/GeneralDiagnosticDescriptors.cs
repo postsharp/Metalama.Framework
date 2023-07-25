@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -322,6 +323,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "The referenced assembly '{0}' has been compiled with Metalama {1}. It must be recompiled with the current version because " +
                     "backward compatibility of compiled assemblies has been broken.",
                     "The referenced assembly must be recompiled with a more recent version of Metalama.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<(IMember Member, INamedType TargetType, InvokerOptions InvokerOptions)>
+            CantInvokeBaseOrCurrentOutsideTargetType =
+                new(
+                    "LAMA0063",
+                    Error,
+                    "Cannot invoke member '{0}' when specifying InvokerOptions.{2} here, because it does not belong to the template target type '{1}'.",
+                    "Cannot invoke a member that does not belong to the template target type when specifying InvokerOptions.Base or InvokerOptions.Current.",
                     _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
