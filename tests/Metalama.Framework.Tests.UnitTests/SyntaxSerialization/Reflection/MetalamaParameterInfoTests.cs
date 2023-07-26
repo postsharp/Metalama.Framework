@@ -146,7 +146,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeIndexerParameter( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetMethod(""get_Item"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[] { typeof(global::System.Int32) }, null)!.GetParameters()[0]",
+                @"typeof(global::Target).GetProperty(""Item"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, typeof(global::System.Int32), new global::System.Type[] { typeof(global::System.Int32) }, null)!.GetIndexParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(

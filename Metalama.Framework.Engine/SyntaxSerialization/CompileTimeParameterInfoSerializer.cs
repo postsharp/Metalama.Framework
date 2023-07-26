@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -19,38 +18,37 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public static ExpressionSyntax SerializeParameter( IParameter parameter, SyntaxSerializationContext serializationContext )
         {
             var declaringMember = parameter.DeclaringMember;
-            var method = declaringMember as IMethodBase;
-            var ordinal = parameter.Index;
 
-            if ( method == null )
+            ExpressionSyntax memberExpression;
+            string getParametersMethodName;
+
+            switch ( declaringMember )
             {
-                if ( declaringMember is IHasAccessors property )
-                {
-                    method = (property.GetAccessor( MethodKind.PropertyGet ) ?? property.GetAccessor( MethodKind.PropertySet ))!;
-                }
-                else
-                {
+                case IMethodBase method:
+                    memberExpression = CompileTimeMethodInfoSerializer.SerializeMethodBase( method, serializationContext );
+                    getParametersMethodName = nameof( MethodBase.GetParameters );
+                    break;
+                case IIndexer indexer:
+                    memberExpression = CompileTimePropertyInfoSerializer.SerializeProperty( indexer, serializationContext );
+                    getParametersMethodName = nameof( PropertyInfo.GetIndexParameters );
+                    break;
+                default:
                     throw new AssertionFailedException( $"Unexpected declaration type for '{declaringMember}'." );
-                }
             }
-
-            var retrieveMethodBase = CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                method,
-                serializationContext );
 
             return ElementAccessExpression(
                     InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            retrieveMethodBase,
-                            IdentifierName( "GetParameters" ) ) ) )
+                            memberExpression,
+                            IdentifierName( getParametersMethodName ) ) ) )
                 .WithArgumentList(
                     BracketedArgumentList(
                         SingletonSeparatedList(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal( ordinal ) ) ) ) ) )
+                                    Literal( parameter.Index ) ) ) ) ) )
                 .NormalizeWhitespace();
         }
 

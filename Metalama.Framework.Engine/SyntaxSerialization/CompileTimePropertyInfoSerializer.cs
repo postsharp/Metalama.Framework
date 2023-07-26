@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -70,7 +71,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                     Argument(
                                         LiteralExpression(
                                             SyntaxKind.StringLiteralExpression,
-                                            Literal( propertyOrIndexer.Name ) ) ),
+                                            Literal( indexer.GetSymbol().AssertNotNull().MetadataName ) ) ),
+                                    Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ),
+                                    Argument( SyntaxFactoryEx.Null ), // binder
                                     Argument( returnTypeCreation ),
                                     Argument(
                                         ArrayCreationExpression(
@@ -81,7 +84,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                             .WithInitializer(
                                                 InitializerExpression(
                                                     SyntaxKind.ArrayInitializerExpression,
-                                                    SeparatedList( parameterTypes ) ) ) ) );
+                                                    SeparatedList( parameterTypes ) ) ) ),
+                                    Argument( SyntaxFactoryEx.Null ) ); // modifiers
 
                         break;
                     }

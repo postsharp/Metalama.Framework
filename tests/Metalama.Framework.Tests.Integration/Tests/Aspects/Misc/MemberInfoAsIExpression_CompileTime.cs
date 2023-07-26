@@ -42,7 +42,7 @@ public sealed class TestAspect : TypeAspect
                     arrayBuilder.Add(field.ToFieldInfo());
                 }
 
-                if (member is IPropertyOrIndexer property)
+                if (member is IProperty property)
                 {
                     arrayBuilder.Add(property.ToPropertyInfo());
                 }
@@ -96,16 +96,17 @@ internal class TargetCode
 
 class RunTimeClass
 {
-    void M() { }
+    void M(int i) { }
     int P { get; set; }
     event EventHandler E { add { } remove { } }
-    //int this[int i] { get => 42; set { } }
+    int this[int i] { get => 42; set { } }
 }
 
 [RunTimeOrCompileTime]
 class RunTimeOrCompileTimeClass
 {
-    void M() { }
+    void M(int i) { }
     int P { get; set; }
     event EventHandler E { add { } remove { } }
+    // indexers are not supported in compile-time code
 }

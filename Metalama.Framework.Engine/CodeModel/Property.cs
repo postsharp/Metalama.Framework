@@ -23,14 +23,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
         public bool IsRequired
 #if ROSLYN_4_4_0_OR_GREATER
             => this.PropertySymbol.IsRequired;
 #else
             => false;
 #endif
-        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
-
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
 
