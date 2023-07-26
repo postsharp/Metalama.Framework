@@ -33,7 +33,7 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
 
     internal void Validate(
         IDeclaration referencingDeclaration,
-        SyntaxNode node,
+        in SyntaxNodeOrToken node,
         ReferenceKinds referenceKind,
         IDiagnosticSink diagnosticAdder,
         UserCodeInvoker userCodeInvoker,
@@ -42,7 +42,7 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
         var validationContext = new ReferenceValidationContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
-            new SyntaxReference( node, this ),
+            new SyntaxReference( node.AsNode() ?? (object) node.AsToken(), this ),
             this.Implementation.State,
             diagnosticAdder,
             this,

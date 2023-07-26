@@ -34,6 +34,10 @@ internal sealed class DesignTimeReferenceValidatorCollection
     {
         this._ownProperties = ownProperties;
         this._ownValidators = ownValidators;
+        
+        // The reason of the structure of this class is to cope with project graphs, especially diamond-shared projects graphs, where we need to avoid duplicates
+        // of projects or validators inside projects. The opinion taken here is that it is cheaper by orders of magnitude to deduplicate projects than validators,
+        // so we deduplicate whole collections instead of individual validators. However this makes the data structure more complex.
 
         this._validatorCollectionsFromProjectReferences =
             validatorsFromProjectReferences.SelectManyRecursiveDistinct( x => x._validatorCollectionsFromProjectReferences, includeRoots: true );

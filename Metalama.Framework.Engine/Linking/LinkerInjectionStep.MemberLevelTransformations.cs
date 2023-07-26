@@ -71,11 +71,7 @@ internal sealed partial class LinkerInjectionStep
             => LazyInitializer.EnsureInitialized( ref this._unorderedArguments ).Add( argument );
     }
 
+    // Currently unused, but might be useful in the future.
     // ReSharper disable once ClassNeverInstantiated.Local
-    private sealed class TypeLevelTransformations
-    {
-        // Currently unused, but might be useful in the future.
-        // ReSharper disable once UnassignedGetOnlyAutoProperty
-        public bool AddExplicitDefaultConstructor { get; }
-    }
+    private sealed class TypeLevelTransformations { }
 }

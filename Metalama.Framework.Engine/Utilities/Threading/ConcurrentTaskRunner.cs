@@ -102,7 +102,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         for ( var i = 0; i < taskCount; i++ )
         {
-            tasks[i] = Task.Factory.StartNew( ProcessQueueAsync, cancellationToken, TaskCreationOptions.None, this._scheduler );
+            tasks[i] = Task.Factory.StartNew( ProcessQueueAsync, cancellationToken, TaskCreationOptions.None, this._scheduler ).Unwrap();
         }
 
         await Task.WhenAll( tasks );

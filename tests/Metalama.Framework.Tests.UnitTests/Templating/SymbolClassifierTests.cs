@@ -407,7 +407,7 @@ class C  {
 
             var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
-            var nodes = syntaxTree.GetRoot().DescendantNodes();
+            var nodes = syntaxTree.GetRoot().DescendantNodes().ToArray();
 
             AssertScope( "Console", TemplatingScope.RunTimeOnly );
             AssertScope( "WriteLine", TemplatingScope.RunTimeOnly );
@@ -416,6 +416,7 @@ class C  {
             AssertScope( "Math", TemplatingScope.RunTimeOrCompileTime );
             AssertScope( "Abs", TemplatingScope.RunTimeOrCompileTime );
 
+            // Resharper disable once LocalFunctionHidesMethod
             void AssertScope( string text, TemplatingScope scope )
             {
                 var node = nodes.Single( n => n.ToString() == text );

@@ -10,8 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class TaskRunner : ITaskRunner
 {
-    // private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
-    private static bool MustRunNewTask() => true;
+    private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
 
     public void RunSynchronously( Func<Task> func, CancellationToken cancellationToken = default )
     {
