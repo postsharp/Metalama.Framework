@@ -10,7 +10,12 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class TaskRunner : ITaskRunner
 {
-    private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
+    // TODO: It seems we still have design-time deadlocks when we are not always running a new task.
+    // It seems that new work items to process the task queue are not being created even if the worker thread pool
+    // is not exhausted.
+    
+    // private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
+    private static bool MustRunNewTask() => true;
 
     public void RunSynchronously( Func<Task> func, CancellationToken cancellationToken = default )
     {
@@ -32,7 +37,12 @@ internal sealed class TaskRunner : ITaskRunner
         }
         else
         {
-            func().GetAwaiter().GetResult();
+            var valueTask = func();
+
+            if ( !valueTask.IsCompleted )
+            {
+                valueTask.AsTask().Wait( cancellationToken );
+            }
         }
     }
 
@@ -40,11 +50,21 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            return Task.Run( func, cancellationToken ).Result;
+            var task = Task.Run( func, cancellationToken );
+            task.Wait( cancellationToken );
+
+            return task.Result;
         }
         else
         {
-            return func().Result;
+            var task = func();
+
+            if ( !task.IsCompleted )
+            {
+                task.Wait( cancellationToken );
+            }
+
+            return task.Result;
         }
     }
 
@@ -52,11 +72,27 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            return Task.Run( () => func().AsTask(), cancellationToken ).Result;
+            var task = Task.Run( () => func().AsTask(), cancellationToken );
+
+            task.Wait( cancellationToken );
+
+            return task.Result;
         }
         else
         {
-            return func().GetAwaiter().GetResult();
+            var valueTask = func();
+
+            if ( valueTask.IsCompleted )
+            {
+                return valueTask.Result;
+            }
+            else
+            {
+                var task = valueTask.AsTask();
+                task.Wait( cancellationToken );
+
+                return task.Result;
+            }
         }
     }
 }
