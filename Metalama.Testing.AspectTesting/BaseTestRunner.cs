@@ -141,7 +141,9 @@ internal abstract partial class BaseTestRunner
                 this.SaveResults( testInput, testResult, state );
                 this.ExecuteAssertions( testInput, testResult, state );
             }
-            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException
+                                         || ( e.InnerException?.GetType().FullName is { } innerException
+                                              && innerException == testInput.Options.ExpectedException ) )
             {
                 return;
             }
