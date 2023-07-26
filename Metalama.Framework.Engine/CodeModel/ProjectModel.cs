@@ -57,6 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public string Name
             => this._projectOptions.ProjectName ?? this._projectOptions.AssemblyName ?? "unnamed";
 
+        public string AssemblyName => this._projectOptions.AssemblyName;
+
         public string? Path => this._projectOptions.ProjectPath;
 
         public ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
