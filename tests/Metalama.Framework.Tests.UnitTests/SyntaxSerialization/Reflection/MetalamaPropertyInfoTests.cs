@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!)",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!)",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!)",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeIndexerWithTarget( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetProperty(""this[]"", typeof(global::System.String), new global::System.Type[] { typeof(global::System.Int32) })",
+                @"typeof(global::Target).GetProperty(""this[]"", typeof(global::System.String), new global::System.Type[] { typeof(global::System.Int32) })!",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = testContext.Serialize( CompileTimePropertyInfo.Create( (Indexer) property ) ).NormalizeWhitespace().ToString();
 
             this.AssertEqual(
-                @"typeof(global::System.String).GetProperty(""this[]"", typeof(global::System.Char), new global::System.Type[] { typeof(global::System.Int32) })",
+                @"typeof(global::System.String).GetProperty(""this[]"", typeof(global::System.Char), new global::System.Type[] { typeof(global::System.Int32) })!",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
