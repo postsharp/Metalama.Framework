@@ -72,6 +72,8 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
+
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )

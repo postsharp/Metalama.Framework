@@ -118,6 +118,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
+
     public Accessibility Accessibility
     {
         get => this._accessibility ?? this.ContainingMember.Accessibility;
