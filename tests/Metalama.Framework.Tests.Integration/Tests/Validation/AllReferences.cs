@@ -16,8 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
     internal class Aspect : TypeAspect
     {
-        private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration, string SyntaxKind)> _warning =
-            new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}' (SyntaxKind={2})." );
+        private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, DeclarationKind ReferencingDeclarationKind, IDeclaration
+            ReferencingDeclaration, DeclarationKind ReferencedDeclarationKind, IDeclaration ReferencedDeclaration, string SyntaxKind)> _warning =
+            new( "MY001", Severity.Warning, "Reference constraint of type '{0}' to {3} '{4}' from {1} '{2}' (SyntaxKind={5})." );
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
@@ -28,7 +29,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         private static void Validate( in ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Syntax.Kind ) ) );
+            context.Diagnostics.Report(
+                _warning.WithArguments(
+                    ( context.ReferenceKinds, context.ReferencingDeclaration.DeclarationKind, context.ReferencingDeclaration,
+                      context.ReferencedDeclaration.DeclarationKind, context.ReferencedDeclaration, context.Syntax.Kind ) ) );
         }
     }
 
@@ -41,7 +45,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         public static int StaticField;
         public int InstanceField;
+
+        public ValidatedClass() { }
+
+        public ValidatedClass( int x ) { }
     }
+
+    [Aspect]
+    internal class ValidatedGenericClass<T> { }
 
     [Aspect]
     internal delegate void ValidatedDelegate();
@@ -59,6 +70,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         // Typeof in field initializer.
         private Type _field2 = typeof(ValidatedClass);
 
+        // Constructors
+        public DerivedClass() { }
+
+        public DerivedClass( int x ) : base( 5 ) { }
+
         // Override.
         public override void VirtualMethod()
         {
@@ -66,6 +82,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             base.VirtualMethod();
         }
 
+        // Parameters, return values.
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
             ValidatedClass variable = new();
@@ -82,8 +99,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             return null;
         }
 
+        // Property.
         public ValidatedClass? Property { get; set; }
 
+        // Events
         public event ValidatedDelegate? FieldLikeEvent;
 
         public event ValidatedDelegate ExplicitEvent
@@ -111,12 +130,17 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         }
     }
 
+    internal class GenericDerivedClass : ValidatedGenericClass<int> { }
+
+    internal class ListOfValidated : List<ValidatedClass> { }
+
     [ValidatedClass]
     internal class AttributeTargets
     {
         [ValidatedClass]
         private int _field;
 
+        [ValidatedClass]
         public int Property
         {
             [ValidatedClass]

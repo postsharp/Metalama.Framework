@@ -100,14 +100,14 @@ namespace Metalama.Framework.Code.Collections
         internal static HashSet<T> SelectManyRecursiveDistinct<T>(
             this T root,
             Func<T, IEnumerable<T>?> getChildren,
-            bool includeRoots = true )
+            bool includeRoot = true )
             where T : class
         {
             var recursionCheck = 0;
 
             HashSet<T> results = new( ReferenceEqualityComparer<T>.Instance );
 
-            if ( includeRoots )
+            if ( includeRoot )
             {
                 results.Add( root );
             }
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Code.Collections
 
         public static HashSet<T> SelectManyRecursiveDistinct<T>(
             this IEnumerable<T> roots,
-            Func<T, IEnumerable<T>?> getItems,
+            Func<T, IEnumerable<T>?> getChildren,
             bool includeRoots = true )
             where T : class
         {
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Code.Collections
                     results.Add( item );
                 }
 
-                VisitMany( getItems( item ), getItems, results, ref recursionCheck );
+                VisitMany( getChildren( item ), getChildren, results, ref recursionCheck );
             }
 
             return results;
