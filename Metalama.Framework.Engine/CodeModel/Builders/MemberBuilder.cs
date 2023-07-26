@@ -66,6 +66,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
         }
     }
 
+    public bool HasImplementation => true;
+
     public bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

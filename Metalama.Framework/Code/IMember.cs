@@ -30,6 +30,14 @@ namespace Metalama.Framework.Code
         bool IsExplicitInterfaceImplementation { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the member has an implementation or is only a definition without a body.
+        /// </summary>
+        /// <remarks>
+        /// Members without implementation are, for example, <c>abstract</c> members, <c>extern</c> methods, <c>partial</c> methods without implementation part or <c>const</c> fields. 
+        /// </remarks>
+        bool HasImplementation { get; }
+
+        /// <summary>
         /// Gets the type containing the current member.
         /// </summary>
         new INamedType DeclaringType { get; }

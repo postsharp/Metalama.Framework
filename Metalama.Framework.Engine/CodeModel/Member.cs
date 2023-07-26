@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -20,6 +21,16 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool IsVirtual => this.Symbol.IsVirtual;
 
         public bool IsOverride => this.Symbol.IsOverride;
+
+        public bool HasImplementation
+            => this.Symbol switch
+            {
+                IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null } => false,
+                IFieldSymbol { IsConst: true } => false,
+                { IsAbstract: true } => false,
+                { IsExtern: true } => false,
+                _ => true,
+            };
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         {
