@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     }
 
     [Aspect]
-    internal class ValidatedClass
+    internal class ValidatedClass : Attribute
     {
         public static void Method( object o ) { }
 
@@ -47,8 +47,12 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     internal delegate void ValidatedDelegate();
 
     // <target>
+    [ValidatedClass]
     internal class DerivedClass : ValidatedClass
     {
+        // Attribute on field.
+        private int _f;
+
         // Field type.
         private ValidatedClass? _field1;
 
@@ -105,5 +109,24 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             // Type argument of generic method.
             _ = new object[0].OfType<ValidatedClass>();
         }
+    }
+
+    [ValidatedClass]
+    internal class AttributeTargets
+    {
+        [ValidatedClass]
+        private int _field;
+
+        public int Property
+        {
+            [ValidatedClass]
+            get;
+            [ValidatedClass]
+            set;
+        }
+
+        [ValidatedClass]
+        [return: ValidatedClass]
+        public int Method( [ValidatedClass] int p ) => p;
     }
 }

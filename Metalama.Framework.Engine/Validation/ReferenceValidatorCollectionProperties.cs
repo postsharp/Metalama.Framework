@@ -34,7 +34,7 @@ public sealed class ReferenceValidatorCollectionProperties
                 this._kindsRequiringDescentIntoBaseTypes |= validator.ReferenceKinds;
             }
 
-            if ( (validator.ReferenceKinds & ~_memberDeclarationOnlyKinds) != 0 )
+            if ( (validator.ReferenceKinds & ~(_memberDeclarationOnlyKinds | _typeDeclarationOnlyKinds)) != 0 )
             {
                 this._mustDescendIntoImplementation = true;
             }

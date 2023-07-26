@@ -99,11 +99,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                 {
                     case MemberAccessExpressionSyntax memberAccess:
                         this.Visit( memberAccess.Expression );
+
                         break;
 
                     case ElementAccessExpressionSyntax elementAccess:
                         this.Visit( elementAccess.Expression );
-                        this.Visit( elementAccess.ArgumentList);
+                        this.Visit( elementAccess.ArgumentList );
+
                         break;
 
                     case IdentifierNameSyntax:
@@ -113,8 +115,8 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                     default:
                         // Other cases are possible but we don't implement them.
                         // For instance, we can assign the return value of a ref method.
-                        break;                
-                }               
+                        break;
+                }
             }
         }
     }
@@ -147,12 +149,19 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         }
     }
 
-    public override void VisitBaseList( BaseListSyntax node )
+    public override void VisitPrimaryConstructorBaseType( PrimaryConstructorBaseTypeSyntax node )
     {
-        foreach ( var baseType in node.Types )
+        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
+
+        if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
         {
-            this.VisitTypeReference( baseType.Type, ReferenceKinds.BaseType );
+            this.Visit( node.ArgumentList );
         }
+    }
+
+    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
+    {
+        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
     }
 
     public override void VisitTypeArgumentList( TypeArgumentListSyntax node )
@@ -181,7 +190,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         this.Validate( node.Name, ReferenceKinds.AttributeType );
 
-        if ( node.ArgumentList != null )
+        if ( node.ArgumentList != null && this._validatorProvider.Properties.MustDescendIntoImplementation() )
         {
             foreach ( var arg in node.ArgumentList.Arguments )
             {
@@ -193,11 +202,6 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     public override void VisitTypeConstraint( TypeConstraintSyntax node )
     {
         this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
-    }
-
-    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
-    {
-        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
     }
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
