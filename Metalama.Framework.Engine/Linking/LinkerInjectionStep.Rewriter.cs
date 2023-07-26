@@ -37,7 +37,11 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
+        
+        // ReSharper disable once NotAccessedField.Local
+#pragma warning disable IDE0052
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
+#pragma warning restore IDE0052
 
         // Maps a diagnostic id to the number of times it has been suppressed.
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -341,22 +345,6 @@ internal sealed partial class LinkerInjectionStep
             var additionalBaseList = this._syntaxTransformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
-            if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
-            {
-                if ( typeLevelTransformations.AddExplicitDefaultConstructor )
-                {
-                    var constructorBody = SyntaxFactoryEx.FormattedBlock();
-
-                    var constructor = ConstructorDeclaration( node.Identifier )
-                        .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
-                        .WithBody( constructorBody )
-                        .NormalizeWhitespace()
-                        .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
-
-                    members.Add( constructor );
-                }
-            }
-
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
                 // Process the type members.
@@ -646,9 +634,7 @@ internal sealed partial class LinkerInjectionStep
                         continue;
                     }
 
-                    var finalVariable = variable;
-
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                     var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
@@ -824,9 +810,7 @@ internal sealed partial class LinkerInjectionStep
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
                 {
-                    var finalVariable = variable;
-
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
 
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
