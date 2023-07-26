@@ -1,8 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using System.Globalization;
 using System.Reflection;
@@ -44,5 +48,31 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override void SetValue( object? obj, object? value, BindingFlags invokeAttr, Binder? binder, CultureInfo? culture )
             => throw CreateNotSupportedException();
+
+        public bool IsAssignable => false;
+
+        public IType Type => TypeFactory.GetType( typeof(FieldInfo) );
+
+        public RefKind RefKind => RefKind.None;
+
+        public ref object? Value => ref RefHelper.Wrap( this );
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        {
+            var generationContext = (SyntaxGenerationContext) syntaxGenerationContext;
+
+            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+
+            var expression = CompileTimeFieldInfoSerializer.SerializeField(
+                this.Target.GetTarget( compilation ),
+                new( compilation, generationContext ) );
+
+            return new(
+                new TypedExpressionSyntaxImpl(
+                    expression,
+                    this.Type,
+                    generationContext,
+                    true ) );
+        }
     }
 }

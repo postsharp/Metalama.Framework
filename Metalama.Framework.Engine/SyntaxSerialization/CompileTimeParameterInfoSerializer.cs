@@ -14,8 +14,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     internal sealed class CompileTimeParameterInfoSerializer : ObjectSerializer<CompileTimeParameterInfo, ParameterInfo>
     {
         public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, SyntaxSerializationContext serializationContext )
+            => SerializeParameter( obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull(), serializationContext );
+        
+        public static ExpressionSyntax SerializeParameter( IParameter parameter, SyntaxSerializationContext serializationContext )
         {
-            var parameter = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
             var declaringMember = parameter.DeclaringMember;
             var method = declaringMember as IMethodBase;
             var ordinal = parameter.Index;

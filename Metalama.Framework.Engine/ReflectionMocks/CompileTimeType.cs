@@ -1,14 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
@@ -165,5 +170,31 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public override Type[] GetInterfaces() => throw CreateNotSupportedException();
 
         public override string ToString() => this._toStringName;
+
+        public bool IsAssignable => false;
+
+        public IType Type => TypeFactory.GetType( typeof(Type) );
+
+        public RefKind RefKind => RefKind.None;
+
+        public ref object? Value => ref RefHelper.Wrap( this );
+
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        {
+            var generationContext = (SyntaxGenerationContext) syntaxGenerationContext;
+
+            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+
+            var expression = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                this.Target.GetSymbol( compilation.RoslynCompilation ).AssertCast<ITypeSymbol>().AssertNotNull(),
+                new( compilation, generationContext ) );
+
+            return new(
+                new TypedExpressionSyntaxImpl(
+                    expression,
+                    this.Type,
+                    generationContext,
+                    true ) );
+        }
     }
 }

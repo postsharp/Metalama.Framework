@@ -5,14 +5,13 @@ using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Utilities.UserCode;
 
 /// <summary>
 /// Encapsulates an executable member of user code, which can be given as a reflection <see cref="MemberInfo"/>,
-/// as a delegate, as an expression or as a symbol. This struct encapsulates the logic required to print error messages.
+/// as a delegate or as a symbol. This struct encapsulates the logic required to print error messages.
 /// </summary>
 internal readonly struct UserCodeMemberInfo : IFormattable
 {
@@ -32,7 +31,6 @@ internal readonly struct UserCodeMemberInfo : IFormattable
     public Location? GetDiagnosticLocation()
         => this._underlying switch
         {
-            Expression => null,
             ISymbol symbol => symbol.GetDiagnosticLocation(),
             MemberInfo => null,
             null => null,
@@ -46,7 +44,6 @@ internal readonly struct UserCodeMemberInfo : IFormattable
     public string ToString( string? format, IFormatProvider? formatProvider )
         => this._underlying switch
         {
-            Expression expression => expression.ToString(),
             ISymbol symbol => MetalamaStringFormatter.Instance.Format( "", symbol, formatProvider ),
             MemberInfo member =>
                 GetTypeName( member.DeclaringType! ) + "." + member.Name,

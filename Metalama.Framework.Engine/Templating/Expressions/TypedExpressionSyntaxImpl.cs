@@ -122,8 +122,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     }
                     else
                     {
-                        throw new ArgumentOutOfRangeException(
-                            nameof(value),
+                        throw new InvalidOperationException(
                             $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." );
                     }
             }

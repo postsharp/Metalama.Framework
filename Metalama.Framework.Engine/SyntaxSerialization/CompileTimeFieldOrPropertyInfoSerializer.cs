@@ -19,31 +19,19 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         // binding flags for private indexers, and that overload is complicated.
 
         public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
+            => SerializeFieldOrProperty( obj.FieldOrPropertyOrIndexer, serializationContext );
+
+        public static ExpressionSyntax SerializeFieldOrProperty( IFieldOrPropertyOrIndexer member, SyntaxSerializationContext serializationContext )
         {
-            ExpressionSyntax propertyInfo;
-
-            switch ( obj.FieldOrPropertyIndexer )
+            var fieldInfoOrPropertyInfo = member switch
             {
-                case IProperty property:
-                    {
-                        propertyInfo = CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
-
-                        break;
-                    }
-
-                case IField field:
-                    {
-                        propertyInfo = CompileTimeFieldInfoSerializer.SerializeField( field, serializationContext );
-
-                        break;
-                    }
-
-                default:
-                    throw new NotImplementedException();
-            }
+                IPropertyOrIndexer property => CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext ),
+                IField field => CompileTimeFieldInfoSerializer.SerializeField( field, serializationContext ),
+                _ => throw new NotImplementedException()
+            };
 
             return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
-                .AddArgumentListArguments( Argument( propertyInfo ) )
+                .AddArgumentListArguments( Argument( fieldInfoOrPropertyInfo ) )
                 .NormalizeWhitespace();
         }
 

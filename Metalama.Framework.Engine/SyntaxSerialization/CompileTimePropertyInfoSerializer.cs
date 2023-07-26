@@ -28,10 +28,12 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.DeclaringType.GetSymbol(), serializationContext );
 
+            ExpressionSyntax result;
+
             switch ( propertyOrIndexer )
             {
                 case IProperty:
-                    return InvocationExpression(
+                    result = InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 typeCreation,
@@ -42,6 +44,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                     SyntaxKind.StringLiteralExpression,
                                     Literal( propertyOrIndexer.Name ) ) ),
                             Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ) );
+
+                    break;
 
                 case IIndexer indexer:
                     {
@@ -57,7 +61,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             parameterTypes.Add( parameterType );
                         }
 
-                        return InvocationExpression(
+                        result = InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
                                         typeCreation,
@@ -77,13 +81,19 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                             .WithInitializer(
                                                 InitializerExpression(
                                                     SyntaxKind.ArrayInitializerExpression,
-                                                    SeparatedList( parameterTypes ) ) ) ) )
-                            ;
+                                                    SeparatedList( parameterTypes ) ) ) ) );
+
+                        break;
                     }
 
                 default:
                     throw new AssertionFailedException( $"Unexpected type: {propertyOrIndexer.DeclarationKind}." );
             }
+
+            // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
+            result = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, result );
+
+            return result;
         }
 
         protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );

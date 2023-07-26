@@ -43,7 +43,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a <see cref="MemberInfo"/> that represents the current member at run time.
         /// </summary>
-        /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
+        /// <returns>A <see cref="MemberInfo"/> that can be used only in run-time code.</returns>
         [CompileTimeReturningRunTime]
         MemberInfo ToMemberInfo();
 

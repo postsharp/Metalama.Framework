@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -152,7 +153,18 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
             using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
             {
-                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
+                try
+                {
+                    initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
+                }
+                catch ( Exception ex )
+                {
+                    context.DiagnosticSink.Report( GeneralDiagnosticDescriptors.CantGetMemberInitializer.CreateRoslynDiagnostic( null, (this, ex.Message) ) );
+
+                    initializerExpressionSyntax = null;
+
+                    return false;
+                }
             }
 
             return true;

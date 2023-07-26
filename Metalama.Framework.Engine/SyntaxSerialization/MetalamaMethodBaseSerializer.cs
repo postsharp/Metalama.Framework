@@ -144,11 +144,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 }
             }
 
-            if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
-            {
-                // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
-                invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
-            }
+            // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
+            invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
 
             return invokeGetMethod.NormalizeWhitespace();
         }
