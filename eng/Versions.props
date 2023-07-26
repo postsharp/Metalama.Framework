@@ -1,4 +1,4 @@
-
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
     <!-- Set the default version -->
@@ -12,17 +12,17 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.24</PostSharpEngineeringVersion>
-        <MetalamaCompilerVersion>2023.2.1-preview</MetalamaCompilerVersion>
+        <PostSharpEngineeringVersion>2023.2.30</PostSharpEngineeringVersion>
+        <MetalamaCompilerVersion>2023.2.2-rc</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
-        <!-- This is the minimal version of the Roslyn AI we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
+        <!-- RoslynApiMinVersion is the minimal version of the Roslyn AI we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
         <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
         <RoslynApiMaxVersion>4.4.0</RoslynApiMaxVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <StreamJsonRpcVersion>2.8.28</StreamJsonRpcVersion>
         <MessagePackVersion>2.2.85</MessagePackVersion>
-		<!-- The version of Microsof.tVisualStudio.Threading must match the one used by StreamJsonRpc -->
+		<!-- The version of Microsoft.VisualStudio.Threading must match the one used by StreamJsonRpc -->
 		<MicrosoftVisualStudioThreadingVersion>16.9.60</MicrosoftVisualStudioThreadingVersion>
 		<!-- The version of Microsoft.VisualStudio.Validation must match the one used by Microsof.tVisualStudio.Threading -->
 		<MicrosoftVisualStudioValidationVersion>16.8.33</MicrosoftVisualStudioValidationVersion>
@@ -34,12 +34,14 @@
         <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
         <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
-        <xUnitVersion>2.4.1</xUnitVersion>
-        <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
-		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+        <!-- xUnitVersion is the latest version of xUnit, which we execute -->
+        <xUnitVersion>2.5.0</xUnitVersion>
+        <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
+        <xUnitApiVersion>2.4.1</xUnitApiVersion>
+		<XUnitRunnerVisualStudioVersion>2.5.0</XUnitRunnerVisualStudioVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DiffPlexVersion>1.7.1</DiffPlexVersion>
-
+		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
         <PostSharpPackageVersion>6.11.2-rc</PostSharpPackageVersion>
 

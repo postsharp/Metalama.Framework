@@ -561,33 +561,44 @@ internal sealed partial class CompileTimeCompilationBuilder
                 // Try to delete with lock detection first to get a better error message.
                 if ( Directory.Exists( outputDirectory ) )
                 {
-                    var files = Directory.GetFiles( outputDirectory );
-                    var deletedDirectory = Path.Combine( Path.GetDirectoryName( outputDirectory )!, Path.GetFileName( outputDirectory ) + ".del" );
+                    string? deletedDirectory = null;
 
-                    RetryHelper.RetryWithLockDetection(
-                        files,
-                        () =>
-                        {
-                            if ( Directory.Exists( outputDirectory ) )
+                    using ( MutexHelper.WithGlobalLock( outputDirectory, this._logger ) )
+                    {
+                        var files = Directory.GetFiles( outputDirectory );
+
+                        RetryHelper.RetryWithLockDetection(
+                            files,
+                            () =>
                             {
-                                // To delete the directory atomically, rename it.
-                                Directory.Move( outputDirectory, deletedDirectory );
-                                Directory.Delete( deletedDirectory, true );
-                            }
-                        },
+                                if ( Directory.Exists( outputDirectory ) )
+                                {
+                                    // Find a unique directory name transactional deletion.
+                                    var deletedIndex = 0;
+
+                                    do
+                                    {
+                                        deletedIndex++;
+
+                                        deletedDirectory = Path.Combine(
+                                            Path.GetDirectoryName( outputDirectory )!,
+                                            Path.GetFileName( outputDirectory ) + $".del{deletedIndex}" );
+                                    }
+                                    while ( Directory.Exists( deletedDirectory ) );
+
+                                    // To delete the directory atomically, rename it.
+                                    Directory.Move( outputDirectory, deletedDirectory );
+                                }
+                            },
+                            this._serviceProvider.Underlying );
+                    }
+
+                    // Delete the moved directory. There could also be a lock due to anti-virus programs.
+                    RetryHelper.RetryWithLockDetection(
+                        Directory.GetFiles( deletedDirectory! ),
+                        () => Directory.Delete( deletedDirectory!, true ),
                         this._serviceProvider.Underlying );
                 }
-
-                // Then delete the directory itself. At this point, we should no longer have locks. 
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( Directory.Exists( outputDirectory ) )
-                        {
-                            Directory.Delete( outputDirectory, true );
-                        }
-                    },
-                    logger: this._logger );
             }
             catch ( Exception e )
             {
@@ -941,7 +952,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
                 var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
-                var aspectTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var aspectTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
@@ -950,20 +961,23 @@ internal sealed partial class CompileTimeCompilationBuilder
                     .Where(
                         t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
                              !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                    .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var transitiveFabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                var fabricTypeNames = fabricTypes
+                    .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
+
+                var transitiveFabricTypeNames = compileTimeCompilation.Assembly.GetTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                    .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var compilerPlugInTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var compilerPlugInTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var otherTemplateTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                var otherTemplateTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
                     .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
@@ -982,11 +996,11 @@ internal sealed partial class CompileTimeCompilationBuilder
                     runTimeCompilation.Assembly.Identity.ToString(),
                     compileTimeCompilation.AssemblyName!,
                     runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
-                    aspectTypes,
-                    compilerPlugInTypes,
-                    fabricTypes,
-                    transitiveFabricTypes,
-                    otherTemplateTypes,
+                    aspectTypeNames,
+                    compilerPlugInTypeNames,
+                    fabricTypeNames,
+                    transitiveFabricTypeNames,
+                    otherTemplateTypeNames,
                     referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
                     compilationResultManifest,
                     projectLicenseInfo?.RedistributionLicenseKey,

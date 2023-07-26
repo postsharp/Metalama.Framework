@@ -99,9 +99,17 @@ namespace Metalama.Framework.DesignTime
 
                 var diagnosticCount = 0;
 
-                // Execute the analysis that are not performed in the pipeline.
+                var reportedDiagnostics = new HashSet<Diagnostic>();
+
                 void ReportDiagnostic( Diagnostic diagnostic )
                 {
+                    // TemplateAnnotator is run from both TemplatingCodeValidator and from the pipeline, so its diagnostics are reported twice.
+                    if ( !reportedDiagnostics.Add( diagnostic ) )
+                    {
+                        this._logger.Trace?.Log( $"Not reporting {FormatDiagnostic( diagnostic )} again." );
+                        return;
+                    }
+
                     this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( diagnostic )}." );
 
                     diagnosticCount++;
@@ -109,6 +117,7 @@ namespace Metalama.Framework.DesignTime
                     context.ReportDiagnostic( diagnostic );
                 }
 
+                // Execute the analyses that are not performed in the pipeline.
                 TemplatingCodeValidator.Validate(
                     pipeline.ServiceProvider,
                     context.SemanticModel,
@@ -280,6 +289,7 @@ namespace Metalama.Framework.DesignTime
                             designTimeDiagnostic.DefaultSeverity,
                             isEnabledByDefault: true,
                             designTimeDiagnostic.WarningLevel,
+                            designTimeDiagnostic.Descriptor.Title,
                             location: newLocation,
                             properties: designTimeDiagnostic.Properties );
 

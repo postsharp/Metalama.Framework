@@ -29,7 +29,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 using Document = Microsoft.CodeAnalysis.Document;
 
 // ReSharper disable MethodHasAsyncOverload
@@ -158,7 +157,7 @@ internal abstract partial class BaseTestRunner
 
         if ( testInput.Options.ExpectedException != null )
         {
-            throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
+            throw new AssertionFailedException( $"The expected exception {testInput.Options.ExpectedException} has not been thrown." );
         }
     }
 

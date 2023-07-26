@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
@@ -60,7 +61,15 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
-        var member = memberId.ResolveToSymbol( compilation );
+        var member = memberId.ResolveToSymbolOrNull( compilation );
+
+        if ( member == null )
+        {
+            diagnosticAdder.Report( TemplatingDiagnosticDescriptors.CantResolveDeclaration.CreateRoslynDiagnostic( location: null, memberId.Id ) );
+
+            adviceAttribute = null;
+            return false;
+        }
 
         if ( this._cacheBySymbol.TryGetValue( member, out adviceAttribute ) )
         {

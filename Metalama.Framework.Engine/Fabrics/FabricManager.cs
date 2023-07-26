@@ -51,24 +51,26 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             // Discover the transitive fabrics from project dependencies, and execute them.
             var transitiveFabricTypes = new Tuple<CompileTimeProject, int>( compileTimeProject, 0 )
-                .SelectManyRecursive( p => p.Item1.References.SelectAsEnumerable( r => new Tuple<CompileTimeProject, int>( r, p.Item2 + 1 ) ), includeThis: false, deduplicate: true )
+                .SelectManyRecursive(
+                    p => p.Item1.References.SelectAsEnumerable( r => new Tuple<CompileTimeProject, int>( r, p.Item2 + 1 ) ),
+                    includeThis: false,
+                    deduplicate: true )
                 .GroupBy( t => t.Item1 )
                 .Select( g => (Project: g.Key, Depth: g.Max( x => x.Item2 )) )
                 .SelectMany( x => x.Project.TransitiveFabricTypes.SelectAsEnumerable( t => (x.Project, x.Depth, Type: t) ) )
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
-                .Select( x => (StaticFabricDriver?) this.CreateDriver( x.Project, x.Type, compilationModel.RoslynCompilation, diagnosticAdder ) )
-                .WhereNotNull();
+                .SelectMany( x => this.CreateDrivers( x.Project, x.Type, compilationModel, diagnosticAdder ) )
+                .ToList();
 
             // Discover the fabrics inside the current project.
             var fabrics =
                 compileTimeProject.FabricTypes
                     .OrderBy( t => t )
-                    .Select( x => this.CreateDriver( compileTimeProject, x, compilationModel.RoslynCompilation, diagnosticAdder ) )
-                    .WhereNotNull()
+                    .SelectMany( x => this.CreateDrivers( compileTimeProject, x, compilationModel, diagnosticAdder ) )
                     .ToOrderedList( x => x );
 
-            var typeFabricDrivers = fabrics.OfType<TypeFabricDriver>().ToImmutableArray();
+            var typeFabricDrivers = fabrics.OfType<TypeFabricDriver>().Concat( transitiveFabricTypes.OfType<TypeFabricDriver>() ).ToImmutableArray();
 
             var aspectSources = ImmutableArray.CreateBuilder<IAspectSource>();
             var validatorSources = ImmutableArray.CreateBuilder<IValidatorSource>();
@@ -98,17 +100,17 @@ namespace Metalama.Framework.Engine.Fabrics
             }
 
             Execute( fabrics.OfType<ProjectFabricDriver>() );
-            Execute( transitiveFabricTypes );
+            Execute( transitiveFabricTypes.OfType<ProjectFabricDriver>() );
             project.Freeze();
             Execute( fabrics.OfType<NamespaceFabricDriver>() );
 
             return new FabricsConfiguration( aspectSources.ToImmutable(), validatorSources.ToImmutable() );
         }
 
-        private FabricDriver? CreateDriver(
+        private IEnumerable<FabricDriver> CreateDrivers(
             CompileTimeProject compileTimeProject,
             string fabricTypeName,
-            Compilation runTimeCompilation,
+            CompilationModel compilation,
             IDiagnosticAdder diagnostics )
         {
             var fabricType = compileTimeProject.GetType( fabricTypeName );
@@ -118,29 +120,29 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, fabricType ) );
 
-                return null;
+                return Enumerable.Empty<FabricDriver>();
             }
 
             var executionContext = new UserCodeExecutionContext( this.ServiceProvider, diagnostics, UserCodeMemberInfo.FromMemberInfo( constructor ) );
 
             if ( !this.UserCodeInvoker.TryInvoke( () => Activator.CreateInstance( fabricType ), executionContext, out var fabric ) )
             {
-                return null;
+                return Enumerable.Empty<FabricDriver>();
             }
 
             switch ( fabric )
             {
                 case TypeFabric typeFabric:
-                    return TypeFabricDriver.Create( this, compileTimeProject, typeFabric, runTimeCompilation );
+                    return TypeFabricDriver.Create( this, compileTimeProject, typeFabric, compilation );
 
                 case TransitiveProjectFabric transitiveCompilationFabric:
-                    return ProjectFabricDriver.Create( this, compileTimeProject, transitiveCompilationFabric, runTimeCompilation );
+                    return new[] { ProjectFabricDriver.Create( this, compileTimeProject, transitiveCompilationFabric, compilation.RoslynCompilation ) };
 
                 case ProjectFabric compilationFabric:
-                    return ProjectFabricDriver.Create( this, compileTimeProject, compilationFabric, runTimeCompilation );
+                    return new[] { ProjectFabricDriver.Create( this, compileTimeProject, compilationFabric, compilation.RoslynCompilation ) };
 
                 case NamespaceFabric namespaceFabric:
-                    return NamespaceFabricDriver.Create( this, compileTimeProject, namespaceFabric, runTimeCompilation );
+                    return new[] { NamespaceFabricDriver.Create( this, compileTimeProject, namespaceFabric, compilation.RoslynCompilation ) };
 
                 default:
                     throw new AssertionFailedException( $"Unexpected fabric type: '{fabricType.FullName}." );

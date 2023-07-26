@@ -25,6 +25,7 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
         {
             case ProcessKind.Rider:
             case ProcessKind.OmniSharp:
+            case ProcessKind.VisualStudioMac:
                 return new LocalWorkspaceProvider( serviceProvider );
 
             default:

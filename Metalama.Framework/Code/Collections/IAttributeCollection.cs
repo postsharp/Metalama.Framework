@@ -15,10 +15,18 @@ namespace Metalama.Framework.Code.Collections
     {
         IEnumerable<IAttribute> OfAttributeType( INamedType type );
 
+        IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind );
+
         IEnumerable<IAttribute> OfAttributeType( Type type );
+
+        IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind );
 
         bool Any( INamedType type );
 
+        bool Any( INamedType type, ConversionKind conversionKind );
+
         bool Any( Type type );
+
+        bool Any( Type type, ConversionKind conversionKind );
     }
 }

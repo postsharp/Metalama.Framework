@@ -482,5 +482,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Converting extension method '{0}' to a delegate using a method group coversion is currently not supported.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> CantResolveDeclaration
+            = new(
+                "LAMA0268",
+                "Could not resolve declaration when looking for template attributes.",
+                "Could not resolve declaration with id '{0}' when looking for template attributes. This can happen when multiple references contain a type that's part of the declaration signature.",
+                _category,
+                Warning );
     }
 }

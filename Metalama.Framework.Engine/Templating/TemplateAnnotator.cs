@@ -1210,7 +1210,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         StatementSyntax? annotatedElseStatement;
         ScopeContext? scopeContext;
 
-        if ( conditionScope.GetExpressionExecutionScope( true ) == TemplatingScope.CompileTimeOnly )
+        if ( conditionScope.GetExpressionValueScope( preferCompileTime: true ) is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime )
         {
             // We have an if statement where the condition is a compile-time expression. Add annotations
             // to the if and else statements but not to the blocks themselves.
@@ -2067,12 +2067,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         // This is a quick-and-dirty implementation that all for statements runtime.
 
-        if ( node.Declaration != null )
-        {
-            this.RequireScope( node.Declaration.Variables, TemplatingScope.RunTimeOnly, "variable of a 'for' loop" );
-        }
-
         var transformedVariableDeclaration = this.Visit( node.Declaration );
+
+        if ( transformedVariableDeclaration != null )
+        {
+            this.RequireScope( transformedVariableDeclaration.Variables, TemplatingScope.RunTimeOnly, "variable of a 'for' loop" );
+        }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         var transformedInitializers = node.Initializers.SelectAsEnumerable( i => this.Visit( i )! );

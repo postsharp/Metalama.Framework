@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;

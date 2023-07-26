@@ -222,7 +222,7 @@ interface I<T>
             Assert.Equal( "M2", m2.Name );
 
             CheckParameterData( m2.ReturnParameter, m2, "int", "<return>", -1 );
-            Assert.Equal( 0, m2.Parameters.Count );
+            Assert.Empty( m2.Parameters );
 
             static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string name, int index )
             {
@@ -1123,7 +1123,7 @@ namespace System { class MySystemClass {} }
             var compilation = testContext.CreateCompilationModel( "" );
             var fromType = compilation.Factory.GetSpecialType( @from );
             var toType = compilation.Factory.GetSpecialType( to );
-            var result = fromType.Is( toType );
+            var result = fromType.Is( toType, ConversionKind.Implicit );
 
             Assert.Equal( expectedResult, result );
         }

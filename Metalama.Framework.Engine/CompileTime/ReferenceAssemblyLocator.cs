@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
@@ -11,7 +12,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
@@ -311,14 +311,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var projectText =
                     $"""
-                        <Project Sdk="Microsoft.NET.Sdk">
+                        <Project>
+                          <PropertyGroup>
+                            <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
+                            <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+                            <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+                          </PropertyGroup>
+                          <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
                           <PropertyGroup>
                             <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
                             <OutputType>Exe</OutputType>
                             <LangVersion>latest</LangVersion>
-                            <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
-                            <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
-                            <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
                           </PropertyGroup>
                           <ItemGroup>
                             <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
@@ -328,6 +331,7 @@ namespace Metalama.Framework.Engine.CompileTime
                           <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
                             <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
                           </Target>
+                          <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
                         </Project>
                         """;
 

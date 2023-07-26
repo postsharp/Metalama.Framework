@@ -17,6 +17,7 @@ public readonly struct AsyncInfo
 
     /// <summary>
     /// Gets a value indicating whether the return type of the method is awaitable, i.e. whether it can be used with the <c>await</c> keyword.
+    /// This does not include <c>IAsyncEnumerable</c>, which can be used with <c>await foreach</c> but not <c>await</c>.
     /// </summary>
     public bool IsAwaitable { get; }
 

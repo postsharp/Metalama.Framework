@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -23,13 +24,32 @@ internal sealed class TypeFabricDriver : FabricDriver
 {
     private readonly string _targetTypeFullName;
 
-    private TypeFabricDriver( CreationData creationData ) : base( creationData )
+    private TypeFabricDriver( CreationData creationData, INamedTypeSymbol targetType ) : base( creationData )
     {
-        this._targetTypeFullName = creationData.FabricType.ContainingType.AssertNotNull().GetFullName().AssertNotNull();
+        this._targetTypeFullName = targetType.AssertNotNull().GetFullName().AssertNotNull();
     }
 
-    public static TypeFabricDriver Create( FabricManager fabricManager, CompileTimeProject compileTimeProject, Fabric fabric, Compilation runTimeCompilation )
-        => new( GetCreationData( fabricManager, compileTimeProject, fabric, runTimeCompilation ) );
+    public static IEnumerable<TypeFabricDriver> Create(
+        FabricManager fabricManager,
+        CompileTimeProject compileTimeProject,
+        Fabric fabric,
+        CompilationModel compilation )
+    {
+        var creationData = GetCreationData( fabricManager, compileTimeProject, fabric, compilation.RoslynCompilation );
+
+        if ( creationData.FabricType.ContainingAssembly.Equals( compilation.RoslynCompilation.Assembly ) )
+        {
+            yield return new TypeFabricDriver( creationData, creationData.FabricType.ContainingType );
+        }
+
+        if ( creationData.FabricType.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) )
+        {
+            foreach ( var derivedType in compilation.GetDerivedTypes( compilation.Factory.GetNamedType( creationData.FabricType.ContainingType ) ) )
+            {
+                yield return new TypeFabricDriver( creationData, derivedType.GetSymbol() );
+            }
+        }
+    }
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
@@ -75,7 +95,7 @@ internal sealed class TypeFabricDriver : FabricDriver
 
     public IDeclaration? GetTargetIfInPartialCompilation( CompilationModel compilation )
     {
-        var symbol = this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation )?.ContainingType;
+        var symbol = compilation.RoslynCompilation.GetTypeByMetadataName( this._targetTypeFullName );
 
         if ( symbol == null || (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Types.Contains( symbol )) )
         {

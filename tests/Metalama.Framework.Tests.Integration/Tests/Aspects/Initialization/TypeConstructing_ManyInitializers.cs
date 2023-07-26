@@ -30,9 +30,5 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     [Aspect]
     public class TargetCode
     {
-        private int Method( int a )
-        {
-            return a;
-        }
     }
 }

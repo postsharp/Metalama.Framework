@@ -3,7 +3,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_ImplicitConstructor
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_TwoAdvices
 {
     public class Aspect : TypeAspect
     {
