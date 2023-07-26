@@ -5,8 +5,6 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using System.Globalization;
 using System.Reflection;
@@ -69,21 +67,6 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public ref object? Value => ref RefHelper.Wrap( this );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        {
-            var generationContext = (SyntaxGenerationContext) syntaxGenerationContext;
-
-            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
-
-            var expression = CompileTimePropertyInfoSerializer.SerializeProperty(
-                this.Target.GetTarget( compilation ),
-                new( compilation, generationContext ) );
-
-            return new(
-                new TypedExpressionSyntaxImpl(
-                    expression,
-                    this.Type,
-                    generationContext,
-                    true ) );
-        }
+            => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimePropertyInfoSerializer.SerializeProperty, syntaxGenerationContext );
     }
 }

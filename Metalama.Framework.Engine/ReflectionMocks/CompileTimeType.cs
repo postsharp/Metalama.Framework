@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -181,20 +180,13 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
-            var generationContext = (SyntaxGenerationContext) syntaxGenerationContext;
-
             var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
 
-            var expression = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+            return CompileTimeMocksHelper.ToTypedExpressionSyntax(
                 this.Target.GetSymbol( compilation.RoslynCompilation ).AssertCast<ITypeSymbol>().AssertNotNull(),
-                new( compilation, generationContext ) );
-
-            return new(
-                new TypedExpressionSyntaxImpl(
-                    expression,
-                    this.Type,
-                    generationContext,
-                    true ) );
+                this.Type,
+                TypeSerializationHelper.SerializeTypeSymbolRecursive,
+                syntaxGenerationContext );
         }
     }
 }
