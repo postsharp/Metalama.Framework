@@ -173,6 +173,12 @@ namespace Metalama.Framework.Engine.Linking
                         new SubstitutionContext( this, generationContext, context ) )
                     : null;
 
+            if (substitutedBody == null && substitutedExpressionBody == null)
+            {
+                // Partial methods with no definition.
+                substitutedBody = Block();
+            }
+
             return this.GetSpecialImplMethod(
                 method,
                 substitutedBody.WithSourceCodeAnnotation(),

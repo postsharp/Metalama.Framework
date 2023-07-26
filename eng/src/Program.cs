@@ -70,6 +70,8 @@ var product = new Product( MetalamaDependencies.Metalama )
             } )
 };
 
+        
+
 product.PrepareCompleted += OnPrepareCompleted;
 
 var commandApp = new CommandApp();
