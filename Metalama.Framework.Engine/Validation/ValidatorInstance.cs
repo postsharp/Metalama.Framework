@@ -9,7 +9,7 @@ using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public abstract class ValidatorInstance : ISyntaxReferenceImpl
+public abstract class ValidatorInstance : ISyntaxReferenceImpl, IDiagnosticSource
 {
     public ValidatorDriver Driver { get; }
 
@@ -17,11 +17,12 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
 
     public ValidatorImplementation Implementation { get; }
 
-    protected ValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation )
+    protected ValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation, string description )
     {
         this.Driver = driver;
         this.Implementation = implementation;
         this.ValidatedDeclaration = validatedDeclaration;
+        this.DiagnosticSourceDescription = description;
     }
 
     // TODO: ISyntaxReferenceImpl should not be implemented in this class.
@@ -40,4 +41,8 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
             SyntaxToken token => token.Kind().ToString(),
             _ => throw new AssertionFailedException( $"{syntaxReference.NodeOrToken} is not supported" )
         };
+
+    public string DiagnosticSourceDescription { get; }
+
+    public override string ToString() => $"{this.GetType().Name}: {this.DiagnosticSourceDescription}";
 }

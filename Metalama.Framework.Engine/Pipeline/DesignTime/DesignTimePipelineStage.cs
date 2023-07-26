@@ -41,14 +41,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Discover the validators.
             ImmutableArray<ReferenceValidatorInstance> referenceValidators;
 
-            var validatorSources = input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources );
+            var validatorSources = pipelineStepsResult.ValidatorSources;
 
             if ( !validatorSources.IsEmpty )
             {
-                var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources, cancellationToken );
+                var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources );
                 var initialCompilation = pipelineStepsResult.FirstCompilation;
                 var finalCompilation = pipelineStepsResult.LastCompilation;
-                validatorRunner.RunDeclarationValidators( initialCompilation, finalCompilation, diagnosticSink );
+                await validatorRunner.RunDeclarationValidatorsAsync( initialCompilation, finalCompilation, diagnosticSink, cancellationToken );
                 referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
             }
             else

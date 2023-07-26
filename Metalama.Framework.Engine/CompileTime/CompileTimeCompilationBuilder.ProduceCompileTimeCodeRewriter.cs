@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         x => x.Type,
                         x => x,
                         symbolEqualityComparer );
-                
+
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
@@ -513,7 +513,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Add non-implemented members of IAspect, IEligible and IProjectData.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
-                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, deduplicate: true );
+                var allImplementedInterfaces = symbol.SelectManyRecursiveDistinct( i => i.Interfaces );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {

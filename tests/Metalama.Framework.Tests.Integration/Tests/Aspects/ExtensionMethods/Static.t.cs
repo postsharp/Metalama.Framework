@@ -1,9 +1,9 @@
 [ReturnNumbers]
 private object Method()
 {
-    var numbers = new object[]
-    {
+  var numbers = new object[]
+  {
     42
-    };
-    return (global::System.Object)global::System.Linq.Enumerable.ToList(numbers);
+  };
+  return (global::System.Object)global::System.Linq.Enumerable.ToList(numbers);
 }

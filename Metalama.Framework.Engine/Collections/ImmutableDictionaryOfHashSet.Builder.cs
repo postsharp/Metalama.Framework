@@ -125,16 +125,20 @@ namespace Metalama.Framework.Engine.Collections
 
             public bool Remove( TKey key, TValue value )
             {
-                var hashSetBuilder = this.GetHashSetBuilder( key );
+                var hashSetBuilder = this.GetHashSetBuilder( key, false );
 
                 if ( hashSetBuilder != null )
                 {
-                    return hashSetBuilder.Remove( value );
+                    if ( hashSetBuilder.Remove( value ) )
+                    {
+                        // We intentionally do not remove the hashSetBuilder from the collection
+                        // because empty hashsets will be removed by ToImmutable, while missing hashsets mean that they are unchanged.
+
+                        return true;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
     }

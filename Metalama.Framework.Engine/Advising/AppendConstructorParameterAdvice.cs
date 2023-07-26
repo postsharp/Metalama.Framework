@@ -62,7 +62,8 @@ internal sealed class AppendConstructorParameterAdvice : Advice
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoStaticConstructor.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, constructor) ) );
+                    (this.Aspect.AspectClass.ShortName, constructor),
+                    this ) );
         }
 
         // Introducing parameters into anything else than a class is not allowed.
@@ -71,7 +72,8 @@ internal sealed class AppendConstructorParameterAdvice : Advice
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoNonClassConstructor.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, constructor) ) );
+                    (this.Aspect.AspectClass.ShortName, constructor),
+                    this ) );
         }
 
         // If we have an implicit constructor, make it explicit.

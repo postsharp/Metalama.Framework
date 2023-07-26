@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             _ = this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, tracer );
 
-            var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeThis: true )
+            var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeRoot: true )
                 .Where( t => t.Result is TemplatingScope.Conflict )
                 .MaxByOrNull( t => t.Depth );
 
@@ -390,7 +390,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
 
                     // If the return type is marked [CompileTime] (as in meta.CompileTime), enforce that.
-                    if ( symbol is IMethodSymbol methodSymbol && methodSymbol.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) ) )
+                    if ( symbol is IMethodSymbol methodSymbol
+                         && methodSymbol.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) ) )
                     {
                         scope = scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly ? OnConflict() : TemplatingScope.CompileTimeOnly;
                     }

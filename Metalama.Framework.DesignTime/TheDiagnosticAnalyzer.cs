@@ -6,6 +6,7 @@ using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.DesignTime
         public TheDiagnosticAnalyzer() : this(
             DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
-        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -118,18 +119,9 @@ namespace Metalama.Framework.DesignTime
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                // Execute the analyses that are not performed in the pipeline.
-                TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
-                    context.SemanticModel,
-                    ReportDiagnostic,
-                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
-                    true,
-                    cancellationToken );
-
                 // Run the pipeline.
                 IEnumerable<Diagnostic> diagnostics;
-                IEnumerable<CacheableScopedSuppression> suppressions;
+                IEnumerable<IScopedSuppression> suppressions;
 
                 var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
@@ -141,7 +133,7 @@ namespace Metalama.Framework.DesignTime
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
 
                     diagnostics = filteredPipelineDiagnostics;
-                    suppressions = Enumerable.Empty<CacheableScopedSuppression>();
+                    suppressions = Enumerable.Empty<IScopedSuppression>();
                 }
                 else
                 {
@@ -149,18 +141,43 @@ namespace Metalama.Framework.DesignTime
                     suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
                 }
 
+                // Execute the analyses that are not performed in the pipeline.
+                // We execute this after the pipeline so we allow it to get to paused state in case of compile-time change.
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    context.SemanticModel,
+                    ReportDiagnostic,
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                // Execute the reference validators.
+                if ( pipelineResult.IsSuccessful )
+                {
+                    var validationResults = DesignTimeReferenceValidatorRunner.Validate(
+                        pipelineResult.Value.Configuration.ServiceProvider,
+                        context.SemanticModel,
+                        pipelineResult.Value,
+                        context.CancellationToken );
+
+                    diagnostics = diagnostics.Concat( validationResults.ReportedDiagnostics );
+                    suppressions = suppressions.Concat( validationResults.DiagnosticSuppressions );
+                }
+
                 // Report diagnostics.
                 this.ReportDiagnostics(
                     diagnostics,
                     compilation,
                     ReportDiagnostic,
-                    true );
+                    cancellationToken );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    var symbol = suppression.DeclarationId.ResolveToSymbolOrNull( compilation );
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var symbol = suppression.GetScopeSymbolOrNull( compilation );
 
                     if ( symbol != null )
                     {
@@ -192,18 +209,19 @@ namespace Metalama.Framework.DesignTime
         /// <param name="diagnostics">List of diagnostics to be reported.</param>
         /// <param name="compilation">The compilation in which diagnostics must be reported.</param>
         /// <param name="reportDiagnostic">The delegate to call to report a diagnostic.</param>
-        /// <param name="wrapUnknownDiagnostics">Determines whether unknown diagnostics should be wrapped into known diagnostics.</param>
         private void ReportDiagnostics(
             IEnumerable<Diagnostic> diagnostics,
             Compilation compilation,
             Action<Diagnostic> reportDiagnostic,
-            bool wrapUnknownDiagnostics )
+            CancellationToken cancellationToken )
         {
             foreach ( var diagnostic in diagnostics )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
+                if ( !this.ShouldWrapUnsupportedDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }
@@ -218,7 +236,7 @@ namespace Metalama.Framework.DesignTime
                             DiagnosticSeverity.Hidden => DesignTimeDiagnosticDescriptors.UserHidden,
                             DiagnosticSeverity.Warning => DesignTimeDiagnosticDescriptors.UserWarning,
                             DiagnosticSeverity.Info => DesignTimeDiagnosticDescriptors.UserInfo,
-                            _ => throw new NotImplementedException()
+                            _ => throw new AssertionFailedException( $"Unexpected severity: {diagnostic.Severity}." )
                         };
 
                     designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(

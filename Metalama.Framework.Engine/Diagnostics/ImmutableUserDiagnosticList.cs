@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     public readonly struct ImmutableUserDiagnosticList
     {
-        internal static ImmutableUserDiagnosticList Empty { get; } = new(
+        public static ImmutableUserDiagnosticList Empty { get; } = new(
             ImmutableArray<Diagnostic>.Empty,
             ImmutableArray<ScopedSuppression>.Empty,
             ImmutableArray<CodeFixInstance>.Empty );

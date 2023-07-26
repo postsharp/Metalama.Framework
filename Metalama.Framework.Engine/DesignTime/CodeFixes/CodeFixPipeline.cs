@@ -70,9 +70,9 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             // Run the validators.
             if ( !pipelineResult.Value.ValidatorSources.IsDefaultOrEmpty )
             {
-                var validationRunner = new ValidationRunner( configuration, pipelineResult.Value.ValidatorSources, cancellationToken );
+                var validationRunner = new ValidationRunner( configuration, pipelineResult.Value.ValidatorSources );
                 var initialCompilation = pipelineResult.Value.FirstCompilationModel.AssertNotNull();
-                var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
+                var validationResult = await validationRunner.RunAllAsync( initialCompilation, finalCompilation, cancellationToken );
 
                 codeFixes = codeFixes.AddRange( validationResult.Diagnostics.CodeFixes );
             }

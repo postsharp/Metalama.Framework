@@ -147,7 +147,8 @@ internal sealed class AspectDriver : IAspectDriver
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
+                        (AspectType: this._aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType),
+                        aspectInstance );
 
                 return CreateResultForError( diagnostic );
             }
@@ -248,7 +249,7 @@ internal sealed class AspectDriver : IAspectDriver
                 {
                     diagnosticSink.Reset();
 
-                    var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, cancellationToken );
+                    var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources );
                     validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
 
                     if ( !diagnosticSink.IsEmpty )

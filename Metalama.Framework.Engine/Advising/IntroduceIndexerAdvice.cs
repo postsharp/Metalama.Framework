@@ -125,7 +125,10 @@ namespace Metalama.Framework.Engine.Advising
                         serviceProvider );
                 }
 
-                CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration.ReturnParameter, this.Builder.SetMethod.AssertNotNull().ReturnParameter, serviceProvider );
+                CopyTemplateAttributes(
+                    this._setTemplate.TemplateMember.Declaration.ReturnParameter,
+                    this.Builder.SetMethod.AssertNotNull().ReturnParameter,
+                    serviceProvider );
             }
 
             var (accessorTemplateForAttributeCopy, skipLastParameter) =
@@ -156,7 +159,8 @@ namespace Metalama.Framework.Engine.Advising
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceIndexerWithoutParameters.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
+                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration),
+                        this ) );
             }
 
             if ( this.Builder.IsStatic )
@@ -164,7 +168,8 @@ namespace Metalama.Framework.Engine.Advising
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticIndexer.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
+                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration),
+                        this ) );
             }
         }
 
@@ -204,7 +209,8 @@ namespace Metalama.Framework.Engine.Advising
                         AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                                this ) );
                 }
 
                 if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingIndexer.Type ) )
@@ -214,7 +220,8 @@ namespace Metalama.Framework.Engine.Advising
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingIndexer.DeclaringType, existingIndexer.Type) ) );
+                                 existingIndexer.DeclaringType, existingIndexer.Type),
+                                this ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -226,7 +233,8 @@ namespace Metalama.Framework.Engine.Advising
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingIndexer.DeclaringType) ) );
+                                     existingIndexer.DeclaringType),
+                                    this ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -239,7 +247,8 @@ namespace Metalama.Framework.Engine.Advising
                             return AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingIndexer.DeclaringType) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingIndexer.DeclaringType),
+                                    this ) );
                         }
                         else
                         {
@@ -280,7 +289,8 @@ namespace Metalama.Framework.Engine.Advising
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                         existingIndexer.DeclaringType) ) );
+                                         existingIndexer.DeclaringType),
+                                        this ) );
                         }
                         else
                         {

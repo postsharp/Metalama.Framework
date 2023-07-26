@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -55,6 +56,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     public string DisplayName { get; }
 
     public string? Description { get; }
+
+    string IDiagnosticSource.DiagnosticSourceDescription => $"aspect '{this.ShortName}'";
 
     internal string? WeaverType { get; }
 
@@ -219,7 +222,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
                         typeSymbol.GetDiagnosticLocation(),
-                        typeSymbol ) );
+                        typeSymbol,
+                        this ) );
 
                 this.HasError = true;
             }

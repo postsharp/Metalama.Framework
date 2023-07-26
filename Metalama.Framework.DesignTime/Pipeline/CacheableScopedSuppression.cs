@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
@@ -10,12 +11,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// <summary>
     /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.
     /// </summary>
-    internal readonly struct CacheableScopedSuppression
+    internal sealed class CacheableScopedSuppression : IScopedSuppression
     {
         /// <summary>
         /// Gets the suppression definition.
         /// </summary>
         public SuppressionDefinition Definition { get; }
+
+        ISymbol? IScopedSuppression.GetScopeSymbolOrNull( Compilation compilation ) => this.DeclarationId.ResolveToSymbolOrNull( compilation );
 
         /// <summary>
         /// Gets the symbol identifier.
@@ -23,7 +26,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public SerializableDeclarationId DeclarationId { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> struct.
+        /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> class.
         /// </summary>
         /// <param name="suppression"></param>
         public CacheableScopedSuppression( in ScopedSuppression suppression )

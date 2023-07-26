@@ -35,4 +35,6 @@ internal sealed class DiagnosticImpl<T> : IDiagnostic
 
         return this;
     }
+
+    public override string ToString() => $"{this._definition.Id}: {this._definition.Title} ({this._arguments})";
 }

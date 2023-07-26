@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -15,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -22,8 +22,8 @@ namespace Metalama.Framework.Engine.Validation;
 public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 {
     private const int _initialStackSize = 8;
-    private readonly IDiagnosticSink _diagnosticAdder;
-    private readonly Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _getValidatorsFunc;
+    private readonly CountingDiagnosticSink _diagnosticAdder;
+    private readonly IReferenceValidatorProvider _validatorProvider;
     private readonly CompilationModel _compilation;
     private readonly SemanticModelProvider _semanticModelProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
@@ -39,12 +39,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     public ReferenceValidationVisitor(
         ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticAdder,
-        Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> getValidatorsFunc,
+        IReferenceValidatorProvider validatorProvider,
         CompilationModel compilation,
         CancellationToken cancellationToken )
     {
-        this._diagnosticAdder = diagnosticAdder;
-        this._getValidatorsFunc = getValidatorsFunc;
+        // This class cannot run concurrently on many threads.
+        this._diagnosticAdder = new CountingDiagnosticSink( diagnosticAdder );
+        this._validatorProvider = validatorProvider;
         this._compilation = compilation;
         this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -74,16 +75,67 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        this.ValidateSymbol( node, ReferenceKinds.None );
+        this.ValidateNodeAndChildren( node, ReferenceKinds.Default );
+    }
+
+    public override void VisitGenericName( GenericNameSyntax node )
+    {
+        this.ValidateNodeWithoutChildren( node, ReferenceKinds.Default, node.Identifier );
+        this.Visit( node.TypeArgumentList );
+    }
+
+    public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
+    {
+        this.ValidateNodeAndChildren( node, ReferenceKinds.Default );
     }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
 
-        if ( !this.ValidateSymbol( node.Left, ReferenceKinds.Assignment ) )
+        var symbol = this._semanticModel!.GetSymbolInfo( node.Left ).Symbol;
+
+        if ( symbol != null )
         {
-            this.Visit( node.Left );
+            if ( !this.ValidateSymbol( symbol, node.Left, ReferenceKinds.Assignment ) )
+            {
+                // If we have no report on the assignment itself, we still need to analyze the children of the left
+                // part with a default ReferenceKind. However we cannot analyze the rightmost member of the expression
+                // because this one is being assigned.
+                switch ( node.Left )
+                {
+                    case MemberAccessExpressionSyntax memberAccess:
+                        this.Visit( memberAccess.Expression );
+
+                        break;
+
+                    case ElementAccessExpressionSyntax elementAccess:
+                        this.Visit( elementAccess.Expression );
+                        this.Visit( elementAccess.ArgumentList );
+
+                        break;
+
+                    case IdentifierNameSyntax:
+                        // If we just have an identifier, we have nothing to visit.
+                        break;
+
+                    default:
+                        // Other cases are possible but we don't implement them.
+                        // For instance, we can assign the return value of a ref method.
+                        break;
+                }
+            }
+        }
+    }
+
+    private void VisitChildren( SyntaxNode node )
+    {
+        foreach ( var nodeOrToken in node.ChildNodesAndTokens() )
+        {
+            if ( nodeOrToken.IsNode )
+            {
+                this.Visit( nodeOrToken.AsNode() );
+            }
         }
     }
 
@@ -91,11 +143,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         if ( node.IsNameOf() )
         {
-            this.ValidateSymbol( node.ArgumentList.Arguments[0].Expression, ReferenceKinds.NameOf );
+            this.ValidateNodeAndChildren( node.ArgumentList.Arguments[0].Expression, ReferenceKinds.NameOf );
         }
         else
         {
-            this.ValidateSymbol( node.Expression, ReferenceKinds.Invocation );
+            this.ValidateNodeAndChildren( node.Expression, ReferenceKinds.Invocation );
 
             foreach ( var arg in node.ArgumentList.Arguments )
             {
@@ -104,12 +156,19 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         }
     }
 
-    public override void VisitBaseList( BaseListSyntax node )
+    public override void VisitPrimaryConstructorBaseType( PrimaryConstructorBaseTypeSyntax node )
     {
-        foreach ( var baseType in node.Types )
+        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
+
+        if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
         {
-            this.VisitTypeReference( baseType.Type, ReferenceKinds.BaseType );
+            this.Visit( node.ArgumentList );
         }
+    }
+
+    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
+    {
+        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
     }
 
     public override void VisitTypeArgumentList( TypeArgumentListSyntax node )
@@ -136,9 +195,9 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public override void VisitAttribute( AttributeSyntax node )
     {
-        this.ValidateSymbol( node.Name, ReferenceKinds.AttributeType );
+        this.ValidateNodeAndChildren( node.Name, ReferenceKinds.AttributeType );
 
-        if ( node.ArgumentList != null )
+        if ( node.ArgumentList != null && this._validatorProvider.Properties.MustDescendIntoImplementation() )
         {
             foreach ( var arg in node.ArgumentList.Arguments )
             {
@@ -150,11 +209,6 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     public override void VisitTypeConstraint( TypeConstraintSyntax node )
     {
         this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
-    }
-
-    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
-    {
-        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
     }
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
@@ -170,6 +224,27 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         return false;
     }
 
+    private void VisitMembers( SyntaxList<MemberDeclarationSyntax> members )
+    {
+        if ( this._validatorProvider.Properties.MustDescendIntoMembers() )
+        {
+            this.Visit( members );
+        }
+        else
+        {
+            // Even if we must not descend into members, we must still visit nested types.
+            foreach ( var member in members )
+            {
+                if ( SyntaxFacts.IsTypeDeclaration( member.Kind() ) )
+                {
+                    this.Visit( member );
+
+                    break;
+                }
+            }
+        }
+    }
+
     public override void VisitClassDeclaration( ClassDeclarationSyntax node )
     {
         if ( this.CanSkipTypeDeclaration( node ) )
@@ -179,7 +254,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
         using ( this.EnterContext( node ) )
         {
-            base.VisitClassDeclaration( node );
+            this.Visit( node.AttributeLists );
+            this.Visit( node.BaseList );
+            this.Visit( node.ConstraintClauses );
+            this.VisitMembers( node.Members );
         }
     }
 
@@ -192,7 +270,16 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
         using ( this.EnterContext( node ) )
         {
-            base.VisitRecordDeclaration( node );
+            this.Visit( node.AttributeLists );
+            this.Visit( node.BaseList );
+            this.Visit( node.ConstraintClauses );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoMembers() )
+            {
+                this.Visit( node.ParameterList );
+            }
+
+            this.VisitMembers( node.Members );
         }
     }
 
@@ -205,7 +292,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
         using ( this.EnterContext( node ) )
         {
-            base.VisitStructDeclaration( node );
+            this.Visit( node.AttributeLists );
+            this.Visit( node.BaseList );
+            this.Visit( node.ConstraintClauses );
+            this.VisitMembers( node.Members );
         }
     }
 
@@ -231,7 +321,16 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
         using ( this.EnterContext( node ) )
         {
-            base.VisitEnumDeclaration( node );
+            this.ValidateNodeAndChildren( node, ReferenceKinds.Default );
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoMembers() )
+            {
+                foreach ( var member in node.Members )
+                {
+                    this.Visit( member );
+                }
+            }
         }
     }
 
@@ -240,7 +339,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         using ( this.EnterContext( node ) )
         {
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol?.OverriddenMethod, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( symbol?.OverriddenMethod, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
             this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
@@ -252,8 +351,11 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
             this.Visit( node.AttributeLists );
 
-            this.Visit( node.ExpressionBody );
-            this.Visit( node.Body );
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -261,14 +363,20 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            this.Visit( node.AttributeLists );
+
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol?.OverriddenProperty, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( symbol?.OverriddenProperty, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
             this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
 
-            this.Visit( node.ExpressionBody );
             this.Visit( node.AccessorList );
-            this.Visit( node.Initializer );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Initializer );
+            }
         }
     }
 
@@ -276,8 +384,10 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
+            this.Visit( node.AttributeLists );
+
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ValidateSymbol( node, symbol?.OverriddenEvent, ReferenceKinds.OverrideMember );
+            this.ValidateSymbol( symbol?.OverriddenEvent, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
             this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
@@ -290,12 +400,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node.Declaration.Variables[0] ) )
         {
+            this.Visit( node.AttributeLists );
             this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
         }
 
         foreach ( var field in node.Declaration.Variables )
         {
-            if ( field.Initializer != null )
+            if ( field.Initializer != null && this._validatorProvider.Properties.MustDescendIntoImplementation() )
             {
                 using ( this.EnterContext( field ) )
                 {
@@ -309,12 +420,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node.Declaration.Variables[0] ) )
         {
+            this.Visit( node.AttributeLists );
             this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
         }
 
         foreach ( var field in node.Declaration.Variables )
         {
-            if ( field.Initializer != null )
+            if ( field.Initializer != null && this._validatorProvider.Properties.MustDescendIntoImplementation() )
             {
                 using ( this.EnterContext( field ) )
                 {
@@ -344,7 +456,20 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            base.VisitOperatorDeclaration( node );
+            this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
+
+            foreach ( var parameter in node.ParameterList.Parameters )
+            {
+                this.Visit( parameter );
+            }
+
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -352,7 +477,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            base.VisitAccessorDeclaration( node );
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -360,10 +491,41 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            // TODO: validate the base constructor.
-            // TODO: validate the call to the base constructor of the implicit constructor.
+            this.Visit( node.AttributeLists );
 
-            base.VisitConstructorDeclaration( node );
+            // Visit the base constructor.
+            ISymbol? baseConstructorSymbol;
+            SyntaxNodeOrToken baseConstructorNode;
+
+            if ( node.Initializer != null )
+            {
+                baseConstructorSymbol = this._semanticModel.GetSymbolInfo( node.Initializer ).Symbol;
+                baseConstructorNode = node.Initializer.ThisOrBaseKeyword;
+            }
+            else
+            {
+                var symbol = this._semanticModel.GetDeclaredSymbol( node );
+                baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
+                baseConstructorNode = node.Identifier;
+            }
+
+            if ( baseConstructorSymbol != null )
+            {
+                this.ValidateSymbol( baseConstructorSymbol, baseConstructorNode, ReferenceKinds.BaseConstructor );
+            }
+
+            // Visit parameters.
+            foreach ( var parameter in node.ParameterList.Parameters )
+            {
+                this.Visit( parameter );
+            }
+
+            // Visit the body.
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -371,7 +533,13 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            base.VisitDestructorDeclaration( node );
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -379,7 +547,20 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            base.VisitConversionOperatorDeclaration( node );
+            this.VisitTypeReference( node.Type, ReferenceKinds.ReturnType );
+
+            foreach ( var parameter in node.ParameterList.Parameters )
+            {
+                this.Visit( parameter );
+            }
+
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
+            }
         }
     }
 
@@ -387,27 +568,37 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            base.VisitIndexerDeclaration( node );
+            this.VisitTypeReference( node.Type, ReferenceKinds.ReturnType );
+
+            foreach ( var parameter in node.ParameterList.Parameters )
+            {
+                this.Visit( parameter );
+            }
+
+            this.Visit( node.AttributeLists );
+
+            if ( this._validatorProvider.Properties.MustDescendIntoImplementation() )
+            {
+                this.Visit( node.ExpressionBody );
+            }
+
+            this.Visit( node.AccessorList );
         }
     }
 
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
-        this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
-        this.Visit( node.ArgumentList );
-        this.Visit( node.Initializer );
+        this.ValidateNodeAndChildren( node, ReferenceKinds.ObjectCreation );
     }
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
-        this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
-        this.Visit( node.ArgumentList );
-        this.Visit( node.Initializer );
+        this.ValidateNodeAndChildren( node, ReferenceKinds.ObjectCreation );
     }
 
     public override void VisitUsingDirective( UsingDirectiveSyntax node )
     {
-        this.ValidateSymbol( node.Name, ReferenceKinds.Using );
+        this.ValidateNodeAndChildren( node.Name, ReferenceKinds.Using );
     }
 
     public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
@@ -420,7 +611,26 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this.Visit( node.Members );
     }
 
-    private bool ValidateSymbol( SyntaxNode? node, ReferenceKinds referenceKind )
+    private void ValidateNodeAndChildren( SyntaxNode? node, ReferenceKinds referenceKind )
+    {
+        if ( node == null )
+        {
+            return;
+        }
+
+        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
+
+        if ( !this.ValidateSymbol( symbol, node, referenceKind ) )
+        {
+            this.VisitChildren( node );
+        }
+        else
+        {
+            // There were reports on the symbol itself so we don't go to children to avoid confusion and duplicates.
+        }
+    }
+
+    private bool ValidateNodeWithoutChildren( SyntaxNode? node, ReferenceKinds referenceKind, SyntaxNodeOrToken? nodeForDiagnostics = null )
     {
         if ( node == null )
         {
@@ -429,7 +639,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
         var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
 
-        return this.ValidateSymbol( node, symbol, referenceKind );
+        return this.ValidateSymbol( symbol, nodeForDiagnostics ?? node, referenceKind );
     }
 
     private void ValidateSymbols<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )
@@ -439,12 +649,18 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             foreach ( var symbol in symbols )
             {
-                this.ValidateSymbol( node, symbol, referenceKinds );
+                this.ValidateSymbol( symbol, node, referenceKinds );
             }
         }
     }
 
-    private bool ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )
+    // Returns true if a diagnostic was reported for the symbol.
+    private bool ValidateSymbol(
+        ISymbol? symbol,
+        SyntaxNodeOrToken node,
+        ReferenceKinds referenceKinds,
+        bool isBaseType = false,
+        bool isContainingType = false )
     {
         if ( symbol == null || symbol.Kind == SymbolKind.Discard )
         {
@@ -489,32 +705,60 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             return false;
         }
 
-        var validators = this._getValidatorsFunc( symbol );
+        var validators = this._validatorProvider.GetValidators( symbol );
+
+        var diagnosticsCountBefore = this._diagnosticAdder.DiagnosticCount;
 
         foreach ( var validator in validators )
         {
-            if ( (validator.ReferenceKinds & referenceKinds) != 0 )
+            if ( (validator.ReferenceKinds & referenceKinds) == 0 )
             {
-                this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
-                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
+                continue;
+            }
+
+            if ( isBaseType && !validator.IncludeDerivedTypes )
+            {
+                continue;
+            }
+
+            this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+            validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
+        }
+
+        if ( symbol.ContainingType != null && this._validatorProvider.Properties.MustDescendIntoReferencedDeclaringType( referenceKinds ) )
+        {
+            this.ValidateSymbol( symbol.ContainingType, node, referenceKinds, isBaseType, true );
+        }
+        else if ( !isContainingType )
+        {
+            if ( symbol is { ContainingNamespace: not null } and { Kind: not SymbolKind.Namespace }
+                 && this._validatorProvider.Properties.MustDescendIntoReferencedNamespace( referenceKinds ) )
+            {
+                // We validate namespaces, but not recursively because it is more cost-efficient when the user registers validators for all child namespaces.
+                this.ValidateSymbol( symbol.ContainingNamespace, node, referenceKinds, isBaseType );
+            }
+            else if ( symbol.ContainingAssembly != null && this._validatorProvider.Properties.MustDescendIntoReferencedAssembly( referenceKinds ) )
+            {
+                this.ValidateSymbol( symbol.ContainingAssembly, node, referenceKinds, isBaseType );
             }
         }
 
-        if ( symbol.ContainingType != null )
+        if ( symbol.Kind == SymbolKind.NamedType && this._validatorProvider.Properties.MustDescendIntoReferencedBaseTypes( referenceKinds ) )
         {
-            this.ValidateSymbol( node, symbol.ContainingType, referenceKinds );
-        }
-        else if ( symbol is { ContainingNamespace: not null } and { Kind: not SymbolKind.Namespace } )
-        {
-            // We validate namespaces, but not recursively because it is more cost-efficient when the user registers validators for all child namespaces.
-            this.ValidateSymbol( node, symbol.ContainingNamespace, referenceKinds );
-        }
-        else if ( symbol.ContainingAssembly != null )
-        {
-            this.ValidateSymbol( node, symbol.ContainingAssembly, referenceKinds );
+            var namedType = (INamedTypeSymbol) symbol;
+
+            if ( namedType.BaseType != null )
+            {
+                this.ValidateSymbol( namedType.BaseType, node, referenceKinds, true );
+            }
+
+            foreach ( var i in namedType.Interfaces )
+            {
+                this.ValidateSymbol( i, node, referenceKinds, true );
+            }
         }
 
-        return true;
+        return this._diagnosticAdder.DiagnosticCount != diagnosticsCountBefore;
     }
 
     private IDeclaration? GetCurrentDeclaration()
@@ -574,27 +818,27 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             case SyntaxKind.IdentifierName:
             case SyntaxKind.QualifiedName:
             case SyntaxKind.PredefinedType:
-                this.ValidateSymbol( type, kind );
+                this.ValidateNodeAndChildren( type, kind );
 
                 break;
 
             case SyntaxKind.NullableType:
-                this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
+                this.ValidateNodeAndChildren( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
 
                 break;
 
             case SyntaxKind.ArrayType:
-                this.ValidateSymbol( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
+                this.ValidateNodeAndChildren( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
 
                 break;
 
             case SyntaxKind.PointerType:
-                this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
+                this.ValidateNodeAndChildren( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
 
                 break;
 
             case SyntaxKind.RefType:
-                this.ValidateSymbol( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
+                this.ValidateNodeAndChildren( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
 
                 break;
 
@@ -618,7 +862,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
                     if ( symbol != null )
                     {
-                        this.ValidateSymbol( genericType, ((INamedTypeSymbol) symbol).ConstructedFrom, kind );
+                        this.ValidateSymbol( ((INamedTypeSymbol) symbol).ConstructedFrom, genericType, kind );
                     }
 
                     foreach ( var arg in genericType.TypeArgumentList.Arguments )

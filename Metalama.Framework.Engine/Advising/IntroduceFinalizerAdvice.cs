@@ -61,7 +61,8 @@ namespace Metalama.Framework.Engine.Advising
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.CannotUseNewOverrideStrategyWithFinalizers.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, targetDeclaration, this.OverrideStrategy) ) );
+                            (this.Aspect.AspectClass.ShortName, targetDeclaration, this.OverrideStrategy),
+                            this ) );
 
                     break;
             }
@@ -95,7 +96,8 @@ namespace Metalama.Framework.Engine.Advising
                         AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
+                                this ) );
                 }
 
                 // There is no existing declaration, we will introduce and override the introduced.
@@ -119,7 +121,8 @@ namespace Metalama.Framework.Engine.Advising
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingFinalizer.DeclaringType) ) );
+                                     existingFinalizer.DeclaringType),
+                                    this ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -128,7 +131,12 @@ namespace Metalama.Framework.Engine.Advising
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideFinalizerTransformation( this, existingFinalizer, this._template.ForIntroduction( existingFinalizer ), this.Tags );
+                            var overriddenMethod = new OverrideFinalizerTransformation(
+                                this,
+                                existingFinalizer,
+                                this._template.ForIntroduction( existingFinalizer ),
+                                this.Tags );
+
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override, existingFinalizer );
@@ -138,7 +146,12 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingFinalizer;
-                            var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+
+                            var overriddenMethod = new OverrideFinalizerTransformation(
+                                this,
+                                this.Builder,
+                                this._template.ForIntroduction( this.Builder ),
+                                this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );

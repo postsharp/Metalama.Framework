@@ -75,17 +75,23 @@ namespace Metalama.Framework.Engine.Fabrics
             this._parent.AddValidatorSource( validatorSource );
         }
 
-        private static IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
+        private IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
             IDeclaration validatedDeclaration,
             ValidatorDriver driver,
             ValidatorImplementation implementation,
-            ReferenceKinds referenceKinds )
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes )
         {
+            var description = MetalamaStringFormatter.Format(
+                $"reference validator for {validatedDeclaration.DeclarationKind} '{validatedDeclaration.ToDisplayString()}' provided by {this._parent.DiagnosticSourceDescription}" );
+
             yield return new ReferenceValidatorInstance(
                 validatedDeclaration,
                 driver,
                 implementation,
-                referenceKinds );
+                referenceKinds,
+                includeDerivedTypes,
+                description );
 
             if ( validatedDeclaration is Method validatedMethod )
             {
@@ -96,7 +102,9 @@ namespace Metalama.Framework.Engine.Fabrics
                             validatedMethod.DeclaringMember!,
                             driver,
                             implementation,
-                            referenceKinds & ~ReferenceKinds.Assignment );
+                            ReferenceKinds.Default,
+                            includeDerivedTypes,
+                            description );
 
                         break;
 
@@ -108,14 +116,19 @@ namespace Metalama.Framework.Engine.Fabrics
                             validatedMethod.DeclaringMember!,
                             driver,
                             implementation,
-                            ReferenceKinds.Assignment );
+                            ReferenceKinds.Assignment,
+                            includeDerivedTypes,
+                            description );
 
                         break;
                 }
             }
         }
 
-        public void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
+        public void ValidateReferences(
+            ValidatorDelegate<ReferenceValidationContext> validateMethod,
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes )
         {
             var methodInfo = validateMethod.Method;
 
@@ -147,11 +160,12 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => SelectReferenceValidatorInstances(
+                        item => this.SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
-                            referenceKinds ) ) ) );
+                            referenceKinds,
+                            includeDerivedTypes ) ) ) );
         }
 
         public void ValidateReferences( ReferenceValidator validator )
@@ -170,11 +184,12 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
                         diagnostics,
-                        item => SelectReferenceValidatorInstances(
+                        item => this.SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( validator ),
-                            validator.ValidatedReferenceKinds ) ) ) );
+                            validator.ValidatedReferenceKinds,
+                            validator.IncludeDerivedTypes ) ) ) );
         }
 
         public void ValidateReferences<TValidator>( Func<T, TValidator> getValidator )
@@ -198,11 +213,12 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
 
-                            return SelectReferenceValidatorInstances(
+                            return this.SelectReferenceValidatorInstances(
                                 item,
                                 source.Driver,
                                 ValidatorImplementation.Create( validator ),
-                                validator.ValidatedReferenceKinds );
+                                validator.ValidatedReferenceKinds,
+                                validator.IncludeDerivedTypes );
                         } ) ) );
         }
 
@@ -228,7 +244,8 @@ namespace Metalama.Framework.Engine.Fabrics
                             new DeclarationValidatorInstance(
                                 item,
                                 (ValidatorDriver<DeclarationValidationContext>) source.Driver,
-                                ValidatorImplementation.Create( source.Predecessor.Instance ) )
+                                ValidatorImplementation.Create( source.Predecessor.Instance ),
+                                this._parent.DiagnosticSourceDescription )
                         } ) ) );
         }
 

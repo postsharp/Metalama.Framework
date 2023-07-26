@@ -29,6 +29,33 @@ internal class SingleThreadedTaskRunner : IConcurrentTaskRunner
         }
     }
 
+    public Task RunInParallelAsync<TItem, TContext>(
+        IEnumerable<TItem> items,
+        Action<TItem, TContext> action,
+        Func<TContext> createContext,
+        CancellationToken cancellationToken )
+        where TItem : notnull
+        where TContext : IDisposable
+    {
+        var orderedItems = this.GetOrderedItems( items );
+
+        try
+        {
+            using var context = createContext();
+
+            foreach ( var item in orderedItems )
+            {
+                action( item, context );
+            }
+
+            return Task.CompletedTask;
+        }
+        catch ( Exception e )
+        {
+            return Task.FromException( e );
+        }
+    }
+
     public async Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull
     {

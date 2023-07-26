@@ -55,7 +55,8 @@ internal sealed class AddAttributeAdvice : Advice
                         return AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.AttributeAlreadyPresent.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this._attribute.Type, targetDeclaration) ) );
+                                (this.Aspect.AspectClass.ShortName, this._attribute.Type, targetDeclaration),
+                                this ) );
 
                     case OverrideStrategy.Ignore:
                         return AdviceImplementationResult.Ignored;

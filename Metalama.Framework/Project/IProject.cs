@@ -22,6 +22,11 @@ namespace Metalama.Framework.Project
         /// Gets the project name, i.e. the <see cref="Path"/> without the directory and without the extension.
         /// </summary>
         string? Name { get; }
+        
+        /// <summary>
+        /// Gets the name of the assembly produced by the project.
+        /// </summary>
+        string AssemblyName { get; }
 
         /// <summary>
         /// Gets the path to the <c>csproj</c> file.

@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
 
-        public ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidators { get; }
+        public ImmutableArray<ReferenceValidatorInstance> ReferenceValidators { get; }
 
         public CompilationModel? FirstCompilationModel { get; }
 
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IAspectSource> aspectSources = default,
             ImmutableArray<IValidatorSource> validatorSources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
-            ImmutableArray<ReferenceValidatorInstance> externallyVisibleValidators = default,
+            ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
             ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default,
@@ -93,8 +93,8 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
 
-            this.ExternallyVisibleValidators =
-                externallyVisibleValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : externallyVisibleValidators;
+            this.ReferenceValidators =
+                referenceValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : referenceValidators;
 
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.AspectSources,
                 this.ValidatorSources,
                 this.ExternallyInheritableAspects,
-                this.ExternallyVisibleValidators,
+                this.ReferenceValidators,
                 this.AdditionalSyntaxTrees,
                 this.AspectInstanceResults,
                 this.AdditionalCompilationOutputFiles,

@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -49,9 +48,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
         public ProjectVersion? ProjectVersion { get; }
 
-        public CompilationPipelineResult PipelineResult { get; }
-
-        public CompilationValidationResult ValidationResult { get; }
+        public AspectPipelineResult PipelineResult { get; }
 
         public long SnapshotId { get; }
 
@@ -59,8 +56,7 @@ internal sealed partial class DesignTimeAspectPipeline
         {
             this._pipeline = pipeline;
             this._dependencies = DependencyGraph.Empty;
-            this.PipelineResult = new CompilationPipelineResult();
-            this.ValidationResult = CompilationValidationResult.Empty;
+            this.PipelineResult = new AspectPipelineResult();
             this.CompileTimeSyntaxTrees = null;
             this.Configuration = null;
             this.Status = DesignTimeAspectPipelineStatus.Default;
@@ -76,7 +72,6 @@ internal sealed partial class DesignTimeAspectPipeline
             this.Configuration = prototype.Configuration;
             this.Status = prototype.Status;
             this.PipelineResult = prototype.PipelineResult;
-            this.ValidationResult = prototype.ValidationResult;
             this._dependencies = prototype._dependencies;
             this.SnapshotId = prototype.SnapshotId + 1;
         }
@@ -95,7 +90,7 @@ internal sealed partial class DesignTimeAspectPipeline
             ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
             DesignTimeAspectPipelineStatus status,
             ProjectVersion projectVersion,
-            CompilationPipelineResult pipelineResult,
+            AspectPipelineResult pipelineResult,
             DependencyGraph dependencies,
             FallibleResultWithDiagnostics<AspectPipelineConfiguration>? configuration )
             : this( prototype )
@@ -123,17 +118,12 @@ internal sealed partial class DesignTimeAspectPipeline
         private PipelineState(
             PipelineState prototype,
             ProjectVersion projectVersion,
-            CompilationPipelineResult pipelineResult,
+            AspectPipelineResult pipelineResult,
             DependencyGraph dependencies ) : this( prototype )
         {
             this.PipelineResult = pipelineResult;
             this.ProjectVersion = projectVersion;
             this._dependencies = dependencies;
-        }
-
-        private PipelineState( PipelineState prototype, CompilationValidationResult validationResult ) : this( prototype )
-        {
-            this.ValidationResult = validationResult;
         }
 
         private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
@@ -205,7 +195,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
             DependencyGraph newDependencyGraph;
-            CompilationPipelineResult newCompilationResult;
+            AspectPipelineResult newAspectPipelineResult;
 
             if ( newChanges.HasCompileTimeCodeChange )
             {
@@ -275,14 +265,14 @@ internal sealed partial class DesignTimeAspectPipeline
                 if ( invalidateCompilationResult )
                 {
                     newDependencyGraph = DependencyGraph.Empty;
-                    newCompilationResult = new CompilationPipelineResult();
+                    newAspectPipelineResult = new AspectPipelineResult();
                 }
                 else
                 {
                     // The pipeline is paused. We do not invalidate the results to we can still serve the old ones.
 
                     newDependencyGraph = this._dependencies;
-                    newCompilationResult = this.PipelineResult;
+                    newAspectPipelineResult = this.PipelineResult;
                 }
             }
             else
@@ -301,12 +291,12 @@ internal sealed partial class DesignTimeAspectPipeline
                         false,
                         cancellationToken );
 
-                    newCompilationResult = invalidator.ToImmutable();
+                    newAspectPipelineResult = invalidator.ToImmutable();
                 }
                 else
                 {
                     newDependencyGraph = this._dependencies;
-                    newCompilationResult = this.PipelineResult;
+                    newAspectPipelineResult = this.PipelineResult;
                 }
             }
 
@@ -317,7 +307,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 newCompileTimeSyntaxTrees,
                 newStatus,
                 newChanges.NewProjectVersion,
-                newCompilationResult,
+                newAspectPipelineResult,
                 newDependencyGraph,
                 newConfiguration );
 
@@ -453,7 +443,7 @@ internal sealed partial class DesignTimeAspectPipeline
         /// <summary>
         /// Executes the pipeline.
         /// </summary>
-        public static async Task<( FallibleResultWithDiagnostics<CompilationResult> CompilationResult, PipelineState NewState)> ExecuteAsync(
+        public static async Task<( FallibleResultWithDiagnostics<AspectPipelineResultAndState> CompilationResult, PipelineState NewState)> ExecuteAsync(
             PipelineState state,
             PartialCompilation compilation,
             DesignTimeProjectVersion projectVersion,
@@ -484,7 +474,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 state = new PipelineState( state, getConfigurationResult, DesignTimeAspectPipelineStatus.Default );
 
-                return (FallibleResultWithDiagnostics<CompilationResult>.Failed( getConfigurationResult.Diagnostics ), state);
+                return (FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
             }
 
             var configuration = getConfigurationResult.Value;
@@ -520,7 +510,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 pipelineResultValue?.ExternallyInheritableAspects.SelectAsImmutableArray( i => new InheritableAspectInstance( i ) )
                 ?? ImmutableArray<InheritableAspectInstance>.Empty;
 
-            var externallyVisibleValidators = pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
+            var referenceValidators = pipelineResultValue?.ReferenceValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
 
             var immutableUserDiagnostics = new ImmutableUserDiagnosticList(
                 diagnosticBag.ToImmutableArray(),
@@ -536,7 +526,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 additionalSyntaxTrees,
                 immutableUserDiagnostics,
                 inheritableAspectInstances,
-                externallyVisibleValidators,
+                referenceValidators,
                 aspectInstances,
                 transformations );
 
@@ -563,84 +553,12 @@ internal sealed partial class DesignTimeAspectPipeline
             // in case of cancellation. From our point of view, this is a safe place to commit.
             state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
-            // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
-            ExecuteValidators( ref state, compilation, configuration, cancellationToken );
-
-            return (new CompilationResult(
+            return (new AspectPipelineResultAndState(
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
-                        state.ValidationResult,
                         state.Status,
                         configuration ), state);
         }
-
-        private static void ExecuteValidators(
-            ref PipelineState state,
-            PartialCompilation compilation,
-            AspectPipelineConfiguration configuration,
-            CancellationToken cancellationToken )
-        {
-            var semanticModelProvider = compilation.Compilation.GetSemanticModelProvider();
-
-            var validationRunner = new DesignTimeValidatorRunner(
-                configuration.ServiceProvider,
-                state.PipelineResult,
-                configuration.ProjectModel,
-                compilation );
-
-            IEnumerable<SyntaxTree> syntaxTreesToValidate;
-
-            if ( state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey )
-            {
-                // If validators did not change, we only have to validate syntax trees that have changed.
-                // (we actually received a closure of modified syntax trees, so the flow could be optimized).
-                syntaxTreesToValidate = compilation.SyntaxTrees.Values;
-            }
-            else
-            {
-                // If validators did change, we need to validate all syntax trees.
-                syntaxTreesToValidate = compilation.Compilation.SyntaxTrees;
-            }
-
-            var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
-
-            var userDiagnosticSink = new UserDiagnosticSink( configuration.ClosureDiagnosticManifest );
-
-            // TODO: this can be parallelized.
-
-            foreach ( var syntaxTree in syntaxTreesToValidate )
-            {
-                userDiagnosticSink.Reset();
-                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
-                validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
-
-                if ( !userDiagnosticSink.IsEmpty )
-                {
-                    var diagnostics = userDiagnosticSink.ToImmutable();
-
-                    var syntaxTreeResult = new SyntaxTreeValidationResult(
-                        diagnostics.ReportedDiagnostics,
-                        diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) )
-                            .ToImmutableArray() );
-
-                    syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
-                }
-                else
-                {
-                    syntaxTreeDictionaryBuilder.Remove( syntaxTree.FilePath );
-                }
-            }
-
-            // TODO: remove trees that no longer exist in the compilation.
-
-            var newValidationResult = new CompilationValidationResult(
-                syntaxTreeDictionaryBuilder.ToImmutable(),
-                state.PipelineResult.Validators.EqualityKey );
-
-            state = state.SetValidationResult( newValidationResult );
-        }
-
-        private PipelineState SetValidationResult( CompilationValidationResult validationResult ) => new( this, validationResult );
 
         private PipelineState SetPipelineResult(
             PartialCompilation compilation,
@@ -649,7 +567,7 @@ internal sealed partial class DesignTimeAspectPipeline
             DesignTimeProjectVersion projectVersion,
             AspectPipelineConfiguration configuration )
         {
-            var compilationResult = this.PipelineResult.Update( compilation, pipelineResult, configuration );
+            var compilationResult = this.PipelineResult.Update( compilation, projectVersion, pipelineResult, configuration );
 
             return new PipelineState( this, (ProjectVersion) projectVersion.ProjectVersion, compilationResult, dependencies );
         }

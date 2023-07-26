@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
@@ -14,12 +15,14 @@ public abstract class DefinitionOnlyDiagnosticAnalyzer : DiagnosticAnalyzer
 {
     private protected DesignTimeDiagnosticDefinitions DiagnosticDefinitions { get; }
 
-    protected DefinitionOnlyDiagnosticAnalyzer( DesignTimeDiagnosticDefinitions diagnosticDefinitions )
+    protected DefinitionOnlyDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
     {
-        this.DiagnosticDefinitions = diagnosticDefinitions;
+        var userDiagnosticRegistrationService = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>();
+        this.ShouldWrapUnsupportedDiagnostics = userDiagnosticRegistrationService.ShouldWrapUnsupportedDiagnostics;
+        this.DiagnosticDefinitions = userDiagnosticRegistrationService.DiagnosticDefinitions;
     }
 
-    protected DefinitionOnlyDiagnosticAnalyzer() : this( DesignTimeDiagnosticDefinitions.GetInstance() ) { }
+    protected bool ShouldWrapUnsupportedDiagnostics { get; }
 
     static DefinitionOnlyDiagnosticAnalyzer()
     {

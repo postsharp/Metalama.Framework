@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using K4os.Hash.xxHash;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -66,15 +65,5 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
 
     public static bool operator !=( SymbolDictionaryKey left, SymbolDictionaryKey right ) => !left.Equals( right );
 
-    public void UpdateHash( XXH64 hasher )
-    {
-        if ( this._identity is not string id )
-        {
-            // We should not compute a hash of lookup keys, only of persistent keys.
-
-            throw new InvalidOperationException();
-        }
-
-        hasher.Update( id );
-    }
+    public override string ToString() => this._identity?.ToString() ?? "null";
 }

@@ -35,7 +35,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
 
-        public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
+        public ImmutableArray<DesignTimeReferenceValidatorInstance> ReferenceValidators { get; }
 
         public ImmutableArray<DesignTimeAspectInstance> AspectInstances { get; }
 
@@ -48,12 +48,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
             ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects,
-            ImmutableArray<DesignTimeValidatorInstance>? validators,
+            ImmutableArray<DesignTimeReferenceValidatorInstance>? validators,
             ImmutableArray<DesignTimeAspectInstance>? aspectInstances,
             ImmutableArray<DesignTimeTransformation>? transformations )
         {
             this.SyntaxTree = syntaxTree;
-            this.Validators = validators ?? ImmutableArray<DesignTimeValidatorInstance>.Empty;
+            this.ReferenceValidators = validators ?? ImmutableArray<DesignTimeReferenceValidatorInstance>.Empty;
             this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;

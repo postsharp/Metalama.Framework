@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using K4os.Hash.xxHash;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
@@ -11,26 +10,35 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class DesignTimeValidatorInstance
+internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidatorProperties
 {
-    private ulong _longHashCode;
+    private readonly ValidatorDriver _driver;
+    private readonly string _description;
 
     public SymbolDictionaryKey ValidatedDeclaration { get; }
 
-    private readonly ReferenceKinds _referenceKinds;
-    private readonly ValidatorDriver _driver;
+    public ReferenceKinds ReferenceKinds { get; }
+
+    public bool IncludeDerivedTypes { get; }
+
+    public DeclarationKind ValidatedDeclarationKind { get; }
 
     internal ValidatorImplementation Implementation { get; }
 
-    internal DesignTimeValidatorInstance(
+    internal DesignTimeReferenceValidatorInstance(
         ISymbol validatedDeclaration,
-        ReferenceKinds referenceKinds,
+        ReferenceKinds referenceReferenceKinds,
+        bool includeDerivedTypes,
         ValidatorDriver driver,
-        ValidatorImplementation implementation )
+        ValidatorImplementation implementation,
+        string description )
     {
         this.ValidatedDeclaration = SymbolDictionaryKey.CreatePersistentKey( validatedDeclaration );
-        this._referenceKinds = referenceKinds;
+        this.ValidatedDeclarationKind = validatedDeclaration.GetDeclarationKind();
+        this.ReferenceKinds = referenceReferenceKinds;
+        this.IncludeDerivedTypes = includeDerivedTypes;
         this._driver = driver;
+        this._description = description;
         this.Implementation = implementation;
     }
 
@@ -39,30 +47,19 @@ internal sealed class DesignTimeValidatorInstance
             compilation.Factory.GetDeclaration( this.ValidatedDeclaration ).AssertNotNull(),
             this._driver,
             this.Implementation,
-            this._referenceKinds );
-
-    internal ulong GetLongHashCode( XXH64 hasher )
-    {
-        if ( this._longHashCode == 0 )
-        {
-            // We expect a zero hasher, but if we receive something else, this does not matter. We are just returning the cumulative digest.
-
-            this.ValidatedDeclaration.UpdateHash( hasher );
-            hasher.Update( (int) this._referenceKinds );
-            this.Implementation.UpdateHash( hasher );
-            hasher.Update( this._driver.GetHashCode() );
-
-            this._longHashCode = hasher.Digest();
-        }
-
-        return this._longHashCode;
-    }
+            this.ReferenceKinds,
+            this.IncludeDerivedTypes,
+            this._description );
 
     public TransitiveValidatorInstance ToTransitiveValidatorInstance()
         => new(
             this.ValidatedDeclaration.ToRef(),
-            this._referenceKinds,
+            this.ReferenceKinds,
+            this.IncludeDerivedTypes,
             this.Implementation.Implementation,
             this.Implementation.State,
-            this._driver.MethodName );
+            this._driver.MethodName,
+            this._description );
+
+    public override string ToString() => this._description;
 }

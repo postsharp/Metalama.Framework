@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         public ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> InheritableAspects { get; private set; }
 
-        public ImmutableArray<TransitiveValidatorInstance> Validators { get; private set; }
+        public ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; private set; }
 
         // Deserializer constructor.
         private TransitiveAspectsManifest()
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableArray<TransitiveValidatorInstance> validators )
         {
             this.InheritableAspects = inheritableAspects;
-            this.Validators = validators;
+            this.ReferenceValidators = validators;
         }
 
         public static TransitiveAspectsManifest Create(
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 var instance = (TransitiveAspectsManifest) obj;
                 initializationArguments.SetValue( nameof(instance.InheritableAspects), instance.InheritableAspects );
-                initializationArguments.SetValue( nameof(instance.Validators), instance.Validators );
+                initializationArguments.SetValue( nameof(instance.ReferenceValidators), instance.ReferenceValidators );
             }
 
             public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
@@ -108,8 +108,8 @@ namespace Metalama.Framework.Engine.Aspects
                     initializationArguments.GetValue<ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>>(
                         nameof(instance.InheritableAspects) )!;
 
-                instance.Validators =
-                    initializationArguments.GetValue<ImmutableArray<TransitiveValidatorInstance>>( nameof(instance.Validators) );
+                instance.ReferenceValidators =
+                    initializationArguments.GetValue<ImmutableArray<TransitiveValidatorInstance>>( nameof(instance.ReferenceValidators) );
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal sealed class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
+    internal sealed class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget, IDiagnosticSource
     {
         private readonly IFieldOrPropertyOrIndexer? _fieldOrPropertyOrIndexer;
         private readonly IMethod? _method;
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IObjectReader Tags => this._common.Tags;
 
-        IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+        ScopedDiagnosticSink IMetaApi.Diagnostics => new( this._common.DiagnosticSink, this, this.Declaration, this.Declaration );
 
         [ExcludeFromCodeCoverage]
         public void DebugBreak()
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
+        public UserDiagnosticSink Diagnostics => this._common.DiagnosticSink;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common )
             : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
@@ -245,5 +245,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common )
             => new( common.Translate( @event ), common.Translate( accessor ), common );
+
+        string IDiagnosticSource.DiagnosticSourceDescription
+            => $"aspect '{this.AspectInstance?.AspectClass.ShortName}' applied to '{this.AspectInstance?.TargetDeclaration.GetTarget( this.Compilation ).ToDisplayString()}' while applying a template on '{this.Declaration.ToDisplayString()}'";
     }
 }

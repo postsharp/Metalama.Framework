@@ -14,10 +14,12 @@ internal sealed class DeclarationValidatorInstance : ValidatorInstance
     public DeclarationValidatorInstance(
         IDeclaration validatedDeclaration,
         ValidatorDriver<DeclarationValidationContext> driver,
-        in ValidatorImplementation implementation ) : base(
+        in ValidatorImplementation implementation,
+        string description ) : base(
         validatedDeclaration,
         driver,
-        implementation )
+        implementation,
+        description )
     {
         this._driver = driver;
     }
@@ -27,7 +29,8 @@ internal sealed class DeclarationValidatorInstance : ValidatorInstance
         var validationContext = new DeclarationValidationContext(
             this.ValidatedDeclaration,
             this.Implementation.State,
-            diagnosticAdder );
+            diagnosticAdder,
+            this );
 
         this._driver.Validate( this.Implementation, validationContext, userCodeInvoker, userCodeExecutionContext );
     }
