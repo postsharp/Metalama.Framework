@@ -4,17 +4,17 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Code;
 
-internal interface ISyntaxReferenceImpl
+internal interface ISourceReferenceImpl
 {
     IDiagnosticLocation GetDiagnosticLocation( in SourceReference sourceReference );
 
     string GetKind( in SourceReference sourceReference );
 
-    SourceSpan GetSourceSpan( SourceReference sourceReference );
+    SourceSpan GetSourceSpan( in SourceReference sourceReference );
 
-    string GetText( SourceSpan sourceSpan );
+    string GetText( in SourceSpan sourceSpan );
 
-    string GetText( SourceReference sourceReference, bool normalized );
+    string GetText( in SourceReference sourceReference, bool normalized );
 
-    bool IsImplementationPart( SourceReference sourceReference );
+    bool IsImplementationPart( in SourceReference sourceReference );
 }

@@ -105,6 +105,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public override ImmutableArray<SourceReference> Sources
-            => this.Symbol.DeclaringSyntaxReferences.SelectAsImmutableArray( r => new SourceReference( r.GetSyntax(), SyntaxReferenceImpl.Instance ) );
+            => this.Symbol.DeclaringSyntaxReferences.SelectAsImmutableArray( r => new SourceReference( r.GetSyntax(), SourceReferenceImpl.Instance ) );
     }
 }

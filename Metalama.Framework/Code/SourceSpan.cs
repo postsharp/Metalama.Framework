@@ -5,9 +5,9 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// Represents a span of source code.
 /// </summary>
-public sealed class SourceSpan
+public readonly struct SourceSpan
 {
-    private readonly ISyntaxReferenceImpl _syntaxReferenceImpl;
+    private readonly ISourceReferenceImpl _sourceReferenceImpl;
 
     internal SourceSpan(
         string filePath,
@@ -18,12 +18,12 @@ public sealed class SourceSpan
         int endLine,
         int startColumn,
         int endColumn,
-        ISyntaxReferenceImpl syntaxReferenceImpl )
+        ISourceReferenceImpl sourceReferenceImpl )
     {
         this.SyntaxTree = syntaxTree;
         this.Start = start;
         this.End = end;
-        this._syntaxReferenceImpl = syntaxReferenceImpl;
+        this._sourceReferenceImpl = sourceReferenceImpl;
         this.FilePath = filePath;
         this.StartLine = startLine;
         this.EndLine = endLine;
@@ -68,7 +68,7 @@ public sealed class SourceSpan
     /// Gets the text representation (i.e. the source code) of the current syntax node or token.
     /// </summary>
     /// <returns>The source code of the current syntax node.</returns>
-    public string GetText() => this._syntaxReferenceImpl.GetText( this );
+    public string GetText() => this._sourceReferenceImpl.GetText( this );
 
     public override string ToString() => $"{this.FilePath}";
 }

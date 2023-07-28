@@ -139,10 +139,10 @@ internal sealed class Method : MethodBase, IMethodImpl
         if ( this.MethodSymbol.PartialImplementationPart != null )
         {
             var sources = ImmutableArray.CreateBuilder<SourceReference>( 2 );
-            sources.Add( new SourceReference( this.MethodSymbol.DeclaringSyntaxReferences[0].GetSyntax(), SyntaxReferenceImpl.Instance ) );
+            sources.Add( new SourceReference( this.MethodSymbol.DeclaringSyntaxReferences[0].GetSyntax(), SourceReferenceImpl.Instance ) );
 
             sources.Add(
-                new SourceReference( this.MethodSymbol.PartialImplementationPart.DeclaringSyntaxReferences[0].GetSyntax(), SyntaxReferenceImpl.Instance ) );
+                new SourceReference( this.MethodSymbol.PartialImplementationPart.DeclaringSyntaxReferences[0].GetSyntax(), SourceReferenceImpl.Instance ) );
 
             return sources.MoveToImmutable();
         }

@@ -12,13 +12,13 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed class SyntaxReferenceImpl : ISyntaxReferenceImpl
+internal sealed class SourceReferenceImpl : ISourceReferenceImpl
 {
-    public static SyntaxReferenceImpl Instance { get; } = new();
+    public static SourceReferenceImpl Instance { get; } = new();
 
-    private SyntaxReferenceImpl() { }
+    private SourceReferenceImpl() { }
 
-    IDiagnosticLocation ISyntaxReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
+    IDiagnosticLocation ISourceReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
         => sourceReference.NodeOrToken switch
         {
             SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
@@ -26,7 +26,7 @@ internal sealed class SyntaxReferenceImpl : ISyntaxReferenceImpl
             _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrToken.GetType()}." )
         };
 
-    string ISyntaxReferenceImpl.GetKind( in SourceReference sourceReference )
+    string ISourceReferenceImpl.GetKind( in SourceReference sourceReference )
         => sourceReference.NodeOrToken switch
         {
             SyntaxNode node => node.Kind().ToString(),
@@ -34,7 +34,7 @@ internal sealed class SyntaxReferenceImpl : ISyntaxReferenceImpl
             _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
         };
 
-    public SourceSpan GetSourceSpan( SourceReference sourceReference )
+    public SourceSpan GetSourceSpan( in SourceReference sourceReference )
     {
         var (syntaxTree, span) = sourceReference.NodeOrToken switch
         {
@@ -57,10 +57,10 @@ internal sealed class SyntaxReferenceImpl : ISyntaxReferenceImpl
             this );
     }
 
-    public string GetText( SourceSpan sourceSpan )
+    public string GetText( in SourceSpan sourceSpan )
         => ((SyntaxTree) sourceSpan.SyntaxTree).GetText().GetSubText( TextSpan.FromBounds( sourceSpan.Start, sourceSpan.End ) ).ToString();
 
-    public string GetText( SourceReference sourceReference, bool normalized )
+    public string GetText( in SourceReference sourceReference, bool normalized )
         => sourceReference.NodeOrToken switch
         {
             SyntaxNode node when normalized => node.NormalizeWhitespace().ToString(),
@@ -70,7 +70,7 @@ internal sealed class SyntaxReferenceImpl : ISyntaxReferenceImpl
             _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
         };
 
-    public bool IsImplementationPart( SourceReference sourceReference )
+    public bool IsImplementationPart( in SourceReference sourceReference )
         => !(sourceReference.NodeOrToken is MethodDeclarationSyntax { Body: null, ExpressionBody: null } method &&
              method.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) ));
 }

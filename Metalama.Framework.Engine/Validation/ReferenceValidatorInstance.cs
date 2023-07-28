@@ -42,7 +42,7 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
         var validationContext = new ReferenceValidationContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
-            new SourceReference( node.AsNode() ?? (object) node.AsToken(), SyntaxReferenceImpl.Instance ),
+            new SourceReference( node.AsNode() ?? (object) node.AsToken(), SourceReferenceImpl.Instance ),
             this.Implementation.State,
             diagnosticAdder,
             this,
