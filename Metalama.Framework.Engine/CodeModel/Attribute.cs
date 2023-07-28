@@ -52,6 +52,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
+        public ImmutableArray<SourceReference> Sources { get; set; }
+
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]

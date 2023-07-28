@@ -7,7 +7,9 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -81,4 +83,6 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     protected override int GetHashCodeCore() => this.Builder.GetHashCode();
 
     public override bool BelongsToCurrentProject => true;
+
+    public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 }

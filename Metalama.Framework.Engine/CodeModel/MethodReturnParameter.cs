@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -32,6 +33,8 @@ namespace Metalama.Framework.Engine.CodeModel
                this.Compilation.CompilationContext.SymbolComparer.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
         public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
+
+        public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
         public override ISymbol? Symbol => null;
 

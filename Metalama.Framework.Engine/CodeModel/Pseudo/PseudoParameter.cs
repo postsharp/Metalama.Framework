@@ -94,11 +94,18 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IExpression.IsAssignable => true;
 
-        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
+        public ref object? Value
+            => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new TypedExpressionSyntaxImpl( SyntaxFactory.IdentifierName( this.Name ), this.Type, (SyntaxGenerationContext) syntaxGenerationContext, isReferenceable: true );
-        
+            => new TypedExpressionSyntaxImpl(
+                SyntaxFactory.IdentifierName( this.Name ),
+                this.Type,
+                (SyntaxGenerationContext) syntaxGenerationContext,
+                isReferenceable: true );
+
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
+
+        public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
     }
 }

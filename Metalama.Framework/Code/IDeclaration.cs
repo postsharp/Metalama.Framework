@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Metrics;
 using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code
 {
@@ -81,5 +82,11 @@ namespace Metalama.Framework.Code
         /// declared in referenced projects or assemblies.
         /// </summary>
         bool BelongsToCurrentProject { get; }
+
+        /// <summary>
+        /// Gets the set of syntax nodes of the source code that declare the current declaration, or an empty
+        /// set if the current declaration is not backed by source code.
+        /// </summary>
+        ImmutableArray<SourceReference> Sources { get; }
     }
 }

@@ -6,7 +6,15 @@ namespace Metalama.Framework.Code;
 
 internal interface ISyntaxReferenceImpl
 {
-    IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference );
+    IDiagnosticLocation GetDiagnosticLocation( in SourceReference sourceReference );
 
-    string GetKind( in SyntaxReference syntaxReference );
+    string GetKind( in SourceReference sourceReference );
+
+    SourceSpan GetSourceSpan( SourceReference sourceReference );
+
+    string GetText( SourceSpan sourceSpan );
+
+    string GetText( SourceReference sourceReference, bool normalized );
+
+    bool IsImplementationPart( SourceReference sourceReference );
 }

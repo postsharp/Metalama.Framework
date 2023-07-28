@@ -6,7 +6,9 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -100,5 +102,9 @@ namespace Metalama.Framework.Engine.CodeModel
         protected override int GetHashCodeCore() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
         public override bool BelongsToCurrentProject => this.Symbol.ContainingAssembly.Equals( this.Compilation.RoslynCompilation.Assembly );
+
+        [Memo]
+        public override ImmutableArray<SourceReference> Sources
+            => this.Symbol.DeclaringSyntaxReferences.SelectAsImmutableArray( r => new SourceReference( r.GetSyntax(), SyntaxReferenceImpl.Instance ) );
     }
 }

@@ -59,6 +59,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     bool IDeclaration.BelongsToCurrentProject => true;
 
+    ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
+
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     public CompilationModel Compilation
