@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions;
 
 internal static class ExpressionExtensions
 {
-    public static ExpressionSyntax ToExpressionSyntax( this IUserExpression userExpression, SyntaxGenerationContext context )
+    public static ExpressionSyntax ToExpressionSyntax( this IUserExpression userExpression, SyntaxSerializationContext context )
         => userExpression.ToTypedExpressionSyntax( context ).Syntax;
 
     public static IUserExpression ToUserExpression( this IExpression expression )
@@ -23,20 +23,20 @@ internal static class ExpressionExtensions
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static IUserExpression ToUserExpression( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
+    public static IUserExpression ToUserExpression( this IExpression expression, ISyntaxSerializationContext syntaxSerializationContext )
         => expression switch
         {
             null => null!,
             IUserExpression userExpression => userExpression,
             TypedConstant typedConstant => new SyntaxUserExpression(
-                ((SyntaxGenerationContext) syntaxGenerationContext).SyntaxGenerator.TypedConstant( typedConstant ),
+                ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerator.TypedConstant( typedConstant ),
                 typedConstant.Type ),
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
+    public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxSerializationContext syntaxGenerationContext )
         => expression.ToUserExpression( syntaxGenerationContext ).ToTypedExpressionSyntax( syntaxGenerationContext );
 
-    public static ExpressionSyntax ToExpressionSyntax( this IExpression expression, SyntaxGenerationContext context )
+    public static ExpressionSyntax ToExpressionSyntax( this IExpression expression, SyntaxSerializationContext context )
         => expression.ToTypedExpressionSyntax( context ).Syntax;
 }

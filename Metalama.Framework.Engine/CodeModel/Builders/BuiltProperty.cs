@@ -61,7 +61,7 @@ internal sealed class BuiltProperty : BuiltMember, IPropertyImpl
 
     public ref object? Value => ref this.PropertyBuilder.Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
         => this.PropertyBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();

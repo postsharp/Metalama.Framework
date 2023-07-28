@@ -27,7 +27,11 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => CompileTimeMocksHelper.ToTypedExpressionSyntax( this.FieldOrPropertyOrIndexer, this.Type, CompileTimeFieldOrPropertyInfoSerializer.SerializeFieldOrProperty, syntaxGenerationContext );
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+            => CompileTimeMocksHelper.ToTypedExpressionSyntax(
+                this.FieldOrPropertyOrIndexer,
+                typeof(FieldOrPropertyInfo),
+                CompileTimeFieldOrPropertyInfoSerializer.SerializeFieldOrProperty,
+                syntaxGenerationContext );
     }
 }

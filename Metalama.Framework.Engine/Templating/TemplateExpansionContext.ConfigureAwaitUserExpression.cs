@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,9 +35,9 @@ internal sealed partial class TemplateExpansionContext
             }
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         {
-            var generatedExpression = this._expression.ToExpressionSyntax( syntaxGenerationContext );
+            var generatedExpression = this._expression.ToExpressionSyntax( syntaxSerializationContext );
 
             // generatedExpression.ConfigureAwait(true/false)
             return InvocationExpression(

@@ -27,12 +27,9 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
-        var contextCopy = context;
         BlockSyntax? getterBody, setterBody;
 
         // Local function that executes the filter for one of the accessors.
-        var syntaxGenerationContext = context.SyntaxGenerationContext;
-
         bool TryExecuteFilters(
             IMethod? accessor,
             out List<StatementSyntax>? inputStatements,
@@ -45,8 +42,8 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                  && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Input ) ) )
             {
                 if ( !advice.TryExecuteTemplates( 
-                        this.OverriddenDeclaration, 
-                        contextCopy, 
+                        this.OverriddenDeclaration,
+                        context, 
                         ContractDirection.Input, 
                         null, 
                         accessor.MethodKind == MethodKind.PropertyGet ? RemoveInputContract : null,
@@ -76,10 +73,10 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
             {
                 returnValueLocalName = 
                     accessor.MethodKind == MethodKind.PropertyGet 
-                        ? contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
+                        ? context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
                         : null;
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) )
                 {
                     inputStatements = null;
                     proceedExpression = null;
@@ -102,8 +99,8 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                 return false;
             }
 
-            proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default )
-                .ToExpressionSyntax( syntaxGenerationContext );
+            proceedExpression = this.CreateProceedDynamicExpression( context, accessor, TemplateKind.Default )
+                .ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
 
             return true;
         }

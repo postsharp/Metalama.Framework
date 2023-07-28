@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, this.GenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, this.GenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments(
                 this.Member.Signature.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, this.Member.Compilation, this.GenerationContext ),
+                TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ),
                 this.GenerationContext );
 
             var expression = ConditionalAccessExpression(

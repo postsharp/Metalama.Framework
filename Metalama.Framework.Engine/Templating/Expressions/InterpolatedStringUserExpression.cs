@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
@@ -61,7 +62,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                         FlushTextToken();
 
-                        var tokenSyntax = TypedExpressionSyntaxImpl.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+                        var tokenSyntax = TypedExpressionSyntaxImpl.FromValue( token.Expression, syntaxSerializationContext ).Syntax;
 
                         if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) &&
                              token.Alignment is null && token.Format is null )
@@ -95,7 +96,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             FlushTextToken();
 
-            return syntaxGenerationContext.SyntaxGenerator.RenderInterpolatedString(
+            return syntaxSerializationContext.SyntaxGenerator.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringStartToken ),
                     SyntaxFactory.List( contents ),

@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             // Get the proceed expression.
-            var proceedExpression = this.CreateProceedExpression( context, templateKind ).ToExpressionSyntax( context.SyntaxGenerationContext );
+            var proceedExpression = this.CreateProceedExpression( context, templateKind ).ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
 
             var statements = new List<StatementSyntax>();
 

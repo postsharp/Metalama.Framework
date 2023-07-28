@@ -154,7 +154,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
             try
             {
-                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
+                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
             }
             catch ( Exception ex )
             {

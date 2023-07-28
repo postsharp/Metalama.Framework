@@ -5,6 +5,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
@@ -27,11 +28,13 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public IType Type => TypeFactory.GetType( typeof(ParameterInfo) );
 
+        public Type ReflectionType => typeof(ParameterInfo);
+
         public RefKind RefKind => RefKind.None;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
             => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimeReturnParameterInfoSerializer.SerializeParameter, syntaxGenerationContext );
     }
 }

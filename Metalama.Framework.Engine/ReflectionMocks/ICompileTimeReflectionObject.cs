@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.References;
+using System;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
@@ -10,5 +11,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         where T : class, ICompilationElement
     {
         ISdkRef<T> Target { get; }
+
+        Type ReflectionType { get; }
     }
 }

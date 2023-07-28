@@ -62,11 +62,13 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public IType Type => TypeFactory.GetType( typeof(PropertyInfo) );
 
+        public Type ReflectionType => typeof(PropertyInfo);
+
         public RefKind RefKind => RefKind.None;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
             => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimePropertyInfoSerializer.SerializeProperty, syntaxGenerationContext );
     }
 }

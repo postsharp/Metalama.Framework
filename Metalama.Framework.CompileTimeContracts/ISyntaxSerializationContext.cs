@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.CompileTimeContracts;
 
-public interface ISyntaxGenerationContext { }
+public interface ISyntaxSerializationContext { }

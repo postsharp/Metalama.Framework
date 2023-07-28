@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -23,11 +24,11 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
             {
                 this.Validate();
 
-                return this._parent._proceedExpression!.ToTypedExpressionSyntax( syntaxGenerationContext ).Syntax;
+                return this._parent._proceedExpression!.ToTypedExpressionSyntax( syntaxSerializationContext ).Syntax;
             }
 
             private void Validate()

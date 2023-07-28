@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -174,19 +173,21 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public IType Type => TypeFactory.GetType( typeof(Type) );
 
+        public Type ReflectionType => typeof(Type);
+
         public RefKind RefKind => RefKind.None;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
         {
-            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+            var compilation = ((SyntaxSerializationContext) syntaxSerializationContext).CompilationModel;
 
             return CompileTimeMocksHelper.ToTypedExpressionSyntax(
                 this.Target.GetSymbol( compilation.RoslynCompilation ).AssertCast<ITypeSymbol>().AssertNotNull(),
-                this.Type,
+                this.ReflectionType,
                 TypeSerializationHelper.SerializeTypeSymbolRecursive,
-                syntaxGenerationContext );
+                syntaxSerializationContext );
         }
     }
 }

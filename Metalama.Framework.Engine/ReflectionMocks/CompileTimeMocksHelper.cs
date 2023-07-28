@@ -2,10 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -21,33 +19,35 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public static TypedExpressionSyntax ToTypedExpressionSyntax<T>(
             ICompileTimeReflectionObject<T> compileTimeMemberInfo,
             Func<T, SyntaxSerializationContext, ExpressionSyntax> serialize,
-            ISyntaxGenerationContext syntaxGenerationContext )
+            ISyntaxSerializationContext syntaxSerializationContext )
             where T : class, ICompilationElement
         {
-            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+            var serializationContext = (SyntaxSerializationContext) syntaxSerializationContext;
 
-            return ToTypedExpressionSyntax( compileTimeMemberInfo.Target.GetTarget( compilation ), compileTimeMemberInfo.Type, serialize, syntaxGenerationContext );
+            return ToTypedExpressionSyntax( 
+                compileTimeMemberInfo.Target.GetTarget( serializationContext.CompilationModel ),
+                compileTimeMemberInfo.ReflectionType,
+                serialize, 
+                syntaxSerializationContext );
         }
 
         public static TypedExpressionSyntax ToTypedExpressionSyntax<T>(
             T member,
-            IType type,
+            Type type,
             Func<T, SyntaxSerializationContext, ExpressionSyntax> serialize,
-            ISyntaxGenerationContext syntaxGenerationContext )
+            ISyntaxSerializationContext syntaxSerializationContext )
         {
-            var generationContext = (SyntaxGenerationContext) syntaxGenerationContext;
+            var serializationContext = (SyntaxSerializationContext) syntaxSerializationContext;
 
-            var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+            var expression = serialize( member, serializationContext );
 
-            var expression = serialize(
-                member,
-                new( compilation, generationContext ) );
+            var iType = serializationContext.CompilationModel.Factory.GetTypeByReflectionType( type );
 
             return new(
                 new TypedExpressionSyntaxImpl(
                     expression,
-                    type,
-                    generationContext,
+                    iType,
+                    serializationContext.SyntaxGenerationContext,
                     true ) );
         }
     }

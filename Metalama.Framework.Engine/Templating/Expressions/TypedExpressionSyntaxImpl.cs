@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -88,15 +89,15 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 syntaxGenerationContext,
                 isReferenceable ) { }
 
-        internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
-            => FromValue( value, compilation, generationContext ).Syntax;
+        internal static ExpressionSyntax GetSyntaxFromValue( object? value, SyntaxSerializationContext serializationContext )
+            => FromValue( value, serializationContext ).Syntax;
 
-        internal static TypedExpressionSyntaxImpl FromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
+        internal static TypedExpressionSyntaxImpl FromValue( object? value, SyntaxSerializationContext serializationContext )
         {
             switch ( value )
             {
                 case null:
-                    return new TypedExpressionSyntaxImpl( SyntaxFactoryEx.Null, generationContext );
+                    return new TypedExpressionSyntaxImpl( SyntaxFactoryEx.Null, serializationContext.SyntaxGenerationContext );
 
                 case TypedExpressionSyntaxImpl runtimeExpression:
                     return runtimeExpression;
@@ -105,10 +106,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return runtimeExpression;
 
                 case IExpression dynamicMember:
-                    return dynamicMember.ToTypedExpressionSyntax( generationContext );
+                    return dynamicMember.ToTypedExpressionSyntax( serializationContext );
 
                 case ExpressionSyntax syntax:
-                    return new TypedExpressionSyntaxImpl( syntax, generationContext );
+                    return new TypedExpressionSyntaxImpl( syntax, serializationContext.SyntaxGenerationContext );
 
                 default:
                     var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
@@ -117,8 +118,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     {
                         return new TypedExpressionSyntaxImpl(
                             expression,
-                            compilation.GetCompilationModel().Factory.GetTypeByReflectionType( value.GetType() ),
-                            generationContext );
+                            serializationContext.CompilationModel.Factory.GetTypeByReflectionType( value.GetType() ),
+                            serializationContext.SyntaxGenerationContext );
                     }
                     else
                     {
@@ -128,7 +129,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             }
         }
 
-        internal static TypedExpressionSyntaxImpl[]? FromValues( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
+        internal static TypedExpressionSyntaxImpl[]? FromValues( object?[]? array, SyntaxSerializationContext serializationContext )
         {
             switch ( array )
             {
@@ -145,7 +146,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                     for ( var i = 0; i < newArray.Length; i++ )
                     {
-                        newArray[i] = FromValue( array[i], compilation, generationContext );
+                        newArray[i] = FromValue( array[i], serializationContext );
                     }
 
                     return newArray;
