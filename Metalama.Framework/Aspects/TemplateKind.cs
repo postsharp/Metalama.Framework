@@ -8,7 +8,7 @@ namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Enumeration of the kind of templates that were specified by the user using <see cref="GetterTemplateSelector"/> or
-    /// <see cref="TemplateKind"/>. A <see cref="MethodTemplateSelector"/> represents the intention of the user, not
+    /// <see cref="MethodTemplateSelector"/>. A <see cref="MethodTemplateSelector"/> represents the intention of the user, not
     /// a characteristic of the declaration used as a template.
     /// </summary>
     internal enum TemplateKind
