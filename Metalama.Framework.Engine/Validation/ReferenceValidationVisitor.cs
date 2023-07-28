@@ -119,10 +119,8 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                         // If we just have an identifier, we have nothing to visit.
                         break;
 
-                    default:
-                        // Other cases are possible but we don't implement them.
-                        // For instance, we can assign the return value of a ref method.
-                        break;
+                    // Other cases are possible but we don't implement them.
+                    // For instance, we can assign the return value of a ref method.
                 }
             }
         }
@@ -721,7 +719,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
                 continue;
             }
 
-            this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
+            this._userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
             validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
         }
 

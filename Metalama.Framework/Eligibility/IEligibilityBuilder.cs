@@ -15,7 +15,8 @@ namespace Metalama.Framework.Eligibility
     public interface IEligibilityBuilder
     {
         /// <summary>
-        /// Gets the <see cref="EligibleScenarios"/> value that rules must return in case they evaluate negatively. The default
+        /// Gets the <see cref="EligibleScenarios"/> value that rules must return in case they evaluate negatively, i.e. what
+        /// is the eligibility of the aspect on the target when the rule is <i>not</i> satisfied.  The default
         /// value of this property is <see cref="EligibleScenarios.None"/>, but it can be changed to anything
         /// using <see cref="EligibilityExtensions.ExceptForScenarios{T}"/>.
         /// </summary>

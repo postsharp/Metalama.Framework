@@ -57,9 +57,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 var stackTrace = new StackTrace( userException, true );
 
-                diagnosticLocation = GetSourceCodeLocation( stackTrace, compileTimeProject )
-                                     ?? context.InvokedMember.GetDiagnosticLocation()
-                                     ?? Location.None;
+                diagnosticLocation = GetSourceCodeLocation( stackTrace, compileTimeProject ) ?? Location.None;
             }
 
             if ( userException is DiagnosticException { InSourceCode: true } invalidUserCodeException )
@@ -119,29 +117,15 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 }
 
                 var exceptionMessage = userException.Message.TrimSuffix( "." );
-                var exceptionType = userException.GetType().Name;
+                var exceptionType = userException.GetType().FullName ?? "<unknown>";
 
-                if ( context.TargetDeclaration != null )
-                {
-                    context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateRoslynDiagnostic(
-                            diagnosticLocation,
-                            (context.InvokedMember,
-                             context.TargetDeclaration,
-                             exceptionType,
-                             exceptionMessage,
-                             reportFile) ) );
-                }
-                else
-                {
-                    context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateRoslynDiagnostic(
-                            diagnosticLocation,
-                            (context.InvokedMember,
-                             exceptionType,
-                             exceptionMessage,
-                             reportFile) ) );
-                }
+                context.Diagnostics.Report(
+                    GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateRoslynDiagnostic(
+                        diagnosticLocation,
+                        (context.Description,
+                         exceptionType,
+                         exceptionMessage,
+                         reportFile) ) );
             }
 
             return true;
@@ -151,7 +135,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             try
             {
-                result = this.Invoke( func, context );
+                result = this.Invoke( func, context, false );
 
                 return true;
             }
@@ -180,12 +164,12 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                 try
                 {
-                    var enumerable = this.Invoke( func, context );
-                    var enumerator = this.Invoke( enumerable.GetEnumerator, context );
+                    var enumerable = this.Invoke( func, context, false );
+                    var enumerator = this.Invoke( enumerable.GetEnumerator, context, false );
 
-                    while ( this.Invoke( enumerator.MoveNext, context ) )
+                    while ( this.Invoke( enumerator.MoveNext, context, false ) )
                     {
-                        result.Add( this.Invoke( () => enumerator.Current, context ) );
+                        result.Add( this.Invoke( () => enumerator.Current, context, false ) );
                     }
                 }
                 catch ( Exception e )
@@ -234,7 +218,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 context,
                 out _ );
 
-        public void Invoke( Action action, UserCodeExecutionContext context )
+        public void Invoke( Action action, UserCodeExecutionContext context, bool wrapExceptions = true )
         {
             _ = this.Invoke(
                 () =>
@@ -243,27 +227,39 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                     return true;
                 },
-                context );
+                context,
+                wrapExceptions );
         }
 
-        public T Invoke<T>( Func<T> func, UserCodeExecutionContext context )
+        public T Invoke<T>( Func<T> func, UserCodeExecutionContext context, bool wrapExceptions = true )
         {
             var adapter = new UserCodeFuncAdapter<T>( func );
 
-            return this.Invoke( adapter.UserCodeFunc, ref adapter, context );
+            return this.Invoke( adapter.UserCodeFunc, ref adapter, context, wrapExceptions );
         }
 
-        public TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload, UserCodeExecutionContext context )
+        public TResult Invoke<TResult, TPayload>(
+            UserCodeFunc<TResult, TPayload> func,
+            ref TPayload payload,
+            UserCodeExecutionContext context,
+            bool wrapException = true )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )
             {
-                if ( this._hook != null )
+                try
                 {
-                    return this._hook.Invoke( func, ref payload );
+                    if ( this._hook != null )
+                    {
+                        return this._hook.Invoke( func, ref payload );
+                    }
+                    else
+                    {
+                        return func( ref payload );
+                    }
                 }
-                else
+                catch ( Exception e ) when ( wrapException )
                 {
-                    return func( ref payload );
+                    throw new UserCodeException( context, e );
                 }
             }
         }

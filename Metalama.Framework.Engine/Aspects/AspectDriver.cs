@@ -161,7 +161,7 @@ internal sealed class AspectDriver : IAspectDriver
             var executionContext = new UserCodeExecutionContext(
                 serviceProvider,
                 diagnosticSink,
-                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                UserCodeDescription.Create( "executing BuildAspect for {0}", aspectInstance ),
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
                 targetDeclaration,

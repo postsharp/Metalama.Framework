@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 var executionContext = new UserCodeExecutionContext(
                     this._serviceProvider,
                     NullDiagnosticAdder.Instance,
-                    UserCodeMemberInfo.FromMemberInfo( f ) );
+                    UserCodeDescription.Create( "getting the DiagnosticDefinition defined by field {0}", f ) );
 
                 if ( !this._userCodeInvoker.TryInvoke( () => f.GetValue( null ), executionContext, out var value ) )
                 {
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 var executionContext = new UserCodeExecutionContext(
                     this._serviceProvider,
                     NullDiagnosticAdder.Instance,
-                    UserCodeMemberInfo.FromMemberInfo( p ) );
+                    UserCodeDescription.Create( "getting the DiagnosticDefinition defined by property {0}", p ) );
 
                 if ( !this._userCodeInvoker.TryInvoke( () => p.GetValue( null ), executionContext, out var value ) )
                 {

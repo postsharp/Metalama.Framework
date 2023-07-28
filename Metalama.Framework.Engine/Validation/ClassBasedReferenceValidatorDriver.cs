@@ -2,28 +2,14 @@
 
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
-using System;
-using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
 internal sealed class ClassBasedReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
 {
-    public ClassBasedReferenceValidatorDriver( Type validatorType )
-    {
-        var baseMethod = typeof(ReferenceValidator).GetMethod( nameof(ReferenceValidator.Validate) ).AssertNotNull();
+    public static ClassBasedReferenceValidatorDriver Instance { get; } = new();
 
-        var method = validatorType.GetMethod(
-                baseMethod.Name,
-                BindingFlags.Instance | BindingFlags.Public,
-                null,
-                baseMethod.GetParameters().SelectAsArray( t => t.ParameterType ),
-                null )
-            .AssertNotNull();
-
-        this.UserCodeMemberInfo = UserCodeMemberInfo.FromMemberInfo( method );
-    }
+    private ClassBasedReferenceValidatorDriver() { }
 
     public override void Validate(
         ValidatorImplementation implementation,
@@ -35,7 +21,8 @@ internal sealed class ClassBasedReferenceValidatorDriver : ValidatorDriver<Refer
         invoker.Invoke( InvokePayload.Validate, ref invokePayload, executionContext );
     }
 
-    internal override UserCodeMemberInfo UserCodeMemberInfo { get; }
+    internal override UserCodeDescription GetUserCodeMemberInfo( ValidatorInstance validatorInstance )
+        => UserCodeDescription.Create( "executing the Validate for", (ReferenceValidatorInstance) validatorInstance );
 
     public override string? MethodName => null;
 

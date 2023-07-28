@@ -51,7 +51,8 @@ internal sealed class MethodBasedReferenceValidatorDriver : ValidatorDriver<Refe
         }
     }
 
-    internal override UserCodeMemberInfo UserCodeMemberInfo => UserCodeMemberInfo.FromMemberInfo( this._validateMethodInfo );
+    internal override UserCodeDescription GetUserCodeMemberInfo( ValidatorInstance validatorInstance )
+        => UserCodeDescription.Create( "executing {0}", validatorInstance );
 
     public override string MethodName => this._validateMethodInfo.Name;
 }

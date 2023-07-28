@@ -11,13 +11,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal sealed class ReflectionSerializerFactory : ISerializerFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly UserCodeExecutionContext _userCodeExecutionContext;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly Type _serializerType;
 
         public ReflectionSerializerFactory( ProjectServiceProvider serviceProvider, Type serializerType )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-            this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );
+            this._serviceProvider = serviceProvider;
             this._serializerType = serializerType;
         }
 
@@ -51,7 +51,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 serializerTypeInstance = this._serializerType;
             }
 
-            var instance = this._userCodeInvoker.Invoke( () => Activator.CreateInstance( serializerTypeInstance ), this._userCodeExecutionContext );
+            var userCodeExecutionContext = new UserCodeExecutionContext(
+                this._serviceProvider,
+                UserCodeDescription.Create( "instantiating the serializer type", serializerTypeInstance ) );
+
+            var instance = this._userCodeInvoker.Invoke( () => Activator.CreateInstance( serializerTypeInstance ), userCodeExecutionContext );
 
             return instance switch
             {

@@ -445,9 +445,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( this._parent._logger.Warning != null )
                     {
-                        this._parent._logger.Warning.Log( "Compiling the compile-time project failed because the source code contains C# errors." );
+                        var diagnostics = compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        
+                        this._parent._logger.Warning.Log( $"Compiling the compile-time project failed because the source code contains {diagnostics.Count} C# error(s):" );
 
-                        foreach ( var error in compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) )
+                        foreach ( var error in diagnostics )
                         {
                             this._parent._logger.Warning.Log( error.ToString() );
                         }
@@ -1357,7 +1359,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                     }
-                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    else if ( symbol is { IsStatic: true } 
+                        && node.Parent is not MemberAccessExpressionSyntax 
+                        && node.Parent is not AliasQualifiedNameSyntax 
+                        && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
                     {
                         switch ( symbol.Kind )
                         {

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -32,7 +33,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
         private readonly CompilationContext? _compilationServices;
         private bool _collectDependencyDisabled;
-        private UserCodeMemberInfo? _invokedMember;
 
         internal static UserCodeExecutionContext Current
             => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal static Type ResolveCompileTimeTypeOf( string typeId, string? ns, string name, string fullName, string toString )
             => Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
-                .Get( new SerializableTypeId( typeId ), new( ns, name, fullName, toString ) );
+                .Get( new SerializableTypeId( typeId ), new CompileTimeTypeMetadata( ns, name, fullName, toString ) );
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -91,9 +91,19 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 } );
         }
 
+        /// <summary>
+        /// Creates a <see cref="UserCodeExecutionContext"/> for a given <see cref="CompilationModel"/>. 
+        /// </summary>
         [PublicAPI]
-        public static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation )
-            => WithContext( new UserCodeExecutionContext( serviceProvider, compilationModel: compilation ) );
+        public static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation, string? description = null )
+            => WithContext(
+                new UserCodeExecutionContext(
+                    serviceProvider,
+                    UserCodeDescription.Create( description ?? "executing a test method" ),
+                    compilationModel: compilation ) );
+
+        internal static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
+            => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilationModel: compilation ) );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
@@ -101,12 +111,14 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         /// </summary>
         internal UserCodeExecutionContext(
             ProjectServiceProvider serviceProvider,
+            UserCodeDescription description,
             AspectLayerId? aspectAspectLayerId = null,
             CompilationModel? compilationModel = null,
             IDeclaration? targetDeclaration = null,
             ISyntaxBuilderImpl? syntaxBuilder = null,
             MetaApi? metaApi = null )
         {
+            this.Description = description;
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
             this.Compilation = compilationModel;
@@ -125,7 +137,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         internal UserCodeExecutionContext(
             ProjectServiceProvider serviceProvider,
             IDiagnosticAdder diagnostics,
-            UserCodeMemberInfo invokedMember,
+            UserCodeDescription description,
             AspectLayerId? aspectAspectLayerId = null,
             CompilationModel? compilationModel = null,
             IDeclaration? targetDeclaration = null,
@@ -139,7 +151,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.Compilation = compilationModel;
             this._diagnosticAdder = diagnostics;
             this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
-            this.InvokedMember = invokedMember;
+            this.Description = description;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
@@ -157,7 +169,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.Compilation = prototype.Compilation;
             this._diagnosticAdder = prototype._diagnosticAdder;
             this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
-            this._invokedMember = prototype._invokedMember;
+            this.Description = prototype.Description;
             this.TargetDeclaration = prototype.TargetDeclaration;
             this._dependencyCollector = prototype._dependencyCollector;
             this._targetType = prototype._targetType;
@@ -176,11 +188,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         // This property is intentionally writable because it allows us to reuse the same context for several calls, when performance
         // is critical. This feature is used by validators.
-        internal UserCodeMemberInfo InvokedMember
-        {
-            get => this._invokedMember ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without invoked member." );
-            set => this._invokedMember = value;
-        }
+        internal UserCodeDescription Description { get; set; }
 
         internal IDeclaration? TargetDeclaration { get; }
 
@@ -206,7 +214,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
 
-        internal UserCodeExecutionContext WithInvokedMember( UserCodeMemberInfo invokedMember )
+        internal UserCodeExecutionContext WithInvokedMember( UserCodeDescription invokedMember )
             => new(
                 this.ServiceProvider,
                 this.Diagnostics,
@@ -228,7 +236,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return new UserCodeExecutionContext(
                 this.ServiceProvider,
                 diagnostics,
-                this.InvokedMember,
+                this.Description,
                 this.AspectLayerId,
                 compilation,
                 this.TargetDeclaration,

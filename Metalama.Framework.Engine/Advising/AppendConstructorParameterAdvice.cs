@@ -130,7 +130,10 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
                 if ( this._pullActionFunc != null )
                 {
-                    using ( UserCodeExecutionContext.WithContext( serviceProvider, compilation ) )
+                    using ( UserCodeExecutionContext.WithContext(
+                               serviceProvider,
+                               compilation,
+                               UserCodeDescription.Create( "evaluating the pull action for {0}", this ) ) )
                     {
                         // Ask the IPullStrategy what to do.
                         pullParameterAction = this._pullActionFunc( parameterBuilder, chainedConstructor );

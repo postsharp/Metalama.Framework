@@ -14,7 +14,7 @@ class TestAspect : TypeAspect
 
     public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
     {
-        builder.MustSatisfy(_ =>
+        builder.AddRules(_ =>
         {
             TypeFactory.GetType(typeof(RunTimeClass));
         });

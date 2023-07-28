@@ -12,15 +12,17 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -145,26 +147,32 @@ namespace Metalama.Framework.Engine.Linking
 
             // Replace wildcard AssemblyVersionAttribute with actual version.
             var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
-            var assemblyVersionType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
-            var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionType ).FirstOrDefault();
+            var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
+            var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
             if ( assemblyVersionAttribute?.ConstructorArguments.FirstOrDefault() is { Value: string version }
                  && version.Contains( '*' ) )
             {
-                attributes.Remove( assemblyVersionType );
+                attributes.Remove( assemblyVersionAttributeType );
 
-                using ( UserCodeExecutionContext.WithContext( this._serviceProvider, input.CompilationModel ) )
-                {
-                    // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
-                    attributes.Add(
-                        new AttributeBuilder(
-                            null!,
-                            input.CompilationModel.DeclaringAssembly,
-                            AttributeConstruction.Create(
-                                assemblyVersionType,
-                                new object[] { input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString() } ) ) );
-                }
+                // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
+                // We avoid to use user APIs that require a user code execution context.
+                var assemblyVersionAttributeConstructor = assemblyVersionAttributeType.Constructors.Single( x => x.Parameters is [{ Type.SpecialType: SpecialType.String }] );
+
+                var newAssemblyVersionAttribute =
+                    new StandaloneAttributeData(
+                        assemblyVersionAttributeConstructor )
+                    {
+                        ConstructorArguments = ImmutableArray.Create(
+                            TypedConstant.Create( input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString(), assemblyVersionAttributeConstructor.Parameters[0].Type ) )
+                    };
+                
+                attributes.Add(
+                    new AttributeBuilder(
+                        null!,
+                        input.CompilationModel.DeclaringAssembly,
+                        newAssemblyVersionAttribute ) );
             }
 #pragma warning restore CA1307
 

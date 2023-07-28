@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 var userCodeExecutionContext = new UserCodeExecutionContext(
                     configuration.ServiceProvider!.Value,
                     diagnostics,
-                    UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ),
+                    UserCodeDescription.Create( "executing {0}", codeFix ),
                     compilationModel: pipelineResult.Value.Compilation );
 
                 await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );

@@ -159,23 +159,12 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "The type must have a default constructor." );
 
-        internal static readonly DiagnosticDefinition<(UserCodeMemberInfo TemplateSymbol, IDeclaration TargetDeclaration, string ExceptionType, string
-                ExceptionMessage, string Details)>
-            ExceptionInUserCodeWithTarget
+        internal static readonly DiagnosticDefinition<(UserCodeDescription TemplateSymbol, string ExceptionType, string ExceptionMessage, string Details)>
+            ExceptionInUserCode
                 = new(
                     "LAMA0041",
                     "Exception in user code",
-                    "'{0}' threw '{2}' when applied to '{1}': {3}. Exception details are in '{4}'. To attach a debugger to the compiler, use the " +
-                    " '-p:MetalamaDebugCompiler=True' command-line option.",
-                    _category,
-                    Error );
-
-        internal static readonly DiagnosticDefinition<(UserCodeMemberInfo TemplateSymbol, string ExceptionType, string ExceptionMessage, string Details)>
-            ExceptionInUserCodeWithoutTarget
-                = new(
-                    "LAMA0042",
-                    "Exception in user code",
-                    "'{0}' threw '{1}': {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
+                    "'Exception of type '{1}' thrown while {0}: {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
                     " '-p:MetalamaDebugCompiler=True' command-line option.",
                     _category,
                     Error );
