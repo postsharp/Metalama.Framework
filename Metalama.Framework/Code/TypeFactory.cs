@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Code;
@@ -13,7 +13,18 @@ namespace Metalama.Framework.Code;
 [CompileTime]
 public static class TypeFactory
 {
-    internal static IDeclarationFactory Implementation => ((ICompilationInternal) SyntaxBuilder.CurrentImplementation.Compilation).Factory;
+    internal static IDeclarationFactory Implementation
+    {
+        get
+        {
+            var syntaxBuilder =
+                MetalamaExecutionContext.CurrentInternal.SyntaxBuilder
+                ?? throw new InvalidOperationException(
+                    "TypeFactory is not available in this context. In BuildEligibility, TypeFactory can only be used inside eligibility delegates." );
+
+            return ((ICompilationInternal) syntaxBuilder.Compilation).Factory;
+        }
+    }
 
     /// <summary>
     /// Gets an <see cref="IType"/> given a reflection <see cref="Type"/>.

@@ -462,7 +462,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
         // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
         // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
+        var executionContext = new UserCodeExecutionContext( this.ServiceProvider, compilationModel: obj.GetCompilationModel() );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 

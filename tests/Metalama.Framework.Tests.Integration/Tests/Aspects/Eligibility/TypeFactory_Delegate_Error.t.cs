@@ -1,0 +1,2 @@
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0042 on `TypeFactory.GetType(typeof(RunTimeClass));`: `'TestAspect.BuildEligibility' threw 'InvalidOperationException': TypeFactory is not available in this context. In BuildEligibility, TypeFactory can only be used inside eligibility delegates. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
