@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `get`: `'Exception of type 'System.ArgumentOutOfRangeException' thrown while executing the template method InvokerAspect.GetTemplate(IProperty): Cannot provide a target other than 'this' or the current type when specifying InvokerOptions.Base or InvokerOptions.Current. (Parameter 'target'). Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0063 on `get`: `Cannot invoke member 'DifferentClass.Property' when specifying InvokerOptions.Base here, because it does not belong to the template target type 'TargetClass'.`
