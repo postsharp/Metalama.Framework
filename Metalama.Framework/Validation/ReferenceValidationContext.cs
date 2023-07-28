@@ -29,7 +29,7 @@ namespace Metalama.Framework.Validation
         public IAspectState? AspectState { get; }
 
         /// <summary>
-        /// Gets the declaration being validated (i.e. the one referenced by the <see cref="Syntax"/> being inspected).
+        /// Gets the declaration being validated (i.e. the one referenced by the <see cref="Source"/> being inspected).
         /// </summary>
         public IDeclaration ReferencedDeclaration { get; }
 
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Validation
                ?? throw new InvalidOperationException( $"Don't know how to get the declaring type of '{this.ReferencingDeclaration}'." );
 
         /// <summary>
-        /// Gets the set (bit mask) of reference kinds for the current <see cref="Syntax"/>. For instance, while validating a parameter of type <c>Foo[]</c>,
+        /// Gets the set (bit mask) of reference kinds for the current <see cref="Source"/>. For instance, while validating a parameter of type <c>Foo[]</c>,
         /// both bits <see cref="Validation.ReferenceKinds.ParameterType"/> and <see cref="Validation.ReferenceKinds.ArrayType"/> will be set.
         /// </summary>
         public ReferenceKinds ReferenceKinds { get; }
@@ -54,19 +54,22 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets the location on which the diagnostic should be reported.
         /// </summary>
-        public IDiagnosticLocation DiagnosticLocation => this.Syntax.DiagnosticLocation;
+        public IDiagnosticLocation DiagnosticLocation => this.Source.DiagnosticLocation;
 
         /// <summary>
         /// Gets the syntax node that represents the reference.
         /// </summary>
-        public SyntaxReference Syntax { get; }
+        public SourceReference Source { get; }
+
+        [Obsolete( "Use the Source property." )]
+        public SourceReference Syntax => this.Source;
 
         public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this.DiagnosticSource, this.DiagnosticLocation, this.ReferencedDeclaration );
 
         internal ReferenceValidationContext(
             IDeclaration referencedDeclaration,
             IDeclaration referencingDeclaration,
-            in SyntaxReference syntax,
+            in SourceReference source,
             IAspectState? aspectState,
             IDiagnosticSink diagnosticSink,
             IDiagnosticSource diagnosticSource,
@@ -78,7 +81,7 @@ namespace Metalama.Framework.Validation
             this.ReferencedDeclaration = referencedDeclaration;
             this.ReferencingDeclaration = referencingDeclaration;
             this.ReferenceKinds = referenceKinds;
-            this.Syntax = syntax;
+            this.Source = source;
         }
     }
 }

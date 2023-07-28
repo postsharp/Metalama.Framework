@@ -178,4 +178,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public override string ToString() => this.ToDisplayString();
 
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
+
+    public ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 }

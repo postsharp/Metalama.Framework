@@ -55,6 +55,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract bool BelongsToCurrentProject { get; }
 
+        public abstract ImmutableArray<SourceReference> Sources { get; }
+
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 
         protected virtual ISymbol? GetSymbol() => null;
