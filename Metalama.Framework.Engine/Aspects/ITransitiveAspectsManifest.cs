@@ -12,6 +12,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType );
 
-        ImmutableArray<TransitiveValidatorInstance> Validators { get; }
+        ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; }
     }
 }

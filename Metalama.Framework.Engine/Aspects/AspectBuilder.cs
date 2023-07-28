@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._aspectBuilderState.Diagnostics;
 
-        public ScopedDiagnosticSink Diagnostics => new( this._aspectBuilderState.Diagnostics, this.Target, this.Target );
+        public ScopedDiagnosticSink Diagnostics => new( this._aspectBuilderState.Diagnostics, this, this.Target, this.Target );
 
         public T Target { get; }
 
@@ -114,7 +114,8 @@ namespace Metalama.Framework.Engine.Aspects
                 this._aspectBuilderState.Diagnostics.Report(
                     GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                         this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!) ) );
+                        (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
+                        this ) );
 
                 this.SkipAspect();
 
@@ -169,5 +170,7 @@ namespace Metalama.Framework.Engine.Aspects
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetDeclarationValidatorDriver( validate );
 
         public LicenseVerifier? LicenseVerifier { get; }
+
+        string IDiagnosticSource.DiagnosticSourceDescription => ((IAspectInstanceInternal) this.AspectInstance).DiagnosticSourceDescription;
     }
 }

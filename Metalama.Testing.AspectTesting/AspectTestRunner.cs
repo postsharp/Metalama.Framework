@@ -265,6 +265,14 @@ namespace Metalama.Testing.AspectTesting
 
             try
             {
+                foreach ( var reference in testResult.OutputCompilation.AssertNotNull().References.OfType<PortableExecutableReference>() )
+                {
+                    if ( Path.GetFileName( reference.FilePath.AssertNotNull() ).StartsWith( "dependency_", StringComparison.Ordinal ) )
+                    {
+                        loadContext.LoadFromAssemblyPath( reference.FilePath! );
+                    }
+                }
+
                 peStream.Seek( 0, SeekOrigin.Begin );
                 var assembly = loadContext.LoadFromStream( peStream, pdbStream );
                 var type = assembly.GetType( mainMethod.DeclaringType.FullName )!;

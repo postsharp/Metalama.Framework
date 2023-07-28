@@ -88,5 +88,43 @@ namespace Metalama.Framework.Engine.Collections
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public Builder ToBuilder() => new( this );
+
+        public ImmutableDictionaryOfHashSet<TKey, TValue> Merge( IEnumerable<ImmutableDictionaryOfHashSet<TKey, TValue>> others )
+        {
+            // We optimize for low conflicts in keys i.e. each dictionary has mostly disjoint set of keys.
+
+            ImmutableDictionary<TKey, Group>.Builder? builder = null;
+
+            foreach ( var other in others )
+            {
+                if ( other.IsEmpty )
+                {
+                    continue;
+                }
+
+                builder ??= this._dictionary.ToBuilder();
+
+                foreach ( var pair in other._dictionary )
+                {
+                    if ( builder.TryGetValue( pair.Key, out var currentGroup ) )
+                    {
+                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ) );
+                    }
+                    else
+                    {
+                        builder[pair.Key] = pair.Value;
+                    }
+                }
+            }
+
+            if ( builder == null )
+            {
+                return this;
+            }
+            else
+            {
+                return new ImmutableDictionaryOfHashSet<TKey, TValue>( builder.ToImmutable(), this.ValueComparer );
+            }
+        }
     }
 }

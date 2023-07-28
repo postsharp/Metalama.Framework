@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // Report error if the compilation does not have the METALAMA preprocessor symbol.
             if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
             {
-                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, null ) );
 
                 return default;
             }
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 var resultPartialCompilation = result.Value.Compilation;
 
                 // Execute validators.
-                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml )

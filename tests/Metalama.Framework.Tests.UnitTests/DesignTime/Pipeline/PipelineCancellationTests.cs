@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 public sealed class PipelineCancellationTests : UnitTestClass
 {
-    private const int _maxCancellationPoints = 23;
+    private const int _maxCancellationPoints = 22;
     private const int _getConfigurationMaxCancellationPoints = 2;
 
     public PipelineCancellationTests( ITestOutputHelper logger ) : base( logger ) { }
@@ -57,7 +57,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
         }
 
         var min = isSmallEnough ? _maxCancellationPoints : 1;
-        var max = isLargeEnough ? _maxCancellationPoints : _maxCancellationPoints * 2;
+        var max = isLargeEnough ? _maxCancellationPoints : _maxCancellationPoints * 10;
 
         for ( var i = min; i < max; i++ )
         {

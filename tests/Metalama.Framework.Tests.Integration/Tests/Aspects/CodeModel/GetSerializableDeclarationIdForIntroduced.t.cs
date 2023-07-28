@@ -64,8 +64,7 @@ class C
       "M:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.set_Property(System.Int32);Return",
       "P:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.Item(System.Int32)",
       "P:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.Item(System.Int32);Parameter=0",
-      "P:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.Property",
-      "T:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C"
+      "P:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.Property"
     };
   }
   private static global::System.String[] GetBuilderIds()

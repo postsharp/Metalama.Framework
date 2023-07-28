@@ -91,7 +91,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                 }
 
                 // Process validators.
-                validatorsBuilder.AddRange( manifest.Validators );
+                validatorsBuilder.AddRange( manifest.ReferenceValidators );
             }
         }
 
@@ -156,7 +156,9 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                             validationTarget,
                             v.GetReferenceValidatorDriver(),
                             ValidatorImplementation.Create( v.Object, v.State ),
-                            v.ReferenceKinds );
+                            v.ReferenceKinds,
+                            v.IncludeDerivedTypes,
+                            v.DiagnosticSourceDescription );
                     } )
                 .WhereNotNull();
         }

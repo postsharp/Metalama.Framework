@@ -5,17 +5,17 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class CompilationValidationResult
+internal sealed class DesignTimeValidationResult
 {
-    public static CompilationValidationResult Empty { get; } = new();
+    public static DesignTimeValidationResult Empty { get; } = new();
 
     internal ImmutableDictionary<string, SyntaxTreeValidationResult> SyntaxTreeResults { get; }
 
     public DesignTimeValidatorCollectionEqualityKey ValidatorEqualityKey { get; }
 
-    private CompilationValidationResult() : this( ImmutableDictionary<string, SyntaxTreeValidationResult>.Empty, default ) { }
+    private DesignTimeValidationResult() : this( ImmutableDictionary<string, SyntaxTreeValidationResult>.Empty, default ) { }
 
-    internal CompilationValidationResult(
+    internal DesignTimeValidationResult(
         ImmutableDictionary<string, SyntaxTreeValidationResult> syntaxTreeResults,
         DesignTimeValidatorCollectionEqualityKey validatorEqualityKey )
     {

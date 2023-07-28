@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rider;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
@@ -22,6 +23,7 @@ public sealed class CodeFixTests : UnitTestClass
     {
         base.ConfigureServices( services );
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
+        services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
     }
 
     [Fact]

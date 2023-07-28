@@ -43,7 +43,7 @@ public static partial class EligibilityRuleFactory
                     fieldOrPropertyOrIndexer
                         => fieldOrPropertyOrIndexer.Convert()
                             .When<IPropertyOrIndexer>()
-                            .MustSatisfy(
+                            .AddRules(
                                 builder =>
                                 {
                                     builder.MustBeReadable();

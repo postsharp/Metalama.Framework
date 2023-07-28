@@ -26,6 +26,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -220,6 +221,8 @@ internal sealed partial class CompileTimeCompilationBuilder
             templateSymbolManifestBuilder,
             cancellationToken );
 
+        var compileTimeToSourceMap = this._observer == null ? null : new Dictionary<string, string>();
+
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
         var transformedFileGenerator = new TransformedPathGenerator();
 
@@ -232,9 +235,12 @@ internal sealed partial class CompileTimeCompilationBuilder
             .Select(
                 t =>
                 {
+                    var path = transformedFileGenerator.GetTransformedFilePath( t.FileName, t.Hash );
+
                     var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.SyntaxTree.GetRoot() )
-                        .AssertNotNull()
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.SyntaxTree.FilePath ) );
+                        .AssertNotNull();
+
+                    compileTimeToSourceMap?.Add( path, t.SyntaxTree.FilePath );
 
                     // Remove all preprocessor trivias.
                     compileTimeSyntaxRoot = new RemovePreprocessorDirectivesRewriter().Visit( compileTimeSyntaxRoot ).AssertNotNull();
@@ -242,7 +248,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     return CSharpSyntaxTree.Create(
                         (CSharpSyntaxNode) compileTimeSyntaxRoot,
                         SupportedCSharpVersions.DefaultParseOptions,
-                        transformedFileGenerator.GetTransformedFilePath( t.FileName, t.Hash ),
+                        path,
                         Encoding.UTF8 );
                 } )
             .ToList();
@@ -286,7 +292,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
-        this._observer?.OnCompileTimeCompilation( compileTimeCompilation );
+        this._observer?.OnCompileTimeCompilation( compileTimeCompilation, compileTimeToSourceMap.AssertNotNull() );
 
         return true;
     }
@@ -327,7 +333,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 assemblyName,
                 predefinedSyntaxTrees,
                 standardReferences,
-                new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
+                new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true, optimizationLevel: OptimizationLevel.Debug ) )
             .AddReferences(
                 referencedProjects
                     .Where( r => r is { IsEmpty: false, IsFramework: false } )
@@ -347,7 +353,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         try
         {
-            var emitOptions = new EmitOptions( debugInformationFormat: DebugInformationFormat.PortablePdb );
+            var emitOptions = new EmitOptions( pdbFilePath: outputPaths.Pdb, debugInformationFormat: DebugInformationFormat.PortablePdb );
 
             // Write the generated files to disk if we should.
             if ( !Directory.Exists( outputDirectory ) )
@@ -355,9 +361,6 @@ internal sealed partial class CompileTimeCompilationBuilder
                 this._logger.Trace?.Log( $"Creating directory '{outputDirectory}'." );
                 Directory.CreateDirectory( outputDirectory );
             }
-
-            compileTimeCompilation =
-                compileTimeCompilation.WithOptions( compileTimeCompilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
 
             foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
             {
@@ -375,26 +378,26 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                 // despite the Mutex. 
+                var bytes = Encoding.UTF8.GetBytes( text );
+
                 RetryHelper.RetryWithLockDetection(
                     path,
-                    p => File.WriteAllText( p, text, Encoding.UTF8 ),
+                    p => File.WriteAllBytes( p, bytes ),
                     this._serviceProvider.Underlying,
                     logger: this._logger );
 
                 // Reparse from the text. There is a little performance cost of doing that instead of keeping
                 // the parsed syntax tree, however, it has the advantage of detecting syntax errors where we have a valid
-                // object tree but an syntax text. These errors are very difficult to diagnose in production situations.
+                // object tree but an invalid syntax text. These errors are very difficult to diagnose in production situations.
+                // We can't change anything in the SyntaxTree after we parse so we don't break the link between the PDB and the source file.
+
+                var sourceText = SourceText.From( bytes, bytes.Length, Encoding.UTF8, SourceHashAlgorithm.Sha256 );
+
                 var newTree = CSharpSyntaxTree.ParseText(
-                    text,
+                    sourceText,
                     (CSharpParseOptions?) compileTimeSyntaxTree.Options,
                     path,
-                    Encoding.UTF8 );
-
-                // Copy annotations on the root.
-                if ( compileTimeSyntaxTree.GetRoot().HasAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ) )
-                {
-                    newTree = newTree.WithRootAndOptions( compileTimeSyntaxTree.GetRoot().CopyAnnotationsTo( newTree.GetRoot() ), newTree.Options );
-                }
+                    cancellationToken );
 
                 compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
             }

@@ -146,7 +146,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                     AdviceImplementationResult.Failed(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
+                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
+                            this ) );
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
@@ -168,7 +169,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingMethod.DeclaringType) ) );
+                             existingMethod.DeclaringType),
+                            this ) );
             }
             else if ( !compilation.Comparers.Default.Is(
                          this.Builder.ReturnType,
@@ -180,7 +182,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingMethod.DeclaringType, existingMethod.ReturnType) ) );
+                             existingMethod.DeclaringType, existingMethod.ReturnType),
+                            this ) );
             }
 
             switch ( this.OverrideStrategy )
@@ -192,7 +195,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingMethod.DeclaringType) ) );
+                                 existingMethod.DeclaringType),
+                                this ) );
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
@@ -205,7 +209,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         return AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, existingMethod.DeclaringType) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, existingMethod.DeclaringType),
+                                this ) );
                     }
                     else
                     {
@@ -213,7 +218,11 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                         this.Builder.IsOverride = false;
                         this.Builder.OverriddenMethod = existingMethod;
 
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation(
+                            this,
+                            this.Builder,
+                            this._template.ForIntroduction( this.Builder ),
+                            this.Tags );
 
                         addTransformation( overriddenMethod );
                         addTransformation( this.Builder.ToTransformation() );
@@ -224,7 +233,11 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                 case OverrideStrategy.Override:
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this._template.ForIntroduction( existingMethod ), this.Tags );
+                        var overriddenMethod = new OverrideMethodTransformation(
+                            this,
+                            existingMethod,
+                            this._template.ForIntroduction( existingMethod ),
+                            this.Tags );
 
                         addTransformation( overriddenMethod );
 
@@ -237,14 +250,20 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingMethod.DeclaringType) ) );
+                                     existingMethod.DeclaringType),
+                                    this ) );
                     }
                     else
                     {
                         this.Builder.IsOverride = true;
                         this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                         this.Builder.OverriddenMethod = existingMethod;
-                        var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+
+                        var overriddenMethod = new OverrideMethodTransformation(
+                            this,
+                            this.Builder,
+                            this._template.ForIntroduction( this.Builder ),
+                            this.Tags );
 
                         addTransformation( this.Builder.ToTransformation() );
                         addTransformation( overriddenMethod );

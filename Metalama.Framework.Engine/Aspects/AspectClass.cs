@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -55,6 +56,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     public string DisplayName { get; }
 
     public string? Description { get; }
+
+    string IDiagnosticSource.DiagnosticSourceDescription => $"aspect '{this.ShortName}'";
 
     internal string? WeaverType { get; }
 
@@ -219,7 +222,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
                         typeSymbol.GetDiagnosticLocation(),
-                        typeSymbol ) );
+                        typeSymbol,
+                        this ) );
 
                 this.HasError = true;
             }
@@ -296,7 +300,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             var executionContext = new UserCodeExecutionContext(
                 this.ServiceProvider,
                 diagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<IEligibilityBuilder<T>>( eligible.BuildEligibility ) ) );
+                UserCodeDescription.Create( "executing BuildEligibility for {0}", this ) );
 
             if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
             {
@@ -458,7 +462,9 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
         // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
         // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
+        var executionContext = new UserCodeExecutionContext(
+            this.ServiceProvider,
+            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this, obj ) );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
@@ -508,7 +514,9 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
         // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
         // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
+        var executionContext = new UserCodeExecutionContext(
+            this.ServiceProvider,
+            UserCodeDescription.Create( "evaluating eligibility description for {0} applied to '{1}'", this, describedObject ) );
 
         return this._userCodeInvoker.Invoke(
             () =>
@@ -521,7 +529,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     internal IAspect CreateDefaultInstance()
         => this._userCodeInvoker.Invoke(
             () => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull(),
-            new UserCodeExecutionContext( this.ServiceProvider ) );
+            new UserCodeExecutionContext( this.ServiceProvider, UserCodeDescription.Create( "executing the default constructor of {0}", this ) ) );
 
     public override string ToString() => this.FullName;
 

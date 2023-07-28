@@ -3,8 +3,8 @@ internal partial class Person : global::System.ComponentModel.INotifyPropertyCha
 {
   public Person(string firstName, string lastName)
   {
-    this.FirstName = firstName;
-    this.LastName = lastName;
+    FirstName = firstName;
+    LastName = lastName;
   }
   private string _firstName = default !;
   public string FirstName

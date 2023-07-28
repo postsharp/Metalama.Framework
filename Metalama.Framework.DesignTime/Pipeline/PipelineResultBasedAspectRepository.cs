@@ -9,9 +9,9 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class PipelineResultBasedAspectRepository : AspectRepository
 {
-    private readonly CompilationPipelineResult _result;
+    private readonly AspectPipelineResult _result;
 
-    public PipelineResultBasedAspectRepository( CompilationPipelineResult result )
+    public PipelineResultBasedAspectRepository( AspectPipelineResult result )
     {
         this._result = result;
     }

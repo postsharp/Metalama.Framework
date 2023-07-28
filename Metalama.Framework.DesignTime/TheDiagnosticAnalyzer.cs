@@ -6,6 +6,7 @@ using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.DesignTime
         public TheDiagnosticAnalyzer() : this(
             DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
-        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -118,18 +119,9 @@ namespace Metalama.Framework.DesignTime
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                // Execute the analyses that are not performed in the pipeline.
-                TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
-                    context.SemanticModel,
-                    ReportDiagnostic,
-                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
-                    true,
-                    cancellationToken );
-
                 // Run the pipeline.
                 IEnumerable<Diagnostic> diagnostics;
-                IEnumerable<CacheableScopedSuppression> suppressions;
+                IEnumerable<IScopedSuppression> suppressions;
 
                 var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
@@ -141,7 +133,7 @@ namespace Metalama.Framework.DesignTime
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
 
                     diagnostics = filteredPipelineDiagnostics;
-                    suppressions = Enumerable.Empty<CacheableScopedSuppression>();
+                    suppressions = Enumerable.Empty<IScopedSuppression>();
                 }
                 else
                 {
@@ -149,18 +141,43 @@ namespace Metalama.Framework.DesignTime
                     suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
                 }
 
+                // Execute the analyses that are not performed in the pipeline.
+                // We execute this after the pipeline so we allow it to get to paused state in case of compile-time change.
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    context.SemanticModel,
+                    ReportDiagnostic,
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                // Execute the reference validators.
+                if ( pipelineResult.IsSuccessful )
+                {
+                    var validationResults = DesignTimeReferenceValidatorRunner.Validate(
+                        pipelineResult.Value.Configuration.ServiceProvider,
+                        context.SemanticModel,
+                        pipelineResult.Value,
+                        context.CancellationToken );
+
+                    diagnostics = diagnostics.Concat( validationResults.ReportedDiagnostics );
+                    suppressions = suppressions.Concat( validationResults.DiagnosticSuppressions );
+                }
+
                 // Report diagnostics.
                 this.ReportDiagnostics(
                     diagnostics,
                     compilation,
                     ReportDiagnostic,
-                    true );
+                    cancellationToken );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    var symbol = suppression.DeclarationId.ResolveToSymbolOrNull( compilation );
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var symbol = suppression.GetScopeSymbolOrNull( compilation );
 
                     if ( symbol != null )
                     {
@@ -192,18 +209,19 @@ namespace Metalama.Framework.DesignTime
         /// <param name="diagnostics">List of diagnostics to be reported.</param>
         /// <param name="compilation">The compilation in which diagnostics must be reported.</param>
         /// <param name="reportDiagnostic">The delegate to call to report a diagnostic.</param>
-        /// <param name="wrapUnknownDiagnostics">Determines whether unknown diagnostics should be wrapped into known diagnostics.</param>
         private void ReportDiagnostics(
             IEnumerable<Diagnostic> diagnostics,
             Compilation compilation,
             Action<Diagnostic> reportDiagnostic,
-            bool wrapUnknownDiagnostics )
+            CancellationToken cancellationToken )
         {
             foreach ( var diagnostic in diagnostics )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
+                if ( !this.ShouldWrapUnsupportedDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }
@@ -218,7 +236,7 @@ namespace Metalama.Framework.DesignTime
                             DiagnosticSeverity.Hidden => DesignTimeDiagnosticDescriptors.UserHidden,
                             DiagnosticSeverity.Warning => DesignTimeDiagnosticDescriptors.UserWarning,
                             DiagnosticSeverity.Info => DesignTimeDiagnosticDescriptors.UserInfo,
-                            _ => throw new NotImplementedException()
+                            _ => throw new AssertionFailedException( $"Unexpected severity: {diagnostic.Severity}." )
                         };
 
                     designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(
@@ -227,60 +245,48 @@ namespace Metalama.Framework.DesignTime
                         properties: diagnostic.Properties );
                 }
 
-                var reportSourceTree = designTimeDiagnostic.Location.SourceTree;
+                var wasAnyLocationRemapped = false;
 
-                if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
+                // Map the diagnostic locations to the compilation.
+                if ( !this.TryMapLocation( diagnostic.Location, compilation, out var mappedLocation, ref wasAnyLocationRemapped ) )
                 {
-                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}" );
-                    reportDiagnostic( designTimeDiagnostic );
+                    this._logger.Warning?.Log( $"Cannot report {diagnostic}." );
+
+                    continue;
+                }
+
+                IReadOnlyList<Location> mappedAdditionalLocations;
+
+                if ( diagnostic.AdditionalLocations.Any( d => d.SourceTree != null && !compilation.ContainsSyntaxTree( d.SourceTree ) ) )
+                {
+                    var mappedAdditionalLocationsList = new List<Location>( diagnostic.AdditionalLocations.Count );
+                    mappedAdditionalLocations = mappedAdditionalLocationsList;
+
+                    foreach ( var t in diagnostic.AdditionalLocations )
+                    {
+                        if ( !this.TryMapLocation(
+                                t,
+                                compilation,
+                                out var mappedAdditionalLocation,
+                                ref wasAnyLocationRemapped ) )
+                        {
+                            // If we can't mapped an additional location, we just skip the location
+                            // but not the whole diagnostic.
+                            continue;
+                        }
+
+                        mappedAdditionalLocationsList.Add( mappedAdditionalLocation );
+                    }
                 }
                 else
                 {
-                    this._logger.Trace?.Log( "Finding the source tree." );
+                    mappedAdditionalLocations = diagnostic.AdditionalLocations;
+                }
 
-                    // Find the new syntax tree in the compilation.
+                this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
 
-                    // TODO: Optimize the indexation of the syntax trees of a compilation. We're doing that many times in many methods and we
-                    // could have a weak dictionary mapping a compilation to an index of syntax trees.
-                    var newSyntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == reportSourceTree.FilePath );
-
-                    // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
-                    var oldNode = reportSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan, getInnermostNodeForTie: true );
-
-                    if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
-                    {
-                        // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
-                        this._logger.Warning?.Log( $"Cannot find the source node for {FormatDiagnostic( diagnostic )}." );
-
-                        continue;
-                    }
-
-                    Location newLocation;
-
-                    // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
-                    var oldToken = oldNode.FindToken( diagnostic.Location.SourceSpan.Start );
-                    var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
-
-                    if ( newToken.IsKind( SyntaxKind.None ) )
-                    {
-                        // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
-                        this._logger.Warning?.Log( $"Cannot find the source token for {FormatDiagnostic( diagnostic )}." );
-
-                        continue;
-                    }
-
-                    if ( newToken.Span.Length == diagnostic.Location.SourceSpan.Length )
-                    {
-                        // The diagnostic was reported to the exact token we found, so we can report it precisely.
-                        newLocation = newToken.GetLocation();
-                    }
-                    else
-                    {
-                        // The diagnostic was reported on the syntax node we found, but not to an exact token. Report the
-                        // diagnostic to the whole node instead.
-                        newLocation = newNode.GetLocation();
-                    }
-
+                if ( wasAnyLocationRemapped )
+                {
                     var relocatedDiagnostic =
                         Diagnostic.Create(
                             designTimeDiagnostic.Id,
@@ -291,12 +297,84 @@ namespace Metalama.Framework.DesignTime
                             isEnabledByDefault: true,
                             designTimeDiagnostic.WarningLevel,
                             designTimeDiagnostic.Descriptor.Title,
-                            location: newLocation,
-                            properties: designTimeDiagnostic.Properties );
+                            location: mappedLocation,
+                            properties: designTimeDiagnostic.Properties,
+                            additionalLocations: mappedAdditionalLocations );
 
-                    this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( designTimeDiagnostic )}." );
                     reportDiagnostic( relocatedDiagnostic );
                 }
+                else
+                {
+                    reportDiagnostic( designTimeDiagnostic );
+                }
+            }
+        }
+
+        private bool TryMapLocation( Location location, Compilation compilation, [NotNullWhen( true )] out Location? mappedLocation, ref bool hasChange )
+        {
+            var reportSourceTree = location.SourceTree;
+
+            if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
+            {
+                mappedLocation = location;
+
+                return true;
+            }
+            else
+            {
+                hasChange = true;
+
+                this._logger.Trace?.Log( "Finding the source tree." );
+
+                // Find the new syntax tree in the compilation.
+
+                if ( !compilation.GetIndexedSyntaxTrees().TryGetValue( reportSourceTree.FilePath, out var newSyntaxTree ) )
+                {
+                    mappedLocation = Location.Create( reportSourceTree.FilePath, location.SourceSpan, location.GetLineSpan().Span );
+
+                    return true;
+                }
+
+                // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
+                var oldNode = reportSourceTree.GetRoot().FindNode( location.SourceSpan, getInnermostNodeForTie: true );
+
+                if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
+                {
+                    // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
+                    this._logger.Warning?.Log( $"Cannot find the source node for location {location}." );
+
+                    mappedLocation = null;
+
+                    return false;
+                }
+
+                // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
+                var oldToken = oldNode.FindToken( location.SourceSpan.Start );
+                var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
+
+                if ( newToken.IsKind( SyntaxKind.None ) )
+                {
+                    // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
+                    this._logger.Warning?.Log( $"Cannot find the source token for location {location}." );
+
+                    mappedLocation = null;
+
+                    return false;
+                }
+
+                if ( newToken.Span.Length == location.SourceSpan.Length )
+                {
+                    // The diagnostic was reported to the exact token we found, so we can report it precisely.
+                    mappedLocation = newToken.GetLocation();
+                }
+                else
+                {
+                    // The diagnostic was reported on the syntax node we found, but not to an exact token. Report the
+                    // diagnostic to the whole node instead.
+                    mappedLocation = newNode.GetLocation();
+                }
+
+                return true;
             }
         }
 

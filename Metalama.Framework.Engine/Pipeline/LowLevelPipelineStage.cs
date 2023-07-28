@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -68,7 +67,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         var executionContext = new UserCodeExecutionContext(
             projectServiceProvider,
             diagnostics,
-            UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( context1 => this._aspectWeaver.TransformAsync( context1 ) ) ) );
+            UserCodeDescription.Create( "calling the TransformAsync method for the weaver {0}", this._aspectWeaver.GetType() ) );
 
         var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
         var success = await userCodeInvoker.TryInvokeAsync( () => this._aspectWeaver.TransformAsync( context ), executionContext );

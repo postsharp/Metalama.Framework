@@ -7,16 +7,15 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Services;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.
     /// </summary>
-    internal sealed class UserDiagnosticRegistrationService : IGlobalService
+    internal sealed class UserDiagnosticRegistrationService : IUserDiagnosticRegistrationService
     {
         // Multiple instances are needed for testing.
         private readonly UserDiagnosticsConfiguration _registrationFile;
@@ -28,13 +27,13 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             this._registrationFile = this._configurationManager.Get<UserDiagnosticsConfiguration>();
         }
 
-        /// <summary>
-        /// Gets the list of supported diagnostic and suppression descriptors, as stored in the user profile.
-        /// </summary>
-        /// <returns></returns>
-        public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
-            => (this._registrationFile.Diagnostics.SelectAsImmutableArray( d => d.Value.DiagnosticDescriptor() ),
-                this._registrationFile.Suppressions.SelectAsImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
+        public bool ShouldWrapUnsupportedDiagnostics => true;
+
+        [Memo]
+        public DesignTimeDiagnosticDefinitions DiagnosticDefinitions
+            => new(
+                this._registrationFile.Diagnostics.SelectAsImmutableArray( d => d.Value.DiagnosticDescriptor() ),
+                this._registrationFile.Suppressions.SelectAsImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ) );
 
         /// <summary>
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics

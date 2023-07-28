@@ -119,7 +119,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             {
                 // Case for event fields.
                 this.Builder.Type = this.Template.Declaration.Type;
-            }            
+            }
 
             this.Builder.Accessibility =
                 this.Template?.Accessibility ?? (this._getTemplate != null
@@ -253,7 +253,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     AdviceImplementationResult.Failed(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                            this ) );
             }
 
             if ( existingProperty.IsStatic != this.Builder.IsStatic )
@@ -263,7 +264,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingProperty.DeclaringType) ) );
+                             existingProperty.DeclaringType),
+                            this ) );
             }
             else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingProperty.Type ) )
             {
@@ -272,7 +274,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingProperty.DeclaringType, existingProperty.Type) ) );
+                             existingProperty.DeclaringType, existingProperty.Type),
+                            this ) );
             }
 
             switch ( this.OverrideStrategy )
@@ -284,7 +287,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                 existingProperty.DeclaringType) ) );
+                                 existingProperty.DeclaringType),
+                                this ) );
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
@@ -297,7 +301,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         return AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, existingProperty.DeclaringType) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, existingProperty.DeclaringType),
+                                this ) );
                     }
                     else
                     {
@@ -323,7 +328,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
                             existingProperty,
-                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ), 
+                            this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
                             this.Tags );
 
@@ -338,7 +343,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingProperty.DeclaringType) ) );
+                                     existingProperty.DeclaringType),
+                                    this ) );
                     }
                     else
                     {

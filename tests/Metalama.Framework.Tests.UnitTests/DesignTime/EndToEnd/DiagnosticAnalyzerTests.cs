@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -19,7 +21,9 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
 {
     private async Task<List<Diagnostic>> RunAnalyzer( string code )
     {
-        using var testContext = this.CreateTestContext();
+        var additionalServices = new AdditionalServiceCollection();
+        additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
+        using var testContext = this.CreateTestContext( additionalServices );
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
@@ -137,7 +141,9 @@ class TheAspect : OverrideMethodAspect
             class C {}
             """;
 
-        using var testContext = this.CreateTestContext();
+        var additionalServices = new AdditionalServiceCollection();
+        additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( true ) );
+        using var testContext = this.CreateTestContext( additionalServices );
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
@@ -187,5 +193,43 @@ class TheAspect : OverrideMethodAspect
         Assert.Equal( diagnostic1.DefaultSeverity, diagnostic2.DefaultSeverity );
         Assert.Equal( diagnostic1.WarningLevel, diagnostic2.WarningLevel );
         Assert.Equal( diagnostic1.Properties, diagnostic2.Properties );
+    }
+
+    [Fact]
+    public async Task ReferenceValidator()
+    {
+        const string code = """
+using System;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
+
+public class Fabric : ProjectFabric
+{
+    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+    public override void AmendProject( IProjectAmender amender )
+    {
+        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+    }
+
+    private void ValidateReference( in ReferenceValidationContext context )
+    {
+        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+    }
+}
+
+class A {}
+class B
+{
+  void M() 
+  {
+   A a;
+  } 
+}
+""";
+
+        var diagnostics = await this.RunAnalyzer( code );
+        Assert.Single( diagnostics, d => d.Id == "MY001" );
     }
 }

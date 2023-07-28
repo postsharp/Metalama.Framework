@@ -74,6 +74,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     IMethod IMethod.MethodDefinition => this;
 
+    bool IMethod.IsPartial => false;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
@@ -81,6 +83,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
 
     public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => this._methodBuilder.Invoke( args );
 
     public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

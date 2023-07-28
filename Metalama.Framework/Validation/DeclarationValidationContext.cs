@@ -17,7 +17,8 @@ namespace Metalama.Framework.Validation
     [PublicAPI]
     public readonly struct DeclarationValidationContext
     {
-        private readonly IDiagnosticSink _diagnostics;
+        private readonly IDiagnosticSink _diagnosticSink;
+        private readonly IDiagnosticSource _diagnosticSource;
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
@@ -28,17 +29,22 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets a service that allows to report or suppress diagnostics.
         /// </summary>
-        public ScopedDiagnosticSink Diagnostics => new( this._diagnostics, this.Declaration, this.Declaration );
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this._diagnosticSource, this.Declaration, this.Declaration );
 
         /// <summary>
         /// Gets the declaration that should be validated.
         /// </summary>
         public IDeclaration Declaration { get; }
 
-        internal DeclarationValidationContext( IDeclaration declaration, IAspectState? aspectState, IDiagnosticSink diagnostics )
+        internal DeclarationValidationContext(
+            IDeclaration declaration,
+            IAspectState? aspectState,
+            IDiagnosticSink diagnosticSink,
+            IDiagnosticSource diagnosticSource )
         {
             this.AspectState = aspectState;
-            this._diagnostics = diagnostics;
+            this._diagnosticSink = diagnosticSink;
+            this._diagnosticSource = diagnosticSource;
             this.Declaration = declaration;
         }
     }

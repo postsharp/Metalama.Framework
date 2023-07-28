@@ -80,4 +80,6 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     public int TargetDeclarationDepth => this._primaryInstance.TargetDeclarationDepth;
 
     public int PredecessorDegree => this._primaryInstance.PredecessorDegree;
+
+    public string DiagnosticSourceDescription => this._primaryInstance.DiagnosticSourceDescription;
 }

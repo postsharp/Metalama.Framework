@@ -21,7 +21,10 @@ internal sealed class ErrorAspectWeaver : IAspectWeaver
     public Task TransformAsync( AspectWeaverContext context )
     {
         context.ReportDiagnostic(
-            GeneralDiagnosticDescriptors.CannotFindAspectWeaver.CreateRoslynDiagnostic( null, (this._aspectClass.WeaverType!, this._aspectClass.ShortName) ) );
+            GeneralDiagnosticDescriptors.CannotFindAspectWeaver.CreateRoslynDiagnostic(
+                null,
+                (this._aspectClass.WeaverType!, this._aspectClass.ShortName),
+                this._aspectClass ) );
 
         return Task.CompletedTask;
     }

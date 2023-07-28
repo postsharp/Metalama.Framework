@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -66,6 +65,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
             this._isOverride = value;
         }
     }
+
+    public bool HasImplementation => true;
 
     public bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
@@ -151,20 +152,17 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
             // TODO: Error about the expression type?
             initializerMethodSyntax = null;
 
-            using ( UserCodeExecutionContext.WithContext( context.ServiceProvider, context.Compilation ) )
+            try
             {
-                try
-                {
-                    initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
-                }
-                catch ( Exception ex )
-                {
-                    context.DiagnosticSink.Report( GeneralDiagnosticDescriptors.CantGetMemberInitializer.CreateRoslynDiagnostic( null, (this, ex.Message) ) );
+                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( context.SyntaxGenerationContext );
+            }
+            catch ( Exception ex )
+            {
+                context.DiagnosticSink.Report( GeneralDiagnosticDescriptors.CantGetMemberInitializer.CreateRoslynDiagnostic( null, (this, ex.Message) ) );
 
-                    initializerExpressionSyntax = null;
+                initializerExpressionSyntax = null;
 
-                    return false;
-                }
+                return false;
             }
 
             return true;

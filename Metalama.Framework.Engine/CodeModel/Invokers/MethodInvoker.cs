@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -21,6 +22,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public object? Invoke( params object?[]? args )
         {
+            // For some reason, overload resolution chooses the wrong overload in the template,
+            // so redirect to the correct one.
+            if (args is [IEnumerable<IExpression> expressionArgs] )
+            {
+                return this.Invoke( expressionArgs );
+            }
+
             args ??= Array.Empty<object>();
 
             var parametersCount = this.Member.Parameters.Count;
@@ -91,6 +99,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                         $"Cannot generate syntax to invoke the this.Declaration '{this.Member}' because this.Declaration kind {this.Member.MethodKind} is not implemented." );
             }
         }
+
+        public object? Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
 
         private object InvokeDefaultMethod( object?[] args )
         {

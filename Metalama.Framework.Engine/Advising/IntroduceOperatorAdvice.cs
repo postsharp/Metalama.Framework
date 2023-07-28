@@ -68,7 +68,10 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.ReturnType = resultType;
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder, TemplateAttributeProperties? templateAttributeProperties )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
@@ -121,7 +124,8 @@ namespace Metalama.Framework.Engine.Advising
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                     existingOperator.DeclaringType) ) );
+                                     existingOperator.DeclaringType),
+                                    this ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -134,14 +138,19 @@ namespace Metalama.Framework.Engine.Advising
                             return AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingOperator.DeclaringType) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, existingOperator.DeclaringType),
+                                    this ) );
                         }
                         else
                         {
                             this.Builder.HasNewKeyword = this.Builder.IsNew = true;
                             this.Builder.IsOverride = false;
 
-                            var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+                            var overriddenOperator = new OverrideOperatorTransformation(
+                                this,
+                                this.Builder,
+                                this._template.ForIntroduction( this.Builder ),
+                                this.Tags );
 
                             addTransformation( overriddenOperator );
                             addTransformation( this.Builder.ToTransformation() );
@@ -152,7 +161,12 @@ namespace Metalama.Framework.Engine.Advising
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
-                            var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this._template.ForIntroduction( existingOperator ), this.Tags );
+                            var overriddenOperator = new OverrideOperatorTransformation(
+                                this,
+                                existingOperator,
+                                this._template.ForIntroduction( existingOperator ),
+                                this.Tags );
+
                             addTransformation( overriddenOperator );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override, existingOperator );
@@ -164,14 +178,20 @@ namespace Metalama.Framework.Engine.Advising
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
-                                         existingOperator.DeclaringType) ) );
+                                         existingOperator.DeclaringType),
+                                        this ) );
                         }
                         else
                         {
                             this.Builder.IsOverride = true;
                             this.Builder.HasNewKeyword = this.Builder.IsNew = false;
                             this.Builder.OverriddenMethod = existingOperator;
-                            var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+
+                            var overriddenOperator = new OverrideOperatorTransformation(
+                                this,
+                                this.Builder,
+                                this._template.ForIntroduction( this.Builder ),
+                                this.Tags );
 
                             addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenOperator );

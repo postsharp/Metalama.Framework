@@ -217,8 +217,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( symbol is IParameterSymbol )
         {
-            // Until we support template parameters and local functions, all parameters are parameters
-            // of expression lambdas, which are of unknown scope.
+            // Local functions in templates are considered run-time-only, so their parameters are also run-time-only.
+            if ( symbol.ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
+            {
+                return TemplatingScope.RunTimeOnly;
+            }
+
+            // Remaining parameters should be parameters of expression lambdas, which are of unknown scope.
             return TemplatingScope.LateBound;
         }
 
@@ -1700,7 +1705,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     }
                 }
 
-                if ( !this._isInLocalFunction )
+                if ( this._isInLocalFunction )
+                {
+                    // Make sure compile-time local function parameters produce errors.
+                    var classifierScope = this._symbolScopeClassifier.GetTemplatingScope( symbol );
+
+                    this.RequireScope( node, classifierScope.GetExpressionExecutionScope(), TemplatingScope.RunTimeOnly, "a template local function" );
+                }
+                else
                 {
                     this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
                 }

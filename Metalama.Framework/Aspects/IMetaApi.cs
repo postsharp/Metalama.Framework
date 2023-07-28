@@ -39,7 +39,7 @@ namespace Metalama.Framework.Aspects
 
         IObjectReader Tags { get; }
 
-        IDiagnosticSink Diagnostics { get; }
+        ScopedDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
     }

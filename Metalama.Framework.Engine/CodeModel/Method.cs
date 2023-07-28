@@ -28,6 +28,14 @@ internal sealed class Method : MethodBase, IMethodImpl
         {
             throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
         }
+
+        // This is intentionally debug-only to not break existing code. Should be non-conditional on the next non-RC version.
+#if DEBUG
+        if ( symbol.PartialDefinitionPart != null )
+        {
+            throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use partial implementation to instantiate the Method class." );
+        }
+#endif
     }
 
     [Memo]
@@ -54,6 +62,8 @@ internal sealed class Method : MethodBase, IMethodImpl
     public IMethod MethodDefinition
         => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
 
+    public bool IsPartial => this.MethodSymbol.IsPartialDefinition || this.MethodSymbol.PartialDefinitionPart != null;
+
     public bool IsExtern => this.MethodSymbol.IsExtern;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
@@ -61,6 +71,8 @@ internal sealed class Method : MethodBase, IMethodImpl
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 

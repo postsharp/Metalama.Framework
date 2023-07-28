@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         x => x.Type,
                         x => x,
                         symbolEqualityComparer );
-                
+
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
@@ -445,9 +445,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( this._parent._logger.Warning != null )
                     {
-                        this._parent._logger.Warning.Log( "Compiling the compile-time project failed because the source code contains C# errors." );
+                        var diagnostics = compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        
+                        this._parent._logger.Warning.Log( $"Compiling the compile-time project failed because the source code contains {diagnostics.Count} C# error(s):" );
 
-                        foreach ( var error in compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) )
+                        foreach ( var error in diagnostics )
                         {
                             this._parent._logger.Warning.Log( error.ToString() );
                         }
@@ -513,7 +515,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Add non-implemented members of IAspect, IEligible and IProjectData.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
-                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, deduplicate: true );
+                var allImplementedInterfaces = symbol.SelectManyRecursiveDistinct( i => i.Interfaces );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
@@ -1357,7 +1359,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                     }
-                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    else if ( symbol is { IsStatic: true } 
+                        && node.Parent is not MemberAccessExpressionSyntax 
+                        && node.Parent is not AliasQualifiedNameSyntax 
+                        && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
                     {
                         switch ( symbol.Kind )
                         {

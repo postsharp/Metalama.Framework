@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.VisualStudio.Services;
 
@@ -16,14 +15,5 @@ public class VsUserProcessDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     // This class exists only because the this.SupportedDiagnostics member is called.
     // It is required for code fixes. If this implementation does not run in devenv, the CodeFixProvider is not called.
 
-    public VsUserProcessDiagnosticAnalyzer() : base( GetDesignTimeDiagnosticDefinitions() ) { }
-
-    private static DesignTimeDiagnosticDefinitions GetDesignTimeDiagnosticDefinitions()
-    {
-        // Explicitly instantiate VsUserProcessServiceProviderFactory, so that DesignTimeUserProcessServiceProviderFactory
-        // is not instantiated implicitly instead by the line below, which would cause an exception later on.
-        _ = DesignTimeServiceProviderFactory.GetSharedServiceProvider<VsUserProcessServiceProviderFactory>();
-
-        return DesignTimeDiagnosticDefinitions.GetInstance();
-    }
+    public VsUserProcessDiagnosticAnalyzer() : base( DesignTimeServiceProviderFactory.GetSharedServiceProvider<VsUserProcessServiceProviderFactory>() ) { }
 }

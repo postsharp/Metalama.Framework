@@ -206,14 +206,14 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
-        [NotNullWhen( true )] out CompilationResult? compilationResult )
+        [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult )
         => this.TryExecute( options, compilation, cancellationToken, out compilationResult, out _ );
 
     public bool TryExecute(
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
-        [NotNullWhen( true )] out CompilationResult? compilationResult,
+        [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult,
         out ImmutableArray<Diagnostic> diagnostics )
     {
         var result = this._taskRunner.RunSynchronously(
@@ -236,7 +236,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
-    private Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    private Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         IProjectOptions projectOptions,
         Compilation compilation,
         AsyncExecutionContext executionContext,
@@ -247,7 +247,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         if ( designTimePipeline == null )
         {
-            return Task.FromResult( FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty ) );
+            return Task.FromResult( FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( ImmutableArray<Diagnostic>.Empty ) );
         }
 
         // Call the execution method that assumes that the pipeline exists or waits for it.
@@ -257,13 +257,13 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
         => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
-    internal Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    internal Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    internal async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,
@@ -273,7 +273,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         if ( pipeline == null )
         {
-            return FallibleResultWithDiagnostics<CompilationResult>.Failed( "Cannot get the pipeline." );
+            return FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( "Cannot get the pipeline." );
         }
 
         return await pipeline.ExecuteAsync( compilation, autoResumePipeline, executionContext, cancellationToken );
@@ -353,14 +353,21 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         if ( configuration.IsSuccessful )
         {
-            var transitiveAspectManifestProvider = await pipeline.GetDesignTimeProjectVersionAsync( compilation.Compilation, autoResumePipeline: false, executionContext, cancellationToken );
+            var transitiveAspectManifestProvider = await pipeline.GetDesignTimeProjectVersionAsync(
+                compilation.Compilation,
+                autoResumePipeline: false,
+                executionContext,
+                cancellationToken );
 
             if ( !transitiveAspectManifestProvider.IsSuccessful )
             {
-                return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( transitiveAspectManifestProvider.Diagnostics, transitiveAspectManifestProvider.DebugReason );
+                return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed(
+                    transitiveAspectManifestProvider.Diagnostics,
+                    transitiveAspectManifestProvider.DebugReason );
             }
 
-            configuration = configuration.Value.WithServiceProvider( configuration.Value.ServiceProvider.WithService( transitiveAspectManifestProvider.Value ) );
+            configuration = configuration.Value.WithServiceProvider(
+                configuration.Value.ServiceProvider.WithService( transitiveAspectManifestProvider.Value ) );
         }
 
         return configuration;

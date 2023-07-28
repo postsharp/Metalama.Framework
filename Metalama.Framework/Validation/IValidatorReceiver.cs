@@ -27,7 +27,11 @@ public interface IValidatorReceiver
     /// </summary>
     /// <param name="validateMethod"></param>
     /// <param name="referenceKinds">Kinds of references that this method is interested to analyze. By default, all references are analyzed.</param>
-    void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds = ReferenceKinds.All );
+    /// <param name="includeDerivedTypes"></param>
+    void ValidateReferences(
+        ValidatorDelegate<ReferenceValidationContext> validateMethod,
+        ReferenceKinds referenceKinds = ReferenceKinds.All,
+        bool includeDerivedTypes = false );
 
     /// <summary>
     /// Registers a reference validator, provided as an instance of the <see cref="ReferenceValidator"/> abstract class. The reference validator  will be
@@ -82,7 +86,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
     /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
     /// <see cref="IValidatorReceiver.Validate"/>
-    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
     /// </summary>
     IValidatorReceiver<TMember> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
         where TMember : class, IDeclaration;
@@ -90,7 +94,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// <summary>
     /// Selects a single member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
     /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
-    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds)"/>.
+    /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
     /// </summary>
     IValidatorReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
         where TMember : class, IDeclaration;

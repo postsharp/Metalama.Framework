@@ -71,6 +71,24 @@ class C : TypeAspect
         }
 
         [Fact]
+        public void ErrorTypes()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+class C : ErrorType { }
+
+class D : C { }
+
+class E { ErrorType X; }
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.RunTimeOnly );
+            this.AssertScope( compilation.Types.OfName( "D" ).Single(), TemplatingScope.RunTimeOnly );
+        }
+
+        [Fact]
         public void DefaultCode()
         {
             using var testContext = this.CreateTestContext();
@@ -389,7 +407,7 @@ class C  {
 
             var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
-            var nodes = syntaxTree.GetRoot().DescendantNodes();
+            var nodes = syntaxTree.GetRoot().DescendantNodes().ToArray();
 
             AssertScope( "Console", TemplatingScope.RunTimeOnly );
             AssertScope( "WriteLine", TemplatingScope.RunTimeOnly );
@@ -398,6 +416,7 @@ class C  {
             AssertScope( "Math", TemplatingScope.RunTimeOrCompileTime );
             AssertScope( "Abs", TemplatingScope.RunTimeOrCompileTime );
 
+            // Resharper disable once LocalFunctionHidesMethod
             void AssertScope( string text, TemplatingScope scope )
             {
                 var node = nodes.Single( n => n.ToString() == text );

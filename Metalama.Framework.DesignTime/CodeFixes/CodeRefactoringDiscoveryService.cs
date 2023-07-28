@@ -66,9 +66,7 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
             return ComputeRefactoringResult.Empty;
         }
 
-        var syntaxTree = compilation.SyntaxTrees.FirstOrDefault( x => x.FilePath == syntaxTreePath );
-
-        if ( syntaxTree == null )
+        if ( !compilation.GetIndexedSyntaxTrees().TryGetValue( syntaxTreePath, out var syntaxTree ) )
         {
             this._logger.Warning?.Log(
                 $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the SyntaxTree '{syntaxTreePath}' in project '{projectKey}'." );

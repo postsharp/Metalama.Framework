@@ -31,7 +31,7 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheDiagnosticSuppressor : DiagnosticSuppressor
     {
-        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
+        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions;
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
@@ -50,6 +50,7 @@ namespace Metalama.Framework.DesignTime
             try
             {
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+                this._designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
                 this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )

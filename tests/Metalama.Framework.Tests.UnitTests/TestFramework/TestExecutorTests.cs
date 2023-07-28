@@ -17,7 +17,7 @@ public sealed class TestExecutorTests : UnitTestClass
 {
     [Theory]
     [InlineData(
-        "/* Empty */",
+        "Error!",
         "**ERROR**",
         "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
     [InlineData(

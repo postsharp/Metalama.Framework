@@ -24,7 +24,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
             public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
             public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
-            public ImmutableArray<DesignTimeValidatorInstance>.Builder? Validators;
+            public ImmutableArray<DesignTimeReferenceValidatorInstance>.Builder? Validators;
             public ImmutableArray<DesignTimeAspectInstance>.Builder? AspectInstances;
             public ImmutableArray<DesignTimeTransformation>.Builder? Transformations;
 #pragma warning restore SA1401 // Fields should be private

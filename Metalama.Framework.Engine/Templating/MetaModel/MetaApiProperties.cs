@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// </summary>
     internal sealed class MetaApiProperties
     {
-        public UserDiagnosticSink Diagnostics { get; }
+        public UserDiagnosticSink DiagnosticSink { get; }
 
         public TemplateMember<IMemberOrNamedType> Template { get; }
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public MetaApiProperties(
             ICompilation sourceCompilation,
-            UserDiagnosticSink diagnostics,
+            UserDiagnosticSink diagnosticSink,
             TemplateMember<IMemberOrNamedType> template,
             IObjectReader tags,
             AspectLayerId aspectLayerId,
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             MetaApiStaticity staticity )
         {
             this.SourceCompilation = sourceCompilation;
-            this.Diagnostics = diagnostics;
+            this.DiagnosticSink = diagnosticSink;
             this.Template = template;
             this.Tags = tags;
             this.AspectLayerId = aspectLayerId;

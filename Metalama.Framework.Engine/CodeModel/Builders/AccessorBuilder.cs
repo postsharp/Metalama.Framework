@@ -106,6 +106,10 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMethod IMethod.MethodDefinition => this;
 
+    public bool IsPartial => false;
+
+    public bool HasImplementation => true;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
@@ -113,6 +117,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public IMethodInvoker With( object? target, InvokerOptions options ) => new MethodInvoker( this, options, target );
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     public Accessibility Accessibility
     {

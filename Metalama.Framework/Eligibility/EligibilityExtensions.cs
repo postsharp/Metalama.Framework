@@ -189,10 +189,9 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.IneligibleScenarios, predicate, getJustification ) );
 
     /// <summary>
-    /// Adds a condition to the given <see cref="IEligibilityBuilder"/>, where the condition must be
-    /// satisfied by the declaration in order to be eligible for the aspect. The new rule is built using a child <see cref="IEligibilityBuilder"/>.
+    /// Adds rules to the given <see cref="IEligibilityBuilder"/> by operating directly on the <see cref="IEligibilityBuilder"/>.
     /// </summary>
-    public static void MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
+    public static void AddRules<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
         where T : class
         => requirement( eligibilityBuilder );
 
@@ -225,6 +224,14 @@ public static partial class EligibilityExtensions
 
                 return $"{member} must be {formattedAccessibilities}";
             } );
+
+    /// <summary>
+    /// Requires the target method to not be partial.
+    /// </summary>
+    public static void MustNotBePartial( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            m => !m.IsPartial,
+            method=> $"{method} must not be partial" );
 
     /// <summary>
     /// Requires the target property or indexer to be writable.
@@ -320,6 +327,11 @@ public static partial class EligibilityExtensions
 
     private static string GetInterfaceName( Type type )
     {
+        if ( type is ICompileTimeType )
+        {
+            return type.Name;
+        }
+
         foreach ( var pair in _interfaceNames )
         {
             if ( pair.Type.IsAssignableFrom( type ) )
@@ -435,7 +447,7 @@ public static partial class EligibilityExtensions
     public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
         => eligibilityBuilder.MustSatisfy(
             t => t.Is( type, conversionKind ),
-            member => $"{member} must be a '{GetInterfaceName( type )}'" );
+            member => $"{member} must be a '{type}'" );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).

@@ -10,10 +10,9 @@
     </PropertyGroup>
 
 
-    <!-- Versions of dependencies -->
+    <!-- Set the default versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.26</PostSharpEngineeringVersion>
-        <MetalamaCompilerVersion>2023.2.1-preview</MetalamaCompilerVersion>
+        <PostSharpEngineeringVersion>2023.2.32</PostSharpEngineeringVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- RoslynApiMinVersion is the minimal version of the Roslyn AI we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
         <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
@@ -24,7 +23,7 @@
         <MessagePackVersion>2.2.85</MessagePackVersion>
 		<!-- The version of Microsoft.VisualStudio.Threading must match the one used by StreamJsonRpc -->
 		<MicrosoftVisualStudioThreadingVersion>16.9.60</MicrosoftVisualStudioThreadingVersion>
-		<!-- The version of Microsoft.VisualStudio.Validation must match the one used by Microsof.tVisualStudio.Threading -->
+		<!-- The version of Microsoft.VisualStudio.Validation must match the one used by Microsoft.VisualStudio.Threading -->
 		<MicrosoftVisualStudioValidationVersion>16.8.33</MicrosoftVisualStudioValidationVersion>
         <!-- This should match the version used by Roslyn in RoslynApiMinVersion -->
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
@@ -38,14 +37,15 @@
         <xUnitVersion>2.5.0</xUnitVersion>
         <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
         <xUnitApiVersion>2.4.1</xUnitApiVersion>
-		<XUnitRunnerVisualStudioVersion>2.5.0</XUnitRunnerVisualStudioVersion>
+        <XUnitRunnerVisualStudioVersion>2.5.0</XUnitRunnerVisualStudioVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DiffPlexVersion>1.7.1</DiffPlexVersion>
-		<XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
         <PostSharpPackageVersion>6.11.2-rc</PostSharpPackageVersion>
-
     </PropertyGroup>
+
+    <!-- Set the deafult versions of auto-updated dependencies -->
+    <Import Project="AutoUpdatedVersions.props" />
 
     <!-- Import overrides for the local build -->
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />

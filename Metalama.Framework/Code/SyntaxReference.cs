@@ -14,7 +14,7 @@ public readonly struct SyntaxReference
     private readonly ISyntaxReferenceImpl _syntaxReferenceImpl;
 
     /// <summary>
-    /// Gets the Roslyn <c>SyntaxNode</c> or <c>SyntaxToken</c>.
+    /// Gets the Roslyn <c>SyntaxNode</c>, <c>SyntaxToken</c>.
     /// </summary>
     public object NodeOrToken { get; }
 

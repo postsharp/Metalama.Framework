@@ -15,7 +15,7 @@ namespace Metalama.Framework.Code
         INamespace GlobalNamespace { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the assembly represents a reference (<c>true</c>), or a project reference (<c>false</c>).
+        /// Gets a value indicating whether the assembly represents a reference (<c>true</c>), or the project being built (<c>false</c>).
         /// </summary>
         bool IsExternal { get; }
 

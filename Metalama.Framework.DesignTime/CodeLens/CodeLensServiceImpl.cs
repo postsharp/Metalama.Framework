@@ -39,7 +39,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
     private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
-        CompilationPipelineResult PipelineResult );
+        AspectPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,
@@ -60,7 +60,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        var pipelineResult = pipeline.CompilationPipelineResult;
+        var pipelineResult = pipeline.AspectPipelineResult;
 
         var compilation = await project.GetCompilationAsync( cancellationToken );
 

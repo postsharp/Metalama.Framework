@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime;
+using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -16,6 +18,12 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 public sealed class DiagnosticSuppressorTests : UnitTestClass
 {
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
+    {
+        base.ConfigureServices( services );
+        services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
+    }
+
     private async Task<List<Suppression>> ExecuteSuppressorAsync( string code, string diagnosticId )
     {
         using var testContext = this.CreateTestContext();

@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.References = references;
 
             this._assembly = assembly;
-            this.ClosureProjects = this.SelectManyRecursive( p => p.References, includeThis: true, deduplicate: true ).ToImmutableList();
+            this.ClosureProjects = this.SelectManyRecursiveDistinct( p => p.References, includeRoot: true ).ToImmutableList();
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
             this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectAsImmutableArray( p => p.DiagnosticManifest ) );
 
@@ -278,7 +278,9 @@ namespace Metalama.Framework.Engine.CompileTime
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
 
             // Ignore collectible assemblies now, as they are not considered later when resolving.
-            var assembly = AppDomainUtility.GetLoadedAssemblies( a => !AssemblyLoader.IsCollectible( a ) && AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
+            var assembly = AppDomainUtility
+                .GetLoadedAssemblies( a => !AssemblyLoader.IsCollectible( a ) && AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) )
+                .FirstOrDefault();
 
             if ( assembly == null )
             {

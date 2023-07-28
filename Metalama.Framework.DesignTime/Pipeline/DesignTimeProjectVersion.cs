@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
@@ -14,6 +15,9 @@ internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvid
     public DesignTimeAspectPipelineStatus PipelineStatus { get; }
 
     public IProjectVersion ProjectVersion { get; }
+
+    public IEnumerable<DesignTimeReferenceValidatorCollection> ReferencedValidatorCollections
+        => this._references.Values.Select( r => (r.TransitiveAspectsManifest as AspectPipelineResult)?.ReferenceValidators ).WhereNotNull();
 
     public DesignTimeProjectVersion(
         IProjectVersion projectVersion,

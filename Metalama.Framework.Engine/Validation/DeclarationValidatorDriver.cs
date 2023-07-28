@@ -44,7 +44,8 @@ internal sealed class DeclarationValidatorDriver : ValidatorDriver<DeclarationVa
         }
     }
 
-    internal override UserCodeMemberInfo UserCodeMemberInfo => UserCodeMemberInfo.FromDelegate( this._validator );
+    internal override UserCodeDescription GetUserCodeMemberInfo( ValidatorInstance validatorInstance )
+        => UserCodeDescription.Create( "executing the validator method for ", validatorInstance );
 
     public override string MethodName => this._validator.Method.Name;
 }

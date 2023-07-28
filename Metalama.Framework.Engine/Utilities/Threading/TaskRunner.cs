@@ -10,14 +10,84 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class TaskRunner : ITaskRunner
 {
+    private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
+
     public void RunSynchronously( Func<Task> func, CancellationToken cancellationToken = default )
-        => Task.Run( func, cancellationToken ).Wait( cancellationToken );
+    {
+        if ( MustRunNewTask() )
+        {
+            Task.Run( func, cancellationToken ).Wait( cancellationToken );
+        }
+        else
+        {
+            func().Wait( cancellationToken );
+        }
+    }
 
     public void RunSynchronously( Func<ValueTask> func, CancellationToken cancellationToken = default )
-        => Task.Run( func, cancellationToken ).Wait( cancellationToken );
+    {
+        if ( MustRunNewTask() )
+        {
+            Task.Run( func, cancellationToken ).Wait( cancellationToken );
+        }
+        else
+        {
+            var valueTask = func();
 
-    public T RunSynchronously<T>( Func<Task<T>> func, CancellationToken cancellationToken = default ) => Task.Run( func, cancellationToken ).Result;
+            if ( !valueTask.IsCompleted )
+            {
+                valueTask.AsTask().Wait( cancellationToken );
+            }
+        }
+    }
+
+    public T RunSynchronously<T>( Func<Task<T>> func, CancellationToken cancellationToken = default )
+    {
+        if ( MustRunNewTask() )
+        {
+            var task = Task.Run( func, cancellationToken );
+            task.Wait( cancellationToken );
+
+            return task.Result;
+        }
+        else
+        {
+            var task = func();
+
+            if ( !task.IsCompleted )
+            {
+                task.Wait( cancellationToken );
+            }
+
+            return task.Result;
+        }
+    }
 
     public T RunSynchronously<T>( Func<ValueTask<T>> func, CancellationToken cancellationToken = default )
-        => Task.Run( () => func().AsTask(), cancellationToken ).Result;
+    {
+        if ( MustRunNewTask() )
+        {
+            var task = Task.Run( () => func().AsTask(), cancellationToken );
+
+            task.Wait( cancellationToken );
+
+            return task.Result;
+        }
+        else
+        {
+            var valueTask = func();
+
+            if ( valueTask.IsCompleted )
+            {
+                return valueTask.Result;
+            }
+            else
+            {
+                var task = valueTask.AsTask();
+                task.Wait( cancellationToken );
+
+                return task.Result;
+            }
+        }
+    }
 }

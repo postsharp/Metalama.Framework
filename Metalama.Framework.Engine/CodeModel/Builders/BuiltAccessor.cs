@@ -30,6 +30,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public string Name => this._accessorBuilder.Name;
 
+    public bool IsPartial => this._accessorBuilder.IsPartial;
+
+    public bool HasImplementation => this._accessorBuilder.HasImplementation;
+
     public bool IsAbstract => this._accessorBuilder.IsAbstract;
 
     public bool IsStatic => this._accessorBuilder.IsStatic;
@@ -69,6 +73,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IMethodInvoker With( object? target, InvokerOptions options ) => this._accessorBuilder.With( target, options );
 
     public object? Invoke( params object?[] args ) => this._accessorBuilder.Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => this._accessorBuilder.Invoke( args );
 
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation );

@@ -64,6 +64,10 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public abstract string Name { get; }
 
+    public bool IsPartial => false;
+
+    public bool HasImplementation => true;
+
     public bool IsAbstract => false;
 
     public bool IsStatic => this.DeclaringMember.IsStatic;
@@ -111,6 +115,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     public ICompilation Compilation => this.DeclaringMember.Compilation;
 
