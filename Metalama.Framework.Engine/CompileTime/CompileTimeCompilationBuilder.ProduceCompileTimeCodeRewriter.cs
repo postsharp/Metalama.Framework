@@ -1359,7 +1359,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                     }
-                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    else if ( symbol is { IsStatic: true } 
+                        && node.Parent is not MemberAccessExpressionSyntax 
+                        && node.Parent is not AliasQualifiedNameSyntax 
+                        && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
                     {
                         switch ( symbol.Kind )
                         {
