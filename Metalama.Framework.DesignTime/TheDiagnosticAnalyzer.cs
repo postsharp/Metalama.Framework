@@ -305,7 +305,7 @@ namespace Metalama.Framework.DesignTime
                 }
                 else
                 {
-                    reportDiagnostic( diagnostic );
+                    reportDiagnostic( designTimeDiagnostic );
                 }
             }
         }
