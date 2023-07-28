@@ -81,4 +81,6 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     protected override int GetHashCodeCore() => this.Builder.GetHashCode();
 
     public override bool BelongsToCurrentProject => true;
+
+    public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 }

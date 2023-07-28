@@ -15,8 +15,7 @@ public abstract class AspectRepository : IAspectRepository
 {
     public abstract AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances, CompilationModel compilation );
 
-    public abstract IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-        where T : IAspect;
-
     public abstract bool HasAspect( IDeclaration declaration, Type aspectType );
+
+    public abstract IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration );
 }

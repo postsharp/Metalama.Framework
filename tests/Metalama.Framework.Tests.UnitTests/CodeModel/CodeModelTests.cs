@@ -1661,6 +1661,35 @@ public partial class B
             static bool GetForField( INamedType type, string name ) => type.Fields.OfName( name ).Single().HasImplementation;
         }
 
+        [Fact]
+        private void SourceReferences()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = @"
+public partial class C
+{
+    public void NonPartial() {}
+    partial void PartialVoid_NoImpl();
+    partial void PartialVoid_Impl();
+    public partial int PartialNonVoid();
+}
+
+public partial class C
+{
+    partial void PartialVoid_Impl() {}
+    public partial int PartialNonVoid() => 42;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            Assert.Equal( 2, type.Sources.Length );
+            var partialMethod = type.Methods.OfName( "PartialNonVoid" ).Single();
+            Assert.Equal( 2, partialMethod.Sources.Length );
+            Assert.Single( partialMethod.Sources, s => s.IsImplementationPart );
+        }
+
         /*
         [Fact]
         public void ExternalInternalAutomaticProperty()

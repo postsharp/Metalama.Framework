@@ -14,7 +14,7 @@ internal class BaseAspect : TypeAspect
 
     protected static void Validate( in ReferenceValidationContext context )
     {
-        context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Syntax.Kind ) ) );
+        context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Source.Kind ) ) );
     }
 }
 

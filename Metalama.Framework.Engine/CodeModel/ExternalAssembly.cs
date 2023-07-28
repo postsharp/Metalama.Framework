@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -54,5 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclarationOrigin Origin => DeclarationOrigin.External;
 
         public override IAssembly DeclaringAssembly => this;
+
+        public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
     }
 }

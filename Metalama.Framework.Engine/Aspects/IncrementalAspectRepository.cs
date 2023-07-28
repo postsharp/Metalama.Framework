@@ -69,18 +69,18 @@ internal sealed class IncrementalAspectRepository : AspectRepository
         return new IncrementalAspectRepository( newDictionary, compilation );
     }
 
-    public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-    {
-        this.VerifyDeclaration( declaration );
-
-        return this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
-    }
-
     // TODO: return null if the aspect of type T is not processed yet.
     public override bool HasAspect( IDeclaration declaration, Type aspectType )
     {
         this.VerifyDeclaration( declaration );
 
         return this._aspects[declaration.ToTypedRef()].Any( a => a.AspectClass.Type == aspectType );
+    }
+
+    public override IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration )
+    {
+        this.VerifyDeclaration( declaration );
+
+        return this._aspects[declaration.ToTypedRef()];
     }
 }

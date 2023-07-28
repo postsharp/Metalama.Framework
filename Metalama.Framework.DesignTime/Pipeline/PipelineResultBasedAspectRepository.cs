@@ -19,11 +19,6 @@ internal sealed class PipelineResultBasedAspectRepository : AspectRepository
     public override AspectRepository WithAspectInstances( IEnumerable<IAspectInstance> aspectInstances, CompilationModel compilation )
         => throw new NotSupportedException();
 
-    public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-    {
-        throw new NotSupportedException( $"The GetAspects method is not supported to evaluate eligibility. Use HasAspect." );
-    }
-
     public override bool HasAspect( IDeclaration declaration, Type aspectType )
     {
         var aspectFullName = aspectType.FullName;
@@ -42,5 +37,10 @@ internal sealed class PipelineResultBasedAspectRepository : AspectRepository
         var declarationId = declaration.ToSerializableId();
 
         return syntaxTreeResult.AspectInstances.Any( a => a.AspectClassFullName == aspectFullName && a.TargetDeclarationId == declarationId );
+    }
+
+    public override IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration )
+    {
+        throw new NotSupportedException( $"The GetAspects method is not supported to evaluate eligibility. Use HasAspect." );
     }
 }

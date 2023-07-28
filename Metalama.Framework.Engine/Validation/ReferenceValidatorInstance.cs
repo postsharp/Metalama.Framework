@@ -2,10 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
-using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -42,7 +42,7 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
         var validationContext = new ReferenceValidationContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
-            new SyntaxReference( node.AsNode() ?? (object) node.AsToken(), this ),
+            new SourceReference( node.AsNode() ?? (object) node.AsToken(), SourceReferenceImpl.Instance ),
             this.Implementation.State,
             diagnosticAdder,
             this,

@@ -130,4 +130,25 @@ internal sealed class Method : MethodBase, IMethodImpl
     public bool IsCanonicalGenericInstance => ReferenceEquals( this.Symbol.OriginalDefinition, this.Symbol );
 
     public bool? IsIteratorMethod => IteratorHelper.IsIteratorMethod( this.MethodSymbol );
+
+    [Memo]
+    public override ImmutableArray<SourceReference> Sources => this.GetSourcesImpl();
+
+    private ImmutableArray<SourceReference> GetSourcesImpl()
+    {
+        if ( this.MethodSymbol.PartialImplementationPart != null )
+        {
+            var sources = ImmutableArray.CreateBuilder<SourceReference>( 2 );
+            sources.Add( new SourceReference( this.MethodSymbol.DeclaringSyntaxReferences[0].GetSyntax(), SourceReferenceImpl.Instance ) );
+
+            sources.Add(
+                new SourceReference( this.MethodSymbol.PartialImplementationPart.DeclaringSyntaxReferences[0].GetSyntax(), SourceReferenceImpl.Instance ) );
+
+            return sources.MoveToImmutable();
+        }
+        else
+        {
+            return base.Sources;
+        }
+    }
 }

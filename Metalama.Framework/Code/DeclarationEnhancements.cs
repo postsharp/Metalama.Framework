@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Code;
 
@@ -34,11 +35,39 @@ public readonly struct DeclarationEnhancements<T>
     /// </remarks>
     public IEnumerable<TAspect> GetAspects<TAspect>()
         where TAspect : IAspect<T>
-        => ((ICompilationInternal) this.Declaration.Compilation).AspectRepository.GetAspectsOf<TAspect>( this.Declaration );
+        => ((ICompilationInternal) this.Declaration.Compilation).AspectRepository.GetAspectInstances( this.Declaration )
+            .Select( x => x.Aspect )
+            .OfType<TAspect>();
 
+    /// <summary>
+    /// Determines if the current declaration has at least one aspect of the given type.
+    /// </summary>
+    /// <remarks>
+    /// You can call this method only for aspects that have been already been applied or are being applied, i.e. you can query aspects
+    /// that are applied before the current aspect, or you can query instances of the current aspects applied in a parent class.
+    /// </remarks>
     public bool HasAspect( Type aspectType )
         => ((ICompilationInternal) this.Declaration.Compilation.Compilation).AspectRepository.HasAspect( this.Declaration, aspectType );
 
+    /// <summary>
+    /// Gets the set of aspects (represented by their <see cref="IAspectInstance"/>) that have been applied to a specified declaration.
+    /// </summary>
+    /// <param name="declaration">The declaration.</param>
+    /// <returns>The set of aspects of exact type <typeparamref name="T"/> applied on the current <see cref="Declaration"/>.</returns>
+    /// <remarks>
+    /// This method will only return aspects that have been already been applied or are being applied, i.e. you can query aspects
+    /// that are applied before the current aspect, or you can query instances of the current aspects applied in a parent class.
+    /// </remarks>
+    public IEnumerable<IAspectInstance> GetAspectInstances()
+        => ((ICompilationInternal) this.Declaration.Compilation).AspectRepository.GetAspectInstances( this.Declaration );
+
+    /// <summary>
+    /// Determines if the current declaration has at least one aspect of the given type.
+    /// </summary>
+    /// <remarks>
+    /// You can call this method only for aspects that have been already been applied or are being applied, i.e. you can query aspects
+    /// that are applied before the current aspect, or you can query instances of the current aspects applied in a parent class.
+    /// </remarks>
     public bool HasAspect<TAspect>()
         where TAspect : IAspect<T>
         => this.HasAspect( typeof(TAspect) );

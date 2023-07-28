@@ -2,14 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Diagnostics;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public abstract class ValidatorInstance : ISyntaxReferenceImpl, IDiagnosticSource
+public abstract class ValidatorInstance : IDiagnosticSource
 {
     public ValidatorDriver Driver { get; }
 
@@ -24,23 +20,6 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl, IDiagnosticSourc
         this.ValidatedDeclaration = validatedDeclaration;
         this.DiagnosticSourceDescription = description;
     }
-
-    // TODO: ISyntaxReferenceImpl should not be implemented in this class.
-    IDiagnosticLocation ISyntaxReferenceImpl.GetDiagnosticLocation( in SyntaxReference syntaxReference )
-        => syntaxReference.NodeOrToken switch
-        {
-            SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
-            SyntaxToken token => new LocationWrapper( token.GetLocation() ),
-            _ => throw new AssertionFailedException( $"Unexpected type {syntaxReference.NodeOrToken.GetType()}." )
-        };
-
-    string ISyntaxReferenceImpl.GetKind( in SyntaxReference syntaxReference )
-        => syntaxReference.NodeOrToken switch
-        {
-            SyntaxNode node => node.Kind().ToString(),
-            SyntaxToken token => token.Kind().ToString(),
-            _ => throw new AssertionFailedException( $"{syntaxReference.NodeOrToken} is not supported" )
-        };
 
     public string DiagnosticSourceDescription { get; }
 
