@@ -24,6 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 => node switch
                 {
                     ExpressionSyntax => false,
+                    LocalFunctionStatementSyntax => false,
                     _ => node.ChildNodes().Any( this.Visit )
                 };
         }
