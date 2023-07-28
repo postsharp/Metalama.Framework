@@ -12,6 +12,8 @@ internal sealed class NamedArgumentList : INamedArgumentList
 {
     private readonly IReadOnlyList<KeyValuePair<string, TypedConstant>> _arguments;
 
+    public static NamedArgumentList Empty { get; } = new NamedArgumentList( null );
+
     internal NamedArgumentList( IReadOnlyList<KeyValuePair<string, TypedConstant>>? arguments )
     {
         this._arguments = arguments ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
