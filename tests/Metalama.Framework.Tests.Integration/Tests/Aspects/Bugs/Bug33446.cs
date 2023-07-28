@@ -19,3 +19,13 @@ class Aspect : OverrideMethodAspect
         }
     }
 }
+
+// <target>
+public class Target
+{
+    [Aspect]
+    public IEnumerable<int> Foo()
+    {
+        return Array.Empty<int>();
+    }
+}
