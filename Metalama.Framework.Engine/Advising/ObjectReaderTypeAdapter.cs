@@ -32,7 +32,9 @@ namespace Metalama.Framework.Engine.Advising
                 return false;
             }
 
-            value = this._userCodeInvoker.Invoke( () => property( obj ), new UserCodeExecutionContext( this._serviceProvider ) );
+            value = this._userCodeInvoker.Invoke(
+                () => property( obj ),
+                new UserCodeExecutionContext( this._serviceProvider, UserCodeDescription.Create( "evaluating the {0} field or property", key ) ) );
 
             return true;
         }

@@ -419,7 +419,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
-            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
+            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
             Assert.Null( deserializedAttribute );
         }
 
@@ -445,7 +445,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
-            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
+            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
             Assert.Null( deserializedAttribute );
         }
 

@@ -163,7 +163,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 arguments[paramsParameter!.Position] = paramsArgument;
             }
 
-            var executionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromMemberInfo( constructor ) );
+            var executionContext = new UserCodeExecutionContext(
+                this._serviceProvider,
+                diagnosticAdder,
+                UserCodeDescription.Create( "calling the {0} constructor while instantiating a custom attribute", constructor ) );
 
             if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( arguments ), executionContext, out var localAttributeInstance ) )
             {
@@ -205,7 +208,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
-                            executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
+                            executionContext.WithInvokedMember(
+                                UserCodeDescription.Create( "setting the {0} property while instantiating a custom attribute", property ) ) ) )
                     {
                         attributeInstance = null;
 
@@ -223,7 +227,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => field.SetValue( localAttributeInstance, translatedValue ),
-                            executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( field ) ) ) )
+                            executionContext.WithInvokedMember(
+                                UserCodeDescription.Create( "setting the {0} field while instantiating a custom attribute", field ) ) ) )
                     {
                         attributeInstance = null;
 

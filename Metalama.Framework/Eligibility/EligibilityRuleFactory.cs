@@ -93,7 +93,7 @@ public static partial class EligibilityRuleFactory
 
             builder.Convert()
                 .When<INamedType>()
-                .MustSatisfy(
+                .AddRules(
                     typeEligibilityBuilder =>
                     {
                         typeEligibilityBuilder.MustSatisfy(
@@ -106,7 +106,7 @@ public static partial class EligibilityRuleFactory
 
             builder.Convert()
                 .When<IConstructor>()
-                .MustSatisfy(
+                .AddRules(
                     constructorEligibilityBuilder =>
                     {
                         constructorEligibilityBuilder.MustNotBeStatic();

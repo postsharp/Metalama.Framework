@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
@@ -154,17 +153,14 @@ namespace Metalama.Framework.Engine.Linking
             {
                 attributes.Remove( assemblyVersionType );
 
-                using ( UserCodeExecutionContext.WithContext( this._serviceProvider, input.CompilationModel ) )
-                {
-                    // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
-                    attributes.Add(
-                        new AttributeBuilder(
-                            null!,
-                            input.CompilationModel.DeclaringAssembly,
-                            AttributeConstruction.Create(
-                                assemblyVersionType,
-                                new object[] { input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString() } ) ) );
-                }
+                // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
+                attributes.Add(
+                    new AttributeBuilder(
+                        null!,
+                        input.CompilationModel.DeclaringAssembly,
+                        AttributeConstruction.Create(
+                            assemblyVersionType,
+                            new object[] { input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString() } ) ) );
             }
 #pragma warning restore CA1307
 

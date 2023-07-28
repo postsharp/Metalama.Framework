@@ -121,7 +121,10 @@ namespace Metalama.Framework.Engine.Fabrics
                 return Enumerable.Empty<FabricDriver>();
             }
 
-            var executionContext = new UserCodeExecutionContext( this.ServiceProvider, diagnostics, UserCodeMemberInfo.FromMemberInfo( constructor ) );
+            var executionContext = new UserCodeExecutionContext(
+                this.ServiceProvider,
+                diagnostics,
+                UserCodeDescription.Create( "instantiating the fabric ", fabricType ) );
 
             if ( !this.UserCodeInvoker.TryInvoke( () => Activator.CreateInstance( fabricType ), executionContext, out var fabric ) )
             {

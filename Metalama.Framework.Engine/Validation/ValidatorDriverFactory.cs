@@ -15,7 +15,7 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory, IDisposa
 
     private readonly Type _aspectOrFabricType;
     private readonly WeakCache<MethodInfo, MethodBasedReferenceValidatorDriver> _methodBasedDrivers = new();
-    
+
     public static ValidatorDriverFactory GetInstance( Type aspectOrFabricType )
     {
         // The factory method is static, and does not depend on IServiceProvider nor is provided by IServiceProvider, because we want
@@ -33,7 +33,7 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory, IDisposa
         => this._methodBasedDrivers.GetOrAdd( validateMethod, this.GetMethodBasedReferenceValidatorDriverCore );
 
     public ClassBasedReferenceValidatorDriver GetReferenceValidatorDriver( Type type )
-        => _classBasedDrivers.GetOrAdd( type, t => new ClassBasedReferenceValidatorDriver( t ) );
+        => _classBasedDrivers.GetOrAdd( type, t => ClassBasedReferenceValidatorDriver.Instance );
 
     public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate ) => new( validate );
 

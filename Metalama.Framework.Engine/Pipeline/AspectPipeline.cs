@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         var executionContext = new UserCodeExecutionContext(
                             projectServiceProviderWithoutPlugins,
                             diagnosticAdder,
-                            UserCodeMemberInfo.FromMemberInfo( constructor ) );
+                            UserCodeDescription.Create( "instantiating the plug-in {0}", type ) );
 
                         if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
                         {

@@ -10,13 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class TaskRunner : ITaskRunner
 {
-    // TODO: It seems we still have design-time deadlocks when we are not always running a new task.
-    // It seems that new work items to process the task queue are not being created even if the worker thread pool
-    // is not exhausted.
-
     private static bool MustRunNewTask() => !Thread.CurrentThread.IsBackground;
-
-    // private static bool MustRunNewTask() => true;
 
     public void RunSynchronously( Func<Task> func, CancellationToken cancellationToken = default )
     {

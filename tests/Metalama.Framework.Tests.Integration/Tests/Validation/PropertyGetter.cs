@@ -57,6 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Validation.PropertyGetter
             // There should be NO match in the next lines.
             c.P = "";
             c[5] = "";
+            _ = new C { P = "" };
 
 
         }

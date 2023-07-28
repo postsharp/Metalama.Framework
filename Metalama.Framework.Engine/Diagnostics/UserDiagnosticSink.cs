@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( !codeFixes.IsDefaultOrEmpty && this._codeFixAvailability != CodeFixAvailability.None )
             {
-                var codeFixCreator = UserCodeExecutionContext.CurrentOrNull.AssertNotNull().InvokedMember.ToString();
+                var codeFixCreator = UserCodeExecutionContext.CurrentOrNull.AssertNotNull().Description;
 
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;

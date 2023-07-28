@@ -17,7 +17,7 @@ namespace Metalama.Framework.Eligibility.Implementation
             this._inner = inner;
         }
 
-        public EligibleScenarios IneligibleScenarios => EligibleScenarios.All;
+        public EligibleScenarios IneligibleScenarios => this._inner.IneligibleScenarios;
 
         public void AddRule( IEligibilityRule<T> rule ) => this._inner.AddRule( new ConditionalRule( this, rule ) );
 
