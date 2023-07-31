@@ -297,7 +297,7 @@ internal static class TemplateBindingHelper
         var templateArguments = GetTemplateArguments( template, arguments, parameterMapping.ToImmutable() );
 
         // Verify that the template return type matches the target.
-        if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template, arguments ) )
+        if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template, arguments, targetMethod.GetAsyncInfo() ) )
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
@@ -331,7 +331,7 @@ internal static class TemplateBindingHelper
         return true;
     }
 
-    private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments )
+    private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments, AsyncInfo? toMethodAsyncInfo = null )
     {
         fromType = fromType.ForCompilation( toType.Compilation );
 
@@ -362,22 +362,36 @@ internal static class TemplateBindingHelper
         {
             return true;
         }
-        else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
+        else if ( toMethodAsyncInfo != null && fromType is INamedType fromNamedType && toType is INamedType toNamedType )
         {
+            // Special rules for matching async-related return types.
+
             var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
+            var toTypeAsyncInfo = toMethodAsyncInfo.Value;
 
             if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
                  && fromNamedType.TypeArguments[0].TypeKind == TypeKind.Dynamic )
             {
-                // We accept Task<dynamic> for any awaitable.
+                // We accept Task<dynamic> for any awaitable, async void, and async enumerable.
 
-                if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
+                if ( toTypeAsyncInfo.IsAwaitable || toTypeAsyncInfo.IsAsync == true ||
                      toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
                 {
                     return true;
                 }
             }
-            else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
+            else if ( fromOriginalDefinition.SpecialType == SpecialType.Task )
+            {
+                // We accept Task for any void-returning awaitable (like the non-generic Task and ValueTask) and async void.
+
+                if ( (toTypeAsyncInfo.IsAwaitable && toTypeAsyncInfo.ResultType.SpecialType == SpecialType.Void) ||
+                    (toTypeAsyncInfo.IsAsync == true && toType.SpecialType == SpecialType.Void) )
+                {
+                    return true;
+                }
+            }
+            else if ( fromNamedType.TypeArguments.Count > 0 &&
+                      fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
                       VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
             {
                 return true;
