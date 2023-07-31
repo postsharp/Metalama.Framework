@@ -271,18 +271,20 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         {
             // Validate that the interface must be introduced to the specific target.
             bool skipInterfaceBaseList;
+            var forceIgnore = false;
 
             if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
             {
                 switch ( this._overrideStrategy )
                 {
-                    case OverrideStrategy.Ignore when interfaceSpecification.InterfaceType.Equals( this._interfaceType ):
-                        return AdviceImplementationResult.Ignored;
-
                     case OverrideStrategy.Ignore:
                         implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
+                        skipInterfaceBaseList = true;
 
-                        continue;
+                        // The interface is implemented, so we ignore its members, as if they had InterfaceMemberOverrideStrategy.Ignore.
+                        forceIgnore = true;
+
+                        break;
 
                     case OverrideStrategy.Fail:
                         diagnostics.Report(
@@ -348,16 +350,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         {
                             switch ( memberSpec.OverrideStrategy )
                             {
-                                case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy != OverrideStrategy.Override:
-                                case InterfaceMemberOverrideStrategy.Fail:
-                                    diagnostics.Report(
-                                        AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
-                                            targetType.GetDiagnosticLocation(),
-                                            (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod),
-                                            this ) );
-
-                                    continue;
-
+                                case { } when forceIgnore:
                                 case InterfaceMemberOverrideStrategy.Ignore:
 
                                     implementedInterfaceMembers.Add(
@@ -366,6 +359,16 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                             memberSpec.InterfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingMethod ) );
+
+                                    continue;
+
+                                case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy != OverrideStrategy.Override:
+                                case InterfaceMemberOverrideStrategy.Fail:
+                                    diagnostics.Report(
+                                        AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
+                                            targetType.GetDiagnosticLocation(),
+                                            (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod),
+                                            this ) );
 
                                     continue;
 
@@ -479,6 +482,18 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         {
                             switch ( memberSpec.OverrideStrategy )
                             {
+                                case { } when forceIgnore:
+                                case InterfaceMemberOverrideStrategy.Ignore:
+
+                                    implementedInterfaceMembers.Add(
+                                        new MemberImplementationResult(
+                                            compilation,
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingProperty ) );
+
+                                    continue;
+
                                 case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy != OverrideStrategy.Override:
                                 case InterfaceMemberOverrideStrategy.Fail:
                                     diagnostics.Report(
@@ -542,17 +557,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     IntroduceProperty( true, false );
 
                                     break;
-
-                                case InterfaceMemberOverrideStrategy.Ignore:
-
-                                    implementedInterfaceMembers.Add(
-                                        new MemberImplementationResult(
-                                            compilation,
-                                            memberSpec.InterfaceMember,
-                                            InterfaceMemberImplementationOutcome.UseExisting,
-                                            existingProperty ) );
-
-                                    continue;
 
                                 default:
                                     throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
@@ -729,8 +733,19 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                         {
                             switch ( memberSpec.OverrideStrategy )
                             {
-                                case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy != OverrideStrategy.Override:
+                                case { } when forceIgnore:
+                                case InterfaceMemberOverrideStrategy.Ignore:
 
+                                    implementedInterfaceMembers.Add(
+                                        new MemberImplementationResult(
+                                            compilation,
+                                            memberSpec.InterfaceMember,
+                                            InterfaceMemberImplementationOutcome.UseExisting,
+                                            existingEvent ) );
+
+                                    continue;
+
+                                case InterfaceMemberOverrideStrategy.Default when this._overrideStrategy != OverrideStrategy.Override:
                                 case InterfaceMemberOverrideStrategy.Fail:
                                     diagnostics.Report(
                                         AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
@@ -793,17 +808,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                                     IntroduceEvent( true, false );
 
                                     break;
-
-                                case InterfaceMemberOverrideStrategy.Ignore:
-
-                                    implementedInterfaceMembers.Add(
-                                        new MemberImplementationResult(
-                                            compilation,
-                                            memberSpec.InterfaceMember,
-                                            InterfaceMemberImplementationOutcome.UseExisting,
-                                            existingEvent ) );
-
-                                    continue;
 
                                 default:
                                     throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
@@ -912,7 +916,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         }
 
         return AdviceImplementationResult.Success(
-            AdviceOutcome.Default,
+            implementedInterfaces.All(i => i.Outcome == InterfaceImplementationOutcome.Ignore) ? AdviceOutcome.Ignore : AdviceOutcome.Default,
             this.TargetDeclaration.As<IDeclaration>(),
             diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null,
             implementedInterfaces,
