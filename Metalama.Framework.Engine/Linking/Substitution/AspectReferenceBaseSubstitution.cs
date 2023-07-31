@@ -37,7 +37,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
             aspectReference.ResolvedSemantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: IEventSymbol @event }
             && @event.IsEventField() == true );
 
-        if ( aspectReference.HasCustomReceiver && !aspectReference.ResolvedSemantic.Symbol.IsStatic )
+        if ( aspectReference is { HasCustomReceiver: true, ResolvedSemantic.Symbol.IsStatic: false } )
         {
             throw AspectLinkerDiagnosticDescriptors.CantInvokeAnotherInstanceBaseRequired.CreateException( aspectReference.OriginalSymbol );
         }

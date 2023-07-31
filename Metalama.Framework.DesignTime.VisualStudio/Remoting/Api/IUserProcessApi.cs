@@ -1,5 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Rpc;
+
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 
 /// <summary>
@@ -12,4 +15,6 @@ internal interface IUserProcessApi : IProjectHandlerCallbackApi
     /// and that the pipeline can be resumed.
     /// </summary>
     void OnIsEditingCompileTimeCodeChanged( bool isEditing );
+
+    void OnCompileTimeErrorsChanged( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> errors );
 }

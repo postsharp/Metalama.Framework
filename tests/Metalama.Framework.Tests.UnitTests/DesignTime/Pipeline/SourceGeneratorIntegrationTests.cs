@@ -70,7 +70,7 @@ partial class C : BaseClass
         // ReSharper disable once AccessToDisposedClosure
         factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
 
-        Assert.Single( results1!.Result.IntroducedSyntaxTrees );
+        Assert.Single( results1.Result.IntroducedSyntaxTrees );
 
         Assert.Contains(
             "Field1Plus",

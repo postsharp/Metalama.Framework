@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Contracts.Diagnostics;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// User-side implementation of the <see cref="ICompileTimeEditingStatusService"/> interface.
 /// It essentially forwards messages to and from the analysis process.
 /// </summary>
-internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
+internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, ICompileTimeErrorStatusService, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly TaskBag _pendingTasks;
@@ -24,7 +25,17 @@ internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatu
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.EndpointAdded += this.OnEndpointAdded;
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
+        this._userProcessEndpoint.CompileTimeErrorsChanged += this.OnCompileTimeErrorsChanged;
+        this.CompileTimeErrors = this._userProcessEndpoint.CompileTimeErrors.ToArray();
     }
+
+    public bool IsEditing { get; private set; }
+
+    public event Action<bool>? IsEditingChanged;
+
+    public IDiagnosticData[] CompileTimeErrors { get; private set; }
+
+    public event Action? CompileTimeErrorsChanged;
 
     private void OnEndpointAdded( UserProcessEndpoint endpoint )
     {
@@ -45,9 +56,12 @@ internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatu
         this.IsEditingChanged?.Invoke( value );
     }
 
-    public bool IsEditing { get; private set; }
-
-    public event Action<bool>? IsEditingChanged;
+    private void OnCompileTimeErrorsChanged( IReadOnlyCollection<IDiagnosticData> readOnlyCollection )
+    {
+        var errors = this._userProcessEndpoint.CompileTimeErrors.ToArray();
+        this.CompileTimeErrors = errors;
+        this.CompileTimeErrorsChanged?.Invoke();
+    }
 
     public async Task OnEditingCompletedAsync( CancellationToken cancellationToken )
     {

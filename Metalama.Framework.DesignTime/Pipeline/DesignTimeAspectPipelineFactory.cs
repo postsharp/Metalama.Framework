@@ -75,7 +75,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     {
         try
         {
-            await this.ResumePipelinesAsync( AsyncExecutionContext.Get(), CancellationToken.None );
+            await this.ResumePipelinesAsync( AsyncExecutionContext.Get(), true, CancellationToken.None );
         }
         catch ( Exception e )
         {
@@ -172,7 +172,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
-    public async ValueTask ResumePipelinesAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken )
+    public async ValueTask ResumePipelinesAsync( AsyncExecutionContext executionContext, bool executePipelineNow, CancellationToken cancellationToken )
     {
         Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
 
@@ -181,7 +181,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         foreach ( var pipeline in this._pipelinesByProjectKey.Values )
         {
-            tasks.Add( pipeline.ResumeAsync( executionContext.Fork(), cancellationToken ) );
+            tasks.Add( pipeline.ResumeAsync( executionContext.Fork(), executePipelineNow, cancellationToken ) );
         }
 
         await Task.WhenAll( tasks );

@@ -136,6 +136,7 @@ namespace Metalama.Framework.Engine.Templating
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
 
+                // Report the errors to the log.
                 if ( this._logger.Trace != null )
                 {
                     this._logger.Trace.Log(

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.Utilities;
@@ -105,5 +106,12 @@ public sealed class AnalysisProcessEventHub : IGlobalService
     internal Task OnExternalBuildCompletedEventAsync( ProjectKey projectKey )
     {
         return this._externalBuildCompletedEvent.InvokeAsync( projectKey );
+    }
+
+    public event Action<ProjectKey, IReadOnlyCollection<DiagnosticData>>? CompileTimeErrorsChanged;
+
+    internal void PublishCompileTimeErrors( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> errors )
+    {
+        this.CompileTimeErrorsChanged?.Invoke( projectKey, errors );
     }
 }

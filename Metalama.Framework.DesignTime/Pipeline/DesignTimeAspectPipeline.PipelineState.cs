@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
@@ -380,13 +381,20 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 var projectLicenseInfo = ProjectLicenseInfo.Get( licenseConsumptionService );
 
-                if ( !state._pipeline.TryInitialize(
-                        diagnosticAdder,
-                        compilation,
-                        projectLicenseInfo,
-                        compileTimeTrees,
-                        cancellationToken,
-                        out var configuration ) )
+                var initializeSuccessful = state._pipeline.TryInitialize(
+                    diagnosticAdder,
+                    compilation,
+                    projectLicenseInfo,
+                    compileTimeTrees,
+                    cancellationToken,
+                    out var configuration );
+
+                // Publish compilation errors. This may create some chaos at the receiving end because compilations are unordered.
+                state._pipeline._eventHub.PublishCompileTimeErrors(
+                    state._pipeline.ProjectKey,
+                    diagnosticAdder.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => new DiagnosticData( d ) ).ToList() );
+
+                if ( !initializeSuccessful )
                 {
                     // A failure here means an error or a cache miss.
 
@@ -402,7 +410,7 @@ internal sealed partial class DesignTimeAspectPipeline
                         +
                         $"the compilation contained {compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
 
-                    var result = FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Succeeded( configuration, diagnosticAdder.ToImmutableArray() );
+                    var result = FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Succeeded( configuration!, diagnosticAdder.ToImmutableArray() );
                     state = new PipelineState( state, result, DesignTimeAspectPipelineStatus.Ready );
 
                     return result;
