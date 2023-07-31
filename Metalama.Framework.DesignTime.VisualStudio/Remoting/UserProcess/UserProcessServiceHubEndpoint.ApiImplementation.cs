@@ -35,7 +35,7 @@ internal sealed partial class UserProcessServiceHubEndpoint
 
             if ( this._parent._registeredEndpointsByPipeName.TryAdd( pipeName, endpoint ) )
             {
-                this._parent.EndpointAdded?.Invoke( endpoint );
+                await this._parent.OnEndpointAddedAsync( endpoint, cancellationToken );
             }
             else
             {

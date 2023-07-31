@@ -176,16 +176,9 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
         this.IsEditingCompileTimeCodeChanged?.Invoke( value );
     }
 
-    private void SetCompileTimeErrors( ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> errors )
-    {
-        this._compileTimeErrorsByProject = errors;
-        this.CompileTimeErrors = new ConsolidatedErrorDiagnosticCollection( this._compileTimeErrorsByProject );
-    }
-
     private void OnCompileTimeErrorsChanged( ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> errors )
     {
-        this.SetCompileTimeErrors( errors );
-        this.CompileTimeErrorsChanged?.Invoke( this.CompileTimeErrors );
+        this.SetCompileTimeErrorsForProjects( errors );
     }
 
     private Task NotifyCompilationResultChangeAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
@@ -240,8 +233,19 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
 
             if ( Interlocked.CompareExchange( ref this._compileTimeErrorsByProject, dictionary, oldDictionary ) == oldDictionary )
             {
+                this.CompileTimeErrors = new ConsolidatedErrorDiagnosticCollection( this._compileTimeErrorsByProject );
+                this.CompileTimeErrorsChanged?.Invoke( this.CompileTimeErrors );
+
                 return;
             }
         }
+    }
+
+    private async Task OnEndpointAddedAsync( UserProcessEndpoint endpoint, CancellationToken cancellationToken )
+    {
+        this.EndpointAdded?.Invoke( endpoint );
+
+        var compileTimeErrors = await endpoint.GetCompileTimeErrorsAsync( cancellationToken );
+        this.SetCompileTimeErrorsForProjects( compileTimeErrors );
     }
 }
