@@ -64,10 +64,10 @@
         </ItemGroup>
     </Target>
 
-    <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
+    <PropertyGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
         <!-- Register to dotnet pack extension point. -->
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_MetalamaPackCompileTimeProjectAsAnalyzer</TargetsForTfmSpecificContentInPackage>
-    </ItemGroup>
+    </PropertyGroup>
 
     <Target Name="_MetalamaPackCompileTimeProjectAsAnalyzer">
         <!-- When MetalamaCompileTimeProject is true, we add the output of the compilation as an analyzer, to make it available to the compile time when referenced. -->
