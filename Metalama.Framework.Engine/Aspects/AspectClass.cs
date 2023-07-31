@@ -464,7 +464,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         // so we have to let the exception fly.
         var executionContext = new UserCodeExecutionContext(
             this.ServiceProvider,
-            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this, obj ) );
+            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this, obj ),
+            compilationModel: obj.GetCompilationModel() );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
