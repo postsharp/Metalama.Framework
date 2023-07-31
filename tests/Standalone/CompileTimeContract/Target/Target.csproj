@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Aspect\Aspect.csproj" />
     <ProjectReference Include="..\ServiceImpl\ServiceImpl.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Contract\Contract.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\Contract\Contract.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
