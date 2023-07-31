@@ -218,7 +218,7 @@ namespace Metalama.Framework.RunTime
             {
                 var list = new AsyncEnumerableList<T>();
 
-                try
+                await using ( enumerator )
                 {
                     while ( await enumerator.MoveNextAsync() )
                     {
@@ -226,10 +226,6 @@ namespace Metalama.Framework.RunTime
 
                         cancellationToken.ThrowIfCancellationRequested();
                     }
-                }
-                finally
-                {
-                    await enumerator.DisposeAsync();
                 }
 
                 return list;
