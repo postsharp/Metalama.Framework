@@ -5,17 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>11.0</LangVersion>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+    <MetalamaCompileTimeProject>true</MetalamaCompileTimeProject>    
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
   </ItemGroup>
-
-  <Target Name="_AddAnalyzersToOutput">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
-    </ItemGroup>
-  </Target>
 
 </Project>

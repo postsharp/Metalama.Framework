@@ -32,12 +32,6 @@ namespace Metalama.Framework.Engine.Pipeline
 
             try
             {
-                // If the assembly is marked [CompileTime], skip all processing.
-                if ( context.Compilation.Assembly.GetAttributes().Any( a => a.AttributeClass?.GetReflectionFullName() == typeof( CompileTimeAttribute ).FullName ) )
-                {
-                    return;
-                }
-
                 // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
                 // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
                 if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )

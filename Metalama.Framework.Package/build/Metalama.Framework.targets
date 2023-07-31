@@ -30,7 +30,7 @@
 
 
     <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
+        <AssemblyAttributes Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True' AND '$(MetalamaDesignTimeEnabled)'=='False'">
@@ -64,5 +64,16 @@
         </ItemGroup>
     </Target>
 
+    <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
+        <!-- Register to dotnet pack extension point. -->
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_MetalamaPackCompileTimeProjectAsAnalyzer</TargetsForTfmSpecificContentInPackage>
+    </ItemGroup>
+
+    <Target Name="_MetalamaPackCompileTimeProjectAsAnalyzer">
+        <!-- When MetalamaCompileTimeProject is true, we add the output of the compilation as an analyzer, to make it available to the compile time when referenced. -->
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
+        </ItemGroup>
+    </Target>
 
 </Project>
