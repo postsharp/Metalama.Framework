@@ -2,13 +2,11 @@
 
 using JetBrains.Annotations;
 using Metalama.Compiler;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
@@ -47,7 +45,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     context.Plugins,
                     context.Options );
 
-                var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );                
+                var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
 
                 using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
