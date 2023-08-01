@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
             "Diagnostics",
             "Fabrics",
             "Project",
+            "Services",
             "Validation" );
 
         // The 'Validation' namespace should NOT be included because referencing a constraint of this namespace is a normal use case in run-time code.
@@ -46,15 +47,25 @@ namespace Metalama.Framework.Engine.CompileTime
                 else
                 {
                     // Any tree containing a using directive for Metalama.Framework needs to be included.
-                    return node.Name switch
+                    if ( IsMetalamaFramework( node.Name ) )
                     {
-                        QualifiedNameSyntax q3 when _subNamespaces.Contains( q3.Right.Identifier.Text ) &&
-                                                    q3.Left is QualifiedNameSyntax
-                                                    {
-                                                        Right.Identifier.Text: "Framework", Left: IdentifierNameSyntax { Identifier.Text: "Metalama" }
-                                                    } => true,
-                        _ => false
-                    };
+                        return true;
+                    }
+
+                    if ( node.Name is QualifiedNameSyntax qualifiedName &&
+                         _subNamespaces.Contains( qualifiedName.Right.Identifier.ValueText ) &&
+                         IsMetalamaFramework( qualifiedName.Left ) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+
+                    static bool IsMetalamaFramework( NameSyntax nameSyntax )
+                        => nameSyntax is QualifiedNameSyntax
+                        {
+                            Right.Identifier.ValueText: "Framework", Left: IdentifierNameSyntax { Identifier.ValueText: "Metalama" }
+                        };
                 }
             }
 

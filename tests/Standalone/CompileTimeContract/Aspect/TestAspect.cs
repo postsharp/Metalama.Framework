@@ -1,7 +1,6 @@
 ﻿using Contract;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Project;
 
 namespace Aspect
 {

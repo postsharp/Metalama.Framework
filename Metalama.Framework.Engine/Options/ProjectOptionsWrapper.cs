@@ -25,8 +25,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual ImmutableArray<object> PlugIns => this.Wrapped.PlugIns;
 
-    public virtual ImmutableArray<string> PlugInAssemblyPaths => this.Wrapped.PlugInAssemblyPaths;
-
     public virtual bool IsFrameworkEnabled => this.Wrapped.IsFrameworkEnabled;
 
     public virtual bool FormatOutput => this.Wrapped.FormatOutput;

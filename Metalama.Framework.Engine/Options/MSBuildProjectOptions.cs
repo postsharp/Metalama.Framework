@@ -101,14 +101,6 @@ namespace Metalama.Framework.Engine.Options
                 .ToImmutableArray();
 
         [Memo]
-        public override ImmutableArray<string> PlugInAssemblyPaths
-            => this.GetStringOption( MSBuildPropertyNames.MetalamaPlugInAssemblyPaths, "" )!
-                .Split( ',' )
-                .SelectAsEnumerable( p => p.Trim() )
-                .Where( p => !string.IsNullOrEmpty( p ) )
-                .ToImmutableArray();
-
-        [Memo]
         public override string? ProjectAssetsFile => this.GetStringOption( MSBuildPropertyNames.ProjectAssetsFile );
 
         [Memo]

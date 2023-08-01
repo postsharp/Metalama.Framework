@@ -63,17 +63,5 @@
             <Clean Include="$(MetalamaSourceGeneratorTouchFile)"/>
         </ItemGroup>
     </Target>
-
-    <PropertyGroup Condition="'$(MetalamaCompileTimeProject)'=='True' AND '$(OutputType)' == 'library'">
-        <!-- Register to dotnet pack extension point. -->
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_MetalamaPackCompileTimeProjectAsAnalyzer</TargetsForTfmSpecificContentInPackage>
-    </PropertyGroup>
-
-    <Target Name="_MetalamaPackCompileTimeProjectAsAnalyzer">
-        <!-- When MetalamaCompileTimeProject=true on a library, we add the output of the compilation as an analyzer, to make it available to the compile time when referenced. -->
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
-        </ItemGroup>
-    </Target>
-
+    
 </Project>

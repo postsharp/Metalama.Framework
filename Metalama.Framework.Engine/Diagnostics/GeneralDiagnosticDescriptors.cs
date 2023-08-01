@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00050",
                 _category,
-                "The weaver type '{0}' required to weave aspect '{1}' is not found in the project. The weaver assembly must be included as an analyzer.",
+                "The weaver type '{0}' required to weave aspect '{1}' is not found in the project.",
                 Error,
                 "Cannot find an aspect weaver." );
 

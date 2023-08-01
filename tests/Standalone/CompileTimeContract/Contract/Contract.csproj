@@ -5,7 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>11.0</LangVersion>
-    <MetalamaCompileTimeProject>true</MetalamaCompileTimeProject>    
   </PropertyGroup>
 
   <ItemGroup>

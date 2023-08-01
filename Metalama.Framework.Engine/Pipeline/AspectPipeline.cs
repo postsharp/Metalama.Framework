@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdditionalOutputs;
@@ -30,7 +29,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -166,21 +164,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
 
-            // Find plug-ins from NuGet packages.
-            var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
+            // TODO: remove all mentions of MetalamaPlugInAssemblyPaths from the solution
 
-            // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
-            // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
-            // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
-            // if they are already provided by ProjectOptions.PlugIns.
+            // Plug-ins are only loaded based on CompileTimeProject.PlugInTypes; ProjectOptions.PlugIns are ignored (and should be deleted).
 
             var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
-            var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
-
-            var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
+            var newPlugIns = compileTimeProject.ClosureProjects
                 .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
-                .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
                 .Select(
                     t =>
                     {
@@ -210,8 +201,6 @@ namespace Metalama.Framework.Engine.Pipeline
                     } )
                 .WhereNotNull()
                 .ToList();
-
-            var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
 
             projectServiceProviderWithProject = projectServiceProviderWithProject
                 .WithServices( newPlugIns.OfType<IProjectService>() );
@@ -347,49 +336,6 @@ namespace Metalama.Framework.Engine.Pipeline
             => compilation.SourceModule.ReferencedAssemblies
                 .Where( identity => identity.Name == "Metalama.Framework" )
                 .Select( x => x.Version );
-
-        private List<object> GetPlugInsFromAdditionalAssemblies( IDiagnosticAdder diagnosticAdder )
-        {
-            var plugIns = new List<object>();
-
-            foreach ( var path in this.ProjectOptions.PlugInAssemblyPaths )
-            {
-                this.Logger.Trace?.Log( $"Loading the plug-in assembly '{path}'." );
-
-                var assembly = this.Domain.LoadAssembly( path );
-
-                foreach ( var type in assembly.ExportedTypes.Where( t => t.IsDefined( typeof(MetalamaPlugInAttribute) ) ) )
-                {
-                    this.Logger.Trace?.Log( $"Loading the plug-in type '{type}' from '{path}'." );
-
-                    try
-                    {
-                        var instance = Activator.CreateInstance( type );
-
-                        if ( instance != null )
-                        {
-                            plugIns.Add( instance );
-                        }
-                        else
-                        {
-                            diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic(
-                                    null,
-                                    (type.FullName!, "the activator returned null.") ) );
-                        }
-                    }
-                    catch ( Exception e )
-                    {
-                        this.Logger.Error?.Log( e.ToString() );
-
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
-                    }
-                }
-            }
-
-            return plugIns;
-        }
 
         private bool IsMetalamaEnabled( Compilation compilation )
             => this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().TryGetMetalamaVersion( compilation, out _ );

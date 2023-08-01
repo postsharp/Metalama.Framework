@@ -246,6 +246,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 return null;
             }
 
+            if ( assembly.Name == "Metalama.Compiler.Interface" )
+            {
+                return TemplatingScope.CompileTimeOnly;
+            }
+
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
                 .Select( GetTemplatingScope )

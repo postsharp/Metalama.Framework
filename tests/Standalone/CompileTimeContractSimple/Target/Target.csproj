@@ -9,13 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-  </ItemGroup>
+      <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Aspect\Aspect.csproj" />
-    <ProjectReference Include="..\ServiceImpl\ServiceImpl.csproj" />
-    <ProjectReference Include="..\Contract\Contract.csproj" />
+      <ProjectReference Include="..\Aspect\Aspect.csproj" />
   </ItemGroup>
 
 </Project>
