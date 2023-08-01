@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Contracts.Diagnostics;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
@@ -20,6 +22,9 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
     private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _cachedGeneratedSources = new();
     private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallbackApi> _projectHandlers = new();
+
+    private ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> _compileTimeErrorsPerProject =
+        ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>.Empty;
 
     public UserProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName )
     {
@@ -60,6 +65,8 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
+    public event Action<ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>>? CompileTimeErrorsChanged;
+
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
         ProjectKey projectKey,
         string syntaxTreePath,
@@ -84,5 +91,24 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
         var peer = await this.GetServerApiAsync( nameof(ICodeActionExecutionService.ExecuteCodeActionAsync), cancellationToken );
 
         return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
+    }
+
+    public Task<ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>> GetCompileTimeErrorsAsync( CancellationToken cancellationToken )
+        => Task.FromResult( this._compileTimeErrorsPerProject );
+
+    private void SetCompileTimeErrors( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> diagnostics )
+    {
+        while ( true )
+        {
+            var oldDictionary = this._compileTimeErrorsPerProject;
+            var dictionary = oldDictionary.SetItem( projectKey, diagnostics.ToImmutableArray<IDiagnosticData>() );
+
+            if ( Interlocked.CompareExchange( ref this._compileTimeErrorsPerProject, dictionary, oldDictionary ) == oldDictionary )
+            {
+                break;
+            }
+        }
+
+        this.CompileTimeErrorsChanged?.Invoke( this._compileTimeErrorsPerProject );
     }
 }

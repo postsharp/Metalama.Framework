@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             // For some reason, overload resolution chooses the wrong overload in the template,
             // so redirect to the correct one.
-            if (args is [IEnumerable<IExpression> expressionArgs] )
+            if ( args is [IEnumerable<IExpression> expressionArgs] )
             {
                 return this.Invoke( expressionArgs );
             }

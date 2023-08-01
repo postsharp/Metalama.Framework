@@ -13,7 +13,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// </summary>
 internal sealed class AspectReferenceSourceSubstitution : AspectReferenceRenamingSubstitution
 {
-    public AspectReferenceSourceSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext, aspectReference )
+    public AspectReferenceSourceSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+        compilationContext,
+        aspectReference )
     {
         // Support only base semantics.
         Invariant.Assert(
@@ -45,7 +47,9 @@ internal sealed class AspectReferenceSourceSubstitution : AspectReferenceRenamin
         var expression =
             targetSymbol.IsStatic
                 ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
-                : this.AspectReference.HasCustomReceiver ? currentNode.Expression : SyntaxFactory.ThisExpression();
+                : this.AspectReference.HasCustomReceiver
+                    ? currentNode.Expression
+                    : SyntaxFactory.ThisExpression();
 
         return currentNode
             .WithExpression(

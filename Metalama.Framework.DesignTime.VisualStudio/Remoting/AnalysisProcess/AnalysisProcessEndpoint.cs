@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
@@ -56,6 +57,7 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         this._serviceProvider = serviceProvider;
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.IsEditingCompileTimeCodeChanged += this.OnIsEditingCompileTimeCodeChanged;
+        this._eventHub.CompileTimeErrorsChanged += this.OnCompileTimeErrorsChanged;
     }
 
     protected override void ConfigureRpc( JsonRpc rpc )
@@ -111,11 +113,20 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         }
     }
 
+    private void OnCompileTimeErrorsChanged( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> errors )
+    {
+        foreach ( var client in this._clients.Values )
+        {
+            client.OnCompileTimeErrorsChanged( projectKey, errors );
+        }
+    }
+
     public override void Dispose()
     {
         base.Dispose();
 
         this._eventHub.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
+        this._eventHub.CompileTimeErrorsChanged -= this.OnCompileTimeErrorsChanged;
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;

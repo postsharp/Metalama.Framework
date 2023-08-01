@@ -429,25 +429,24 @@ namespace Metalama.Framework.Engine.CompileTime
                 var compileTimeDiagnostics = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree )
                     .GetDiagnostics( node.Span, this._cancellationToken );
 
-                if ( this._parent._executionScenario.MustReportCSharpErrorsInCompileTimeCode )
+                foreach ( var diagnostic in compileTimeDiagnostics )
                 {
-                    foreach ( var diagnostic in compileTimeDiagnostics )
-                    {
-                        this._diagnosticAdder.Report( diagnostic );
+                    this._diagnosticAdder.Report( diagnostic );
 
-                        if ( diagnostic.Severity == DiagnosticSeverity.Error )
-                        {
-                            typeHasError = true;
-                        }
+                    if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                    {
+                        typeHasError = true;
                     }
                 }
-                else if ( compileTimeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+
+                if ( typeHasError )
                 {
                     if ( this._parent._logger.Warning != null )
                     {
                         var diagnostics = compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
-                        
-                        this._parent._logger.Warning.Log( $"Compiling the compile-time project failed because the source code contains {diagnostics.Count} C# error(s):" );
+
+                        this._parent._logger.Warning.Log(
+                            $"Compiling the compile-time project failed because the source code contains {diagnostics.Count} C# error(s):" );
 
                         foreach ( var error in diagnostics )
                         {
@@ -455,11 +454,6 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                     }
 
-                    typeHasError = true;
-                }
-
-                if ( typeHasError )
-                {
                     this.Success = false;
 
                     return node;
@@ -1359,10 +1353,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                     }
-                    else if ( symbol is { IsStatic: true } 
-                        && node.Parent is not MemberAccessExpressionSyntax 
-                        && node.Parent is not AliasQualifiedNameSyntax 
-                        && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
+                    else if ( symbol is { IsStatic: true }
+                              && node.Parent is not MemberAccessExpressionSyntax
+                              && node.Parent is not AliasQualifiedNameSyntax
+                              && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
                     {
                         switch ( symbol.Kind )
                         {

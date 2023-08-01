@@ -628,16 +628,16 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         }
     }
 
-    private bool ValidateNodeWithoutChildren( SyntaxNode? node, ReferenceKinds referenceKind, SyntaxNodeOrToken? nodeForDiagnostics = null )
+    private void ValidateNodeWithoutChildren( SyntaxNode? node, ReferenceKinds referenceKind, SyntaxNodeOrToken? nodeForDiagnostics = null )
     {
         if ( node == null )
         {
-            return false;
+            return;
         }
 
         var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
 
-        return this.ValidateSymbol( symbol, nodeForDiagnostics ?? node, referenceKind );
+        this.ValidateSymbol( symbol, nodeForDiagnostics ?? node, referenceKind );
     }
 
     private void ValidateSymbols<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )

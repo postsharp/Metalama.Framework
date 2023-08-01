@@ -231,7 +231,7 @@ public static partial class EligibilityExtensions
     public static void MustNotBePartial( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             m => !m.IsPartial,
-            method=> $"{method} must not be partial" );
+            method => $"{method} must not be partial" );
 
     /// <summary>
     /// Requires the target property or indexer to be writable.

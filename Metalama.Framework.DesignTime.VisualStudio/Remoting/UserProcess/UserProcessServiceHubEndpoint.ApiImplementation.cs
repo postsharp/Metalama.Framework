@@ -25,17 +25,26 @@ internal sealed partial class UserProcessServiceHubEndpoint
         {
             this._parent.Logger.Trace?.Log( $"Registering the endpoint '{pipeName}'." );
             var endpoint = new UserProcessEndpoint( this._parent._serviceProvider, pipeName );
+
+            // Subscribe to events.
             endpoint.IsEditingCompileTimeCodeChanged += this._parent.OnIsEditingCompileTimeCodeChanged;
+            endpoint.CompileTimeErrorsChanged += this._parent.OnCompileTimeErrorsChanged;
+
+            // Connect to the analysis process.
             await endpoint.ConnectAsync( cancellationToken );
 
             if ( this._parent._registeredEndpointsByPipeName.TryAdd( pipeName, endpoint ) )
             {
-                this._parent.EndpointAdded?.Invoke( endpoint );
+                await this._parent.OnEndpointAddedAsync( endpoint, cancellationToken );
             }
             else
             {
                 this._parent.Logger.Error?.Log( $"The endpoint '{pipeName}' was already registered." );
             }
+
+            // Get the initial state.
+            var errors = await endpoint.GetCompileTimeErrorsAsync( cancellationToken );
+            this._parent.SetCompileTimeErrorsForProjects( errors );
         }
 
         public Task RegisterAnalysisServiceProjectAsync( ProjectKey projectKey, string pipeName, CancellationToken cancellationToken )
