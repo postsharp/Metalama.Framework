@@ -5,7 +5,7 @@ using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncMethod_CrossAssembly
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncMethod_CrossAssembly
 {
     // <target>
     class TargetCode

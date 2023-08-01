@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncTemplate
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterators.AsyncTemplate
 {
     internal class Aspect : OverrideMethodAspect
     {

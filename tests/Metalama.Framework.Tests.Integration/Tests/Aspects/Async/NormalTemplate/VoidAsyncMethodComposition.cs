@@ -5,11 +5,11 @@
 using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition;
 
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition
 {
     internal class Aspect1 : OverrideMethodAspect
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.ProceedConfigureAwait;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.ProceedConfigureAwait;
 
 public sealed class TransactionalMethodAttribute : OverrideMethodAspect
 {

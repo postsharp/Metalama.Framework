@@ -5,7 +5,7 @@ using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncMethod
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncMethod
 {
     class Aspect : OverrideMethodAspect
     {

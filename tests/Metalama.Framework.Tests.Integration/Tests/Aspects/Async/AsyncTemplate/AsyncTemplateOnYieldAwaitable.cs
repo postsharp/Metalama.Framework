@@ -5,7 +5,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncTemplateOnYieldAwaitable
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncTemplateOnYieldAwaitable
 {
     internal class Aspect : MethodAspect
     {
