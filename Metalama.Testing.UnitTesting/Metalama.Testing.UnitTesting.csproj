@@ -15,7 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="JetBrains.Profiler.SelfApi" Version="2.4.0" Condition="'$(TargetFramework)'=='net472' OR '$(TargetFramework)'=='net6.0' " />
       <PackageReference Include="xunit.abstractions" Version="2.0.3" />
     </ItemGroup>
     
