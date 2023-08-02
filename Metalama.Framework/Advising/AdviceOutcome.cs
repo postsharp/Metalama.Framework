@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using System;
+using System.ComponentModel;
 
 namespace Metalama.Framework.Advising;
 
@@ -33,6 +34,7 @@ public enum AdviceOutcome
     Ignore,
 
     [Obsolete]
+    [EditorBrowsable( EditorBrowsableState.Never )]
     Ignored = Ignore,
 
     /// <summary>

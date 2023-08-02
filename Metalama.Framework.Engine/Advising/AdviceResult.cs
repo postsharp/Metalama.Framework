@@ -18,7 +18,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
                                         IAddInitializerAdviceResult, IRemoveAttributesAdviceResult
     where T : class, IDeclaration
 {
-    private readonly IRef<T> _declaration;
+    private readonly IRef<T>? _declaration;
     private readonly CompilationModel _compilation;
 
     /// <summary>
@@ -28,7 +28,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
     /// </summary>
     public T Declaration
         => this.Outcome != AdviceOutcome.Error
-            ? this._declaration.GetTarget( this._compilation, ReferenceResolutionOptions.CanBeMissing ).Assert( d => d is not IDeclarationBuilder )
+            ? this._declaration.AssertNotNull().GetTarget( this._compilation, ReferenceResolutionOptions.CanBeMissing ).Assert( d => d is not IDeclarationBuilder )
             : throw new InvalidOperationException( "Cannot get the resulting declaration when the outcome is Error." );
 
     public AdviceKind AdviceKind { get; }
@@ -41,7 +41,7 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
-    internal AdviceResult( IRef<T> declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind, IReadOnlyCollection<IInterfaceImplementationResult> interfaces, IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
+    internal AdviceResult( IRef<T>? declaration, CompilationModel compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder, AdviceKind adviceKind, IReadOnlyCollection<IInterfaceImplementationResult> interfaces, IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
     {
         this._declaration = declaration;
         this._compilation = compilation.Assert( c => c.IsMutable );

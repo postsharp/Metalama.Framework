@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Operators.AdviceResult_Ignore
 {
     public class TestAspect : TypeAspect
@@ -39,11 +41,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
                 throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
             }
 
-            // TODO: #33060
-            //if (result.Declaration != builder.Target.Events.Single())
-            //{
-            //    throw new InvalidOperationException($"Declaration was not correct.");
-            //}
+            if (result.Declaration != builder.Target.Methods.Single().ForCompilation(result.Declaration.Compilation))
+            {
+                throw new InvalidOperationException($"Declaration was not correct.");
+            }
         }
 
         [Template]

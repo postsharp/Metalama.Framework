@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -65,4 +66,10 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
+
+    public override Ref<IDeclaration> ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+
+    IRef<IDeclaration> IDeclaration.ToRef() => this.ToAttributeRef();
+
+    public AttributeRef ToAttributeRef() => new( this );
 }

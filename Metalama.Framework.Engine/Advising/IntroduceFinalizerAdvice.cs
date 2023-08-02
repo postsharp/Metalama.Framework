@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceImplementationResult.Ignored;
+                        return AdviceImplementationResult.Ignored( existingFinalizer );
 
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )

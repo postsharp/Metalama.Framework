@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
+using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Aspects
 {
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Aspects
     public enum InterfaceMemberOverrideStrategy
     {
         /// <summary>
-        /// The behavior depends on the <see cref="OverrideStrategy"/> specified when calling the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+        /// The behavior depends on the <see cref="OverrideStrategy"/> specified when calling the <see cref="IAdviceFactory.ImplementInterface(INamedType,INamedType,OverrideStrategy,object?)"/>
         /// method. When set to <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
         /// the strategy is to override.
         /// </summary>
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Aspects
         MakeExplicit,
 
         /// <summary>
-        /// When the <see cref="OverrideStrategy"/> of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+        /// When the <see cref="OverrideStrategy"/> of the <see cref="IAdviceFactory.ImplementInterface(INamedType,INamedType,OverrideStrategy,object?)"/>
         /// is set to <see cref="OverrideStrategy.Override"/>, does not override this member if there is already an implementation. 
         /// </summary>
         Ignore = 3

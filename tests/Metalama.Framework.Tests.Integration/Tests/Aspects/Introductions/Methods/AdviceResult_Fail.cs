@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.AdviceResult_Fail
 {
     public class TestAspect : TypeAspect
