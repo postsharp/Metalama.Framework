@@ -266,11 +266,10 @@ namespace Metalama.Framework.Workspaces
 
             using var msbuildProjectCollection = new ProjectCollection( allProperties );
 
+            // Start all tasks in parallel because even that may be expensive.
             var loadProjectTasks = roslynWorkspace.CurrentSolution.Projects.AsParallel().Select( GetOurProjectAsync ).ToArray();
 
-            await Task.WhenAll( loadProjectTasks );
-
-            var ourProjects = loadProjectTasks.Select( x => x.Result ).ToImmutableArray();
+            var ourProjects = (await Task.WhenAll( loadProjectTasks )).ToImmutableArray();
 
             var projectSet = new ProjectSet( ourProjects, name ?? $"{ourProjects.Length} projects" );
 
