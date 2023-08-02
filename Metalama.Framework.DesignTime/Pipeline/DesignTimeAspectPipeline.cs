@@ -257,7 +257,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             // There was an external build. Touch the files to re-run the analyzer.
             this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectKey}'." );
 
-            await this.ResumeAsync( AsyncExecutionContext.Get(), CancellationToken.None );
+            await this.ResumeAsync( AsyncExecutionContext.Get(), false, CancellationToken.None );
 
             // Raise the event.
             await this._eventHub.OnExternalBuildCompletedEventAsync( this.ProjectKey );
@@ -269,7 +269,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 #pragma warning restore VSTHRD100
 
-    public async Task ResumeAsync( AsyncExecutionContext executionContext, CancellationToken cancellationToken = default )
+    public async Task ResumeAsync( AsyncExecutionContext executionContext, bool executePipelineNow, CancellationToken cancellationToken = default )
     {
         this.Logger.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectKey}'." );
 
@@ -285,6 +285,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 }
 
                 await this.ResumeCoreAsync( executionContext );
+
+                if ( executePipelineNow && this.LastProjectVersion != null )
+                {
+                    await this.ExecuteAsync( this.LastProjectVersion.Compilation, executionContext, cancellationToken.ToTestable() );
+                }
             }
             finally
             {
@@ -1158,11 +1163,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         CancellationToken cancellationToken,
         [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
     {
-        if ( base.TryInitialize( diagnosticAdder, compilation, projectLicenseInfo, compileTimeTreesHint, cancellationToken, out configuration ) )
+        var tryInitialize = base.TryInitialize( diagnosticAdder, compilation, projectLicenseInfo, compileTimeTreesHint, cancellationToken, out configuration );
+
+        if ( tryInitialize )
         {
             // Register user diagnostics.
             // If we have a new compile-time project, we need to register user diagnostics.
-            if ( configuration.ClosureDiagnosticManifest is { DiagnosticDefinitions.IsEmpty: false } or { SuppressionDefinitions.IsEmpty: false } )
+            if ( configuration!.ClosureDiagnosticManifest is { DiagnosticDefinitions.IsEmpty: false } or { SuppressionDefinitions.IsEmpty: false } )
             {
                 this._userDiagnosticsRegistrationService?.RegisterDescriptors( configuration.ClosureDiagnosticManifest );
             }

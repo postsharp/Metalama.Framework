@@ -35,7 +35,7 @@ public interface I {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
-            Assert.Equal( new[] { "Aspect" }, compilationResult1!.Result.InheritableAspectTypes.ToArray() );
+            Assert.Equal( new[] { "Aspect" }, compilationResult1.Result.InheritableAspectTypes.ToArray() );
 
             Assert.Equal(
                 new[] { "T:I" },
@@ -68,7 +68,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1!.Result.GetInheritableAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
+                compilationResult1.Result.GetInheritableAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
 
             // Add a target class.
             var targetTree2 = CSharpSyntaxTree.ParseText(
@@ -81,7 +81,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:C", "T:I" },
-                compilationResult2!.Result.GetInheritableAspects( "Aspect" )
+                compilationResult2.Result.GetInheritableAspects( "Aspect" )
                     .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
@@ -93,7 +93,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:C" },
-                compilationResult3!.Result.GetInheritableAspects( "Aspect" )
+                compilationResult3.Result.GetInheritableAspects( "Aspect" )
                     .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
@@ -140,7 +140,7 @@ public interface I {}
             Assert.True( pipelineFactory.TryExecute( testContext1.ProjectOptions, compilation1, default, out _ ) );
             Assert.True( pipelineFactory.TryExecute( testContext2.ProjectOptions, compilation2, default, out var compilationResult2 ) );
 
-            Assert.Single( compilationResult2!.Result.IntroducedSyntaxTrees );
+            Assert.Single( compilationResult2.Result.IntroducedSyntaxTrees );
         }
     }
 }

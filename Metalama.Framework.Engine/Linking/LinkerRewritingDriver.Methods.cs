@@ -173,7 +173,7 @@ namespace Metalama.Framework.Engine.Linking
                         new SubstitutionContext( this, generationContext, context ) )
                     : null;
 
-            if (substitutedBody == null && substitutedExpressionBody == null)
+            if ( substitutedBody == null && substitutedExpressionBody == null )
             {
                 // Partial methods with no definition.
                 substitutedBody = Block();
@@ -267,14 +267,16 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
+        private static MethodDeclarationSyntax GetTrampolineForMethod(
+            MethodDeclarationSyntax method,
+            IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
             Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
 
             Invariant.Implies(
                 targetSemantic.Kind is IntermediateSymbolSemanticKind.Base,
                 targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
-            
+
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return method

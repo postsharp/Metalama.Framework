@@ -141,6 +141,20 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
             await CompareAsyncEnumeratorsAsync( list.GetAsyncEnumerator(), buffered );
         }
 
+        [Fact]
+        public async Task BufferAsyncEnumeratorToListAsync()
+        {
+            var original = ReturnsAsyncEnumerableAsync().GetAsyncEnumerator();
+            var bufferedList = await original.BufferToListAsync();
+
+            await CompareAsyncEnumeratorsAsync( ReturnsAsyncEnumerableAsync().GetAsyncEnumerator(), bufferedList.GetAsyncEnumerator() );
+
+            Assert.Same( bufferedList, bufferedList.GetAsyncEnumerator().Parent );
+
+            var reBufferedList = await bufferedList.GetAsyncEnumerator().BufferToListAsync();
+
+            Assert.Same( bufferedList, reBufferedList );
+        }
 #endif
 
         private static void CompareEnumerators( IEnumerator a, IEnumerator b )

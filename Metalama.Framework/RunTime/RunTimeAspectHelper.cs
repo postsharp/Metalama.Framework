@@ -158,7 +158,7 @@ namespace Metalama.Framework.RunTime
 
         /// <summary>
         /// Evaluates an <see cref="IAsyncEnumerator{T}"/>, stores the result into an <see cref="AsyncEnumerableList{T}"/> and returns an enumerator for this object.
-        /// If the enumerable is already an enumerator of a <see cref="AsyncEnumerableList{T}"/>, returns the input enumerator.
+        /// If the enumerator is already an <see cref="AsyncEnumerableList{T}"/> enumerator, returns the input enumerator.
         ///  The intended side effect of this method is to completely evaluate the input enumerator.
         /// </summary>
         /// <param name="enumerator">An enumerator.</param>
@@ -193,6 +193,42 @@ namespace Metalama.Framework.RunTime
                 }
 
                 return list.GetAsyncEnumerator( cancellationToken );
+            }
+        }
+
+        /// <summary>
+        /// Evaluates an <see cref="IAsyncEnumerator{T}"/>, stores the result into an <see cref="AsyncEnumerableList{T}"/> and returns the list.
+        /// If the enumerator is already an <see cref="AsyncEnumerableList{T}"/> enumerator, returns the parent <see cref="AsyncEnumerableList{T}"/>.
+        ///  The intended side effect of this method is to completely evaluate the input enumerator.
+        /// </summary>
+        /// <param name="enumerator">An enumerator.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>An <see cref="AsyncEnumerableList{T}"/> made from the items of <paramref name="enumerator"/>, or the parent <see cref="AsyncEnumerableList{T}"/> object
+        /// if the <paramref name="enumerator"/> object itself it is already an <see cref="AsyncEnumerableList{T}"/> enumerator.</returns>
+        public static async ValueTask<AsyncEnumerableList<T>> BufferToListAsync<T>(
+            this IAsyncEnumerator<T> enumerator,
+            CancellationToken cancellationToken = default )
+        {
+            if ( enumerator is AsyncEnumerableList<T>.AsyncEnumerator typedEnumerator )
+            {
+                return typedEnumerator.Parent;
+            }
+            else
+            {
+                var list = new AsyncEnumerableList<T>();
+
+                await using ( enumerator )
+                {
+                    while ( await enumerator.MoveNextAsync() )
+                    {
+                        list.Add( enumerator.Current );
+
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
+
+                return list;
             }
         }
 #endif

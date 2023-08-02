@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Contracts.Diagnostics;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
@@ -25,6 +27,10 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<ProjectKey, UserProcessEndpoint> _registeredEndpointsByProject = new();
     private readonly ConcurrentDictionary<JsonRpc, ApiImplementation> _clients = new();
+
+    // We use an immutable dictionary to have a simple consistent enumerator.
+    private volatile ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> _compileTimeErrorsByProject =
+        ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>.Empty;
 
     public UserProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, int.MaxValue )
     {
@@ -54,6 +60,10 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
     }
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
+
+    public event Action<IReadOnlyCollection<IDiagnosticData>>? CompileTimeErrorsChanged;
+
+    public IReadOnlyCollection<IDiagnosticData> CompileTimeErrors { get; private set; } = Array.Empty<DiagnosticData>();
 
     public event Action<UserProcessEndpoint>? EndpointAdded;
 
@@ -166,6 +176,11 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
         this.IsEditingCompileTimeCodeChanged?.Invoke( value );
     }
 
+    private void OnCompileTimeErrorsChanged( ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> errors )
+    {
+        this.SetCompileTimeErrorsForProjects( errors );
+    }
+
     private Task NotifyCompilationResultChangeAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
     {
         var tasks = new List<Task>();
@@ -202,5 +217,35 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
         {
             return Task.CompletedTask;
         }
+    }
+
+    private void SetCompileTimeErrorsForProjects( ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> errors )
+    {
+        while ( true )
+        {
+            var oldDictionary = this._compileTimeErrorsByProject;
+            var dictionary = oldDictionary;
+
+            foreach ( var group in errors )
+            {
+                dictionary = dictionary.SetItem( group.Key, group.Value );
+            }
+
+            if ( Interlocked.CompareExchange( ref this._compileTimeErrorsByProject, dictionary, oldDictionary ) == oldDictionary )
+            {
+                this.CompileTimeErrors = new ConsolidatedErrorDiagnosticCollection( this._compileTimeErrorsByProject );
+                this.CompileTimeErrorsChanged?.Invoke( this.CompileTimeErrors );
+
+                return;
+            }
+        }
+    }
+
+    private async Task OnEndpointAddedAsync( UserProcessEndpoint endpoint, CancellationToken cancellationToken )
+    {
+        this.EndpointAdded?.Invoke( endpoint );
+
+        var compileTimeErrors = await endpoint.GetCompileTimeErrorsAsync( cancellationToken );
+        this.SetCompileTimeErrorsForProjects( compileTimeErrors );
     }
 }

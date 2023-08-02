@@ -7,7 +7,6 @@ using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
@@ -55,7 +54,6 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
-    private readonly ExecutionScenario _executionScenario;
     private readonly ITaskRunner _taskRunner;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
@@ -106,7 +104,6 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = serviceProvider.Underlying.GetRequiredBackstageService<ITempFileManager>();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
-        this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
         this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
     }
 

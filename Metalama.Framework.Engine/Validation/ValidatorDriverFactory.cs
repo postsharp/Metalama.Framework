@@ -33,7 +33,7 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory, IDisposa
         => this._methodBasedDrivers.GetOrAdd( validateMethod, this.GetMethodBasedReferenceValidatorDriverCore );
 
     public ClassBasedReferenceValidatorDriver GetReferenceValidatorDriver( Type type )
-        => _classBasedDrivers.GetOrAdd( type, t => ClassBasedReferenceValidatorDriver.Instance );
+        => _classBasedDrivers.GetOrAdd( type, _ => ClassBasedReferenceValidatorDriver.Instance );
 
     public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate ) => new( validate );
 

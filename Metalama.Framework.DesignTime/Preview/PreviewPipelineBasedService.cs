@@ -77,7 +77,7 @@ public abstract class PreviewPipelineBasedService
 
         // Resume all pipelines.
         var executionContext = AsyncExecutionContext.Get();
-        await this.PipelineFactory.ResumePipelinesAsync( executionContext, cancellationToken );
+        await this.PipelineFactory.ResumePipelinesAsync( executionContext, false, cancellationToken );
 
         // Get the pipeline configuration from the design-time pipeline.
         var getConfigurationResult = await pipeline.GetConfigurationAsync( partialCompilation, true, executionContext, cancellationToken );

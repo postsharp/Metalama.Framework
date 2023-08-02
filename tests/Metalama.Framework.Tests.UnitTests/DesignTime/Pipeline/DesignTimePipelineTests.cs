@@ -179,7 +179,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         // First execution of the pipeline.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
-        var dumpedResults = DumpResults( results! );
+        var dumpedResults = DumpResults( results );
         this.TestOutput.WriteLine( dumpedResults );
 
         const string expectedResult = @"
@@ -195,7 +195,7 @@ F1.cs:
 
         // Second execution. The result should be the same, and the number of executions should not change.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
-        var dumpedResults2 = DumpResults( results2! );
+        var dumpedResults2 = DumpResults( results2 );
         Assert.Equal( expectedResult.Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
     }
@@ -293,7 +293,7 @@ Target.cs:
 
         // First execution of the pipeline.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
-        var dumpedResults = DumpResults( results! );
+        var dumpedResults = DumpResults( results );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
@@ -301,7 +301,7 @@ Target.cs:
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
-        var dumpedResults2 = DumpResults( results2! );
+        var dumpedResults2 = DumpResults( results2 );
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
@@ -315,7 +315,7 @@ Target.cs:
             name: assemblyName );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, default, out var results3 ) );
-        var dumpedResults3 = DumpResults( results3! );
+        var dumpedResults3 = DumpResults( results3 );
 
         this.TestOutput.WriteLine( dumpedResults3 );
 
@@ -339,7 +339,7 @@ Target.cs:
         Assert.True( factory.EventHub.IsEditingCompileTimeCode );
         Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
-        var dumpedResults4 = DumpResults( results4! );
+        var dumpedResults4 = DumpResults( results4 );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
@@ -367,7 +367,7 @@ Target.cs:
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results5 ) );
-        var dumpedResults5 = DumpResults( results5! );
+        var dumpedResults5 = DumpResults( results5 );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
@@ -382,12 +382,12 @@ Target.cs:
             d => d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
         // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-        await pipeline.ResumeAsync( AsyncExecutionContext.Get() );
+        await pipeline.ResumeAsync( AsyncExecutionContext.Get(), false );
         Assert.False( factory.EventHub.IsEditingCompileTimeCode );
 
         // A new evaluation of the design-time pipeline should now give the new results.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results6 ) );
-        var dumpedResults6 = DumpResults( results6! );
+        var dumpedResults6 = DumpResults( results6 );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
         Assert.Equal( 3, pipeline.PipelineExecutionCount );
@@ -460,14 +460,14 @@ Target.cs:
 
         // First execution of the pipeline.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
-        var dumpedResults = DumpResults( results! );
+        var dumpedResults = DumpResults( results );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
-        var dumpedResults2 = DumpResults( results2! );
+        var dumpedResults2 = DumpResults( results2 );
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
@@ -490,14 +490,14 @@ Target.cs:
         Assert.True( factory.EventHub.IsEditingCompileTimeCode );
         Assert.True( aspectProjectPipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
-        var dumpedResults3 = DumpResults( results3! );
+        var dumpedResults3 = DumpResults( results3 );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
         Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
 
         // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-        await aspectProjectPipeline.ResumeAsync( AsyncExecutionContext.Get() );
+        await aspectProjectPipeline.ResumeAsync( AsyncExecutionContext.Get(), false );
         await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, targetProjectPipeline.Status );
@@ -506,7 +506,7 @@ Target.cs:
 
         // A new evaluation of the design-time pipeline should now give the new results.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results6 ) );
-        var dumpedResults6 = DumpResults( results6! );
+        var dumpedResults6 = DumpResults( results6 );
 
         Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
         await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
@@ -568,7 +568,7 @@ partial class C
 
             Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var results ) );
 
-            var dumpedResults = DumpResults( results! );
+            var dumpedResults = DumpResults( results );
 
             this.TestOutput.WriteLine( "-----------------" );
             this.TestOutput.WriteLine( dumpedResults );
@@ -658,7 +658,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field1'",
-            results1!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results1.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Second compilation with a different master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -676,7 +676,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2'",
-            results2!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results2.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Third compilation. Add a syntax tree with a partial type.
         var masterCode3 = new Dictionary<string, string>()
@@ -699,7 +699,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2,Field3'",
-            results3!.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
+            results3.Result.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
     }
 
     [Fact]
@@ -971,7 +971,7 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netFrameworkCompilation, default, out _ ) );
         Assert.True( factory.TryExecute( testContext.ProjectOptions, netCompilation, default, out var result ) );
 
-        foreach ( var (_, treeResult) in result!.Result.SyntaxTreeResults )
+        foreach ( var (_, treeResult) in result.Result.SyntaxTreeResults )
         {
             Assert.Empty( treeResult.Diagnostics );
         }
@@ -1022,12 +1022,12 @@ class D{version}
         Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
 
         // Note that LAMA0118 is no longer reported by the pipeline but by the analyzer.
-        Assert.Empty( compilationResult!.GetAllDiagnostics( "Aspect.cs" ) );
+        Assert.Empty( compilationResult.GetAllDiagnostics( "Aspect.cs" ) );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
         // Resume while the code is still invalid.
-        await pipeline.ResumeAsync( AsyncExecutionContext.Get() );
+        await pipeline.ResumeAsync( AsyncExecutionContext.Get(), false );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Default, pipeline.Status );
 
@@ -1086,7 +1086,7 @@ class D{version}
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
-        var dumpedResults = DumpResults( results! );
+        var dumpedResults = DumpResults( results );
         this.TestOutput.WriteLine( dumpedResults );
 
         const string expectedResult = """

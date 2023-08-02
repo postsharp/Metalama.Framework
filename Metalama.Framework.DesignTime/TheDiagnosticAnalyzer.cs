@@ -219,6 +219,13 @@ namespace Metalama.Framework.DesignTime
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                if ( diagnostic.Id.StartsWith( "CS", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    // Do not try to report C# errors. They are sent by the template compiler and are useful in other UI parts
+                    // but they should not be reported by the analyzer.
+                    continue;
+                }
+
                 Diagnostic designTimeDiagnostic;
 
                 if ( !this.ShouldWrapUnsupportedDiagnostics || this.DiagnosticDefinitions.SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
