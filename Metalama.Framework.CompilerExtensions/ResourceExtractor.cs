@@ -26,6 +26,9 @@ namespace Metalama.Framework.CompilerExtensions
         private static readonly object _initializeLock = new();
         private static readonly string[] _assembliesShippedWithMetalamaCompiler = new[] { "Metalama.Backstage", "Metalama.Compiler.Interfaces" };
 
+        private static readonly bool _isNetFramework =
+            RuntimeInformation.FrameworkDescription.StartsWith( ".NET Framework", StringComparison.OrdinalIgnoreCase );
+
         private static readonly Dictionary<string, (string Path, AssemblyName Name)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
 
         private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
@@ -54,7 +57,8 @@ namespace Metalama.Framework.CompilerExtensions
             _snapshotDirectory = GetTempDirectory( "Extract" );
         }
 
-        private static string GetTempDirectory( string purpose ) => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId );
+        private static string GetTempDirectory( string purpose )
+            => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId, _isNetFramework ? "desktop" : "core" );
 
         private static void Initialize()
         {
@@ -244,7 +248,7 @@ namespace Metalama.Framework.CompilerExtensions
 
                         foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
-                            const string prefix = "Metalama.Framework.CompilerExtensions.Resources.";
+                            var prefix = "Metalama.Framework.CompilerExtensions.Resources." + (_isNetFramework ? "Desktop" : "Core") + ".";
 
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
                                  resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
@@ -302,10 +306,10 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static Assembly? GetAssemblyCore( string name, StringBuilder? log )
         {
-            bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
+            static bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
 
-            bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
+            static bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
 
             var requestedAssemblyName = new AssemblyName( name );

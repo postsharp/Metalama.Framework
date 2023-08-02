@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <!-- We target the two frameworks for which csc.exe is built.  -->
+        <TargetFrameworks>net6.0;netframework472</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <!-- Disable warning: conflicting versions -->
+        <NoWarn>MSB3277</NoWarn>
+        <ResolveAssemblyReferencesSilent>True</ResolveAssemblyReferencesSilent>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj"  />
+    </ItemGroup>
+</Project>
