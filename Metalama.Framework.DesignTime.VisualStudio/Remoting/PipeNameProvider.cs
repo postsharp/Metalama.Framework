@@ -10,7 +10,7 @@ internal static class PipeNameProvider
 {
     public static string GetPipeName( ServiceRole role, int? processId = default )
     {
-        // The hash must be the across all target frameworks.
+        // The hash must be consistent across all target frameworks so we take the package version and not the MVID.
         var buildHash = HashUtilities.HashString( EngineAssemblyMetadataReader.Instance.PackageVersion.AssertNotNull() );
 
         return $"Metalama_{role.ToString().ToLowerInvariant()}_{processId ?? Process.GetCurrentProcess().Id}_{buildHash}";
