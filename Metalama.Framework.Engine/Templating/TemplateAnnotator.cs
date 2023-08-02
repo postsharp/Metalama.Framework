@@ -553,7 +553,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
             (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
             (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
-            (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+            (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnlyReturningBoth,
             (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
             (TemplatingScope.RunTimeOnly, _) => TemplatingScope.RunTimeOnly,
             _ => throw new AssertionFailedException( $"Unexpected combination: ({combinedExecutionScope}, {combinedValueScope})." )
@@ -561,10 +561,33 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && useCompileTimeIfPossible && preferCompileTime )
         {
-            resultingScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+            // Switch from RTOCT to CTORB for serializable types, when preferred.
+            if ( IsExpressionOfSerializableType() == true )
+            {
+                resultingScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+            }
+        }
+        else if ( resultingScope == TemplatingScope.CompileTimeOnlyReturningBoth )
+        {
+            // Switch from CTORB to RTOCT for non-serializable types.
+            if ( IsExpressionOfSerializableType() == false )
+            {
+                resultingScope = TemplatingScope.RunTimeOrCompileTime;
+            }
         }
 
         return resultingScope;
+
+        bool? IsExpressionOfSerializableType()
+        {
+            if ( originalParent is ExpressionSyntax expression &&
+                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is { } expressionType )
+            {
+                return this._serializableTypes.IsSerializable( expressionType );
+            }
+
+            return null;
+        }
     }
 
     private ScopeContextCookie WithScopeContext( ScopeContext? scopeContext )
