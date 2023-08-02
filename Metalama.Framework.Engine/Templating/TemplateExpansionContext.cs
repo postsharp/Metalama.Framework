@@ -344,7 +344,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     {
         // We are in an async iterator (or async stream), and we cannot have a return statement.
         // Generate this instead:
-        // async using ( var enumerator = METHOD() )
+        // await using ( var enumerator = METHOD() )
         // {
         //     while ( await enumerator.MoveNextAsync() )
         //     {
@@ -582,6 +582,42 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
+
+    internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
+    {
+        if ( this._template?.MustInterpretAsAsyncIteratorTemplate() != true )
+        {
+            return block;
+        }
+
+        if ( new HasAnyYieldVisitor().Visit( block ) )
+        {
+            return block;
+        }
+
+        return block.AddStatements( YieldStatement( SyntaxKind.YieldBreakStatement ) );
+    }
+
+    private sealed class HasAnyYieldVisitor : SafeSyntaxVisitor<bool>
+    {
+        public override bool DefaultVisit( SyntaxNode node )
+        {
+            foreach ( var child in node.ChildNodesAndTokens() )
+            {
+                if ( child.AsNode() is StatementSyntax statement )
+                {
+                    if ( this.Visit( statement ) )
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
+    }
 
     private sealed class DisposeCookie : IDisposable
     {

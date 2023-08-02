@@ -55,7 +55,7 @@ public class TaskAttribute : MethodAspect
     {
         await Task.Yield();
         Console.WriteLine("Task");
-        meta.Proceed();
+        await meta.ProceedAsync();
     }
 }
 

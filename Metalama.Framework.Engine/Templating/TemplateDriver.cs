@@ -50,6 +50,10 @@ namespace Metalama.Framework.Engine.Templating
 
             block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
 
+            // If we're generating an async iterator method, but there is no yield statement, we would get an error.
+            // Prevent that by adding `yield break;` at the end of the method body.
+            block = templateExpansionContext.AddYieldBreakIfNecessary( block );
+
             block = block.NormalizeWhitespace();
 
             // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.

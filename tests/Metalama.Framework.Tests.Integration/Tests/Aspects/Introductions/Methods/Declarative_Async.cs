@@ -15,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         {
             Console.WriteLine( "This is introduced method." );
             await Task.Yield();
-            meta.Proceed();
+            await meta.ProceedAsync();
         }
 
         [Introduce]
@@ -23,7 +23,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         {
             Console.WriteLine("This is introduced method.");
             await Task.Yield();
-            meta.Proceed();
+            await meta.ProceedAsync();
         }
 
         [Introduce]
@@ -31,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         {
             Console.WriteLine( "This is introduced method." );
             await Task.Yield();
-            return meta.Proceed();
+            return await meta.ProceedAsync();
         }
     }
 
