@@ -72,14 +72,17 @@
         <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSignable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned&quot; --nologo" />
         <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSignable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned&quot; --nologo" />
         
-        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\DesktopSignable.zip" />
-        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\CoreSignable.zip" />
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned\DesktopSignable.zip" />
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned\CoreSignable.zip" />
         
         <ItemGroup>
+            <_DesktopSignedFileToEmbed Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned\*.dll"  />
+            <_CoreSignedFileToEmbed Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned\*.dll" />
+
             <EmbeddedResource Include="@(DesktopAssemblyToEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
             <EmbeddedResource Include="@(CoreAssemblyToEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned\*.dll" Link="Resources\Desktop\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned\*.dll" Link="Resources\Core\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_DesktopSignedFileToEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_CoreSignedFileToEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     
