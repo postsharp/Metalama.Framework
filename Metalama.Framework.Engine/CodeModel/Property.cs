@@ -69,8 +69,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
-            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
 
         private IExpression? GetInitializerExpressionCore()
         {

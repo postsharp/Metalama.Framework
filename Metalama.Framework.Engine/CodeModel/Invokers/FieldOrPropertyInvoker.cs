@@ -94,10 +94,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             Invariant.Assert(
-                this.SerializationContext.SyntaxGenerationContext.Equals( (syntaxSerializationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
+                this.SerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
 
             return this.GetTypedExpressionSyntax();
         }

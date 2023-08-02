@@ -83,8 +83,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
-        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
 
     public TemplateMember<IField>? InitializerTemplate { get; set; }
 

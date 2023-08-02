@@ -33,8 +33,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
-            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxSerializationContext );
+        TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext );
 
         public sealed override string ToString() => this._toString ??= this.ToStringCore();
 

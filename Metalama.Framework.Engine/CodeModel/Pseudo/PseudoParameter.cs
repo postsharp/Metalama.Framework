@@ -98,11 +98,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public ref object? Value
             => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl( 
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,
-                ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerationContext,
+                ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
                 isReferenceable: true );
         
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;

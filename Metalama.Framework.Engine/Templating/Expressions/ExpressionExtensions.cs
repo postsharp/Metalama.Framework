@@ -23,18 +23,18 @@ internal static class ExpressionExtensions
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static IUserExpression ToUserExpression( this IExpression expression, ISyntaxSerializationContext syntaxSerializationContext )
+    public static IUserExpression ToUserExpression( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
         => expression switch
         {
             null => null!,
             IUserExpression userExpression => userExpression,
             TypedConstant typedConstant => new SyntaxUserExpression(
-                ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerator.TypedConstant( typedConstant ),
+                ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerator.TypedConstant( typedConstant ),
                 typedConstant.Type ),
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxSerializationContext syntaxGenerationContext )
+    public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
         => expression.ToUserExpression( syntaxGenerationContext ).ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public static ExpressionSyntax ToExpressionSyntax( this IExpression expression, SyntaxSerializationContext context )

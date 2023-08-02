@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             this.CheckNotPropertyBackingField();
 

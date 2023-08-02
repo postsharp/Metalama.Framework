@@ -44,7 +44,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public ref object? Value => ref this._parameterBuilder.Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => this._parameterBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )

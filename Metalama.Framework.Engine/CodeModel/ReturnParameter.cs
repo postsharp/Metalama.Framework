@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ref object? Value => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;

@@ -50,7 +50,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public ref object? Value => ref this.FieldBuilder.Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => this.FieldBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();

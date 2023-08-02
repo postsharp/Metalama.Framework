@@ -19,25 +19,25 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public static TypedExpressionSyntax ToTypedExpressionSyntax<T>(
             ICompileTimeReflectionObject<T> compileTimeMemberInfo,
             Func<T, SyntaxSerializationContext, ExpressionSyntax> serialize,
-            ISyntaxSerializationContext syntaxSerializationContext )
+            ISyntaxGenerationContext syntaxGenerationContext )
             where T : class, ICompilationElement
         {
-            var serializationContext = (SyntaxSerializationContext) syntaxSerializationContext;
+            var serializationContext = (SyntaxSerializationContext) syntaxGenerationContext;
 
             return ToTypedExpressionSyntax( 
                 compileTimeMemberInfo.Target.GetTarget( serializationContext.CompilationModel ),
                 compileTimeMemberInfo.ReflectionType,
                 serialize, 
-                syntaxSerializationContext );
+                syntaxGenerationContext );
         }
 
         public static TypedExpressionSyntax ToTypedExpressionSyntax<T>(
             T member,
             Type type,
             Func<T, SyntaxSerializationContext, ExpressionSyntax> serialize,
-            ISyntaxSerializationContext syntaxSerializationContext )
+            ISyntaxGenerationContext syntaxGenerationContext )
         {
-            var serializationContext = (SyntaxSerializationContext) syntaxSerializationContext;
+            var serializationContext = (SyntaxSerializationContext) syntaxGenerationContext;
 
             var expression = serialize( member, serializationContext );
 

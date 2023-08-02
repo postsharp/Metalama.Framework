@@ -179,15 +179,15 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
-            var compilation = ((SyntaxSerializationContext) syntaxSerializationContext).CompilationModel;
+            var compilation = ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel;
 
             return CompileTimeMocksHelper.ToTypedExpressionSyntax(
                 this.Target.GetSymbol( compilation.RoslynCompilation ).AssertCast<ITypeSymbol>().AssertNotNull(),
                 this.ReflectionType,
                 TypeSerializationHelper.SerializeTypeSymbolRecursive,
-                syntaxSerializationContext );
+                syntaxGenerationContext );
         }
     }
 }

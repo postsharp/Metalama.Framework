@@ -108,7 +108,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
 
     public TemplateMember<IProperty>? InitializerTemplate

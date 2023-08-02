@@ -81,12 +81,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxSerializationContext syntaxSerializationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new(
                 new TypedExpressionSyntaxImpl(
                     SyntaxFactory.IdentifierName( this.Name ),
                     this.Type,
-                    ((SyntaxSerializationContext) syntaxSerializationContext).SyntaxGenerationContext,
+                    ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
                     true ) );
     }
 }
