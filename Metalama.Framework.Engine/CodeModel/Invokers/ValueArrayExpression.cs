@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,9 +22,9 @@ internal sealed class ValueArrayExpression : UserExpression
         this._parent = (ParameterList) parent;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
     {
-        var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
+        var syntaxGenerator = syntaxSerializationContext.SyntaxGenerator;
 
         return syntaxGenerator.ArrayCreationExpression(
             syntaxGenerator.Type( SpecialType.System_Object ),

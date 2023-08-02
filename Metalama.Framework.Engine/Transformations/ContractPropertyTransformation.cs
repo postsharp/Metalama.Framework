@@ -27,12 +27,9 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
-        var contextCopy = context;
         BlockSyntax? getterBody, setterBody;
 
         // Local function that executes the filter for one of the accessors.
-        var syntaxGenerationContext = context.SyntaxGenerationContext;
-
         bool TryExecuteFilters(
             IMethod? accessor,
             ContractDirection direction,
@@ -46,14 +43,14 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             {
                 if ( direction == ContractDirection.Output )
                 {
-                    returnValueLocalName = contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
+                    returnValueLocalName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
                 }
                 else
                 {
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, null, out statements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, direction, returnValueLocalName, null, out statements ) )
                 {
                     proceedExpression = null;
 
@@ -68,8 +65,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                         _ => TemplateKind.Default,
                     };
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, templateKind )
-                    .ToExpressionSyntax( syntaxGenerationContext );
+                proceedExpression = this.CreateProceedDynamicExpression( context, accessor, templateKind )
+                    .ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
 
                 return true;
             }

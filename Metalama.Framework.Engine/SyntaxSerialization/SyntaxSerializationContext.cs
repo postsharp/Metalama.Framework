@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -11,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal sealed class SyntaxSerializationContext
+    internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
     {
         private int _recursionLevel;
 

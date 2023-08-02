@@ -69,12 +69,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
 
-        bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+        bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-        public ref object? Value => throw new NotSupportedException( "Cannot turn use the return parameter as an expression." );
+        public ref object? Value => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => throw new NotSupportedException( "Cannot use a return parameter as an expression." );
+            => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
     }

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -21,8 +22,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+            => syntaxSerializationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
 
         public override IType Type => this._type;
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -85,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 new TypedExpressionSyntaxImpl(
                     SyntaxFactory.IdentifierName( this.Name ),
                     this.Type,
-                    (SyntaxGenerationContext) syntaxGenerationContext,
+                    ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
                     true ) );
     }
 }

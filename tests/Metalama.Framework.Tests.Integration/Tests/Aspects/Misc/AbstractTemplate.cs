@@ -5,7 +5,7 @@ using Metalama.Framework.Eligibility;
 
 // We are testing the abstract/override thing in templates.
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.AbstractTemplate
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AbstractTemplate
 {
     [AttributeUsage( AttributeTargets.Method )]
     public abstract class AbstractAspect : Attribute, IAspect<IMethod>

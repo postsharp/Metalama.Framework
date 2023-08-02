@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -98,12 +99,12 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new TypedExpressionSyntaxImpl(
+            => new TypedExpressionSyntaxImpl( 
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,
-                (SyntaxGenerationContext) syntaxGenerationContext,
+                ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
                 isReferenceable: true );
-
+        
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsAssignable = isAssignable;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this.Expression;
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext ) => this.Expression;
 
         public override IType Type { get; }
 

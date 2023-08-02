@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -23,14 +24,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
         public bool IsRequired
 #if ROSLYN_4_4_0_OR_GREATER
             => this.PropertySymbol.IsRequired;
 #else
             => false;
 #endif
-        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
-
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
 
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
+            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
 
         private IExpression? GetInitializerExpressionCore()
         {

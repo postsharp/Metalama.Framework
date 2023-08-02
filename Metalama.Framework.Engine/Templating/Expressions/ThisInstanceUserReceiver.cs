@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
             => ThisExpression();
 
         public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;

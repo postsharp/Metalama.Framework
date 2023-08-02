@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -20,21 +21,21 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
-            Assert.Equal( "typeof(void)", GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Void ) ) );
+            Assert.Equal( "typeof(void)", GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Void ) ) );
 
             Assert.Equal(
                 "typeof(global::System.Int32)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ) ) );
 
             Assert.Equal(
                 "typeof(global::System.Object)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Object ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Object ) ) );
 
             Assert.Equal(
                 "typeof(global::System.String)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.String ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.String ) ) );
         }
 
         [Fact]
@@ -42,11 +43,11 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             Assert.Equal(
                 "typeof(global::System.Int32*)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakePointerType() ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakePointerType() ) );
         }
 
         [Fact]
@@ -54,15 +55,15 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             Assert.Equal(
                 "typeof(global::System.Int32[])",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType() ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType() ) );
 
             Assert.Equal(
                 "typeof(global::System.Int32[,])",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType( 2 ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.Int32 ).MakeArrayType( 2 ) ) );
         }
 
         [Fact]
@@ -70,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             var functionPointerTypeSymbol = compilation.GetRoslynCompilation()
                 .CreateFunctionPointerTypeSymbol(
@@ -81,7 +82,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var functionPointerType = new FunctionPointerType( functionPointerTypeSymbol, compilation );
 
-            Assert.Equal( "typeof(delegate*<global::System.Int32,global::System.Int32>)", GetSyntaxString( syntaxGenerationContext, functionPointerType ) );
+            Assert.Equal( "typeof(delegate*<global::System.Int32,global::System.Int32>)", GetSyntaxString( syntaxSerializationContext, functionPointerType ) );
         }
 
         [Fact]
@@ -89,9 +90,9 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "namespace N { class A { } }" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
-            Assert.Equal( "typeof(global::N.A)", GetSyntaxString( syntaxGenerationContext, compilation.Types.OfName( "A" ).Single() ) );
+            Assert.Equal( "typeof(global::N.A)", GetSyntaxString( syntaxSerializationContext, compilation.Types.OfName( "A" ).Single() ) );
         }
 
         [Fact]
@@ -99,13 +100,13 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "namespace N { class A<T,U,V> { } }" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             Assert.Equal(
                 "typeof(global::System.Collections.Generic.List<>)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ) ) );
 
-            Assert.Equal( "typeof(global::N.A<,,>)", GetSyntaxString( syntaxGenerationContext, compilation.Types.OfName( "A" ).Single() ) );
+            Assert.Equal( "typeof(global::N.A<,,>)", GetSyntaxString( syntaxSerializationContext, compilation.Types.OfName( "A" ).Single() ) );
         }
 
         [Fact]
@@ -113,17 +114,17 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "namespace N { class A<T,U,V> { } }" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
             var argumentType = compilation.Factory.GetSpecialType( SpecialType.Int32 );
 
             Assert.Equal(
                 "typeof(global::System.Collections.Generic.List<global::System.Int32>)",
-                GetSyntaxString( syntaxGenerationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ).WithTypeArguments( argumentType ) ) );
+                GetSyntaxString( syntaxSerializationContext, compilation.Factory.GetSpecialType( SpecialType.List_T ).WithTypeArguments( argumentType ) ) );
 
             Assert.Equal(
                 "typeof(global::N.A<global::System.Int32,global::System.Int32,global::System.Int32>)",
                 GetSyntaxString(
-                    syntaxGenerationContext,
+                    syntaxSerializationContext,
                     compilation.Types.OfName( "A" ).Single().WithTypeArguments( argumentType, argumentType, argumentType ) ) );
         }
 
@@ -132,14 +133,14 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "namespace N { class A<T,U> { void Foo(A<U,T> x) {}} }" );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( compilation.CompilationContext );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             var parameterType = compilation.Types.Single().Methods.Single().Parameters.Single().Type;
 
-            Assert.Equal( "typeof(global::N.A<U,T>)", GetSyntaxString( syntaxGenerationContext, parameterType ) );
+            Assert.Equal( "typeof(global::N.A<U,T>)", GetSyntaxString( syntaxSerializationContext, parameterType ) );
         }
 
-        private static string GetSyntaxString( SyntaxGenerationContext syntaxGenerationContext, IType type )
-            => ((IUserExpression) type.ToTypeOfExpression()).ToTypedExpressionSyntax( syntaxGenerationContext ).Syntax.ToFullString();
+        private static string GetSyntaxString( SyntaxSerializationContext syntaxSerializationContext, IType type )
+            => ((IUserExpression) type.ToTypeOfExpression()).ToTypedExpressionSyntax( syntaxSerializationContext ).Syntax.ToFullString();
     }
 }

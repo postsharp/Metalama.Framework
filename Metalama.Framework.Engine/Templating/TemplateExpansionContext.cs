@@ -34,11 +34,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly IUserExpression? _proceedExpression;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
-
     internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext
-           ?? _currentSyntaxGenerationContext.Value;
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
+        _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
 
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
@@ -46,6 +44,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
         => CurrentSyntaxGenerationContextOrNull
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
+
+    private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
+
+    /// <summary>
+    /// Gets the current <see cref="SyntaxSerializationContext"/>.
+    /// </summary>
+    internal static SyntaxSerializationContext CurrentSyntaxSerializationContext
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
+           ?? _currentSyntaxSerializationContext.Value
+           ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxSerializationContext has not be set." );
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
@@ -80,20 +88,20 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     }
 
     /// <summary>
-    /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
-    /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
+    /// Sets the <see cref="CurrentSyntaxSerializationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
+    /// This method is used in tests, when the <see cref="CurrentSyntaxSerializationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
-        _currentSyntaxGenerationContext.Value = generationContext;
+        _currentSyntaxSerializationContext.Value = serializationContext;
 
         return new DisposeCookie(
             () =>
             {
                 handle.Dispose();
-                _currentSyntaxGenerationContext.Value = null;
+                _currentSyntaxSerializationContext.Value = null;
             } );
     }
 
@@ -511,7 +519,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     }
 
                     var returnExpression = returnUserExpression
-                        .ToExpressionSyntax( this.SyntaxGenerationContext )
+                        .ToExpressionSyntax( this.SyntaxSerializationContext )
                         .RemoveParenthesis();
 
                     return Block( ExpressionStatement( returnExpression ), returnStatement )
@@ -545,7 +553,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 ExpressionStatement(
                                     AwaitExpression(
                                         Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                        returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ) ) ),
                                 ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -556,14 +564,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 ExpressionStatement(
                                     AwaitExpression(
                                         Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                        returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ) ) ),
                                 ReturnStatement( SyntaxFactoryEx.Default ).WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
             }
             else
             {
-                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
+                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ), awaitResult );
             }
         }
     }

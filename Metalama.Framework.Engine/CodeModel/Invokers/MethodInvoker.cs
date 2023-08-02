@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -106,8 +105,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             SimpleNameSyntax name;
 
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
             var receiverInfo = this.GetReceiverInfo();
 
             if ( this.Member.IsGeneric )
@@ -115,7 +112,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this.GetCleanTargetMemberName() ),
                     TypeArgumentList(
-                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => this.GenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
@@ -126,8 +123,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments(
                 this.Member.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, compilation, generationContext ),
-                generationContext );
+                TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ),
+                this.GenerationContext );
 
             if ( this.Member.MethodKind == MethodKind.LocalFunction )
             {
@@ -140,7 +137,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext ) );
+                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext ) );
 
                 return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
             }
