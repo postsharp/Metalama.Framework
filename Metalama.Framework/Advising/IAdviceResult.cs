@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
+using System;
 
 namespace Metalama.Framework.Advising;
 
@@ -31,5 +32,6 @@ public interface IAdviceResult
     /// <summary>
     /// Gets the <see cref="IAspectBuilder"/>.
     /// </summary>
+    [Obsolete( "Instead of accessing this property, use the IAspectBuilder<T> parameter of BuildAspect." )]
     IAspectBuilder AspectBuilder { get; }
 }
