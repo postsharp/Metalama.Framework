@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 CompilationContext compilationContext,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
-                DerivedTypeIndex derivedTypeIndex,
+                Lazy<DerivedTypeIndex> derivedTypeIndex,
                 ImmutableArray<ManagedResource> resources )
                 : base( compilationContext, derivedTypeIndex, resources )
             {

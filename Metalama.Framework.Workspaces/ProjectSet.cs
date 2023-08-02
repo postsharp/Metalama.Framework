@@ -24,7 +24,7 @@ namespace Metalama.Framework.Workspaces
 
         internal ProjectSet( ImmutableArray<Project> projects, string name )
         {
-            this._sourceCode = new CompilationSet( name, projects.Select( x => x.Compilation ).ToImmutableArray() );
+            this._sourceCode = new CompilationSet( name, projects.AsParallel().Select( x => x.Compilation ).ToImmutableArray() );
 
             // This gets a snapshot of the collection of project at the moment the object is created.
             this.Projects = projects;
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Workspaces
 
         [Memo]
         internal ICompilationSetResult CompilationResult
-            => new CompilationSetResult( this.Projects.Select( x => x.CompilationResult ).ToImmutableArray(), this.ToString() );
+            => new CompilationSetResult( this.Projects.AsParallel().Select( x => x.CompilationResult ).ToImmutableArray(), this.ToString() );
 
         public override string ToString() => this._sourceCode.ToString();
 
