@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Project>
 
     <PropertyGroup>
-        <MetalamaBackstageVersion></MetalamaBackstageVersion>
-        <MetalamaCompilerVersion></MetalamaCompilerVersion>
+        <MetalamaBackstageVersion>2023.2.3-rc</MetalamaBackstageVersion>
+        <MetalamaCompilerVersion>2023.2.3-rc</MetalamaCompilerVersion>
     </PropertyGroup>
 
 </Project>
