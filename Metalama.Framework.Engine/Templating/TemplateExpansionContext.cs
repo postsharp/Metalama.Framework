@@ -595,7 +595,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             return block;
         }
 
-        return block.AddStatements( YieldStatement( SyntaxKind.YieldBreakStatement ) );
+        return block.AddStatements( CreateYieldBreakStatement() );
     }
 
     private sealed class HasAnyYieldVisitor : SafeSyntaxVisitor<bool>
