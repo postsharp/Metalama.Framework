@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects;

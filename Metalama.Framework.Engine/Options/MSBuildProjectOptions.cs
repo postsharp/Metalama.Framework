@@ -25,15 +25,14 @@ namespace Metalama.Framework.Engine.Options
         private readonly TransformerOptions _transformerOptions;
 
         [UsedImplicitly]
-        protected MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        protected MSBuildProjectOptions( IProjectOptionsSource source, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
-            this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
-            this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, TransformerOptions? transformerOptions = null ) :
+            this( new OptionsAdapter( options ), transformerOptions ) { }
 
         [Memo]
         public override string? BuildTouchFile => this.GetStringOption( MSBuildPropertyNames.MetalamaBuildTouchFile );
@@ -43,8 +42,6 @@ namespace Metalama.Framework.Engine.Options
 
         [Memo]
         public override string? AssemblyName => this.GetStringOption( MSBuildPropertyNames.AssemblyName );
-
-        public override ImmutableArray<object> PlugIns { get; }
 
         [Memo]
         public override bool IsFrameworkEnabled

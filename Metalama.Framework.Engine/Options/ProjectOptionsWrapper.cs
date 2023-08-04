@@ -23,8 +23,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? AssemblyName => this.Wrapped.AssemblyName;
 
-    public virtual ImmutableArray<object> PlugIns => this.Wrapped.PlugIns;
-
     public virtual bool IsFrameworkEnabled => this.Wrapped.IsFrameworkEnabled;
 
     public virtual bool FormatOutput => this.Wrapped.FormatOutput;

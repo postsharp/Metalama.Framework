@@ -24,6 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
             "Aspects",
             "Code",
             "Diagnostics",
+            "Engine",
             "Fabrics",
             "Project",
             "Services",

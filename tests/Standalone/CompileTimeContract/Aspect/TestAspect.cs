@@ -6,17 +6,17 @@ namespace Aspect
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            int? x = builder.Project.ServiceProvider.GetService<IContract>()?.Foo();
+            var id = builder.Project.ServiceProvider.GetService<IContract>()?.GetDocumentationCommentId( builder.Target );
 
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Bar), args: new { i = x });
+            builder.Advice.IntroduceMethod( builder.Target, nameof( Bar ), args: new { s = id } );
         }
 
         [Template]
-        public static void Bar([CompileTime] int i)
+        public static void Bar( [CompileTime] string s )
         {
-            Console.WriteLine($"{i}");
+            Console.WriteLine( s );
         }
     }
 }

@@ -68,11 +68,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-            this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IProjectService>() );
-
             // Set the execution scenario. In cases where we re-use the design-time pipeline for preview or introspection,
             // we replace the execution scenario for future services in the current pipeline.
-            this.ServiceProvider = this.ServiceProvider.WithService( executionScenario, true );
+            this.ServiceProvider = serviceProvider.WithService( executionScenario, true );
 
             // Setup the domain.
             if ( domain != null )
@@ -164,13 +162,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
 
-            // TODO: remove all mentions of MetalamaPlugInAssemblyPaths from the solution
-
-            // Plug-ins are only loaded based on CompileTimeProject.PlugInTypes; ProjectOptions.PlugIns are ignored (and should be deleted).
-
             var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
-            var newPlugIns = compileTimeProject.ClosureProjects
+            var plugIns = compileTimeProject.ClosureProjects
                 .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
                 .Select(
                     t =>
@@ -200,12 +194,10 @@ namespace Metalama.Framework.Engine.Pipeline
                         }
                     } )
                 .WhereNotNull()
-                .ToList();
+                .ToImmutableArray();
 
             projectServiceProviderWithProject = projectServiceProviderWithProject
-                .WithServices( newPlugIns.OfType<IProjectService>() );
-
-            var allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
+                .WithServices( plugIns.OfType<IProjectService>() );
 
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
@@ -236,7 +228,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Create aspect types.
 
-            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, projectServiceProviderWithProject );
+            var driverFactory = new AspectDriverFactory( compilationModel, plugIns, projectServiceProviderWithProject );
             var aspectTypeFactory = new AspectClassFactory( driverFactory, compilationModel.CompilationContext );
 
             var aspectClasses = aspectTypeFactory.GetClasses(

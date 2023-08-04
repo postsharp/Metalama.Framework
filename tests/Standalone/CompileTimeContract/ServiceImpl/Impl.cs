@@ -1,16 +1,14 @@
 ﻿using Contract;
-using Metalama.Compiler;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace ServiceImpl
 {
     [MetalamaPlugIn]
-    [CompileTime]
     public class Impl : IContract
     {
-        public int Foo()
-        {
-            return 42;
-        }
+        public string? GetDocumentationCommentId( IDeclaration declaration )
+            => declaration.GetSymbol().GetDocumentationCommentId();
     }
 }
