@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Transformations
             [NotNullWhen( true )] out BlockSyntax? body )
         {
             var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.TemplateMember.SelectedKind );
+                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.TemplateMember.EffectiveKind );
 
             var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,

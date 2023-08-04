@@ -21,6 +21,10 @@ internal sealed class TemplateMember<T>
 
     public TemplateKind SelectedKind { get; }
 
+    /// <summary>
+    /// Gets a value indicating which kind should the template be interpreted as, based on the target method.
+    /// For example, a <see cref="TemplateKind.Default"/> template that is applied to an <c>async Task</c> method should be interpreted as <see cref="TemplateKind.Async"/>.
+    /// </summary>
     public TemplateKind InterpretedKind { get; }
 
     public Accessibility Accessibility { get; }
@@ -30,9 +34,53 @@ internal sealed class TemplateMember<T>
     public Accessibility SetAccessorAccessibility { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the method is a <c>yield</c>-base iterator method. If the template is a property, the value applies to the getter.
+    /// Gets a value indicating whether the method is a <c>yield</c>-based iterator method. If the template is a property, the value applies to the getter.
     /// </summary>
     public bool IsIteratorMethod { get; }
+
+    /// <summary>
+    /// Gets a value indicating which kind should the template be treated as, based on the selected template method.
+    /// For example, a <see cref="TemplateKind.Default"/> template that is <c>async Task</c> should be treated as <see cref="TemplateKind.Async"/>.
+    /// </summary>
+    public TemplateKind EffectiveKind
+    {
+        get
+        {
+            if ( this.SelectedKind == TemplateKind.Default )
+            {
+                if ( this.Declaration is IMethod method && method.GetAsyncInfo() is { IsAsync: true } )
+                {
+                    if ( this.IsIteratorMethod )
+                    {
+                        switch ( method.GetIteratorInfo().EnumerableKind )
+                        {
+                            case EnumerableKind.IAsyncEnumerable:
+                                return TemplateKind.IAsyncEnumerable;
+                            case EnumerableKind.IAsyncEnumerator:
+                                return TemplateKind.IAsyncEnumerator;
+                        }
+                    }
+                    else
+                    {
+                        return TemplateKind.Async;
+                    }
+                }
+                else if ( this.IsIteratorMethod )
+                {
+                    var iteratorMethod = this.Declaration as IMethod ?? (this.Declaration as IProperty)?.GetMethod;
+                    switch ( iteratorMethod?.GetIteratorInfo().EnumerableKind )
+                    {
+                        case EnumerableKind.IEnumerable:
+                            return TemplateKind.IEnumerable;
+                        case EnumerableKind.IEnumerator:
+                            return TemplateKind.IEnumerator;
+                    }
+                }
+            }
+
+            return this.SelectedKind;
+        }
+    }
 
     public TemplateMember(
         T implementation,

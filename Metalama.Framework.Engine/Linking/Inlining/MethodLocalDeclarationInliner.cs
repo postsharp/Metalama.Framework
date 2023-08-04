@@ -63,10 +63,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             // Should be within local declaration.
             if ( variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
-                // Only incorrect code can get here.
-                throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                // return false;
+                return false;
             }
 
             // The invocation needs to be inlineable in itself.

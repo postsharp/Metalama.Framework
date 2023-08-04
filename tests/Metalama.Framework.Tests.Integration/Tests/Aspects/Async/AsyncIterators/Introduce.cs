@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.AsyncIterators.Introduce
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterators.Introduce
 {
     internal class Aspect : TypeAspect
     {

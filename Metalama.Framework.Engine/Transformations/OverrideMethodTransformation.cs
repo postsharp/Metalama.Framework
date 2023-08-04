@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.TemplateMember.SelectedKind );
+            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.TemplateMember.EffectiveKind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,

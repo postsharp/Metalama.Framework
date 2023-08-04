@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncThenNonAsync;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncThenNonAsync;
 
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncThenNonAsync
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncThenNonAsync
 {
     internal class Aspect1 : MethodAspect
     {

@@ -6,7 +6,7 @@ using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.NonAsyncMethod_NoInlining
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplate.NonAsyncMethod_NoInlining
 {
     internal class Aspect : OverrideMethodAspect
     {

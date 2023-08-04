@@ -11,7 +11,7 @@ using Metalama.Framework;
 using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncIteratorTemplate
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterators.AsyncIteratorTemplate
 {
     class Aspect : OverrideMethodAspect
     {

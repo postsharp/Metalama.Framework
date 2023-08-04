@@ -56,13 +56,17 @@ internal class TargetClass
         global::System.Console.WriteLine("dynamic");
         return this.SyncTask_Task();
     }
+    private global::System.Threading.Tasks.Task SyncTask_TaskDynamic()
+    {
+        global::System.Console.WriteLine("Task<dynamic>");
+        Console.WriteLine("This is the original method.");
+        return Task.CompletedTask;
+    }
     private async global::System.Threading.Tasks.Task SyncTask_Task()
     {
         await global::System.Threading.Tasks.Task.Yield();
         global::System.Console.WriteLine("Task");
-        global::System.Console.WriteLine("Task<dynamic>");
-        Console.WriteLine("This is the original method.");
-        _ = Task.CompletedTask;
+        await this.SyncTask_TaskDynamic();
     }
     [Dynamic]
     [Task]
@@ -125,13 +129,17 @@ internal class TargetClass
         global::System.Console.WriteLine("dynamic");
         return this.SyncValueTask_Task();
     }
+    private global::System.Threading.Tasks.ValueTask SyncValueTask_TaskDynamic()
+    {
+        global::System.Console.WriteLine("Task<dynamic>");
+        Console.WriteLine("This is the original method.");
+        return new ValueTask();
+    }
     private async global::System.Threading.Tasks.ValueTask SyncValueTask_Task()
     {
         await global::System.Threading.Tasks.Task.Yield();
         global::System.Console.WriteLine("Task");
-        global::System.Console.WriteLine("Task<dynamic>");
-        Console.WriteLine("This is the original method.");
-        _ = new ValueTask();
+        await this.SyncValueTask_TaskDynamic();
     }
     [Dynamic]
     [Task]
