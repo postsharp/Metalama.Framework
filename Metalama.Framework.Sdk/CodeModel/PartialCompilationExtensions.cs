@@ -120,5 +120,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
             => compilation.WithSyntaxTreeTransformations( syntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToList() );
+
+        /// <summary>
+        /// Gets <see cref="ParseOptions"/> that should be used when adding new syntax trees to this compilation.
+        /// </summary>
+        public static ParseOptions GetParseOptions( this IPartialCompilation compilation )
+        {
+            var firstTree = compilation.SyntaxTrees.Values.FirstOrDefault();
+
+            if ( firstTree == null )
+            {
+                return CSharpParseOptions.Default;
+            }
+
+            return firstTree.Options;
+        }
     }
 }
