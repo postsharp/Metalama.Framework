@@ -12,7 +12,6 @@ namespace Metalama.Framework.CompileTimeContracts
         /// <summary>
         /// Creates an <see cref="TypedExpressionSyntax"/> for the current <see cref="IUserExpression"/>.
         /// </summary>
-        /// <param name="syntaxGenerationContext"></param>
         TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext );
     }
 }

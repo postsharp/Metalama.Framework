@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -34,6 +36,7 @@ namespace Metalama.Framework.Workspaces
         private readonly WorkspaceCollection _collection;
         private readonly CompileTimeDomain _domain;
         private readonly IntrospectionOptionsBox _introspectionOptions;
+        private static ILogger _logger;
 
         internal string Key { get; }
 
@@ -42,21 +45,33 @@ namespace Metalama.Framework.Workspaces
 
         static Workspace()
         {
-            if ( MSBuildLocator.CanRegister )
+            WorkspaceServices.Initialize();
+            _logger = BackstageServiceFactory.ServiceProvider.GetLoggerFactory().GetLogger( "Workspace" );
+        }
+
+        private static void InitializeMSBuild( string projectDirectory )
+        {
+            if ( !MSBuildLocator.IsRegistered )
             {
-                try
-                {
-                    MSBuildLocator.RegisterDefaults();
-                }
-                catch ( InvalidOperationException e )
+                _logger.Trace?.Log(
+                    $"Initializing MSBuild with directory '{projectDirectory}' with {RuntimeInformation.FrameworkDescription} running on {RuntimeInformation.RuntimeIdentifier}." );
+
+                var instances = MSBuildLocator.QueryVisualStudioInstances(
+                        new VisualStudioInstanceQueryOptions { DiscoveryTypes = DiscoveryType.DotNetSdk, WorkingDirectory = projectDirectory } )
+                    .OrderByDescending( i => i.Version )
+                    .ToList();
+
+                _logger.Trace?.Log( $"Found {instances.Count} instances: {string.Join( ", ", instances.Select( x => x.Name ) )}" );
+
+                if ( instances.Count == 0 )
                 {
                     throw new DotNetSdkLoadException(
-                        $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?",
-                        e );
+                        $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?" );
                 }
-            }
 
-            WorkspaceServices.Initialize();
+                var instance = instances.First();
+                MSBuildLocator.RegisterInstance( instance );
+            }
         }
 
         private Workspace(
@@ -167,7 +182,7 @@ namespace Metalama.Framework.Workspaces
             dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
         }
 
-        private static async Task<ProjectSet> LoadProjectSetAsync(
+        private static Task<ProjectSet> LoadProjectSetAsync(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
@@ -176,8 +191,32 @@ namespace Metalama.Framework.Workspaces
             bool restore,
             CancellationToken cancellationToken )
         {
-            var ourProjects = ImmutableArray.CreateBuilder<Project>();
+            if ( projects.IsEmpty )
+            {
+                return Task.FromResult( new ProjectSet( ImmutableArray<Project>.Empty, "Empty" ) );
+            }
 
+            // We need to initialize MSBuild once per process. The initialization may depend on `global.json`.
+            // In case we are using a single process to analyze projects with repos with different global.json,
+            // weird things may appear. Currently this case is not covered.
+            if ( !MSBuildLocator.IsRegistered )
+            {
+                InitializeMSBuild( Path.GetDirectoryName( projects[0] ) );
+            }
+
+            // We can call the next method only after MSBuild initialization because it loads MSBuild assemblies.
+            return LoadProjectSetCoreAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
+        }
+
+        private static async Task<ProjectSet> LoadProjectSetCoreAsync(
+            ImmutableArray<string> projects,
+            ImmutableDictionary<string, string> properties,
+            WorkspaceCollection collection,
+            CompileTimeDomain domain,
+            IIntrospectionOptionsProvider introspectionOptions,
+            bool restore,
+            CancellationToken cancellationToken )
+        {
             var allProperties = properties
                 .Add( "MSBuildEnableWorkloadResolver", "false" )
                 .Add( "DOTNET_ROOT_X64", "" )
@@ -227,9 +266,18 @@ namespace Metalama.Framework.Workspaces
 
             using var msbuildProjectCollection = new ProjectCollection( allProperties );
 
-            foreach ( var roslynProject in roslynWorkspace.CurrentSolution.Projects )
+            // Start all tasks in parallel because even that may be expensive.
+            var loadProjectTasks = roslynWorkspace.CurrentSolution.Projects.AsParallel().Select( GetOurProjectAsync ).ToArray();
+
+            var ourProjects = (await Task.WhenAll( loadProjectTasks )).ToImmutableArray();
+
+            var projectSet = new ProjectSet( ourProjects, name ?? $"{ourProjects.Length} projects" );
+
+            return projectSet;
+
+            async Task<Project> GetOurProjectAsync( Microsoft.CodeAnalysis.Project roslynProject )
             {
-                // Get an evaluated MSBuild project (the Roslyn workspace presumably does it, but it the result is not made available). 
+                // Get an evaluated MSBuild project (the Roslyn workspace presumably does but it the result is not made available). 
                 var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( roslynProject );
 
                 Dictionary<string, string>? projectProperties = null;
@@ -267,12 +315,8 @@ namespace Metalama.Framework.Workspaces
                     projectOptions,
                     introspectionOptions );
 
-                ourProjects.Add( ourProject );
+                return ourProject;
             }
-
-            var projectSet = new ProjectSet( ourProjects.ToImmutable(), name ?? $"{ourProjects.Count} projects" );
-
-            return projectSet;
         }
 
         public event EventHandler? Disposed;
@@ -345,18 +389,12 @@ namespace Metalama.Framework.Workspaces
         {
             var candidates = this.Projects.Where( p => p.Name == name && (targetFramework == null || p.TargetFramework == targetFramework) ).ToList();
 
-            if ( candidates.Count == 0 )
+            return candidates.Count switch
             {
-                throw new KeyNotFoundException();
-            }
-            else if ( candidates.Count > 1 )
-            {
-                throw new InvalidOperationException( "Ambiguous match." );
-            }
-            else
-            {
-                return candidates[0];
-            }
+                0 => throw new KeyNotFoundException(),
+                > 1 => throw new InvalidOperationException( "Ambiguous match." ),
+                _ => candidates[0]
+            };
         }
 
 #pragma warning restore CA1822

@@ -200,7 +200,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
-                    return AdviceImplementationResult.Ignored;
+                    return AdviceImplementationResult.Ignored( existingMethod );
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.

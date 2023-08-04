@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal AspectRepository AspectRepository { get; }
 
-        private readonly DerivedTypeIndex _derivedTypes;
+        private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
         private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirections =
             ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
 
-            this._derivedTypes = partialCompilation.DerivedTypes;
+            this._derivedTypes = partialCompilation.LazyDerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
@@ -187,7 +187,8 @@ namespace Metalama.Framework.Engine.CodeModel
                         .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
                         .Select( a => new AttributeRef( a ) );
 
-                this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
+                this._derivedTypes = new Lazy<DerivedTypeIndex>(
+                    () => prototype._derivedTypes.Value.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() ) );
 
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.
                 this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
@@ -294,7 +295,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
+            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
         }
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
@@ -491,5 +492,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
+
+        public override bool BelongsToCurrentProject => true;
     }
 }

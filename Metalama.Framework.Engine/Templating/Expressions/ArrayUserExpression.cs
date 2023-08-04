@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
@@ -21,12 +22,12 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = this._itemType.MakeArrayType();
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         {
             var items = this._arrayBuilder.Items.SelectAsImmutableArray(
-                i => TypedExpressionSyntaxImpl.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax );
+                i => TypedExpressionSyntaxImpl.FromValue( i, syntaxSerializationContext ).Syntax );
 
-            var generator = syntaxGenerationContext.SyntaxGenerator;
+            var generator = syntaxSerializationContext.SyntaxGenerator;
 
             return generator.ArrayCreationExpression(
                 generator.Type( this._itemType.GetSymbol() ),

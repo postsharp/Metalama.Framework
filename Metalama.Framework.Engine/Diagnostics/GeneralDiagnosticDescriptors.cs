@@ -323,6 +323,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "Cannot invoke a member that does not belong to the template target type when specifying InvokerOptions.Base or InvokerOptions.Current.",
                     _category );
 
+        internal static readonly DiagnosticDefinition<(IMember Member, string ExceptionMessage)>
+            CantGetMemberInitializer =
+                new(
+                    "LAMA0064",
+                    Error,
+                    "Couldn't get initializer for '{0}': {1}",
+                    "Couldn't get initializer for member.",
+                    _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

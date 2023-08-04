@@ -8,6 +8,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -275,7 +276,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
 
         return new AdviceResult<T>(
-            result.NewDeclaration.As<T>(),
+            result.NewDeclaration.As<IDeclaration, T>(),
             this._state.CurrentCompilation,
             result.Outcome,
             this._state.AspectBuilder.AssertNotNull(),
@@ -1613,7 +1614,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         else
         {
             result = new AdviceResult<T>(
-                advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
+                advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<IDeclaration, T>(),
                 this._state.CurrentCompilation,
                 AdviceOutcome.Default,
                 this._state.AspectBuilder.AssertNotNull(),

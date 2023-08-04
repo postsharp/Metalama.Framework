@@ -6,5 +6,5 @@ namespace Metalama.Framework.Workspaces;
 
 internal sealed class DotNetSdkLoadException : Exception
 {
-    public DotNetSdkLoadException( string message, Exception inner ) : base( message, inner ) { }
+    public DotNetSdkLoadException( string message ) : base( message ) { }
 }

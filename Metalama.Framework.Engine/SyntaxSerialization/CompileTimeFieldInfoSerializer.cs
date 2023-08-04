@@ -27,7 +27,7 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
         var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( field.DeclaringType.GetSymbol(), serializationContext );
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( field, serializationContext );
 
-        var fieldInfo = InvocationExpression(
+        ExpressionSyntax fieldInfo = InvocationExpression(
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     typeCreation,
@@ -39,6 +39,9 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
                         Literal( field.Name ) ) ),
                 Argument( allBindingFlags ) )
             .NormalizeWhitespace();
+
+        // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
+        fieldInfo = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, fieldInfo );
 
         return fieldInfo;
     }

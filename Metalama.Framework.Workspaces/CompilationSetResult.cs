@@ -58,7 +58,7 @@ internal sealed class CompilationSetResult : ICompilationSetResult
 
     private List<T> AggregateResults<T>( Func<IIntrospectionCompilationResult, IEnumerable<T>> func )
     {
-        var list = new List<T>();
+        var results = new List<T>();
         var failedProjects = new List<string>();
         var diagnostics = new List<IIntrospectionDiagnostic>();
 
@@ -66,7 +66,7 @@ internal sealed class CompilationSetResult : ICompilationSetResult
         {
             try
             {
-                list.AddRange( func( compilationResult ) );
+                results.AddRange( func( compilationResult ) );
             }
             catch ( CompilationFailedException e )
             {
@@ -82,6 +82,6 @@ internal sealed class CompilationSetResult : ICompilationSetResult
                 diagnostics.ToImmutableArray() );
         }
 
-        return list;
+        return results;
     }
 }

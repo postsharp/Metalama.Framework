@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.AdviceResult_Override_Existing
 {
     public class TestAspect : TypeAspect
@@ -25,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
             {
                 throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceEvent.");
             }
-            
+
             if (result.AspectBuilder != builder)
             {
                 throw new InvalidOperationException($"AspectBuilder was not the correct instance.");

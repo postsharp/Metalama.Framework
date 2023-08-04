@@ -20,7 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     public abstract partial class PartialCompilation : IPartialCompilationInternal
     {
-        public DerivedTypeIndex DerivedTypes { get; }
+        public DerivedTypeIndex DerivedTypes => this.LazyDerivedTypes.Value;
+
+        internal Lazy<DerivedTypeIndex> LazyDerivedTypes { get; }
 
         /// <summary>
         /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
@@ -79,13 +81,13 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         // Initial constructor.
-        private PartialCompilation( CompilationContext compilationContext, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
+        private PartialCompilation( CompilationContext compilationContext, Lazy<DerivedTypeIndex> derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
             this.CompilationContext = compilationContext;
             this.InitialCompilation = compilationContext.Compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeTransformation>.Empty;
             this.Resources = resources.IsDefault ? ImmutableArray<ManagedResource>.Empty : resources;
-            this.DerivedTypes = derivedTypeIndex;
+            this.LazyDerivedTypes = derivedTypeIndex;
         }
 
         // Incremental constructor.
@@ -97,7 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.InitialCompilation = baseCompilation.InitialCompilation;
             var compilation = baseCompilation.Compilation;
 
-            this.DerivedTypes = baseCompilation.DerivedTypes;
+            this.LazyDerivedTypes = baseCompilation.LazyDerivedTypes;
 
             // TODO: accept new relationships to the type index.
 
@@ -194,7 +196,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => CreateComplete( CompilationContextFactory.GetInstance( compilation ), resources );
 
         private static PartialCompilation CreateComplete( CompilationContext compilationContext, ImmutableArray<ManagedResource> resources = default )
-            => new CompleteImpl( compilationContext, GetDerivedTypeIndex( compilationContext.Compilation ), resources );
+            => new CompleteImpl( compilationContext, new Lazy<DerivedTypeIndex>( () => GetDerivedTypeIndex( compilationContext.Compilation ) ), resources );
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
@@ -212,7 +214,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types,
-                closure.DerivedTypes,
+                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypes ),
                 resources );
         }
 
@@ -231,7 +233,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types.ToImmutableHashSet(),
-                closure.DerivedTypes,
+                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypes ),
                 resources );
         }
 

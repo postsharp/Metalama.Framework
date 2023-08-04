@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Testing.UnitTesting;
@@ -45,10 +46,11 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
+            var syntaxGenerationContext = syntaxSerializationContext.SyntaxGenerationContext;
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       syntaxSerializationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -128,10 +130,10 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       syntaxSerializationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
@@ -153,7 +155,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
+                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.SyntaxGenerationContext );
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" ).Single();
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -203,10 +205,10 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       syntaxSerializationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
@@ -235,7 +237,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
+                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.SyntaxGenerationContext );
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
@@ -285,7 +287,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       compilation.CompilationContext.DefaultSyntaxGenerationContext,
+                       new( compilation ),
                        serviceProvider ) )
             {
                 var method = compilation.Types.Single().Methods.Single();
@@ -320,10 +322,8 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
-
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       new( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -356,10 +356,8 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
-
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       new( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -387,16 +385,16 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       syntaxSerializationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
+                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxSerializationContext.SyntaxGenerationContext );
 
                 AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"this.MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"this.MyEvent -= value" );
@@ -427,16 +425,16 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       syntaxGenerationContext,
+                       syntaxSerializationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
+                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxSerializationContext.SyntaxGenerationContext );
 
                 AssertEx.DynamicEquals(
                     @event.AddMethod.Invoke( parameterExpression ),
@@ -484,7 +482,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       compilation.CompilationContext.DefaultSyntaxGenerationContext,
+                       new( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();

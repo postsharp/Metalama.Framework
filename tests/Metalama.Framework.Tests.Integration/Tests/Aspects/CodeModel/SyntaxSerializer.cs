@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @RequiredConstant(NET5_0_OR_GREATER) - Slight differences in .NET Framework due to nullability annotations 
-#endif
-
 using System.Linq;
 using System.Reflection;
 using Metalama.Framework.Aspects;

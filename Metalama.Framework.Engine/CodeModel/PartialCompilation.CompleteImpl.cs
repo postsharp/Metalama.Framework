@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private sealed class CompleteImpl : PartialCompilation
         {
-            public CompleteImpl( CompilationContext compilationContext, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
+            public CompleteImpl( CompilationContext compilationContext, Lazy<DerivedTypeIndex> derivedTypeIndex, ImmutableArray<ManagedResource> resources )
                 : base( compilationContext, derivedTypeIndex, resources ) { }
 
             private CompleteImpl(

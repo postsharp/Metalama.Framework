@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @RequiredConstant(NET5_0_OR_GREATER) - Slight differences in .NET Framework due to nullability annotations
-#endif
-
 #pragma warning disable CS0067
 #pragma warning disable CS0169
 
