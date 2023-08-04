@@ -39,7 +39,6 @@ namespace Metalama.Framework.DesignTime
         }
 
         private const string _makePartialKey = "Metalama.MakePartial";
-        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions;
 
         private readonly ILogger _logger;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
@@ -54,11 +53,11 @@ namespace Metalama.Framework.DesignTime
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
             serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
-            this._designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
+            var designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
 
             var fixableDiagnosticIds = ImmutableArray.Create( GeneralDiagnosticDescriptors.TypeNotPartial.Id )
                 .Add( GeneralDiagnosticDescriptors.SuggestedCodeFix.Id )
-                .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
+                .AddRange( designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
 
             this.FixableDiagnosticIds = fixableDiagnosticIds;
 

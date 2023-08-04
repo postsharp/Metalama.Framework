@@ -2,9 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -17,36 +16,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-        {
-            var typeExpression =
-                this._type switch
-                {
-                    // Generic type definition has to have omitted arguments in "typeof".
-                    INamedType { IsCanonicalGenericInstance: true, IsGeneric: true } =>
-                        syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ) switch
-                        {
-                            // [alias::]Namespace.Type<T,...>
-                            QualifiedNameSyntax { Right: GenericNameSyntax genericName } qualifiedName =>
-                                qualifiedName.WithRight(
-                                    genericName.WithTypeArgumentList(
-                                        TypeArgumentList(
-                                            SeparatedList<TypeSyntax>(
-                                                genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ) ),
-                            
-                            // Type<T,...>
-                            GenericNameSyntax genericName =>
-                                genericName.WithTypeArgumentList(
-                                    TypeArgumentList(
-                                        SeparatedList<TypeSyntax>(
-                                            genericName.TypeArgumentList.Arguments.SelectAsEnumerable( _ => OmittedTypeArgument() ) ) ) ),
-                            var x => throw new AssertionFailedException( $"Unsupported canonical generic instance syntax {x}." ),
-                        },
-                    _ => syntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
-                };
-
-            return TypeOfExpression( typeExpression );
-        }
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+            => syntaxSerializationContext.SyntaxGenerator.TypeOfExpression( this._type.GetSymbol() );
 
         protected override bool CanBeNull => false;
 

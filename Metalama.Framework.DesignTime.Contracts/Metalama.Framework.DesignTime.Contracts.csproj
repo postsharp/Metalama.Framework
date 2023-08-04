@@ -14,8 +14,6 @@
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     </ItemGroup>
 
-
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
-
 
 </Project>

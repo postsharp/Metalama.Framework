@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -23,13 +22,13 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
     {
-        private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
+        private readonly SyntaxSerializationContext _syntaxSerializationContext;
 
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
-            this._syntaxGenerationContext = templateExpansionContext.SyntaxGenerationContext;
+            this._syntaxSerializationContext = templateExpansionContext.SyntaxSerializationContext;
         }
 
         public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
-            var statement = SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
+            var statement = SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxSerializationContext ).RemoveParenthesis() );
 
             list.Add( new StatementOrTrivia( statement ) );
         }
@@ -199,13 +198,13 @@ namespace Metalama.Framework.Engine.Templating
                         $"expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead." );
                 }
 
-                return SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() );
+                return SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this._syntaxSerializationContext ).RemoveParenthesis() );
             }
             else if ( awaitResult && expression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 return
                     SyntaxFactory.ExpressionStatement(
-                        SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this._syntaxGenerationContext ) )
+                        SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this._syntaxSerializationContext ) )
                             .RemoveParenthesis() );
             }
             else
@@ -215,8 +214,8 @@ namespace Metalama.Framework.Engine.Templating
                             kind,
                             identifier,
                             awaitResult
-                                ? SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this._syntaxGenerationContext ).RemoveParenthesis() )
-                                : expression.ToExpressionSyntax( this._syntaxGenerationContext ) )
+                                ? SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this._syntaxSerializationContext ).RemoveParenthesis() )
+                                : expression.ToExpressionSyntax( this._syntaxSerializationContext ) )
                         .RemoveParenthesis() );
             }
         }
@@ -234,7 +233,7 @@ namespace Metalama.Framework.Engine.Templating
                 throw new AssertionFailedException( "The expression should not be null." );
             }
 
-            var runtimeExpression = value.ToExpressionSyntax( this._syntaxGenerationContext );
+            var runtimeExpression = value.ToExpressionSyntax( this._syntaxSerializationContext );
 
             if ( value.Type.Equals( SpecialType.Void )
                  || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
@@ -247,7 +246,7 @@ namespace Metalama.Framework.Engine.Templating
                 switch ( type )
                 {
                     case IdentifierNameSyntax { IsVar: true }:
-                        variableType = this._syntaxGenerationContext.SyntaxGenerator.Type( Microsoft.CodeAnalysis.SpecialType.System_Object );
+                        variableType = this._syntaxSerializationContext.SyntaxGenerator.Type( Microsoft.CodeAnalysis.SpecialType.System_Object );
 
                         variableValue = SyntaxFactoryEx.Null;
 
@@ -306,7 +305,7 @@ namespace Metalama.Framework.Engine.Templating
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = userExpression.ToExpressionSyntax( this._syntaxGenerationContext );
+            var expression = userExpression.ToExpressionSyntax( this._syntaxSerializationContext );
 
             return new TypedExpressionSyntaxImpl(
                 SyntaxFactory.MemberAccessExpression(
@@ -314,25 +313,21 @@ namespace Metalama.Framework.Engine.Templating
                         expression,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                this._syntaxGenerationContext );
+                this._syntaxSerializationContext.SyntaxGenerationContext );
         }
 
         public SyntaxToken GetUniqueIdentifier( string hint )
             => SyntaxFactory.Identifier( this._templateExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
 
         public ExpressionSyntax Serialize<T>( T o )
-            => this._templateExpansionContext.SyntaxSerializationService.Serialize(
-                o,
-                new SyntaxSerializationContext(
-                    this._templateExpansionContext.Compilation.AssertNotNull(),
-                    this._syntaxGenerationContext ) );
+            => this._templateExpansionContext.SyntaxSerializationService.Serialize( o, this._syntaxSerializationContext );
 
         public T AddSimplifierAnnotations<T>( T node )
             where T : SyntaxNode
             => node.WithSimplifierAnnotation();
 
         public ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
-            => this._syntaxGenerationContext.SyntaxGenerator.RenderInterpolatedString( interpolatedString );
+            => this._syntaxSerializationContext.SyntaxGenerator.RenderInterpolatedString( interpolatedString );
 
         public ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse )
         {
@@ -361,7 +356,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( expression )
             {
                 case IExpression dynamicExpression:
-                    return dynamicExpression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
+                    return dynamicExpression.ToTypedExpressionSyntax( this._syntaxSerializationContext );
 
                 default:
                     if ( this._templateExpansionContext.SyntaxSerializationService.TrySerialize(
@@ -376,19 +371,19 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax GetTypedExpression( IExpression expression ) => expression.ToTypedExpressionSyntax( this._syntaxGenerationContext );
+        public TypedExpressionSyntax GetTypedExpression( IExpression expression ) => expression.ToTypedExpressionSyntax( this._syntaxSerializationContext );
 
         public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {
-            var syntaxGenerationContext = this._syntaxGenerationContext;
+            var syntaxSerializationContext = this._syntaxSerializationContext;
 
             var expressionType = type != null
-                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdResolver.ResolveId(
+                ? syntaxSerializationContext.CompilationContext.SerializableTypeIdResolver.ResolveId(
                     new SerializableTypeId( type ),
                     this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
-            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext );
+            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxSerializationContext.SyntaxGenerationContext );
         }
 
         public IUserExpression GetUserExpression( object expression ) => ((IExpression) expression).ToUserExpression();
@@ -403,7 +398,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                         operand,
-                        this._syntaxGenerationContext.CompilationContext,
+                        this._syntaxSerializationContext.CompilationContext,
                         out var typeSymbol ) )
                 {
                     // Value types, including nullable value types don't need suppression.
@@ -426,7 +421,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )
         {
-            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( expression, this._syntaxGenerationContext.CompilationContext, out var typeSymbol );
+            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( expression, this._syntaxSerializationContext.CompilationContext, out var typeSymbol );
 
             return typeSymbol?.IsNullable() != false
                 ? SyntaxFactory.ConditionalAccessExpression( expression, whenNotNullExpression )

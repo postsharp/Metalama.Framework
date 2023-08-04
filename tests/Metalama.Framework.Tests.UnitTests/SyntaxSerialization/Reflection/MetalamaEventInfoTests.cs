@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
+                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!",
                 serialized );
 
             this.TestExpression<EventInfo>(
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
+                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!",
                 serialized );
 
             this.TestExpression<EventInfo>(
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target<>).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
+                @"typeof(global::Target<>).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)!",
                 serialized );
 
             this.TestExpression<EventInfo>(

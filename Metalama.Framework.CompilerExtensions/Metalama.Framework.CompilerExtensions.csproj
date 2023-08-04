@@ -3,119 +3,96 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>Metalama.Framework.CompilerExtensions</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
         <!-- Packaging -->
         <IsPackable>False</IsPackable>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-
     <ItemGroup>
-
-        <!-- Third-party dependencies -->
-        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-
-        <AssemblyToEmbed Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" />
-
-        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-        <AssemblyToEmbed Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" />
-
-        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-        <AssemblyToEmbed Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" />
-
-        
-        <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" PrivateAssets="all">
-			<GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-        <AssemblyToEmbed Include="$(PkgDiffPlex)\lib\netstandard2.0\DiffPlex.dll" />
-
-		<!-- The following dependencies are required by Rider because it does not ship them. -->
-		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all">
-			<GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<AssemblyToEmbed Include="$(PkgMicrosoft_VisualStudio_Threading)\lib\netstandard2.0\Microsoft.VisualStudio.Threading.dll" />
-
-		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="$(MicrosoftVisualStudioValidationVersion)" PrivateAssets="all">
-			<GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<AssemblyToEmbed Include="$(PkgMicrosoft_VisualStudio_Validation)\lib\netstandard2.0\Microsoft.VisualStudio.Validation.dll" />
-
-
-        <!-- First-party dependencies to external repos -->
-        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" PrivateAssets="all">
-            <GeneratePathProperty>True</GeneratePathProperty>
-        </PackageReference>
-        <AssemblyToEmbed Include="$(PkgMetalama_Backstage)\lib\netstandard2.0\Metalama.Backstage.dll" />
-
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
-        <AssemblyToEmbed Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll" />
-    </ItemGroup>
-    
-    <ItemGroup Condition="'$(NoBuild)'!='True'">
-		
-		<!-- Project dependencies to ensure correct build order -->
-		<ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj" ReferenceOutputAssembly="false" />
-		
-		<!-- Current repo: Version-neutral assemblies -->
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.SystemTypes\bin\$(Configuration)\$(TargetFramework)\Metalama.SystemTypes.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" />
-		<AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.Rpc\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Rpc.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Introspection\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Introspection.dll" />
-		<AssemblyToSignAndEmbed Include="..\Metalama.Framework.CompileTimeContracts\bin\$(Configuration)\netstandard2.0\Metalama.Framework.CompileTimeContracts.dll" />
 
-        <!-- Current repo: latest API version -->
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynApiMaxVersion).dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynApiMaxVersion).dll" />
-
-        <!-- Current repo: 4.0.1 -->
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.0.1.dll" />
-        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll" />
         
     </ItemGroup>
     
+    
+     
     <ItemGroup>
       <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyLoader.cs" Link="AssemblyLoader.cs" />
     </ItemGroup>
-    
-    <Target Name="SignAndEmbedAssemblies">
 
-        <MakeDir Directories="$(IntermediateOutputPath)signable" />
-        <MakeDir Directories="$(IntermediateOutputPath)signed" />
-        
-        <Copy SourceFiles="@(AssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" />
-        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip" Overwrite="true" /> 
-        
-        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed&quot; --nologo" />
-        
-        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\signable.zip" />
-        
+
+    <Target Name="SelectAssembliesToEmbed">
+        <!-- Make sure the project has been built. -->
+        <MSBuild Projects="..\Metalama.Framework.CompilerExtensions.Resources\Metalama.Framework.CompilerExtensions.Resources.csproj" Properties="Configuration=$(Configuration)"/>
+
+
+        <!-- List of assemblies that should not be selected -->
+        <PropertyGroup>
+            <AssembliesNotToEmbed>
+                **\Metalama.*;
+                **\MessagePack.*;
+                **\Microsoft.CodeAnalysis.*;
+                **\System.*;
+                **\Nerdbank.*;
+                **\StreamJsonRpc.*;
+            </AssembliesNotToEmbed>
+        </PropertyGroup>
+
+
+        <!-- Select assembies -->
         <ItemGroup>
-            <_SignedAssembly Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\*.dll" />
-            <EmbeddedResource Include="@(AssemblyToEmbed)" Link="Resources\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="@(_SignedAssembly)" Link="Resources\%(Filename)%(Extension)" />
+            <DesktopAssemblyToSignAndEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\netframework472\Metalama.*.dll" />
+            <CoreAssemblyToSignAndEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net6.0\Metalama.*.dll" />
+
+            <DesktopAssemblyToEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\netframework472\*.dll" Exclude="$(AssembliesNotToEmbed)"/>
+            <CoreAssemblyToEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net6.0\*.dll" Exclude="$(AssembliesNotToEmbed)"/>
         </ItemGroup>
     </Target>
     
-    <Target Name="EmbedUnsignedAssemblies">
+    <!-- The next target is used in the Public build. It signs assemblies before embedding them. -->
+    <Target Name="SignAndEmbedAssemblies" DependsOnTargets="SelectAssembliesToEmbed">
+
+        <MakeDir Directories="$(IntermediateOutputPath)DesktopSignable" />
+        <MakeDir Directories="$(IntermediateOutputPath)DesktopSigned" />
+        <MakeDir Directories="$(IntermediateOutputPath)CoreSignable" />
+        <MakeDir Directories="$(IntermediateOutputPath)CoreSigned" />
+
+       
+        
+        <Copy SourceFiles="@(DesktopAssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSignable" />
+        <Copy SourceFiles="@(CoreAssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSignable" />
+
+        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSignable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSignable.zip" Overwrite="true" /> 
+        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSignable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSignable.zip" Overwrite="true" /> 
+
+        
+        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSignable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned&quot; --nologo" />
+        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSignable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned&quot; --nologo" />
+        
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned\DesktopSignable.zip" />
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned\CoreSignable.zip" />
+        
         <ItemGroup>
-            <EmbeddedResource Include="@(AssemblyToEmbed)" Link="Resources\%(Filename)%(Extension)" />
-            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)" Link="Resources\%(Filename)%(Extension)" />
+            <_DesktopSignedFileToEmbed Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)DesktopSigned\*.dll"  />
+            <_CoreSignedFileToEmbed Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)CoreSigned\*.dll" />
+
+            <EmbeddedResource Include="@(DesktopAssemblyToEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(CoreAssemblyToEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_DesktopSignedFileToEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_CoreSignedFileToEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
+        </ItemGroup>
+    </Target>
+    
+    <!-- The next target is used in the Debug and Release builds. Contrarily to the previous target, it does not sign assemblies before embedding them. -->
+    <Target Name="EmbedUnsignedAssemblies" DependsOnTargets="SelectAssembliesToEmbed">
+        <ItemGroup>
+            <EmbeddedResource Include="@(DesktopAssemblyToEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(CoreAssemblyToEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(DesktopAssemblyToSignAndEmbed)" Link="Resources\Desktop\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(CoreAssemblyToSignAndEmbed)" Link="Resources\Core\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     

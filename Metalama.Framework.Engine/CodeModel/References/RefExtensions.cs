@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -12,4 +14,16 @@ public static class RefExtensions
     // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree( this IRef<IDeclaration> reference, CompilationContext compilationContext )
         => ((IRefImpl) reference).GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
+
+    [return: NotNullIfNotNull( nameof(reference) )]
+    public static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
+        where TFrom : class, ICompilationElement
+        where TTo : class, ICompilationElement
+        => reference switch
+        {
+            null => null,
+            IRef<TTo> iref => iref,
+            Ref<TFrom> @ref => @ref.As<TTo>(),
+            _ => throw new InvalidOperationException( $"Cannot cast {reference.GetType()} to {typeof( IRef<TTo> )}." )
+        };
 }

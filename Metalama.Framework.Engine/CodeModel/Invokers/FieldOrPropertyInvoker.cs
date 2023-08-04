@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -30,10 +30,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this.CheckInvocationOptionsAndTarget();
 
             var receiverInfo = this.GetReceiverInfo();
-            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var name = IdentifierName( this.GetCleanTargetMemberName() );
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, generationContext );
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
 
             ExpressionSyntax expression;
 
@@ -68,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Member.Compilation, this.GenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -90,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             => new TypedExpressionSyntaxImpl(
                 this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
                 this.Member.Type,
-                this.GenerationContext,
+                this.SerializationContext.SyntaxGenerationContext,
                 this.IsRef() );
 
         private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
@@ -98,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             Invariant.Assert(
-                this.GenerationContext.Equals( syntaxGenerationContext as SyntaxGenerationContext ) );
+                this.SerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
 
             return this.GetTypedExpressionSyntax();
         }

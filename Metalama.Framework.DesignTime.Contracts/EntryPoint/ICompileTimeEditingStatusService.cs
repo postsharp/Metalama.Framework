@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 
+// This interface is not is the adequate namespace but it cannot be moved without breaking the contract between the VSX and the package implementation.
+
 /// <summary>
 /// Interface that supports the feature where the pipeline is paused when the user edits the compile-time code.
 /// The interface exposes an event and a property to observe the status, and methods to change the status.

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
@@ -13,11 +14,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         {
             var typeSymbol = this.Type.GetSymbol();
 
-            return syntaxGenerationContext.SyntaxGenerator.DefaultExpression( typeSymbol );
+            return syntaxSerializationContext.SyntaxGenerator.DefaultExpression( typeSymbol );
         }
 
         public override IType Type { get; }

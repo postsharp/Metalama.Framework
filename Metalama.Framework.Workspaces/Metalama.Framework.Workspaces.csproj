@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="System.Linq.Parallel" Version="4.3.0"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />

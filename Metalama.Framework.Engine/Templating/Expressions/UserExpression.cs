@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -16,13 +17,13 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     {
         private string? _toString;
 
-        protected abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
+        protected abstract ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext );
 
         /// <summary>
         /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
-        internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => new( this.ToSyntax( syntaxGenerationContext ), this.Type, syntaxGenerationContext, false, this.CanBeNull );
+        internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext )
+            => new( this.ToSyntax( syntaxSerializationContext ), this.Type, syntaxSerializationContext.SyntaxGenerationContext, false, this.CanBeNull );
 
         public abstract IType Type { get; }
 
@@ -33,15 +34,19 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public ref object? Value => ref RefHelper.Wrap( this );
 
         TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => this.ToTypedExpressionSyntax( (SyntaxGenerationContext) syntaxGenerationContext );
+            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext );
 
         public sealed override string ToString() => this._toString ??= this.ToStringCore();
 
         protected virtual bool CanBeNull => true;
 
         protected virtual string ToStringCore()
-            => this.ToSyntax( SyntaxGenerationContext.Create( this.Type.GetCompilationModel().CompilationContext, false, false ) )
-                .NormalizeWhitespace()
-                .ToString();
+        {
+            var compilation = this.Type.GetCompilationModel();
+
+            return this.ToSyntax( new( compilation, SyntaxGenerationContext.Create( compilation.CompilationContext, isNullOblivious: false ) ) )
+                        .NormalizeWhitespace()
+                        .ToString();
+        }
     }
 }

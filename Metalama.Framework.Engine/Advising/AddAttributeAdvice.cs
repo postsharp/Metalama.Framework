@@ -45,7 +45,9 @@ internal sealed class AddAttributeAdvice : Advice
         {
             // Determine if we already have a custom attribute of this type, and handle conflict.
 
-            if ( targetDeclaration.Attributes.OfAttributeType( this._attribute.Type ).Any() )
+            var existingAttribute = targetDeclaration.Attributes.OfAttributeType( this._attribute.Type ).FirstOrDefault();
+
+            if ( existingAttribute != null )
             {
                 // There is a conflict.
 
@@ -59,7 +61,7 @@ internal sealed class AddAttributeAdvice : Advice
                                 this ) );
 
                     case OverrideStrategy.Ignore:
-                        return AdviceImplementationResult.Ignored;
+                        return AdviceImplementationResult.Ignored( existingAttribute.ToRef() );
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
@@ -92,7 +94,7 @@ internal sealed class AddAttributeAdvice : Advice
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
             addTransformation( attributeBuilder.ToTransformation() );
 
-            return AdviceImplementationResult.Success( outcome, attributeBuilder.ToTypedRef<IDeclaration>() );
+            return AdviceImplementationResult.Success( outcome, attributeBuilder.ToAttributeRef() );
         }
     }
 }

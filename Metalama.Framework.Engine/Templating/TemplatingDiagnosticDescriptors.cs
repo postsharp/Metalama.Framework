@@ -378,7 +378,7 @@ namespace Metalama.Framework.Engine.Templating
                 "The argument of ConfigureAwait after ProceedAsync can only be 'true' or 'false', it can't be '{0}'.",
                 _category,
                 Error );
-        
+
         internal static readonly DiagnosticDefinition<(string Expression, string Type)> CannotCastRunTimeExpressionToCompileTimeType
             = new(
                 "LAMA0255",
@@ -386,7 +386,7 @@ namespace Metalama.Framework.Engine.Templating
                 "Cannot cast the run-time expression '{0}' to the compile-time type '{1}'.",
                 _category,
                 Error );
-        
+
         internal static readonly DiagnosticDefinition<string> DynamicArgumentMustBeCastToIExpression
             = new(
                 "LAMA0256",
@@ -427,21 +427,23 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Declaration1, INamedTypeSymbol Attribute1, ISymbol Declaration2, INamedTypeSymbol Attribute2)> MultipleAdviceAttributes
-            = new(
-                "LAMA0261",
-                "Declarations cannot have more than one template or advice attribute applied.",
-                "Multiple template or advice attributes found on the same declaration: {1} on {0} and {3} on {2}.",
-                _category,
-                Error );
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration1, INamedTypeSymbol Attribute1, ISymbol Declaration2, INamedTypeSymbol Attribute2)>
+            MultipleAdviceAttributes
+                = new(
+                    "LAMA0261",
+                    "Declarations cannot have more than one template or advice attribute applied.",
+                    "Multiple template or advice attributes found on the same declaration: {1} on {0} and {3} on {2}.",
+                    _category,
+                    Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol AccessorDeclaration, INamedTypeSymbol Attribute, string ContainingMemberKind)> AdviceAttributeOnAccessor
-            = new(
-                "LAMA0262",
-                "Accessors cannot have template or advice attributes applied.",
-                "Accessor '{0}' cannot have the '{1}' attribute. Add the attribute to the containing {2} instead.",
-                _category,
-                Error );
+        internal static readonly DiagnosticDefinition<(ISymbol AccessorDeclaration, INamedTypeSymbol Attribute, string ContainingMemberKind)>
+            AdviceAttributeOnAccessor
+                = new(
+                    "LAMA0262",
+                    "Accessors cannot have template or advice attributes applied.",
+                    "Accessor '{0}' cannot have the '{1}' attribute. Add the attribute to the containing {2} instead.",
+                    _category,
+                    Error );
 
         internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
             = new(

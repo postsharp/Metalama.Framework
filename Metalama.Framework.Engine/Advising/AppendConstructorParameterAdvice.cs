@@ -165,7 +165,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
                     case PullActionKind.UseExpression:
                         parameterValue =
-                            pullParameterAction.Expression.AssertNotNull().ToExpressionSyntax( chainedSyntaxGenerationContext );
+                            pullParameterAction.Expression.AssertNotNull().ToExpressionSyntax( new( compilation, chainedSyntaxGenerationContext ) );
 
                         break;
 

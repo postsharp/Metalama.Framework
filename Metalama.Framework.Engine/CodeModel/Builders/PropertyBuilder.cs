@@ -8,6 +8,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -108,7 +109,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: (SyntaxGenerationContext) syntaxGenerationContext ).GetTypedExpressionSyntax();
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
 
     public TemplateMember<IProperty>? InitializerTemplate
     {

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using System.Collections.Immutable;
@@ -43,6 +44,11 @@ internal sealed partial class UserProcessEndpoint
         public void OnIsEditingCompileTimeCodeChanged( bool isEditing )
         {
             this._parent.IsEditingCompileTimeCodeChanged?.Invoke( isEditing );
+        }
+
+        public void OnCompileTimeErrorsChanged( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> diagnostics )
+        {
+            this._parent.SetCompileTimeErrors( projectKey, diagnostics );
         }
     }
 }

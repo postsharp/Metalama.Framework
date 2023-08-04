@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
@@ -40,5 +41,5 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new(
-            new TypedExpressionSyntaxImpl( SyntaxFactory.IdentifierName( this.Name ), this.Type, (SyntaxGenerationContext) syntaxGenerationContext, true ) );
+            new TypedExpressionSyntaxImpl( SyntaxFactory.IdentifierName( this.Name ), this.Type, ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext, true ) );
 }

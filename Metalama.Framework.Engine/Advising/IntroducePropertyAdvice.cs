@@ -292,7 +292,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
-                    return AdviceImplementationResult.Ignored;
+                    return AdviceImplementationResult.Ignored( existingProperty );
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.

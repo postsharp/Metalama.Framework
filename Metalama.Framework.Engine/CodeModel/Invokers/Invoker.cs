@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,6 +21,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected object? Target { get; }
 
         protected SyntaxGenerationContext GenerationContext { get; }
+
+        protected SyntaxSerializationContext SerializationContext { get; }
 
         protected Invoker( T member, InvokerOptions? options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
         {
@@ -40,6 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             // a non-template context e.g. a unit test or LinqPad.
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
                 ?? member.GetCompilationModel().CompilationContext.DefaultSyntaxGenerationContext;
+            this.SerializationContext = new( member.GetCompilationModel(), this.GenerationContext );
 
             this._order = orderOptions switch
             {
@@ -114,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 receiver = receiver.WithAspectReferenceOrder( this._order );
 
                 return new ReceiverTypedExpressionSyntax(
-                    receiver.ToTypedExpressionSyntax( this.GenerationContext ),
+                    receiver.ToTypedExpressionSyntax( this.SerializationContext ),
                     false,
                     receiver.AspectReferenceSpecification );
             }
@@ -124,7 +128,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
                 if ( this.Target != null )
                 {
-                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, this.Member.Compilation, this.GenerationContext );
+                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, this.SerializationContext );
 
                     return new ReceiverTypedExpressionSyntax(
                         typedExpressionSyntax,
@@ -134,7 +138,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 else if ( this.Member.IsStatic )
                 {
                     return new ReceiverTypedExpressionSyntax(
-                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.GenerationContext ),
+                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.SerializationContext ),
                         false,
                         aspectReferenceSpecification );
                 }
@@ -142,7 +146,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 {
                     return new ReceiverTypedExpressionSyntax(
                         new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
-                            this.GenerationContext ),
+                            this.SerializationContext ),
                         false,
                         aspectReferenceSpecification );
                 }

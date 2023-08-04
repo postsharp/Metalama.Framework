@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests
         public static void DynamicEquals( object expression, string expected )
         {
             var meta = (IExpression) expression;
-            var actual = meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
+            var actual = meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxSerializationContext ).NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
         }
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests
             try
             {
                 var runtimeExpression = (IExpression) testCode()!;
-                _ = runtimeExpression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                _ = runtimeExpression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxSerializationContext );
 
                 Assert.Fail( "Exception InvalidUserCodeException was not received." );
             }

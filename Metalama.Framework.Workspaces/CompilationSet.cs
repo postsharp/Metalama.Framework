@@ -21,25 +21,25 @@ internal sealed class CompilationSet : ICompilationSet
     public ImmutableArray<ICompilation> Compilations { get; }
 
     [Memo]
-    public ImmutableArray<INamedType> Types => this.Compilations.SelectMany( p => p.Types ).ToImmutableArray();
+    public ImmutableArray<INamedType> Types => this.Compilations.AsParallel().SelectMany( p => p.Types ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IMethod> Methods => this.Types.SelectMany( t => t.Methods ).ToImmutableArray();
+    public ImmutableArray<IMethod> Methods => this.Types.AsParallel().SelectMany( t => t.Methods ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IField> Fields => this.Types.SelectMany( t => t.Fields ).ToImmutableArray();
+    public ImmutableArray<IField> Fields => this.Types.AsParallel().SelectMany( t => t.Fields ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IProperty> Properties => this.Types.SelectMany( t => t.Properties ).ToImmutableArray();
+    public ImmutableArray<IProperty> Properties => this.Types.AsParallel().SelectMany( t => t.Properties ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IFieldOrProperty> FieldsAndProperties => this.Types.SelectMany( t => t.FieldsAndProperties ).ToImmutableArray();
+    public ImmutableArray<IFieldOrProperty> FieldsAndProperties => this.Types.AsParallel().SelectMany( t => t.FieldsAndProperties ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IConstructor> Constructors => this.Types.SelectMany( t => t.Constructors ).ToImmutableArray();
+    public ImmutableArray<IConstructor> Constructors => this.Types.AsParallel().SelectMany( t => t.Constructors ).ToImmutableArray();
 
     [Memo]
-    public ImmutableArray<IEvent> Events => this.Types.SelectMany( t => t.Events ).ToImmutableArray();
+    public ImmutableArray<IEvent> Events => this.Types.AsParallel().SelectMany( t => t.Events ).ToImmutableArray();
 
     [Memo]
     public ImmutableArray<string> TargetFrameworks
