@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -17,6 +18,13 @@ public sealed class PreviewAspectPipeline : AspectPipeline
         serviceProvider,
         executionScenario,
         domain ) { }
+
+    private protected override LowLevelPipelineStage CreateLowLevelStage( PipelineStageConfiguration configuration )
+    {
+        var partData = configuration.AspectLayers.Single();
+
+        return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass );
+    }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage(
         PipelineStageConfiguration configuration,
