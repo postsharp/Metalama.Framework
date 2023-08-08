@@ -91,20 +91,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             }
                             else
                             {
-                                return
-                                    SyntaxFactoryEx.FormattedBlock(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                    IdentifierName(
-                                                        Identifier(
-                                                            TriviaList(),
-                                                            SyntaxKind.UnderscoreToken,
-                                                            "_",
-                                                            "_",
-                                                            TriviaList() ) ),
-                                                    arrowExpressionClause.Expression ) ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                return DiscardBlock();
                             }
                         }
                         else
@@ -134,22 +121,20 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 }
                                 else
                                 {
-                                    return
-                                        SyntaxFactoryEx.FormattedBlock(
-                                                ExpressionStatement(
-                                                    AssignmentExpression(
-                                                        SyntaxKind.SimpleAssignmentExpression,
-                                                        IdentifierName(
-                                                            Identifier(
-                                                                TriviaList(),
-                                                                SyntaxKind.UnderscoreToken,
-                                                                "_",
-                                                                "_",
-                                                                TriviaList() ) ),
-                                                        arrowExpressionClause.Expression ) ) )
-                                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    return DiscardBlock();
                                 }
                             }
+                        }
+
+                        BlockSyntax DiscardBlock()
+                        {
+                            var returnTypeSyntax =
+                                this.CompilationContext.GetSyntaxGenerationContext( currentNode ).SyntaxGenerator.Type( this._targetMethod.ReturnType );
+
+                            return SyntaxFactoryEx.FormattedBlock(
+                                    SyntaxFactoryEx.DiscardStatement(
+                                        SyntaxFactoryEx.SafeCastExpression( returnTypeSyntax, arrowExpressionClause.Expression ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
 

@@ -218,6 +218,7 @@ namespace Metalama.Framework.Engine.Linking
                                     inliningSpecification.AspectReference.ContainingBody,
                                     inliningSpecification.ReturnVariableIdentifier,
                                     inliningSpecification.ReturnLabelIdentifier,
+                                    inliningSpecification.TargetSemantic.Symbol.ReturnType,
                                     returnStatementProperties.ReplaceWithBreakIfOmitted ) );
                         }
 

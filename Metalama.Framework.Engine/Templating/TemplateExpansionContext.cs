@@ -36,7 +36,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
-        _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
+           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
 
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
@@ -447,9 +447,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
         switch ( returnExpression )
         {
-            case ConditionalAccessExpressionSyntax:
+            case PostfixUnaryExpressionSyntax { RawKind: (int) SyntaxKind.SuppressNullableWarningExpression, Operand: var operand }:
+                // We're ignoring the value, so we don't care about its nullability and removing the ! operator might bring further opportunities for simplification.
+                return CreateReturnStatementVoid( operand );
+
+            case ConditionalAccessExpressionSyntax { WhenNotNull: InvocationExpressionSyntax }:
             case InvocationExpressionSyntax:
                 // Do not use discard on invocations, because it may be void.
+
+            case AwaitExpressionSyntax:
+                // We have to await in a statement, then return in another statement.
                 return
                     Block(
                             ExpressionStatement( returnExpression ),
@@ -463,30 +470,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 // care about the value.
                 return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
-            case AwaitExpressionSyntax awaitExpression:
-                // We have to await in a statement, then return in another statement.
-                return Block(
-                        ExpressionStatement( awaitExpression ),
-                        ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
             default:
                 // Anything else should use discard.
                 return
                     Block(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName(
-                                        Identifier(
-                                            TriviaList(),
-                                            SyntaxKind.UnderscoreToken,
-                                            "_",
-                                            "_",
-                                            TriviaList() ) ),
-                                    SyntaxFactoryEx.SafeCastExpression(
-                                        PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                        ParenthesizedExpression( returnExpression ).WithSimplifierAnnotation() ) ) ),
+                            SyntaxFactoryEx.DiscardStatement(
+                                SyntaxFactoryEx.SafeCastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), returnExpression ) ),
                             ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
