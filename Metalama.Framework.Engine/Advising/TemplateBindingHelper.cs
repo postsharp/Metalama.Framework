@@ -129,6 +129,22 @@ internal static class TemplateBindingHelper
     }
 
     /// <summary>
+    /// Binds a template that is caled from another template.
+    /// </summary>
+    public static BoundTemplateMethod ForCalledTemplate( this TemplateMember<IMethod> template, IObjectReader arguments )
+    {
+        // The template must not have run-time parameters.
+        if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
+        }
+
+        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty ) );
+    }
+
+    /// <summary>
     /// Binds a template to a contract for a given location name with given arguments.
     /// </summary>
     public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, ExpressionSyntax parameterExpression, IObjectReader? arguments = null )

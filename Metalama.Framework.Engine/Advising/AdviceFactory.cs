@@ -9,6 +9,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -34,6 +35,7 @@ internal sealed class AdviceFactory : IAdviceFactory
     private readonly INamedType? _aspectTargetType;
     private readonly AdviceFactoryState _state;
     private readonly ObjectReaderFactory _objectReaderFactory;
+    private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
     public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
     {
@@ -41,6 +43,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         this._templateInstance = templateInstance;
         this._layerName = layerName;
         this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
+        this._otherTemplateClassProvider = state.ServiceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         // The AdviceFactory is now always working on the initial compilation.
         // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
@@ -59,7 +62,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         => this.WithTemplateClassInstance(
             new TemplateClassInstance(
                 templateProvider,
-                this._state.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName.AssertNotNull()] ) );
+                this._otherTemplateClassProvider.Get( templateProvider ) ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
@@ -86,7 +89,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                 return null;
             }
         }
-        else if ( this._templateInstance.TemplateClass.Members.TryGetValue( templateName, out var template ) )
+
+        var template = ValidateTemplateName( this._templateInstance.TemplateClass, templateName, required, ignoreMissing );
+
+        return template == null ? null : new( template, templateKind );
+    }
+
+    // TODO: rename and move to another class (TemplateClass?)
+    public static TemplateClassMember? ValidateTemplateName( TemplateClass templateClass, string templateName, bool required = false, bool ignoreMissing = false )
+    {
+        Invariant.Assert( !(required && ignoreMissing) );
+
+        if ( templateClass.Members.TryGetValue( templateName, out var template ) )
         {
             if ( template.TemplateInfo.IsNone )
             {
@@ -108,7 +122,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 }
             }
 
-            return new TemplateMemberRef( template, templateKind );
+            return template;
         }
         else
         {
@@ -119,7 +133,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             else
             {
                 throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._templateInstance.TemplateClass.ShortName, templateName) );
+                    (templateClass.ShortName, templateName) );
             }
         }
     }

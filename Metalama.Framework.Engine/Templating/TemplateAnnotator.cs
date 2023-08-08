@@ -88,7 +88,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     /// <param name="descriptor">Diagnostic descriptor.</param>
     /// <param name="targetNode">Node on which the diagnostic should be reported.</param>
     /// <param name="arguments">Arguments of the formatting string.</param>
-    /// <typeparam name="T"></typeparam>
     private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
         where T : notnull
     {
@@ -126,7 +125,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             throw new ArgumentOutOfRangeException( nameof(scope) );
         }
 
-        if ( this._localScopes.TryGetValue( symbol, out _ ) )
+        if ( this._localScopes.ContainsKey( symbol ) )
         {
             throw new AssertionFailedException( $"The symbol {symbol} was already assigned to the scope {scope}." );
         }
@@ -779,14 +778,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( scope.Value.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
         {
-            // Template code cannot be referenced in a template until this is implemented.
-
             var symbol = symbols[0];
 
-            if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
+            if ( symbol is not IMethodSymbol && this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
             {
                 this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
+                    TemplatingDiagnosticDescriptors.OnlyMethodsCanBeSubtemplates,
                     node,
                     (symbol, this._currentTemplateMember!) );
             }

@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.DynamicArrayBuilder
 {
     [CompileTime]
     internal class Aspect

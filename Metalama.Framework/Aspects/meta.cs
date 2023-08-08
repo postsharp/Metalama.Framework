@@ -244,5 +244,36 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method.
+        /// </summary>
+        /// <param name="templateName">The name of the called template method.</param>
+        /// <param name="templateProvider">Object on which the template method will be called, or <see langword="null"/> for the current template provider (usually the current aspect).</param>
+        /// <param name="arguments">Compile-time template arguments that will be passed to the template.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? arguments = null ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method.
+        /// </summary>
+        /// <param name="templateInvocation">Object that contains information about the called template method.</param>
+        /// <param name="arguments">Compile-time template arguments that will be passed to the template, in addition to arguments from <paramref name="templateInvocation"/>.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null ) => throw CreateException();
+
+        /// <summary>
+        /// Inserts a <c>return;</c> statement into the target code.
+        /// </summary>
+        [TemplateKeyword]
+        public static void Return() => throw CreateException();
+
+        /// <summary>
+        /// Inserts a <c>return</c> statement into the target code.
+        /// This can be used to return a value from <see langword="void" />-returning template methods.
+        /// </summary>
+        /// <param name="value">The value to return.</param>
+        [TemplateKeyword]
+        public static void Return( dynamic? value ) => throw CreateException();
     }
 }

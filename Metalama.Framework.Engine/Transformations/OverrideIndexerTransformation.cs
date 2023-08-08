@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )

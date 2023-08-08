@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -321,7 +322,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType );
 
-            var augmentedServiceProvider = serviceProvider.WithService( ExecutionScenario.CompileTime.WithTest() );
+            serviceProvider = serviceProvider.WithServices(
+                ExecutionScenario.CompileTime.WithTest(),
+                new OtherTemplateClassProvider( ImmutableDictionary<string, OtherTemplateClass>.Empty ) );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
@@ -333,7 +336,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     default,
                     syntaxGenerationContext,
                     null!,
-                    augmentedServiceProvider,
+                    serviceProvider,
                     MetaApiStaticity.Default ) );
 
             return (new TemplateExpansionContext(

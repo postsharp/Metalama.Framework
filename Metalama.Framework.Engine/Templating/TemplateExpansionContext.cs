@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
@@ -33,6 +34,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 {
     private readonly TemplateMember<IMethod>? _template;
     private readonly IUserExpression? _proceedExpression;
+    private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
     internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
@@ -153,6 +155,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
+        this._otherTemplateClassProvider = serviceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         this.TemplateGenericArguments =
             (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
@@ -173,6 +176,22 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._localFunctionInfo = localFunctionInfo;
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
         this._proceedExpression = prototype._proceedExpression;
+        this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
+    }
+
+    private TemplateExpansionContext( TemplateExpansionContext prototype, ITemplateProvider templateInstance ) : base( prototype )
+    {
+        this._template = prototype._template;
+        this.TemplateInstance = templateInstance;
+        this.SyntaxSerializationService = prototype.SyntaxSerializationService;
+        this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
+        this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
+        this.LexicalScope = prototype.LexicalScope;
+        this.SyntaxFactory = prototype.SyntaxFactory;
+        this._localFunctionInfo = prototype._localFunctionInfo;
+        this.TemplateGenericArguments = prototype.TemplateGenericArguments;
+        this._proceedExpression = prototype._proceedExpression;
+        this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
     public object TemplateInstance { get; }
@@ -597,6 +616,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
+    internal TemplateExpansionContext ForTemplateInstance( ITemplateProvider templateProvider )
+    {
+        return new( this, templateProvider );
+    }
+
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
         if ( this._template?.MustInterpretAsAsyncIteratorTemplate() != true )
@@ -631,6 +655,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         }
 
         public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
+    }
+
+    public TemplateClass GetTemplateClass( ITemplateProvider? templateProvider )
+    {
+        if ( templateProvider == null )
+        {
+            return this._template.AssertNotNull().TemplateClassMember.TemplateClass;
+        }
+
+        return this._otherTemplateClassProvider.Get( templateProvider );
     }
 
     private sealed class DisposeCookie : IDisposable

@@ -1002,9 +1002,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // nameof is always transformed into a literal except when it is a template parameter.
 
             var expression = node.ArgumentList.Arguments[0].Expression;
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+            var argumentSymbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-            if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
+            if ( argumentSymbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
             {
                 if ( transformationKind == TransformationKind.Transform )
                 {
@@ -1028,7 +1028,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
             }
 
-            var symbolName = symbol?.Name ?? "<error>";
+            var symbolName = argumentSymbol?.Name ?? "<error>";
 
             if ( transformationKind == TransformationKind.Transform )
             {
@@ -1046,8 +1046,50 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return proceedNode;
         }
 
+        // Process special methods.
+        switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
+        {
+            case MetaMemberKind.InsertComment:
+                {
+                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
+
+                    // TemplateSyntaxFactory.AddComments( __s, comments );
+                    this.AddTemplateSyntaxFactoryStatement( node, nameof( ITemplateSyntaxFactory.AddComments ), transformedArgumentList.ToArray() );
+
+                    return null;
+                }
+
+            case MetaMemberKind.InsertStatement:
+                // TemplateSyntaxFactory.AddStatement( __s, statement );
+                this.AddAddStatementStatement( node, node.ArgumentList.Arguments.Single().Expression );
+
+                return null;
+
+            case MetaMemberKind.InvokeTemplate:
+                {
+                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
+
+                    // TemplateSyntaxFactory.AddStatement( __s, TemplateSyntaxFactory.InvokeTemplate( ... ) );
+                    this.AddAddStatementStatement(
+                        node,
+                        InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.InvokeTemplate ) ) )
+                            .AddArgumentListArguments( transformedArgumentList.ToArray() ) );
+
+                    return null;
+                }
+
+            case MetaMemberKind.Return:
+                var returnStatement = ReturnStatement( node.ArgumentList.Arguments.SingleOrDefault()?.Expression );
+
+                var transformedReturnStatement = this.TransformReturnStatement( returnStatement );
+
+                this.AddAddStatementStatement( node, transformedReturnStatement );
+
+                return null;
+        }
+
         if ( transformationKind != TransformationKind.Transform &&
-             node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
+             node.ArgumentList.Arguments.Any( this._templateMemberClassifier.IsDynamicParameter ) )
         {
             // We are transforming a call to a compile-time method that accepts dynamic arguments.
 
@@ -1115,68 +1157,31 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return this.Visit( expression );
             }
         }
-        else
+
+        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
+
+        if ( symbol != null )
         {
-            // Process special methods.
+            var templateInfo = this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
 
-            switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
+            if ( !templateInfo.IsNone && !templateInfo.CanBeReferencedAsRunTimeCode )
             {
-                case MetaMemberKind.InsertComment:
-                    {
-                        var transformedArgumentList = (ArgumentListSyntax) this.Visit( node.ArgumentList )!;
+                var compiledTemplateName = TemplateNameHelper.GetCompiledTemplateName( symbol );
+                var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
 
-                        var arguments = transformedArgumentList.Arguments.Insert(
-                            0,
-                            Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+                var templateInvocationExpression = InvocationExpression( IdentifierName( compiledTemplateName ) )
+                    .AddArgumentListArguments( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier ) )
+                    .AddArgumentListArguments( transformedArgumentList.ToArray() );
 
-                        // TemplateSyntaxFactory.AddComments( __s, comments );
+                this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof( StatementSyntax ) ), templateInvocationExpression ) );
 
-                        var addCommentsMetaStatement =
-                            ExpressionStatement(
-                                InvocationExpression(
-                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddComments) ),
-                                    ArgumentList( arguments ) ) );
-
-                        var addCommentsStatement = this.DeepIndent(
-                            addCommentsMetaStatement.WithLeadingTrivia(
-                                GetCommentFromNode( node.Parent! )
-                                    .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
-
-                        this._currentMetaContext.Statements.Add( addCommentsStatement );
-
-                        return null;
-                    }
-
-                case MetaMemberKind.InsertStatement:
-                    {
-                        // TemplateSyntaxFactory.AddStatement( __s, comments );
-                        var arguments = node.ArgumentList.Arguments.Insert(
-                            0,
-                            Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
-
-                        var addStatementMetaStatement =
-                            ExpressionStatement(
-                                InvocationExpression(
-                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddStatement) ),
-                                    ArgumentList( arguments ) ) );
-
-                        var addStatementStatement = this.DeepIndent(
-                            addStatementMetaStatement.WithLeadingTrivia(
-                                GetCommentFromNode( node.Parent! )
-                                    .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
-
-                        this._currentMetaContext.Statements.Add( addStatementStatement );
-
-                        return null;
-                    }
+                return null;
             }
         }
 
         // Expand extension methods.
         if ( transformationKind == TransformationKind.Transform )
         {
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
-
             if ( symbol is IMethodSymbol { ReducedFrom: not null } method )
             {
                 if ( node.Expression is MemberAccessExpressionSyntax memberAccessExpression )
@@ -1208,6 +1213,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         return base.VisitInvocationExpression( node );
     }
+
+    private void AddTemplateSyntaxFactoryStatement( SyntaxNode node, string templateSyntaxFactoryMemberName, params ArgumentSyntax[] arguments )
+    {
+        var addStatementStatement = ExpressionStatement(
+            InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( templateSyntaxFactoryMemberName ) )
+                .AddArgumentListArguments( Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) )
+                .AddArgumentListArguments( arguments ) );
+
+        addStatementStatement = this.DeepIndent(
+            addStatementStatement.WithLeadingTrivia(
+                GetCommentFromNode( node.Parent! )
+                    .AddRange( addStatementStatement.GetLeadingTrivia() ) ) );
+
+        this._currentMetaContext.Statements.Add( addStatementStatement );
+    }
+
+    private void AddAddStatementStatement( SyntaxNode node, ExpressionSyntax statementExpression )
+        => this.AddTemplateSyntaxFactoryStatement( node, nameof( ITemplateSyntaxFactory.AddStatement ), Argument( statementExpression ) );
 
     private static SyntaxTriviaList GetCommentFromNode( SyntaxNode node )
     {

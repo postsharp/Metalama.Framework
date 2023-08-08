@@ -268,6 +268,8 @@ namespace Metalama.Framework.Engine.Pipeline
                     diagnosticAdder )
                 .ToImmutableDictionary( x => x.FullName, x => x );
 
+            projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new OtherTemplateClassProvider( otherTemplateClasses ) );
+
             // Add fabrics.
 
             var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
@@ -299,7 +301,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 stages,
                 allAspectClasses,
-                otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
                 compileTimeProjectRepository,

@@ -130,12 +130,11 @@ namespace Metalama.Framework.Engine.Templating
                     Error );
 
         internal static readonly DiagnosticDefinition<(ISymbol ReferencedDeclaration, ISymbol ReferencingDeclaration)>
-            TemplateCannotReferenceTemplate
+            OnlyMethodsCanBeSubtemplates
                 = new(
                     "LAMA0220",
-                    "A template cannot reference another template.",
-                    "The declaration '{0}' cannot be referenced from '{1}' both declarations are templates, "
-                    + "and templates cannot reference each other yet.",
+                    "A template can only reference other templates that are methods.",
+                    "The declaration '{0}' cannot be referenced from '{1}', because it is a template, but not a method.",
                     _category,
                     Error );
 

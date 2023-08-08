@@ -23,9 +23,9 @@ namespace Metalama.Framework.Engine.Advising
 
         private bool IsNull => this._selectedKind == TemplateKind.None;
 
-        public TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind ) : this( template, selectedKind, selectedKind ) { }
+        public TemplateMemberRef( TemplateClassMember template, TemplateKind selectedKind ) : this( template, selectedKind, selectedKind ) { }
 
-        private TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind, TemplateKind interpretedKind )
+        private TemplateMemberRef( TemplateClassMember template, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
             this._templateMember = template;
             this._selectedKind = selectedKind;
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Advising
             var type = templateReflectionContext.Compilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
 
             var symbol = type.GetMembers( this._templateMember.Name )
-                .Single( m => classifier.IsTemplate( m ) );
+                .Single( classifier.IsTemplate );
 
             var declaration = templateReflectionContext.GetCompilationModel( compilation ).Factory.GetDeclaration( symbol );
 

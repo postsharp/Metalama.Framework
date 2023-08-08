@@ -71,12 +71,10 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
-
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
             => lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
-                : new[] { Whitespace( this.GetIndentationWhitespace() ) };
+                : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
 
         protected static SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();
 

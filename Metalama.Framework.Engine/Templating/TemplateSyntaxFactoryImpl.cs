@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -24,16 +27,18 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly TemplateExpansionContext _templateExpansionContext;
         private readonly SyntaxSerializationContext _syntaxSerializationContext;
+        private readonly ObjectReaderFactory _objectReaderFactory;
 
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
             this._syntaxSerializationContext = templateExpansionContext.SyntaxSerializationContext;
+            this._objectReaderFactory = templateExpansionContext.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
         }
 
         public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
 
-        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
+        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax? statement ) => list.Add( new StatementOrTrivia( statement ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
             => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax ) );
@@ -450,6 +455,46 @@ namespace Metalama.Framework.Engine.Templating
             var returnTypeSymbol = new SerializableTypeId( returnType ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), genericArguments );
 
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
+        }
+
+        private BlockSyntax? InvokeTemplate( string templateName, ITemplateProvider? templateProvider, IObjectReader arguments )
+        {
+            var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
+
+            var template = AdviceFactory.ValidateTemplateName( templateClass, templateName, required: true )!;
+
+            // TODO: do I need TMR? if I do, move it back to ValidateTemplateName? if I don't, extract relevant part from TMR.GetTemplateMember()
+            var templateMemberRef = new TemplateMemberRef( template, TemplateKind.Default );
+            var templateMember = templateMemberRef.GetTemplateMember<IMethod>( this.Compilation.GetCompilationModel(), this._templateExpansionContext.ServiceProvider );
+
+            var driver = templateClass.GetTemplateDriver( templateMember.Declaration );
+
+            // TODO: will probably need context with different template
+            var context = this._templateExpansionContext;
+
+            if ( templateProvider != null )
+            {
+                context = context.ForTemplateInstance( templateProvider );
+            }
+
+            var boundTemplate = templateMember.ForCalledTemplate( arguments );
+
+            driver.TryExpandDeclaration( context, boundTemplate.TemplateArguments, out var block );
+
+            return block;
+        }
+
+        public BlockSyntax? InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? arguments = null )
+        {
+            return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( arguments ) );
+        }
+
+        public BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null )
+        {
+            var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
+            var directArgs = this._objectReaderFactory.GetReader( arguments );
+
+            return this.InvokeTemplate( templateInvocation.TemplateName, templateInvocation.TemplateProvider, ObjectReader.Merge( invocationArgs, directArgs ) );
         }
     }
 }

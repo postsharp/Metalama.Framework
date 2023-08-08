@@ -174,7 +174,6 @@ internal sealed class AspectDriver : IAspectDriver
                 currentCompilationRevision,
                 aspectInstance,
                 diagnosticSink,
-                pipelineConfiguration,
                 executionContext,
                 pipelineStepIndex,
                 indexWithinType );

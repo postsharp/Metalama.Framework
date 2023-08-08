@@ -17,11 +17,11 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         private sealed class TemplateMetaSyntaxFactoryImpl
         {
-            private readonly IdentifierNameSyntax _templateSyntaxFactoryIdentifier;
+            public IdentifierNameSyntax TemplateSyntaxFactoryIdentifier { get; }
 
             public TemplateMetaSyntaxFactoryImpl( string templateSyntaxFactoryIdentifier )
             {
-                this._templateSyntaxFactoryIdentifier = SyntaxFactory.IdentifierName( templateSyntaxFactoryIdentifier );
+                this.TemplateSyntaxFactoryIdentifier = SyntaxFactory.IdentifierName( templateSyntaxFactoryIdentifier );
             }
 
             /// <summary>
@@ -33,13 +33,13 @@ namespace Metalama.Framework.Engine.Templating
             public MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._templateSyntaxFactoryIdentifier,
+                    this.TemplateSyntaxFactoryIdentifier,
                     SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericTemplateSyntaxFactoryMember( string name, params TypeSyntax[] genericParameters )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._templateSyntaxFactoryIdentifier,
+                    this.TemplateSyntaxFactoryIdentifier,
                     SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
                         .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
 

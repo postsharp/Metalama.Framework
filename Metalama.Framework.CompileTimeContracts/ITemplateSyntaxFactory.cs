@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis;
@@ -13,7 +14,7 @@ public interface ITemplateSyntaxFactory
 {
     ICompilation Compilation { get; }
 
-    void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement );
+    void AddStatement( List<StatementOrTrivia> list, StatementSyntax? statement );
 
     void AddStatement( List<StatementOrTrivia> list, IStatement statement );
 
@@ -77,4 +78,8 @@ public interface ITemplateSyntaxFactory
     InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation );
 
     ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments, bool isAsync = false );
+
+    BlockSyntax? InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? arguments = null );
+
+    BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null );
 }

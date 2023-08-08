@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -32,8 +31,6 @@ internal sealed class AdviceFactoryState
 
     public IDiagnosticAdder Diagnostics { get; }
 
-    public AspectPipelineConfiguration PipelineConfiguration { get; }
-
     public IntrospectionPipelineListener? IntrospectionListener { get; }
 
     public List<ITransformation> Transformations { get; } = new();
@@ -50,7 +47,6 @@ internal sealed class AdviceFactoryState
         CompilationModel currentCompilation,
         IAspectInstanceInternal aspectInstance,
         IDiagnosticAdder diagnostics,
-        AspectPipelineConfiguration pipelineConfiguration,
         UserCodeExecutionContext executionContext,
         int pipelineStepIndex,
         int orderWithinType )
@@ -62,7 +58,6 @@ internal sealed class AdviceFactoryState
         this.AspectInstance = aspectInstance;
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
-        this.PipelineConfiguration = pipelineConfiguration;
         this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.Comparers.Default );
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;

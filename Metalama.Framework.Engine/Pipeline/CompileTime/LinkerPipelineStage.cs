@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Run the linker.
             var linker = new AspectLinker(
-                this._serviceProvider,
+                pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Transformations,
@@ -72,7 +72,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
-                additionalCompilationOutputFiles = await this.GenerateAdditionalCompilationOutputFilesAsync(
+                additionalCompilationOutputFiles = await GenerateAdditionalCompilationOutputFilesAsync(
+                    pipelineConfiguration.ServiceProvider,
                     input,
                     pipelineStepsResult,
                     cancellationToken );
@@ -108,6 +109,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
             var diagnostics = new UserDiagnosticSink();
 
+            // TODO: use service provider from configuration here?
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 this._serviceProvider,
                 input.Compilation,
