@@ -4,7 +4,7 @@ class Target
   {
     Console.WriteLine("Before");
     Console.WriteLine("Original");
-    _ = 42;
+    _ = (global::System.Int32)(42);
     Console.WriteLine("After");
     return 42;
   }

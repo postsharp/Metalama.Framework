@@ -25,17 +25,17 @@ internal class TargetClass
     {
       if (x == 42)
       {
-        _ = 42;
+        _ = (global::System.Int32)(42);
         goto __aspect_return_1;
       }
       x--;
     }
     if (x > 0)
     {
-      _ = -1;
+      _ = (global::System.Int32)(-1);
       goto __aspect_return_1;
     }
-    _ = 0;
+    _ = (global::System.Int32)(0);
     goto __aspect_return_1;
     __aspect_return_1:
       return default;
@@ -50,17 +50,17 @@ internal class TargetClass
       {
         if (z == 42)
         {
-          _ = x;
+          _ = (T? )(x);
           goto __aspect_return_1;
         }
         z--;
       }
       if (z > 0)
       {
-        _ = x;
+        _ = (T? )(x);
         goto __aspect_return_1;
       }
-      _ = default(T? );
+      _ = (T? )(default(T? ));
       goto __aspect_return_1;
     }
     __aspect_return_1:

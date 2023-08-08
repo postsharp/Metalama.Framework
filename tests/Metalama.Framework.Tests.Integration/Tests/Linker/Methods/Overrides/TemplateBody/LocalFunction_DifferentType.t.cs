@@ -9,7 +9,7 @@ class TargetClass
     {
       Console.WriteLine("Override");
       Console.WriteLine("Original");
-      _ = x;
+      _ = (global::System.Int32)(x);
     }
   }
   void VoidMethod_IntLocalFunction()

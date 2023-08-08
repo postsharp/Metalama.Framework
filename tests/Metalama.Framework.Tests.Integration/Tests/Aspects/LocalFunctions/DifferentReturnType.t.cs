@@ -5,7 +5,7 @@ internal class C
   {
     string LocalFunction()
     {
-      _ = 42;
+      _ = (global::System.Int32)(42);
       return (global::System.String)"something";
     }
     var s = LocalFunction();
@@ -16,7 +16,7 @@ internal class C
   {
     string LocalFunction()
     {
-      _ = 42;
+      _ = (global::System.Int32)(42);
       return (global::System.String)"something";
     }
     var s = LocalFunction();

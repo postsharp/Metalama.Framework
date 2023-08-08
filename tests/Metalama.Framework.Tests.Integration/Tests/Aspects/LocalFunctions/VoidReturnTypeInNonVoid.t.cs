@@ -5,7 +5,7 @@ internal class TargetClass
   {
     void LocalFunction()
     {
-      _ = 42;
+      _ = (global::System.Int32)(42);
     }
     LocalFunction();
     return default;
@@ -15,7 +15,7 @@ internal class TargetClass
   {
     void LocalFunction()
     {
-      _ = 42;
+      _ = (global::System.Int32)(42);
     }
     LocalFunction();
     return default;

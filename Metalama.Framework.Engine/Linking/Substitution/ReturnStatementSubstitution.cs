@@ -16,7 +16,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// </summary>
     internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
     {
-        private readonly IMethodSymbol _containingSymbol;
+        private readonly IMethodSymbol _referencingSymbol;
+        private readonly IMethodSymbol _originalContainingSymbol;
         private readonly string? _returnVariableIdentifier;
         private readonly string? _returnLabelIdentifier;
         private readonly bool _replaceByBreakIfOmitted;
@@ -26,13 +27,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public ReturnStatementSubstitution(
             CompilationContext compilationContext,
             SyntaxNode returnNode,
+            IMethodSymbol referencingSymbol,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
             string? returnLabelIdentifier,
             bool replaceByBreakIfOmitted ) : base( compilationContext )
         {
             this.TargetNode = returnNode;
-            this._containingSymbol = containingSymbol;
+            this._referencingSymbol = referencingSymbol;
+            this._originalContainingSymbol = containingSymbol;
             this._returnVariableIdentifier = returnVariableIdentifier;
             this._returnLabelIdentifier = returnLabelIdentifier;
             this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
@@ -108,7 +111,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case ExpressionSyntax returnExpression:
                     if ( this._returnLabelIdentifier != null )
                     {
-                        if ( this._containingSymbol.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock(
@@ -127,14 +130,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        if ( this._containingSymbol.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
                             var discardStatement =
                                 ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,
                                             IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
-                                            returnExpression ) )
+                                            CastConditional( returnExpression ) ) )
                                     .WithOriginalLocationAnnotationFrom( returnExpression );
 
                             if ( this._replaceByBreakIfOmitted )
@@ -182,10 +185,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )
             {
                 IdentifierNameSyntax identifier;
+                bool makeCastConditional;
 
                 if ( this._returnVariableIdentifier != null )
                 {
                     identifier = IdentifierName( this._returnVariableIdentifier );
+                    makeCastConditional = false;
                 }
                 else
                 {
@@ -197,6 +202,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 "_",
                                 "_",
                                 TriviaList() ) );
+                    makeCastConditional = true;
+                }
+
+                if ( makeCastConditional )
+                {
+                    expression = CastConditional( expression );
                 }
 
                 return
@@ -220,6 +231,31 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+            }
+
+            ExpressionSyntax CastConditional( ExpressionSyntax node )
+            {
+                // NOTE: One possibility is ignored:
+                //   A Foo(B x) {
+                //       return (C)x;
+                //   }
+                // Suppose there is an implicit conversion operator from C to A. When we inline as discard:
+                //   _ = (C)x;
+                // Instead of:
+                //   _ = (A)(C)x; 
+                // This skips the conversion operator, which might (and should not) have a side effect.
+
+                if ( node is not CastExpressionSyntax && !this._originalContainingSymbol.ReturnsVoid )
+                {
+                    return
+                        CastExpression(
+                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
+                            ParenthesizedExpression( node ) );
+                }
+                else
+                {
+                    return node;
+                }
             }
         }
     }

@@ -20,11 +20,11 @@ internal class TargetClass
     Console.WriteLine("Begin target.");
     if (x == 0)
     {
-      _ = 42;
+      _ = (global::System.Int32)(42);
       goto __aspect_return_1;
     }
     Console.WriteLine("End target.");
-    _ = x;
+    _ = (global::System.Int32)(x);
     goto __aspect_return_1;
     __aspect_return_1:
       return default;
@@ -36,11 +36,11 @@ internal class TargetClass
     Console.WriteLine("Begin target.");
     if (x?.Equals(default) ?? false)
     {
-      _ = x;
+      _ = (T? )(x);
       goto __aspect_return_1;
     }
     Console.WriteLine("End target.");
-    _ = x;
+    _ = (T? )(x);
     goto __aspect_return_1;
     __aspect_return_1:
       return default;
