@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -342,7 +341,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         templateInstance,
                         metaApi,
                         lexicalScope,
-                        serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
                         template,
                         proceedExpression,

@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Introspection;
@@ -53,12 +52,10 @@ namespace Metalama.Framework.Engine.Transformations
                     this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
+                context,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                this.ContextDeclaration,
                 this._boundTemplate,
                 null,
                 this.ParentAdvice.AspectLayerId );

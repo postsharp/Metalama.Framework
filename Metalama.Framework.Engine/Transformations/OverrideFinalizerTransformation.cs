@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -49,12 +48,10 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
+                context,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                this.OverriddenDeclaration,
                 this.BoundTemplate,
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );

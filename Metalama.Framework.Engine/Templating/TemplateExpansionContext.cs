@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -112,11 +113,27 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
 
     public TemplateExpansionContext(
+        TransformationContext transformationContext,
+        object templateInstance,
+        MetaApi metaApi,
+        IDeclaration declarationForLexicalScope,
+        BoundTemplateMethod? template,
+        IUserExpression? proceedExpression,
+        AspectLayerId aspectLayerId ) : this(
+        transformationContext.ServiceProvider,
+        templateInstance,
+        metaApi,
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
+        transformationContext.SyntaxGenerationContext,
+        template,
+        proceedExpression,
+        aspectLayerId ) { }
+
+    public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
-        object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
+        object templateInstance,
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
-        SyntaxSerializationService syntaxSerializationService,
         SyntaxGenerationContext syntaxGenerationContext,
         BoundTemplateMethod? template,
         IUserExpression? proceedExpression,
@@ -131,7 +148,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     {
         this._template = template?.TemplateMember;
         this.TemplateInstance = templateInstance;
-        this.SyntaxSerializationService = syntaxSerializationService;
+        this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;

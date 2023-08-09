@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -99,12 +98,10 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
-            context.ServiceProvider,
+            context,
             advice.TemplateInstance.Instance,
             metaApi,
-            context.LexicalScopeProvider.GetLexicalScope( this ),
-            context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-            context.SyntaxGenerationContext,
+            this,
             default,
             null,
             advice.AspectLayerId );
