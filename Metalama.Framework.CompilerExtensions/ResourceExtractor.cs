@@ -261,9 +261,24 @@ namespace Metalama.Framework.CompilerExtensions
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
 
-                                using ( var outputStream = File.Create( filePath ) )
+                                const uint ERROR_SHARING_VIOLATION = 0x80070020;
+
+                                try
                                 {
+                                    using var outputStream = File.Create( filePath );
+
                                     stream.CopyTo( outputStream );
+                                }
+                                catch ( IOException ex ) when ( (uint) ex.HResult == ERROR_SHARING_VIOLATION )
+                                {
+                                    // We couldn't write to the file, so try to read it instead and verify its content is correct.
+
+                                    using var readStream = File.OpenRead( filePath );
+
+                                    if ( !StreamsContentsAreEqual( stream, readStream ) )
+                                    {
+                                        throw new InvalidOperationException( $"Could not open file '{filePath}' for writing and its existing content is not correct", ex );
+                                    }
                                 }
                             }
                             else
@@ -273,11 +288,13 @@ namespace Metalama.Framework.CompilerExtensions
                         }
 
                         File.WriteAllText( completedFilePath, "completed" );
+
+                        log.WriteLine( "Extracting resources completed." );
                     }
                 }
                 catch ( Exception e )
                 {
-                    log.WriteLine( e.ToString() );
+                    log?.WriteLine( e.ToString() );
 
                     throw;
                 }
@@ -296,6 +313,54 @@ namespace Metalama.Framework.CompilerExtensions
                     File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
                 }
                 catch { }
+            }
+        }
+
+        // https://stackoverflow.com/a/47422179/41071
+        private static bool StreamsContentsAreEqual( Stream stream1, Stream stream2 )
+        {
+            const int bufferSize = 4096;
+
+            var buffer1 = new byte[bufferSize];
+            var buffer2 = new byte[bufferSize];
+
+            while ( true )
+            {
+                var count1 = ReadFullBuffer( stream1, buffer1 );
+                var count2 = ReadFullBuffer( stream2, buffer2 );
+
+                if ( count1 != count2 )
+                {
+                    return false;
+                }
+
+                if ( count1 == 0 )
+                {
+                    return true;
+                }
+
+                if ( !buffer1.AsSpan().SequenceEqual( buffer2 ) )
+                {
+                    return false;
+                }
+            }
+
+            static int ReadFullBuffer( Stream stream, byte[] buffer )
+            {
+                var bytesRead = 0;
+                while ( bytesRead < buffer.Length )
+                {
+                    var read = stream.Read( buffer, bytesRead, buffer.Length - bytesRead );
+                    if ( read == 0 )
+                    {
+                        // Reached end of stream.
+                        return bytesRead;
+                    }
+
+                    bytesRead += read;
+                }
+
+                return bytesRead;
             }
         }
 
