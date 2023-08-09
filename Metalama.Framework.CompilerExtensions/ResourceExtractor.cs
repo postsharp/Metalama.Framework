@@ -288,6 +288,8 @@ namespace Metalama.Framework.CompilerExtensions
                         }
 
                         File.WriteAllText( completedFilePath, "completed" );
+
+                        log.WriteLine( "Extracting resources completed." );
                     }
                 }
                 catch ( Exception e )
