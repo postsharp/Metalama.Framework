@@ -987,8 +987,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                 if ( diagnostics.Any() )
                 {
                     sourceFilePathIndexes = sourceTreesWithCompileTimeCode
-                        .Select( ( tree, index ) => (tree.FilePath, index) )
                         .OrderBy( x => x.FilePath )
+                        .Select( ( tree, index ) => (tree.FilePath, index) )
                         .ToDictionary( x => x.FilePath, x => x.index );
                 }
 
