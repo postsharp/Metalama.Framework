@@ -12,26 +12,26 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
     {
         private readonly ArrowExpressionClauseSyntax _rootNode;
-        private readonly IMethodSymbol _referencingMethod;
-        private readonly IMethodSymbol _targetMethod;
+        private readonly IMethodSymbol _referencingSymbol;
+        private readonly IMethodSymbol _originalContainingSymbol;
         private readonly bool _usingSimpleInlining;
         private readonly string? _returnVariableIdentifier;
 
         public ExpressionBodySubstitution(
             CompilationContext compilationContext,
             ArrowExpressionClauseSyntax rootNode,
-            IMethodSymbol referencingMethod,
-            IMethodSymbol targetMethod,
+            IMethodSymbol referencingSymbol,
+            IMethodSymbol originalContainingSymbol,
             bool usingSimpleInlining,
             string? returnVariableIdentifier = null ) : base( compilationContext )
         {
             Invariant.Implies( usingSimpleInlining, returnVariableIdentifier == null );
-            Invariant.Implies( usingSimpleInlining, SymbolEqualityComparer.Default.Equals( referencingMethod.ReturnType, targetMethod.ReturnType ) );
-            Invariant.Implies( targetMethod.ReturnsVoid, this._returnVariableIdentifier == null );
+            Invariant.Implies( usingSimpleInlining, SymbolEqualityComparer.Default.Equals( referencingSymbol.ReturnType, originalContainingSymbol.ReturnType ) );
+            Invariant.Implies( originalContainingSymbol.ReturnsVoid, this._returnVariableIdentifier == null );
 
             this._rootNode = rootNode;
-            this._referencingMethod = referencingMethod;
-            this._targetMethod = targetMethod;
+            this._referencingSymbol = referencingSymbol;
+            this._originalContainingSymbol = originalContainingSymbol;
             this._usingSimpleInlining = usingSimpleInlining;
             this._returnVariableIdentifier = returnVariableIdentifier;
         }
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     if ( this._usingSimpleInlining )
                     {
                         // Uses the simple inlining, i.e. generating simple return statement without any changes for non-void methods.
-                        if ( this._referencingMethod.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
@@ -79,9 +79,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        if ( this._referencingMethod.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
-                            if ( this._targetMethod.ReturnsVoid )
+                            if ( this._originalContainingSymbol.ReturnsVoid )
                             {
                                 // Both referencing and target methods return void, expression can be simply changed to 
 
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             }
                             else
                             {
-                                if ( this._targetMethod.ReturnsVoid )
+                                if ( this._originalContainingSymbol.ReturnsVoid )
                                 {
                                     Invariant.Assert( this._returnVariableIdentifier == null );
 
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         BlockSyntax DiscardBlock()
                         {
                             var returnTypeSyntax =
-                                this.CompilationContext.GetSyntaxGenerationContext( currentNode ).SyntaxGenerator.Type( this._targetMethod.ReturnType );
+                                substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType );
 
                             return SyntaxFactoryEx.FormattedBlock(
                                     SyntaxFactoryEx.DiscardStatement(

@@ -16,10 +16,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// </summary>
     internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
     {
-        private readonly IMethodSymbol _containingSymbol;
+        private readonly IMethodSymbol _referencingSymbol;
+        private readonly IMethodSymbol _originalContainingSymbol;
         private readonly string? _returnVariableIdentifier;
         private readonly string? _returnLabelIdentifier;
-        private readonly ITypeSymbol _returnType;
         private readonly bool _replaceByBreakIfOmitted;
 
         public override SyntaxNode TargetNode { get; }
@@ -27,17 +27,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public ReturnStatementSubstitution(
             CompilationContext compilationContext,
             SyntaxNode returnNode,
+            IMethodSymbol referencingSymbol,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
             string? returnLabelIdentifier,
-            ITypeSymbol returnType,
             bool replaceByBreakIfOmitted ) : base( compilationContext )
         {
             this.TargetNode = returnNode;
-            this._containingSymbol = containingSymbol;
+            this._referencingSymbol = referencingSymbol;
+            this._originalContainingSymbol = containingSymbol;
             this._returnVariableIdentifier = returnVariableIdentifier;
             this._returnLabelIdentifier = returnLabelIdentifier;
-            this._returnType = returnType;
             this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
         }
 
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case ExpressionSyntax returnExpression:
                     if ( this._returnLabelIdentifier != null )
                     {
-                        if ( this._containingSymbol.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock(
@@ -165,7 +165,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     identifier = SyntaxFactoryEx.DiscardIdentifier();
 
                     expression = SyntaxFactoryEx.SafeCastExpression(
-                        this.CompilationContext.GetSyntaxGenerationContext( expression ).SyntaxGenerator.Type( this._returnType ),
+                        substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
                         expression );
                 }
 
