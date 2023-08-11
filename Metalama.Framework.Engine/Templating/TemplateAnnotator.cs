@@ -1079,6 +1079,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
         {
+            var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
+
             // If the scope of the expression on the left side is known (because of rules on the symbol),
             // we know the scope of arguments upfront. Otherwise, we need to decide of the invocation scope based on arguments (else branch of this if).
 
@@ -1095,9 +1097,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 // Transform the argument value.
                 var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameter?.Type );
 
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
+                var isRunTimeParameterOfSubtemplate = parameter != null
+                    && templateInfo.CanBeReferencedAsSubtemplate
+                    && this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter || isRunTimeParameterOfSubtemplate )
                 {
-                    // dynamic or dynamic[]
+                    // dynamic, dynamic[] or run-time subtemplate parameter
 
                     using ( this.WithScopeContext(
                                this._currentScopeContext.RunTimePreferred(
@@ -1119,6 +1125,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                 argument.Expression,
                                 argument.Expression.ToString() );
                         }
+                    }
+
+                    // Ensure that a run-time argument of a subtemplate is transformed.
+                    if ( isRunTimeParameterOfSubtemplate && transformedArgumentValue.GetScopeFromAnnotation() == TemplatingScope.RunTimeOrCompileTime )
+                    {
+                        transformedArgumentValue = transformedArgumentValue.ReplaceScopeAnnotation( TemplatingScope.RunTimeOnly );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )

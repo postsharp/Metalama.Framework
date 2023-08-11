@@ -1054,7 +1054,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
 
                     // TemplateSyntaxFactory.AddComments( __s, comments );
-                    this.AddTemplateSyntaxFactoryStatement( node, nameof( ITemplateSyntaxFactory.AddComments ), transformedArgumentList.ToArray() );
+                    this.AddTemplateSyntaxFactoryStatement( node, nameof(ITemplateSyntaxFactory.AddComments), transformedArgumentList.ToArray() );
 
                     return null;
                 }
@@ -1072,7 +1072,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // TemplateSyntaxFactory.AddStatement( __s, TemplateSyntaxFactory.InvokeTemplate( ... ) );
                     this.AddAddStatementStatement(
                         node,
-                        InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.InvokeTemplate ) ) )
+                        InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.InvokeTemplate) ) )
                             .AddArgumentListArguments( transformedArgumentList.ToArray() ) );
 
                     return null;
@@ -1164,16 +1164,51 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             var templateInfo = this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
 
-            if ( !templateInfo.IsNone && !templateInfo.CanBeReferencedAsRunTimeCode )
+            if ( templateInfo.CanBeReferencedAsSubtemplate )
             {
+                // We are calling a subtemplate.
                 var compiledTemplateName = TemplateNameHelper.GetCompiledTemplateName( symbol );
-                var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
+
+                var transformedArguments = new ArgumentSyntax[node.ArgumentList.Arguments.Count];
+
+                for ( var i = 0; i < node.ArgumentList.Arguments.Count; i++ )
+                {
+                    var argument = node.ArgumentList.Arguments[i];
+
+                    if ( argument.Expression is not LiteralExpressionSyntax && argument.Expression.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly )
+                    {
+                        // Run-time parameters are passed to subtemplates as expressions.
+                        // If the subtemplate accessed that parameter multiple times, that would cause re-evaluation of the expression.
+                        // Avoid that by storing the value in a run-time local variable.
+                        var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertNotNull();
+
+                        var variableIdentifier = this.ReserveRunTimeSymbolName( parameter );
+
+                        // T arg = expr;
+                        var variableDeclaration = this.MetaSyntaxFactory.LocalDeclarationStatement(
+                            SyntaxFactoryEx.Default,
+                            SyntaxFactoryEx.Default,
+                            this.MetaSyntaxFactory.VariableDeclaration(
+                                this.Transform( MetaSyntaxFactoryImpl.Type( parameter.Type ) ),
+                                this.MetaSyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                    this.MetaSyntaxFactory.VariableDeclarator(
+                                        variableIdentifier,
+                                        SyntaxFactoryEx.Default,
+                                        this.MetaSyntaxFactory.EqualsValueClause( this.Transform( argument.Expression ) ) ) ) ) );
+
+                        this.AddAddStatementStatement( node, variableDeclaration );
+
+                        argument = argument.WithExpression( this.MetaSyntaxFactory.IdentifierName( variableIdentifier ) );
+                    }
+
+                    transformedArguments[i] = this.VisitArgument( argument ).AssertCast<ArgumentSyntax>();
+                }
 
                 var templateInvocationExpression = InvocationExpression( IdentifierName( compiledTemplateName ) )
                     .AddArgumentListArguments( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier ) )
-                    .AddArgumentListArguments( transformedArgumentList.ToArray() );
+                    .AddArgumentListArguments( transformedArguments );
 
-                this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof( StatementSyntax ) ), templateInvocationExpression ) );
+                this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ), templateInvocationExpression ) );
 
                 return null;
             }
@@ -1230,7 +1265,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     private void AddAddStatementStatement( SyntaxNode node, ExpressionSyntax statementExpression )
-        => this.AddTemplateSyntaxFactoryStatement( node, nameof( ITemplateSyntaxFactory.AddStatement ), Argument( statementExpression ) );
+        => this.AddTemplateSyntaxFactoryStatement( node, nameof(ITemplateSyntaxFactory.AddStatement), Argument( statementExpression ) );
 
     private static SyntaxTriviaList GetCommentFromNode( SyntaxNode node )
     {
