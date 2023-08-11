@@ -26,16 +26,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     internal sealed class LinkerPipelineStage : HighLevelPipelineStage
     {
         private readonly CompileTimeProject _compileTimeProject;
-        private readonly ProjectServiceProvider _serviceProvider;
 
         public LinkerPipelineStage(
             CompileTimeProject compileTimeProject,
-            IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            ProjectServiceProvider serviceProvider )
+            IReadOnlyList<OrderedAspectLayer> aspectLayers )
             : base( compileTimeProject, aspectLayers )
         {
             this._compileTimeProject = compileTimeProject;
-            this._serviceProvider = serviceProvider;
         }
 
         /// <inheritdoc/>
@@ -99,7 +96,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
 
-        private async Task<IReadOnlyList<AdditionalCompilationOutputFile>> GenerateAdditionalCompilationOutputFilesAsync(
+        private static async Task<IReadOnlyList<AdditionalCompilationOutputFile>> GenerateAdditionalCompilationOutputFilesAsync(
+            ProjectServiceProvider serviceProvider,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepResult,
             TestableCancellationToken cancellationToken )
@@ -109,9 +107,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
             var diagnostics = new UserDiagnosticSink();
 
-            // TODO: use service provider from configuration here?
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
-                this._serviceProvider,
+                serviceProvider,
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,
