@@ -46,8 +46,6 @@ namespace Metalama.Framework.Engine.Templating
             /// <summary>
             /// Generates a call to the <see cref="ITemplateSyntaxFactory.GetUniqueIdentifier"/> method.
             /// </summary>
-            /// <param name="hint"></param>
-            /// <returns></returns>
             public ExpressionSyntax GetUniqueIdentifier( string hint )
                 => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetUniqueIdentifier) ) )
                     .WithArgumentList(

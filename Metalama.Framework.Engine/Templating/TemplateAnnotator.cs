@@ -671,7 +671,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( symbol != null )
         {
-            this.SetLocalSymbolScope( symbol, scope );
+            var existingScope = this.GetSymbolScope( symbol );
+
+            if ( existingScope == TemplatingScope.LateBound )
+            {
+                this.SetLocalSymbolScope( symbol, scope );
+            }
+            else if ( existingScope != scope )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.AnonumousTypeDifferentScopes, node, symbol );
+            }
         }
 
         // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
