@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// A base aspect that overrides the implementation of a method.
+    /// A base aspect that overrides the implementation of a field or a property.
     /// </summary>
     /// <seealso href="@overriding-fields-or-properties"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
