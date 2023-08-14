@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CallingTemplates.DynamicCallWithArgs;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.DynamicCallWithArgs;
 
 internal class Aspect : OverrideMethodAspect
 {

@@ -3,21 +3,20 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CallingTemplates.DirectCallWithArgs;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.ReturnVoidForNonVoid;
 
 internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("regular template");
-        CalledTemplate(42);
+        CalledTemplate();
         return default;
     }
 
     [Template]
-    private void CalledTemplate([CompileTime] int i)
+    private void CalledTemplate()
     {
-        Console.WriteLine($"called template i={i}");
+        return;
     }
 }
 
@@ -25,7 +24,8 @@ internal class TargetCode
 {
     // <target>
     [Aspect]
-    private void Method()
+    private int Method()
     {
+        return 42;
     }
 }
