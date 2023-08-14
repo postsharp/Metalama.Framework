@@ -1174,14 +1174,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 for ( var i = 0; i < node.ArgumentList.Arguments.Count; i++ )
                 {
                     var argument = node.ArgumentList.Arguments[i];
+                    var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertNotNull();
 
                     if ( argument.Expression is not LiteralExpressionSyntax && argument.Expression.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly )
                     {
                         // Run-time parameters are passed to subtemplates as expressions.
-                        // If the subtemplate accessed that parameter multiple times, that would cause re-evaluation of the expression.
+                        // If the subtemplate accessed that parameter multiple times, it would cause re-evaluation of the expression.
                         // Avoid that by storing the value in a run-time local variable.
-                        var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertNotNull();
-
                         var variableIdentifier = this.ReserveRunTimeSymbolName( parameter );
 
                         // T arg = expr;
@@ -1200,11 +1199,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         argument = argument.WithExpression( this.MetaSyntaxFactory.IdentifierName( variableIdentifier ) );
                     }
+                    else if ( this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly )
+                    {
+                        argument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
+                    }
 
                     transformedArguments[i] = this.VisitArgument( argument ).AssertCast<ArgumentSyntax>();
                 }
 
-                var templateInvocationExpression = InvocationExpression( IdentifierName( compiledTemplateName ) )
+                var templateExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
+                var identifierNodes = templateExpression.DescendantNodesAndSelf().Where( node => node is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == symbol.Name );
+                Invariant.Assert( identifierNodes.Any() );
+                var compiledTemplateExpression = templateExpression.ReplaceNodes( identifierNodes, ( _, _ ) => IdentifierName( compiledTemplateName ) );
+
+                var templateInvocationExpression = InvocationExpression( compiledTemplateExpression )
                     .AddArgumentListArguments( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier ) )
                     .AddArgumentListArguments( transformedArguments );
 
@@ -1350,7 +1358,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 isVoid );
         }
 
-        var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ) );
+        var result = this.CreateTemplateMethod( node, body, templateParameters.ToArray(), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ).ToArray() );
 
         this.Unindent( 3 );
 
@@ -1388,14 +1396,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Create the parameter list.
         var parameters = node.Keyword.IsKind( SyntaxKind.GetKeyword )
-            ? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) )
-            : ParameterList(
-                SeparatedList(
-                    new[]
-                    {
-                        this.CreateTemplateSyntaxFactoryParameter(),
-                        Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null )
-                    } ) );
+            ? new[] { this.CreateTemplateSyntaxFactoryParameter() }
+            : new[]
+            {
+                this.CreateTemplateSyntaxFactoryParameter(),
+                Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null )
+            };
 
         // Create the method.
         var result = this.CreateTemplateMethod( node, body, parameters );
@@ -1458,12 +1464,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null, IEnumerable<SyntaxToken>? accessibilityModifiers = null )
+    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterSyntax[]? parameters = null, SyntaxToken[]? accessibilityModifiers = null )
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
-            .WithParameterList( parameters ?? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) ) )
-            .WithModifiers( TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } ) )
+            .AddParameterListParameters( parameters ?? new[] { this.CreateTemplateSyntaxFactoryParameter() } )
+            .AddModifiers( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } )
+            .AddModifiers(
+                this._rootTemplateSymbol.AssertNotNull().IsStatic ? new[] { Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) } : Array.Empty<SyntaxToken>() )
             .NormalizeWhitespace()
             .WithBody( body )
             .WithLeadingTrivia( node.GetLeadingTrivia() )

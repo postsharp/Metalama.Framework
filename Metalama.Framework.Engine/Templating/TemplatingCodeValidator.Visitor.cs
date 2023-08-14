@@ -583,16 +583,6 @@ namespace Metalama.Framework.Engine.Templating
 
                         return default;
                     }
-
-                    if ( declaredSymbol.ContainingType?.IsStatic == true )
-                    {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.TemplatesInStaticTypeNotSupported.CreateRoslynDiagnostic(
-                                declaredSymbol.GetDiagnosticLocation(),
-                                (declaredSymbol, declaredSymbol.ContainingType) ) );
-
-                        return default;
-                    }
                 }
 
                 // Report error on conflict scope.

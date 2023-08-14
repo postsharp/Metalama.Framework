@@ -1105,6 +1105,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 {
                     // dynamic, dynamic[] or run-time subtemplate parameter
 
+                    // TODO: separate reason for subtemplates
                     using ( this.WithScopeContext(
                                this._currentScopeContext.RunTimePreferred(
                                    $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
@@ -1125,12 +1126,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                 argument.Expression,
                                 argument.Expression.ToString() );
                         }
-                    }
-
-                    // Ensure that a run-time argument of a subtemplate is transformed.
-                    if ( isRunTimeParameterOfSubtemplate && transformedArgumentValue.GetScopeFromAnnotation() == TemplatingScope.RunTimeOrCompileTime )
-                    {
-                        transformedArgumentValue = transformedArgumentValue.ReplaceScopeAnnotation( TemplatingScope.RunTimeOnly );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )

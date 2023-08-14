@@ -3,22 +3,22 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.RunTimeParameter_SideEffects;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Parameters;
 
 class Aspect : TypeAspect
 {
     [Introduce]
     int Add(int a)
     {
-        AddImpl(1, Add(1), 1);
+        AddImpl(a, 1, meta.CompileTime(1), 1, meta.CompileTime(1));
 
         throw new Exception();
     }
 
     [Template]
-    void AddImpl(int a, int b, [CompileTime] int c)
+    void AddImpl(int a, int b, int c, [CompileTime] int d, [CompileTime] int e)
     {
-        meta.Return(a + b + c);
+        meta.Return(a + b + c + d + e);
     }
 }
 
