@@ -9,7 +9,7 @@ using Metalama.Framework.Code.Invokers;
 // This checks that throw expressions in expression bodies work properly.
 // Part of the fix was that the transformed run-time code for the aspect was incorrect, so we also cover it with tests.
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28883
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28883
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {
