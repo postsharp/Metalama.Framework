@@ -468,14 +468,6 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol, INamedTypeSymbol)> TemplatesInStaticTypeNotSupported
-            = new(
-                "LAMA0266",
-                "Templates in static types are not supported.",
-                "The template '{0}' is contained within the static type '{1}', which is not supported.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<IMethodSymbol> ExtensionMethodMethodGroupConversion
             = new(
                 "LAMA0267",
@@ -505,6 +497,14 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0270",
                 "Template call cannot be part of another expression or statement.",
                 "Template call '{0}' can only be done as a stand-alone statement, it cannot be part of another expression or statement.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> ExtensionMethodTemplateNotSupported
+            = new(
+                "LAMA0271",
+                "Extension method templates are not supported.",
+                "The template '{0}' is an extension method, which is not supported.",
                 _category,
                 Error );
     }

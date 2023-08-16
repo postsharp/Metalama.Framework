@@ -583,6 +583,16 @@ namespace Metalama.Framework.Engine.Templating
 
                         return default;
                     }
+
+                    if ( declaredSymbol is IMethodSymbol { IsExtensionMethod: true } )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.ExtensionMethodTemplateNotSupported.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                declaredSymbol ) );
+
+                        return default;
+                    }
                 }
 
                 // Report error on conflict scope.
