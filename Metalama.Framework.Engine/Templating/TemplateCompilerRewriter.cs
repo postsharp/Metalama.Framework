@@ -1081,7 +1081,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case MetaMemberKind.Return:
                 var returnStatement = ReturnStatement( node.ArgumentList.Arguments.SingleOrDefault()?.Expression );
 
-                var transformedReturnStatement = this.TransformReturnStatement( returnStatement );
+                var transformedReturnStatement = (ExpressionSyntax) this.VisitReturnStatement( returnStatement );
 
                 this.AddAddStatementStatement( node, transformedReturnStatement );
 

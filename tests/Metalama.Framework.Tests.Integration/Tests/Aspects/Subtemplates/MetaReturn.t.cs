@@ -11,7 +11,7 @@ internal class TargetCode
     [Aspect]
     private int IntMethod()
     {
-        return 42;
+        return (global::System.Int32)42;
         return default;
     }
 }

@@ -372,10 +372,17 @@ internal static class TemplateBindingHelper
         }
         else if ( fromType.TypeKind == TypeKind.Dynamic )
         {
+            // dynamic templates support any target.
+            return true;
+        }
+        else if ( fromType.SpecialType == SpecialType.Void )
+        {
+            // void templates support any target.
             return true;
         }
         else if ( fromType.Is( toType ) )
         {
+            // Return types of template and target match.
             return true;
         }
         else if ( toMethodAsyncInfo != null && fromType is INamedType fromNamedType && toType is INamedType toNamedType )
