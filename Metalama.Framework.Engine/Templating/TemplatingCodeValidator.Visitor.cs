@@ -349,13 +349,13 @@ namespace Metalama.Framework.Engine.Templating
                 => this.VisitBaseMethodOrAccessor(
                     node,
                     node.Modifiers,
-                    syntax => base.VisitMethodDeclaration( syntax ) );
+                    base.VisitMethodDeclaration );
 
             public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
                 => this.VisitBaseMethodOrAccessor(
                     node,
                     node.Modifiers,
-                    syntax => base.VisitAccessorDeclaration( syntax ) );
+                    base.VisitAccessorDeclaration );
 
             private void VisitBaseMethodOrAccessor<T>( T node, SyntaxTokenList modifiers, Action<T> visitBase, ISymbol? declaredSymbol = null )
                 where T : SyntaxNode

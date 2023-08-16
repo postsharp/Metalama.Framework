@@ -507,5 +507,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The template '{0}' is an extension method, which is not supported.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition RedundantReturnNotAllowed
+            = new(
+                "LAMA0272",
+                Error,
+                "Redundant return statements are not allowed in templates.",
+                "Redundant return statement is not allowed in a template.",
+                _category );
     }
 }

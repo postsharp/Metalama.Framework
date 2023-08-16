@@ -1676,15 +1676,27 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
         // Detect if the current member is a template.
-        var isTemplate = !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone
-                         || (symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                             && !this._symbolScopeClassifier.GetTemplateInfo( associatedSymbol ).IsNone);
+        var templateInfo = this._symbolScopeClassifier.GetTemplateInfo( symbol );
 
         // If it is a template, update the currentTemplateMember field.
-        if ( isTemplate )
+        if ( !templateInfo.IsNone )
         {
             var previousTemplateMember = this._currentTemplateMember;
             this._currentTemplateMember = symbol;
+
+            if ( templateInfo.AttributeType == TemplateAttributeType.Template )
+            {
+                var isVoid = symbol is IMethodSymbol methodSymbol &&
+                             (methodSymbol.ReturnsVoid ||
+                              (AsyncHelper.TryGetAsyncInfo( methodSymbol.ReturnType, out var resultType, out _ ) &&
+                               resultType.SpecialType == SpecialType.System_Void));
+
+                if ( isVoid && node is MethodDeclarationSyntax { Body: { } body } )
+                {
+                    // Check void template methods for redundant return statements.
+                    RedundantReturnVisitor.ReportErrors( this, body );
+                }
+            }
 
             try
             {

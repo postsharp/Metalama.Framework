@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Return;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Return_If;
 
 internal class Aspect : OverrideMethodAspect
 {
