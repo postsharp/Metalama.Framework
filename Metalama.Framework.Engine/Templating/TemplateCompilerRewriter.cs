@@ -912,8 +912,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // return null in case of pragma. In this case, the ExpressionStatement must return null too.
         // In the default implementation, such case would result in an exception.
 
+        bool IsSubtemplateCall()
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
+
+            if ( symbol == null )
+            {
+                return false;
+            }
+
+            return this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
+        }
+
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform
-             || this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
+             || (this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) && !IsSubtemplateCall()) )
         {
             return this.TransformExpressionStatement( node );
         }

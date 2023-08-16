@@ -499,5 +499,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The anonymous type '{0}' can't can't be used as both run-time and compile-time in the same template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> SubtemplateCallCantBeSubexpression
+            = new(
+                "LAMA0270",
+                "Template call cannot be part of another expression or statement.",
+                "Template call '{0}' can only be done as a stand-alone statement, it cannot be part of another expression or statement.",
+                _category,
+                Error );
     }
 }

@@ -1039,6 +1039,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
 
+        var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
+
+        if ( templateInfo.CanBeReferencedAsSubtemplate && node.Parent is not ExpressionStatementSyntax )
+        {
+            this.ReportDiagnostic(
+                TemplatingDiagnosticDescriptors.SubtemplateCallCantBeSubexpression,
+                node,
+                node.ToString() );
+        }
+
         switch ( symbol )
         {
             case IMethodSymbol method:
@@ -1079,8 +1089,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
         {
-            var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
-
             // If the scope of the expression on the left side is known (because of rules on the symbol),
             // we know the scope of arguments upfront. Otherwise, we need to decide of the invocation scope based on arguments (else branch of this if).
 
@@ -1101,11 +1109,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     && templateInfo.CanBeReferencedAsSubtemplate
                     && this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
 
-                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter || isRunTimeParameterOfSubtemplate )
+                if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
-                    // dynamic, dynamic[] or run-time subtemplate parameter
+                    // dynamic or dynamic[]
 
-                    // TODO: separate reason for subtemplates
                     using ( this.WithScopeContext(
                                this._currentScopeContext.RunTimePreferred(
                                    $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
@@ -1126,6 +1133,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                 argument.Expression,
                                 argument.Expression.ToString() );
                         }
+                    }
+                }
+                else if ( isRunTimeParameterOfSubtemplate )
+                {
+                    using ( this.WithScopeContext(
+                               this._currentScopeContext.RunTimePreferred(
+                                   $"argument of the run-time parameter '{parameter!.Name}' of a called template" ) ) )
+                    {
+                        transformedArgumentValue = this.Visit( argument.Expression );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
