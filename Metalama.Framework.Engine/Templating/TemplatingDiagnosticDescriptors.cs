@@ -515,5 +515,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Redundant return statements are not allowed in templates.",
                 "Redundant return statement is not allowed in a template.",
                 _category );
+
+        internal static readonly DiagnosticDefinition<ISymbol> SubtemplatesHaveToBeInvoked
+            = new(
+                "LAMA0273",
+                "When a template references another template, it has to be directly invoked.",
+                "The template '{0}' has to be directly invoked.",
+                _category,
+                Error );
     }
 }

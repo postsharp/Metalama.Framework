@@ -780,12 +780,24 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var symbol = symbols[0];
 
-            if ( symbol is not IMethodSymbol && this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
+            if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
             {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.OnlyMethodsCanBeSubtemplates,
-                    node,
-                    (symbol, this._currentTemplateMember!) );
+                if ( symbol is not IMethodSymbol )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.OnlyMethodsCanBeSubtemplates,
+                        node,
+                        (symbol, this._currentTemplateMember!) );
+                }
+                else if ( node.Parent is not (InvocationExpressionSyntax or MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax }) )
+                {
+                    // Only name(...) and expr.name(...) are valid ways to reference a subtemplate.
+
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SubtemplatesHaveToBeInvoked,
+                        node,
+                        symbol );
+                }
             }
         }
 
