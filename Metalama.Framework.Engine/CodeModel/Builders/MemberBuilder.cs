@@ -113,7 +113,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     internal bool GetInitializerExpressionOrMethod<T>(
         Advice advice,
-        in MemberInjectionContext context,
+        MemberInjectionContext context,
         IType targetType,
         IExpression? initializerExpression,
         TemplateMember<T>? initializerTemplate,

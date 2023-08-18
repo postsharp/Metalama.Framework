@@ -3,26 +3,25 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateInStaticClass;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateInStaticClass_NotProvider;
 
 internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
         Console.WriteLine("regular template");
-        StaticClass.StaticTemplate(1);
-        meta.InvokeTemplate(nameof(StaticClass.StaticTemplate), typeof(StaticClass), new { i = 2 });
+        StaticClass.StaticTemplate(1, 2);
         return default;
     }
 }
 
-[TemplateProvider]
+[RunTimeOrCompileTime]
 static class StaticClass
 {
     [Template]
-    public static void StaticTemplate([CompileTime] int i)
+    public static void StaticTemplate(int i, [CompileTime] int j)
     {
-        Console.WriteLine($"static template i={i}");
+        Console.WriteLine($"static template i={i}, j={j}");
     }
 }
 

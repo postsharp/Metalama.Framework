@@ -1220,12 +1220,30 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
 
                 var templateExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
-                var identifierNodes = templateExpression.DescendantNodesAndSelf().Where( node => node is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == symbol.Name );
+
+                var identifierNodes = templateExpression.DescendantNodesAndSelf()
+                    .Where( n => n is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == symbol.Name )
+                    .ToArray();
+                
                 Invariant.Assert( identifierNodes.Any() );
                 var compiledTemplateExpression = templateExpression.ReplaceNodes( identifierNodes, ( _, _ ) => IdentifierName( compiledTemplateName ) );
 
+                var templateProviderExpression = (symbol.IsStatic, node.Expression) switch
+                {
+                    // Called template is static and from the same type as current template, so preserve templateProvider.
+                    (IsStatic: true, _) when symbol.ContainingType.Equals( this._rootTemplateSymbol?.ContainingType ) => SyntaxFactoryEx.Null,
+                    (IsStatic: true, _) => TypeOfExpression( MetaSyntaxFactoryImpl.Type( symbol.ContainingType ) ),
+                    (IsStatic: false, IdentifierNameSyntax) => ThisExpression(),
+                    (IsStatic: false, MemberAccessExpressionSyntax memberAccess) => memberAccess.Expression,
+                    (IsStatic: false, _) => throw new AssertionFailedException( $"Expression '{node.Expression}' has unexpected expression type {node.Expression.GetType()}." )
+                };
+
+                // templateSyntaxFactory.ForTemplate("templateName", templateProvider)
+                var templateSyntaxFactoryExpression = InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier, IdentifierName( nameof(ITemplateSyntaxFactory.ForTemplate) ) ) )
+                    .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralNonNullExpression( symbol.Name ) ), Argument( templateProviderExpression ) );
+
                 var templateInvocationExpression = InvocationExpression( compiledTemplateExpression )
-                    .AddArgumentListArguments( Argument( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier ) )
+                    .AddArgumentListArguments( Argument( templateSyntaxFactoryExpression ) )
                     .AddArgumentListArguments( transformedArguments );
 
                 this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ), templateInvocationExpression ) );

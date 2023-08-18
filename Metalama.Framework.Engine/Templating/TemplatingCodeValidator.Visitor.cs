@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
-                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Framework.Fabrics.TypeFabric) );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
             }
 
@@ -580,18 +581,27 @@ namespace Metalama.Framework.Engine.Templating
                             TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
                                 declaredSymbol ) );
-
-                        return default;
                     }
-
-                    if ( declaredSymbol is IMethodSymbol { IsExtensionMethod: true } )
+                    else if ( declaredSymbol is IMethodSymbol { IsExtensionMethod: true } )
                     {
                         this.Report(
                             TemplatingDiagnosticDescriptors.ExtensionMethodTemplateNotSupported.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
                                 declaredSymbol ) );
+                    }
 
-                        return default;
+                    var containingType = declaredSymbol.ContainingType;
+                    var compilation = this._compilationContext.SourceCompilation;
+                    var reflectionMapper = this._compilationContext.ReflectionMapper;
+
+                    if ( !compilation.HasImplicitConversion( containingType, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) ) &&
+                         !compilation.HasImplicitConversion( containingType, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) ) &&
+                         !containingType.HasInheritedAttribute( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( typeof(TemplateProviderAttribute) ) ) )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.TemplatesHaveToBeInTemplateProvider.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, containingType) ) );
                     }
                 }
 

@@ -30,7 +30,7 @@ internal class Aspect : OverrideMethodAspect
     }
 }
 
-[RunTimeOrCompileTime]
+[TemplateProvider]
 class AnotherClass
 {
     [Template]

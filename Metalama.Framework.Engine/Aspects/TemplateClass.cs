@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -93,10 +94,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return templateDriver;
             }
 
-            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-
-            var compiledTemplateMethodInfo = this.Type.GetAnyMethod( templateName )
-                                             ?? throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
+            var compiledTemplateMethodInfo = this.GetCompiledTemplateMethodInfo( templateSymbol );
 
             templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
 
@@ -109,6 +107,14 @@ namespace Metalama.Framework.Engine.Aspects
                 // Another thread instantiated the same driver in the meantime.
                 return this._templateDrivers[id];
             }
+        }
+
+        internal MethodInfo GetCompiledTemplateMethodInfo( ISymbol templateSymbol )
+        {
+            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
+
+            return this.Type.GetAnyMethod( templateName )
+                ?? throw new AssertionFailedException( $"Could not find the compile template for {templateSymbol}." );
         }
 
         public abstract string FullName { get; }

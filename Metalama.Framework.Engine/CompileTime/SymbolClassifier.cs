@@ -238,6 +238,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
                 nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
+                nameof(TemplateProviderAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 _ => null
             };
 

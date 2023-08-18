@@ -523,5 +523,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The template '{0}' has to be directly invoked.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> TemplatesHaveToBeInTemplateProvider
+            = new(
+                "LAMA0274",
+                "Templates have to be contained in an aspect, fabric, or a type marked as [TemplateProvider].",
+                "The template '{0}' is contained in '{1}', which is not an aspect, a fabric, or a type marked as [TemplateProvider].",
+                _category,
+                Error );
     }
 }

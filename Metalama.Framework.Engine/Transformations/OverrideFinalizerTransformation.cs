@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 this.OverriddenDeclaration,
                 this.BoundTemplate,
-                proceedExpression,
+                _ => proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
             return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
-        private SyntaxUserExpression CreateProceedExpression( in MemberInjectionContext context )
+        private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
         {
             return new SyntaxUserExpression(
                 context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),

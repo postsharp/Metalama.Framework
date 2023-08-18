@@ -11,7 +11,7 @@ using System;
 namespace Metalama.Framework.Engine.Aspects;
 
 /// <summary>
-/// Represents a template class that implements <see cref="ITemplateProvider"/>.
+/// Represents a template class that is marked with <see cref="TemplateProviderAttribute"/>.
 /// </summary>
 internal sealed class OtherTemplateClass : TemplateClass
 {

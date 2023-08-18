@@ -59,6 +59,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this._state, templateClassInstance, this._layerName );
 
     public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
+        => this.WithTemplateProvider( (object) templateProvider );
+
+    public IAdviceFactory WithTemplateProvider( object templateProvider )
         => this.WithTemplateClassInstance(
             new TemplateClassInstance(
                 templateProvider,

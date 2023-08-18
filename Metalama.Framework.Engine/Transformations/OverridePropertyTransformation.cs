@@ -94,13 +94,12 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.TemplateMember.EffectiveKind );
+            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedDynamicExpression( context, accessor, kind );
 
             var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,
@@ -122,7 +121,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 accessor,
                 accessorTemplate,
-                proceedExpression,
+                proceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );

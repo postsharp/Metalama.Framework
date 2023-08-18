@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -457,34 +458,23 @@ namespace Metalama.Framework.Engine.Templating
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
 
-        private BlockSyntax? InvokeTemplate( string templateName, ITemplateProvider? templateProvider, IObjectReader arguments )
+        private BlockSyntax? InvokeTemplate( string templateName, object? templateProvider, IObjectReader arguments )
         {
-            var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
+            var (templateClass, templateMember) = this.GetTemplateDescription( templateName, templateProvider );
 
-            var template = AdviceFactory.ValidateTemplateName( templateClass, templateName, required: true )!;
+            var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
+            var templateArguments = templateMember.ArgumentsForCalledTemplate( arguments );
 
-            // TODO: do I need TMR? if I do, move it back to ValidateTemplateName? if I don't, extract relevant part from TMR.GetTemplateMember()
-            var templateMemberRef = new TemplateMemberRef( template, TemplateKind.Default );
-            var templateMember = templateMemberRef.GetTemplateMember<IMethod>( this.Compilation.GetCompilationModel(), this._templateExpansionContext.ServiceProvider );
+            // Add the first template argument.
+            var allArguments = new object?[templateArguments.Length + 1];
+            allArguments[0] = this.ForTemplate( templateName, templateProvider );
+            templateArguments.CopyTo( allArguments, 1 );
 
-            var driver = templateClass.GetTemplateDriver( templateMember.Declaration );
-
-            // TODO: will probably need context with different template
-            var context = this._templateExpansionContext;
-
-            if ( templateProvider != null )
-            {
-                context = context.ForTemplateInstance( templateProvider );
-            }
-
-            var boundTemplate = templateMember.ForCalledTemplate( arguments );
-
-            driver.TryExpandDeclaration( context, boundTemplate.TemplateArguments, out var block );
-
-            return block;
+            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
+            return compiledTemplateMethodInfo.Invoke( context.TemplateInstance, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
-        public BlockSyntax? InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? arguments = null )
+        public BlockSyntax? InvokeTemplate( string templateName, object? templateProvider = null, object? arguments = null )
         {
             return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( arguments ) );
         }
@@ -495,6 +485,32 @@ namespace Metalama.Framework.Engine.Templating
             var directArgs = this._objectReaderFactory.GetReader( arguments );
 
             return this.InvokeTemplate( templateInvocation.TemplateName, templateInvocation.TemplateProvider, ObjectReader.Merge( invocationArgs, directArgs ) );
+        }
+
+        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription( string templateName, object? templateProvider )
+        {
+            if ( templateProvider == this._templateExpansionContext.TemplateInstance )
+            {
+                templateProvider = null;
+            }
+
+            var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
+            var template = AdviceFactory.ValidateTemplateName( templateClass, templateName, required: true )!;
+
+            // TODO: do I need TMR? if I do, move it back to ValidateTemplateName? if I don't, extract relevant part from TMR.GetTemplateMember()
+            var templateMemberRef = new TemplateMemberRef( template, TemplateKind.Default );
+            var templateMember = templateMemberRef.GetTemplateMember<IMethod>( this.Compilation.GetCompilationModel(), this._templateExpansionContext.ServiceProvider );
+
+            return (templateClass, templateMember);
+        }
+
+        public ITemplateSyntaxFactory ForTemplate( string templateName, object? templateProvider )
+        {
+            var templateMember = this.GetTemplateDescription( templateName, templateProvider ).TemplateMember;
+
+            var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
+
+            return context.SyntaxFactory;
         }
     }
 }

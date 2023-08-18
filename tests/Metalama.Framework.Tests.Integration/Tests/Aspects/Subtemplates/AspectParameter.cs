@@ -23,7 +23,7 @@ internal class Aspect : OverrideMethodAspect
     }
 }
 
-[RunTimeOrCompileTime]
+[TemplateProvider]
 static class AnotherClass
 {
     [Template]

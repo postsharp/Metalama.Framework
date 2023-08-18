@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
     private readonly TemplateMember<IMethod>? _template;
-    private readonly IUserExpression? _proceedExpression;
+    private readonly Func<TemplateKind, IUserExpression>? _proceedExpressionProvider;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
@@ -120,7 +120,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         MetaApi metaApi,
         IDeclaration declarationForLexicalScope,
         BoundTemplateMethod? template,
-        IUserExpression? proceedExpression,
+        Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
         templateInstance,
@@ -128,7 +128,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
         transformationContext.SyntaxGenerationContext,
         template,
-        proceedExpression,
+        proceedExpressionProvider,
         aspectLayerId ) { }
 
     public TemplateExpansionContext(
@@ -138,7 +138,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         TemplateLexicalScope lexicalScope,
         SyntaxGenerationContext syntaxGenerationContext,
         BoundTemplateMethod? template,
-        IUserExpression? proceedExpression,
+        Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
@@ -154,7 +154,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
-        this._proceedExpression = proceedExpression;
+        this._proceedExpressionProvider = proceedExpressionProvider;
         this._otherTemplateClassProvider = serviceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         this.TemplateGenericArguments =
@@ -175,22 +175,22 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.SyntaxFactory = prototype.SyntaxFactory;
         this._localFunctionInfo = localFunctionInfo;
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
-        this._proceedExpression = prototype._proceedExpression;
+        this._proceedExpressionProvider = prototype._proceedExpressionProvider;
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    private TemplateExpansionContext( TemplateExpansionContext prototype, ITemplateProvider templateInstance ) : base( prototype )
+    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template, object? templateInstance ) : base( prototype )
     {
-        this._template = prototype._template;
-        this.TemplateInstance = templateInstance;
+        this._template = template;
+        this.TemplateInstance = templateInstance ?? prototype.TemplateInstance;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
         this.LexicalScope = prototype.LexicalScope;
-        this.SyntaxFactory = prototype.SyntaxFactory;
+        this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
         this._localFunctionInfo = prototype._localFunctionInfo;
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
-        this._proceedExpression = prototype._proceedExpression;
+        this._proceedExpressionProvider = prototype._proceedExpressionProvider;
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
@@ -603,7 +603,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public IUserExpression Proceed( string methodName )
     {
-        if ( this._proceedExpression == null )
+        if ( this._proceedExpressionProvider == null )
         {
             throw new AssertionFailedException( "No proceed expression was provided." );
         }
@@ -616,10 +616,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
-    internal TemplateExpansionContext ForTemplateInstance( ITemplateProvider templateProvider )
-    {
-        return new( this, templateProvider );
-    }
+    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, object? templateProvider )
+        => new( this, template, templateProvider );
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
@@ -657,7 +655,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
     }
 
-    public TemplateClass GetTemplateClass( ITemplateProvider? templateProvider )
+    public TemplateClass GetTemplateClass( object? templateProvider )
     {
         if ( templateProvider == null )
         {

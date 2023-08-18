@@ -129,19 +129,20 @@ internal static class TemplateBindingHelper
     }
 
     /// <summary>
-    /// Binds a template that is caled from another template.
+    /// Binds arguments for a template that is caled from another template using meta.InvokeTemplate.
     /// </summary>
-    public static BoundTemplateMethod ForCalledTemplate( this TemplateMember<IMethod> template, IObjectReader arguments )
+    public static object?[] ArgumentsForCalledTemplate( this TemplateMember<IMethod> template, IObjectReader arguments )
     {
         // The template must not have run-time parameters.
         if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
         {
+            // TODO: add test for this case
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
+                    $"Cannot use the method '{template.Declaration}' in meta.InvokeTemplate: the method cannot have run-time parameters." ) );
         }
 
-        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty ) );
+        return GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty );
     }
 
     /// <summary>

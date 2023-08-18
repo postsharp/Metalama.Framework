@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.TemplateMember.EffectiveKind );
+            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedExpression( context, kind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 this.OverriddenDeclaration,
                 this.BoundTemplate,
-                proceedExpression,
+                proceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );

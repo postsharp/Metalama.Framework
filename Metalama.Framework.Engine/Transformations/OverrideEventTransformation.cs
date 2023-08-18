@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             SyntaxGenerationContext generationContext,
@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 accessor,
                 accessorTemplate,
-                proceedExpression,
+                _ => proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
