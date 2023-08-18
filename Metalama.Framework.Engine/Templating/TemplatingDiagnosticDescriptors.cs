@@ -531,5 +531,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The template '{0}' is contained in '{1}', which is not an aspect, a fabric, or a type marked as [TemplateProvider].",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> SubtemplateCallCantBeVirtual
+            = new(
+                "LAMA0275",
+                "Template call cannot be virtual.",
+                "Template call '{0}' cannot be virtual. Consider marking the called template method or its containing type as sealed.",
+                _category,
+                Error );
     }
 }

@@ -1053,12 +1053,23 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
 
-        if ( templateInfo.CanBeReferencedAsSubtemplate && node.Parent is not ExpressionStatementSyntax )
+        if ( templateInfo.CanBeReferencedAsSubtemplate )
         {
-            this.ReportDiagnostic(
-                TemplatingDiagnosticDescriptors.SubtemplateCallCantBeSubexpression,
-                node,
-                node.ToString() );
+            if ( node.Parent is not ExpressionStatementSyntax )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCallCantBeSubexpression,
+                    node,
+                    node.ToString() );
+            }
+
+            if ( (symbol!.IsVirtual || symbol.IsAbstract || symbol.IsOverride) && !symbol.IsSealed )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCallCantBeVirtual,
+                    node,
+                    node.ToString() );
+            }
         }
 
         switch ( symbol )
