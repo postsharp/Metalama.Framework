@@ -5,16 +5,16 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [assembly: AspectOrder(typeof(RegularAspect1), typeof(CombinedAspect), typeof(WeaverAspect), typeof(RegularAspect2))]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2.AspectWeaver")]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect2.AspectWeaver")]
     internal class WeaverAspect : MethodAspect { }
 
     // Weaver aspect is not actually used, so weaver does not have to exist.

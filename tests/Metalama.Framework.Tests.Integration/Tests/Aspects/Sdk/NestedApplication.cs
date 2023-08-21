@@ -8,9 +8,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.NestedApplication
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplication
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.NestedApplication.AspectWeaver")]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplication.AspectWeaver")]
     internal class Aspect : TypeAspect { }
 
     [MetalamaPlugIn]

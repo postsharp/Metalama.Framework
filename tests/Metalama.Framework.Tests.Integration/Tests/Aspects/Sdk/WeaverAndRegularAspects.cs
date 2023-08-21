@@ -4,16 +4,16 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [assembly: AspectOrder(typeof(RegularAspect1), typeof(WeaverAspect), typeof(RegularAspect2))]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects.AspectWeaver")]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects.AspectWeaver")]
     internal class WeaverAspect : MethodAspect { }
 
     [MetalamaPlugIn]

@@ -8,9 +8,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.FileScopedNamespace;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.FileScopedNamespace;
 
-[RequireAspectWeaver("Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.FileScopedNamespace.AspectWeaver")]
+[RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.FileScopedNamespace.AspectWeaver")]
 internal class Aspect : MethodAspect { }
 
 [MetalamaPlugIn]

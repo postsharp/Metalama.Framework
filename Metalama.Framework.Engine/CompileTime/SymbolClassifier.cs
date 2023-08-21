@@ -995,12 +995,19 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                             config.Namespace == t.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
                             return true;
                         }
+                    }
+
+                    // Check Roslyn types.
+                    if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
+                    {
+                        scope = TemplatingScope.CompileTimeOnly;
+                        return true;
                     }
 
                     // Check system types.                   
