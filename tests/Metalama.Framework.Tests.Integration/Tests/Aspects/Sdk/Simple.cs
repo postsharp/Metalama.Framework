@@ -1,16 +1,16 @@
 using System;
 using System.Threading.Tasks;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.Simple
 {
-    [RequireAspectWeaver( "Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple.AspectWeaver" )]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.Simple.AspectWeaver")]
     internal class Aspect : MethodAspect { }
 
     [MetalamaPlugIn]

@@ -246,7 +246,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                 var testOptions = new TestContextOptions
                 {
-                    PlugIns = projectReferences.PlugIns,
                     References = projectReferences.MetadataReferences,
                     RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
                 };

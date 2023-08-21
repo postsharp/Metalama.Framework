@@ -109,7 +109,6 @@ public abstract class AspectTestClass
 
         var testOptions = new TestContextOptions
         {
-            PlugIns = projectReferences.PlugIns,
             References = projectReferences.MetadataReferences,
             RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault(),
             FormatCompileTimeCode = testInput.Options.FormatCompileTimeCode ?? false

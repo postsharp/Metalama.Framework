@@ -23,10 +23,6 @@ namespace Metalama.Framework.Engine.Options
 
         string? AssemblyName { get; }
 
-        ImmutableArray<object> PlugIns { get; }
-
-        ImmutableArray<string> PlugInAssemblyPaths { get; }
-
         /// <summary>
         /// Gets a value indicating whether the aspect framework is enabled for the current project. If <c>false</c>,
         /// the project will not be modified. 

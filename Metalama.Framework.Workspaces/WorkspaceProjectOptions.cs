@@ -19,7 +19,7 @@ namespace Metalama.Framework.Workspaces
         public WorkspaceProjectOptions(
             Microsoft.CodeAnalysis.Project roslynProject,
             Microsoft.Build.Evaluation.Project msbuildProject,
-            Compilation compilation ) : base( new PropertySource( msbuildProject ), ImmutableArray<object>.Empty, TransformerOptions.Default )
+            Compilation compilation ) : base( new PropertySource( msbuildProject ), TransformerOptions.Default )
         {
             this._roslynProject = roslynProject;
             this._compilation = compilation;

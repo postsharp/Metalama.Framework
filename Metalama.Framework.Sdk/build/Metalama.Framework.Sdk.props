@@ -1,8 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <!-- The effect of the MetalamaCompileTimeProject property is to define an assembly-level
-             CompileTimeAttribute and to disable Metalama framework for the whole project -->
-        <MetalamaCompileTimeProject>True</MetalamaCompileTimeProject>
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddMetalamaPropsToPackage</TargetsForTfmSpecificContentInPackage>
-    </PropertyGroup>
-</Project>
