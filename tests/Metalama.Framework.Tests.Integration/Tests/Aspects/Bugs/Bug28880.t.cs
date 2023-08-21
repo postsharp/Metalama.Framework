@@ -1,45 +1,45 @@
 internal class TargetCode
 {
-  [TestMethodAspect]
-  private int Method(int a)
-  {
-    throw new global::System.NotSupportedException();
-  }
-  [global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880.TestPropertyAspect]
-  private global::System.Int32 field
-  {
-    get
+    [TestMethodAspect]
+    private int Method(int a)
     {
-      throw new global::System.NotSupportedException();
+        throw new global::System.NotSupportedException();
     }
-    set
+    [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880.TestPropertyAspect]
+    private global::System.Int32 field
     {
-      throw new global::System.NotSupportedException();
+        get
+        {
+            throw new global::System.NotSupportedException();
+        }
+        set
+        {
+            throw new global::System.NotSupportedException();
+        }
     }
-  }
-  [TestPropertyAspect]
-  private int Property
-  {
-    get
+    [TestPropertyAspect]
+    private int Property
     {
-      throw new global::System.NotSupportedException();
+        get
+        {
+            throw new global::System.NotSupportedException();
+        }
+        set
+        {
+            throw new global::System.NotSupportedException();
+        }
     }
-    set
+    private int _property2;
+    [TestPropertyAspect2]
+    private int Property2
     {
-      throw new global::System.NotSupportedException();
+        get
+        {
+            throw new global::System.NotSupportedException();
+        }
+        set
+        {
+            this._property2 = value;
+        }
     }
-  }
-  private int _property2;
-  [TestPropertyAspect2]
-  private int Property2
-  {
-    get
-    {
-      throw new global::System.NotSupportedException();
-    }
-    set
-    {
-      this._property2 = value;
-    }
-  }
 }
