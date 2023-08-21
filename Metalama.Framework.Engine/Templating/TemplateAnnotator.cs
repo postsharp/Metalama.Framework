@@ -561,7 +561,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && useCompileTimeIfPossible && preferCompileTime )
         {
-            // Switch from RTOCT to CTORB for serializable types, when preferred.
+            // Switch from RunTimeOrCompileTime to CompileTimeOnlyReturningBoth for serializable types, when preferred.
             if ( IsExpressionOfSerializableType() == true )
             {
                 resultingScope = TemplatingScope.CompileTimeOnlyReturningBoth;
@@ -569,7 +569,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
         else if ( resultingScope == TemplatingScope.CompileTimeOnlyReturningBoth )
         {
-            // Switch from CTORB to RTOCT for non-serializable types.
+            // Switch from CompileTimeOnlyReturningBoth to RunTimeOrCompileTime for non-serializable types.
             if ( IsExpressionOfSerializableType() == false )
             {
                 resultingScope = TemplatingScope.RunTimeOrCompileTime;
@@ -581,7 +581,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         bool? IsExpressionOfSerializableType()
         {
             if ( originalParent is ExpressionSyntax expression &&
-                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is { } expressionType )
+                 this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is { } expressionType )
             {
                 return this._serializableTypes.IsSerializable( expressionType );
             }
