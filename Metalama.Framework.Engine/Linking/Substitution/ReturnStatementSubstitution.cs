@@ -16,7 +16,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// </summary>
     internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
     {
-        private readonly IMethodSymbol _containingSymbol;
+        private readonly IMethodSymbol _referencingSymbol;
+        private readonly IMethodSymbol _originalContainingSymbol;
         private readonly string? _returnVariableIdentifier;
         private readonly string? _returnLabelIdentifier;
         private readonly bool _replaceByBreakIfOmitted;
@@ -26,13 +27,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public ReturnStatementSubstitution(
             CompilationContext compilationContext,
             SyntaxNode returnNode,
+            IMethodSymbol referencingSymbol,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
             string? returnLabelIdentifier,
             bool replaceByBreakIfOmitted ) : base( compilationContext )
         {
             this.TargetNode = returnNode;
-            this._containingSymbol = containingSymbol;
+            this._referencingSymbol = referencingSymbol;
+            this._originalContainingSymbol = containingSymbol;
             this._returnVariableIdentifier = returnVariableIdentifier;
             this._returnLabelIdentifier = returnLabelIdentifier;
             this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
@@ -50,8 +53,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             return
                                 SyntaxFactoryEx.FormattedBlock(
                                         CreateAssignmentStatement( returnStatement.Expression )
-                                            .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                                            .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
+                                            .WithTriviaFrom( returnStatement )
                                             .WithOriginalLocationAnnotationFrom( returnStatement ),
                                         CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -67,8 +69,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             var assignmentStatement =
                                 CreateAssignmentStatement( returnStatement.Expression )
-                                    .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                                    .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
+                                    .WithTriviaFrom( returnStatement )
                                     .WithOriginalLocationAnnotationFrom( returnStatement );
 
                             if ( this._replaceByBreakIfOmitted )
@@ -108,7 +109,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case ExpressionSyntax returnExpression:
                     if ( this._returnLabelIdentifier != null )
                     {
-                        if ( this._containingSymbol.ReturnsVoid )
+                        if ( this._referencingSymbol.ReturnsVoid )
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock(
@@ -127,51 +128,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        if ( this._containingSymbol.ReturnsVoid )
-                        {
-                            var discardStatement =
-                                ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
-                                            returnExpression ) )
-                                    .WithOriginalLocationAnnotationFrom( returnExpression );
+                        var assignmentStatement =
+                            CreateAssignmentStatement( returnExpression )
+                                .WithOriginalLocationAnnotationFrom( returnExpression );
 
-                            if ( this._replaceByBreakIfOmitted )
-                            {
-                                return
-                                    SyntaxFactoryEx.FormattedBlock(
-                                            discardStatement,
-                                            BreakStatement(
-                                                Token( SyntaxKind.BreakKeyword ),
-                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                            }
-                            else
-                            {
-                                return discardStatement;
-                            }
+                        if ( this._replaceByBreakIfOmitted )
+                        {
+                            return
+                                SyntaxFactoryEx.FormattedBlock(
+                                        assignmentStatement,
+                                        BreakStatement(
+                                            Token( SyntaxKind.BreakKeyword ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
-                            var assignmentStatement =
-                                CreateAssignmentStatement( returnExpression )
-                                    .WithOriginalLocationAnnotationFrom( returnExpression );
-
-                            if ( this._replaceByBreakIfOmitted )
-                            {
-                                return
-                                    SyntaxFactoryEx.FormattedBlock(
-                                            assignmentStatement,
-                                            BreakStatement(
-                                                Token( SyntaxKind.BreakKeyword ),
-                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                            }
-                            else
-                            {
-                                return assignmentStatement;
-                            }
+                            return assignmentStatement;
                         }
                     }
 
@@ -189,14 +162,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 }
                 else
                 {
-                    identifier =
-                        IdentifierName(
-                            Identifier(
-                                TriviaList(),
-                                SyntaxKind.UnderscoreToken,
-                                "_",
-                                "_",
-                                TriviaList() ) );
+                    identifier = SyntaxFactoryEx.DiscardIdentifier();
+
+                    expression = SyntaxFactoryEx.SafeCastExpression(
+                        substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
+                        expression );
                 }
 
                 return

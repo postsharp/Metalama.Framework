@@ -4,7 +4,7 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bug28769
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28769
 {
     internal class ConvertToRunTimeAspect : OverrideMethodAspect
     {

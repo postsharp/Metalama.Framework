@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Misc.AdvancedInterpolatedStringBuilder
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AdvancedInterpolatedStringBuilder
 {
     class GenerateMethodAttribute : TypeAspect
     {

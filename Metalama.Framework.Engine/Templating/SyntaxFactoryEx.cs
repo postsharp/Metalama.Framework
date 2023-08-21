@@ -130,6 +130,12 @@ internal static partial class SyntaxFactoryEx
 
     public static CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
+        if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, topLevel: false ) )
+        {
+            // It's already a cast to the same type, no need to cast again.
+            return cast;
+        }
+
         var requiresParenthesis = syntax switch
         {
             CastExpressionSyntax => false,
@@ -145,7 +151,8 @@ internal static partial class SyntaxFactoryEx
             ObjectCreationExpressionSyntax => false,
             ArrayCreationExpressionSyntax => false,
             PostfixUnaryExpressionSyntax => false,
-            PrefixUnaryExpressionSyntax => false,
+            // The syntax (T)-x is ambiguous and interpreted as binary minus, not cast of unary minus.
+            PrefixUnaryExpressionSyntax { RawKind: not (int)SyntaxKind.UnaryMinusExpression } => false,
             TupleExpressionSyntax => false,
             ThisExpressionSyntax => false,
             _ => true
@@ -176,6 +183,19 @@ internal static partial class SyntaxFactoryEx
                         ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
                         : s ) ),
             SyntaxFactory.Token( SyntaxKind.CloseBraceToken ).WithLeadingTrivia( SyntaxFactory.ElasticLineFeed ) );
+
+    public static ExpressionStatementSyntax DiscardStatement( ExpressionSyntax discardedExpression )
+        => SyntaxFactory.ExpressionStatement(
+            SyntaxFactory.AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, DiscardIdentifier(), discardedExpression ) );
+
+    public static IdentifierNameSyntax DiscardIdentifier()
+        => SyntaxFactory.IdentifierName(
+            SyntaxFactory.Identifier(
+                SyntaxFactory.TriviaList(),
+                SyntaxKind.UnderscoreToken,
+                "_",
+                "_",
+                SyntaxFactory.TriviaList() ) );
 
     public static ExpressionSyntax ParseExpressionSafe( string text )
     {
