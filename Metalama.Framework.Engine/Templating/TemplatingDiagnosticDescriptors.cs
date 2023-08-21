@@ -492,5 +492,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Could not resolve declaration with id '{0}' when looking for template attributes. This can happen when multiple references contain a type that's part of the declaration signature.",
                 _category,
                 Warning );
+
+        internal static readonly DiagnosticDefinition<ISymbol> AnonumousTypeDifferentScopes
+            = new(
+                "LAMA0269",
+                "Anonymous type can't can't be used as both run-time and compile-time in the same template.",
+                "The anonymous type '{0}' can't can't be used as both run-time and compile-time in the same template.",
+                _category,
+                Error );
     }
 }

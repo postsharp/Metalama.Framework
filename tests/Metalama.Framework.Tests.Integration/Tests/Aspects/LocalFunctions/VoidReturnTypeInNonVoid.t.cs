@@ -1,23 +1,23 @@
 internal class TargetClass
 {
-  [Override]
-  private int Method()
-  {
-    void LocalFunction()
+    [Override]
+    private int Method()
     {
-      _ = 42;
+        void LocalFunction()
+        {
+            _ = (global::System.Int32)42;
+        }
+        LocalFunction();
+        return default;
     }
-    LocalFunction();
-    return default;
-  }
-  [Override]
-  private int Method_ExpressionBody()
-  {
-    void LocalFunction()
+    [Override]
+    private int Method_ExpressionBody()
     {
-      _ = 42;
+        void LocalFunction()
+        {
+            _ = (global::System.Int32)42;
+        }
+        LocalFunction();
+        return default;
     }
-    LocalFunction();
-    return default;
-  }
 }

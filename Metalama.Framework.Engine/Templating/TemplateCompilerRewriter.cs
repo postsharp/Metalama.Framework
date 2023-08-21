@@ -312,10 +312,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             var tupleElement = tupleType.TupleElements[i];
             ArgumentSyntax arg;
 
+            // If the tuple element has a name (i.e. it's not just ItemX), set it explicitly.
             if ( !tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ) )
             {
-                var name = tupleType.TupleElements[i].Name;
-                arg = node.Arguments[i].WithNameColon( NameColon( name ) );
+                arg = node.Arguments[i].WithNameColon( NameColon( tupleElement.Name ) );
             }
             else
             {
@@ -325,15 +325,36 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             transformedArguments[i] = arg;
         }
 
-        var qualifiedTuple = node.WithArguments( default(SeparatedSyntaxList<ArgumentSyntax>).AddRange( transformedArguments ) );
+        return node.WithArguments( SeparatedList( transformedArguments ) );
+    }
 
-        return qualifiedTuple;
+    protected override ExpressionSyntax TransformAnonymousObjectCreationExpression( AnonymousObjectCreationExpressionSyntax node )
+    {
+        var qualifiedAnonymousObject = this.AddAnonymousObjectNames( node );
+
+        return base.TransformAnonymousObjectCreationExpression( qualifiedAnonymousObject );
+    }
+
+    private AnonymousObjectCreationExpressionSyntax AddAnonymousObjectNames( AnonymousObjectCreationExpressionSyntax node )
+    {
+        var anonymousType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node )
+            ?? throw new AssertionFailedException( $"Cannot get the type of anonymous type '{node}'." );
+
+        var transformedInitializers = new AnonymousObjectMemberDeclaratorSyntax[node.Initializers.Count];
+
+        var properties = anonymousType.GetMembers().OfType<IPropertySymbol>().ToArray();
+
+        for ( var i = 0; i < properties.Length; i++ )
+        {
+            transformedInitializers[i] = node.Initializers[i].WithNameEquals( NameEquals( properties[i].Name ) );
+        }
+
+        return node.WithInitializers( SeparatedList( transformedInitializers ) );
     }
 
     protected override ExpressionSyntax Transform( SyntaxToken token )
     {
-        // Following renaming of local variables cannot be apply for TupleElement  
-        if ( token.IsKind( SyntaxKind.IdentifierToken ) && token.Parent != null && token.Parent is not TupleElementSyntax )
+        if ( token.IsKind( SyntaxKind.IdentifierToken ) && token.Parent != null )
         {
             // Transforms identifier declarations (local variables and local functions). Local identifiers must have
             // a unique name in the target code, which is unknown when the template is compiled, therefore local identifiers
@@ -1030,7 +1051,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             // We are transforming a call to a compile-time method that accepts dynamic arguments.
 
-            SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
+            ArgumentSyntax LocalTransformArgument( ArgumentSyntax a )
             {
                 if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                 {
@@ -1052,28 +1073,29 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                         Argument(
                                             LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
 
-                                return Argument( typedExpression );
-                            }
-                            else
-                            {
-                                return Argument( transformedExpression );
+                                transformedExpression = typedExpression;
                             }
 
+                            break;
+
                         default:
-                            return Argument( this.CreateRunTimeExpression( transformedExpression ) );
+                            transformedExpression = this.CreateRunTimeExpression( transformedExpression );
+                            break;
                     }
+
+                    return a.WithExpression( transformedExpression );
                 }
                 else
                 {
-                    return this.Visit( a );
+                    return this.VisitArgument( a ).AssertCast<ArgumentSyntax>();
                 }
             }
 
-            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( syntax => LocalTransformArgument( syntax )! );
+            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( LocalTransformArgument );
 
             return node.Update(
                 (ExpressionSyntax) this.Visit( node.Expression )!,
-                ArgumentList( SeparatedList( transformedArguments )! ) );
+                ArgumentList( SeparatedList( transformedArguments ) ) );
         }
         else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
         {
