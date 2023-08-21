@@ -1059,25 +1059,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             {
                 var argument = node.ArgumentList.Arguments[argumentIndex];
 
-                // The parameter index can be different than the argument index in case of 'params xx[]'.
-                IParameterSymbol? parameter;
-
-                if ( !parameters.IsDefault )
-                {
-                    var parameterIndex = argumentIndex >= parameters.Length ? parameters.Length - 1 : argumentIndex;
-                    parameter = parameters[parameterIndex];
-                }
-                else
-                {
-                    parameter = null;
-                }
-
-                var parameterType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
+                var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument );
 
                 ExpressionSyntax transformedArgumentValue;
 
                 // Transform the argument value.
-                var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameterType );
+                var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameter?.Type );
 
                 if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {

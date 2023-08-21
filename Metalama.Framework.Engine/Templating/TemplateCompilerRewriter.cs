@@ -1030,7 +1030,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             // We are transforming a call to a compile-time method that accepts dynamic arguments.
 
-            SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
+            ArgumentSyntax LocalTransformArgument( ArgumentSyntax a )
             {
                 if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                 {
@@ -1052,28 +1052,29 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                         Argument(
                                             LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
 
-                                return Argument( typedExpression );
-                            }
-                            else
-                            {
-                                return Argument( transformedExpression );
+                                transformedExpression = typedExpression;
                             }
 
+                            break;
+
                         default:
-                            return Argument( this.CreateRunTimeExpression( transformedExpression ) );
+                            transformedExpression = this.CreateRunTimeExpression( transformedExpression );
+                            break;
                     }
+
+                    return a.WithExpression( transformedExpression );
                 }
                 else
                 {
-                    return this.Visit( a );
+                    return this.VisitArgument( a ).AssertCast<ArgumentSyntax>();
                 }
             }
 
-            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( syntax => LocalTransformArgument( syntax )! );
+            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( LocalTransformArgument );
 
             return node.Update(
                 (ExpressionSyntax) this.Visit( node.Expression )!,
-                ArgumentList( SeparatedList( transformedArguments )! ) );
+                ArgumentList( SeparatedList( transformedArguments ) ) );
         }
         else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
         {
