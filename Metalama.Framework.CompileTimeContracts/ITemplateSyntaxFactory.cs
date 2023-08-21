@@ -6,6 +6,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.CompileTimeContracts;
@@ -84,4 +85,6 @@ public interface ITemplateSyntaxFactory
     BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null );
 
     ITemplateSyntaxFactory ForTemplate( string templateName, object? templateProvider );
+
+    TemplateTypeArgument TemplateTypeArgument( string name, Type type );
 }

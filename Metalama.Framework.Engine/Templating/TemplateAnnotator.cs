@@ -1070,6 +1070,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     node,
                     node.ToString() );
             }
+
+            if ( symbol is IMethodSymbol { TypeParameters: var typeParameters } && typeParameters.Any( tp => this.GetSymbolScope( tp ) == TemplatingScope.RunTimeOnly ) )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCantHaveRunTimeTypeParameter,
+                    node,
+                    symbol );
+            }
         }
 
         switch ( symbol )
@@ -2698,13 +2706,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return transformedNode;
     }
 
-    private T VisitGenericNameCore<T>( T node, Func<T, SyntaxNode> callBase, Func<TemplatingScope, T, T>? addColor = null )
-        where T : SyntaxNode
+    private (T TransformedNode, TemplatingScope TemplatingScope, bool IsSubtemplate) VisitGenericNameCore<T>( T node, Func<T, SyntaxNode> callBase )
+        where T : ExpressionSyntax
     {
-        addColor ??= ( _, n ) => n;
-
         var scope = this.GetNodeScope( node );
         T transformedNode;
+
+        var isSubtemplate = false;
 
         switch ( scope )
         {
@@ -2721,28 +2729,37 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 // We cannot have generic type instances of dynamic.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
 
-                return node;
+                return (node, TemplatingScope.DynamicTypeConstruction, false);
 
             default:
+                ScopeContext? context;
+
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
-                    var context = this._currentScopeContext.CompileTimeOnly( "a generic argument of compile-time declaration" );
+                    var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node );
 
-                    using ( this.WithScopeContext( context ) )
+                    var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
+
+                    if ( templateInfo.CanBeReferencedAsSubtemplate )
                     {
-                        transformedNode = (T) callBase( node );
+                        context = this._currentScopeContext.RunTimePreferred( "a generic argument of a called template" );
+                        isSubtemplate = true;
+                    }
+                    else
+                    {
+                        context = this._currentScopeContext.CompileTimeOnly( "a generic argument of compile-time declaration" );
                     }
                 }
                 else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                 {
-                    var context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
-
-                    using ( this.WithScopeContext( context ) )
-                    {
-                        transformedNode = (T) callBase( node );
-                    }
+                    context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
                 }
                 else
+                {
+                    context = null;
+                }
+
+                using ( this.WithScopeContext( context ) )
                 {
                     transformedNode = (T) callBase( node );
                 }
@@ -2750,9 +2767,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 break;
         }
 
-        transformedNode = addColor( scope, transformedNode );
-
-        return transformedNode.AddScopeAnnotation( scope );
+        return (transformedNode.AddScopeAnnotation( scope ), scope, isSubtemplate);
     }
 
     public override SyntaxNode VisitGenericName( GenericNameSyntax node )
@@ -2769,24 +2784,40 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 {
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
-                        argument.GetLocation(),
+                        argument,
                         default );
                 }
             }
         }
 
-        return this.VisitGenericNameCore(
-            node,
-            base.VisitGenericName!,
-            ( scope, transformedNode ) =>
-            {
-                var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+        var (transformedNode, scope, isSubtemplate) = this.VisitGenericNameCore( node, base.VisitGenericName! );
 
-                return transformedNode.WithIdentifier( annotatedIdentifier );
-            } );
+        if ( isSubtemplate )
+        {
+            foreach ( var typeArgument in transformedNode.TypeArgumentList.Arguments )
+            {
+                // Subtemplate type argument has to be a run-time-only type (including compile-time template type parameter) ...
+                this.RequireScope( typeArgument, TemplatingScope.RunTimeOnly, "a generic argument of a called template" );
+
+                var typeArgumentSymbol = this._syntaxTreeAnnotationMap.GetSymbol( typeArgument );
+
+                // ... but not a run-time template type parameter.
+                if ( typeArgumentSymbol != null && this._typeParameterDetectionVisitor.Visit( typeArgumentSymbol ) )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SubtemplateCantBeCalledWithRunTimeTypeParameter,
+                        typeArgument,
+                        (symbol!, typeArgument) );
+                }
+            }
+        }
+
+        var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+
+        return transformedNode.WithIdentifier( annotatedIdentifier );
     }
 
-    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! );
+    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! ).TransformedNode;
 
     public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {

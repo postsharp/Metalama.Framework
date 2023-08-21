@@ -136,10 +136,17 @@ internal static class TemplateBindingHelper
         // The template must not have run-time parameters.
         if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
         {
-            // TODO: add test for this case
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
                     $"Cannot use the method '{template.Declaration}' in meta.InvokeTemplate: the method cannot have run-time parameters." ) );
+        }
+
+        // The template must not have run-time type parameters.
+        if ( !template.TemplateClassMember.RunTimeTypeParameters.IsEmpty )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the method '{template.Declaration}' in meta.InvokeTemplate: the method cannot have run-time type parameters." ) );
         }
 
         return GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty );
@@ -535,32 +542,26 @@ internal static class TemplateBindingHelper
                             $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
                 }
 
-                IType typeModel;
-
-                switch ( parameterValue )
+                var typeModel = parameterValue switch
                 {
-                    case IType type:
-                        typeModel = type;
+                    IType type => type,
+                    Type type => TypeFactory.Implementation.GetTypeByReflectionType( type ),
+                    _ => throw new InvalidAdviceParametersException(
+                        MetalamaStringFormatter.Format(
+                            $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) ),
+                };
 
-                        break;
-
-                    case Type type:
-                        typeModel = TypeFactory.Implementation.GetTypeByReflectionType( type );
-
-                        break;
-
-                    default:
-                        throw new InvalidAdviceParametersException(
-                            MetalamaStringFormatter.Format(
-                                $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
-                }
-
-                var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
-                var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeModel.GetSymbol() ).Type;
-
-                templateArguments.Add( new TemplateTypeArgument( parameter.Name, typeModel, syntax, syntaxForTypeOf ) );
+                templateArguments.Add( CreateTemplateTypeArgument( parameter.Name, typeModel ) );
             }
         }
+    }
+
+    public static TemplateTypeArgument CreateTemplateTypeArgument( string name, IType type )
+    {
+        var syntax = OurSyntaxGenerator.CompileTime.Type( type.GetSymbol() ).AssertNotNull();
+        var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( type.GetSymbol() ).Type;
+
+        return new TemplateTypeArgument( name, type, syntax, syntaxForTypeOf );
     }
 
     private static void VerifyArguments( TemplateMember<IMethod> template, IObjectReader compileTimeArguments )

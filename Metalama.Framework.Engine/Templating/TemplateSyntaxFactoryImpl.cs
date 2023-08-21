@@ -512,5 +512,8 @@ namespace Metalama.Framework.Engine.Templating
 
             return context.SyntaxFactory;
         }
+
+        public TemplateTypeArgument TemplateTypeArgument( string name, Type type )
+            => TemplateBindingHelper.CreateTemplateTypeArgument( name, TypeFactory.Implementation.GetTypeByReflectionType( type ) );
     }
 }

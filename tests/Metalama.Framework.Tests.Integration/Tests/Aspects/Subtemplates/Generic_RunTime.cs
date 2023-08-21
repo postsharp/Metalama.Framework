@@ -1,23 +1,21 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Delegate;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Generic_RunTime;
 
 internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var template = CalledTemplate;
-
-        template();
+        CalledTemplate<int>();
 
         return default;
     }
 
     [Template]
-    private void CalledTemplate()
+    private void CalledTemplate<T>()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine($"called template T={typeof(T)}");
     }
 }
 

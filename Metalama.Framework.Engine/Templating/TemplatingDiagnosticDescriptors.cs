@@ -5,6 +5,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
 
@@ -537,6 +538,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0275",
                 "Template call cannot be virtual.",
                 "Template call '{0}' cannot be virtual. Consider marking the called template method or its containing type as sealed.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> SubtemplateCantHaveRunTimeTypeParameter
+            = new(
+                "LAMA0276",
+                "Called template can't have run-time type parameters.",
+                "Called template '{0}' can't have run-time type parameters.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol, TypeSyntax)> SubtemplateCantBeCalledWithRunTimeTypeParameter
+            = new(
+                "LAMA0277",
+                "A template can't be called with run-time type parameters.",
+                "The template '{0}' can't be called with type argument '{1}', which contains run-time template type parameter.",
                 _category,
                 Error );
     }

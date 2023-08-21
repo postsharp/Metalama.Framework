@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating
                     method,
                     method.Parameters,
                     true ),
-                IMethodSymbol method => GetCompiledTemplateName( method.Name, method, method.Parameters ),
+                IMethodSymbol method => GetCompiledTemplateName( method.Name, method.OriginalDefinition, method.Parameters ),
 
                 // Initializer templates.
                 IFieldSymbol field => GetCompiledTemplateName( field.Name, field ),

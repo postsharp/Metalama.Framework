@@ -1181,7 +1181,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // We are calling a subtemplate.
                 var compiledTemplateName = TemplateNameHelper.GetCompiledTemplateName( symbol );
 
-                var transformedArguments = new ArgumentSyntax[node.ArgumentList.Arguments.Count];
+                var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
 
                 for ( var i = 0; i < node.ArgumentList.Arguments.Count; i++ )
                 {
@@ -1216,26 +1216,48 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         argument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
                     }
 
-                    transformedArguments[i] = this.VisitArgument( argument ).AssertCast<ArgumentSyntax>();
+                    transformedArguments.Add( this.VisitArgument( argument ).AssertCast<ArgumentSyntax>() );
                 }
 
-                var templateExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
+                // TODO: handle receiver side-effects
 
-                var identifierNodes = templateExpression.DescendantNodesAndSelf()
-                    .Where( n => n is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == symbol.Name )
-                    .ToArray();
-                
-                Invariant.Assert( identifierNodes.Any() );
-                var compiledTemplateExpression = templateExpression.ReplaceNodes( identifierNodes, ( _, _ ) => IdentifierName( compiledTemplateName ) );
+                var (receiver, name) = node.Expression switch
+                {
+                    SimpleNameSyntax simpleName => (null, simpleName),
+                    MemberAccessExpressionSyntax memberAccess => (this.Visit( memberAccess.Expression ).AssertCast<ExpressionSyntax>().AssertNotNull(), memberAccess.Name),
+                    _ => throw new AssertionFailedException( $"Expression '{node.Expression}' has unexpected expression type {node.Expression.GetType()}." )
+                };
 
-                var templateProviderExpression = (symbol.IsStatic, node.Expression) switch
+                if ( name is GenericNameSyntax genericName )
+                {
+                    var i = 0;
+
+                    var typeParameters = symbol.AssertCast<IMethodSymbol>().TypeParameters;
+
+                    foreach ( var typeArgument in genericName.TypeArgumentList.Arguments )
+                    {
+                        var typeParameter = typeParameters[i];
+
+                        // templateSyntaxFactory.TemplateTypeArgument("name", typeof(T))
+                        var templateTypeArgumentExpression =
+                            InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.TemplateTypeArgument ) ) )
+                            .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralNonNullExpression( typeParameter.Name ) ), Argument( this.TransformCompileTimeCode<ExpressionSyntax>( TypeOfExpression( typeArgument ) ) ) );
+
+                        transformedArguments.Add( Argument( templateTypeArgumentExpression ) );
+
+                        i++;
+                    }
+                }
+
+                ExpressionSyntax compiledTemplateExpression =
+                    receiver == null ? IdentifierName( compiledTemplateName ) : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, IdentifierName( compiledTemplateName ) );
+
+                var templateProviderExpression = symbol.IsStatic switch
                 {
                     // Called template is static and from the same type as current template, so preserve templateProvider.
-                    (IsStatic: true, _) when symbol.ContainingType.Equals( this._rootTemplateSymbol?.ContainingType ) => SyntaxFactoryEx.Null,
-                    (IsStatic: true, _) => TypeOfExpression( MetaSyntaxFactoryImpl.Type( symbol.ContainingType ) ),
-                    (IsStatic: false, IdentifierNameSyntax) => ThisExpression(),
-                    (IsStatic: false, MemberAccessExpressionSyntax memberAccess) => memberAccess.Expression,
-                    (IsStatic: false, _) => throw new AssertionFailedException( $"Expression '{node.Expression}' has unexpected expression type {node.Expression.GetType()}." )
+                    true when symbol.ContainingType.Equals( this._rootTemplateSymbol?.ContainingType ) => SyntaxFactoryEx.Null,
+                    true => TypeOfExpression( MetaSyntaxFactoryImpl.Type( symbol.ContainingType ) ),
+                    false => receiver ?? ThisExpression()
                 };
 
                 // templateSyntaxFactory.ForTemplate("templateName", templateProvider)
@@ -1244,7 +1266,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 var templateInvocationExpression = InvocationExpression( compiledTemplateExpression )
                     .AddArgumentListArguments( Argument( templateSyntaxFactoryExpression ) )
-                    .AddArgumentListArguments( transformedArguments );
+                    .AddArgumentListArguments( transformedArguments.ToArray() );
 
                 this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ), templateInvocationExpression ) );
 
@@ -2361,7 +2383,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return this.TransformTypeOfExpression( node );
         }
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol &&
-                  this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
+                  this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ).GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
         {
             var typeId = typeSymbol.GetSerializableTypeId().Id;
 

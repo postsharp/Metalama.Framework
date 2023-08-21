@@ -1,21 +1,20 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.DirectCallWithArgs;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.DynamicCallWithArgs_RunTime;
 
 internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("regular template");
-        CalledTemplate(42);
+        meta.InvokeTemplate(nameof(CalledTemplate), arguments: new { a = 42 });
         return default;
     }
 
     [Template]
-    private void CalledTemplate([CompileTime] int i)
+    private void CalledTemplate(int a)
     {
-        Console.WriteLine($"called template i={i}");
+        Console.WriteLine($"called template a={a}");
     }
 }
 
