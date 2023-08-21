@@ -617,7 +617,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             var currentScope = visitedNode.GetScopeFromAnnotation();
 
-            if ( currentScope is TemplatingScope.RunTimeOnly or TemplatingScope.Dynamic ||
+            if ( currentScope?.GetExpressionExecutionScope() is TemplatingScope.RunTimeOnly ||
                  this._templateMemberClassifier.IsNodeOfDynamicType( visitedNode ) )
             {
                 // The current expression is obliged to be compile-time-only by inference.
