@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;

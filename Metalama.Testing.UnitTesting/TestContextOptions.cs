@@ -28,11 +28,6 @@ public sealed record TestContextOptions
     public ImmutableDictionary<string, string> Properties { get; init; } = ImmutableDictionary<string, string>.Empty;
 
     /// <summary>
-    /// Gets the set of compiler plug-ins exposed to the tests.
-    /// </summary>
-    internal ImmutableArray<object> PlugIns { get; init; } = ImmutableArray<object>.Empty;
-
-    /// <summary>
     /// Gets a value indicating whether the output code should be formatted.
     /// </summary>
     public bool FormatOutput { get; init; }

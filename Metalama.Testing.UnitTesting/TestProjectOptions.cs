@@ -25,7 +25,6 @@ namespace Metalama.Testing.UnitTesting
         public TestProjectOptions( TestContextOptions contextOptions, string? testName )
         {
             this.ProjectName = testName;
-            this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;
 
             this._properties = contextOptions.Properties;
 
@@ -66,8 +65,6 @@ namespace Metalama.Testing.UnitTesting
                 } );
 
         public override string? ProjectName { get; }
-
-        public override ImmutableArray<object> PlugIns { get; }
 
         public string BaseDirectory => this._baseDirectory.Value;
 

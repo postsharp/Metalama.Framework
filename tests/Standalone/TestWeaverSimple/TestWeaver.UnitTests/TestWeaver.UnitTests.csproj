@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+        <MetalamaEnabled>false</MetalamaEnabled>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\TestWeaver.Library\TestWeaver.Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Metalama.Testing.AspectTesting" Version="$(MetalamaVersion)" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

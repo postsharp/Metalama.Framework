@@ -1,10 +1,10 @@
 using System;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.ServicePlugIn
 {
     internal class Aspect : OverrideMethodAspect
     {

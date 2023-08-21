@@ -1,5 +1,4 @@
-﻿using Metalama.Compiler;
-using Metalama.Framework.Engine.AspectWeavers;
+﻿using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk
 {

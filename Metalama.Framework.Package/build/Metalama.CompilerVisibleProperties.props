@@ -18,7 +18,6 @@
         <CompilerVisibleProperty Include="MetalamaAllowPreviewLanguageFeatures"/>
         <CompilerVisibleProperty Include="MetalamaConcurrentBuildEnabled"/>
         <CompilerVisibleProperty Include="MetalamaCompileTimePackages"/>
-        <CompilerVisibleProperty Include="MetalamaPlugInAssemblyPaths"/>
         <CompilerVisibleProperty Include="MetalamaWriteHtml"/>
         <CompilerVisibleProperty Include="MetalamaWriteLicenseCreditData" />
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>

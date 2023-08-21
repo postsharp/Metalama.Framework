@@ -29,7 +29,6 @@ public static class MSBuildPropertyNames
     public const string MetalamaRequireOrderedAspects = nameof(MetalamaRequireOrderedAspects);
     public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
     public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
-    public const string MetalamaPlugInAssemblyPaths = nameof(MetalamaPlugInAssemblyPaths);
     public const string MetalamaWriteHtml = nameof(MetalamaWriteHtml);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
     public const string MetalamaReferenceAssemblyRestoreTimeout = nameof(MetalamaReferenceAssemblyRestoreTimeout);
