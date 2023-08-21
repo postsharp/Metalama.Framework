@@ -174,12 +174,12 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             // Get all symbols.
-            var symbols = new List<IMethodSymbol> { firstMethod, (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] };
+            var symbols = new List<IMethodSymbol> { firstMethod };
 
-            while ( enumerator.MoveNext() )
+            do
             {
                 symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] );
-            }
+            } while ( enumerator.MoveNext() );
 
             // If we have an ambiguity, it is because one of the arguments is dynamic. 
             // Take only signatures that have a dynamic argument.
@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.Templating
                 return null;
             }
 
-            var invocationSymbol = this.GetSymbol( argument.Parent.Parent );
+            var invocationSymbol = this.GetInvocableSymbol( argument.Parent.Parent.AssertCast<ExpressionSyntax>() );
 
             var parameters = invocationSymbol switch
             {

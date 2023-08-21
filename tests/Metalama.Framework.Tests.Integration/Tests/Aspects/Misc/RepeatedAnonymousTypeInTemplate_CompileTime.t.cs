@@ -1,0 +1,5 @@
+[Aspect]
+void M()
+{
+    return;
+}
