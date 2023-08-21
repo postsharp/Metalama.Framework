@@ -14,15 +14,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Metalama.Framework.Sdk.targets is NOT transitive because we only want the direct project
-             to have customized packaging. -->
-        <None Include="build\Metalama.Framework.Sdk.targets" Pack="true" PackagePath="build" />
-
-        <!-- Metalama.Framework.Sdk.targets is transitive because all projects referencing the Sdk, even
-             indirectly, are compile-time-only by default. -->
-        <None Include="build\Metalama.Framework.Sdk.props" Pack="true" PackagePath="buildTransitive" />
-
-
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
@@ -32,10 +23,6 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynApiMinVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
 
-        <!-- We don't want Metalama to customize the build of SDK projects, so we have to list private assets.
-             Note that this is not sufficient because SDK projects will likely transitively import Metalama.Framework,
-             so we have the MetalamaCompileTimeProject property defined in Metalama.Framework.Sdk.props.
-         -->
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive" />
 
     </ItemGroup>

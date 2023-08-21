@@ -19,7 +19,6 @@
 
         <!-- Convert items to properties -->
         <MetalamaCompileTimePackages>@(MetalamaCompileTimePackage, ',')</MetalamaCompileTimePackages>
-        <MetalamaPlugInAssemblyPaths>@(MetalamaPlugInAssemblyPath, ',')</MetalamaPlugInAssemblyPaths>
 
         <!-- Elevating CS8032: An instance of analyzer X cannot be created. 
              We elevate this warning to an error because otherwise, if Metalama.Framework fails to load, the compilation will be incorrect while there
@@ -30,7 +29,7 @@
 
 
     <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
+        <AssemblyAttributes Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True' AND '$(MetalamaDesignTimeEnabled)'=='False'">
@@ -63,6 +62,5 @@
             <Clean Include="$(MetalamaSourceGeneratorTouchFile)"/>
         </ItemGroup>
     </Target>
-
-
+    
 </Project>

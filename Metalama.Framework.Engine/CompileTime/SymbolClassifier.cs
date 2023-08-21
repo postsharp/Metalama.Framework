@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Compiler;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -54,7 +53,6 @@ namespace Metalama.Framework.Engine.CompileTime
                     (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly),
                     (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly),
                     (typeof(Marshal), TemplatingScope.RunTimeOnly),
-                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly),
                     (typeof(Index), TemplatingScope.RunTimeOrCompileTime),
                     (typeof(Range), TemplatingScope.RunTimeOrCompileTime)
                 }.ToImmutableDictionary(
@@ -244,6 +242,11 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( assembly == null )
             {
                 return null;
+            }
+
+            if ( assembly.Name == "Metalama.Compiler.Interface" )
+            {
+                return TemplatingScope.CompileTimeOnly;
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
@@ -992,12 +995,19 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                             config.Namespace == t.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
                             return true;
                         }
+                    }
+
+                    // Check Roslyn types.
+                    if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
+                    {
+                        scope = TemplatingScope.CompileTimeOnly;
+                        return true;
                     }
 
                     // Check system types.                   

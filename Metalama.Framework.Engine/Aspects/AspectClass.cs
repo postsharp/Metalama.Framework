@@ -196,7 +196,12 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                     break;
 
                 case nameof(RequireAspectWeaverAttribute):
-                    this.WeaverType = (string?) attribute.ConstructorArguments[0].Value ?? this.ShortName;
+                    this.WeaverType = attribute.ConstructorArguments[0].Value switch
+                    {
+                        string weaverTypeName => weaverTypeName,
+                        ITypeSymbol weaverTypeSymbol => weaverTypeSymbol.GetReflectionFullName(),
+                        var value => throw new InvalidOperationException( $"Invalid value '{value?.ToString() ?? "null"}' for RequireAspectWeaverAttribute argument." )
+                    };
 
                     break;
             }

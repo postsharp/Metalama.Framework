@@ -4,7 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Tests.Integration.Aspects.Sdk.SkippedWeaverAndRegularAspects;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.SkippedWeaverAndRegularAspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,9 +13,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [assembly: AspectOrder(typeof(RegularAspect1), typeof(WeaverAspect), typeof(RegularAspect2))]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.SkippedWeaverAndRegularAspects
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.SkippedWeaverAndRegularAspects
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Aspects.Sdk.SkippedWeaverAndRegularAspects.AspectWeaver")]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.SkippedWeaverAndRegularAspects.AspectWeaver")]
     internal class WeaverAspect : MethodAspect { }
 
     internal class RegularAspect1 : OverrideMethodAspect
