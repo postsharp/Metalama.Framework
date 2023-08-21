@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880;
 
 #pragma warning disable CS0169
 
@@ -9,7 +9,7 @@ using Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880;
 
 [assembly: AspectOrder( typeof(TestMethodAspect), typeof(TestPropertyAspect), typeof(TestPropertyAspect2), typeof(TestEventAspect) )]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880
 {
     internal class TestMethodAspect : OverrideMethodAspect
     {
