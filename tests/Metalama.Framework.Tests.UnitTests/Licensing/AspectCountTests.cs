@@ -11,22 +11,22 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     public sealed class AspectCountTests : LicensingTestsBase
     {
         private const string _arbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
-        private const string _tooManyAspectsErrorId = "LAMA0800";
+        private const string _insufficientCreditsErrorId = "LAMA0800";
         private const string _redistributionInvalidErrorId = "LAMA0803";
 
         public AspectCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId )]
         [InlineData( TestLicenseKeys.PostSharpFramework, 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, 11, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId )]
         [InlineData( TestLicenseKeys.PostSharpUltimate, 11, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 1, _arbitraryNamespace, _arbitraryNamespace, _redistributionInvalidErrorId )]
         [InlineData(
@@ -47,12 +47,16 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
             TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
             null )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, _insufficientCreditsErrorId, 4 )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
             string licenseKey,
             int numberOfAspects,
             string aspectNamespace,
             string targetNamespace,
-            string? expectedErrorId )
+            string? expectedErrorId,
+            int numberOfContracts = 0 )
         {
             const string usingsAndOrdering = @"
 using Metalama.Framework.Aspects;
@@ -69,8 +73,25 @@ namespace {0}
     {{
         public override dynamic? OverrideMethod()
         {{
-            Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect{1}));
+            System.Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect{1}));
             return meta.Proceed();
+        }}
+    }}
+}}
+";
+
+            const string contractPrototype = @"
+
+namespace {0}
+{{
+    public class Contract{1} : ContractAspect
+    {{
+        public override void Validate( dynamic? value )
+        {{
+            if ( value == null )
+            {{
+                throw new ArgumentNullException(nameof(value), $""Validated by {{nameof(Contract{1})}}."");
+            }}
         }}
     }}
 }}
@@ -82,7 +103,7 @@ namespace {0}
     class TargetClass
     {{
         {1}
-        void TargetMethod()
+        void TargetMethod({2}int? parameter)
         {{
         }}
     }}
@@ -90,7 +111,8 @@ namespace {0}
 ";
 
             var sourceCodeBuilder = new StringBuilder();
-            var customAttributeApplicationBuilder = new StringBuilder();
+            var aspectApplicationBuilder = new StringBuilder();
+            var contractsApplicationBuilder = new StringBuilder();
             var aspectOrderApplicationBuilder = new StringBuilder();
 
             for ( var i = 1; i <= numberOfAspects; i++ )
@@ -103,7 +125,23 @@ namespace {0}
                     $"typeof({aspectNamespace}.Aspect{i}) " );
 #pragma warning restore SA1114 // Parameter list should follow declaration
 
-                if ( i < numberOfAspects )
+                if ( i < numberOfAspects || numberOfContracts > 0 )
+                {
+                    aspectOrderApplicationBuilder.Append( ", " );
+                }
+            }
+
+            for ( var i = 1; i <= numberOfContracts; i++ )
+            {
+#pragma warning disable SA1114 // Parameter list should follow declaration
+                aspectOrderApplicationBuilder.AppendLine(
+#if NET
+                    CultureInfo.InvariantCulture,
+#endif
+                    $"typeof({aspectNamespace}.Contract{i}) " );
+#pragma warning restore SA1114 // Parameter list should follow declaration
+
+                if ( i < numberOfContracts )
                 {
                     aspectOrderApplicationBuilder.Append( ", " );
                 }
@@ -115,16 +153,33 @@ namespace {0}
             {
                 sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, aspectPrototype, aspectNamespace, i ) );
 #pragma warning disable SA1114 // Parameter list should follow declaration
-                customAttributeApplicationBuilder.AppendLine(
+                aspectApplicationBuilder.AppendLine(
 #if NET
                     CultureInfo.InvariantCulture,
 #endif
                     $"[{aspectNamespace}.Aspect{i}]" );
 #pragma warning restore SA1114 // Parameter list should follow declaration
             }
+            
+            for ( var i = 1; i <= numberOfContracts; i++ )
+            {
+                sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, contractPrototype, aspectNamespace, i ) );
+#pragma warning disable SA1114 // Parameter list should follow declaration
+                contractsApplicationBuilder.Append(
+#if NET
+                    CultureInfo.InvariantCulture,
+#endif
+                    $"[{aspectNamespace}.Contract{i}]" );
+#pragma warning restore SA1114 // Parameter list should follow declaration
+
+                if (i == numberOfContracts)
+                {
+                    contractsApplicationBuilder.Append( " " );
+                }
+            }
 
             sourceCodeBuilder.AppendLine(
-                string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, customAttributeApplicationBuilder.ToString() ) );
+                string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, aspectApplicationBuilder.ToString(), contractsApplicationBuilder.ToString() ) );
 
             var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace );
 

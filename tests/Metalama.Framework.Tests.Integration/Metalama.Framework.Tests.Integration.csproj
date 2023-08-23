@@ -36,6 +36,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Licensing\RedistributionAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\RedistributionWithContractsAllowed - Copy (2).t.cs" />
+      <Compile Remove="Tests\Licensing\RedistributionWithContractsAllowed - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -44,6 +50,21 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
 		    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Licensing\RedistributionWithContractsAllowed - Copy (2).t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>RedistributionWithContractsAllowed.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\RedistributionWithContractsAllowed - Copy.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>RedistributionWithContractsAllowed.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\RedistributionWithContractsAllowed.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>RedistributionWithContractsAllowed.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
