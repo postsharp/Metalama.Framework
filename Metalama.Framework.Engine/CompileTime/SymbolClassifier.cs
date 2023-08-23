@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -92,6 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
         private readonly IAttributeDeserializer _attributeDeserializer;
         private readonly ILogger _logger;
+        private readonly bool _roslynIsCompileTimeOnly;
         private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
         private readonly CompilationContext _compilationContext;
 
@@ -108,7 +110,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 serviceProvider.GetReferenceAssemblyLocator() ) { }
 
         private SymbolClassifier(
-            GlobalServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation,
             IAttributeDeserializer attributeDeserializer,
             ReferenceAssemblyLocator referenceAssemblyLocator )
@@ -128,6 +130,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             this._attributeDeserializer = attributeDeserializer;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
+
+            this._roslynIsCompileTimeOnly = serviceProvider.GetRequiredService<IProjectOptions>().RoslynIsCompileTimeOnly;
 
             var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
             this._compilation = compilation;
@@ -1006,7 +1010,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Check Roslyn types.
                     if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
                     {
-                        scope = TemplatingScope.CompileTimeOnly;
+                        scope = this._roslynIsCompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOrCompileTime;
                         return true;
                     }
 

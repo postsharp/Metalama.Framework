@@ -112,6 +112,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool? WriteLicenseCreditData => this.GetNullableBooleanOption( MSBuildPropertyNames.MetalamaWriteLicenseCreditData );
 
+        [Memo]
+        public override bool RoslynIsCompileTimeOnly => this.GetBooleanOption( MSBuildPropertyNames.MetalamaRoslynIsCompileTimeOnly, defaultValue: true );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );
