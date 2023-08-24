@@ -24,6 +24,7 @@
         <CompilerVisibleProperty Include="MetalamaReferenceAssemblyRestoreTimeout"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
         <CompilerVisibleProperty Include="Configuration"/>
+        <CompilerVisibleProperty Include="MetalamaRoslynIsCompileTimeOnly"/>
         
     </ItemGroup>
 

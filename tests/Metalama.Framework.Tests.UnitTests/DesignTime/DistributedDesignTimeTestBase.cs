@@ -19,9 +19,9 @@ public class DistributedDesignTimeTestBase : UnitTestClass
         services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
     }
 
-    protected override TestContext CreateTestContextCore( TestContextOptions projectOptions, IAdditionalServiceCollection services )
+    protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
     {
-        return new DistributedDesignTimeTestContext( projectOptions, services );
+        return new DistributedDesignTimeTestContext( contextOptions, services );
     }
 
     private protected DistributedDesignTimeTestContext CreateDistributedDesignTimeTestContext(
