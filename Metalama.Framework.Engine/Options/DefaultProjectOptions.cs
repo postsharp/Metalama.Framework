@@ -85,5 +85,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool? WriteLicenseCreditData => null;
 
+    public virtual bool RoslynIsCompileTimeOnly => true;
+
     public virtual bool IsTest => false;
 }

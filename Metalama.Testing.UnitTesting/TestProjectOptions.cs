@@ -39,6 +39,7 @@ namespace Metalama.Testing.UnitTesting
             this.FormatCompileTimeCode = contextOptions.FormatCompileTimeCode;
             this.AdditionalAssemblies = contextOptions.AdditionalAssemblies;
             this.RequireOrderedAspects = contextOptions.RequireOrderedAspects;
+            this.RoslynIsCompileTimeOnly = contextOptions.RoslynIsCompileTimeOnly;
 
             if ( contextOptions.HasSourceGeneratorTouchFile )
             {
@@ -83,6 +84,8 @@ namespace Metalama.Testing.UnitTesting
         public override bool IsTest => true;
 
         public override string? BuildTouchFile { get; }
+
+        public override bool RoslynIsCompileTimeOnly { get; }
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 

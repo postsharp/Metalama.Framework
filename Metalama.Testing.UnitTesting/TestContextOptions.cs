@@ -52,6 +52,8 @@ public sealed record TestContextOptions
 
     internal bool HasBuildTouchFile { get; init; }
 
+    internal bool RoslynIsCompileTimeOnly { get; init; } = true;
+
     /// <summary>
     /// Gets the list of references that will be added to compilations created in this context.
     /// </summary>

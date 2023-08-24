@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Linq;
 using Xunit;
@@ -30,9 +31,9 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
+        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null, TestContextOptions? contextOptions = null )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateTestContext( contextOptions );
 
             var classifier = testContext.ServiceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation ).SymbolClassifier;
 
@@ -423,6 +424,50 @@ class C  {
                 var symbol = semanticModel.GetSymbolInfo( node ).Symbol!;
 
                 this.AssertScope( compilation.RoslynCompilation, symbol, scope );
+            }
+        }
+
+        [Theory]
+        [InlineData( true )]
+        [InlineData( false )]
+        public void RoslynTypes( bool roslynIsCompileTime )
+        {
+            const string code = """
+                using Microsoft.CodeAnalysis;
+                using Microsoft.CodeAnalysis.CSharp;
+
+                class C
+                {
+                    void M()
+                    {
+                        ISymbol symbol;
+                        CSharpSyntaxNode node;
+                    }
+                }
+                """;
+
+            var options = new TestContextOptions() { RoslynIsCompileTimeOnly = roslynIsCompileTime };
+            using var testContext = this.CreateTestContext( options );
+
+            var additionalReferences = new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsEnumerable( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+            var compilation = testContext.CreateCompilationModel( code, additionalReferences: additionalReferences );
+
+            var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+            var nodes = syntaxTree.GetRoot().DescendantNodes().ToArray();
+
+            var expectedScope = roslynIsCompileTime ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOrCompileTime;
+
+            AssertScope( "ISymbol", expectedScope );
+            AssertScope( "CSharpSyntaxNode", expectedScope );
+
+            // Resharper disable once LocalFunctionHidesMethod
+            void AssertScope( string text, TemplatingScope scope )
+            {
+                var node = nodes.Single( n => n.ToString() == text );
+                var symbol = semanticModel.GetSymbolInfo( node ).Symbol!;
+
+                this.AssertScope( compilation.RoslynCompilation, symbol, scope, contextOptions: options );
             }
         }
     }
