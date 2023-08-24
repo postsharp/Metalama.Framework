@@ -139,6 +139,12 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         bool? WriteLicenseCreditData { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether Roslyn (Microsoft.CodeAnalysis) types are considered compile-time-only.
+        /// When set to <c>false</c>, Roslyn types are considered run-time-or-compile-time, which means they can be used in run-time code.
+        /// </summary>
+        bool RoslynIsCompileTimeOnly { get; }
+
         bool IsTest { get; }
     }
 }
