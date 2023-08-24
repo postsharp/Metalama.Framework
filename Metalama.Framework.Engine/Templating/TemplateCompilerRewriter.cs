@@ -406,7 +406,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // Variable of dynamic? type needs to become var type (without the ?).
                 return base.TransformVariableDeclaration(
                     VariableDeclaration(
-                        IdentifierName( Identifier( "var" ) ),
+                        SyntaxFactoryEx.VarIdentifier(),
                         node.Variables ) );
 
             default:
@@ -448,7 +448,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
             {
                 // Avoid transforming "dynamic?" into "var?".
-                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+                return base.TransformIdentifierName( SyntaxFactoryEx.VarIdentifier() );
             }
             else if ( this._templateCompileTimeTypeParameterNames.Contains( identifier.Identifier.ValueText ) )
             {
@@ -482,7 +482,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         if ( string.Equals( node.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
         {
             // We change all dynamic into var in the template.
-            return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            return base.TransformIdentifierName( SyntaxFactoryEx.VarIdentifier() );
         }
 
         // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
@@ -1200,8 +1200,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             SyntaxFactoryEx.Default,
                             SyntaxFactoryEx.Default,
                             this.MetaSyntaxFactory.VariableDeclaration(
-                                this.Transform( MetaSyntaxFactoryImpl.Type( parameter.Type ) ),
-                                this.MetaSyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                            this.Transform( MetaSyntaxFactoryImpl.Type( parameter.Type ) ),
+                            this.MetaSyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
                                     this.MetaSyntaxFactory.VariableDeclarator(
                                         variableIdentifier,
                                         SyntaxFactoryEx.Default,
@@ -1219,14 +1219,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     transformedArguments.Add( this.VisitArgument( argument ).AssertCast<ArgumentSyntax>() );
                 }
 
-                // TODO: handle receiver side-effects
-
                 var (receiver, name) = node.Expression switch
                 {
                     SimpleNameSyntax simpleName => (null, simpleName),
                     MemberAccessExpressionSyntax memberAccess => (this.Visit( memberAccess.Expression ).AssertCast<ExpressionSyntax>().AssertNotNull(), memberAccess.Name),
                     _ => throw new AssertionFailedException( $"Expression '{node.Expression}' has unexpected expression type {node.Expression.GetType()}." )
                 };
+
+                if ( !symbol.IsStatic && receiver is (not null) and (not ThisExpressionSyntax) )
+                {
+                    // Handle receiver side-effects by saving it into a variable.
+                    var variableIdentifier = this._currentMetaContext!.GetVariable( symbol.Name );
+
+                    var variableDeclaration = LocalDeclarationStatement( VariableDeclaration( SyntaxFactoryEx.VarIdentifier() ).AddVariables( VariableDeclarator( variableIdentifier, default, EqualsValueClause( receiver ) ) ) );
+
+                    this._currentMetaContext.Statements.Add( variableDeclaration );
+
+                    receiver = IdentifierName( variableIdentifier );
+                }
 
                 if ( name is GenericNameSyntax genericName )
                 {
@@ -1555,12 +1565,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <summary>
     /// Generates a run-time block from expression.
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
     /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
     /// (in this case, a return statement is returned).</param>
-    /// <param name="isVoid"></param>
-    /// <returns></returns>
     private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression, bool isVoid )
     {
         StatementSyntax statement;
@@ -1580,11 +1587,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <summary>
     /// Generates a run-time block.
     /// </summary>
-    /// <param name="node"></param>
     /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
     /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
     /// (in this case, a return statement is returned).</param>
-    /// <returns></returns>
     private SyntaxNode BuildRunTimeBlock( BlockSyntax node, bool generateExpression )
         => this.BuildRunTimeBlock(
             node.Statements,
@@ -1598,7 +1603,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
     /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
     /// (in this case, a return statement is returned).</param>
-    /// <returns></returns>
     private SyntaxNode BuildRunTimeBlock(
         SyntaxList<StatementSyntax> statements,
         bool generateExpression,

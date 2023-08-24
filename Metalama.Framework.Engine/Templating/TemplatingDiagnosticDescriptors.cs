@@ -556,5 +556,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The template '{0}' can't be called with type argument '{1}', which contains run-time template type parameter.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string, ISymbol)> StructCantBeTemplateProvider
+            = new(
+                "LAMA0278",
+                "An aspect or a template provider can't be a value type.",
+                "The {0} '{1}' can't be a value type.",
+                _category,
+                Error );
     }
 }

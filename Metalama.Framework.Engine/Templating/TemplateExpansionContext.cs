@@ -364,13 +364,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         // However, the user may have stored the result in a differently-typed variable, so we need to cast.
 
         var forEach = ForEachStatement(
-                IdentifierName(
-                    Identifier(
-                        default,
-                        SyntaxKind.VarKeyword,
-                        "var",
-                        "var",
-                        default ) ),
+                SyntaxFactoryEx.VarIdentifier(),
                 Identifier( resultItem ),
                 returnExpression,
                 Block(
@@ -426,14 +420,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
-            local = VariableDeclaration(
-                    IdentifierName(
-                        Identifier(
-                            default,
-                            SyntaxKind.VarKeyword,
-                            "var",
-                            "var",
-                            TriviaList( ElasticSpace ) ) ) )
+            local = VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                 .WithVariables(
                     SingletonSeparatedList(
                         VariableDeclarator( Identifier( enumerator ) )

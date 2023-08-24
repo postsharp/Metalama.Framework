@@ -562,6 +562,34 @@ namespace Metalama.Framework.Engine.Templating
                             (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member, adviceAttributes[1].AttributeClass) ) );
                 }
 
+                var compilation = this._compilationContext.SourceCompilation;
+                var reflectionMapper = this._compilationContext.ReflectionMapper;
+
+                bool IsAspect( INamedTypeSymbol symbol )
+                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
+
+                bool IsFabric( INamedTypeSymbol symbol )
+                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
+
+                bool IsTemplateProvider( INamedTypeSymbol symbol )
+                    => symbol.HasInheritedAttribute( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( typeof(TemplateProviderAttribute) ) );
+
+                // Report an error for struct aspect or template provider.
+                if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol )
+                {
+                    var typeKind = IsAspect( typeSymbol ) ? "aspect" :
+                        IsTemplateProvider( typeSymbol ) ? "template provider" :
+                        null;
+
+                    if ( typeKind != null )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.StructCantBeTemplateProvider.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (typeKind, declaredSymbol) ) );
+                    }
+                }
+
                 // Get the type scope.
                 var typeScope = declaredSymbol is INamedTypeSymbol ? scope : this._currentTypeScope;
 
@@ -591,12 +619,8 @@ namespace Metalama.Framework.Engine.Templating
                     }
 
                     var containingType = declaredSymbol.ContainingType;
-                    var compilation = this._compilationContext.SourceCompilation;
-                    var reflectionMapper = this._compilationContext.ReflectionMapper;
 
-                    if ( !compilation.HasImplicitConversion( containingType, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) ) &&
-                         !compilation.HasImplicitConversion( containingType, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) ) &&
-                         !containingType.HasInheritedAttribute( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( typeof(TemplateProviderAttribute) ) ) )
+                    if ( !IsAspect( containingType ) && !IsFabric( containingType ) && !IsTemplateProvider( containingType ) )
                     {
                         this.Report(
                             TemplatingDiagnosticDescriptors.TemplatesHaveToBeInTemplateProvider.CreateRoslynDiagnostic(
