@@ -512,7 +512,7 @@ internal static class TemplateBindingHelper
                 }
 
                 IType typeModel;
-
+                
                 switch ( parameterValue )
                 {
                     case IType type:
@@ -525,10 +525,15 @@ internal static class TemplateBindingHelper
 
                         break;
 
+                    case null:
+                        throw new InvalidAdviceParametersException(
+                            MetalamaStringFormatter.Format(
+                                $"The value of type parameter '{parameter.Name}' for template '{template.Declaration}' must not be null." ) );
+
                     default:
                         throw new InvalidAdviceParametersException(
                             MetalamaStringFormatter.Format(
-                                $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
+                                $"The value of type parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
                 }
 
                 var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
