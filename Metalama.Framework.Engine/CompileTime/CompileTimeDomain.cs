@@ -112,7 +112,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     this._logger.Trace?.Log( $"Loading assembly '{path}'." );
 
-                    return this.LoadAssembly( path );
+                    var assembly = this.LoadAssembly( path );
+
+                    if ( assembly.FullName != compileTimeIdentity.ToString() )
+                    {
+                        throw new AssertionFailedException(
+                            $"Assembly identify mismatch: the expected identity is '{compileTimeIdentity}', but the identity of the loaded assembly is '{assembly.FullName}'." );
+                    }
+
+                    return assembly;
                 } );
 
             // CompileTimeDomain is used only for compile-time assemblies, which always have a unique name, so we can have safely

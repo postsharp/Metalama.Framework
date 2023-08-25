@@ -24,12 +24,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         Invariant.Assert( introducedDeclaration.IsStatic );
 
         var targetType = introducedDeclaration.DeclaringType;
-
-        if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
-        {
-            Invariant.Assert( targetType.Constructors.Count == 1 );
-            this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();
-        }
+        this.ReplacedMember = targetType.StaticConstructor?.ToMemberRef<IMember>() ?? default;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )

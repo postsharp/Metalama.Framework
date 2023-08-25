@@ -164,6 +164,12 @@ namespace Metalama.Framework.Engine.CompileTime
             Assembly? assembly = null,
             DiagnosticManifest? diagnosticManifest = null )
         {
+            if ( compiledAssemblyPath != null && compileTimeIdentity.Name != Path.GetFileNameWithoutExtension( compiledAssemblyPath ) )
+            {
+                throw new AssertionFailedException(
+                    $"Assembly identify mismatch: the expected identity is '{compileTimeIdentity}', but the file path is '{compileTimeIdentity}'." );
+            }
+
             this.Domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._mapFileProvider = mapFileProvider;
@@ -323,7 +329,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(
-                assemblyIdentity.ToString(),
                 assemblyIdentity.ToString(),
                 "",
                 aspectTypes,

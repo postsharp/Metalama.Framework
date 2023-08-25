@@ -469,7 +469,7 @@ internal sealed partial class CompileTimeProjectRepository
                 this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
-                new AssemblyIdentity( manifest.CompileTimeAssemblyName ),
+                new AssemblyIdentity( Path.GetFileNameWithoutExtension( assemblyPath ) ),
                 referenceProjects,
                 manifest,
                 assemblyPath,
