@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Transformations
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
                 new MetaApiProperties(
-                    this.ParentAdvice.SourceCompilation,
+                    context.Compilation,
                     context.DiagnosticSink,
                     this.BoundTemplate.TemplateMember.Cast(),
                     this.Tags,
