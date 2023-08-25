@@ -458,12 +458,12 @@ namespace Metalama.Framework.Engine.Templating
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
 
-        private BlockSyntax? InvokeTemplate( string templateName, object? templateProvider, IObjectReader arguments )
+        private BlockSyntax? InvokeTemplate( string templateName, object? templateProvider, IObjectReader args )
         {
             var (templateClass, templateMember) = this.GetTemplateDescription( templateName, templateProvider );
 
             var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
-            var templateArguments = templateMember.ArgumentsForCalledTemplate( arguments );
+            var templateArguments = templateMember.ArgumentsForCalledTemplate( args );
 
             // Add the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
@@ -474,15 +474,15 @@ namespace Metalama.Framework.Engine.Templating
             return compiledTemplateMethodInfo.Invoke( context.TemplateInstance, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
-        public BlockSyntax? InvokeTemplate( string templateName, object? templateProvider = null, object? arguments = null )
+        public BlockSyntax? InvokeTemplate( string templateName, object? templateProvider = null, object? args = null )
         {
-            return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( arguments ) );
+            return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( args ) );
         }
 
-        public BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null )
+        public BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
         {
             var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
-            var directArgs = this._objectReaderFactory.GetReader( arguments );
+            var directArgs = this._objectReaderFactory.GetReader( args );
 
             return this.InvokeTemplate( templateInvocation.TemplateName, templateInvocation.TemplateProvider, ObjectReader.Merge( invocationArgs, directArgs ) );
         }

@@ -7,7 +7,7 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InvokeTemplate(nameof(CalledTemplateSimple), arguments: new { a = 42 });
+        meta.InvokeTemplate(nameof(CalledTemplateSimple), args: new { a = 42 });
         meta.InvokeTemplate(new TemplateInvocation(nameof(CalledTemplateInvocation), null, new { a = 0, b = 1 }), new { a = 42, c = 2 });
         var templateProvider = new Templates();
         meta.InvokeTemplate(nameof(Templates.CalledTemplateSimple), templateProvider, new { a = 42 });

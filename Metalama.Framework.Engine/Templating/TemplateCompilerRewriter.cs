@@ -1369,9 +1369,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 this.CreateTemplateSyntaxFactoryParameter()
             };
 
+        var templateParameterDefaultStatements = new List<StatementSyntax>();
+
         foreach ( var parameter in node.ParameterList.Parameters )
         {
-            var templateParameter = parameter.WithDefault( null );
+            var templateParameter = parameter;
             var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
             var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
 
@@ -1382,6 +1384,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         .WithType( SyntaxFactoryEx.ExpressionSyntaxType )
                         .WithModifiers( TokenList() )
                         .WithAttributeLists( default );
+
+                if ( parameter.Default != null )
+                { 
+                    templateParameter = 
+                        templateParameter.WithDefault( EqualsValueClause( SyntaxFactoryEx.Null ) );
+
+                    // param ??= default-syntax;
+                    templateParameterDefaultStatements.Add(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.CoalesceAssignmentExpression,
+                                IdentifierName( parameter.Identifier ),
+                                this.TransformExpression( parameter.Default.Value ) ) ) );
+                }
             }
 
             templateParameters.Add( templateParameter );
@@ -1418,6 +1434,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 node.ExpressionBody.AssertNotNull().Expression,
                 false,
                 isVoid );
+        }
+
+        if ( templateParameterDefaultStatements.Any() )
+        {
+            body = body.WithStatements( body.Statements.InsertRange( 0, templateParameterDefaultStatements ) );
         }
 
         var result = this.CreateTemplateMethod( node, body, templateParameters.ToArray(), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ).ToArray() );

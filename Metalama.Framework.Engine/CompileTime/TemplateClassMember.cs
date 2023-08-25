@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -28,5 +29,21 @@ namespace Metalama.Framework.Engine.CompileTime
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }
 
-    internal sealed record TemplateClassMemberParameter( int SourceIndex, string Name, bool IsCompileTime, int? TemplateIndex );
+    internal sealed record TemplateClassMemberParameter(
+        int SourceIndex,
+        string Name,
+        bool IsCompileTime,
+        int? TemplateIndex,
+        bool HasDefaultValue = false,
+        object? DefaultValue = null )
+    {
+        public TemplateClassMemberParameter( IParameterSymbol parameterSymbol, bool isCompileTime, int? templateIndex )
+            : this(
+                parameterSymbol.Ordinal,
+                parameterSymbol.Name,
+                isCompileTime,
+                templateIndex,
+                parameterSymbol.HasExplicitDefaultValue,
+                parameterSymbol.HasExplicitDefaultValue ? parameterSymbol.ExplicitDefaultValue : null ) { }
+    }
 }

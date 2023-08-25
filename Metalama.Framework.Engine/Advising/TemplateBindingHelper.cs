@@ -509,14 +509,21 @@ internal static class TemplateBindingHelper
         {
             if ( parameter.IsCompileTime )
             {
-                if ( !compileTimeArguments.TryGetValue( parameter.Name, out var parameterValue ) )
+                if ( compileTimeArguments.TryGetValue( parameter.Name, out var parameterValue ) )
+                {
+                    templateArguments.Add( parameterValue );
+                }
+                else if ( parameter.HasDefaultValue )
+                {
+                    // Note that DefaultValue is null for default(SomeValueType), but MethodInfo.Invoke changes that back to default(SomeValueType).
+                    templateArguments.Add( parameter.DefaultValue );
+                }
+                else
                 {
                     throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
                             $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
                 }
-
-                templateArguments.Add( parameterValue );
             }
             else
             {

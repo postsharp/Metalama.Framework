@@ -8,7 +8,7 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InvokeTemplate(nameof(CalledTemplate), arguments: new { T = typeof(int), i = 1 });
+        meta.InvokeTemplate(nameof(CalledTemplate), args: new { T = typeof(int), i = 1 });
 
         return default;
     }
@@ -18,13 +18,13 @@ internal class Aspect : OverrideMethodAspect
     {
         Console.WriteLine($"called template T={typeof(T)} i={i}");
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), arguments: new { T = typeof(T) });
+        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(T) });
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), arguments: new { T = typeof(T[]) });
+        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(T[]) });
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), arguments: new { T = typeof(Dictionary<int, T>) });
+        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(Dictionary<int, T>) });
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), arguments: new { T = typeof(TargetCode) });
+        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(TargetCode) });
     }
 
     [Template]
