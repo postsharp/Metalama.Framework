@@ -433,15 +433,16 @@ namespace Metalama.Framework.Engine.Formatting
 
             foreach ( var document in project.Documents )
             {
-                var documentPath = Path.GetFullPath( document.FilePath.AssertNotNull() );
+                var documentPath = document.FilePath.AssertNotNull();
+                var documentFullPath = Path.GetFullPath( documentPath );
 
-                if ( !documentPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+                if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // Skipping this document.
                     continue;
                 }
 
-                var relativePath = documentPath.Substring( projectDirectory.Length + 1 );
+                var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
                 var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
 
                 var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
