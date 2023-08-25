@@ -9,7 +9,6 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -68,12 +67,10 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._otherTemplateClassProvider.Get( templateProvider ) ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
-        => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
+        => this.ValidateTemplateName( templateName, templateKind, required: true )!.Value;
 
     private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
     {
-        Invariant.Assert( !(required && ignoreMissing) );
-
         if ( this._templateInstance == null )
         {
             throw new AssertionFailedException( "The template instance cannot be null." );
@@ -93,13 +90,10 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
         }
 
-        var template = ValidateTemplateName( this._templateInstance.TemplateClass, templateName, required, ignoreMissing );
-
-        return template == null ? null : new( template, templateKind );
+        return ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
     }
 
-    // TODO: rename and move to another class (TemplateClass?)
-    public static TemplateClassMember? ValidateTemplateName( TemplateClass templateClass, string templateName, bool required = false, bool ignoreMissing = false )
+    public static TemplateMemberRef? ValidateTemplateName( TemplateClass templateClass, string templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
     {
         Invariant.Assert( !(required && ignoreMissing) );
 
@@ -125,7 +119,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 }
             }
 
-            return template;
+            return new( template, templateKind );
         }
         else
         {

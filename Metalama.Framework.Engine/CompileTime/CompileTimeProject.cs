@@ -319,9 +319,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 .ToImmutableArray();
 
             var templateProviders =
-                assembly.GetTypes().Where( HasCustomAttibuteIncludingInterfaces<TemplateProviderAttribute> ).Select( t => t.FullName ).ToImmutableArray();
+                assembly.GetTypes().Where( HasCustomAttributeIncludingInterfaces<TemplateProviderAttribute> ).Select( t => t.FullName ).ToImmutableArray();
 
-            static bool HasCustomAttibuteIncludingInterfaces<T>( Type type )
+            static bool HasCustomAttributeIncludingInterfaces<T>( Type type )
                 where T : Attribute
             {
                 if ( type.GetCustomAttribute<T>() != null )
@@ -331,7 +331,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var @interface in type.GetInterfaces() )
                 {
-                    if ( HasCustomAttibuteIncludingInterfaces<T>( @interface ) )
+                    if ( HasCustomAttributeIncludingInterfaces<T>( @interface ) )
                     {
                         return true;
                     }

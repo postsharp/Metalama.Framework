@@ -118,6 +118,7 @@ internal partial class TemplateAnnotator
         public override void VisitSwitchStatement( SwitchStatementSyntax node )
         {
             var hasDefaultLabel = node.Sections.Any( section => section.Labels.OfType<DefaultSwitchLabelSyntax>().Any() );
+
             if ( !hasDefaultLabel )
             {
                 // Assume that no default means that the switch is not exhaustive, which means the end is reachable.

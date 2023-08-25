@@ -129,7 +129,7 @@ internal static class TemplateBindingHelper
     }
 
     /// <summary>
-    /// Binds arguments for a template that is caled from another template using meta.InvokeTemplate.
+    /// Binds arguments for a template that is called from another template using meta.InvokeTemplate.
     /// </summary>
     public static object?[] ArgumentsForCalledTemplate( this TemplateMember<IMethod> template, IObjectReader arguments )
     {

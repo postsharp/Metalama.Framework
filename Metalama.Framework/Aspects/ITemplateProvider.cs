@@ -6,7 +6,7 @@ namespace Metalama.Framework.Aspects;
 
 /// <summary>
 /// Base interface for types that define template members, which must be annotated with <see cref="TemplateAttribute"/>.
-/// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider(ITemplateProvider)"/> method of the <see cref="IAdviceFactory"/>. 
+/// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider(ITemplateProvider)"/> method. 
 /// </summary>
 [TemplateProvider]
 public interface ITemplateProvider { }

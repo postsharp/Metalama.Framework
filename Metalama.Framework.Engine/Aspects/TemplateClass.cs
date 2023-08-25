@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Aspects
             var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
 
             return this.Type.GetAnyMethod( templateName )
-                ?? throw new AssertionFailedException( $"Could not find the compile template for {templateSymbol}." );
+                   ?? throw new AssertionFailedException( $"Could not find the compile template for {templateSymbol}." );
         }
 
         public abstract string FullName { get; }

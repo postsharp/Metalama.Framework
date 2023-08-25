@@ -497,7 +497,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0270",
                 "Template call cannot be part of another expression or statement.",
-                "Template call '{0}' can only be done as a stand-alone statement, it cannot be part of another expression or statement.",
+                "Template call '{0}' cannot be part of another expression or statement, it can only be done as a stand-alone statement.",
                 _category,
                 Error );
 

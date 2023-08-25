@@ -458,28 +458,29 @@ namespace Metalama.Framework.Engine.Templating
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
 
-        private BlockSyntax? InvokeTemplate( string templateName, object? templateProvider, IObjectReader args )
+        private BlockSyntax InvokeTemplate( string templateName, object? templateProvider, IObjectReader args )
         {
             var (templateClass, templateMember) = this.GetTemplateDescription( templateName, templateProvider );
 
             var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
             var templateArguments = templateMember.ArgumentsForCalledTemplate( args );
 
-            // Add the first template argument.
+            // Add ITemplateSyntaxFactory as the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
             allArguments[0] = this.ForTemplate( templateName, templateProvider );
             templateArguments.CopyTo( allArguments, 1 );
 
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
+
             return compiledTemplateMethodInfo.Invoke( context.TemplateInstance, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
-        public BlockSyntax? InvokeTemplate( string templateName, object? templateProvider = null, object? args = null )
+        public BlockSyntax InvokeTemplate( string templateName, object? templateProvider = null, object? args = null )
         {
             return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( args ) );
         }
 
-        public BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
+        public BlockSyntax InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
         {
             var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
             var directArgs = this._objectReaderFactory.GetReader( args );
@@ -495,10 +496,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
-            var template = AdviceFactory.ValidateTemplateName( templateClass, templateName, required: true )!;
-
-            // TODO: do I need TMR? if I do, move it back to ValidateTemplateName? if I don't, extract relevant part from TMR.GetTemplateMember()
-            var templateMemberRef = new TemplateMemberRef( template, TemplateKind.Default );
+            var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
             var templateMember = templateMemberRef.GetTemplateMember<IMethod>( this.Compilation.GetCompilationModel(), this._templateExpansionContext.ServiceProvider );
 
             return (templateClass, templateMember);

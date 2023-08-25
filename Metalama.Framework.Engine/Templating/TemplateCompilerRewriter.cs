@@ -913,16 +913,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // In the default implementation, such case would result in an exception.
 
         bool IsSubtemplateCall()
-        {
-            var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
-
-            if ( symbol == null )
-            {
-                return false;
-            }
-
-            return this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
-        }
+            => this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression ) is { } symbol
+               && this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
 
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform
              || (this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) && !IsSubtemplateCall()) )
@@ -1063,7 +1055,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             case MetaMemberKind.InsertComment:
                 {
-                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
+                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments );
 
                     // TemplateSyntaxFactory.AddComments( __s, comments );
                     this.AddTemplateSyntaxFactoryStatement( node, nameof(ITemplateSyntaxFactory.AddComments), transformedArgumentList.ToArray() );
@@ -1079,7 +1071,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             case MetaMemberKind.InvokeTemplate:
                 {
-                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments )!;
+                    var transformedArgumentList = this.VisitList( node.ArgumentList.Arguments );
 
                     // TemplateSyntaxFactory.AddStatement( __s, TemplateSyntaxFactory.InvokeTemplate( ... ) );
                     this.AddAddStatementStatement(
@@ -1183,9 +1175,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
 
-                for ( var i = 0; i < node.ArgumentList.Arguments.Count; i++ )
+                foreach ( var argument in node.ArgumentList.Arguments )
                 {
-                    var argument = node.ArgumentList.Arguments[i];
+                    var modifiedArgument = argument;
                     var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertNotNull();
 
                     if ( argument.Expression is not LiteralExpressionSyntax && argument.Expression.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly )
@@ -1200,8 +1192,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             SyntaxFactoryEx.Default,
                             SyntaxFactoryEx.Default,
                             this.MetaSyntaxFactory.VariableDeclaration(
-                            this.Transform( MetaSyntaxFactoryImpl.Type( parameter.Type ) ),
-                            this.MetaSyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                this.Transform( MetaSyntaxFactoryImpl.Type( parameter.Type ) ),
+                                this.MetaSyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
                                     this.MetaSyntaxFactory.VariableDeclarator(
                                         variableIdentifier,
                                         SyntaxFactoryEx.Default,
@@ -1209,14 +1201,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         this.AddAddStatementStatement( node, variableDeclaration );
 
-                        argument = argument.WithExpression( this.MetaSyntaxFactory.IdentifierName( variableIdentifier ) );
+                        modifiedArgument = argument.WithExpression( this.MetaSyntaxFactory.IdentifierName( variableIdentifier ) );
                     }
                     else if ( this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly )
                     {
-                        argument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
+                        modifiedArgument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
                     }
 
-                    transformedArguments.Add( this.VisitArgument( argument ).AssertCast<ArgumentSyntax>() );
+                    transformedArguments.Add( this.VisitArgument( modifiedArgument ).AssertCast<ArgumentSyntax>() );
                 }
 
                 var (receiver, name) = node.Expression switch
@@ -1250,8 +1242,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         // templateSyntaxFactory.TemplateTypeArgument("name", typeof(T))
                         var templateTypeArgumentExpression =
-                            InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( ITemplateSyntaxFactory.TemplateTypeArgument ) ) )
-                            .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralNonNullExpression( typeParameter.Name ) ), Argument( this.TransformCompileTimeCode<ExpressionSyntax>( TypeOfExpression( typeArgument ) ) ) );
+                            InvocationExpression(
+                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TemplateTypeArgument) ) )
+                                .AddArgumentListArguments(
+                                    Argument( SyntaxFactoryEx.LiteralNonNullExpression( typeParameter.Name ) ),
+                                    Argument( this.TransformCompileTimeCode<ExpressionSyntax>( TypeOfExpression( typeArgument ) ) ) );
 
                         transformedArguments.Add( Argument( templateTypeArgumentExpression ) );
 
@@ -1271,7 +1266,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 };
 
                 // templateSyntaxFactory.ForTemplate("templateName", templateProvider)
-                var templateSyntaxFactoryExpression = InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._templateMetaSyntaxFactory.TemplateSyntaxFactoryIdentifier, IdentifierName( nameof(ITemplateSyntaxFactory.ForTemplate) ) ) )
+                var templateSyntaxFactoryExpression = InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ForTemplate) ) ) 
                     .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralNonNullExpression( symbol.Name ) ), Argument( templateProviderExpression ) );
 
                 var templateInvocationExpression = InvocationExpression( compiledTemplateExpression )

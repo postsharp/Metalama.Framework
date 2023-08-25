@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -1045,9 +1044,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         var expressionScope = this.GetNodeScope( transformedExpression );
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-
-        ImmutableArray<IParameterSymbol> parameters;
 
         var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
 
@@ -1080,42 +1076,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
         }
 
-        switch ( symbol )
-        {
-            case IMethodSymbol method:
-                parameters = method.Parameters;
-
-                break;
-
-            default:
-                switch ( expressionType )
-                {
-                    case null when symbol == null:
-                        // This seems to happen when one of the argument is dynamic.
-                        // Roslyn then stops doing the symbol analysis for the whole downstream syntax tree.
-                        parameters = default;
-
-                        break;
-
-                    case { TypeKind: TypeKind.Delegate }:
-                        parameters = ((INamedTypeSymbol) expressionType).Constructors.Single().Parameters;
-
-                        break;
-
-                    case { TypeKind: TypeKind.Dynamic }:
-                        // In case of invocation of a dynamic location, there is no list of parameters, only arguments.
-                        parameters = default;
-
-                        break;
-
-                    default:
-                        // We can get here in case of syntax error.
-                        return node;
-                }
-
-                break;
-        }
-
         InvocationExpressionSyntax updatedInvocation;
 
         if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
@@ -1136,9 +1096,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 // Transform the argument value.
                 var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameter?.Type );
 
-                var isRunTimeParameterOfSubtemplate = parameter != null
-                    && templateInfo.CanBeReferencedAsSubtemplate
-                    && this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+                var isRunTimeParameterOfSubtemplate =
+                    parameter != null &&
+                    templateInfo.CanBeReferencedAsSubtemplate &&
+                    this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
 
                 if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
