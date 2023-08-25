@@ -165,31 +165,41 @@ public sealed class LicenseVerifier : IProjectService
 
     internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        // Distinguish redistribution and non-redistribution aspect classes.
-        var nonRedistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        var aspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        
+        // Compute required credits.
+        var consumptions = new List<LicenseCreditConsumption>();
 
-        var projectsWithRedistributionLicense = nonRedistributionAspectClasses
+        // Before excluding aspect classes from redistributable libraries, check aspects considered as features.
+        if ( aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) ) > 0 )
+        {
+            // Consume 1 credit for all contracts.
+            consumptions.Add( new LicenseCreditConsumption( "Contract Aspects", 1, LicenseCreditConsumptionKind.Feature ) );
+        }
+        
+        // Identify redistributable libraries.
+        var projectsWithRedistributionLicense = aspectClasses
             .OfType<AspectClass>()
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
             .Distinct()
             .Where( this.IsProjectWithValidRedistributionLicense )
             .ToHashSet();
-
-        nonRedistributionAspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
-
-        // Compute required credits.
-        var consumptions = new List<LicenseCreditConsumption>();
-
-        consumptions.AddRange(
-            nonRedistributionAspectClasses.SelectAsEnumerable( x => x.FullName )
-                .OrderBy( x => x )
-                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.UserClass ) ) );
-
+        
+        // Consume 1 credit per redistributable library.
         consumptions.AddRange(
             projectsWithRedistributionLicense.SelectAsEnumerable( x => x.RunTimeIdentity.Name )
                 .OrderBy( x => x )
                 .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.Library ) ) );
+        
+        // Exclude aspect classes coming from the redistributable libraries. 
+        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
+
+        // Consume 1 credit per remaining aspect class.
+        consumptions.AddRange(
+            aspectClasses.SelectAsEnumerable( x => x.FullName )
+                .OrderBy( x => x )
+                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.UserClass ) ) );
 
         var totalRequiredCredits = (int) Math.Ceiling( consumptions.Sum( c => c.ConsumedCredits ) );
 
