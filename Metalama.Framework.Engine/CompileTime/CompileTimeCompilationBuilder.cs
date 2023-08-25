@@ -1065,6 +1065,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
+        out string? compileTimeAssemblyName,
         out string assemblyPath,
         out string? sourceDirectory )
     {
@@ -1078,6 +1079,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         assemblyPath = outputPaths.Pe;
         sourceDirectory = outputPaths.Directory;
+        compileTimeAssemblyName = outputPaths.CompileTimeAssemblyName;
 
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {

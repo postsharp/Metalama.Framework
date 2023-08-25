@@ -450,6 +450,7 @@ internal sealed partial class CompileTimeProjectRepository
                     referenceProjects,
                     diagnosticAdder,
                     cancellationToken,
+                    out var compileTimeAssemblyName,
                     out var assemblyPath,
                     out var sourceDirectory ) )
             {
@@ -469,7 +470,7 @@ internal sealed partial class CompileTimeProjectRepository
                 this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
-                new AssemblyIdentity( Path.GetFileNameWithoutExtension( assemblyPath ) ),
+                new AssemblyIdentity( compileTimeAssemblyName ),
                 referenceProjects,
                 manifest,
                 assemblyPath,
