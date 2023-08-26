@@ -233,6 +233,7 @@ namespace Metalama.Framework.Engine.CompileTime
             => attribute.AttributeClass?.Name switch
             {
                 nameof(CompileTimeAttribute) => TemplatingScope.CompileTimeOnly,
+                nameof(RunTimeAttribute) => TemplatingScope.RunTimeOnly,
                 nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
@@ -1011,6 +1012,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
                     {
                         scope = this._roslynIsCompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOrCompileTime;
+
                         return true;
                     }
 
