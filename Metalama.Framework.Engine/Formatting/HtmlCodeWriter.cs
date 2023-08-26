@@ -400,7 +400,7 @@ namespace Metalama.Framework.Engine.Formatting
             ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
             string htmlExtension,
-            Func<string, FileDiffInfo>? getDiffInfo = null )
+            Func<string, FileDiffInfo?>? getDiffInfo = null )
         {
             var compilation = partialCompilation.Compilation;
             var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
@@ -479,11 +479,18 @@ namespace Metalama.Framework.Engine.Formatting
                 ".t.cs.html",
                 p => GetDiffInfoForPath( p, false ) );
 
-            FileDiffInfo GetDiffInfoForPath( string path, bool isOld )
+            FileDiffInfo? GetDiffInfoForPath( string path, bool isOld )
             {
-                var oldTree = inputCompilation.SyntaxTrees[path];
-                var newTree = outputCompilation.SyntaxTrees[path];
+                if ( !inputCompilation.SyntaxTrees.TryGetValue( path, out var oldTree ) )
+                {
+                    return null;
+                }
 
+                if ( !outputCompilation.SyntaxTrees.TryGetValue( path, out var newTree ) )
+                {
+                    return null;
+                }
+                
                 return GetDiffInfo( oldTree, newTree, isOld );
             }
         }
