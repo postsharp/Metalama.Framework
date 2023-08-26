@@ -7,12 +7,10 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
@@ -24,12 +22,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         Invariant.Assert( introducedDeclaration.IsStatic );
 
         var targetType = introducedDeclaration.DeclaringType;
-
-        if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
-        {
-            Invariant.Assert( targetType.Constructors.Count == 1 );
-            this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();
-        }
+        this.ReplacedMember = targetType.StaticConstructor?.ToMemberRef<IMember>() ?? default;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
