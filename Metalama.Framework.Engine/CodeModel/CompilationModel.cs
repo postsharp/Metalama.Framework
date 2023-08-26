@@ -27,7 +27,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
+    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
     {
         static CompilationModel()
         {
@@ -68,7 +68,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
 
+        SemanticModel ISdkCompilation.GetCachedSemanticModel( SyntaxTree syntaxTree ) => this.RoslynCompilation.GetCachedSemanticModel( syntaxTree );
+
         public DeclarationFactory Factory { get; }
+
+        ISdkDeclarationFactory ISdkCompilation.Factory => this.Factory;
 
         IAspectRepository ICompilationInternal.AspectRepository => this.AspectRepository;
 
