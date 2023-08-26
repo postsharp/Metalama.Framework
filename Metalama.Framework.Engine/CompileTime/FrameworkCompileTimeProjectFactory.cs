@@ -114,7 +114,6 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
             tfm,
             _ => new CompileTimeProjectManifest(
                 _frameworkAssemblyIdentity.ToString(),
-                _frameworkAssemblyIdentity.ToString(),
                 "",
                 new[] { typeof(InternalImplementAttribute) }.SelectAsImmutableArray( t => t.FullName ),
                 ImmutableArray<string>.Empty,
