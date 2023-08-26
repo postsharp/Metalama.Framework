@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
 /// </summary>
 [PublicAPI]
-public sealed class DeclarationFactory : IDeclarationFactory
+public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFactory
 {
     private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
         new( RefEqualityComparer<ICompilationElement>.Default );
@@ -168,7 +168,7 @@ public sealed class DeclarationFactory : IDeclarationFactory
             @event.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
-    internal bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
+    public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
     {
         var compilationElement = this.GetCompilationElement( symbol );
         declaration = compilationElement as IDeclaration;
@@ -517,10 +517,10 @@ public sealed class DeclarationFactory : IDeclarationFactory
         /*
         if ( propertyBuilder is PromotedField promotedField )
         {
-            // When getting a promoted field, we need to look at the current CompilationModel. Are we before or after 
+            // When getting a promoted field, we need to look at the current CompilationModel. Are we before or after
             // promotion? The result will be different
-            
-            
+
+
             return promotedField.Field switch
             {
                 BuiltField builtField => this.GetField( builtField.FieldBuilder, options ),

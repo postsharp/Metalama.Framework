@@ -65,6 +65,24 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public static Compilation GetRoslynCompilation( this ICompilation compilation ) => ((ISdkCompilation) compilation).RoslynCompilation;
+
+        public static SemanticModel GetSemanticModel( this ICompilation compilation, SyntaxTree syntaxTree )
+            => ((ISdkCompilation) compilation).GetCachedSemanticModel( syntaxTree );
+
+        public static bool TryGetDeclaration( this ICompilation compilation, ISymbol symbol, out IDeclaration? declaration )
+            => ((ISdkCompilation) compilation).Factory.TryGetDeclaration( symbol, out declaration );
+
+        public static IDeclaration GetDeclaration( this ICompilation compilation, ISymbol symbol )
+        {
+            if ( !compilation.TryGetDeclaration( symbol, out var declaration ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(symbol), $"The symbol '{symbol}' cannot be mapped to the compilation '{compilation}'." );
+            }
+
+            return declaration;
+        }
+
         private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {
             public static ExpressionTypeVisitor Instance { get; } = new();
