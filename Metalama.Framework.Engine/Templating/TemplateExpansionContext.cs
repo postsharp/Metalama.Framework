@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
@@ -137,9 +138,20 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
 
-        this.TemplateGenericArguments =
-            (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
+        var templateTypeArguments =
+            template?.TemplateArguments.OfType<TemplateTypeArgument>().ToImmutableDictionary( x => x.Name, x => x.Type )
             ?? ImmutableDictionary<string, IType>.Empty;
+
+        if (metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
+        {
+            // Generic method - we need to add type parameters as named arguments for correct serializable id resultion.
+
+            // TODO: This presumes mapping of type parameters by name, more appropriate place would be to have a map in BoundTemplateMethod, but there is currently no other use for that.
+
+            templateTypeArguments = templateTypeArguments.AddRange( targetMethod.TypeParameters.SelectAsEnumerable( p => new KeyValuePair<string, IType>( p.Name, p ) ) );
+        }
+
+        this.TemplateGenericArguments = templateTypeArguments;
 
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
