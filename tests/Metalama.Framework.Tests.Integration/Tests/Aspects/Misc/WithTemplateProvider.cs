@@ -19,7 +19,8 @@ public class MyAspect : TypeAspect
     }
 }
 
-internal class TemplateProvider : ITemplateProvider
+[TemplateProvider]
+internal class TemplateProvider
 {
     [Template]
     public string? OverrideTemplate

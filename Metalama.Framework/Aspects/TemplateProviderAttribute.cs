@@ -10,5 +10,5 @@ namespace Metalama.Framework.Aspects;
 /// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider(object)"/> method. 
 /// </summary>
 [RunTimeOrCompileTime]
-[AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface )]
+[AttributeUsage( AttributeTargets.Class )]
 public class TemplateProviderAttribute : Attribute { }

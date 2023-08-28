@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateProvider_Struct;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.StructAspect;
 
 struct Aspect : IAspect<IMethod>
 {
@@ -22,18 +22,6 @@ struct Aspect : IAspect<IMethod>
     {
         Console.WriteLine("regular template");
 
-        new Templates().CalledTemplate();
-        new Templates().CalledTemplate();
-
         return meta.Proceed();
-    }
-}
-
-struct Templates : ITemplateProvider
-{
-    [Template]
-    public void CalledTemplate()
-    {
-        Console.WriteLine($"called template");
     }
 }

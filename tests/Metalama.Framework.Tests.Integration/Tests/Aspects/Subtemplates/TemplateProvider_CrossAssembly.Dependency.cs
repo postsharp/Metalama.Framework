@@ -4,7 +4,8 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateProvider_CrossAssembly;
 
 [CompileTime]
-public class Templates : ITemplateProvider
+[TemplateProvider]
+public class Templates
 {
     [Template]
     public void Template([CompileTime] int i)

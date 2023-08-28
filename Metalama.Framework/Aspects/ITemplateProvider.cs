@@ -1,12 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Advising;
+using System;
 
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Base interface for types that define template members, which must be annotated with <see cref="TemplateAttribute"/>.
-/// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider(ITemplateProvider)"/> method. 
+/// Mark the class with <see cref="TemplateProviderAttribute"/> instead.
 /// </summary>
-[TemplateProvider]
+[Obsolete("Mark the class with [TemplateProvider] instead.", error: true)]
 public interface ITemplateProvider { }

@@ -16,7 +16,8 @@ class Aspect : OverrideMethodAspect
     }
 }
 
-class Templates : ITemplateProvider
+[TemplateProvider]
+class Templates
 {
     private static int i;
 

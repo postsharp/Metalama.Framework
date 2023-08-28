@@ -557,11 +557,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string, ISymbol)> StructCantBeTemplateProvider
+        internal static readonly DiagnosticDefinition<ISymbol> AspectCantBeStruct
             = new(
                 "LAMA0278",
-                "An aspect or a template provider can't be a value type.",
-                "The {0} '{1}' can't be a value type.",
+                "An aspect or can't be a value type.",
+                "The aspect '{0}' can't be a value type.",
                 _category,
                 Error );
 

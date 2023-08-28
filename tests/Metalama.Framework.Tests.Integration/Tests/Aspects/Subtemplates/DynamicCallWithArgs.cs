@@ -29,7 +29,8 @@ internal class Aspect : OverrideMethodAspect
 }
 
 [CompileTime]
-class Templates : ITemplateProvider
+[TemplateProvider]
+class Templates
 {
     [Template]
     public void CalledTemplateSimple([CompileTime] int a)

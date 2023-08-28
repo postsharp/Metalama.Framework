@@ -574,20 +574,13 @@ namespace Metalama.Framework.Engine.Templating
                 bool IsTemplateProvider( INamedTypeSymbol symbol )
                     => symbol.HasInheritedAttribute( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( typeof(TemplateProviderAttribute) ) );
 
-                // Report an error for struct aspect or template provider.
-                if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol )
+                // Report an error for struct aspect.
+                if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol && IsAspect( typeSymbol ) )
                 {
-                    var typeKind = IsAspect( typeSymbol ) ? "aspect" :
-                        IsTemplateProvider( typeSymbol ) ? "template provider" :
-                        null;
-
-                    if ( typeKind != null )
-                    {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.StructCantBeTemplateProvider.CreateRoslynDiagnostic(
-                                declaredSymbol.GetDiagnosticLocation(),
-                                (typeKind, declaredSymbol) ) );
-                    }
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.AspectCantBeStruct.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol ) );
                 }
 
                 // Get the type scope.

@@ -27,7 +27,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     }
 
     [CompileTime]
-    public class AdviceResultTemplates : ITemplateProvider
+    [TemplateProvider]
+    public class AdviceResultTemplates
     {
         [Template]
         public void WitnessTemplate([CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types, [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members)

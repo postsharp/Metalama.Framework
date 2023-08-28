@@ -12,7 +12,8 @@ internal class MyAspect : TypeAspect
     }
 }
 
-internal class MyTemplateProvider : ITemplateProvider
+[TemplateProvider]
+internal class MyTemplateProvider
 {
     [Template]
     public void NewMethod()
