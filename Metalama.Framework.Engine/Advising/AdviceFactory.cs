@@ -61,7 +61,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         => this.WithTemplateClassInstance(
             new TemplateClassInstance(
                 templateProvider,
-                this._otherTemplateClassProvider.Get( templateProvider ) ) );
+                this._otherTemplateClassProvider.Get( new( templateProvider ) ) ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, required: true )!.Value;

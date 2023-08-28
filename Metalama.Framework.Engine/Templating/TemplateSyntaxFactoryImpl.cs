@@ -458,7 +458,7 @@ namespace Metalama.Framework.Engine.Templating
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
 
-        private BlockSyntax InvokeTemplate( string templateName, object? templateProvider, IObjectReader args )
+        private BlockSyntax InvokeTemplate( string templateName, TemplateProvider templateProvider, IObjectReader args )
         {
             var (templateClass, templateMember) = this.GetTemplateDescription( templateName, templateProvider );
 
@@ -477,7 +477,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public BlockSyntax InvokeTemplate( string templateName, object? templateProvider = null, object? args = null )
         {
-            return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( args ) );
+            return this.InvokeTemplate( templateName, new( templateProvider ), this._objectReaderFactory.GetReader( args ) );
         }
 
         public BlockSyntax InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
@@ -485,14 +485,14 @@ namespace Metalama.Framework.Engine.Templating
             var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
             var directArgs = this._objectReaderFactory.GetReader( args );
 
-            return this.InvokeTemplate( templateInvocation.TemplateName, templateInvocation.TemplateProvider, ObjectReader.Merge( invocationArgs, directArgs ) );
+            return this.InvokeTemplate( templateInvocation.TemplateName, new( templateInvocation.TemplateProvider ), ObjectReader.Merge( invocationArgs, directArgs ) );
         }
 
-        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription( string templateName, object? templateProvider )
+        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription( string templateName, TemplateProvider templateProvider )
         {
-            if ( templateProvider == this._templateExpansionContext.TemplateInstance )
+            if ( templateProvider.Value == this._templateExpansionContext.TemplateInstance )
             {
-                templateProvider = null;
+                templateProvider = new( null );
             }
 
             var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
@@ -503,6 +503,9 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public ITemplateSyntaxFactory ForTemplate( string templateName, object? templateProvider )
+            => this.ForTemplate( templateName, new( templateProvider ) );
+
+        private ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
         {
             var templateMember = this.GetTemplateDescription( templateName, templateProvider ).TemplateMember;
 

@@ -603,8 +603,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
-    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, object? templateProvider )
-        => new( this, template, templateProvider );
+    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, TemplateProvider templateProvider )
+        => new( this, template, templateProvider.Value );
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
@@ -642,9 +642,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
     }
 
-    public TemplateClass GetTemplateClass( object? templateProvider )
+    public TemplateClass GetTemplateClass( TemplateProvider templateProvider )
     {
-        if ( templateProvider == null )
+        if ( templateProvider.Value == null )
         {
             return this._template.AssertNotNull().TemplateClassMember.TemplateClass;
         }

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Services;
-using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -15,10 +15,6 @@ internal class OtherTemplateClassProvider : IProjectService
         this._otherTemplateClasses = otherTemplateClasses;
     }
 
-    public TemplateClass Get( object templateProvider )
-    {
-        var type = templateProvider as Type ?? templateProvider.GetType();
-
-        return this._otherTemplateClasses[type.FullName.AssertNotNull()];
-    }
+    public TemplateClass Get( TemplateProvider templateProvider )
+        => this._otherTemplateClasses[templateProvider.ValueType.FullName.AssertNotNull()];
 }
