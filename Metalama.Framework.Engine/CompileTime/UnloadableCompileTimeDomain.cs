@@ -2,6 +2,7 @@
 
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -132,7 +133,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( stopwatch.Elapsed.TotalSeconds > 30 )
                     {
-                        var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
+                        var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => (Assembly?) r.Target ).WhereNotNull().Select( a => a.GetName().Name ) );
 
                         // ReSharper disable CommentTypo
 
