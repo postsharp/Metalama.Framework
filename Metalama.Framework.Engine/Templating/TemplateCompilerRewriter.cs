@@ -1349,12 +1349,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
-        if ( node.Body == null && node.ExpressionBody == null )
-        {
-            // Not supported or incomplete syntax.
-            return node;
-        }
-
         this.Indent( 3 );
 
         // Build the template parameter list.
@@ -1415,13 +1409,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
 
         // Build the template body.
-        BlockSyntax body;
+        BlockSyntax? body;
 
         if ( node.Body != null )
         {
             body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
         }
-        else
+        else if ( node.ExpressionBody != null )
         {
             var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.IsKind( SyntaxKind.VoidKeyword );
 
@@ -1430,10 +1424,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 false,
                 isVoid );
         }
+        else
+        {
+            body = null;
+        }
 
         if ( templateParameterDefaultStatements.Any() )
         {
-            body = body.WithStatements( body.Statements.InsertRange( 0, templateParameterDefaultStatements ) );
+            body = body?.WithStatements( body.Statements.InsertRange( 0, templateParameterDefaultStatements ) );
         }
 
         var result = this.CreateTemplateMethod( node, body, templateParameters.ToArray(), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ).ToArray() );
@@ -1542,18 +1540,87 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterSyntax[]? parameters = null, SyntaxToken[]? accessibilityModifiers = null )
+    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax? body, ParameterSyntax[]? parameters = null, SyntaxToken[]? accessibilityModifiers = null )
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
             .AddParameterListParameters( parameters ?? new[] { this.CreateTemplateSyntaxFactoryParameter() } )
-            .AddModifiers( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } )
-            .AddModifiers(
-                this._rootTemplateSymbol.AssertNotNull().IsStatic ? new[] { Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) } : Array.Empty<SyntaxToken>() )
+            .WithModifiers( this.DetermineModifiers( accessibilityModifiers ) )
             .NormalizeWhitespace()
             .WithBody( body )
+            .WithSemicolonToken( Token( body == null ? SyntaxKind.SemicolonToken : SyntaxKind.None ) )
             .WithLeadingTrivia( node.GetLeadingTrivia() )
             .WithTrailingTrivia( LineFeed, LineFeed );
+
+    private SyntaxTokenList DetermineModifiers( SyntaxToken[]? accessibilityModifiers )
+    {
+        var modifiers = TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } );
+
+        var templateSymbol = this._rootTemplateSymbol.AssertNotNull();
+
+        void AddModifier( SyntaxKind kind ) => modifiers = modifiers.Add( Token( kind ).WithTrailingTrivia( Space ) );
+
+        if ( templateSymbol.IsStatic )
+        {
+            AddModifier( SyntaxKind.StaticKeyword );
+        }
+
+        if ( templateSymbol is IMethodSymbol { AssociatedSymbol: null } )
+        {
+            // Only regular methods (not accessors) can be used as subtemplates, so only they get virtual-related modifiers.
+
+            if ( templateSymbol.IsVirtual )
+            {
+                AddModifier( SyntaxKind.VirtualKeyword );
+            }
+
+            if ( templateSymbol.IsAbstract )
+            {
+                AddModifier( SyntaxKind.AbstractKeyword );
+            }
+
+            if ( templateSymbol.IsOverride )
+            {
+                // If the base template is from an assembly that was compiled with Metalama version older than 2023.3,
+                // the base compiled template won't be abstract or virtual, so the derived compiled template can't be override.
+                var overriddenTemplate = templateSymbol.GetOverriddenMember();
+
+                if ( overriddenTemplate != null && !Equals( overriddenTemplate.ContainingAssembly, templateSymbol.ContainingAssembly ) )
+                {
+                    var compileTimeBaseType = this.MetaSyntaxFactory.ReflectionMapper.GetNamedTypeSymbolByMetadataName(
+                        overriddenTemplate.ContainingType.GetReflectionFullName(),
+                        new( overriddenTemplate.ContainingAssembly.Name ) );
+
+                    var baseCompiledTemplate = compileTimeBaseType.GetMembers( this._templateName ).SingleOrDefault();
+
+                    if ( baseCompiledTemplate != null && (baseCompiledTemplate.IsVirtual || baseCompiledTemplate.IsAbstract) )
+                    {
+                        if ( templateSymbol.IsSealed )
+                        {
+                            AddModifier( SyntaxKind.SealedKeyword );
+                        }
+
+                        AddModifier( SyntaxKind.OverrideKeyword );
+                    }
+                    else if ( !templateSymbol.IsSealed && !templateSymbol.ContainingType.IsSealed )
+                    {
+                        AddModifier( SyntaxKind.VirtualKeyword );
+                    }
+                }
+                else
+                {
+                    if ( templateSymbol.IsSealed )
+                    {
+                        AddModifier( SyntaxKind.SealedKeyword );
+                    }
+
+                    AddModifier( SyntaxKind.OverrideKeyword );
+                }
+            }
+        }
+
+        return modifiers;
+    }
 
     public override SyntaxNode VisitBlock( BlockSyntax node )
     {

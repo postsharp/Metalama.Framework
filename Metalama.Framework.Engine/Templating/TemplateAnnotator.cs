@@ -1059,10 +1059,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     node.ToString() );
             }
 
-            if ( (symbol!.IsVirtual || symbol.IsAbstract || symbol.IsOverride) && !symbol.IsSealed )
+            if ( (symbol!.IsVirtual || symbol.IsAbstract || symbol.IsOverride)
+                 && !symbol.IsSealed
+                 && symbol is IMethodSymbol { Parameters: var parameters }
+                 && parameters.Length > node.ArgumentList.Arguments.Count )
             {
                 this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.SubtemplateCallCantBeVirtual,
+                    TemplatingDiagnosticDescriptors.SubtemplateCallWithMissingArgumentsCantBeVirtual,
                     node,
                     node.ToString() );
             }
@@ -1073,6 +1076,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     TemplatingDiagnosticDescriptors.SubtemplateCantHaveRunTimeTypeParameter,
                     node,
                     symbol );
+            }
+
+            // TODO: only forbid this when either calling the abstract template using base, or when there is no override.
+            if ( templateInfo.IsAbstract )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.CantCallAbstractSubtemplate,
+                    node,
+                    symbol! );
             }
         }
 

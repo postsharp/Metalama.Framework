@@ -7,13 +7,22 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        this?.CalledTemplate();
+        var templates = Templates.Create();
+
+        templates?.CalledTemplate();
 
         return default;
     }
+}
+
+[TemplateProvider]
+class Templates
+{
+    [CompileTime]
+    public static Templates? Create() => new();
 
     [Template]
-    private void CalledTemplate()
+    public void CalledTemplate()
     {
         Console.WriteLine("called template");
     }

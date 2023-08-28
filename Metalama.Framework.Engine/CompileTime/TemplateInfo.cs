@@ -71,7 +71,6 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Returns a copy of the current <see cref="TemplateInfo"/>, but with the <see cref="IsAbstract"/> property set to <c>true</c>.
         /// </summary>
-        /// <returns></returns>
         public TemplateInfo AsAbstract() => new( this, true );
 
         public override string ToString() => $"Type={this.AttributeType}, Attribute={this.Attribute}";

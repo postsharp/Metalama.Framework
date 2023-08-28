@@ -533,11 +533,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> SubtemplateCallCantBeVirtual
+        internal static readonly DiagnosticDefinition<string> SubtemplateCallWithMissingArgumentsCantBeVirtual
             = new(
                 "LAMA0275",
-                "Template call cannot be virtual.",
-                "Template call '{0}' cannot be virtual. Consider marking the called template method or its containing type as sealed.",
+                "Template call that uses optional parameters currently can't be virtual.",
+                "Template call '{0}' currently cannot be virtual and use optional parameters at the same time.",
                 _category,
                 Error );
 
@@ -562,6 +562,14 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0278",
                 "An aspect or a template provider can't be a value type.",
                 "The {0} '{1}' can't be a value type.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> CantCallAbstractSubtemplate
+            = new(
+                "LAMA0279",
+                "Abstract or empty template can't be called.",
+                "The abstract or empty template '{0}' can't be called.",
                 _category,
                 Error );
     }

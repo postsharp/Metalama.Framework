@@ -6,10 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -47,8 +47,7 @@ namespace Metalama.Framework.Engine.Advising
             var templateReflectionContext = this._templateMember.TemplateClass.GetTemplateReflectionContext( compilation.CompilationContext );
             var type = templateReflectionContext.Compilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
 
-            var symbol = type.GetMembers( this._templateMember.Name )
-                .Single( classifier.IsTemplate );
+            var symbol = type.GetSingleMemberIncludingBase( this._templateMember.Name, classifier.IsTemplate );
 
             var declaration = templateReflectionContext.GetCompilationModel( compilation ).Factory.GetDeclaration( symbol );
 

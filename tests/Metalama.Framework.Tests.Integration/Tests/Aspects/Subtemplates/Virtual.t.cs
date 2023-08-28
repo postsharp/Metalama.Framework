@@ -1,4 +1,51 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0275 on `OverrideMethod()`: `Template call 'OverrideMethod()' cannot be virtual. Consider marking the called template method or its containing type as sealed.`
-// Error LAMA0275 on `overrideMethodAspect.OverrideMethod()`: `Template call 'overrideMethodAspect.OverrideMethod()' cannot be virtual. Consider marking the called template method or its containing type as sealed.`
-// Error LAMA0275 on `((OverrideMethodAspect)this).OverrideMethod()`: `Template call '((OverrideMethodAspect)this).OverrideMethod()' cannot be virtual. Consider marking the called template method or its containing type as sealed.`
+class TargetCode
+{
+    [Aspect]
+    private void Method1(int x)
+    {
+        global::System.Console.WriteLine("normal template");
+        switch (x)
+        {
+            case 0:
+                {
+                    global::System.Console.WriteLine("base called template");
+                }
+                break;
+            case 1:
+                {
+                    global::System.Console.WriteLine("base called template");
+                }
+                break;
+            case 2:
+                {
+                    global::System.Console.WriteLine("base called template");
+                }
+                break;
+        }
+        throw new global::System.Exception();
+    }
+    [DerivedAspect]
+    private void Method2(int x)
+    {
+        global::System.Console.WriteLine("normal template");
+        switch (x)
+        {
+            case 0:
+                {
+                    global::System.Console.WriteLine("derived called template");
+                }
+                break;
+            case 1:
+                {
+                    global::System.Console.WriteLine("derived called template");
+                }
+                break;
+            case 2:
+                {
+                    global::System.Console.WriteLine("derived called template");
+                }
+                break;
+        }
+        throw new global::System.Exception();
+    }
+}

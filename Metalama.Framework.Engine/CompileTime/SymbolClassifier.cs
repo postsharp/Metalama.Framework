@@ -190,6 +190,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 return associatedTemplateInfo;
             }
 
+            if ( symbol.OriginalDefinition != symbol
+                && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
+            {
+                return originalDefinitionTemplateInfo;
+            }
+
             if ( symbol.GetOverriddenMember() is { } overriddenMember )
             {
                 return this.GetTemplateInfo( overriddenMember, true );

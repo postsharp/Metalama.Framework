@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -46,6 +47,8 @@ namespace Metalama.Framework.Engine.Templating
             ImmutableArray<IParameterSymbol> parameters = default,
             bool ignoredLastParameter = false )
         {
+            symbol = symbol.GetOverriddenMember() ?? symbol;
+
             var principal = "__" + templateMemberName;
 
             if ( parameters.IsDefaultOrEmpty || (ignoredLastParameter && parameters.Length == 1) )

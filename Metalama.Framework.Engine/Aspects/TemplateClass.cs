@@ -128,8 +128,23 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             IDiagnosticAdder diagnosticAdder )
         {
-            var members = this._baseClass?.Members.ToBuilder()
-                          ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
+            var members = ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
+
+            if ( this._baseClass != null )
+            {
+                foreach ( var baseMember in this._baseClass.Members )
+                {
+                    var derivedMember = baseMember.Value with
+                    {
+                        TemplateClass = this,
+                        Accessors = baseMember.Value.Accessors
+                            .SelectAsEnumerable( kvp => (kvp.Key, Value: kvp.Value with { TemplateClass = this }) )
+                            .ToImmutableDictionary( kvp => kvp.Key, kvp => kvp.Value )
+                    };
+
+                    members.Add( baseMember.Key, derivedMember );
+                }
+            }
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
@@ -311,13 +326,13 @@ namespace Metalama.Framework.Engine.Aspects
                          !existingMember.TemplateInfo.IsNone )
                     {
                         // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
-                        // would have failed. The
+                        // would have failed.
 
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name),
+                                (memberKey, type.Name, existingMember.TemplateClass._baseClass!.Type.Name),
                                 this ) );
 
                         this.HasError = true;

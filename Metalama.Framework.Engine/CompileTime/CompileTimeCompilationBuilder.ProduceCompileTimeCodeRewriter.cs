@@ -687,6 +687,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( success )
                 {
+                    if ( methodSymbol.IsAbstract )
+                    {
+                        yield return node;
+                    }
                     if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
                         yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
