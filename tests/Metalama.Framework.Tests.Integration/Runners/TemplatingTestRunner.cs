@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
@@ -289,7 +290,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var compilationServices = CompilationContextFactory.GetInstance( roslynCompilation );
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-            var templateInstance = Activator.CreateInstance( templateType )!;
+            var templateProvider = TemplateProvider.FromInstanceUnsafe( Activator.CreateInstance( templateType )! );
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
@@ -341,7 +342,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             return (new TemplateExpansionContext(
                         serviceProvider,
-                        templateInstance,
+                        templateProvider,
                         metaApi,
                         lexicalScope,
                         syntaxGenerationContext,

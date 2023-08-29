@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 var expansionContext = new TemplateExpansionContext(
                     context,
-                    this.TemplateInstance.Instance,
+                    this.TemplateInstance.TemplateProvider,
                     metaApi,
                     targetMember,
                     boundTemplate,

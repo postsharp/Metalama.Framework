@@ -1,4 +1,4 @@
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
     private async Task Method1(bool condition)

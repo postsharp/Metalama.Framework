@@ -23,40 +23,39 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             var result = aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface), OverrideStrategy.Override );
 
-            if (result.Outcome != Advising.AdviceOutcome.Default)
+            if (result.Outcome != AdviceOutcome.Default)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Default.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Default." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.ImplementInterface)
+            if (result.AdviceKind != AdviceKind.ImplementInterface)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of ImplementInterface.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of ImplementInterface." );
             }
 
-            aspectBuilder.Advice.WithTemplateProvider(new AdviceResultTemplates())
-                .Override(aspectBuilder.Target.Methods.OfName("Witness").Single(), nameof(AdviceResultTemplates.WitnessTemplate), args: new { types = result.Interfaces, members = result.InterfaceMembers });
+            aspectBuilder.Advice.WithTemplateProvider( TemplateProvider.FromInstance( new AdviceResultTemplates() ) )
+                .Override(
+                    aspectBuilder.Target.Methods.OfName( "Witness" ).Single(),
+                    nameof(AdviceResultTemplates.WitnessTemplate),
+                    args: new { types = result.Interfaces, members = result.InterfaceMembers } );
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
-        public void BaseMethod()
-        {
-        }
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
+        public void BaseMethod() { }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public int BaseProperty { get; set; }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public event EventHandler? BaseEvent;
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
-        public void Method()
-        {
-        }
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
+        public void Method() { }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public int Property { get; set; }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public event EventHandler? Event;
     }
 
@@ -64,26 +63,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     [Introduction]
     public class TargetClass
     {
-        public void BaseMethod()
-        {
-        }
+        public void BaseMethod() { }
 
         public int BaseProperty { get; set; }
 
-
         public event EventHandler? BaseEvent;
 
-        public void Method()
-        {
-        }
+        public void Method() { }
 
         public int Property { get; set; }
 
-
         public event EventHandler? Event;
 
-        public void Witness()
-        {
-        }
+        public void Witness() { }
     }
 }

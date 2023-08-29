@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var expansionContext = new TemplateExpansionContext(
                 context,
-                this.ParentAdvice.TemplateInstance.Instance,
+                this.ParentAdvice.TemplateInstance.TemplateProvider,
                 metaApi,
                 this.ContextDeclaration,
                 this._boundTemplate,

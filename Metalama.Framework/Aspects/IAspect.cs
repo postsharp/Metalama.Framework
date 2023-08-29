@@ -11,6 +11,7 @@ namespace Metalama.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [RunTimeOrCompileTime]
+    [TemplateProvider]
     public interface IAspect : ICompileTimeSerializable { }
 
     /// <summary>

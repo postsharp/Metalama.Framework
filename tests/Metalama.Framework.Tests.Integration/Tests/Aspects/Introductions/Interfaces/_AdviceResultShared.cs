@@ -31,17 +31,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public class AdviceResultTemplates
     {
         [Template]
-        public void WitnessTemplate([CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types, [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members)
+        public void WitnessTemplate(
+            [CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types,
+            [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members )
         {
             foreach (var type in types)
             {
-                Console.WriteLine($"InterfaceType: {type.InterfaceType}, Action: {type.Outcome}");
+                Console.WriteLine( $"InterfaceType: {type.InterfaceType}, Action: {type.Outcome}" );
             }
 
             foreach (var member in members)
             {
-                Console.WriteLine($"Member: {member.InterfaceMember}, Action: {member.Outcome}, Target: {member.TargetMember}");
+                Console.WriteLine( $"Member: {member.InterfaceMember}, Action: {member.Outcome}, Target: {member.TargetMember}" );
             }
         }
+
+        public TemplateProvider AsTemplateProvider() => TemplateProvider.FromInstance( this );
     }
 }

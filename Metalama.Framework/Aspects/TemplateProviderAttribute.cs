@@ -7,8 +7,8 @@ namespace Metalama.Framework.Aspects;
 
 /// <summary>
 /// Attribute used to mark types that define template members, which must be annotated with <see cref="TemplateAttribute"/>.
-/// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider(object)"/> method. 
+/// To use an instance of this type, use the <see cref="IAdviceFactory.WithTemplateProvider"/> method. 
 /// </summary>
 [RunTimeOrCompileTime]
-[AttributeUsage( AttributeTargets.Class )]
+[AttributeUsage( AttributeTargets.Class | AttributeTargets.Interface )]
 public class TemplateProviderAttribute : Attribute { }

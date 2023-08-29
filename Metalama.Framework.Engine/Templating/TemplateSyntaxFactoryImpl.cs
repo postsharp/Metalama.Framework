@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( kind != SyntaxKind.SimpleAssignmentExpression )
                 {
-                    throw new InvalidOperationException( 
+                    throw new InvalidOperationException(
                         $"Templates using context-dependent compound assignments (e.g. 'x += meta.Proceed()') cannot be expanded when the right side " +
                         $"expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead." );
                 }
@@ -472,12 +472,12 @@ namespace Metalama.Framework.Engine.Templating
 
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
 
-            return compiledTemplateMethodInfo.Invoke( context.TemplateInstance, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
+            return compiledTemplateMethodInfo.Invoke( context.TemplateProvider.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
-        public BlockSyntax InvokeTemplate( string templateName, object? templateProvider = null, object? args = null )
+        public BlockSyntax? InvokeTemplate( string templateName, TemplateProvider templateProvider, object? args = null )
         {
-            return this.InvokeTemplate( templateName, new( templateProvider ), this._objectReaderFactory.GetReader( args ) );
+            return this.InvokeTemplate( templateName, templateProvider, this._objectReaderFactory.GetReader( args ) );
         }
 
         public BlockSyntax InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
@@ -485,33 +485,51 @@ namespace Metalama.Framework.Engine.Templating
             var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
             var directArgs = this._objectReaderFactory.GetReader( args );
 
-            return this.InvokeTemplate( templateInvocation.TemplateName, new( templateInvocation.TemplateProvider ), ObjectReader.Merge( invocationArgs, directArgs ) );
+            return this.InvokeTemplate(
+                templateInvocation.TemplateName,
+                templateInvocation.TemplateProvider,
+                ObjectReader.Merge( invocationArgs, directArgs ) );
         }
 
-        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription( string templateName, TemplateProvider templateProvider )
+        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription(
+            string templateName,
+            TemplateProvider templateProvider )
         {
-            if ( templateProvider.Value == this._templateExpansionContext.TemplateInstance )
+            if ( templateProvider == this._templateExpansionContext.TemplateProvider )
             {
-                templateProvider = new( null );
+                templateProvider = default;
             }
 
             var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
             var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
-            var templateMember = templateMemberRef.GetTemplateMember<IMethod>( this.Compilation.GetCompilationModel(), this._templateExpansionContext.ServiceProvider );
+
+            var templateMember = templateMemberRef.GetTemplateMember<IMethod>(
+                this.Compilation.GetCompilationModel(),
+                this._templateExpansionContext.ServiceProvider );
 
             return (templateClass, templateMember);
         }
 
-        public ITemplateSyntaxFactory ForTemplate( string templateName, object? templateProvider )
-            => this.ForTemplate( templateName, new( templateProvider ) );
-
-        private ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
+        public ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
         {
             var templateMember = this.GetTemplateDescription( templateName, templateProvider ).TemplateMember;
 
             var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
 
             return context.SyntaxFactory;
+        }
+
+        public ITemplateSyntaxFactory ForTemplate( string templateName, object? templateInstanceOrType )
+        {
+            var templateProvider = templateInstanceOrType switch
+            {
+                null => default,
+                Type type => TemplateProvider.FromType( type ),
+                TemplateProvider => throw new ArgumentOutOfRangeException(),
+                _ => TemplateProvider.FromInstanceUnsafe( templateInstanceOrType )
+            };
+
+            return this.ForTemplate( templateName, templateProvider );
         }
 
         public TemplateTypeArgument TemplateTypeArgument( string name, Type type )

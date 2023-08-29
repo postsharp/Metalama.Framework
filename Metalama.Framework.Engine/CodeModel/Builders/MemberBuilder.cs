@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -99,7 +100,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            advice.TemplateInstance.Instance,
+            advice.TemplateInstance.TemplateProvider,
             metaApi,
             this,
             default,
@@ -151,7 +152,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
             try
             {
-                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
+                initializerExpressionSyntax =
+                    initializerExpression.ToExpressionSyntax( new SyntaxSerializationContext( context.Compilation, context.SyntaxGenerationContext ) );
             }
             catch ( Exception ex )
             {

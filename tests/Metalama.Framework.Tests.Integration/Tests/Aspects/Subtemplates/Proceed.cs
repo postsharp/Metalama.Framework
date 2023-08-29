@@ -14,15 +14,15 @@ internal class Aspect : OverrideMethodAspect
     public override async Task<dynamic?> OverrideAsyncMethod()
     {
         await Task.Yield();
-        Console.WriteLine("regular template");
+        Console.WriteLine( "regular template" );
 
         if (meta.Target.Parameters[0].Value)
         {
-            StaticClass.StaticTemplate(1);
+            StaticClass.StaticTemplate( 1 );
         }
         else
         {
-            meta.InvokeTemplate(nameof(StaticClass.StaticTemplate), typeof(StaticClass), new { i = 2 });
+            meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromType( typeof(StaticClass) ), new { i = 2 } );
         }
 
         throw new Exception();
@@ -30,13 +30,13 @@ internal class Aspect : OverrideMethodAspect
 }
 
 [TemplateProvider]
-static class StaticClass
+internal static class StaticClass
 {
     [Template]
-    public static void StaticTemplate([CompileTime] int i)
+    public static void StaticTemplate( [CompileTime] int i )
     {
-        Console.WriteLine($"static template i={i}");
-        meta.Return(meta.Proceed());
+        Console.WriteLine( $"static template i={i}" );
+        meta.Return( meta.Proceed() );
     }
 }
 
@@ -44,7 +44,7 @@ internal class TargetCode
 {
     // <target>
     [Aspect]
-    private async Task Method(bool condition)
+    private async Task Method( bool condition )
     {
         await Task.Yield();
     }

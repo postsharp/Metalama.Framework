@@ -116,14 +116,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext(
         TransformationContext transformationContext,
-        object templateInstance,
+        TemplateProvider templateProvider,
         MetaApi metaApi,
         IDeclaration declarationForLexicalScope,
         BoundTemplateMethod? template,
         Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
-        templateInstance,
+        templateProvider,
         metaApi,
         transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
         transformationContext.SyntaxGenerationContext,
@@ -133,7 +133,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
-        object templateInstance,
+        TemplateProvider templateProvider,
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
         SyntaxGenerationContext syntaxGenerationContext,
@@ -149,7 +149,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         metaApi: metaApi )
     {
         this._template = template?.TemplateMember;
-        this.TemplateInstance = templateInstance;
+        this.TemplateProvider = templateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -167,7 +167,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private TemplateExpansionContext( TemplateExpansionContext prototype, LocalFunctionInfo localFunctionInfo ) : base( prototype )
     {
         this._template = prototype._template;
-        this.TemplateInstance = prototype.TemplateInstance;
+        this.TemplateProvider = prototype.TemplateProvider;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -179,10 +179,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template, object? templateInstance ) : base( prototype )
+    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template, TemplateProvider templateProvider ) : base(
+        prototype )
     {
         this._template = template;
-        this.TemplateInstance = templateInstance ?? prototype.TemplateInstance;
+        this.TemplateProvider = templateProvider.IsNull ? prototype.TemplateProvider : templateProvider;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -194,7 +195,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    public object TemplateInstance { get; }
+    public TemplateProvider TemplateProvider { get; }
 
     public SyntaxSerializationService SyntaxSerializationService { get; }
 
@@ -476,7 +477,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
             case ConditionalAccessExpressionSyntax { WhenNotNull: InvocationExpressionSyntax }:
             case InvocationExpressionSyntax:
-                // Do not use discard on invocations, because it may be void.
+            // Do not use discard on invocations, because it may be void.
 
             case AwaitExpressionSyntax:
                 // We have to await in a statement, then return in another statement.
@@ -604,7 +605,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
     internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, TemplateProvider templateProvider )
-        => new( this, template, templateProvider.Value );
+        => new( this, template, templateProvider );
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
@@ -644,7 +645,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateClass GetTemplateClass( TemplateProvider templateProvider )
     {
-        if ( templateProvider.Value == null )
+        if ( templateProvider.IsNull )
         {
             return this._template.AssertNotNull().TemplateClassMember.TemplateClass;
         }

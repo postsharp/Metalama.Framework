@@ -6,53 +6,53 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtua
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
         return meta.Proceed();
     }
 
-    public async override Task<dynamic?> OverrideAsyncMethod()
+    public override async Task<dynamic?> OverrideAsyncMethod()
     {
-        Console.WriteLine("normal template");
+        Console.WriteLine( "normal template" );
 
         if (meta.Target.Parameters["condition"].Value)
         {
-            meta.InvokeTemplate(nameof(OverrideMethod));
+            meta.InvokeTemplate( nameof(OverrideMethod) );
         }
         else
         {
-            meta.InvokeTemplate(nameof(OverrideMethod), this);
+            meta.InvokeTemplate( nameof(OverrideMethod), TemplateProvider.FromInstance( this ) );
         }
 
         throw new Exception();
     }
 }
 
-class DerivedAspect : Aspect
+internal class DerivedAspect : Aspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("overridden virtual method");
+        Console.WriteLine( "overridden virtual method" );
 
         return meta.Proceed();
     }
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    private async Task Method1(bool condition)
+    private async Task Method1( bool condition )
     {
         await Task.Yield();
     }
 
     [DerivedAspect]
-    private async Task Method2(bool condition)
+    private async Task Method2( bool condition )
     {
         await Task.Yield();
     }

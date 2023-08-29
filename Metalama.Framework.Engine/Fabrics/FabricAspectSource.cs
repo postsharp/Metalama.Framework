@@ -67,7 +67,8 @@ internal sealed class FabricAspectSource : IAspectSource
             var aggregateClass = new FabricAggregateAspectClass( compileTimeProject, drivers.As<TemplateClass>() );
 
             // Create a TemplateInstance for each fabric.
-            var templateInstances = drivers.Select( d => new TemplateClassInstance( d.Driver.Fabric, d ) ).ToImmutableArray();
+            var templateInstances = drivers.Select( d => new TemplateClassInstance( TemplateProvider.FromInstanceUnsafe( d.Driver.Fabric ), d ) )
+                .ToImmutableArray();
 
             // Create an IAspect.
             IAspect aspect = target switch

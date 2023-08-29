@@ -57,11 +57,11 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this._state, templateClassInstance, this._layerName );
 
-    public IAdviceFactory WithTemplateProvider( object templateProvider )
+    public IAdviceFactory WithTemplateProvider( TemplateProvider templateProvider )
         => this.WithTemplateClassInstance(
             new TemplateClassInstance(
                 templateProvider,
-                this._otherTemplateClassProvider.Get( new( templateProvider ) ) ) );
+                this._otherTemplateClassProvider.Get( templateProvider ) ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, required: true )!.Value;
@@ -90,7 +90,12 @@ internal sealed class AdviceFactory : IAdviceFactory
         return ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
     }
 
-    public static TemplateMemberRef? ValidateTemplateName( TemplateClass templateClass, string templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
+    public static TemplateMemberRef? ValidateTemplateName(
+        TemplateClass templateClass,
+        string templateName,
+        TemplateKind templateKind,
+        bool required = false,
+        bool ignoreMissing = false )
     {
         Invariant.Assert( !(required && ignoreMissing) );
 
@@ -116,7 +121,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 }
             }
 
-            return new( template, templateKind );
+            return new TemplateMemberRef( template, templateKind );
         }
         else
         {
@@ -126,8 +131,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
             else
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (templateClass.ShortName, templateName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (templateClass.ShortName, templateName) );
             }
         }
     }

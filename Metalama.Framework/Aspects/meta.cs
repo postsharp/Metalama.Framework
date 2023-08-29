@@ -249,10 +249,10 @@ namespace Metalama.Framework.Aspects
         /// Calls another template method.
         /// </summary>
         /// <param name="templateName">The name of the called template method.</param>
-        /// <param name="templateProvider">Object on which the template method will be called, <see cref="Type"/> for static template methods, or <see langword="null"/> for the current template provider (usually the current aspect).</param>
+        /// <param name="templateProvider">An optional <see cref="TemplateProvider"/>, or <see langword="default"/> for the current template provider (usually the current aspect).</param>
         /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
         [TemplateKeyword]
-        public static void InvokeTemplate( string templateName, object? templateProvider = null, object? args = null ) => throw CreateException();
+        public static void InvokeTemplate( string templateName, TemplateProvider templateProvider = default, object? args = null ) => throw CreateException();
 
         /// <summary>
         /// Calls another template method.
