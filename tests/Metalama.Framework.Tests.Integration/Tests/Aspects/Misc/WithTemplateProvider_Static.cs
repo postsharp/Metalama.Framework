@@ -8,7 +8,7 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var templateProvider = TemplateProvider.FromTypeUnsafe( typeof(TemplateProviderImpl) );
+        var templateProvider = TemplateProvider.FromType<TemplateProviderImpl>();
 
         builder.Advice.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProviderImpl.IntroducedProperty) );
 

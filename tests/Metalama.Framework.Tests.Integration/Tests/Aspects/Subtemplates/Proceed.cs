@@ -22,7 +22,7 @@ internal class Aspect : OverrideMethodAspect
         }
         else
         {
-            meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromTypeUnsafe( typeof(StaticClass) ), new { i = 2 } );
+            meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromType<StaticClass>(), new { i = 2 } );
         }
 
         throw new Exception();

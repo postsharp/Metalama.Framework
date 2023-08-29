@@ -953,14 +953,18 @@ internal sealed partial class CompileTimeCompilationBuilder
                 var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
                 var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
+                bool IsAspect( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, aspectType );
+
+                bool IsFabric( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, fabricType );
+
                 var aspectTypeNames = compilationForManifest.Assembly.GetAllTypes()
-                    .Where( t => compilationForManifest.HasImplicitConversion( t, aspectType ) )
+                    .Where( IsAspect )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
                 var fabricTypes = compilationForManifest.Assembly.GetTypes()
                     .Where(
-                        t => compilationForManifest.HasImplicitConversion( t, fabricType ) &&
+                        t => IsFabric( t ) &&
                              !compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                     .ToList();
 
@@ -979,7 +983,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     .ToList();
 
                 var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
-                    .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) )
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 

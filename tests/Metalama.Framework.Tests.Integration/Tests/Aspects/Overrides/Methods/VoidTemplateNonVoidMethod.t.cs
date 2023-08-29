@@ -1,25 +1,25 @@
 internal class TargetClass
 {
-    [Override]
-    void VoidMethod(object arg)
+  [Override]
+  void VoidMethod(object arg)
+  {
+    if (arg == null)
     {
-        if (arg == null)
-        {
-            global::System.Console.WriteLine("error");
-            return;
-        }
-        Console.WriteLine("void method");
-        return;
+      global::System.Console.WriteLine("error");
+      return;
     }
-    [Override]
-    int IntMethod(object arg)
+    Console.WriteLine("void method");
+    return;
+  }
+  [Override]
+  int IntMethod(object arg)
+  {
+    if (arg == null)
     {
-        if (arg == null)
-        {
-            global::System.Console.WriteLine("error");
-            return default;
-        }
-        Console.WriteLine("int method");
-        return 42;
+      global::System.Console.WriteLine("error");
+      return default;
     }
+    Console.WriteLine("int method");
+    return 42;
+  }
 }

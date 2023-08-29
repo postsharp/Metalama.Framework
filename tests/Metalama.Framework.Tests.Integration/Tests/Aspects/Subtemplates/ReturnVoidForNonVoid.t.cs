@@ -4,6 +4,6 @@
 [Aspect]
 private int Method()
 {
-    return;
-    return default;
+  return;
+  return default;
 }

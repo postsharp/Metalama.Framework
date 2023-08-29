@@ -80,7 +80,7 @@ public interface ITemplateSyntaxFactory
 
     ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments, bool isAsync = false );
 
-    BlockSyntax? InvokeTemplate( string templateName, TemplateProvider templateProvider = default, object? args = null );
+    BlockSyntax? InvokeTemplate( string templateName, object? templateInstanceOrType = default, object? args = null );
 
     BlockSyntax? InvokeTemplate( TemplateInvocation templateInvocation, object? arguments = null );
 
