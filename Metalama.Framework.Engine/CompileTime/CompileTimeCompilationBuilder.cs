@@ -152,6 +152,11 @@ internal sealed partial class CompileTimeCompilationBuilder
     private ulong ComputeProjectHash( IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash, string? redistributionLicenseKey )
     {
         XXH64 h = new();
+
+        // We include the MVID of the current module in the hash instead of for instance the version number.
+        // The benefit is to avoid conflicts in our development environments where we rebuild without changing the version number.
+        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has differents
+        // builds, one for each platform.
         h.Update( _buildId );
         this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
 
@@ -999,7 +1004,6 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 var manifest = new CompileTimeProjectManifest(
                     runTimeCompilation.Assembly.Identity.ToString(),
-                    compileTimeCompilation.AssemblyName!,
                     runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
                     aspectTypeNames,
                     compilerPlugInTypeNames,
@@ -1067,6 +1071,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
+        out string? compileTimeAssemblyName,
         out string assemblyPath,
         out string? sourceDirectory )
     {
@@ -1080,6 +1085,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         assemblyPath = outputPaths.Pe;
         sourceDirectory = outputPaths.Directory;
+        compileTimeAssemblyName = outputPaths.CompileTimeAssemblyName;
 
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {

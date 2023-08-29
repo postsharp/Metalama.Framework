@@ -17,7 +17,6 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
     {
         public CompileTimeProjectManifest(
             string runTimeAssemblyIdentity,
-            string compileTimeAssemblyName,
             string targetFramework,
             IReadOnlyList<string> aspectTypes,
             IReadOnlyList<string> plugInTypes,
@@ -34,7 +33,6 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             int manifestVersion = 0 )
         {
             this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
-            this.CompileTimeAssemblyName = compileTimeAssemblyName;
             this.TargetFramework = targetFramework;
             this.AspectTypes = aspectTypes;
             this.PlugInTypes = plugInTypes;
@@ -60,9 +58,9 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
 #endif
         }
 
-        public string RunTimeAssemblyIdentity { get; }
+        // We intentionally don't include the project hash because it differs among Metalama builds.
 
-        public string CompileTimeAssemblyName { get; }
+        public string RunTimeAssemblyIdentity { get; }
 
         public string TargetFramework { get; }
 

@@ -239,6 +239,7 @@ namespace Metalama.Framework.Engine.CompileTime
             => attribute.AttributeClass?.Name switch
             {
                 nameof(CompileTimeAttribute) => TemplatingScope.CompileTimeOnly,
+                nameof(RunTimeAttribute) => TemplatingScope.RunTimeOnly,
                 nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
