@@ -6,8 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtua
 
 // Tests that none of these cases cause compile-time error.
 
-[TemplateProvider]
-abstract class B
+internal abstract class B : ITemplateProvider
 {
     [Template]
     public abstract void M();
@@ -16,17 +15,17 @@ abstract class B
     public virtual void M2() { }
 }
 
-class C : B
+internal class C : B
 {
     public override void M() { }
 
-    public override sealed void M2() { }
+    public sealed override void M2() { }
 }
 
-sealed class D : B
+internal sealed class D : B
 {
     public override void M() { }
 }
 
 // <target>
-class T { }
+internal class T { }

@@ -15,8 +15,7 @@ internal class Aspect : OverrideMethodAspect
     }
 }
 
-[TemplateProvider]
-class Templates
+internal class Templates : ITemplateProvider
 {
     [CompileTime]
     public static Templates? Create() => new();
@@ -24,7 +23,7 @@ class Templates
     [Template]
     public void CalledTemplate()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine( "called template" );
     }
 }
 
@@ -32,7 +31,5 @@ class Templates
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

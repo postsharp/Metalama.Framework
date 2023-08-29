@@ -25,7 +25,7 @@ internal class Aspect : OverrideMethodAspect
         }
         else
         {
-            meta.InvokeTemplate( nameof(OverrideMethod), TemplateProvider.FromInstance( this ) );
+            meta.InvokeTemplate( nameof(OverrideMethod), this );
         }
 
         throw new Exception();

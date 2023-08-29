@@ -22,15 +22,14 @@ internal class Aspect : OverrideMethodAspect
         }
         else
         {
-            meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromType( typeof(StaticClass) ), new { i = 2 } );
+            meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromTypeUnsafe( typeof(StaticClass) ), new { i = 2 } );
         }
 
         throw new Exception();
     }
 }
 
-[TemplateProvider]
-internal static class StaticClass
+internal class StaticClass : ITemplateProvider
 {
     [Template]
     public static void StaticTemplate( [CompileTime] int i )

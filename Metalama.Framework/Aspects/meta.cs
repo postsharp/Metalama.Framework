@@ -246,13 +246,22 @@ namespace Metalama.Framework.Aspects
         public static void InsertStatement( string statement ) => throw CreateException();
 
         /// <summary>
-        /// Calls another template method.
+        /// Calls another template method. This overload accepts a <see cref="TemplateProvider"/>.
+        /// </summary>
+        /// <param name="templateName">The name of the called template method.</param>
+        /// <param name="templateProvider">A <see cref="TemplateProvider"/>.</param>
+        /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( string templateName, TemplateProvider templateProvider, object? args = null ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method. This overload accepts an <see cref="ITemplateProvider"/>. 
         /// </summary>
         /// <param name="templateName">The name of the called template method.</param>
         /// <param name="templateProvider">An optional <see cref="TemplateProvider"/>, or <see langword="default"/> for the current template provider (usually the current aspect).</param>
         /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
         [TemplateKeyword]
-        public static void InvokeTemplate( string templateName, TemplateProvider templateProvider = default, object? args = null ) => throw CreateException();
+        public static void InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? args = null ) => throw CreateException();
 
         /// <summary>
         /// Calls another template method.

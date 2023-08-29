@@ -53,7 +53,7 @@ internal sealed class TypeFabricDriver : FabricDriver
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
-        var templateInstance = new TemplateClassInstance( TemplateProvider.FromInstanceUnsafe( this.Fabric ), templateClass );
+        var templateInstance = new TemplateClassInstance( TemplateProvider.FromInstance( this.Fabric ), templateClass );
         var targetType = (INamedType) aspectBuilder.Target;
         var compilation = aspectBuilder.Target.GetCompilationModel();
 

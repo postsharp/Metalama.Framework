@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Mark the class with <see cref="TemplateProviderAttribute"/> instead.
+/// An interface that specifies that the type contains templates. Templates must be annotated with <see cref="TemplateAttribute"/>.
 /// </summary>
-[Obsolete("Mark the class with [TemplateProvider] instead.", error: true)]
+[RunTimeOrCompileTime]
 public interface ITemplateProvider { }

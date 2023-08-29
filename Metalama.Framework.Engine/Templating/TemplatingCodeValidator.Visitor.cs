@@ -524,7 +524,8 @@ namespace Metalama.Framework.Engine.Templating
                 if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
                 {
                     var adviceAttribute = declaredSymbol.GetAttributes()
-                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+                        .FirstOrDefault(
+                            a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
 
                     if ( adviceAttribute != null )
                     {
@@ -547,7 +548,9 @@ namespace Metalama.Framework.Engine.Templating
                         .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
                         .Select( a => (member, a.AttributeClass!) );
 
-                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol } ? memberAssociatedSymbol : member.GetOverriddenMember();
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol }
+                        ? memberAssociatedSymbol
+                        : member.GetOverriddenMember();
 
                     return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }
@@ -559,20 +562,19 @@ namespace Metalama.Framework.Engine.Templating
                     this.Report(
                         TemplatingDiagnosticDescriptors.MultipleAdviceAttributes.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member, adviceAttributes[1].AttributeClass) ) );
+                            (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member,
+                             adviceAttributes[1].AttributeClass) ) );
                 }
 
                 var compilation = this._compilationContext.SourceCompilation;
                 var reflectionMapper = this._compilationContext.ReflectionMapper;
 
-                bool IsAspect( INamedTypeSymbol symbol )
-                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
+                bool IsAspect( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
 
-                bool IsFabric( INamedTypeSymbol symbol )
-                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
+                bool IsFabric( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
 
                 bool IsTemplateProvider( INamedTypeSymbol symbol )
-                    => symbol.HasInheritedAttribute( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( typeof(TemplateProviderAttribute) ) );
+                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(ITemplateProvider) ) );
 
                 // Report an error for struct aspect.
                 if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol && IsAspect( typeSymbol ) )
@@ -669,7 +671,10 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             private static bool IsSupportedTemplateDeclaration( ISymbol declaredSymbol )
-                => declaredSymbol is not IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator };
+                => declaredSymbol is not IMethodSymbol
+                {
+                    MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator
+                };
 
             private readonly struct Context : IDisposable
             {

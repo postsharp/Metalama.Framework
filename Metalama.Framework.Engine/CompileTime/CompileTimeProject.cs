@@ -319,26 +319,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 .ToImmutableArray();
 
             var templateProviders =
-                assembly.GetTypes().Where( HasCustomAttributeIncludingInterfaces<TemplateProviderAttribute> ).Select( t => t.FullName ).ToImmutableArray();
-
-            static bool HasCustomAttributeIncludingInterfaces<T>( Type type )
-                where T : Attribute
-            {
-                if ( type.GetCustomAttribute<T>() != null )
-                {
-                    return true;
-                }
-
-                foreach ( var @interface in type.GetInterfaces() )
-                {
-                    if ( HasCustomAttributeIncludingInterfaces<T>( @interface ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
+                assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
 
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(

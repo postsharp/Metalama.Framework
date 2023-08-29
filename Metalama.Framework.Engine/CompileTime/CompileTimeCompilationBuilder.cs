@@ -946,38 +946,40 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 textMapDirectory.Write( outputPaths.Directory );
 
-                var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
-                var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
-                var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
-                var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(TemplateProviderAttribute).FullName.AssertNotNull() );
+                // Create the manifest.
+                var compilationForManifest = compileTimeCompilation;
+                var aspectType = compilationForManifest.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
+                var fabricType = compilationForManifest.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
+                var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
+                var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
-                var aspectTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
-                    .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                var aspectTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, aspectType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var fabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                var fabricTypes = compilationForManifest.Assembly.GetTypes()
                     .Where(
-                        t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
-                             !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                        t => compilationForManifest.HasImplicitConversion( t, fabricType ) &&
+                             !compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                     .ToList();
 
                 var fabricTypeNames = fabricTypes
                     .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
 
-                var transitiveFabricTypeNames = compileTimeCompilation.Assembly.GetTypes()
-                    .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                var transitiveFabricTypeNames = compilationForManifest.Assembly.GetTypes()
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                     .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var compilerPlugInTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
+                var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
                     .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var otherTemplateTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
-                    .Where( t => t.HasInheritedAttribute( templateProviderType ) )
+                var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 

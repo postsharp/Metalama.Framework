@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of ImplementInterface." );
             }
 
-            aspectBuilder.Advice.WithTemplateProvider( new AdviceResultTemplates().AsTemplateProvider() )
+            aspectBuilder.Advice.WithTemplateProvider( new AdviceResultTemplates() )
                 .Override(
                     aspectBuilder.Target.Methods.OfName( "Witness" ).Single(),
                     nameof(AdviceResultTemplates.WitnessTemplate),

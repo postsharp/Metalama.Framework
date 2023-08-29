@@ -27,8 +27,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     }
 
     [CompileTime]
-    [TemplateProvider]
-    public class AdviceResultTemplates
+    public class AdviceResultTemplates : ITemplateProvider
     {
         [Template]
         public void WitnessTemplate(
@@ -45,7 +44,5 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 Console.WriteLine( $"Member: {member.InterfaceMember}, Action: {member.Outcome}, Target: {member.TargetMember}" );
             }
         }
-
-        public TemplateProvider AsTemplateProvider() => TemplateProvider.FromInstance( this );
     }
 }

@@ -3,11 +3,11 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateProvider_SideEffects;
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("regular template");
+        Console.WriteLine( "regular template" );
 
         new Templates().CalledTemplate();
         new Templates().CalledTemplate();
@@ -16,8 +16,7 @@ class Aspect : OverrideMethodAspect
     }
 }
 
-[TemplateProvider]
-class Templates
+internal class Templates : ITemplateProvider
 {
     private static int i;
 
@@ -29,7 +28,7 @@ class Templates
     [Template]
     public void CalledTemplate()
     {
-        Console.WriteLine($"called template i={i}");
+        Console.WriteLine( $"called template i={i}" );
     }
 }
 
@@ -37,7 +36,5 @@ internal class TargetCode
 {
     // <target>
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

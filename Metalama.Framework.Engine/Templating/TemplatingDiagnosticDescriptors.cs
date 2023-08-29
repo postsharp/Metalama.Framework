@@ -528,8 +528,8 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly DiagnosticDefinition<ISymbol> TemplatesHaveToBeInTemplateProvider
             = new(
                 "LAMA0274",
-                "Templates have to be contained in an aspect, fabric, or a type marked as [TemplateProvider].",
-                "The template '{0}' is contained in '{1}', which is not an aspect, a fabric, or a type marked as [TemplateProvider].",
+                "Templates have to be contained in an aspect, fabric, or a type implementing ITemplateProvider.",
+                "The template '{0}' is contained in '{1}', which is not an aspect, a fabric, or a type marked implementing ITemplateProvider.",
                 _category,
                 Error );
 

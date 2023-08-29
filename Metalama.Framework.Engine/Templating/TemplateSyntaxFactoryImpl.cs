@@ -524,9 +524,9 @@ namespace Metalama.Framework.Engine.Templating
             var templateProvider = templateInstanceOrType switch
             {
                 null => default,
-                Type type => TemplateProvider.FromType( type ),
-                TemplateProvider => throw new ArgumentOutOfRangeException(),
-                _ => TemplateProvider.FromInstanceUnsafe( templateInstanceOrType )
+                Type type => TemplateProvider.FromTypeUnsafe( type ),
+                ITemplateProvider instance => TemplateProvider.FromInstance( instance ),
+                _ => throw new AssertionFailedException()
             };
 
             return this.ForTemplate( templateName, templateProvider );

@@ -10,4 +10,15 @@ namespace Metalama.Framework.Aspects;
 /// current template provider should be used.</param>
 /// <param name="Arguments">Compile-time template arguments that will be passed to the template.</param>
 [CompileTime]
-public record TemplateInvocation( string TemplateName, TemplateProvider TemplateProvider = default, object? Arguments = null );
+public record TemplateInvocation( string TemplateName, TemplateProvider TemplateProvider, object? Arguments = null )
+{
+    public TemplateInvocation( string templateName, object? arguments = null ) : this(
+        templateName,
+        default(TemplateProvider),
+        arguments ) { }
+
+    public TemplateInvocation( string templateName, ITemplateProvider templateProvider, object? arguments = null ) : this(
+        templateName,
+        TemplateProvider.FromInstance( templateProvider ),
+        arguments ) { }
+}

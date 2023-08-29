@@ -9,14 +9,13 @@ internal class Aspect : OverrideMethodAspect
     {
         Console.WriteLine( "regular template" );
         StaticClass.StaticTemplate( 1 );
-        meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromType( typeof(StaticClass) ), new { i = 2 } );
+        meta.InvokeTemplate( nameof(StaticClass.StaticTemplate), TemplateProvider.FromTypeUnsafe( typeof(StaticClass) ), new { i = 2 } );
 
         return default;
     }
 }
 
-[TemplateProvider]
-internal static class StaticClass
+internal class StaticClass : ITemplateProvider
 {
     [Template]
     public static void StaticTemplate( [CompileTime] int i )

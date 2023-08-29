@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             if ( symbol.OriginalDefinition != symbol
-                && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
+                 && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
             {
                 return originalDefinitionTemplateInfo;
             }
@@ -244,7 +244,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
                 nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
-                nameof(TemplateProviderAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 _ => null
             };
 
@@ -1018,6 +1017,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
                     {
                         scope = this._roslynIsCompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOrCompileTime;
+
                         return true;
                     }
 

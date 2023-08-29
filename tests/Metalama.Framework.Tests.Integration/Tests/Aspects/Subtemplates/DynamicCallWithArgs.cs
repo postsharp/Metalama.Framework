@@ -8,12 +8,12 @@ internal class Aspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         meta.InvokeTemplate( nameof(CalledTemplateSimple), args: new { a = 42 } );
-        meta.InvokeTemplate( new TemplateInvocation( nameof(CalledTemplateInvocation), default, new { a = 0, b = 1 } ), new { a = 42, c = 2 } );
+        meta.InvokeTemplate( new TemplateInvocation( nameof(CalledTemplateInvocation), arguments: new { a = 0, b = 1 } ), new { a = 42, c = 2 } );
         var templateProvider = new Templates();
-        meta.InvokeTemplate( nameof(Templates.CalledTemplateSimple), TemplateProvider.FromInstance( templateProvider ), new { a = 42 } );
+        meta.InvokeTemplate( nameof(Templates.CalledTemplateSimple), templateProvider, new { a = 42 } );
 
         meta.InvokeTemplate(
-            new TemplateInvocation( nameof(Templates.CalledTemplateInvocation), TemplateProvider.FromInstance( templateProvider ), new { a = 0, b = 1 } ),
+            new TemplateInvocation( nameof(Templates.CalledTemplateInvocation), templateProvider, new { a = 0, b = 1 } ),
             new { a = 42, c = 2 } );
 
         return default;
@@ -33,8 +33,7 @@ internal class Aspect : OverrideMethodAspect
 }
 
 [CompileTime]
-[TemplateProvider]
-internal class Templates
+internal class Templates : ITemplateProvider
 {
     [Template]
     public void CalledTemplateSimple( [CompileTime] int a )

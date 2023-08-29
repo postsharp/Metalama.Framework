@@ -12,7 +12,7 @@ namespace Metalama.Framework.Fabrics
     /// </summary>
     /// <seealso href="@applying-aspects"/>
     [CompileTime]
-    public abstract class Fabric : ICompileTimeSerializable
+    public abstract class Fabric : ICompileTimeSerializable, ITemplateProvider
     {
         private protected Fabric() { }
     }

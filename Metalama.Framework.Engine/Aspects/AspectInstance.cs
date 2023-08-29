@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.TargetDeclarationDepth = declarationDepth;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
-                .Add( aspectClass, new TemplateClassInstance( TemplateProvider.FromInstanceUnsafe( aspect ), aspectClass ) );
+                .Add( aspectClass, new TemplateClassInstance( TemplateProvider.FromInstance( aspect ), aspectClass ) );
 
 #if DEBUG
             if ( !predecessors.IsDefaultOrEmpty )
