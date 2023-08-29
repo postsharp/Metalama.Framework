@@ -14,17 +14,17 @@ namespace Metalama.Framework.CompileTimeContracts
     {
         public string Name { get; }
 
+        public IType Type { get; }
+
         public TypeSyntax Syntax { get; }
 
         public TypeSyntax SyntaxWithoutNullabilityAnnotations { get; }
 
-        public IType Type { get; }
-
         internal TemplateTypeArgument( string name, IType type, TypeSyntax syntax, TypeSyntax syntaxWithoutNullabilityAnnotations )
         {
             this.Name = name;
-            this.Syntax = syntax;
             this.Type = type;
+            this.Syntax = syntax;
             this.SyntaxWithoutNullabilityAnnotations = syntaxWithoutNullabilityAnnotations;
         }
     }

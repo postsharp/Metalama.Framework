@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class TransformationContext
+internal abstract class TransformationContext
 {
     public ProjectServiceProvider ServiceProvider { get; }
 

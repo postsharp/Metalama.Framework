@@ -5,13 +5,14 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.Aspects;
 
 /// <summary>
-/// Represents a template class that implements <see cref="ITemplateProvider"/>.
+/// Represents a template class implementing <see cref="ITemplateProvider"/> but neither <see cref="IAspect"/> nor <see cref="Fabric"/>.
 /// </summary>
 internal sealed class OtherTemplateClass : TemplateClass
 {

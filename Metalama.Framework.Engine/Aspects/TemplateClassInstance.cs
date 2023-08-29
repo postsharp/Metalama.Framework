@@ -1,21 +1,23 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// An instance of a template class, i.e. the transformed class containing the compiled templates.
-    /// For a normal template, the template <see cref="Instance"/> is the aspect instance itself. For fabrics,
-    /// the template <see cref="Instance"/> is the transformed fabric class.
+    /// For a normal template, see cref="TemplateProvider"/> is the aspect instance itself. For fabrics,
+    /// the <see cref="TemplateProvider"/> is the transformed fabric class.
     /// </summary>
     internal sealed class TemplateClassInstance
     {
-        public object Instance { get; }
-
         public TemplateClass TemplateClass { get; }
 
-        public TemplateClassInstance( object instance, TemplateClass templateClass )
+        public TemplateProvider TemplateProvider { get; }
+
+        public TemplateClassInstance( TemplateProvider templateProvider, TemplateClass templateClass )
         {
-            this.Instance = instance;
+            this.TemplateProvider = templateProvider;
             this.TemplateClass = templateClass;
         }
     }

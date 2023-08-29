@@ -27,7 +27,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         : base( advice, overriddenDeclaration, tags ) { }
 
     protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
-        in MemberInjectionContext context,
+        MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
@@ -85,7 +85,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         return overrides;
     }
 
-    protected SyntaxUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
+    protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -99,14 +99,14 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
-    protected override ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
+    protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
         => context.AspectReferenceSyntaxProvider.GetPropertyReference(
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration,
             AspectReferenceTargetKind.PropertyGetAccessor,
             context.SyntaxGenerator );
 
-    protected override ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
+    protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
             context.AspectReferenceSyntaxProvider.GetPropertyReference(

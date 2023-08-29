@@ -5,6 +5,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
 
@@ -130,12 +131,11 @@ namespace Metalama.Framework.Engine.Templating
                     Error );
 
         internal static readonly DiagnosticDefinition<(ISymbol ReferencedDeclaration, ISymbol ReferencingDeclaration)>
-            TemplateCannotReferenceTemplate
+            OnlyMethodsCanBeSubtemplates
                 = new(
                     "LAMA0220",
-                    "A template cannot reference another template.",
-                    "The declaration '{0}' cannot be referenced from '{1}' both declarations are templates, "
-                    + "and templates cannot reference each other yet.",
+                    "A template can only reference other templates that are methods.",
+                    "The declaration '{0}' cannot be referenced from '{1}', because it is a template, but not a method.",
                     _category,
                     Error );
 
@@ -469,14 +469,6 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol, INamedTypeSymbol)> TemplatesInStaticTypeNotSupported
-            = new(
-                "LAMA0266",
-                "Templates in static types are not supported.",
-                "The template '{0}' is contained within the static type '{1}', which is not supported.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<IMethodSymbol> ExtensionMethodMethodGroupConversion
             = new(
                 "LAMA0267",
@@ -498,6 +490,86 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0269",
                 "Anonymous type can't can't be used as both run-time and compile-time in the same template.",
                 "The anonymous type '{0}' can't can't be used as both run-time and compile-time in the same template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<string> SubtemplateCallCantBeSubexpression
+            = new(
+                "LAMA0270",
+                "Template call cannot be part of another expression or statement.",
+                "Template call '{0}' cannot be part of another expression or statement, it can only be done as a stand-alone statement.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> ExtensionMethodTemplateNotSupported
+            = new(
+                "LAMA0271",
+                "Extension method templates are not supported.",
+                "The template '{0}' is an extension method, which is not supported.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition RedundantReturnNotAllowed
+            = new(
+                "LAMA0272",
+                Error,
+                "Redundant return statements are not allowed in templates.",
+                "Redundant return statement is not allowed in a template.",
+                _category );
+
+        internal static readonly DiagnosticDefinition<ISymbol> SubtemplatesHaveToBeInvoked
+            = new(
+                "LAMA0273",
+                "When a template references another template, it has to be directly invoked.",
+                "The template '{0}' has to be directly invoked.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> TemplatesHaveToBeInTemplateProvider
+            = new(
+                "LAMA0274",
+                "Templates have to be contained in an aspect, fabric, or a type implementing ITemplateProvider.",
+                "The template '{0}' is contained in '{1}', which is not an aspect, a fabric, or a type marked implementing ITemplateProvider.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<string> SubtemplateCallWithMissingArgumentsCantBeVirtual
+            = new(
+                "LAMA0275",
+                "Template call that uses optional parameters currently can't be virtual.",
+                "Template call '{0}' currently cannot be virtual and use optional parameters at the same time.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> SubtemplateCantHaveRunTimeTypeParameter
+            = new(
+                "LAMA0276",
+                "Called template can't have run-time type parameters.",
+                "Called template '{0}' can't have run-time type parameters.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol, TypeSyntax)> SubtemplateCantBeCalledWithRunTimeTypeParameter
+            = new(
+                "LAMA0277",
+                "A template can't be called with run-time type parameters.",
+                "The template '{0}' can't be called with type argument '{1}', which contains run-time template type parameter.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> AspectCantBeStruct
+            = new(
+                "LAMA0278",
+                "An aspect or can't be a value type.",
+                "The aspect '{0}' can't be a value type.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> CantCallAbstractSubtemplate
+            = new(
+                "LAMA0279",
+                "Abstract or empty template can't be called.",
+                "The abstract or empty template '{0}' can't be called.",
                 _category,
                 Error );
     }

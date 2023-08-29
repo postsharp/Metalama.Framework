@@ -95,26 +95,30 @@ class TheAspect : OverrideMethodAspect
     public async Task TemplateAnnotatorDiagnosticsAreReported()
     {
         const string code = """
+using System;
+using Metalama.Framework;
 using Metalama.Framework.Aspects;
 
 class TheAspect : OverrideMethodAspect 
 { 
-   public override dynamic? OverrideMethod()
-   {
-      // The following line is an error.
-      AnotherTemplate();
+    public override dynamic? OverrideMethod()
+    {
+        int i = meta.CompileTime(0);
 
-      return null;
-   }
+        if (meta.Target.Parameters[0].Value)
+        {
+            // The following line is an error.
+            i = 1;
+        }
 
-   [Template]
-   void AnotherTemplate() {}
+        return null;
+    }
 }
 """;
 
         var diagnostics = await this.RunAnalyzer( code );
 
-        Assert.Equal( TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate.Id, Assert.Single( diagnostics ).Id );
+        Assert.Equal( TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock.Id, Assert.Single( diagnostics ).Id );
     }
 
     [Fact]

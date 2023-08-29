@@ -22,7 +22,10 @@ internal class ResetCreditsCommands : CreditsBaseCommand
         {
             try
             {
-                File.Delete( file.DataFilePath );
+                if ( file.DataFilePath != null )
+                {
+                    File.Delete( file.DataFilePath );
+                }
 
                 deleted++;
             }

@@ -3,6 +3,7 @@
 // ReSharper disable RedundantUsingDirective
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
         InsertComment,
 
         /// <summary>
-        /// The <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> method (or another overload).
+        /// The <see cref="meta.InsertStatement(IStatement)"/> method (or another overload).
         /// </summary>
         InsertStatement,
 
@@ -43,6 +44,16 @@ namespace Metalama.Framework.Engine.Templating
 
         ProceedAsyncEnumerable,
 
-        ProceedAsyncEnumerator
+        ProceedAsyncEnumerator,
+
+        /// <summary>
+        /// The <see cref="meta.InvokeTemplate(TemplateInvocation, object?)" /> method (or its overload).
+        /// </summary>
+        InvokeTemplate,
+
+        /// <summary>
+        /// The <see cref="meta.Return()" /> method (or its overload).
+        /// </summary>
+        Return
     }
 }

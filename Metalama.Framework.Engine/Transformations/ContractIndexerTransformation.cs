@@ -153,14 +153,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
             {
                 getterStatements.Add(
                     SyntaxFactory.LocalDeclarationStatement(
-                        SyntaxFactory.VariableDeclaration(
-                                SyntaxFactory.IdentifierName(
-                                    SyntaxFactory.Identifier(
-                                        SyntaxFactory.TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "var",
-                                        "var",
-                                        SyntaxFactory.TriviaList( SyntaxFactory.ElasticSpace ) ) ) )
+                        SyntaxFactory.VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                             .WithVariables(
                                 SyntaxFactory.SingletonSeparatedList(
                                     SyntaxFactory.VariableDeclarator(

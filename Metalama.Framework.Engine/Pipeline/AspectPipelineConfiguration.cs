@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Manifest;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// Stores the "static" configuration of the pipeline, i.e. the things that don't change
-    /// when the user code change. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
+    /// when the user code changes. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
     /// the order of layers.
     /// </summary>
     public sealed class AspectPipelineConfiguration
@@ -29,8 +28,6 @@ namespace Metalama.Framework.Engine.Pipeline
         internal BoundAspectClassCollection BoundAspectClasses { get; }
 
         public IReadOnlyCollection<IAspectClass> AspectClasses => this.BoundAspectClasses;
-
-        internal IReadOnlyDictionary<string, OtherTemplateClass> OtherTemplateClasses { get; }
 
         internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
@@ -52,7 +49,6 @@ namespace Metalama.Framework.Engine.Pipeline
             CompileTimeDomain domain,
             ImmutableArray<PipelineStageConfiguration> stages,
             BoundAspectClassCollection aspectClasses,
-            IReadOnlyDictionary<string, OtherTemplateClass> otherTemplateClasses,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
             CompileTimeProjectRepository compileTimeProjectRepository,
@@ -64,7 +60,6 @@ namespace Metalama.Framework.Engine.Pipeline
             this.Domain = domain;
             this.Stages = stages;
             this.BoundAspectClasses = aspectClasses;
-            this.OtherTemplateClasses = otherTemplateClasses;
             this.AspectLayers = aspectLayers;
             this.CompileTimeProject = compileTimeProject;
             this.CompileTimeProjectRepository = compileTimeProjectRepository;
@@ -79,7 +74,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 this.Stages,
                 this.BoundAspectClasses,
-                this.OtherTemplateClasses,
                 this.AspectLayers,
                 this.CompileTimeProject,
                 this.CompileTimeProjectRepository,
@@ -95,7 +89,6 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.Domain,
                     this.Stages,
                     this.BoundAspectClasses,
-                    this.OtherTemplateClasses,
                     this.AspectLayers,
                     this.CompileTimeProject,
                     this.CompileTimeProjectRepository,

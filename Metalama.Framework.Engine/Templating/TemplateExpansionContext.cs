@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
@@ -12,6 +13,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -31,7 +33,8 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
     private readonly TemplateMember<IMethod>? _template;
-    private readonly IUserExpression? _proceedExpression;
+    private readonly Func<TemplateKind, IUserExpression>? _proceedExpressionProvider;
+    private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
     internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
@@ -112,14 +115,30 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     public IReadOnlyDictionary<string, IType> TemplateGenericArguments { get; }
 
     public TemplateExpansionContext(
+        TransformationContext transformationContext,
+        TemplateProvider templateProvider,
+        MetaApi metaApi,
+        IDeclaration declarationForLexicalScope,
+        BoundTemplateMethod? template,
+        Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
+        AspectLayerId aspectLayerId ) : this(
+        transformationContext.ServiceProvider,
+        templateProvider,
+        metaApi,
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
+        transformationContext.SyntaxGenerationContext,
+        template,
+        proceedExpressionProvider,
+        aspectLayerId ) { }
+
+    public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
-        object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
+        TemplateProvider templateProvider,
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
-        SyntaxSerializationService syntaxSerializationService,
         SyntaxGenerationContext syntaxGenerationContext,
         BoundTemplateMethod? template,
-        IUserExpression? proceedExpression,
+        Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
@@ -130,12 +149,13 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         metaApi: metaApi )
     {
         this._template = template?.TemplateMember;
-        this.TemplateInstance = templateInstance;
-        this.SyntaxSerializationService = syntaxSerializationService;
+        this.TemplateProvider = templateProvider;
+        this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
-        this._proceedExpression = proceedExpression;
+        this._proceedExpressionProvider = proceedExpressionProvider;
+        this._otherTemplateClassProvider = serviceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         this.TemplateGenericArguments =
             (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
@@ -147,7 +167,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private TemplateExpansionContext( TemplateExpansionContext prototype, LocalFunctionInfo localFunctionInfo ) : base( prototype )
     {
         this._template = prototype._template;
-        this.TemplateInstance = prototype.TemplateInstance;
+        this.TemplateProvider = prototype.TemplateProvider;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -155,10 +175,27 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.SyntaxFactory = prototype.SyntaxFactory;
         this._localFunctionInfo = localFunctionInfo;
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
-        this._proceedExpression = prototype._proceedExpression;
+        this._proceedExpressionProvider = prototype._proceedExpressionProvider;
+        this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    public object TemplateInstance { get; }
+    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template, TemplateProvider templateProvider ) : base(
+        prototype )
+    {
+        this._template = template;
+        this.TemplateProvider = templateProvider.IsNull ? prototype.TemplateProvider : templateProvider;
+        this.SyntaxSerializationService = prototype.SyntaxSerializationService;
+        this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
+        this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
+        this.LexicalScope = prototype.LexicalScope;
+        this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
+        this._localFunctionInfo = prototype._localFunctionInfo;
+        this.TemplateGenericArguments = prototype.TemplateGenericArguments;
+        this._proceedExpressionProvider = prototype._proceedExpressionProvider;
+        this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
+    }
+
+    public TemplateProvider TemplateProvider { get; }
 
     public SyntaxSerializationService SyntaxSerializationService { get; }
 
@@ -328,13 +365,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         // However, the user may have stored the result in a differently-typed variable, so we need to cast.
 
         var forEach = ForEachStatement(
-                IdentifierName(
-                    Identifier(
-                        default,
-                        SyntaxKind.VarKeyword,
-                        "var",
-                        "var",
-                        default ) ),
+                SyntaxFactoryEx.VarIdentifier(),
                 Identifier( resultItem ),
                 returnExpression,
                 Block(
@@ -390,14 +421,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
-            local = VariableDeclaration(
-                    IdentifierName(
-                        Identifier(
-                            default,
-                            SyntaxKind.VarKeyword,
-                            "var",
-                            "var",
-                            TriviaList( ElasticSpace ) ) ) )
+            local = VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                 .WithVariables(
                     SingletonSeparatedList(
                         VariableDeclarator( Identifier( enumerator ) )
@@ -453,7 +477,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
             case ConditionalAccessExpressionSyntax { WhenNotNull: InvocationExpressionSyntax }:
             case InvocationExpressionSyntax:
-                // Do not use discard on invocations, because it may be void.
+            // Do not use discard on invocations, because it may be void.
 
             case AwaitExpressionSyntax:
                 // We have to await in a statement, then return in another statement.
@@ -567,7 +591,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public IUserExpression Proceed( string methodName )
     {
-        if ( this._proceedExpression == null )
+        if ( this._proceedExpressionProvider == null )
         {
             throw new AssertionFailedException( "No proceed expression was provided." );
         }
@@ -579,6 +603,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         => new ConfigureAwaitUserExpression( expression, continueOnCapturedContext );
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
+
+    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, TemplateProvider templateProvider )
+        => new( this, template, templateProvider );
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
@@ -614,6 +641,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         }
 
         public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
+    }
+
+    public TemplateClass GetTemplateClass( TemplateProvider templateProvider )
+    {
+        if ( templateProvider.IsNull )
+        {
+            return this._template.AssertNotNull().TemplateClassMember.TemplateClass;
+        }
+
+        return this._otherTemplateClassProvider.Get( templateProvider );
     }
 
     private sealed class DisposeCookie : IDisposable
