@@ -197,6 +197,15 @@ internal static partial class SyntaxFactoryEx
                 "_",
                 SyntaxFactory.TriviaList() ) );
 
+    public static IdentifierNameSyntax VarIdentifier()
+        => SyntaxFactory.IdentifierName(
+            SyntaxFactory.Identifier(
+                SyntaxFactory.TriviaList(),
+                SyntaxKind.VarKeyword,
+                "var",
+                "var",
+                SyntaxFactory.TriviaList( SyntaxFactory.ElasticSpace ) ) );
+
     public static ExpressionSyntax ParseExpressionSafe( string text )
     {
         var expression = SyntaxFactory.ParseExpression( text );

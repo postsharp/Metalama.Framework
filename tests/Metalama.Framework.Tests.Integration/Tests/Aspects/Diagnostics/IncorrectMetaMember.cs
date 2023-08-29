@@ -55,6 +55,13 @@ class IndexerAspectTest : AspectBase
     protected override string TargetName => meta.Target.Indexer.Name;
 }
 
+class ParametersAspectTest : TypeAspect
+{
+    [Introduce]
+    private string? field = meta.Target.Parameters.FirstOrDefault()?.Name;
+}
+
+[ParametersAspectTest]
 class TargetCode
 {
     [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]

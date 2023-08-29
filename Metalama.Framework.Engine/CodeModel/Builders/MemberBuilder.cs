@@ -99,12 +99,10 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
-            context.ServiceProvider,
-            advice.TemplateInstance.Instance,
+            context,
+            advice.TemplateInstance.TemplateProvider,
             metaApi,
-            context.LexicalScopeProvider.GetLexicalScope( this ),
-            context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-            context.SyntaxGenerationContext,
+            this,
             default,
             null,
             advice.AspectLayerId );
@@ -116,7 +114,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     internal bool GetInitializerExpressionOrMethod<T>(
         Advice advice,
-        in MemberInjectionContext context,
+        MemberInjectionContext context,
         IType targetType,
         IExpression? initializerExpression,
         TemplateMember<T>? initializerTemplate,
@@ -154,7 +152,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
             try
             {
-                initializerExpressionSyntax = initializerExpression.ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
+                initializerExpressionSyntax =
+                    initializerExpression.ToExpressionSyntax( new SyntaxSerializationContext( context.Compilation, context.SyntaxGenerationContext ) );
             }
             catch ( Exception ex )
             {

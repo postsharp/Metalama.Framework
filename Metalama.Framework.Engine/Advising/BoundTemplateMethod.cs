@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Metalama.Framework.Engine.Advising;
 
 /// <summary>
-/// Represents a template fully bound to a target methods and template arguments.
+/// Represents a template fully bound to a target method and template arguments.
 /// </summary>
 internal sealed class BoundTemplateMethod
 {

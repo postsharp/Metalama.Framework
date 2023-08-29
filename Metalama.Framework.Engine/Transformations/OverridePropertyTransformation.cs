@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -95,13 +94,12 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.TemplateMember.EffectiveKind );
+            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedDynamicExpression( context, accessor, kind );
 
             var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,
@@ -118,14 +116,12 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
-                this.ParentAdvice.TemplateInstance.Instance,
+                context,
+                this.ParentAdvice.TemplateInstance.TemplateProvider,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                accessor,
                 accessorTemplate,
-                proceedExpression,
+                proceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );

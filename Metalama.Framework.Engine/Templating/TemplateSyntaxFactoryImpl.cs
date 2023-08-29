@@ -1,9 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -24,16 +28,18 @@ namespace Metalama.Framework.Engine.Templating
     {
         private readonly TemplateExpansionContext _templateExpansionContext;
         private readonly SyntaxSerializationContext _syntaxSerializationContext;
+        private readonly ObjectReaderFactory _objectReaderFactory;
 
         public TemplateSyntaxFactoryImpl( TemplateExpansionContext templateExpansionContext )
         {
             this._templateExpansionContext = templateExpansionContext;
             this._syntaxSerializationContext = templateExpansionContext.SyntaxSerializationContext;
+            this._objectReaderFactory = templateExpansionContext.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
         }
 
         public ICompilation Compilation => this._templateExpansionContext.Compilation.AssertNotNull();
 
-        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
+        public void AddStatement( List<StatementOrTrivia> list, StatementSyntax? statement ) => list.Add( new StatementOrTrivia( statement ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
             => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax ) );
@@ -193,7 +199,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( kind != SyntaxKind.SimpleAssignmentExpression )
                 {
-                    throw new InvalidOperationException( 
+                    throw new InvalidOperationException(
                         $"Templates using context-dependent compound assignments (e.g. 'x += meta.Proceed()') cannot be expanded when the right side " +
                         $"expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead." );
                 }
@@ -451,5 +457,86 @@ namespace Metalama.Framework.Engine.Templating
 
             return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol, isAsync ) ) );
         }
+
+        private BlockSyntax InvokeTemplate( string templateName, TemplateProvider templateProvider, IObjectReader args )
+        {
+            var (templateClass, templateMember) = this.GetTemplateDescription( templateName, templateProvider );
+
+            var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
+            var templateArguments = templateMember.ArgumentsForCalledTemplate( args );
+
+            // Add ITemplateSyntaxFactory as the first template argument.
+            var allArguments = new object?[templateArguments.Length + 1];
+            allArguments[0] = this.ForTemplate( templateName, templateProvider );
+            templateArguments.CopyTo( allArguments, 1 );
+
+            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
+
+            return compiledTemplateMethodInfo.Invoke( context.TemplateProvider.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
+        }
+
+        public BlockSyntax? InvokeTemplate( string templateName, object? templateInstanceOrType = null, object? args = null )
+        {
+            return this.InvokeTemplate( templateName, GetTemplateProvider( templateInstanceOrType ), this._objectReaderFactory.GetReader( args ) );
+        }
+
+        public BlockSyntax InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
+        {
+            var invocationArgs = this._objectReaderFactory.GetReader( templateInvocation.Arguments );
+            var directArgs = this._objectReaderFactory.GetReader( args );
+
+            return this.InvokeTemplate(
+                templateInvocation.TemplateName,
+                templateInvocation.TemplateProvider,
+                ObjectReader.Merge( invocationArgs, directArgs ) );
+        }
+
+        private (TemplateClass TemplateClass, TemplateMember<IMethod> TemplateMember) GetTemplateDescription(
+            string templateName,
+            TemplateProvider templateProvider )
+        {
+            if ( templateProvider == this._templateExpansionContext.TemplateProvider )
+            {
+                templateProvider = default;
+            }
+
+            var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
+            var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
+
+            var templateMember = templateMemberRef.GetTemplateMember<IMethod>(
+                this.Compilation.GetCompilationModel(),
+                this._templateExpansionContext.ServiceProvider );
+
+            return (templateClass, templateMember);
+        }
+
+        public ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
+        {
+            var templateMember = this.GetTemplateDescription( templateName, templateProvider ).TemplateMember;
+
+            var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
+
+            return context.SyntaxFactory;
+        }
+
+        public ITemplateSyntaxFactory ForTemplate( string templateName, object? templateInstanceOrType )
+        {
+            var templateProvider = GetTemplateProvider( templateInstanceOrType );
+
+            return this.ForTemplate( templateName, templateProvider );
+        }
+
+        private static TemplateProvider GetTemplateProvider( object? templateInstanceOrType )
+            => templateInstanceOrType switch
+            {
+                null => default,
+                TemplateProvider templateProvider => templateProvider,
+                Type type => TemplateProvider.FromTypeUnsafe( type ),
+                ITemplateProvider instance => TemplateProvider.FromInstance( instance ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public TemplateTypeArgument TemplateTypeArgument( string name, Type type )
+            => TemplateBindingHelper.CreateTemplateTypeArgument( name, TypeFactory.Implementation.GetTypeByReflectionType( type ) );
     }
 }

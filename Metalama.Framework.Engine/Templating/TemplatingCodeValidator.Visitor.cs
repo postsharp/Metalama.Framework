@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
-                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Framework.Fabrics.TypeFabric) );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
             }
 
@@ -349,13 +350,13 @@ namespace Metalama.Framework.Engine.Templating
                 => this.VisitBaseMethodOrAccessor(
                     node,
                     node.Modifiers,
-                    syntax => base.VisitMethodDeclaration( syntax ) );
+                    base.VisitMethodDeclaration );
 
             public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
                 => this.VisitBaseMethodOrAccessor(
                     node,
                     node.Modifiers,
-                    syntax => base.VisitAccessorDeclaration( syntax ) );
+                    base.VisitAccessorDeclaration );
 
             private void VisitBaseMethodOrAccessor<T>( T node, SyntaxTokenList modifiers, Action<T> visitBase, ISymbol? declaredSymbol = null )
                 where T : SyntaxNode
@@ -523,7 +524,8 @@ namespace Metalama.Framework.Engine.Templating
                 if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
                 {
                     var adviceAttribute = declaredSymbol.GetAttributes()
-                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+                        .FirstOrDefault(
+                            a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
 
                     if ( adviceAttribute != null )
                     {
@@ -546,7 +548,9 @@ namespace Metalama.Framework.Engine.Templating
                         .Where( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) )
                         .Select( a => (member, a.AttributeClass!) );
 
-                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol } ? memberAssociatedSymbol : member.GetOverriddenMember();
+                    var baseAttributesSource = member is IMethodSymbol { AssociatedSymbol: { } memberAssociatedSymbol }
+                        ? memberAssociatedSymbol
+                        : member.GetOverriddenMember();
 
                     return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }
@@ -558,7 +562,27 @@ namespace Metalama.Framework.Engine.Templating
                     this.Report(
                         TemplatingDiagnosticDescriptors.MultipleAdviceAttributes.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member, adviceAttributes[1].AttributeClass) ) );
+                            (adviceAttributes[0].Member, adviceAttributes[0].AttributeClass, adviceAttributes[1].Member,
+                             adviceAttributes[1].AttributeClass) ) );
+                }
+
+                var compilation = this._compilationContext.SourceCompilation;
+                var reflectionMapper = this._compilationContext.ReflectionMapper;
+
+                bool IsAspect( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
+
+                bool IsFabric( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
+
+                bool IsTemplateProvider( INamedTypeSymbol symbol )
+                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(ITemplateProvider) ) );
+
+                // Report an error for struct aspect.
+                if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol && IsAspect( typeSymbol ) )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.AspectCantBeStruct.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            declaredSymbol ) );
                 }
 
                 // Get the type scope.
@@ -580,18 +604,23 @@ namespace Metalama.Framework.Engine.Templating
                             TemplatingDiagnosticDescriptors.CannotMarkDeclarationAsTemplate.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
                                 declaredSymbol ) );
-
-                        return default;
                     }
-
-                    if ( declaredSymbol.ContainingType?.IsStatic == true )
+                    else if ( declaredSymbol is IMethodSymbol { IsExtensionMethod: true } )
                     {
                         this.Report(
-                            TemplatingDiagnosticDescriptors.TemplatesInStaticTypeNotSupported.CreateRoslynDiagnostic(
+                            TemplatingDiagnosticDescriptors.ExtensionMethodTemplateNotSupported.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
-                                (declaredSymbol, declaredSymbol.ContainingType) ) );
+                                declaredSymbol ) );
+                    }
 
-                        return default;
+                    var containingType = declaredSymbol.ContainingType;
+
+                    if ( !IsAspect( containingType ) && !IsFabric( containingType ) && !IsTemplateProvider( containingType ) )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.TemplatesHaveToBeInTemplateProvider.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                (declaredSymbol, containingType) ) );
                     }
                 }
 
@@ -642,7 +671,10 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             private static bool IsSupportedTemplateDeclaration( ISymbol declaredSymbol )
-                => declaredSymbol is not IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator };
+                => declaredSymbol is not IMethodSymbol
+                {
+                    MethodKind: MethodKind.Constructor or MethodKind.Destructor or MethodKind.Conversion or MethodKind.UserDefinedOperator
+                };
 
             private readonly struct Context : IDisposable
             {

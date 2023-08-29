@@ -127,14 +127,7 @@ namespace Metalama.Framework.Engine.Transformations
                     // var returnValue = <proceed>;
                     statements.Add(
                         LocalDeclarationStatement(
-                            VariableDeclaration(
-                                    IdentifierName(
-                                        Identifier(
-                                            TriviaList(),
-                                            SyntaxKind.VarKeyword,
-                                            "var",
-                                            "var",
-                                            TriviaList( ElasticSpace ) ) ) )
+                            VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                                 .WithVariables(
                                     SingletonSeparatedList(
                                         VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
@@ -145,14 +138,7 @@ namespace Metalama.Framework.Engine.Transformations
                         // var contractInput = returnValue;
                         statements.Add(
                             LocalDeclarationStatement(
-                                VariableDeclaration(
-                                        IdentifierName(
-                                            Identifier(
-                                                TriviaList(),
-                                                SyntaxKind.VarKeyword,
-                                                "var",
-                                                "var",
-                                                TriviaList( ElasticSpace ) ) ) )
+                                VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                                     .WithVariables(
                                         SingletonSeparatedList(
                                             VariableDeclarator( Identifier( contractInputName.AssertNotNull() ).WithTrailingTrivia( ElasticSpace ) )
@@ -262,7 +248,7 @@ namespace Metalama.Framework.Engine.Transformations
                             : default,
                         Token( SyntaxKind.ForEachKeyword ),
                         Token( SyntaxKind.OpenParenToken ),
-                        IdentifierName( Identifier( TriviaList(), SyntaxKind.VarKeyword, "var", "var", TriviaList( ElasticSpace ) ) ),
+                        SyntaxFactoryEx.VarIdentifier(),
                         Identifier( returnItemName ),
                         Token( TriviaList( ElasticSpace ), SyntaxKind.InKeyword, TriviaList( ElasticSpace ) ),
                         enumerableExpression,

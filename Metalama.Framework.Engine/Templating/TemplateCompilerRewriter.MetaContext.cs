@@ -47,8 +47,6 @@ namespace Metalama.Framework.Engine.Templating
             /// <see cref="StatementListVariableName"/>.
             /// </summary>
             /// <param name="parentContext">The parent context, or <c>null</c> if we are building the root context.</param>
-            /// <param name="statementListVariableName"></param>
-            /// <returns></returns>
             public static MetaContext CreateForRunTimeBlock( MetaContext? parentContext, string statementListVariableName )
             {
                 var generatedCodeSymbolNameLocals = parentContext?._generatedCodeSymbolNameLocals
@@ -66,8 +64,6 @@ namespace Metalama.Framework.Engine.Templating
             /// Creates a child <see cref="MetaContext"/> copies everything from the parent context but has its own
             /// list of statements.
             /// </summary>
-            /// <param name="parentContext"></param>
-            /// <returns></returns>
             public static MetaContext CreateHelperContext( MetaContext parentContext )
             {
                 return new MetaContext(
@@ -81,8 +77,6 @@ namespace Metalama.Framework.Engine.Templating
             /// Creates a child <see cref="MetaContext"/> that corresponds to a new build-time block (lexical scope).
             /// Symbols defined in the child scope are not defined in the parent scope.
             /// </summary>
-            /// <param name="parentContext"></param>
-            /// <returns></returns>
             public static MetaContext CreateForBuildTimeBlock( MetaContext parentContext )
             {
                 // Build-time blocks are currently without effect because the dictionary maps resolved symbols, and not symbol
@@ -114,9 +108,6 @@ namespace Metalama.Framework.Engine.Templating
             /// Gets the name of the compiled template variable containing the name of the run-time variable corresponding
             /// to a given source template symbol (typically a local variable or a local method), if such name has been defined before.
             /// </summary>
-            /// <param name="symbol"></param>
-            /// <param name="templateVariableName"></param>
-            /// <returns></returns>
             public bool TryGetRunTimeSymbolLocal( ISymbol symbol, out SyntaxToken templateVariableName )
                 => this._generatedCodeSymbolNameLocals.TryGetValue( symbol, out templateVariableName );
 
@@ -124,8 +115,6 @@ namespace Metalama.Framework.Engine.Templating
             /// Maps a local template symbol (typically a local variable or a local function of the source template) to
             /// the name of the compiled template variable that contains the run-time name of the symbol. 
             /// </summary>
-            /// <param name="identifierSymbol"></param>
-            /// <param name="templateVariableName"></param>
             public void AddRunTimeSymbolLocal( ISymbol identifierSymbol, SyntaxToken templateVariableName )
             {
                 this._generatedCodeSymbolNameLocals.Add( identifierSymbol, templateVariableName );
@@ -150,6 +139,13 @@ namespace Metalama.Framework.Engine.Templating
             public SyntaxToken GetTemplateVariableName( string hint )
             {
                 var name = this._templateUniqueNames.GetUniqueIdentifier( hint + "Name" );
+
+                return SyntaxFactory.Identifier( name );
+            }
+
+            public SyntaxToken GetVariable( string hint )
+            {
+                var name = this._templateUniqueNames.GetUniqueIdentifier( hint );
 
                 return SyntaxFactory.Identifier( name );
             }

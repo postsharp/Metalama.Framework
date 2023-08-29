@@ -26,6 +26,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public bool CanBeReferencedAsRunTimeCode => this.AttributeType is TemplateAttributeType.DeclarativeAdvice or TemplateAttributeType.InterfaceMember;
 
+        public bool CanBeReferencedAsSubtemplate => !this.IsNone && !this.CanBeReferencedAsRunTimeCode;
+
         /// <summary>
         /// Gets the <see cref="TemplateAttribute"/> if it could be instantiated by the <see cref="SymbolClassifier"/>, i.e.
         /// only if it is a system attribute but not if it is defined in user code.
@@ -69,7 +71,6 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Returns a copy of the current <see cref="TemplateInfo"/>, but with the <see cref="IsAbstract"/> property set to <c>true</c>.
         /// </summary>
-        /// <returns></returns>
         public TemplateInfo AsAbstract() => new( this, true );
 
         public override string ToString() => $"Type={this.AttributeType}, Attribute={this.Attribute}";

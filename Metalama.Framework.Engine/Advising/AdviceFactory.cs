@@ -34,6 +34,7 @@ internal sealed class AdviceFactory : IAdviceFactory
     private readonly INamedType? _aspectTargetType;
     private readonly AdviceFactoryState _state;
     private readonly ObjectReaderFactory _objectReaderFactory;
+    private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
     public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
     {
@@ -41,6 +42,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         this._templateInstance = templateInstance;
         this._layerName = layerName;
         this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
+        this._otherTemplateClassProvider = state.ServiceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         // The AdviceFactory is now always working on the initial compilation.
         // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
@@ -55,19 +57,20 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this._state, templateClassInstance, this._layerName );
 
-    public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
+    public IAdviceFactory WithTemplateProvider( TemplateProvider templateProvider )
         => this.WithTemplateClassInstance(
             new TemplateClassInstance(
                 templateProvider,
-                this._state.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName.AssertNotNull()] ) );
+                this._otherTemplateClassProvider.Get( templateProvider ) ) );
+
+    public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
+        => this.WithTemplateProvider( TemplateProvider.FromInstance( templateProvider ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
-        => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
+        => this.ValidateTemplateName( templateName, templateKind, required: true )!.Value;
 
     private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
     {
-        Invariant.Assert( !(required && ignoreMissing) );
-
         if ( this._templateInstance == null )
         {
             throw new AssertionFailedException( "The template instance cannot be null." );
@@ -86,7 +89,20 @@ internal sealed class AdviceFactory : IAdviceFactory
                 return null;
             }
         }
-        else if ( this._templateInstance.TemplateClass.Members.TryGetValue( templateName, out var template ) )
+
+        return ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
+    }
+
+    public static TemplateMemberRef? ValidateTemplateName(
+        TemplateClass templateClass,
+        string templateName,
+        TemplateKind templateKind,
+        bool required = false,
+        bool ignoreMissing = false )
+    {
+        Invariant.Assert( !(required && ignoreMissing) );
+
+        if ( templateClass.Members.TryGetValue( templateName, out var template ) )
         {
             if ( template.TemplateInfo.IsNone )
             {
@@ -118,8 +134,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
             else
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._templateInstance.TemplateClass.ShortName, templateName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (templateClass.ShortName, templateName) );
             }
         }
     }

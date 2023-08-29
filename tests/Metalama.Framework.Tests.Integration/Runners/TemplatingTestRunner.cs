@@ -1,14 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -289,7 +290,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var compilationServices = CompilationContextFactory.GetInstance( roslynCompilation );
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-            var templateInstance = Activator.CreateInstance( templateType )!;
+
+            // In templating tests, test classes do not implement ITemplateProvider so we use FromInstanceUnsafe.
+            var templateProvider = TemplateProvider.FromInstanceUnsafe( Activator.CreateInstance( templateType )! );
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
@@ -322,7 +325,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType );
 
-            var augmentedServiceProvider = serviceProvider.WithService( ExecutionScenario.CompileTime.WithTest() );
+            serviceProvider = serviceProvider.WithServices(
+                ExecutionScenario.CompileTime.WithTest(),
+                new OtherTemplateClassProvider( ImmutableDictionary<string, OtherTemplateClass>.Empty ) );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
@@ -334,18 +339,17 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     default,
                     syntaxGenerationContext,
                     null!,
-                    augmentedServiceProvider,
+                    serviceProvider,
                     MetaApiStaticity.Default ) );
 
             return (new TemplateExpansionContext(
                         serviceProvider,
-                        templateInstance,
+                        templateProvider,
                         metaApi,
                         lexicalScope,
-                        serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
                         template,
-                        proceedExpression,
+                        _ => proceedExpression,
                         default ),
                     roslynTargetMethod);
 
