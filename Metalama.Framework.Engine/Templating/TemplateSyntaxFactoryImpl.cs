@@ -530,6 +530,7 @@ namespace Metalama.Framework.Engine.Templating
             => templateInstanceOrType switch
             {
                 null => default,
+                TemplateProvider templateProvider => templateProvider,
                 Type type => TemplateProvider.FromTypeUnsafe( type ),
                 ITemplateProvider instance => TemplateProvider.FromInstance( instance ),
                 _ => throw new AssertionFailedException()
