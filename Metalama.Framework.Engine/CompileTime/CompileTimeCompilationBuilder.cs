@@ -781,7 +781,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             wasInconsistent = true;
             return false;
         }
-        else if (peExists || manifestExists)
+        else if (!peExists || !manifestExists)
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): Cache miss." );
             wasInconsistent = false;
