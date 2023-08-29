@@ -29,7 +29,7 @@ public sealed class PreviewAspectPipeline : AspectPipeline
     private protected override HighLevelPipelineStage CreateHighLevelStage(
         PipelineStageConfiguration configuration,
         CompileTimeProject compileTimeProject )
-        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
 
     public async Task<FallibleResult<PartialCompilation>> ExecutePreviewAsync(
         DiagnosticBag diagnostics,

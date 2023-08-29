@@ -9,6 +9,6 @@ internal class VersionCommand : BaseCommand<BaseCommandSettings>
 {
     protected override void Execute( ExtendedCommandContext context, BaseCommandSettings settings )
     {
-        context.Console.WriteSuccess( EngineAssemblyMetadataReader.Instance.PackageVersion );
+        context.Console.WriteSuccess( EngineAssemblyMetadataReader.Instance.PackageVersion ?? "<unknown>" );
     }
 }

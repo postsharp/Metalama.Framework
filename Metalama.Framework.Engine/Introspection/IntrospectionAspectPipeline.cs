@@ -25,7 +25,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
     }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
-        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
 
     private static ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics( DiagnosticBag diagnostics, CompilationModel compilation )
     {

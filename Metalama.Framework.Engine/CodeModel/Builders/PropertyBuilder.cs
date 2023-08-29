@@ -200,7 +200,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     protected internal virtual bool GetPropertyInitializerExpressionOrMethod(
         Advice advice,
-        in MemberInjectionContext context,
+        MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
     {

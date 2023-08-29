@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Transformations
             : base( advice, overriddenDeclaration, tags ) { }
 
         protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BlockSyntax? getAccessorBody,
             BlockSyntax? setAccessorBody )
         {
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
             return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, "__linker_param") );
         }
 
-        protected SyntaxUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
+        protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
             => accessor.MethodKind switch
             {
                 MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -101,14 +101,14 @@ namespace Metalama.Framework.Engine.Transformations
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
             };
 
-        protected override ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
+        protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
             => context.AspectReferenceSyntaxProvider.GetIndexerReference(
                 this.ParentAdvice.AspectLayerId,
                 this.OverriddenDeclaration,
                 AspectReferenceTargetKind.PropertyGetAccessor,
                 context.SyntaxGenerator );
 
-        protected override ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
+        protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
             => AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 context.AspectReferenceSyntaxProvider.GetIndexerReference(

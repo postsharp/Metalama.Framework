@@ -107,14 +107,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             getterStatements.Insert(
                 0,
                 SyntaxFactory.LocalDeclarationStatement(
-                    SyntaxFactory.VariableDeclaration(
-                            SyntaxFactory.IdentifierName(
-                                SyntaxFactory.Identifier(
-                                    SyntaxFactory.TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "var",
-                                    "var",
-                                    SyntaxFactory.TriviaList( SyntaxFactory.ElasticSpace ) ) ) )
+                    SyntaxFactory.VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                         .WithVariables(
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.VariableDeclarator(

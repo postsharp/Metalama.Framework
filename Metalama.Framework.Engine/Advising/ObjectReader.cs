@@ -42,17 +42,12 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
-            switch ( nonEmptyCount )
+            return nonEmptyCount switch
             {
-                case 0:
-                    return Empty;
-
-                case 1:
-                    return readers[nonEmptyIndex].AssertNotNull();
-
-                default:
-                    return new ObjectReaderMergeWrapper( readers );
-            }
+                0 => Empty,
+                1 => readers[nonEmptyIndex].AssertNotNull(),
+                _ => new ObjectReaderMergeWrapper( readers ),
+            };
         }
 
         public object? this[ string key ]
