@@ -44,10 +44,10 @@
 
         <!-- Select assembies -->
         <ItemGroup>
-            <DesktopAssemblyToSignAndEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\netframework472\Metalama.*.dll" />
+            <DesktopAssemblyToSignAndEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net472\Metalama.*.dll" />
             <CoreAssemblyToSignAndEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net6.0\Metalama.*.dll" />
 
-            <DesktopAssemblyToEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\netframework472\*.dll" Exclude="$(AssembliesNotToEmbed)"/>
+            <DesktopAssemblyToEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net472\*.dll" Exclude="$(AssembliesNotToEmbed)"/>
             <CoreAssemblyToEmbed Include="..\Metalama.Framework.CompilerExtensions.Resources\bin\$(Configuration)\net6.0\*.dll" Exclude="$(AssembliesNotToEmbed)"/>
         </ItemGroup>
     </Target>
