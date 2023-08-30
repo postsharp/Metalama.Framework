@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -137,20 +138,30 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
 
-        var templateTypeArguments =
-            template?.TemplateArguments.OfType<TemplateTypeArgument>().ToImmutableDictionary( x => x.Name, x => x.Type )
-            ?? ImmutableDictionary<string, IType>.Empty;
+        var templateTypeArguments = ImmutableDictionary<string, IType>.Empty.ToBuilder();
+
+        if ( template != null )
+        {
+            templateTypeArguments.AddRange( template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+        }
 
         if (metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
         {
-            // Generic method - we need to add type parameters as named arguments for correct serializable id resultion.
+            // Generic method - we need to add type parameters as named arguments for correct serializable id resulution.
+            // Any target method type parameter that matches name of template argument can be skipped - template will not have a runtime type parameter of that name.
 
             // TODO: This presumes mapping of type parameters by name, more appropriate place would be to have a map in BoundTemplateMethod, but there is currently no other use for that.
 
-            templateTypeArguments = templateTypeArguments.AddRange( targetMethod.TypeParameters.SelectAsEnumerable( p => new KeyValuePair<string, IType>( p.Name, p ) ) );
+            foreach ( var targetTypeParameter in targetMethod.TypeParameters )
+            {
+                if ( !templateTypeArguments.ContainsKey( targetTypeParameter.Name ) )
+                {
+                    templateTypeArguments.Add( targetTypeParameter.Name, targetTypeParameter );
+                }
+            }
         }
 
-        this.TemplateGenericArguments = templateTypeArguments;
+        this.TemplateGenericArguments = templateTypeArguments.ToImmutable();
 
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }

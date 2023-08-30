@@ -24,6 +24,23 @@ public class TestAspect : MethodAspect
         return meta.Proceed();
     }
 }
+public class TestAspect2 : MethodAspect
+{
+    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    {
+        builder.Advice.Override(
+            builder.Target,
+            nameof(Template),
+            args: new { T = typeof(int) });
+    }
+
+    [Template]
+    public dynamic? Template<[CompileTime] T>()
+    {
+        new TestData<T>();
+        return meta.Proceed();
+    }
+}
 
 [RunTimeOrCompileTime]
 public class TestData<T>
@@ -38,8 +55,12 @@ class Target
     {
     }
 
-    public void Bar<T>(TestData<T> data)
+    [TestAspect2]
+    public void Foo2<T>()
     {
     }
 
+    public void Bar<T>(TestData<T> data)
+    {
+    }
 }
