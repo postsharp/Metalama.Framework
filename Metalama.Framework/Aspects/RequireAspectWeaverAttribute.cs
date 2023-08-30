@@ -17,11 +17,21 @@ public sealed class RequireAspectWeaverAttribute : Attribute
     /// <summary>
     /// Initializes a new instance of the <see cref="RequireAspectWeaverAttribute"/> class.
     /// </summary>
-    /// <param name="weaverType">Full name (namespace and name but not assembly name) of the type implemented the aspect. This type must implement the
-    /// <c>IAspectWeaver</c> interface, be annotated with the <c>[MetalamaPlugin]</c> attribute, and the assembly must be included as an analyzer in the project.</param>
+    /// <param name="weaverType">Full name (namespace and name but not assembly name) of the type implementing the aspect. This type must implement the
+    /// <c>IAspectWeaver</c> interface and be annotated with the <c>[MetalamaPlugin]</c> attribute.</param>
     public RequireAspectWeaverAttribute( string weaverType )
     {
         this.Type = weaverType;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RequireAspectWeaverAttribute"/> class.
+    /// </summary>
+    /// <param name="weaverType">The type implementing the aspect. This type must implement the
+    /// <c>IAspectWeaver</c> interface and be annotated with the <c>[MetalamaPlugin]</c> attribute.</param>
+    public RequireAspectWeaverAttribute( Type weaverType )
+    {
+        this.Type = weaverType.FullName!;
     }
 
     /// <summary>

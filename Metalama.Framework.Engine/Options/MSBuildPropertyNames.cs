@@ -29,12 +29,12 @@ public static class MSBuildPropertyNames
     public const string MetalamaRequireOrderedAspects = nameof(MetalamaRequireOrderedAspects);
     public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
     public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
-    public const string MetalamaPlugInAssemblyPaths = nameof(MetalamaPlugInAssemblyPaths);
     public const string MetalamaWriteHtml = nameof(MetalamaWriteHtml);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
     public const string MetalamaReferenceAssemblyRestoreTimeout = nameof(MetalamaReferenceAssemblyRestoreTimeout);
     public const string MetalamaLicense = nameof(MetalamaLicense);
     public const string MetalamaWriteLicenseCreditData = nameof(MetalamaWriteLicenseCreditData);
+    public const string MetalamaRoslynIsCompileTimeOnly = nameof(MetalamaRoslynIsCompileTimeOnly);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
         MetalamaBuildTouchFile,
@@ -60,5 +60,6 @@ public static class MSBuildPropertyNames
         ProjectAssetsFile,
         MetalamaReferenceAssemblyRestoreTimeout,
         MetalamaLicense,
-        MetalamaWriteLicenseCreditData );
+        MetalamaWriteLicenseCreditData,
+        MetalamaRoslynIsCompileTimeOnly );
 }

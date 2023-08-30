@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using System.Threading.Tasks;
 
@@ -11,7 +10,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// are used for low-level transformations only, and don't totally integrate with high-level aspects. Implementations
     /// of this class must be public, have a default constructor, and be annotated with the <see cref="MetalamaPlugInAttribute"/> custom attribute.
     /// </summary>
-    [CompileTime] /* For cases when the weaver is not in a separate compile-time assembly */
+    [CompileTime]
     public interface IAspectWeaver : IAspectDriver
     {
         /// <summary>

@@ -8,18 +8,18 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var templateProvider = new TemplateProvider();
+        var templateProvider = TemplateProvider.FromInstance( new TemplateProviderImpl() );
 
-        builder.Advice.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProvider.IntroducedProperty) );
+        builder.Advice.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProviderImpl.IntroducedProperty) );
 
         foreach (var property in builder.Target.Properties)
         {
-            builder.Advice.WithTemplateProvider( templateProvider ).Override( property, nameof(TemplateProvider.OverrideTemplate) );
+            builder.Advice.WithTemplateProvider( templateProvider ).Override( property, nameof(TemplateProviderImpl.OverrideTemplate) );
         }
     }
 }
 
-internal class TemplateProvider : ITemplateProvider
+internal class TemplateProviderImpl : ITemplateProvider
 {
     [Template]
     public string? OverrideTemplate

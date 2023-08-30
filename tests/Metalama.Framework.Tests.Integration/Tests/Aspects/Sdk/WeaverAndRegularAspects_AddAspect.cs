@@ -1,20 +1,20 @@
 using System;
 using System.Threading.Tasks;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [assembly: AspectOrder(typeof(RegularAspect1), typeof(WeaverAspect), typeof(RegularAspect2), typeof(CombinedAspect))]
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Aspects.Sdk.WeaverAndRegularAspects_AddAspect.AspectWeaver")]
+    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect.AspectWeaver")]
     internal class WeaverAspect : MethodAspect { }
 
     [MetalamaPlugIn]

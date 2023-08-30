@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating
             templateArguments.CopyTo( allArguments, 1 );
 
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, allArguments ).AssertNotNull(),
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider.Object, allArguments ).AssertNotNull(),
                     templateExpansionContext,
                     out var output ) )
             {

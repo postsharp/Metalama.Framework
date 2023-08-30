@@ -26,7 +26,7 @@ public enum ExecutionScope
     CompileTime,
 
     /// <summary>
-    /// Run-time-or-compile=time declaration. Typically an aspect or a type annotated with <see cref="RunTimeOrCompileTimeAttribute"/>.
+    /// Run-time-or-compile-time declaration. Typically an aspect or a type annotated with <see cref="RunTimeOrCompileTimeAttribute"/>.
     /// </summary>
     RunTimeOrCompileTime
 }

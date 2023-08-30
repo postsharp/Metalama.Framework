@@ -25,14 +25,19 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
 		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
-             the compile-time assembly. See ReferenceAssemblyLocator                                           -->
+             the compile-time assembly. See ReferenceAssemblyLocator. -->
         <EmbeddedResource Include="..\Metalama.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Metalama.Framework.dll">
             <LogicalName>Metalama.Framework.dll</LogicalName>
         </EmbeddedResource>
 
+        <!-- Metalama.Framework depends on Metalama.SystemTypes, so we have to embed that as well. -->
+        <EmbeddedResource Include="..\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll">
+            <LogicalName>Metalama.SystemTypes.dll</LogicalName>
+        </EmbeddedResource>
+        
         <!-- We also embed the self-contained build of Metalama.Compiler.Interface.dll because at run-time, this project
             may receive the build containing forwarders (this happens in Metalama.Try). However, we need to compile against
-            the self-contained version -->
+            the self-contained version. -->
         <EmbeddedResource Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll">
             <LogicalName>Metalama.Compiler.Interface.dll</LogicalName>
         </EmbeddedResource>

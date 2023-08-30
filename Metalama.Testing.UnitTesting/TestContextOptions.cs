@@ -28,11 +28,6 @@ public sealed record TestContextOptions
     public ImmutableDictionary<string, string> Properties { get; init; } = ImmutableDictionary<string, string>.Empty;
 
     /// <summary>
-    /// Gets the set of compiler plug-ins exposed to the tests.
-    /// </summary>
-    internal ImmutableArray<object> PlugIns { get; init; } = ImmutableArray<object>.Empty;
-
-    /// <summary>
     /// Gets a value indicating whether the output code should be formatted.
     /// </summary>
     public bool FormatOutput { get; init; }
@@ -56,6 +51,8 @@ public sealed record TestContextOptions
     internal bool HasSourceGeneratorTouchFile { get; init; }
 
     internal bool HasBuildTouchFile { get; init; }
+
+    internal bool RoslynIsCompileTimeOnly { get; init; } = true;
 
     /// <summary>
     /// Gets the list of references that will be added to compilations created in this context.

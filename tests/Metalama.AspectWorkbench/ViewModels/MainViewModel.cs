@@ -124,7 +124,6 @@ namespace Metalama.AspectWorkbench.ViewModels
                 serviceProvider,
                 new TestProjectReferences(
                     metadataReferences.ToImmutableArray(),
-                    ImmutableArray<object>.Empty,
                     null ),
                 null );
 

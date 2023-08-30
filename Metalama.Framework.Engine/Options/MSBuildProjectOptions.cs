@@ -25,15 +25,14 @@ namespace Metalama.Framework.Engine.Options
         private readonly TransformerOptions _transformerOptions;
 
         [UsedImplicitly]
-        protected MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        protected MSBuildProjectOptions( IProjectOptionsSource source, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
-            this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
-            this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, TransformerOptions? transformerOptions = null ) :
+            this( new OptionsAdapter( options ), transformerOptions ) { }
 
         [Memo]
         public override string? BuildTouchFile => this.GetStringOption( MSBuildPropertyNames.MetalamaBuildTouchFile );
@@ -43,8 +42,6 @@ namespace Metalama.Framework.Engine.Options
 
         [Memo]
         public override string? AssemblyName => this.GetStringOption( MSBuildPropertyNames.AssemblyName );
-
-        public override ImmutableArray<object> PlugIns { get; }
 
         [Memo]
         public override bool IsFrameworkEnabled
@@ -101,14 +98,6 @@ namespace Metalama.Framework.Engine.Options
                 .ToImmutableArray();
 
         [Memo]
-        public override ImmutableArray<string> PlugInAssemblyPaths
-            => this.GetStringOption( MSBuildPropertyNames.MetalamaPlugInAssemblyPaths, "" )!
-                .Split( ',' )
-                .SelectAsEnumerable( p => p.Trim() )
-                .Where( p => !string.IsNullOrEmpty( p ) )
-                .ToImmutableArray();
-
-        [Memo]
         public override string? ProjectAssetsFile => this.GetStringOption( MSBuildPropertyNames.ProjectAssetsFile );
 
         [Memo]
@@ -122,6 +111,9 @@ namespace Metalama.Framework.Engine.Options
 
         [Memo]
         public override bool? WriteLicenseCreditData => this.GetNullableBooleanOption( MSBuildPropertyNames.MetalamaWriteLicenseCreditData );
+
+        [Memo]
+        public override bool RoslynIsCompileTimeOnly => this.GetBooleanOption( MSBuildPropertyNames.MetalamaRoslynIsCompileTimeOnly, defaultValue: true );
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {

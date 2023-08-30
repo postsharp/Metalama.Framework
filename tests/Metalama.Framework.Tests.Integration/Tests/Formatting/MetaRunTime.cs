@@ -6,10 +6,9 @@ using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.MetaRunTime
 {   
-    [RunTimeOrCompileTime]
-    class Aspect
+    class Aspect : IAspect
     {
-        [TestTemplate]
+        [Template]
         void Template()
         {
             var metalamaRelease = meta.RunTime( meta.CompileTime( new DateTime( 2023, 5, 3 ) ) );

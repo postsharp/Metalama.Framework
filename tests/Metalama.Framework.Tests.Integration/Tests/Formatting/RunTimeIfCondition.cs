@@ -19,10 +19,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         }
     }
 
-    [RunTimeOrCompileTime]
-    class Aspect
+    class Aspect : IAspect
     {
-        [TestTemplate]
+        [Template]
         dynamic? Template()
         {
             var runTimeObject = new RunTimeClass();

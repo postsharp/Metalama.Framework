@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -127,7 +126,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             SyntaxGenerationContext generationContext,
@@ -157,14 +156,12 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
-                this.ParentAdvice.TemplateInstance.Instance,
+                context,
+                this.ParentAdvice.TemplateInstance.TemplateProvider,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                accessor,
                 accessorTemplate,
-                proceedExpression,
+                _ => proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );

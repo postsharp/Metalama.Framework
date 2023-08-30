@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal sealed partial class TemplateAnnotator
 {
     /// <summary>
-    /// Determines if a type references a template type parameter.
+    /// Determines if a type references a run-time template type parameter.
     /// </summary>
     private sealed class TypeParameterDetectionVisitor : SymbolVisitor<bool>
     {

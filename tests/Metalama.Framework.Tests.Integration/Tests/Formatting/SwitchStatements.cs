@@ -6,10 +6,9 @@ using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.SwitchStatements;
 
-[RunTimeOrCompileTime]
-class Aspect
+class Aspect : IAspect
 {
-    [TestTemplate]
+    [Template]
     dynamic? Template()
     {
         switch (0)

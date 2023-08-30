@@ -5,5 +5,6 @@ namespace Metalama.Framework.Engine.Licensing;
 public enum LicenseCreditConsumptionKind
 {
     UserClass,
-    Library
+    Library,
+    Feature
 }

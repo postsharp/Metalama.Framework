@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
 
@@ -25,19 +24,17 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
 
     public MSBuildProjectOptions GetProjectOptions(
         AnalyzerConfigOptionsProvider options,
-        ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
-        => this.GetProjectOptions( options.GlobalOptions, plugIns, transformerOptions );
+        => this.GetProjectOptions( options.GlobalOptions, transformerOptions );
 
     private MSBuildProjectOptions GetProjectOptions(
         AnalyzerConfigOptions options,
-        ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
     {
-        if ( plugIns != null || transformerOptions != null )
+        if ( transformerOptions != null )
         {
             // We have a source transformer. Caching is useless.
-            return new MSBuildProjectOptions( options, plugIns, transformerOptions );
+            return new MSBuildProjectOptions( options, transformerOptions );
         }
         else
         {
@@ -48,9 +45,8 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
 
     public MSBuildProjectOptions GetProjectOptions(
         Microsoft.CodeAnalysis.Project project,
-        ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
-        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, plugIns, transformerOptions );
+        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, transformerOptions );
 
     public void Dispose() => this._cache.Dispose();
 

@@ -400,7 +400,7 @@ namespace Metalama.Framework.Engine.Formatting
             ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
             string htmlExtension,
-            Func<string, FileDiffInfo>? getDiffInfo = null )
+            Func<string, FileDiffInfo?>? getDiffInfo = null )
         {
             var compilation = partialCompilation.Compilation;
             var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
@@ -433,15 +433,16 @@ namespace Metalama.Framework.Engine.Formatting
 
             foreach ( var document in project.Documents )
             {
-                var documentPath = Path.GetFullPath( document.FilePath.AssertNotNull() );
+                var documentPath = document.FilePath.AssertNotNull();
+                var documentFullPath = Path.GetFullPath( documentPath );
 
-                if ( !documentPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+                if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // Skipping this document.
                     continue;
                 }
 
-                var relativePath = documentPath.Substring( projectDirectory.Length + 1 );
+                var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
                 var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
 
                 var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
@@ -478,11 +479,18 @@ namespace Metalama.Framework.Engine.Formatting
                 ".t.cs.html",
                 p => GetDiffInfoForPath( p, false ) );
 
-            FileDiffInfo GetDiffInfoForPath( string path, bool isOld )
+            FileDiffInfo? GetDiffInfoForPath( string path, bool isOld )
             {
-                var oldTree = inputCompilation.SyntaxTrees[path];
-                var newTree = outputCompilation.SyntaxTrees[path];
+                if ( !inputCompilation.SyntaxTrees.TryGetValue( path, out var oldTree ) )
+                {
+                    return null;
+                }
 
+                if ( !outputCompilation.SyntaxTrees.TryGetValue( path, out var newTree ) )
+                {
+                    return null;
+                }
+                
                 return GetDiffInfo( oldTree, newTree, isOld );
             }
         }

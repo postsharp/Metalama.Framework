@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
@@ -160,12 +159,10 @@ namespace Metalama.Framework.Engine.Advising
                 var boundTemplate = contract.Template.ForContract( parameterExpression, contract.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
-                    context.ServiceProvider,
-                    this.TemplateInstance.Instance,
+                    context,
+                    this.TemplateInstance.TemplateProvider,
                     metaApi,
-                    context.LexicalScopeProvider.GetLexicalScope( targetMember ),
-                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                    context.SyntaxGenerationContext,
+                    targetMember,
                     boundTemplate,
                     null,
                     this.AspectLayerId );

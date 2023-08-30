@@ -105,38 +105,21 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this.MetaType ) )
             {
-                switch ( symbol.Name )
+                return symbol.Name switch
                 {
-                    case nameof(meta.This):
-                        return MetaMemberKind.This;
-
-                    case nameof(meta.InsertComment):
-                        return MetaMemberKind.InsertComment;
-
-                    case nameof(meta.InsertStatement):
-                        return MetaMemberKind.InsertStatement;
-
-                    case nameof(meta.Proceed):
-                        return MetaMemberKind.Proceed;
-
-                    case nameof(meta.ProceedAsync):
-                        return MetaMemberKind.ProceedAsync;
-
-                    case nameof(meta.ProceedEnumerable):
-                        return MetaMemberKind.ProceedEnumerable;
-
-                    case nameof(meta.ProceedEnumerator):
-                        return MetaMemberKind.ProceedEnumerator;
-
-                    case "ProceedAsyncEnumerable":
-                        return MetaMemberKind.ProceedAsyncEnumerable;
-
-                    case "ProceedAsyncEnumerator":
-                        return MetaMemberKind.ProceedAsyncEnumerator;
-
-                    default:
-                        return MetaMemberKind.Default;
-                }
+                    nameof(meta.This) => MetaMemberKind.This,
+                    nameof(meta.InsertComment) => MetaMemberKind.InsertComment,
+                    nameof(meta.InsertStatement) => MetaMemberKind.InsertStatement,
+                    nameof(meta.Proceed) => MetaMemberKind.Proceed,
+                    nameof(meta.ProceedAsync) => MetaMemberKind.ProceedAsync,
+                    nameof(meta.ProceedEnumerable) => MetaMemberKind.ProceedEnumerable,
+                    nameof(meta.ProceedEnumerator) => MetaMemberKind.ProceedEnumerator,
+                    "ProceedAsyncEnumerable" => MetaMemberKind.ProceedAsyncEnumerable,
+                    "ProceedAsyncEnumerator" => MetaMemberKind.ProceedAsyncEnumerator,
+                    nameof(meta.InvokeTemplate) => MetaMemberKind.InvokeTemplate,
+                    nameof(meta.Return) => MetaMemberKind.Return,
+                    _ => MetaMemberKind.Default,
+                };
             }
             else
             {

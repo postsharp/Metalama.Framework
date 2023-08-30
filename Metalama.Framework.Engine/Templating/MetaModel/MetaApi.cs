@@ -39,11 +39,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     ? nameof(this.FieldOrProperty)
                     : nameof(this.FieldOrPropertyOrIndexer);
 
-                alternativeSuggestion = $" Consider using meta.{alternativeMemberName} instead.";
+                alternativeSuggestion = $" Consider using meta.Target.{alternativeMemberName} instead.";
             }
 
             return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                (this._common.Template.Declaration, "meta.Target." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName, alternativeSuggestion) );
         }
 
@@ -69,15 +69,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+        public IParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethod) );
 
         public IParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
         public IIndexer Indexer => this._fieldOrPropertyOrIndexer as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
 
-        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
+        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type), nameof(INamedType) );
 
-        public ContractDirection ContractDirection => this._contractDirection ?? throw this.CreateInvalidOperationException( nameof(this.ContractDirection) );
+        public ContractDirection ContractDirection => this._contractDirection ?? throw this.CreateInvalidOperationException( nameof(this.ContractDirection), nameof(Framework.Aspects.ContractDirection) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => (this._common.Staticity, this._type, this.Declaration) switch

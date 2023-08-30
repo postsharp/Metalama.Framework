@@ -17,10 +17,6 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? AssemblyName => null;
 
-    public virtual ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
-
-    public virtual ImmutableArray<string> PlugInAssemblyPaths => ImmutableArray<string>.Empty;
-
     public virtual bool IsFrameworkEnabled => true;
 
     public virtual bool FormatOutput => false;
@@ -88,6 +84,8 @@ public class DefaultProjectOptions : IProjectOptions
     public virtual string? License => null;
 
     public virtual bool? WriteLicenseCreditData => null;
+
+    public virtual bool RoslynIsCompileTimeOnly => true;
 
     public virtual bool IsTest => false;
 }

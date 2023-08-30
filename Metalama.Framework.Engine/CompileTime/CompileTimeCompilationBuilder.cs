@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
@@ -153,6 +152,11 @@ internal sealed partial class CompileTimeCompilationBuilder
     private ulong ComputeProjectHash( IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash, string? redistributionLicenseKey )
     {
         XXH64 h = new();
+
+        // We include the MVID of the current module in the hash instead of for instance the version number.
+        // The benefit is to avoid conflicts in our development environments where we rebuild without changing the version number.
+        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has differents
+        // builds, one for each platform.
         h.Update( _buildId );
         this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
 
@@ -947,38 +951,44 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 textMapDirectory.Write( outputPaths.Directory );
 
-                var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
-                var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
-                var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
-                var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
+                // Create the manifest.
+                var compilationForManifest = compileTimeCompilation;
+                var aspectType = compilationForManifest.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
+                var fabricType = compilationForManifest.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
+                var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
+                var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
-                var aspectTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
-                    .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                bool IsAspect( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, aspectType );
+
+                bool IsFabric( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, fabricType );
+
+                var aspectTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                    .Where( IsAspect )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var fabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                var fabricTypes = compilationForManifest.Assembly.GetTypes()
                     .Where(
-                        t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
-                             !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                        t => IsFabric( t ) &&
+                             !compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                     .ToList();
 
                 var fabricTypeNames = fabricTypes
                     .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
 
-                var transitiveFabricTypeNames = compileTimeCompilation.Assembly.GetTypes()
-                    .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                var transitiveFabricTypeNames = compilationForManifest.Assembly.GetTypes()
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                     .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var compilerPlugInTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
-                    .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
+                var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                    .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
-                var otherTemplateTypeNames = compileTimeCompilation.Assembly.GetAllTypes()
-                    .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
+                var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                    .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )
                     .Select( t => t.GetReflectionFullName().AssertNotNull() )
                     .ToList();
 
@@ -994,7 +1004,6 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 var manifest = new CompileTimeProjectManifest(
                     runTimeCompilation.Assembly.Identity.ToString(),
-                    compileTimeCompilation.AssemblyName!,
                     runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
                     aspectTypeNames,
                     compilerPlugInTypeNames,
@@ -1062,6 +1071,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
+        out string? compileTimeAssemblyName,
         out string assemblyPath,
         out string? sourceDirectory )
     {
@@ -1075,6 +1085,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         assemblyPath = outputPaths.Pe;
         sourceDirectory = outputPaths.Directory;
+        compileTimeAssemblyName = outputPaths.CompileTimeAssemblyName;
 
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {

@@ -5,10 +5,9 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeCodeInRuntimeCode
 {
-    [RunTimeOrCompileTime]
-    class Aspect
+    class Aspect : IAspect
     {
-        [TestTemplate]
+        [Template]
         dynamic? Template()
         {
             Console.WriteLine( $"Invoking {meta.Target.Method.ToDisplayString()}" );

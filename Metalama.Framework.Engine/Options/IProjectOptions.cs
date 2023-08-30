@@ -23,10 +23,6 @@ namespace Metalama.Framework.Engine.Options
 
         string? AssemblyName { get; }
 
-        ImmutableArray<object> PlugIns { get; }
-
-        ImmutableArray<string> PlugInAssemblyPaths { get; }
-
         /// <summary>
         /// Gets a value indicating whether the aspect framework is enabled for the current project. If <c>false</c>,
         /// the project will not be modified. 
@@ -142,6 +138,12 @@ namespace Metalama.Framework.Engine.Options
         /// is null, it is considered <c>true</c> in trial mode and <c>false</c> otherwise.
         /// </summary>
         bool? WriteLicenseCreditData { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether Roslyn (Microsoft.CodeAnalysis) types are considered compile-time-only.
+        /// When set to <c>false</c>, Roslyn types are considered run-time-or-compile-time, which means they can be used in run-time code.
+        /// </summary>
+        bool RoslynIsCompileTimeOnly { get; }
 
         bool IsTest { get; }
     }

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Compiler;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -54,7 +54,6 @@ namespace Metalama.Framework.Engine.CompileTime
                     (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly),
                     (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly),
                     (typeof(Marshal), TemplatingScope.RunTimeOnly),
-                    (typeof(MetalamaPlugInAttribute), TemplatingScope.CompileTimeOnly),
                     (typeof(Index), TemplatingScope.RunTimeOrCompileTime),
                     (typeof(Range), TemplatingScope.RunTimeOrCompileTime)
                 }.ToImmutableDictionary(
@@ -94,6 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
         private readonly IAttributeDeserializer _attributeDeserializer;
         private readonly ILogger _logger;
+        private readonly bool _roslynIsCompileTimeOnly;
         private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
         private readonly CompilationContext _compilationContext;
 
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 serviceProvider.GetReferenceAssemblyLocator() ) { }
 
         private SymbolClassifier(
-            GlobalServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation,
             IAttributeDeserializer attributeDeserializer,
             ReferenceAssemblyLocator referenceAssemblyLocator )
@@ -130,6 +130,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             this._attributeDeserializer = attributeDeserializer;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
+
+            this._roslynIsCompileTimeOnly = serviceProvider.GetRequiredService<IProjectOptions>().RoslynIsCompileTimeOnly;
 
             var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
             this._compilation = compilation;
@@ -188,6 +190,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 return associatedTemplateInfo;
             }
 
+            if ( symbol.OriginalDefinition != symbol
+                 && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
+            {
+                return originalDefinitionTemplateInfo;
+            }
+
             if ( symbol.GetOverriddenMember() is { } overriddenMember )
             {
                 return this.GetTemplateInfo( overriddenMember, true );
@@ -231,6 +239,7 @@ namespace Metalama.Framework.Engine.CompileTime
             => attribute.AttributeClass?.Name switch
             {
                 nameof(CompileTimeAttribute) => TemplatingScope.CompileTimeOnly,
+                nameof(RunTimeAttribute) => TemplatingScope.RunTimeOnly,
                 nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
@@ -244,6 +253,11 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( assembly == null )
             {
                 return null;
+            }
+
+            if ( assembly.Name == "Metalama.Compiler.Interface" )
+            {
+                return TemplatingScope.CompileTimeOnly;
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
@@ -992,12 +1006,20 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.GetFullName() )
+                             config.Namespace == t.ContainingNamespace.GetFullName() )
                         {
                             scope = config.Scope;
 
                             return true;
                         }
+                    }
+
+                    // Check Roslyn types.
+                    if ( namedType.ContainingNamespace.GetFullName()?.StartsWith( "Microsoft.CodeAnalysis", StringComparison.Ordinal ) == true )
+                    {
+                        scope = this._roslynIsCompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOrCompileTime;
+
+                        return true;
                     }
 
                     // Check system types.                   

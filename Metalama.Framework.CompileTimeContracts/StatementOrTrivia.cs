@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Metalama.Framework.CompileTimeContracts
 {
     /// <summary>
-    /// Represents either a <see cref="Content"/>, a <see cref="SyntaxTriviaList"/>, or <c>null</c>.
+    /// Represents either a <see cref="StatementSyntax"/>, a <see cref="SyntaxTriviaList"/>, or <c>null</c>.
     /// </summary>
     [PublicAPI]
     public readonly struct StatementOrTrivia

@@ -25,7 +25,6 @@ namespace Metalama.Testing.UnitTesting
         public TestProjectOptions( TestContextOptions contextOptions, string? testName )
         {
             this.ProjectName = testName;
-            this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;
 
             this._properties = contextOptions.Properties;
 
@@ -40,6 +39,7 @@ namespace Metalama.Testing.UnitTesting
             this.FormatCompileTimeCode = contextOptions.FormatCompileTimeCode;
             this.AdditionalAssemblies = contextOptions.AdditionalAssemblies;
             this.RequireOrderedAspects = contextOptions.RequireOrderedAspects;
+            this.RoslynIsCompileTimeOnly = contextOptions.RoslynIsCompileTimeOnly;
 
             if ( contextOptions.HasSourceGeneratorTouchFile )
             {
@@ -67,8 +67,6 @@ namespace Metalama.Testing.UnitTesting
 
         public override string? ProjectName { get; }
 
-        public override ImmutableArray<object> PlugIns { get; }
-
         public string BaseDirectory => this._baseDirectory.Value;
 
         public override bool FormatOutput { get; }
@@ -86,6 +84,8 @@ namespace Metalama.Testing.UnitTesting
         public override bool IsTest => true;
 
         public override string? BuildTouchFile { get; }
+
+        public override bool RoslynIsCompileTimeOnly { get; }
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
