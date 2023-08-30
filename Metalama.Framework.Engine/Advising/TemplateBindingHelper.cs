@@ -553,6 +553,9 @@ internal static class TemplateBindingHelper
                 {
                     IType type => type,
                     Type type => TypeFactory.Implementation.GetTypeByReflectionType( type ),
+                    null => throw new InvalidAdviceParametersException(
+                        MetalamaStringFormatter.Format(
+                            $"The value of type parameter '{parameter.Name}' for template '{template.Declaration}' must not be null." ) ),
                     _ => throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
                             $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) ),
