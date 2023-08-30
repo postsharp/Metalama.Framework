@@ -1092,76 +1092,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return null;
         }
 
-        if ( transformationKind != TransformationKind.Transform &&
-             node.ArgumentList.Arguments.Any( this._templateMemberClassifier.IsDynamicParameter ) )
-        {
-            // We are transforming a call to a compile-time method that accepts dynamic arguments.
-
-            ArgumentSyntax LocalTransformArgument( ArgumentSyntax a )
-            {
-                if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
-                {
-                    var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
-                    var transformedExpression = (ExpressionSyntax) this.Visit( a.Expression )!;
-
-                    switch ( expressionScope )
-                    {
-                        case TemplatingScope.Dynamic:
-                        case TemplatingScope.RunTimeOnly:
-                            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( a.Expression );
-
-                            if ( expressionType != null )
-                            {
-                                var typedExpression = InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
-                                    .AddArgumentListArguments(
-                                        Argument( transformedExpression ),
-                                        Argument(
-                                            LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
-
-                                transformedExpression = typedExpression;
-                            }
-
-                            break;
-
-                        default:
-                            transformedExpression = this.CreateRunTimeExpression( transformedExpression );
-                            break;
-                    }
-
-                    return a.WithExpression( transformedExpression );
-                }
-                else
-                {
-                    return this.VisitArgument( a ).AssertCast<ArgumentSyntax>();
-                }
-            }
-
-            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( LocalTransformArgument );
-
-            return node.Update(
-                (ExpressionSyntax) this.Visit( node.Expression )!,
-                ArgumentList( SeparatedList( transformedArguments ) ) );
-        }
-        else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
-        {
-            // We are in an invocation like: `meta.This.Foo(...)`.
-        }
-        else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
-        {
-            // Replace `meta.RunTime(x)` to `x`.
-            var expression = node.ArgumentList.Arguments[0].Expression;
-
-            if ( this.GetTransformationKind( expression ) == TransformationKind.None )
-            {
-                return this.CreateRunTimeExpression( expression );
-            }
-            else
-            {
-                return this.Visit( expression );
-            }
-        }
-
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
 
         if ( symbol != null )
@@ -1276,6 +1206,76 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 this.AddAddStatementStatement( node, CastExpression( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ), templateInvocationExpression ) );
 
                 return null;
+            }
+        }
+
+        if ( transformationKind != TransformationKind.Transform &&
+             node.ArgumentList.Arguments.Any( this._templateMemberClassifier.IsDynamicParameter ) )
+        {
+            // We are transforming a call to a compile-time method that accepts dynamic arguments.
+
+            ArgumentSyntax LocalTransformArgument( ArgumentSyntax a )
+            {
+                if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
+                {
+                    var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
+                    var transformedExpression = (ExpressionSyntax) this.Visit( a.Expression )!;
+
+                    switch ( expressionScope )
+                    {
+                        case TemplatingScope.Dynamic:
+                        case TemplatingScope.RunTimeOnly:
+                            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( a.Expression );
+
+                            if ( expressionType != null )
+                            {
+                                var typedExpression = InvocationExpression(
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RunTimeExpression) ) )
+                                    .AddArgumentListArguments(
+                                        Argument( transformedExpression ),
+                                        Argument(
+                                            LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( expressionType.GetSerializableTypeId().Id ) ) ) );
+
+                                transformedExpression = typedExpression;
+                            }
+
+                            break;
+
+                        default:
+                            transformedExpression = this.CreateRunTimeExpression( transformedExpression );
+                            break;
+                    }
+
+                    return a.WithExpression( transformedExpression );
+                }
+                else
+                {
+                    return this.VisitArgument( a ).AssertCast<ArgumentSyntax>();
+                }
+            }
+
+            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( LocalTransformArgument );
+
+            return node.Update(
+                (ExpressionSyntax) this.Visit( node.Expression )!,
+                ArgumentList( SeparatedList( transformedArguments ) ) );
+        }
+        else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
+        {
+            // We are in an invocation like: `meta.This.Foo(...)`.
+        }
+        else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
+        {
+            // Replace `meta.RunTime(x)` to `x`.
+            var expression = node.ArgumentList.Arguments[0].Expression;
+
+            if ( this.GetTransformationKind( expression ) == TransformationKind.None )
+            {
+                return this.CreateRunTimeExpression( expression );
+            }
+            else
+            {
+                return this.Visit( expression );
             }
         }
 
