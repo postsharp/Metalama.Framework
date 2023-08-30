@@ -429,6 +429,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         // We don't write the PE stream directly to the final file because this operation is not atomic.
                         // Instead, we write to a temporary file, and then we move this file to the final destination, because
                         // moving a file is an atomic operation.
+                        // Otherwise the cache directory would be treated as corrupted.
 
                         var tempPeFileName = Path.ChangeExtension( outputPaths.Pe, "tmp" );
 
@@ -438,7 +439,11 @@ internal sealed partial class CompileTimeCompilationBuilder
                             emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                         }
 
-                        File.Move( tempPeFileName, outputPaths.Pe );
+                        if ( emitResult.Success )
+                        {
+                            // Only move the file if emit was successful.
+                            File.Move( tempPeFileName, outputPaths.Pe );
+                        }
                     },
                     this._serviceProvider.Underlying,
                     logger: this._logger );
