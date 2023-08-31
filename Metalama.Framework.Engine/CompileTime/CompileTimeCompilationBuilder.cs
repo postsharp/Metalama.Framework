@@ -766,7 +766,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             return true;
         }
 
-        if (!this.CheckCompileTimeProjectDiskCache(runTimeCompilation.AssemblyName, outputPaths, out wasInconsistent)
+        if ( !this.CheckCompileTimeProjectDiskCache( runTimeCompilation.AssemblyName, outputPaths, out wasInconsistent ) )
         {
             return false;
         }
@@ -794,10 +794,10 @@ internal sealed partial class CompileTimeCompilationBuilder
         return true;
     }
 
-    private bool CheckCompileTimeProjectDiskCache( 
-        string assemblyName,
+    private bool CheckCompileTimeProjectDiskCache(
+        string? assemblyName,
         OutputPaths outputPaths,
-        out bool wasInconsistent)
+        out bool wasInconsistent )
     {
         var peExists = File.Exists( outputPaths.Pe );
         var manifestExists = File.Exists( outputPaths.Manifest );
@@ -1142,7 +1142,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         outputPaths = outputPaths.WithAlternateOrdinal( alternateOrdinal );
                     }
                 }
-            }            
+            }
         }
     }
 
