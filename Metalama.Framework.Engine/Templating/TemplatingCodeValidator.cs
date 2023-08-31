@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Templating
                 isDesignTime,
                 cancellationToken );
 
-            visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
+            visitor.Visit( semanticModel.SyntaxTree.GetRoot( cancellationToken ) );
 
             return !visitor.HasError;
         }

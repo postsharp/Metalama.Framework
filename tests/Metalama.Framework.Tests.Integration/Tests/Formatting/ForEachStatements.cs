@@ -18,10 +18,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
         public IEnumerable<int> compileTimeEnumerable;
     }
 
-    [RunTimeOrCompileTime]
-    class Aspect
+    class Aspect : IAspect
     {
-        [TestTemplate]
+        [Template]
         dynamic? Template()
         {
             var runTimeObject = new RunTimeClass();

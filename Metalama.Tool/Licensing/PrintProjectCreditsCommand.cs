@@ -29,7 +29,7 @@ internal class PrintProjectCreditsCommand : CreditsBaseCommand
                 file.TargetFramework,
                 file.TotalCredits.ToString( CultureInfo.InvariantCulture ),
                 file.MetalamaVersion,
-                file.MetalamaBuildDate?.ToString( "d", CultureInfo.InvariantCulture ) );
+                file.MetalamaBuildDate?.ToString( "d", CultureInfo.InvariantCulture ) ?? " ");
         }
 
         table.AddRow(

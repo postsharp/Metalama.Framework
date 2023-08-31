@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -88,7 +87,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     /// <param name="descriptor">Diagnostic descriptor.</param>
     /// <param name="targetNode">Node on which the diagnostic should be reported.</param>
     /// <param name="arguments">Arguments of the formatting string.</param>
-    /// <typeparam name="T"></typeparam>
     private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
         where T : notnull
     {
@@ -126,7 +124,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             throw new ArgumentOutOfRangeException( nameof(scope) );
         }
 
-        if ( this._localScopes.TryGetValue( symbol, out _ ) )
+        if ( this._localScopes.ContainsKey( symbol ) )
         {
             throw new AssertionFailedException( $"The symbol {symbol} was already assigned to the scope {scope}." );
         }
@@ -779,16 +777,26 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( scope.Value.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
         {
-            // Template code cannot be referenced in a template until this is implemented.
-
             var symbol = symbols[0];
 
             if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
             {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
-                    node,
-                    (symbol, this._currentTemplateMember!) );
+                if ( symbol is not IMethodSymbol )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.OnlyMethodsCanBeSubtemplates,
+                        node,
+                        (symbol, this._currentTemplateMember!) );
+                }
+                else if ( node.Parent is not (InvocationExpressionSyntax or MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax }) )
+                {
+                    // Only name(...) and expr.name(...) are valid ways to reference a subtemplate.
+
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SubtemplatesHaveToBeInvoked,
+                        node,
+                        symbol );
+                }
             }
         }
 
@@ -1036,46 +1044,48 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         var expressionScope = this.GetNodeScope( transformedExpression );
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-
-        ImmutableArray<IParameterSymbol> parameters;
 
         var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression );
 
-        switch ( symbol )
+        var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
+
+        if ( templateInfo.CanBeReferencedAsSubtemplate )
         {
-            case IMethodSymbol method:
-                parameters = method.Parameters;
+            if ( node.Parent is not ExpressionStatementSyntax )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCallCantBeSubexpression,
+                    node,
+                    node.ToString() );
+            }
 
-                break;
+            if ( (symbol!.IsVirtual || symbol.IsAbstract || symbol.IsOverride)
+                 && !symbol.IsSealed
+                 && symbol is IMethodSymbol { Parameters: var parameters }
+                 && parameters.Length > node.ArgumentList.Arguments.Count )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCallWithMissingArgumentsCantBeVirtual,
+                    node,
+                    node.ToString() );
+            }
 
-            default:
-                switch ( expressionType )
-                {
-                    case null when symbol == null:
-                        // This seems to happen when one of the argument is dynamic.
-                        // Roslyn then stops doing the symbol analysis for the whole downstream syntax tree.
-                        parameters = default;
+            if ( symbol is IMethodSymbol { TypeParameters: var typeParameters } && typeParameters.Any( tp => this.GetSymbolScope( tp ) == TemplatingScope.RunTimeOnly ) )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.SubtemplateCantHaveRunTimeTypeParameter,
+                    node,
+                    symbol );
+            }
 
-                        break;
-
-                    case { TypeKind: TypeKind.Delegate }:
-                        parameters = ((INamedTypeSymbol) expressionType).Constructors.Single().Parameters;
-
-                        break;
-
-                    case { TypeKind: TypeKind.Dynamic }:
-                        // In case of invocation of a dynamic location, there is no list of parameters, only arguments.
-                        parameters = default;
-
-                        break;
-
-                    default:
-                        // We can get here in case of syntax error.
-                        return node;
-                }
-
-                break;
+            // TODO: only forbid this when either calling the abstract template using base, or when there is no override.
+            if ( templateInfo.IsAbstract )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.CantCallAbstractSubtemplate,
+                    node,
+                    symbol! );
+            }
         }
 
         InvocationExpressionSyntax updatedInvocation;
@@ -1097,6 +1107,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                 // Transform the argument value.
                 var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameter?.Type );
+
+                var isRunTimeParameterOfSubtemplate =
+                    parameter != null &&
+                    templateInfo.CanBeReferencedAsSubtemplate &&
+                    this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
 
                 if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
@@ -1122,6 +1137,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                 argument.Expression,
                                 argument.Expression.ToString() );
                         }
+                    }
+                }
+                else if ( isRunTimeParameterOfSubtemplate )
+                {
+                    using ( this.WithScopeContext(
+                               this._currentScopeContext.RunTimePreferred(
+                                   $"argument of the run-time parameter '{parameter!.Name}' of a called template" ) ) )
+                    {
+                        transformedArgumentValue = this.Visit( argument.Expression );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
@@ -1656,15 +1680,27 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
         // Detect if the current member is a template.
-        var isTemplate = !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone
-                         || (symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                             && !this._symbolScopeClassifier.GetTemplateInfo( associatedSymbol ).IsNone);
+        var templateInfo = this._symbolScopeClassifier.GetTemplateInfo( symbol );
 
         // If it is a template, update the currentTemplateMember field.
-        if ( isTemplate )
+        if ( !templateInfo.IsNone )
         {
             var previousTemplateMember = this._currentTemplateMember;
             this._currentTemplateMember = symbol;
+
+            if ( templateInfo.AttributeType == TemplateAttributeType.Template )
+            {
+                var isVoid = symbol is IMethodSymbol methodSymbol &&
+                             (methodSymbol.ReturnsVoid ||
+                              (AsyncHelper.TryGetAsyncInfo( methodSymbol.ReturnType, out var resultType, out _ ) &&
+                               resultType.SpecialType == SpecialType.System_Void));
+
+                if ( isVoid && node is MethodDeclarationSyntax { Body: { } body } )
+                {
+                    // Check void template methods for redundant return statements.
+                    RedundantReturnVisitor.ReportErrors( this, body );
+                }
+            }
 
             try
             {
@@ -2643,13 +2679,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return transformedNode;
     }
 
-    private T VisitGenericNameCore<T>( T node, Func<T, SyntaxNode> callBase, Func<TemplatingScope, T, T>? addColor = null )
-        where T : SyntaxNode
+    private (T TransformedNode, TemplatingScope TemplatingScope, bool IsSubtemplate) VisitGenericNameCore<T>( T node, Func<T, SyntaxNode> callBase )
+        where T : ExpressionSyntax
     {
-        addColor ??= ( _, n ) => n;
-
         var scope = this.GetNodeScope( node );
         T transformedNode;
+
+        var isSubtemplate = false;
 
         switch ( scope )
         {
@@ -2666,28 +2702,37 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 // We cannot have generic type instances of dynamic.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
 
-                return node;
+                return (node, TemplatingScope.DynamicTypeConstruction, false);
 
             default:
+                ScopeContext? context;
+
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
-                    var context = this._currentScopeContext.CompileTimeOnly( "a generic argument of compile-time declaration" );
+                    var symbol = this._syntaxTreeAnnotationMap.GetInvocableSymbol( node );
 
-                    using ( this.WithScopeContext( context ) )
+                    var templateInfo = symbol == null ? TemplateInfo.None : this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol );
+
+                    if ( templateInfo.CanBeReferencedAsSubtemplate )
                     {
-                        transformedNode = (T) callBase( node );
+                        context = this._currentScopeContext.RunTimePreferred( "a generic argument of a called template" );
+                        isSubtemplate = true;
+                    }
+                    else
+                    {
+                        context = this._currentScopeContext.CompileTimeOnly( "a generic argument of compile-time declaration" );
                     }
                 }
                 else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                 {
-                    var context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
-
-                    using ( this.WithScopeContext( context ) )
-                    {
-                        transformedNode = (T) callBase( node );
-                    }
+                    context = this._currentScopeContext.RunTimePreferred( "a generic argument of run-time declaration" );
                 }
                 else
+                {
+                    context = null;
+                }
+
+                using ( this.WithScopeContext( context ) )
                 {
                     transformedNode = (T) callBase( node );
                 }
@@ -2695,9 +2740,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 break;
         }
 
-        transformedNode = addColor( scope, transformedNode );
-
-        return transformedNode.AddScopeAnnotation( scope );
+        return (transformedNode.AddScopeAnnotation( scope ), scope, isSubtemplate);
     }
 
     public override SyntaxNode VisitGenericName( GenericNameSyntax node )
@@ -2714,24 +2757,40 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 {
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.ForbiddenDynamicUseInTemplate,
-                        argument.GetLocation(),
+                        argument,
                         default );
                 }
             }
         }
 
-        return this.VisitGenericNameCore(
-            node,
-            base.VisitGenericName!,
-            ( scope, transformedNode ) =>
-            {
-                var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+        var (transformedNode, scope, isSubtemplate) = this.VisitGenericNameCore( node, base.VisitGenericName! );
 
-                return transformedNode.WithIdentifier( annotatedIdentifier );
-            } );
+        if ( isSubtemplate )
+        {
+            foreach ( var typeArgument in transformedNode.TypeArgumentList.Arguments )
+            {
+                // Subtemplate type argument has to be a run-time-only type (including compile-time template type parameter) ...
+                this.RequireScope( typeArgument, TemplatingScope.RunTimeOnly, "a generic argument of a called template" );
+
+                var typeArgumentSymbol = this._syntaxTreeAnnotationMap.GetSymbol( typeArgument );
+
+                // ... but not a run-time template type parameter.
+                if ( typeArgumentSymbol != null && this._typeParameterDetectionVisitor.Visit( typeArgumentSymbol ) )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SubtemplateCantBeCalledWithRunTimeTypeParameter,
+                        typeArgument,
+                        (symbol!, typeArgument) );
+                }
+            }
+        }
+
+        var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+
+        return transformedNode.WithIdentifier( annotatedIdentifier );
     }
 
-    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! );
+    public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => this.VisitGenericNameCore( node, base.VisitTupleType! ).TransformedNode;
 
     public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {

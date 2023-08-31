@@ -1,25 +1,25 @@
 internal class C
 {
-    [Override]
-    private int Method_ExpressionBody()
+  [Override]
+  private int Method_ExpressionBody()
+  {
+    string LocalFunction()
     {
-        string LocalFunction()
-        {
-            _ = (global::System.Int32)42;
-            return (global::System.String)"something";
-        }
-        var s = LocalFunction();
-        return (global::System.Int32)s.Length;
+      _ = (global::System.Int32)42;
+      return (global::System.String)"something";
     }
-    [Override]
-    private int Method_BlockBody()
+    var s = LocalFunction();
+    return (global::System.Int32)s.Length;
+  }
+  [Override]
+  private int Method_BlockBody()
+  {
+    string LocalFunction()
     {
-        string LocalFunction()
-        {
-            _ = (global::System.Int32)42;
-            return (global::System.String)"something";
-        }
-        var s = LocalFunction();
-        return (global::System.Int32)s.Length;
+      _ = (global::System.Int32)42;
+      return (global::System.String)"something";
     }
+    var s = LocalFunction();
+    return (global::System.Int32)s.Length;
+  }
 }

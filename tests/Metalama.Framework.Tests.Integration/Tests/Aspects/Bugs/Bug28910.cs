@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0169
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28910
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28910
 {
     public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
     {

@@ -93,7 +93,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
     private protected override HighLevelPipelineStage CreateHighLevelStage(
         PipelineStageConfiguration configuration,
         CompileTimeProject compileTimeProject )
-        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
 
     private sealed class AspectSource : IAspectSource
     {

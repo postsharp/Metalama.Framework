@@ -244,5 +244,45 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method. This overload accepts a <see cref="TemplateProvider"/>.
+        /// </summary>
+        /// <param name="templateName">The name of the called template method.</param>
+        /// <param name="templateProvider">A <see cref="TemplateProvider"/>.</param>
+        /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( string templateName, TemplateProvider templateProvider, object? args = null ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method. This overload accepts an <see cref="ITemplateProvider"/>. 
+        /// </summary>
+        /// <param name="templateName">The name of the called template method.</param>
+        /// <param name="templateProvider">An optional <see cref="TemplateProvider"/>, or <see langword="default"/> for the current template provider (usually the current aspect).</param>
+        /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? args = null ) => throw CreateException();
+
+        /// <summary>
+        /// Calls another template method.
+        /// </summary>
+        /// <param name="templateInvocation">Object that contains information about the called template method.</param>
+        /// <param name="args">Compile-time template arguments that will be passed to the template, in addition to arguments from <paramref name="templateInvocation"/>.</param>
+        [TemplateKeyword]
+        public static void InvokeTemplate( TemplateInvocation templateInvocation, object? args = null ) => throw CreateException();
+
+        /// <summary>
+        /// Inserts a <c>return;</c> statement into the target code.
+        /// </summary>
+        [TemplateKeyword]
+        public static void Return() => throw CreateException();
+
+        /// <summary>
+        /// Inserts a <c>return</c> statement into the target code.
+        /// This can be used to return a value from <see langword="void" />-returning template methods.
+        /// </summary>
+        /// <param name="value">The value to return.</param>
+        [TemplateKeyword]
+        public static void Return( dynamic? value ) => throw CreateException();
     }
 }

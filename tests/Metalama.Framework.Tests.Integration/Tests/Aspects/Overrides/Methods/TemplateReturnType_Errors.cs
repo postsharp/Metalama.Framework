@@ -7,23 +7,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.TemplateReturnType_Errors;
 
-public class VoidAttribute : MethodAspect
-{
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
-    {
-        base.BuildAspect(builder);
-
-        builder.Advice.Override(builder.Target, nameof(Template));
-    }
-
-    [Template]
-    public void Template()
-    {
-        Console.WriteLine("void");
-        meta.Proceed();
-    }
-}
-
 public class DynamicAttribute : MethodAspect
 {
     public override void BuildAspect(IAspectBuilder<IMethod> builder)
@@ -91,7 +74,6 @@ internal class TargetClass
         Console.WriteLine("This is the original method.");
     }
 
-    [Void]
     [Task]
     [TaskDynamic]
     public int Int()
@@ -100,21 +82,6 @@ internal class TargetClass
         return 42;
     }
 
-    [Void]
-    public Task SyncTask()
-    {
-        Console.WriteLine("This is the original method.");
-        return Task.CompletedTask;
-    }
-
-    [Void]
-    public async Task AsyncTask()
-    {
-        await Task.Yield();
-        Console.WriteLine("This is the original method.");
-    }
-
-    [Void]
     [Task]
     public Task<int> SyncTaskInt()
     {
@@ -122,7 +89,6 @@ internal class TargetClass
         return Task.FromResult(42);
     }
 
-    [Void]
     [Task]
     public async Task<int> AsyncTaskInt()
     {
@@ -131,21 +97,6 @@ internal class TargetClass
         return 42;
     }
 
-    [Void]
-    public ValueTask SyncValueTask()
-    {
-        Console.WriteLine("This is the original method.");
-        return new();
-    }
-
-    [Void]
-    public async ValueTask AsyncValueTask()
-    {
-        await Task.Yield();
-        Console.WriteLine("This is the original method.");
-    }
-
-    [Void]
     [Task]
     public ValueTask<int> SyncValueTaskInt()
     {
@@ -153,7 +104,6 @@ internal class TargetClass
         return new(42);
     }
 
-    [Void]
     [Task]
     public async ValueTask<int> AsyncValueTaskInt()
     {

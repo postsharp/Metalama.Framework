@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Also provide our embedded assemblies.
 
             var embeddedAssemblies =
-                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectAsImmutableArray(
+                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface", "Metalama.SystemTypes" }.SelectAsImmutableArray(
                     name => (MetadataReference)
                         MetadataReference.CreateFromStream(
                             this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )

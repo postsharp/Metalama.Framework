@@ -226,6 +226,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+            => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
     }
 }

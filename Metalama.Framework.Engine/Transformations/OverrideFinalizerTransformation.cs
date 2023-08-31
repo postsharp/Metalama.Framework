@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -49,14 +48,12 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
-                this.ParentAdvice.TemplateInstance.Instance,
+                context,
+                this.ParentAdvice.TemplateInstance.TemplateProvider,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                this.OverriddenDeclaration,
                 this.BoundTemplate,
-                proceedExpression,
+                _ => proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
@@ -87,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
             return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
-        private SyntaxUserExpression CreateProceedExpression( in MemberInjectionContext context )
+        private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
         {
             return new SyntaxUserExpression(
                 context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),

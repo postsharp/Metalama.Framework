@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.TemplateMember.EffectiveKind );
+            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedExpression( context, kind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
@@ -42,14 +41,12 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                context.ServiceProvider,
-                this.ParentAdvice.TemplateInstance.Instance,
+                context,
+                this.ParentAdvice.TemplateInstance.TemplateProvider,
                 metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
+                this.OverriddenDeclaration,
                 this.BoundTemplate,
-                proceedExpression,
+                proceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );

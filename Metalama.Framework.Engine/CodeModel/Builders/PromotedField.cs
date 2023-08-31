@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected internal override bool GetPropertyInitializerExpressionOrMethod(
             Advice advice,
-            in MemberInjectionContext context,
+            MemberInjectionContext context,
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {

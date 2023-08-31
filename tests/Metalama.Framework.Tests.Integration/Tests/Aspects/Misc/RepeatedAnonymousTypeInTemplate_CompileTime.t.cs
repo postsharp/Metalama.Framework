@@ -1,5 +1,5 @@
 [Aspect]
 void M()
 {
-    return;
+  return;
 }

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -93,10 +94,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return templateDriver;
             }
 
-            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-
-            var compiledTemplateMethodInfo = this.Type.GetAnyMethod( templateName )
-                                             ?? throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
+            var compiledTemplateMethodInfo = this.GetCompiledTemplateMethodInfo( templateSymbol );
 
             templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
 
@@ -111,6 +109,14 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
+        internal MethodInfo GetCompiledTemplateMethodInfo( ISymbol templateSymbol )
+        {
+            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
+
+            return this.Type.GetAnyMethod( templateName )
+                   ?? throw new AssertionFailedException( $"Could not find the compile template for {templateSymbol}." );
+        }
+
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
@@ -122,8 +128,23 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             IDiagnosticAdder diagnosticAdder )
         {
-            var members = this._baseClass?.Members.ToBuilder()
-                          ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
+            var members = ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
+
+            if ( this._baseClass != null )
+            {
+                foreach ( var baseMember in this._baseClass.Members )
+                {
+                    var derivedMember = baseMember.Value with
+                    {
+                        TemplateClass = this,
+                        Accessors = baseMember.Value.Accessors
+                            .SelectAsEnumerable( kvp => (kvp.Key, Value: kvp.Value with { TemplateClass = this }) )
+                            .ToImmutableDictionary( kvp => kvp.Key, kvp => kvp.Value )
+                    };
+
+                    members.Add( baseMember.Key, derivedMember );
+                }
+            }
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
@@ -165,7 +186,7 @@ namespace Metalama.Framework.Engine.Aspects
                     if ( accessor != null )
                     {
                         var accessorParameters =
-                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) )
+                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p, false, null ) )
                                 .ToImmutableArray();
 
                         accessors = accessors.Add(
@@ -209,8 +230,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                                 parameterBuilder.Add(
                                     new TemplateClassMemberParameter(
-                                        parameter.Ordinal,
-                                        parameter.Name,
+                                        parameter,
                                         isCompileTime,
                                         allTemplateParametersCount ) );
 
@@ -306,13 +326,13 @@ namespace Metalama.Framework.Engine.Aspects
                          !existingMember.TemplateInfo.IsNone )
                     {
                         // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
-                        // would have failed. The
+                        // would have failed.
 
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name),
+                                (memberKey, type.Name, existingMember.TemplateClass._baseClass!.Type.Name),
                                 this ) );
 
                         this.HasError = true;

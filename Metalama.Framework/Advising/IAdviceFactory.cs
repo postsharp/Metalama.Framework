@@ -737,9 +737,16 @@ namespace Metalama.Framework.Advising
             ImmutableArray<AttributeConstruction> attributes = default );
 
         /// <summary>
-        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will use the specified object to find template methods.
         /// </summary>
-        /// <param name="templateProvider">Instance of an object with template members.</param>
+        /// <param name="templateProvider">A <see cref="TemplateProvider"/>.</param>
+        /// <returns>An <see cref="IAdviceFactory"/>.</returns>
+        IAdviceFactory WithTemplateProvider( TemplateProvider templateProvider );
+
+        /// <summary>
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will use the specified object to find template methods.
+        /// </summary>
+        /// <param name="templateProvider">An <see cref="ITemplateProvider"/>.</param>
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
 

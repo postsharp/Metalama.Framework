@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 this.Validate();
 
-                return this._parent._proceedExpression!.ToTypedExpressionSyntax( syntaxSerializationContext ).Syntax;
+                return this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind ).ToTypedExpressionSyntax( syntaxSerializationContext ).Syntax;
             }
 
             private void Validate()
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public override IType Type => this._parent._proceedExpression!.Type;
+            public override IType Type => this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind ).Type;
 
             protected override string ToStringCore() => $"meta.{this._methodName}()";
         }

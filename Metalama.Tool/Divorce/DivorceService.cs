@@ -50,7 +50,7 @@ internal class DivorceService
     {
         var doc = XDocument.Load( projectPath );
 
-        var propertyGroup = doc.Root.Element( "PropertyGroup" );
+        var propertyGroup = doc.Root?.Element( "PropertyGroup" );
 
         if ( propertyGroup == null )
         {
