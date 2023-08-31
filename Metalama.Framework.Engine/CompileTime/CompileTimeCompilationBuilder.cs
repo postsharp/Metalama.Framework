@@ -34,6 +34,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -765,35 +766,12 @@ internal sealed partial class CompileTimeCompilationBuilder
             return true;
         }
 
-        var peExists = File.Exists( outputPaths.Pe );
-        var manifestExists = File.Exists( outputPaths.Manifest );
-
-        // Look on disk.
-        if ( !peExists )
+        if (!this.CheckCompileTimeProjectDiskCache(runTimeCompilation.AssemblyName, outputPaths, out wasInconsistent)
         {
-            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Pe}' not found." );
-        }
-
-        if ( !manifestExists )
-        {
-            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Manifest}' not found." );
-        }
-
-        if (peExists ^ manifestExists)
-        {
-            // Here we presume that other files (that are not checked and are cached) are never locked and never deleted without PE or manifest missing.
-            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Directory}' inconsistent, will attempt an alternate." );
-            wasInconsistent = true;
-            return false;
-        }
-        else if (!peExists || !manifestExists)
-        {
-            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): Cache miss." );
-            wasInconsistent = false;
             return false;
         }
 
-        this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found on disk. Deserializing." );
+        this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): deserializing." );
 
         // Deserialize the manifest.
         var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ), logger: this._logger ) );
@@ -812,6 +790,44 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         this._cache.Add( projectHash, project );
 
+        wasInconsistent = false;
+        return true;
+    }
+
+    private bool CheckCompileTimeProjectDiskCache( 
+        string assemblyName,
+        OutputPaths outputPaths,
+        out bool wasInconsistent)
+    {
+        var peExists = File.Exists( outputPaths.Pe );
+        var manifestExists = File.Exists( outputPaths.Manifest );
+
+        // Look on disk.
+        if ( !peExists )
+        {
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Pe}' not found." );
+        }
+
+        if ( !manifestExists )
+        {
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Manifest}' not found." );
+        }
+
+        if ( peExists ^ manifestExists )
+        {
+            // Here we presume that other files (that are not checked and are cached) are never locked and never deleted without PE or manifest missing.
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Directory}' inconsistent, will attempt an alternate." );
+            wasInconsistent = true;
+            return false;
+        }
+        else if ( !peExists || !manifestExists )
+        {
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): Cache miss." );
+            wasInconsistent = false;
+            return false;
+        }
+
+        this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): found on disk." );
         wasInconsistent = false;
         return true;
     }
@@ -1099,21 +1115,34 @@ internal sealed partial class CompileTimeCompilationBuilder
         assemblyPath = outputPaths.Pe;
         sourceDirectory = outputPaths.Directory;
 
+        var alternateOrdinal = 0;
+
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {
-            if ( File.Exists( outputPaths.Pe ) )
+            while ( true )
             {
-                // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
-                // emitted and it does not need to be done a second time.
+                if ( this.CheckCompileTimeProjectDiskCache( runTimeAssemblyName, outputPaths, out var wasInconsistent ) )
+                {
+                    // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
+                    // emitted and it does not need to be done a second time.
 
-                this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputPaths.Pe}' already exists." );
+                    this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): compile-time project already exists." );
 
-                return true;
-            }
-            else
-            {
-                return this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
-            }
+                    return true;
+                }
+                else
+                {
+                    if ( !wasInconsistent )
+                    {
+                        return this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
+                    }
+                    else
+                    {
+                        alternateOrdinal++;
+                        outputPaths = outputPaths.WithAlternateOrdinal( alternateOrdinal );
+                    }
+                }
+            }            
         }
     }
 
