@@ -1106,11 +1106,11 @@ internal sealed partial class CompileTimeCompilationBuilder
                             manifest.Serialize( manifestStream );
                         }
                     }
+
+                    this._cache.Add( projectHash, project );
+
+                    return true;
                 }
-
-                this._cache.Add( projectHash, project );
-
-                return true;
             }
 
             throw CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
