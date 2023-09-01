@@ -1141,7 +1141,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     }
                     else
                     {
-                        // The cache was inconsistent, we will defer to
+                        // The cache was inconsistent, we will defer to a suffixed directory.
                         alternateOrdinal++;
                         outputPaths = outputPaths.WithAlternateOrdinal( alternateOrdinal );
                     }
