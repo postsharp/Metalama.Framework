@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParameter;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParameter_BuildAspect;
 
 internal class Aspect : PropertyAspect
 {
@@ -15,12 +15,7 @@ internal class Aspect : PropertyAspect
     {
         base.BuildAspect(builder);
 
-        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody = GetPropertyBody(builder.Target) });
-    }
-
-    string? GetPropertyBody(IProperty property)
-    {
-        var methodBody = property.GetSymbol()
+        var propertyBody = builder.Target.GetSymbol()
             ?.DeclaringSyntaxReferences
             .Select(r => r.GetSyntax())
             .Cast<PropertyDeclarationSyntax>()
@@ -37,9 +32,10 @@ internal class Aspect : PropertyAspect
                 return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
             })
             .WhereNotNull()
-            .FirstOrDefault();
+            .FirstOrDefault()
+            ?.ToString();
 
-        return methodBody?.ToString();
+        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody });
     }
 
     [Template]

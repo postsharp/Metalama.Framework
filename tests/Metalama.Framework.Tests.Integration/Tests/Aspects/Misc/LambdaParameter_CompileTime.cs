@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParameter;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParameter_CompileTime;
 
 internal class Aspect : PropertyAspect
 {
@@ -18,6 +18,7 @@ internal class Aspect : PropertyAspect
         builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody = GetPropertyBody(builder.Target) });
     }
 
+    [CompileTime]
     string? GetPropertyBody(IProperty property)
     {
         var methodBody = property.GetSymbol()
