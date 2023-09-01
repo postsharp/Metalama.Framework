@@ -1183,7 +1183,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         throw CreateTooManyInconsistentCacheDirectoriesException( runTimeAssemblyName, outputPaths );
     }
 
-    private static Exception CreateTooManyInconsistentCacheDirectoriesException( string runTimeAssemblyName, OutputPaths outputPaths )
+    private static Exception CreateTooManyInconsistentCacheDirectoriesException( string? runTimeAssemblyName, OutputPaths outputPaths )
     {
         return new InvalidOperationException(
             $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the compile-time assembly. " +
