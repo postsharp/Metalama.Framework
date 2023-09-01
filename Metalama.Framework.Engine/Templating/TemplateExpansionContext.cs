@@ -157,9 +157,30 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._proceedExpressionProvider = proceedExpressionProvider;
         this._otherTemplateClassProvider = serviceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
-        this.TemplateGenericArguments =
-            (IReadOnlyDictionary<string, IType>?) template?.TemplateArguments.OfType<TemplateTypeArgument>().ToDictionary( x => x.Name, x => x.Type )
-            ?? ImmutableDictionary<string, IType>.Empty;
+        var templateTypeArguments = ImmutableDictionary<string, IType>.Empty.ToBuilder();
+
+        if ( template != null )
+        {
+            templateTypeArguments.AddRange( template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+        }
+
+        if (metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
+        {
+            // Generic method - we need to add type parameters as named arguments for correct serializable id resulution.
+            // Any target method type parameter that matches name of template argument can be skipped - template will not have a runtime type parameter of that name.
+
+            // TODO: This presumes mapping of type parameters by name, more appropriate place would be to have a map in BoundTemplateMethod, but there is currently no other use for that.
+
+            foreach ( var targetTypeParameter in targetMethod.TypeParameters )
+            {
+                if ( !templateTypeArguments.ContainsKey( targetTypeParameter.Name ) )
+                {
+                    templateTypeArguments.Add( targetTypeParameter.Name, targetTypeParameter );
+                }
+            }
+        }
+
+        this.TemplateGenericArguments = templateTypeArguments.ToImmutable();
 
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
