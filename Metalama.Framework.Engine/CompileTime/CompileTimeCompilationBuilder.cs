@@ -29,6 +29,7 @@ using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -895,7 +896,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 }
             }
 
-            throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
+            throw CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
         }
         else
         {
@@ -1099,7 +1100,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 return true;
             }
 
-            throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
+            throw CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
         }
     }
 
@@ -1179,10 +1180,10 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
-        throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeAssemblyName, outputPaths );
+        throw CreateTooManyInconsistentCacheDirectoriesException( runTimeAssemblyName, outputPaths );
     }
 
-    private Exception CreateTooManyInconsistentCacheDirectoriesException( string runTimeAssemblyName, OutputPaths outputPaths )
+    private static Exception CreateTooManyInconsistentCacheDirectoriesException( string runTimeAssemblyName, OutputPaths outputPaths )
     {
         return new InvalidOperationException(
             $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the compile-time assembly. " +
