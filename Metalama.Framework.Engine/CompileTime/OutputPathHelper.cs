@@ -109,18 +109,20 @@ internal sealed class OutputPathHelper
 
         var compileTimeAssemblyName = baseCompileTimeAssemblyName + "_" + hash;
 
-        var outputPaths = new OutputPaths( directory, compileTimeAssemblyName, null );
+        var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
+        var pdb = Path.ChangeExtension( pe, ".pdb" );
+        var manifest = Path.Combine( directory, "manifest.json" );
 
-        if ( outputPaths.Pe.Length > 255 )
+        if ( pe.Length > 255 )
         {
-            throw new AssertionFailedException( $"The path '{outputPaths.Pe}' is too long: {outputPaths.Pe.Length} characters." );
+            throw new AssertionFailedException( $"The path '{pe}' is too long: {pe.Length} characters." );
         }
 
-        if ( outputPaths.Manifest.Length > 255 )
+        if ( manifest.Length > 255 )
         {
-            throw new AssertionFailedException( $"The path '{outputPaths.Manifest}' is too long: {outputPaths.Manifest.Length} characters." );
+            throw new AssertionFailedException( $"The path '{manifest}' is too long: {manifest.Length} characters." );
         }
 
-        return outputPaths;
+        return new OutputPaths( directory, pe, pdb, manifest, compileTimeAssemblyName );
     }
 }
