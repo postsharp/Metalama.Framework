@@ -861,36 +861,12 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
-        if ( this.TryGetCompileTimeProjectFromCache(
-                runTimeCompilation,
-                referencedProjects,
-                outputPaths,
-                projectHash,
-                out project,
-                out _,
-                null ) )
-        {
-            ReportCachedDiagnostics( project );
-
-            return true;
-        }
-
         if ( cacheOnly )
         {
-            // We were asked to get cache projects only. Don't create it.
-            project = null;
+            var alternateDirectoryOrdinal = 0;
 
-            return false;
-        }
-
-        var alternateDirectoryOrdinal = 0;
-
-        // Do not try to try more than 10 alternates, probability of that happening is low and we may get into an infinite cycle.
-        while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
-        {
-            using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
+            while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
             {
-                // Do a second cache lookup within the lock.
                 if ( this.TryGetCompileTimeProjectFromCache(
                         runTimeCompilation,
                         referencedProjects,
@@ -902,174 +878,229 @@ internal sealed partial class CompileTimeCompilationBuilder
                 {
                     ReportCachedDiagnostics( project );
 
-                    // Coverage: ignore (this depends on a multi-threaded condition)
                     return true;
                 }
 
                 if ( wasInconsistent )
                 {
-                    // The cache directory was not consistent, i.e. files are missing and most likely the file that exists is locked.                    
-                    // We will defer to a suffixed directory (or a higher suffix).
+                    // If the cache directory is not consistent, attempt the next alternate fallback.
                     alternateDirectoryOrdinal++;
                     outputPaths = outputPaths.WithAlternateOrdinal( alternateDirectoryOrdinal );
-
-                    continue;
-                }
-
-                var diagnostics = new List<Diagnostic>();
-
-                // Without this local function, the closure for this method causes a memory leak.
-                static DiagnosticAdderAdapter CreateDiagnosticAdder( IDiagnosticAdder diagnosticSink, List<Diagnostic> diagnostics )
-                    => new(
-                        diagnostic =>
-                        {
-                            // Report diagnostics to the current sink and also store them for the cache.
-                            diagnosticSink.Report( diagnostic );
-                            diagnostics.Add( diagnostic );
-                        } );
-
-                var diagnosticAdder = CreateDiagnosticAdder( diagnosticSink, diagnostics );
-
-                // Generate the C# compilation.
-                if ( !this.TryCreateCompileTimeCompilation(
-                        compilationContext,
-                        sourceTreesWithCompileTimeCode,
-                        referencedProjects,
-                        globalUsings,
-                        outputPaths,
-                        diagnosticAdder,
-                        cancellationToken,
-                        out var compileTimeCompilation,
-                        out var locationAnnotationMap,
-                        out var compilationResultManifest ) )
-                {
-                    project = null;
-
-                    this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): TryCreateCompileTimeCompilation." );
-
-                    return false;
-                }
-
-                if ( compileTimeCompilation == null )
-                {
-                    // The run-time compilation does not contain compile-time classes, but it can have compile-time references.
-
-                    if ( referencedProjects.Count == 0 )
-                    {
-                        project = null;
-                    }
-                    else
-                    {
-                        project = CompileTimeProject.CreateEmpty(
-                            this._serviceProvider,
-                            this._domain,
-                            runTimeCompilation.Assembly.Identity,
-                            new AssemblyIdentity( outputPaths.CompileTimeAssemblyName ),
-                            referencedProjects );
-                    }
-
-                    return true;
                 }
                 else
                 {
-                    var textMapDirectory = TextMapDirectory.Create( compileTimeCompilation, locationAnnotationMap! );
+                    // We were asked to get cache projects only. Don't create it.
+                    project = null;
+                    return false;
+                }
+            }
 
-                    if ( !this.TryEmit( outputPaths, compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
+            throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
+        }
+        else
+        {
+            var alternateDirectoryOrdinal = 0;
+
+            if ( this.TryGetCompileTimeProjectFromCache(
+                    runTimeCompilation,
+                    referencedProjects,
+                    outputPaths,
+                    projectHash,
+                    out project,
+                    out var wasInconsistent,
+                    null ) )
+            {
+                ReportCachedDiagnostics( project );
+
+                return true;
+            }
+
+            // Do not try to try more than 10 alternates, probability of that happening is low and we may get into an infinite cycle.
+            while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
+            {
+                using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
+                {
+                    // Do a second cache lookup within the lock.
+                    if ( this.TryGetCompileTimeProjectFromCache(
+                            runTimeCompilation,
+                            referencedProjects,
+                            outputPaths,
+                            projectHash,
+                            out project,
+                            out wasInconsistent,
+                            null ) )
+                    {
+                        ReportCachedDiagnostics( project );
+
+                        // Coverage: ignore (this depends on a multi-threaded condition)
+                        return true;
+                    }
+
+                    if ( wasInconsistent )
+                    {
+                        // The cache directory was not consistent, i.e. files are missing and most likely the file that exists is locked.                    
+                        // We will defer to a suffixed directory (or a higher suffix).
+                        alternateDirectoryOrdinal++;
+                        outputPaths = outputPaths.WithAlternateOrdinal( alternateDirectoryOrdinal );
+
+                        continue;
+                    }
+
+                    var diagnostics = new List<Diagnostic>();
+
+                    // Without this local function, the closure for this method causes a memory leak.
+                    static DiagnosticAdderAdapter CreateDiagnosticAdder( IDiagnosticAdder diagnosticSink, List<Diagnostic> diagnostics )
+                        => new(
+                            diagnostic =>
+                            {
+                                // Report diagnostics to the current sink and also store them for the cache.
+                                diagnosticSink.Report( diagnostic );
+                                diagnostics.Add( diagnostic );
+                            } );
+
+                    var diagnosticAdder = CreateDiagnosticAdder( diagnosticSink, diagnostics );
+
+                    // Generate the C# compilation.
+                    if ( !this.TryCreateCompileTimeCompilation(
+                            compilationContext,
+                            sourceTreesWithCompileTimeCode,
+                            referencedProjects,
+                            globalUsings,
+                            outputPaths,
+                            diagnosticAdder,
+                            cancellationToken,
+                            out var compileTimeCompilation,
+                            out var locationAnnotationMap,
+                            out var compilationResultManifest ) )
                     {
                         project = null;
 
-                        this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeCompilation.AssemblyName}' ): emit failed." );
+                        this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): TryCreateCompileTimeCompilation." );
 
                         return false;
                     }
 
-                    textMapDirectory.Write( outputPaths.Directory );
-
-                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName.AssertNotNull() );
-                    var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( Fabric ).FullName.AssertNotNull() );
-                    var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( TransitiveProjectFabric ).FullName.AssertNotNull() );
-                    var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof( ITemplateProvider ).FullName.AssertNotNull() );
-
-                    var aspectTypes = compileTimeCompilation.Assembly.GetAllTypes()
-                        .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                        .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                        .ToList();
-
-                    var fabricTypes = compileTimeCompilation.Assembly.GetTypes()
-                        .Where(
-                            t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
-                                 !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                        .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                        .ToList();
-
-                    var transitiveFabricTypes = compileTimeCompilation.Assembly.GetTypes()
-                        .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                        .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                        .ToList();
-
-                    var compilerPlugInTypes = compileTimeCompilation.Assembly.GetAllTypes()
-                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof( MetalamaPlugInAttribute ) } ) )
-                        .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                        .ToList();
-
-                    var otherTemplateTypes = compileTimeCompilation.Assembly.GetAllTypes()
-                        .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
-                        .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                        .ToList();
-
-                    Dictionary<string, int>? sourceFilePathIndexes = null;
-
-                    if ( diagnostics.Any() )
+                    if ( compileTimeCompilation == null )
                     {
-                        sourceFilePathIndexes = sourceTreesWithCompileTimeCode
-                            .Select( ( tree, index ) => (tree.FilePath, index) )
-                            .OrderBy( x => x.FilePath )
-                            .ToDictionary( x => x.FilePath, x => x.index );
+                        // The run-time compilation does not contain compile-time classes, but it can have compile-time references.
+
+                        if ( referencedProjects.Count == 0 )
+                        {
+                            project = null;
+                        }
+                        else
+                        {
+                            project = CompileTimeProject.CreateEmpty(
+                                this._serviceProvider,
+                                this._domain,
+                                runTimeCompilation.Assembly.Identity,
+                                new AssemblyIdentity( outputPaths.CompileTimeAssemblyName ),
+                                referencedProjects );
+                        }
+
+                        return true;
                     }
-
-                    var manifest = new CompileTimeProjectManifest(
-                        runTimeCompilation.Assembly.Identity.ToString(),
-                        compileTimeCompilation.AssemblyName!,
-                        runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
-                        aspectTypes,
-                        compilerPlugInTypes,
-                        fabricTypes,
-                        transitiveFabricTypes,
-                        otherTemplateTypes,
-                        referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
-                        compilationResultManifest,
-                        projectLicenseInfo?.RedistributionLicenseKey,
-                        sourceHash,
-                        textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFileManifest( f ) ).ToArray(),
-                        diagnostics.SelectAsArray( d => new CompileTimeDiagnosticManifest( d, sourceFilePathIndexes! ) ) );
-
-                    project = CompileTimeProject.Create(
-                        this._serviceProvider,
-                        this._domain,
-                        runTimeCompilation.Assembly.Identity,
-                        compileTimeCompilation.Assembly.Identity,
-                        referencedProjects,
-                        manifest,
-                        outputPaths.Pe,
-                        outputPaths.Directory,
-                        textMapDirectory,
-                        null );
-
-                    this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
-
-                    using ( var manifestStream = File.Create( outputPaths.Manifest ) )
+                    else
                     {
-                        manifest.Serialize( manifestStream );
+                        var textMapDirectory = TextMapDirectory.Create( compileTimeCompilation, locationAnnotationMap! );
+
+                        if ( !this.TryEmit( outputPaths, compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
+                        {
+                            project = null;
+
+                            this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeCompilation.AssemblyName}' ): emit failed." );
+
+                            return false;
+                        }
+
+                        textMapDirectory.Write( outputPaths.Directory );
+
+                        var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName.AssertNotNull() );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( Fabric ).FullName.AssertNotNull() );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( TransitiveProjectFabric ).FullName.AssertNotNull() );
+                        var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof( ITemplateProvider ).FullName.AssertNotNull() );
+
+                        var aspectTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToList();
+
+                        var fabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                            .Where(
+                                t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
+                                     !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToList();
+
+                        var transitiveFabricTypes = compileTimeCompilation.Assembly.GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToList();
+
+                        var compilerPlugInTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof( MetalamaPlugInAttribute ) } ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToList();
+
+                        var otherTemplateTypes = compileTimeCompilation.Assembly.GetAllTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToList();
+
+                        Dictionary<string, int>? sourceFilePathIndexes = null;
+
+                        if ( diagnostics.Any() )
+                        {
+                            sourceFilePathIndexes = sourceTreesWithCompileTimeCode
+                                .Select( ( tree, index ) => (tree.FilePath, index) )
+                                .OrderBy( x => x.FilePath )
+                                .ToDictionary( x => x.FilePath, x => x.index );
+                        }
+
+                        var manifest = new CompileTimeProjectManifest(
+                            runTimeCompilation.Assembly.Identity.ToString(),
+                            compileTimeCompilation.AssemblyName!,
+                            runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
+                            aspectTypes,
+                            compilerPlugInTypes,
+                            fabricTypes,
+                            transitiveFabricTypes,
+                            otherTemplateTypes,
+                            referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
+                            compilationResultManifest,
+                            projectLicenseInfo?.RedistributionLicenseKey,
+                            sourceHash,
+                            textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFileManifest( f ) ).ToArray(),
+                            diagnostics.SelectAsArray( d => new CompileTimeDiagnosticManifest( d, sourceFilePathIndexes! ) ) );
+
+                        project = CompileTimeProject.Create(
+                            this._serviceProvider,
+                            this._domain,
+                            runTimeCompilation.Assembly.Identity,
+                            compileTimeCompilation.Assembly.Identity,
+                            referencedProjects,
+                            manifest,
+                            outputPaths.Pe,
+                            outputPaths.Directory,
+                            textMapDirectory,
+                            null );
+
+                        this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
+
+                        using ( var manifestStream = File.Create( outputPaths.Manifest ) )
+                        {
+                            manifest.Serialize( manifestStream );
+                        }
                     }
                 }
+
+                this._cache.Add( projectHash, project );
+
+                return true;
             }
 
-            this._cache.Add( projectHash, project );
-
-            return true;
+            throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
         }
-
-        throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
     }
 
     private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
