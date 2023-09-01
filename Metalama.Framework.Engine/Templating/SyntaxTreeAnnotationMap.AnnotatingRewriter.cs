@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -22,6 +23,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly SyntaxTreeAnnotationMap _map;
             private readonly bool _isTemplate;
             private readonly IDiagnosticAdder _diagnosticAdder;
+            private readonly CancellationToken _cancellationToken;
 
             private HashSet<SyntaxNode>? _nodesWithErrorReports;
 
@@ -29,18 +31,22 @@ namespace Metalama.Framework.Engine.Templating
                 SemanticModel? semanticModel,
                 SyntaxTreeAnnotationMap map,
                 bool isTemplate,
-                IDiagnosticAdder diagnosticAdder )
+                IDiagnosticAdder diagnosticAdder,
+                CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._map = map;
                 this._isTemplate = isTemplate;
                 this._diagnosticAdder = diagnosticAdder;
+                this._cancellationToken = cancellationToken;
             }
 
             public bool Success { get; private set; } = true;
 
             public override SyntaxToken VisitToken( SyntaxToken token )
             {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
                 return this._map.AddLocationAnnotation( token );
             }
 
@@ -50,6 +56,8 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return null;
                 }
+
+                this._cancellationToken.ThrowIfCancellationRequested();
 
                 var originalNode = node;
                 var transformedNode = base.VisitCore( node )!;
@@ -62,9 +70,9 @@ namespace Metalama.Framework.Engine.Templating
                     // Get info from the semantic mode.
                     var semanticModel = this._semanticModel.AssertNotNull();
 
-                    var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
+                    var symbolInfo = semanticModel.GetSymbolInfo( originalNode, this._cancellationToken );
                     var typeInfo = semanticModel.GetTypeInfo( originalNode );
-                    var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode );
+                    var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode, this._cancellationToken );
 
                     // Cache semanticModel.GetSymbolInfo
                     var symbol = symbolInfo.Symbol;
