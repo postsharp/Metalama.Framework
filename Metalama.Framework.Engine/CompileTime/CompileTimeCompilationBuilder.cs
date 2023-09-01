@@ -986,10 +986,10 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                     textMapDirectory.Write( outputPaths.Directory );
 
-                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
-                    var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
-                    var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
-                    var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
+                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName.AssertNotNull() );
+                    var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( Fabric ).FullName.AssertNotNull() );
+                    var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( TransitiveProjectFabric ).FullName.AssertNotNull() );
+                    var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof( ITemplateProvider ).FullName.AssertNotNull() );
 
                     var aspectTypes = compileTimeCompilation.Assembly.GetAllTypes()
                         .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
@@ -1009,7 +1009,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         .ToList();
 
                     var compilerPlugInTypes = compileTimeCompilation.Assembly.GetAllTypes()
-                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
+                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof( MetalamaPlugInAttribute ) } ) )
                         .Select( t => t.GetReflectionFullName().AssertNotNull() )
                         .ToList();
 
@@ -1070,8 +1070,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             return true;
         }
 
-        this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeCompilation.AssemblyName}' ): too many inconsistent cache directories for the assembly." );
-        return false;
+        throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
     }
 
     private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
@@ -1150,11 +1149,15 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
-        assemblyPath = outputPaths.Pe;
-        sourceDirectory = null;
+        throw this.CreateTooManyInconsistentCacheDirectoriesException( runTimeAssemblyName, outputPaths );
+    }
 
-        this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the assembly." );
-        return false;
+    private Exception CreateTooManyInconsistentCacheDirectoriesException( string runTimeAssemblyName, OutputPaths outputPaths )
+    {
+        return new InvalidOperationException(
+            $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the compile-time assembly. " +
+            $"Please delete \"{Path.GetDirectoryName( outputPaths.Directory )}\" directory before retrying the build. " +
+            $"If this occurs on a build server, please verify that the cache is correctly cleaned up between builds." );
     }
 
     private IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName, this._logger );
