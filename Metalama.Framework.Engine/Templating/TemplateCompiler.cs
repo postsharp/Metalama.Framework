@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Templating
             usedApiVersion = versionVerifier.MaximalUsedVersion;
 
             // Annotate the syntax tree with symbols.
-            if ( !this._syntaxTreeAnnotationMap.TryAnnotateTemplate( sourceSyntaxRoot, semanticModel, diagnostics, out currentSyntaxRoot ) )
+            if ( !this._syntaxTreeAnnotationMap.TryAnnotateTemplate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out currentSyntaxRoot ) )
             {
                 annotatedSyntaxRoot = currentSyntaxRoot;
 

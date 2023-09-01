@@ -133,7 +133,8 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node, base.VisitDelegateDeclaration );
+        public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            => this.VisitSimpleTypeDeclaration( node, base.VisitDelegateDeclaration );
 
         public override void VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node, base.VisitEnumDeclaration );
 
@@ -212,6 +213,8 @@ namespace Metalama.Framework.Engine.Formatting
 
         public override void VisitToken( SyntaxToken token )
         {
+            this._cancellationToken.ThrowIfCancellationRequested();
+
             if ( this._isInTemplate )
             {
                 var colorFromAnnotation = token.GetColorFromAnnotation();

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -43,9 +44,14 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
         /// </summary>
-        public bool TryAnnotateTemplate( SyntaxNode root, SemanticModel semanticModel, IDiagnosticAdder diagnostics, out SyntaxNode annotatedRoot )
+        public bool TryAnnotateTemplate(
+            SyntaxNode root,
+            SemanticModel semanticModel,
+            IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
+            out SyntaxNode annotatedRoot )
         {
-            var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics );
+            var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics, cancellationToken );
 
             annotatedRoot = rewriter.Visit( root )!;
 
@@ -179,7 +185,8 @@ namespace Metalama.Framework.Engine.Templating
             do
             {
                 symbols.Add( (IMethodSymbol) this._annotationToSymbolMap[enumerator.Current] );
-            } while ( enumerator.MoveNext() );
+            }
+            while ( enumerator.MoveNext() );
 
             // If we have an ambiguity, it is because one of the arguments is dynamic. 
             // Take only signatures that have a dynamic argument.
