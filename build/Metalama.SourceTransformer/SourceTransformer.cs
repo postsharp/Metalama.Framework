@@ -223,21 +223,6 @@ namespace Metalama.SourceTransformer
                 return result;
             }
 
-
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
-            {
-                var parentFieldsToAdd = this._fieldsToAdd;
-                this._fieldsToAdd = new List<FieldDeclarationSyntax>();
-
-                var result = (RecordDeclarationSyntax) base.VisitRecordDeclaration( node )!;
-
-                result = result.AddMembers( this._fieldsToAdd.ToArray<MemberDeclarationSyntax>() );
-
-                this._fieldsToAdd = parentFieldsToAdd;
-
-                return result;
-            }
-
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 const string usingSystemThreading = "using System.Threading;";
