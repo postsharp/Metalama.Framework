@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Templating
                     var semanticModel = this._semanticModel.AssertNotNull();
 
                     var symbolInfo = semanticModel.GetSymbolInfo( originalNode, this._cancellationToken );
-                    var typeInfo = semanticModel.GetTypeInfo( originalNode );
+                    var typeInfo = semanticModel.GetTypeInfo( originalNode, this._cancellationToken );
                     var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode, this._cancellationToken );
 
                     // Cache semanticModel.GetSymbolInfo
