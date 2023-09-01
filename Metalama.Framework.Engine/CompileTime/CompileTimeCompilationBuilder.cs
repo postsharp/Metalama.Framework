@@ -1033,10 +1033,10 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                         // Create the manifest.
                         var compilationForManifest = compileTimeCompilation;
-                        var aspectType = compilationForManifest.GetTypeByMetadataName( typeof( IAspect ).FullName.AssertNotNull() );
-                        var fabricType = compilationForManifest.GetTypeByMetadataName( typeof( Fabric ).FullName.AssertNotNull() );
-                        var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof( TransitiveProjectFabric ).FullName.AssertNotNull() );
-                        var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof( ITemplateProvider ).FullName.AssertNotNull() );
+                        var aspectType = compilationForManifest.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
+                        var fabricType = compilationForManifest.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
+                        var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
+                        var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
                         bool IsAspect( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, aspectType );
 
@@ -1058,14 +1058,14 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                         var transitiveFabricTypeNames = compilationForManifest.Assembly.GetTypes()
                             .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
-                            .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( InheritableAttribute ) ) ) )
+                            .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
                             .ToList();
 
                         var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
-                            .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( MetalamaPlugInAttribute ) ) )
+                            .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                            .ToList();
+                                    .ToList();
 
                         var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )
