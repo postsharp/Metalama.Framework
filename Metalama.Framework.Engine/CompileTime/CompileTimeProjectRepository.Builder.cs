@@ -443,10 +443,8 @@ internal sealed partial class CompileTimeProjectRepository
             // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
                     runTimeAssemblyIdentity.Name,
-                    string.IsNullOrEmpty( manifest.TargetFramework ) ? null : new FrameworkName( manifest.TargetFramework ),
+                    manifest,
                     syntaxTrees,
-                    manifest.SourceHash,
-                    manifest.RedistributionLicenseKey,
                     referenceProjects,
                     diagnosticAdder,
                     cancellationToken,

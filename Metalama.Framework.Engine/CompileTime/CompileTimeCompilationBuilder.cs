@@ -1161,10 +1161,8 @@ internal sealed partial class CompileTimeCompilationBuilder
     /// </summary>
     public bool TryCompileDeserializedProject(
         string runTimeAssemblyName,
-        FrameworkName? targetFramework,
+        CompileTimeProjectManifest manifest,
         IReadOnlyList<SyntaxTree> syntaxTrees,
-        ulong syntaxTreeHash,
-        string? redistributionLicenseKey,
         IReadOnlyList<CompileTimeProject> referencedProjects,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
@@ -1172,8 +1170,10 @@ internal sealed partial class CompileTimeCompilationBuilder
         out string assemblyPath,
         out string? sourceDirectory )
     {
+        var targetFramework = string.IsNullOrEmpty( manifest.TargetFramework ) ? null : new FrameworkName( manifest.TargetFramework );
+
         this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-        var projectHash = this.ComputeProjectHash( referencedProjects, syntaxTreeHash, redistributionLicenseKey );
+        var projectHash = this.ComputeProjectHash( referencedProjects, manifest.SourceHash, manifest.RedistributionLicenseKey );
 
         var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
 
@@ -1207,7 +1207,18 @@ internal sealed partial class CompileTimeCompilationBuilder
                         sourceDirectory = outputPaths.Directory;
                         compileTimeAssemblyName = outputPaths.CompileTimeAssemblyName;
 
-                        return this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
+                        var emitResult = this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
+
+                        if (emitResult)
+                        {
+                            // If successful, we will add the manifest which is not written by TryEmit.
+                            using ( var stream = File.OpenWrite( outputPaths.Manifest ) )
+                            {
+                                manifest.Serialize( stream );
+                            }
+                        }
+
+                        return emitResult;
                     }
                     else
                     {
