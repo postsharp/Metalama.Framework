@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal sealed partial class CompileTimeCompilationBuilder
 {
+    private const int inconsistentFallbackLimit = 10;
+
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
     private readonly ProjectServiceProvider _serviceProvider;
@@ -885,7 +887,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var alternateDirectoryOrdinal = 0;
 
         // Do not try to try more than 10 alternates, probability of that happening is low and we may get into an infinite cycle.
-        while ( alternateDirectoryOrdinal < 10 )
+        while ( alternateDirectoryOrdinal < inconsistentFallbackLimit )
         {
             using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
             {
@@ -1111,19 +1113,19 @@ internal sealed partial class CompileTimeCompilationBuilder
         var compilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects )
             .AddSyntaxTrees( syntaxTrees );
 
-        assemblyPath = outputPaths.Pe;
-        sourceDirectory = outputPaths.Directory;
-
         var alternateOrdinal = 0;
 
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {
-            while ( true )
+            while ( alternateOrdinal < inconsistentFallbackLimit )
             {
                 if ( this.CheckCompileTimeProjectDiskCache( runTimeAssemblyName, outputPaths, out var wasInconsistent ) )
                 {
                     // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
                     // emitted and it does not need to be done a second time.
+
+                    assemblyPath = outputPaths.Pe;
+                    sourceDirectory = outputPaths.Directory;
 
                     this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): compile-time project already exists." );
 
@@ -1133,16 +1135,26 @@ internal sealed partial class CompileTimeCompilationBuilder
                 {
                     if ( !wasInconsistent )
                     {
+                        assemblyPath = outputPaths.Pe;
+                        sourceDirectory = outputPaths.Directory;
+
                         return this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
                     }
                     else
                     {
+                        // The cache was inconsistent, we will defer to
                         alternateOrdinal++;
                         outputPaths = outputPaths.WithAlternateOrdinal( alternateOrdinal );
                     }
                 }
             }
         }
+
+        assemblyPath = outputPaths.Pe;
+        sourceDirectory = null;
+
+        this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the assembly." );
+        return false;
     }
 
     private IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName, this._logger );
