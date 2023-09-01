@@ -877,37 +877,64 @@ internal sealed partial class CompileTimeCompilationBuilder
             }
         }
 
+        if ( this.TryGetCompileTimeProjectFromCache(
+                runTimeCompilation,
+                referencedProjects,
+                outputPaths,
+                projectHash,
+                out project,
+                out var wasInconsistent,
+                null ) )
+        {
+            ReportCachedDiagnostics( project );
+
+            return true;
+        }
+
         if ( cacheOnly )
         {
+            // We were asked to get cache projects only. Don't create it.
+
             var alternateDirectoryOrdinal = 0;
 
-            while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
+            if ( !wasInconsistent )
             {
-                if ( this.TryGetCompileTimeProjectFromCache(
+                // The primary directory was not present, no need to enter lock.
+                project = null;
+                return false;
+            }
+
+            // The main directory was inconsistent, we will enter a lock to synchronize with other processes that may be creating a fallback.
+            using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
+            {
+                while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
+                {
+                    if ( this.TryGetCompileTimeProjectFromCache(
                         runTimeCompilation,
                         referencedProjects,
                         outputPaths,
                         projectHash,
                         out project,
-                        out var wasInconsistent,
+                        out wasInconsistent,
                         null ) )
-                {
-                    ReportCachedDiagnostics( project );
+                    {
+                        ReportCachedDiagnostics( project );
 
-                    return true;
-                }
+                        return true;
+                    }
 
-                if ( wasInconsistent )
-                {
-                    // If the cache directory is not consistent, attempt the next alternate fallback.
-                    alternateDirectoryOrdinal++;
-                    outputPaths = outputPaths.WithAlternateOrdinal( alternateDirectoryOrdinal );
-                }
-                else
-                {
-                    // We were asked to get cache projects only. Don't create it.
-                    project = null;
-                    return false;
+                    if ( wasInconsistent )
+                    {
+                        // If the cache directory is not consistent, attempt the next alternate fallback.
+                        alternateDirectoryOrdinal++;
+                        outputPaths = outputPaths.WithAlternateOrdinal( alternateDirectoryOrdinal );
+                    }
+                    else
+                    {
+                        // The cache directory was not present, we can return.
+                        project = null;
+                        return false;
+                    }
                 }
             }
 
@@ -917,24 +944,10 @@ internal sealed partial class CompileTimeCompilationBuilder
         {
             var alternateDirectoryOrdinal = 0;
 
-            if ( this.TryGetCompileTimeProjectFromCache(
-                    runTimeCompilation,
-                    referencedProjects,
-                    outputPaths,
-                    projectHash,
-                    out project,
-                    out var wasInconsistent,
-                    null ) )
-            {
-                ReportCachedDiagnostics( project );
-
-                return true;
-            }
-
             // Do not try to try more than 10 alternates, probability of that happening is low and we may get into an infinite cycle.
-            while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
+            using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
             {
-                using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
+                while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
                 {
                     // Do a second cache lookup within the lock.
                     if ( this.TryGetCompileTimeProjectFromCache(
@@ -1116,11 +1129,11 @@ internal sealed partial class CompileTimeCompilationBuilder
                             manifest.Serialize( manifestStream );
                         }
                     }
+
+                    this._cache.Add( projectHash, project );
+
+                    return true;
                 }
-
-                this._cache.Add( projectHash, project );
-
-                return true;
             }
 
             throw CreateTooManyInconsistentCacheDirectoriesException( runTimeCompilation.AssemblyName, outputPaths );
