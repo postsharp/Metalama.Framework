@@ -29,7 +29,6 @@ using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal sealed partial class CompileTimeCompilationBuilder
 {
-    private const int inconsistentFallbackLimit = 10;
+    private const int _inconsistentFallbackLimit = 10;
 
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
@@ -887,7 +886,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var alternateDirectoryOrdinal = 0;
 
         // Do not try to try more than 10 alternates, probability of that happening is low and we may get into an infinite cycle.
-        while ( alternateDirectoryOrdinal < inconsistentFallbackLimit )
+        while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
         {
             using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
             {
@@ -1116,7 +1115,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
         {
-            while ( alternateOrdinal < inconsistentFallbackLimit )
+            while ( alternateOrdinal < _inconsistentFallbackLimit )
             {
                 if ( this.CheckCompileTimeProjectDiskCache( runTimeAssemblyName, outputPaths, out var wasInconsistent ) )
                 {
