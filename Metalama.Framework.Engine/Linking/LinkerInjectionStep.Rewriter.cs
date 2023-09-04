@@ -163,13 +163,14 @@ internal sealed partial class LinkerInjectionStep
             return transformedNode;
         }
 
-        private (SyntaxList<AttributeListSyntax> Attributes, SyntaxTriviaList Trivia) RewriteDeclarationAttributeLists(
+        private (SyntaxList<AttributeListSyntax> Attributes, SyntaxTriviaList Trivia)? RewriteDeclarationAttributeLists(
             SyntaxNode originalDeclaringNode,
-            SyntaxList<AttributeListSyntax> attributeLists )
+            SyntaxList<AttributeListSyntax> attributeLists,
+            SyntaxNode? originalNodeForTrivia = null )
         {
             if ( !this._nodesWithModifiedAttributes.Contains( originalDeclaringNode ) )
             {
-                return (attributeLists, default);
+                return null;
             }
 
             // Resolve the symbol.
@@ -178,11 +179,21 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol == null )
             {
-                return (attributeLists, default);
+                return null;
+            }
+            
+            // Find trivia that's directly on the declaration (and not on its attributes).
+            originalNodeForTrivia ??= originalDeclaringNode;
+
+            if ( attributeLists.Any() )
+            {
+                originalNodeForTrivia = originalNodeForTrivia.RemoveNodes( attributeLists, SyntaxRemoveOptions.KeepNoTrivia )!;
             }
 
+            var originalDeclarationTrivia = originalNodeForTrivia.GetLeadingTrivia();
+
             var outputLists = new List<AttributeListSyntax>();
-            var outputTrivias = new List<SyntaxTrivia>();
+            var outputTrivias = new List<SyntaxTrivia>( originalDeclarationTrivia );
             SyntaxGenerationContext? syntaxGenerationContext = null;
 
             this.RewriteAttributeLists(
@@ -308,10 +319,23 @@ internal sealed partial class LinkerInjectionStep
                         newList = newList.WithTarget( AttributeTargetSpecifier( Token( targetKind ) ) );
                     }
 
+                    if ( outputTrivia.Any() && !outputAttributeLists.Any() )
+                    {
+                        newList = newList.WithLeadingTrivia( newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ) );
+
+                        outputTrivia.Clear();
+                    }
+
                     outputAttributeLists.Add( newList );
                 }
             }
         }
+
+        private static T ReplaceAttributes<T>( T node, (SyntaxList<AttributeListSyntax> Attributes, SyntaxTriviaList Trivia)? attributesTuple )
+            where T : MemberDeclarationSyntax
+            => attributesTuple is var (attributes, trivia)
+                ? (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes )
+                : node;
 
         public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
@@ -400,7 +424,7 @@ internal sealed partial class LinkerInjectionStep
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-                node = (T) node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+                node = ReplaceAttributes( node, rewrittenAttributes );
 
                 return node;
             }
@@ -621,7 +645,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
-                 && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
+                 && originalNode.Declaration.Variables.Any( this._nodesWithModifiedAttributes.Contains ) )
             {
                 // TODO: This needs to use rewritten variable declaration or do removal in place.
                 var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
@@ -635,11 +659,12 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
-                    var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+                    var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, originalNode );
 
-                    var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
-                        .WithTrailingTrivia( ElasticLineFeed )
-                        .WithLeadingTrivia( attributes.Trivia );
+                    var fieldDeclaration = FieldDeclaration( default, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
+                        .WithTrailingTrivia( ElasticLineFeed );
+
+                    fieldDeclaration = ReplaceAttributes( fieldDeclaration, attributes );
 
                     members.Add( fieldDeclaration );
                 }
@@ -648,8 +673,8 @@ internal sealed partial class LinkerInjectionStep
             }
             else
             {
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
-                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists, originalNode );
+                node = ReplaceAttributes( node, rewrittenAttributes );
 
                 var anyChangeToVariables = false;
                 var rewrittenVariables = new List<VariableDeclaratorSyntax>();
@@ -696,7 +721,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            node = ReplaceAttributes( node, rewrittenAttributes );
 
             return (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
         }
@@ -708,7 +733,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            node = ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -720,7 +745,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            node = ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -732,7 +757,11 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+            if ( rewrittenAttributes is var (attributes, trivia) )
+            {
+                node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
+            }
 
             return node;
         }
@@ -744,7 +773,11 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            
+            if ( rewrittenAttributes is var (attributes, trivia) )
+            {
+                node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
+            }
 
             return node;
         }
@@ -768,7 +801,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            node = ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -780,7 +813,11 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            
+            if ( rewrittenAttributes is var (attributes, trivia) )
+            {
+                node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
+            }
 
             return node;
         }
@@ -792,7 +829,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+            node = ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -803,7 +840,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
-                 && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
+                 && originalNode.Declaration.Variables.Any( this._nodesWithModifiedAttributes.Contains ) )
             {
                 var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
@@ -812,16 +849,17 @@ internal sealed partial class LinkerInjectionStep
                 {
                     var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
 
-                    var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+                    var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, node );
 
                     var eventDeclaration = EventFieldDeclaration(
-                            attributes.Attributes,
+                            default,
                             node.Modifiers,
                             Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                             declaration,
                             Token( SyntaxKind.SemicolonToken ) )
-                        .WithTrailingTrivia( ElasticLineFeed )
-                        .WithLeadingTrivia( attributes.Trivia );
+                        .WithTrailingTrivia( ElasticLineFeed );
+
+                    eventDeclaration = ReplaceAttributes( eventDeclaration, attributes );
 
                     members.Add( eventDeclaration );
                 }
@@ -830,8 +868,8 @@ internal sealed partial class LinkerInjectionStep
             }
             else
             {
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
-                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists, node );
+                node = ReplaceAttributes( node, rewrittenAttributes );
 
                 return new[] { node };
             }
