@@ -372,7 +372,7 @@ namespace Metalama.Framework.CompilerExtensions
         private static Assembly? GetAssemblyCore( string name, StringBuilder? log )
         {
             static bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
-                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version <= candidate.Version;
 
             static bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
@@ -398,15 +398,16 @@ namespace Metalama.Framework.CompilerExtensions
                     // It seems that MSBuild will use any Metalama.Compiler process of a higher version if one is available, so a project
                     // compiled with a lower version of Metalama.Backstage and Metalama.Compiler.Interfaces may end up with a higher version.
 
-                    log?.AppendLine( $"'{requestedAssemblyName.Name}' is an assembly provided by Metalama.Compiler. Accepting a higher version." );
+                    log?.AppendLine( $"'{requestedAssemblyName.Name}' is an assembly provided by Metalama.Compiler. A higher version can be accepted." );
                     assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
 
                     if ( assembly != null )
                     {
+                        log?.AppendLine( $"'{requestedAssemblyName.Name}' was already loaded (version '{assembly.GetName().Version}')" );
                         return assembly;
                     }
 
-                    log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded copy." );
+                    log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded version '{embeddedAssembly.Name.Version}'." );
                 }
                 else
                 {
