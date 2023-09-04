@@ -1767,7 +1767,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                     this.RequireScope( node, classifierScope.GetExpressionExecutionScope(), TemplatingScope.RunTimeOnly, "a template local function" );
                 }
-                else
+                else if ( symbol.ContainingSymbol is not IMethodSymbol { MethodKind: MethodKind.LambdaMethod } )
                 {
                     this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
                 }
