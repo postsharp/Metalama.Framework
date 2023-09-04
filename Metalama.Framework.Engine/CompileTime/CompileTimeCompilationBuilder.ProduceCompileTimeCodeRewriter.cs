@@ -691,7 +691,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         yield return node;
                     }
-                    if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
+                    else if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
                         yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
@@ -875,14 +875,21 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
-                    else if ( propertySymbol.IsAbstract && (!this.SymbolClassifier.GetTemplatingScope( propertySymbol.Type ).CanExecuteAtCompileTime()
-                                                            || propertySymbol.Parameters.Any(
-                                                                p => !this.SymbolClassifier.GetTemplatingScope( p.Type ).CanExecuteAtCompileTime() )) )
+                    else if ( propertySymbol.IsAbstract )
                     {
-                        this._diagnosticAdder.Report(
-                            TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
-                                propertySymbol.GetDiagnosticLocation(),
-                                propertySymbol ) );
+                        if ( !this.SymbolClassifier.GetTemplatingScope( propertySymbol.Type ).CanExecuteAtCompileTime()
+                             || propertySymbol.Parameters.Any(
+                                 p => !this.SymbolClassifier.GetTemplatingScope( p.Type ).CanExecuteAtCompileTime() ) )
+                        {
+                            this._diagnosticAdder.Report(
+                                TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
+                                    propertySymbol.GetDiagnosticLocation(),
+                                    propertySymbol ) );
+                        }
+                        else
+                        {
+                            yield return node;
+                        }
                     }
                     else
                     {
@@ -1016,6 +1023,11 @@ namespace Metalama.Framework.Engine.CompileTime
                         yield return createMember( (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull() );
                     }
                 }
+
+                if ( isTemplate && symbol.IsAbstract )
+                {
+                    yield return createMember( variable );
+                }
             }
 
             private IEnumerable<MemberDeclarationSyntax> TransformEventDeclaration( EventDeclarationSyntax node )
@@ -1086,13 +1098,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
-                    else if ( eventSymbol.IsAbstract && !this.SymbolClassifier.GetTemplatingScope( eventSymbol.Type ).CanExecuteAtCompileTime() )
-                    {
-                        this._diagnosticAdder.Report(
-                            TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
-                                eventSymbol.GetDiagnosticLocation(),
-                                eventSymbol ) );
-                    }
+
+                    // Note: EventDeclarationSyntax can't be abstract, only EventFieldDeclarationSyntax can.
 
                     if ( transformedAddDeclaration != null )
                     {
