@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <Target Name="AddMetalamaTestFrameworkAttributes" DependsOnTargets="AddImplicitDefineConstants"
-            BeforeTargets="CoreGenerateAssemblyInfo">
+            BeforeTargets="GetAssemblyAttributes">
         
         <Error Text="The MetalamaTestReplaceFramework property is no longer supported. Set the MetalamaTestFramework property to Original instead."
                Condition="'$(MetalamaTestReplaceFramework)'!=''"/>
