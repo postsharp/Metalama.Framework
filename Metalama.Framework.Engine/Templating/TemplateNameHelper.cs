@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Templating
             ImmutableArray<IParameterSymbol> parameters = default,
             bool ignoredLastParameter = false )
         {
-            symbol = symbol.GetOverriddenMember() ?? symbol;
+            symbol = symbol.GetOverriddenMember()?.OriginalDefinition ?? symbol;
 
             var principal = "__" + templateMemberName;
 

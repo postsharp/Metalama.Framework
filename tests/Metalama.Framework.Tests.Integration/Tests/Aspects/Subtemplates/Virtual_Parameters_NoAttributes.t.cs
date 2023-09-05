@@ -1,2 +1,27 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0276 on `CalledTemplate<int>(4, 5, 6)`: `Called template 'DerivedAspect.CalledTemplate<int>(int, int, int)' can't have run-time type parameters.`
+class TargetCode
+{
+    [Aspect]
+    void Method1()
+    {
+        global::System.Console.WriteLine("regular template");
+        global::System.Console.WriteLine($"called template i={1} j=2 k={3}");
+        return;
+    }
+    [DerivedAspect]
+    void Method2()
+    {
+        global::System.Console.WriteLine("regular template");
+        global::System.Console.WriteLine($"derived template i={1} j=2 k={3}");
+        return;
+    }
+    [DerivedAspect]
+    Task Method3()
+    {
+        global::System.Console.WriteLine($"derived template i={4} j=5 k={6}");
+        return this.Method3_Source();
+    }
+    private async Task Method3_Source()
+    {
+        await Task.Yield();
+    }
+}

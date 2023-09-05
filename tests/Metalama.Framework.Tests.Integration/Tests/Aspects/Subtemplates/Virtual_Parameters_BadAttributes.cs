@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual_Parameters_NoAttributes2;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual_Parameters_BadAttributes;
 
 class Aspect : OverrideMethodAspect
 {
@@ -10,13 +10,11 @@ class Aspect : OverrideMethodAspect
     {
         Console.WriteLine("regular template");
 
-        CalledTemplate(1, 2);
-
         return meta.Proceed();
     }
 
     [Template]
-    protected virtual void CalledTemplate(int i, [CompileTime] int j)
+    protected virtual void CalledTemplate<T>(int i, int j)
     {
         Console.WriteLine($"called template i={i} j={j}");
     }
@@ -26,12 +24,12 @@ class DerivedAspect : Aspect
 {
     public override Task<dynamic?> OverrideAsyncMethod()
     {
-        CalledTemplate(3, 4);
+        CalledTemplate<int>(3, 4);
 
         return meta.ProceedAsync();
     }
 
-    protected override void CalledTemplate(int i, int j)
+    protected override void CalledTemplate<[CompileTime] T>(int i, [CompileTime] int j)
     {
         Console.WriteLine($"derived template i={i} j={j}");
     }

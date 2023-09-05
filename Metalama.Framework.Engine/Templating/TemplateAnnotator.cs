@@ -191,7 +191,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             case IParameterSymbol templateParameter when TemplateMemberSymbolClassifier.IsTemplateParameter( templateParameter ):
                 var parameterScope = this._symbolScopeClassifier.GetTemplatingScope( templateParameter );
 
-                return parameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
+                return parameterScope.GetExpressionExecutionScope() is TemplatingScope.CompileTimeOnly or TemplatingScope.Conflict
                     ? parameterScope
                     : TemplatingScope.RunTimeTemplateParameter;
 
@@ -199,7 +199,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             case ITypeParameterSymbol typeParameter when TemplateMemberSymbolClassifier.IsTemplateTypeParameter( typeParameter ):
                 var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
 
-                return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
+                return typeParameterScope.GetExpressionExecutionScope() is TemplatingScope.CompileTimeOnly or TemplatingScope.Conflict
                     ? typeParameterScope
                     : TemplatingScope.RunTimeOnly;
 
@@ -418,17 +418,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     // ReSharper disable once UnusedMember.Local
 
-    private TemplatingScope GetExpressionTypeScope( ExpressionSyntax? node )
-    {
-        if ( node != null && this._syntaxTreeAnnotationMap.GetExpressionType( node ) is { } parentExpressionType )
-        {
-            return this.GetSymbolScope( parentExpressionType );
-        }
-        else
-        {
-            return TemplatingScope.RunTimeOrCompileTime;
-        }
-    }
+    private TemplatingScope GetExpressionTypeScope( ITypeSymbol? expressionType ) 
+        => expressionType != null ? this.GetSymbolScope( expressionType ) : TemplatingScope.RunTimeOrCompileTime;
 
     private TemplatingScope GetExpressionScope( IReadOnlyList<SyntaxNode?>? annotatedChildren, SyntaxNode originalParent, bool reportError = true )
     {
@@ -457,11 +448,13 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         // Get the scope of type of the parent node.
 
+        ITypeSymbol? parentExpressionType = null;
         var parentExpressionScope = TemplatingScope.RunTimeOrCompileTime;
 
         if ( originalParent is ExpressionSyntax originalExpression )
         {
-            parentExpressionScope = this.GetExpressionTypeScope( originalExpression );
+            parentExpressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalExpression );
+            parentExpressionScope = this.GetExpressionTypeScope( parentExpressionType );
         }
 
         var combinedExecutionScope = TemplatingScope.RunTimeOrCompileTime;
@@ -528,11 +521,21 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             if ( reportError )
             {
                 // Report an error.
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
-                    originalParent,
-                    (originalParent.ToString(), parentExpressionScope.ToDisplayString(), children[lastNonNeutralNodeIndex].AssertNotNull().ToString(),
-                     childrenScopes[lastNonNeutralNodeIndex].ToDisplayString()) );
+                if ( lastNonNeutralNodeIndex == -1 )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.UnexplainedTemplatingScopeConflict,
+                        originalParent,
+                        parentExpressionType! );
+                }
+                else
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
+                        originalParent,
+                        (originalParent.ToString(), parentExpressionScope.ToDisplayString(), children[lastNonNeutralNodeIndex].AssertNotNull().ToString(),
+                         childrenScopes[lastNonNeutralNodeIndex].ToDisplayString()) );
+                }
 
                 // We don't propagate the conflict state after we report the error, because this would cause the reporting of more errors and be more confusing.
                 return TemplatingScope.RunTimeOrCompileTime;
@@ -700,7 +703,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
             else if ( existingScope != scope )
             {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.AnonumousTypeDifferentScopes, node, symbol );
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.AnonymousTypeDifferentScopes, node, symbol );
             }
         }
 
@@ -1055,17 +1058,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             {
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.SubtemplateCallCantBeSubexpression,
-                    node,
-                    node.ToString() );
-            }
-
-            if ( (symbol!.IsVirtual || symbol.IsAbstract || symbol.IsOverride)
-                 && !symbol.IsSealed
-                 && symbol is IMethodSymbol { Parameters: var parameters }
-                 && parameters.Length > node.ArgumentList.Arguments.Count )
-            {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.SubtemplateCallWithMissingArgumentsCantBeVirtual,
                     node,
                     node.ToString() );
             }
@@ -1759,6 +1751,17 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                             (symbol.Name, symbol.Type) );
                     }
                 }
+                else if ( scope == TemplatingScope.Conflict )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.OverriddenParameterCantBeCompileTime,
+                        node,
+                        ("parameter", symbol, symbol.ContainingSymbol) );
+
+                    scope = TemplatingScope.RunTimeOrCompileTime;
+                }
+
+                annotatedNode = annotatedNode.AddScopeAnnotation( scope );
 
                 if ( this._isInLocalFunction )
                 {
@@ -1792,6 +1795,16 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 if ( scope == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+                else if ( scope == TemplatingScope.Conflict )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.OverriddenParameterCantBeCompileTime,
+                        node,
+                        ("type parameter", symbol, symbol.ContainingSymbol) );
+
+                    scope = TemplatingScope.RunTimeOrCompileTime;
+                    annotatedNode = annotatedNode.AddScopeAnnotation( scope );
                 }
 
                 if ( !this._isInLocalFunction )

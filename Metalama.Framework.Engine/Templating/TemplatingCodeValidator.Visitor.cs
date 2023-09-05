@@ -38,6 +38,8 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _hasCompileTimeCodeFast;
             private readonly ITypeSymbol _typeFabricType;
             private readonly ITypeSymbol _iAdviceAttributeType;
+            private readonly ITypeSymbol _iAspect;
+            private readonly ITypeSymbol _iTemplateProvider;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -67,6 +69,8 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
                 this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
+                this._iAspect = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect) );
+                this._iTemplateProvider = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ITemplateProvider) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -249,18 +253,48 @@ namespace Metalama.Framework.Engine.Templating
                 base.VisitInterfaceDeclaration( node );
             }
 
-            private void VerifyTypeDeclaration( BaseTypeDeclarationSyntax node, in Context context )
+            private void VerifyTypeDeclaration( TypeDeclarationSyntax node, in Context context )
             {
+                var declaredType = (INamedTypeSymbol) context.DeclaredSymbol!;
+
                 // Report an error on aspect classes when the pipeline is paused.
                 if ( this._currentScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
-                            context.DeclaredSymbol! ) );
+                            declaredType ) );
                 }
 
                 this.VerifyModifiers( node.Modifiers );
+
+                if ( node.BaseList != null && node.TypeParameterList != null )
+                {
+                    if ( this._semanticModel.Compilation.HasImplicitConversion( declaredType, this._iAspect ) )
+                    {
+                        // Aspects can't be generic at all.
+                        this.Report(
+                            GeneralDiagnosticDescriptors.GenericAspectTypeNotSupported.CreateRoslynDiagnostic(
+                                declaredType.GetDiagnosticLocation(),
+                                declaredType ) );
+                    }
+                    else if ( this._semanticModel.Compilation.HasImplicitConversion( declaredType, this._iTemplateProvider ) )
+                    {
+                        // Template providers can only have compile-time type parameters.
+                        foreach ( var typeParameter in declaredType.TypeParameters )
+                        {
+                            var typeParameterScope = this._classifier.GetTemplatingScope( typeParameter );
+
+                            if ( typeParameterScope != TemplatingScope.CompileTimeOnly )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.TemplateProviderTypeParameterHasToBeCompileTime.CreateRoslynDiagnostic(
+                                        typeParameter.GetDiagnosticLocation(),
+                                        (typeParameter, declaredType) ) );
+                            }
+                        }
+                    }
+                }
 
                 // Verify that the base class and implemented interfaces are scope-compatible.
                 // If the scope is conflict, an error message is written elsewhere.
@@ -269,7 +303,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = (INamedTypeSymbol?) ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol;
+                        var baseType = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
 
                         if ( baseType == null )
                         {
@@ -284,16 +318,14 @@ namespace Metalama.Framework.Engine.Templating
                         }
                         else
                         {
-                            var isAcceptableScope = (this._currentScope, scope: baseTypeScope) switch
-                            {
-                                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
-                                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
-                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
-                                (TemplatingScope.RunTimeOnly, TemplatingScope.DynamicTypeConstruction) => true,
-                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
-                                (TemplatingScope.RunTimeOrCompileTime, _) => true,
-                                _ => false
-                            };
+                            var isAcceptableScope =
+                                (this._currentScope, scope: baseTypeScope) is
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) or
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) or
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) or
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.DynamicTypeConstruction) or
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) or
+                                (TemplatingScope.RunTimeOrCompileTime, _);
 
                             if ( !isAcceptableScope )
                             {

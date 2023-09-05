@@ -311,5 +311,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             return false;
         }
+
+        public static ISymbol GetSingleMemberIncludingBase( this INamedTypeSymbol type, string name, Func<ISymbol, bool> condition )
+        {
+            var member = type.GetMembers( name ).SingleOrDefault( condition );
+
+            return member ?? type.BaseType.AssertNotNull().OriginalDefinition.GetSingleMemberIncludingBase( name, condition );
+        }
     }
 }

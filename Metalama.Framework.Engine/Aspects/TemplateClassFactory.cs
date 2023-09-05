@@ -131,7 +131,7 @@ internal abstract class TemplateClassFactory<T>
             ITemplateReflectionContext templateDiscoveryContext,
             [NotNullWhen( true )] out T? metadata )
         {
-            if ( this._classes.TryGetValue( templateTypeSymbol.GetFullName().AssertNotNull(), out var existingValue ) )
+            if ( this._classes.TryGetValue( templateTypeSymbol.GetFullName(), out var existingValue ) )
             {
                 metadata = existingValue;
 
@@ -144,7 +144,7 @@ internal abstract class TemplateClassFactory<T>
             {
                 // Process the base type.
 
-                if ( templateTypeDataDictionary.TryGetValue( templateTypeSymbol.BaseType.GetReflectionFullName().AssertNotNull(), out var baseData ) )
+                if ( templateTypeDataDictionary.TryGetValue( templateTypeSymbol.BaseType.OriginalDefinition.GetReflectionFullName(), out var baseData ) )
                 {
                     if ( !TryProcessType(
                             templateTypeSymbol.BaseType,
@@ -160,7 +160,7 @@ internal abstract class TemplateClassFactory<T>
                 }
                 else
                 {
-                    // This is not an aspect class, typically System.Attribute.
+                    // This is not an aspect class or a template provider, typically System.Attribute.
                 }
             }
 
@@ -177,7 +177,7 @@ internal abstract class TemplateClassFactory<T>
                 return false;
             }
 
-            this._classes.Add( templateTypeSymbol.GetFullName().AssertNotNull(), metadata );
+            this._classes.Add( templateTypeSymbol.GetFullName(), metadata );
 
             return true;
         }

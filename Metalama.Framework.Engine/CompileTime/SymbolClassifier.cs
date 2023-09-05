@@ -85,6 +85,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
+        private readonly INamedTypeSymbol? _iTemplateProvider;
 
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?>[] _caches;
 
@@ -142,6 +143,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
                     .AssertNotNull();
+
+                this._iTemplateProvider = this._compilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() )
+                    .AssertNotNull();
             }
         }
 
@@ -190,7 +194,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return associatedTemplateInfo;
             }
 
-            if ( symbol.OriginalDefinition != symbol
+            if ( !ReferenceEquals( symbol.OriginalDefinition, symbol )
                  && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
             {
                 return originalDefinitionTemplateInfo;
@@ -441,41 +445,52 @@ namespace Metalama.Framework.Engine.CompileTime
                         return TemplatingScope.Dynamic;
 
                     // Type parameters.
-                    case ITypeParameterSymbol typeParameterSymbol:
-                        var scopeFromAttribute = GetScopeFromAttributes( typeParameterSymbol );
+                    case ITypeParameterSymbol typeParameter:
+                        {
+                            TemplatingScope? overriddenTypeParameterScope = null;
 
-                        if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameterSymbol.ContainingSymbol is IMethodSymbol m
-                                                                                   && !this.GetTemplateInfo( m ).IsNone )
-                        {
-                            return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-                        }
+                            if ( typeParameter.ContainingSymbol.GetOverriddenMember() is IMethodSymbol overriddenMember )
+                            {
+                                var overriddenTypeParameter = overriddenMember.TypeParameters[typeParameter.Ordinal];
 
-                        if ( scopeFromAttribute != null )
-                        {
-                            return scopeFromAttribute.Value;
-                        }
-                        else if ( typeParameterSymbol.ContainingSymbol.Kind == SymbolKind.Method
-                                  && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
-                        {
-                            // Template parameters are run-time by default.
-                            return TemplatingScope.RunTimeOnly;
-                        }
-                        else if ( (options & GetTemplatingScopeOptions.TypeParametersAreNeutral) != 0 )
-                        {
-                            // Do not try to go to the containing symbol if we are called from the method level because this would
-                            // create an infinite recursion.
+                                overriddenTypeParameterScope = this.GetTemplatingScopeCore( overriddenTypeParameter, options, symbolsBeingProcessed, tracer );
+                            }
 
-                            return null;
-                        }
-                        else
-                        {
-                            var declaringScope = this.GetTemplatingScopeCore(
-                                typeParameterSymbol.ContainingSymbol,
-                                options,
-                                symbolsBeingProcessedIncludingCurrent,
-                                tracer );
+                            var scopeFromAttribute = GetScopeFromAttributes( typeParameter );
 
-                            return declaringScope;
+                            if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameter.ContainingSymbol is IMethodSymbol m
+                                                                                       && !this.GetTemplateInfo( m ).IsNone )
+                            {
+                                scopeFromAttribute = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                            }
+
+                            if ( CombineParameterScopeWithOverridden( scopeFromAttribute, overriddenTypeParameterScope ) is { } combinedScope )
+                            {
+                                return combinedScope;
+                            }
+                            else if ( typeParameter.ContainingSymbol.Kind == SymbolKind.Method
+                                      && !this.GetTemplateInfo( typeParameter.ContainingSymbol ).IsNone )
+                            {
+                                // Template parameters are run-time by default.
+                                return TemplatingScope.RunTimeOnly;
+                            }
+                            else if ( (options & GetTemplatingScopeOptions.TypeParametersAreNeutral) != 0 )
+                            {
+                                // Do not try to go to the containing symbol if we are called from the method level because this would
+                                // create an infinite recursion.
+
+                                return null;
+                            }
+                            else
+                            {
+                                var declaringScope = this.GetTemplatingScopeCore(
+                                    typeParameter.ContainingSymbol,
+                                    options,
+                                    symbolsBeingProcessedIncludingCurrent,
+                                    tracer );
+
+                                return declaringScope;
+                            }
                         }
 
                     // Error (unresolved types).
@@ -506,6 +521,26 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Generic type instances.
                     case INamedTypeSymbol { IsGenericType: true } namedType when !namedType.IsGenericTypeDefinition():
                         {
+                            if ( this._compilation.HasImplicitConversion( namedType, this._iTemplateProvider ) )
+                            {
+                                // Template providers require that all type arguments are compile-time.
+
+                                foreach ( var typeArgument in namedType.TypeArguments )
+                                {
+                                    var typeArgumentScope = this.GetTemplatingScopeCore(
+                                            typeArgument,
+                                            options | GetTemplatingScopeOptions.TypeParametersAreNeutral,
+                                            symbolsBeingProcessedIncludingCurrent,
+                                            tracer )
+                                        ?.GetExpressionExecutionScope();
+
+                                    if ( typeArgumentScope == TemplatingScope.RunTimeOnly )
+                                    {
+                                        return OnConflict();
+                                    }
+                                }
+                            }
+
                             List<TemplatingScope?> scopes = new( namedType.TypeArguments.Length + 1 );
 
                             var declarationScope = this.GetTemplatingScopeCore(
@@ -710,11 +745,20 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     case IParameterSymbol parameter:
                         {
+                            TemplatingScope? overriddenParameterScope = null;
+
+                            if ( parameter.Ordinal != -1 && parameter.ContainingSymbol.GetOverriddenMember() is { } overriddenMember )
+                            {
+                                var overriddenParameter = overriddenMember.GetParameters()[parameter.Ordinal];
+
+                                overriddenParameterScope = this.GetTemplatingScopeCore( overriddenParameter, options, symbolsBeingProcessed, tracer );
+                            }
+
                             var parameterScope = GetScopeFromAttributes( parameter );
 
-                            if ( parameterScope != null )
+                            if ( CombineParameterScopeWithOverridden( parameterScope, overriddenParameterScope ) is { } combinedScope )
                             {
-                                return parameterScope;
+                                return combinedScope;
                             }
 
                             parameterScope = this.GetTemplatingScopeCore( parameter.Type, options, symbolsBeingProcessedIncludingCurrent, tracer )
@@ -883,6 +927,31 @@ namespace Metalama.Framework.Engine.CompileTime
                                     throw new AssertionFailedException( $"Not supported: '{symbol}'." );
                             }
                         }
+                }
+
+                static TemplatingScope? CombineParameterScopeWithOverridden( TemplatingScope? parameterScope, TemplatingScope? overriddenParameterScope )
+                {
+                    switch (parameterScope, overriddenParameterScope)
+                    {
+                        case (not null, null):
+                            return parameterScope;
+
+                        case (null, not null):
+                            return overriddenParameterScope;
+
+                        case (null, null):
+                            return null;
+
+                        default:
+                            if ( parameterScope.Value.GetExpressionExecutionScope() == overriddenParameterScope.Value.GetExpressionExecutionScope() )
+                            {
+                                return parameterScope;
+                            }
+                            else
+                            {
+                                return OnConflict();
+                            }
+                    }
                 }
             }
         }

@@ -36,6 +36,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Subtemplates\Virtual_Parameters - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Subtemplates\Virtual_Parameters_BadAttributes - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -44,6 +49,13 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
 		    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Subtemplates\Virtual_Parameters_Specialization.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Virtual_Parameters_Specialization.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

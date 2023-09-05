@@ -6,7 +6,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Generi
 
 internal class Aspect : TypeAspect
 {
-
     [Introduce]
     private void Introduced<T>()
     {

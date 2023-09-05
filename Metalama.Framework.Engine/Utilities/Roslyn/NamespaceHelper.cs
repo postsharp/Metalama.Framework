@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -13,9 +14,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
             => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, GetFullNameImpl );
 
-        private static string? GetFullNameImpl( this INamespaceOrTypeSymbol? symbol )
+        [return: NotNullIfNotNull( nameof(symbol) )]
+        public static string? GetFullName( this ITypeSymbol? symbol )
+            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, GetFullNameImpl );
+
+        private static string? GetFullNameImpl( this INamespaceOrTypeSymbol symbol )
         {
-            if ( symbol is null or INamespaceSymbol { IsGlobalNamespace: true } )
+            if ( symbol is INamespaceSymbol { IsGlobalNamespace: true } )
             {
                 return null;
             }

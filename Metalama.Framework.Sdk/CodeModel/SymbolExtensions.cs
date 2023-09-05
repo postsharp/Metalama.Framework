@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -45,10 +46,22 @@ namespace Metalama.Framework.Engine.CodeModel
         public static ISymbol? GetOverriddenMember( this ISymbol? symbol )
             => symbol switch
             {
+                // A constructed generic method like Foo<int>() has null OverriddenMethod,
+                // so we need to go Derived.Foo<int>() -> Derived.Foo<T>() -> Base.Foo<T>() -> Base.Foo<int>().
+                IMethodSymbol { IsGenericMethod: true } method when method.OriginalDefinition != method
+                    => method.OriginalDefinition.OverriddenMethod?.Construct( method.TypeArguments, method.TypeArgumentNullableAnnotations ),
                 IMethodSymbol method => method.OverriddenMethod,
                 IPropertySymbol property => property.OverriddenProperty,
                 IEventSymbol @event => @event.OverriddenEvent,
                 _ => null
+            };
+
+        public static ImmutableArray<IParameterSymbol> GetParameters( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol method => method.Parameters,
+                IPropertySymbol property => property.Parameters,
+                _ => throw new InvalidOperationException( $"Unexpected symbol type '{symbol?.GetType()}'." )
             };
 
         public static ITypeSymbol? GetExpressionType( this ISymbol symbol )

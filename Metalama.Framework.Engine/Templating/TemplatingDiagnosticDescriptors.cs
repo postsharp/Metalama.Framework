@@ -485,7 +485,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Warning );
 
-        internal static readonly DiagnosticDefinition<ISymbol> AnonumousTypeDifferentScopes
+        internal static readonly DiagnosticDefinition<ISymbol> AnonymousTypeDifferentScopes
             = new(
                 "LAMA0269",
                 "Anonymous type can't can't be used as both run-time and compile-time in the same template.",
@@ -533,14 +533,6 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> SubtemplateCallWithMissingArgumentsCantBeVirtual
-            = new(
-                "LAMA0275",
-                "Template call that uses optional parameters currently can't be virtual.",
-                "Template call '{0}' currently cannot be virtual and use optional parameters at the same time.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<ISymbol> SubtemplateCantHaveRunTimeTypeParameter
             = new(
                 "LAMA0276",
@@ -570,6 +562,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0279",
                 "Abstract or empty template can't be called.",
                 "The abstract or empty template '{0}' can't be called.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string, ISymbol, ISymbol)> OverriddenParameterCantBeCompileTime
+            = new(
+                "LAMA0280",
+                "Overridden template parameter or type parameter can't be marked compile-time, because the parameter in the overridden member is not marked.",
+                "The template {0} '{1}' in '{2}' can't be marked compile-time, because the {0} in the overridden member is not marked.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol, ISymbol)> TemplateProviderTypeParameterHasToBeCompileTime
+            = new(
+                "LAMA0281",
+                "Type parameter of a template provider has to be compile-time.",
+                "The type parameter '{0}' of template provider '{1}' has to be marked compile-time.",
                 _category,
                 Error );
     }

@@ -356,14 +356,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         }
         else if ( aspectTypeSymbol.IsGenericType )
         {
-            diagnosticAdder.Report(
-                GeneralDiagnosticDescriptors.GenericAspectTypeNotSupported.CreateRoslynDiagnostic(
-                    aspectTypeSymbol.GetDiagnosticLocation(),
-                    aspectTypeSymbol ) );
-
-            aspectClass = null;
-
-            return false;
+            // This is also checked by TemplatingCodeValidator.
+            throw new AssertionFailedException( "Aspect types can't be generic." );
         }
         else
         {

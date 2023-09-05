@@ -1,3 +1,21 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0275 on `CalledTemplate(1)`: `Template call 'CalledTemplate(1)' currently cannot be virtual and use optional parameters at the same time.`
-// Error LAMA0275 on `CalledTemplate()`: `Template call 'CalledTemplate()' currently cannot be virtual and use optional parameters at the same time.`
+class TargetCode
+{
+    [Aspect]
+    void Method1()
+    {
+        global::System.Console.WriteLine("regular template");
+        global::System.Console.WriteLine($"called template i={1} j=2");
+        global::System.Console.WriteLine($"called template i={1} j=-2");
+        global::System.Console.WriteLine($"called template i={-1} j=-2");
+        return;
+    }
+    [DerivedAspect]
+    void Method2()
+    {
+        global::System.Console.WriteLine("regular template");
+        global::System.Console.WriteLine($"derived template i={1} j=2");
+        global::System.Console.WriteLine($"derived template i={1} j=-2");
+        global::System.Console.WriteLine($"derived template i={-10} j=-2");
+        return;
+    }
+}
