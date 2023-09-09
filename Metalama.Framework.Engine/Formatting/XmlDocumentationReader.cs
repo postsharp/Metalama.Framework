@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,9 +32,12 @@ namespace Metalama.Framework.Engine.Formatting
                 var documentationDocument = XDocument.Load( documentationPath );
 
                 this._members = documentationDocument.Root
-                    !.Element( "members" )
-                    !.Elements( "member" )
-                    .ToDictionary( m => m.Attribute( "name" )!.Value, m => m );
+                                    ?.Element( "members" )
+                                    ?.Elements( "member" )
+                                    .Select( m => (Member: m, Name: m.Attribute( "name" )?.Value) )
+                                    .Where( x => x.Name != null )
+                                    .ToDictionary( x => x.Name!, x => x.Member )
+                                ?? new Dictionary<string, XElement>();
             }
             else
             {
@@ -97,7 +101,13 @@ namespace Metalama.Framework.Engine.Formatting
 
                     case XElement see when see.Name == "see":
 
-                        var cref = see.Attribute( "cref" )!.Value;
+                        var cref = see.Attribute( "cref" )?.Value;
+
+                        if ( cref == null )
+                        {
+                            continue;
+                        }
+                        
                         var referencedSymbol = DocumentationCommentId.GetFirstSymbolForReferenceId( cref, compilation );
 
                         stringBuilder.Append( '\'' );
@@ -117,14 +127,14 @@ namespace Metalama.Framework.Engine.Formatting
                             {
                                 case "T":
                                     // Coverage: ignore (we should not get here because the resolution works well for types).
-                                    stringBuilder.Append( CleanUpName( parts[parts.Length - 1] ) );
+                                    stringBuilder.Append( CleanUpName( parts[^1] ) );
 
                                     break;
 
                                 default:
-                                    stringBuilder.Append( CleanUpName( parts[parts.Length - 2] ) );
+                                    stringBuilder.Append( CleanUpName( parts[^2] ) );
                                     stringBuilder.Append( '.' );
-                                    stringBuilder.Append( CleanUpName( parts[parts.Length - 1] ) );
+                                    stringBuilder.Append( CleanUpName( parts[^1] ) );
 
                                     break;
                             }
