@@ -1,44 +1,34 @@
 // Warning CS0162 on `return`: `Unreachable code detected`
-
-using System.Collections.Concurrent;
-
+// Warning CS0162 on `return`: `Unreachable code detected`
 public class SelfCachedClass
 {
-    [Cache]
-    public int Add( int a, int b )
+  [Cache]
+  public int Add(int a, int b)
+  {
     {
-        {
-            var cacheKey = $"Add({string.Join( ", ", new object[] { a, b } )})";
-
-            if (!_cache.TryGetValue( cacheKey, out var returnValue ))
-            {
-                returnValue = a + b;
-                _cache.TryAdd( cacheKey, returnValue );
-            }
-
-            return (int)returnValue;
-        }
-
-        return default;
+      var cacheKey = $"Add({string.Join(", ", new object[] { a, b })})";
+      if (!_cache.TryGetValue(cacheKey, out var returnValue))
+      {
+        returnValue = a + b;
+        _cache.TryAdd(cacheKey, returnValue);
+      }
+      return (global::System.Int32)returnValue;
     }
-
-    [CacheAndRetry]
-    public int Rmove( int a, int b )
+    return default;
+  }
+  [CacheAndRetry]
+  public int Rmove(int a, int b)
+  {
     {
-        {
-            var cacheKey = $"Rmove({string.Join( ", ", new object[] { a, b } )})";
-
-            if (!_cache.TryGetValue( cacheKey, out var returnValue ))
-            {
-                returnValue = a - b;
-                _cache.TryAdd( cacheKey, returnValue );
-            }
-
-            return (int)returnValue;
-        }
-
-        return default;
+      var cacheKey = $"Rmove({string.Join(", ", new object[] { a, b })})";
+      if (!_cache.TryGetValue(cacheKey, out var returnValue))
+      {
+        returnValue = a - b;
+        _cache.TryAdd(cacheKey, returnValue);
+      }
+      return (global::System.Int32)returnValue;
     }
-
-    private ConcurrentDictionary<string, object> _cache = (ConcurrentDictionary<string, object>)( new ConcurrentDictionary<string, object>() );
+    return default;
+  }
+  private global::System.Collections.Concurrent.ConcurrentDictionary<global::System.String, global::System.Object> _cache = (global::System.Collections.Concurrent.ConcurrentDictionary<global::System.String, global::System.Object>)(new());
 }
