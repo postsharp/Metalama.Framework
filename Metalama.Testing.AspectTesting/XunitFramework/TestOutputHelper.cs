@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -11,6 +12,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
     {
         private readonly IMessageSink _messageSink;
         private readonly ITest _test;
+        private readonly StringBuilder _stringBuilder = new();
 
         public TestOutputHelper( IMessageSink messageSink, ITest test )
         {
@@ -18,8 +20,15 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._test = test;
         }
 
-        public void WriteLine( string message ) => this._messageSink.OnMessage( new TestOutput( this._test, message + Environment.NewLine ) );
+        public void WriteLine( string message )
+        {
+            var line = message + Environment.NewLine;
+            this._messageSink.OnMessage( new TestOutput( this._test, line ) );
+            this._stringBuilder.Append( line );
+        }
 
         public void WriteLine( string format, params object[] args ) => this.WriteLine( string.Format( format, args ) );
+
+        public override string ToString() => this._stringBuilder.ToString();
     }
 }

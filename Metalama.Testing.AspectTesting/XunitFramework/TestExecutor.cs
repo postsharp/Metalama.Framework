@@ -163,7 +163,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                         testMetrics.Finished += () =>
                         {
-                            executionMessageSink.OnMessage( new TestFinished( test, testMetrics.ExecutionTime, "" ) );
+                            executionMessageSink.OnMessage( new TestFinished( test, testMetrics.ExecutionTime, logger.ToString() ) );
 
                             executionMessageSink.OnMessage(
                                 new TestCaseFinished(
