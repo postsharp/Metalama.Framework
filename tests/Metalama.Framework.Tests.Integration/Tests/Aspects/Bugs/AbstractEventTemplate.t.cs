@@ -1,15 +1,15 @@
 [DerivedAspect]
 class Target
 {
-    public event global::System.EventHandler<dynamic> IntroducedEvent
+  public event global::System.EventHandler<dynamic> IntroducedEvent
+  {
+    add
     {
-        add
-        {
-            throw new global::System.NotSupportedException();
-        }
-        remove
-        {
-            throw new global::System.NotSupportedException();
-        }
+      throw new global::System.NotSupportedException();
     }
+    remove
+    {
+      throw new global::System.NotSupportedException();
+    }
+  }
 }
