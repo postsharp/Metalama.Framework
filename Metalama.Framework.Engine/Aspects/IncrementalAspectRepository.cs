@@ -38,6 +38,11 @@ internal sealed class IncrementalAspectRepository : AspectRepository
                 MetalamaStringFormatter.Format( $"The Enhancement() method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
         }
 
+        if ( type.IsGenericType )
+        {
+            type = type.ConstructedFrom;
+        }
+
         if ( !this._compilation.PartialCompilation.Types.Contains( type ) )
         {
             if ( MetalamaExecutionContext.Current.ExecutionScenario.IsDesignTime )
