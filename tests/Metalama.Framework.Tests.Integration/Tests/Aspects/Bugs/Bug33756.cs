@@ -1,3 +1,8 @@
+#if TEST_OPTIONS
+// @IgnoredDiagnostic(CS0162)
+// @IgnoredDiagnostic(CS8605)
+#endif
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -5,10 +10,11 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33756;
 
+
 public class CacheAttribute : OverrideMethodAspect
 {
     [Introduce( WhenExists = OverrideStrategy.Ignore )]
-    private ConcurrentDictionary<string, object> _cache = new();
+    private ConcurrentDictionary<string, object?> _cache = new();
 
     public override dynamic? OverrideMethod()
     {
