@@ -1,18 +1,25 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
 using System.IO;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
     internal sealed class TestOutputHelper : ITestOutputHelper
     {
-        private StringWriter StringWriter { get; } = new();
+        private readonly IMessageSink _messageSink;
+        private readonly ITest _test;
 
-        public void WriteLine( string message ) => this.StringWriter.WriteLine( message );
+        public TestOutputHelper( IMessageSink messageSink, ITest test )
+        {
+            this._messageSink = messageSink;
+            this._test = test;
+        }
 
-        public void WriteLine( string format, params object[] args ) => this.StringWriter.WriteLine( format, args );
+        public void WriteLine( string message ) => this._messageSink.OnMessage( new TestOutput( this._test, message + Environment.NewLine ) );
 
-        public override string ToString() => this.StringWriter.ToString();
+        public void WriteLine( string format, params object[] args ) => this.WriteLine( string.Format( format, args ) );
     }
 }

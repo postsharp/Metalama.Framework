@@ -152,7 +152,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                     {
                         var testMetrics = new Metrics( typeMetrics );
                         var test = new Test( testCase );
-                        var logger = new TestOutputHelper();
+                        var logger = new TestOutputHelper( executionMessageSink, test );
 
                         testMetrics.Started += () =>
                         {
@@ -163,7 +163,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                         testMetrics.Finished += () =>
                         {
-                            executionMessageSink.OnMessage( new TestFinished( test, testMetrics.ExecutionTime, logger.ToString() ) );
+                            executionMessageSink.OnMessage( new TestFinished( test, testMetrics.ExecutionTime, "" ) );
 
                             executionMessageSink.OnMessage(
                                 new TestCaseFinished(
@@ -246,8 +246,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                 var testOptions = new TestContextOptions
                 {
-                    References = projectReferences.MetadataReferences,
-                    RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
+                    References = projectReferences.MetadataReferences, RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
                 };
 
                 if ( testInput.IsSkipped )
