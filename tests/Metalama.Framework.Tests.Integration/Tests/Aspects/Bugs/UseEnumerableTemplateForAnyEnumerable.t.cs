@@ -1,12 +1,12 @@
 class EmptyOverrideFieldOrPropertyExample
 {
-    [Aspect]
-    IEnumerable<int> M()
+  [Aspect]
+  IEnumerable<int> M()
+  {
+    global::System.Console.WriteLine("enumerable");
+    return new[]
     {
-        global::System.Console.WriteLine("enumerable");
-        return new[]
-        {
-          42
-        };
-    }
+      42
+    };
+  }
 }
