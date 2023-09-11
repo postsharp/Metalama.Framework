@@ -11,12 +11,15 @@ using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Elfie.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -62,8 +65,10 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly TemplateProjectManifestBuilder _compileTimeManifestBuilder;
 
             private Context _currentContext;
+            private readonly SafeSymbolComparer _symbolEqualityComparer;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
+            private Dictionary<ISymbol, HashSet<ISymbol>> _currentTypeImplicitInterfaceImplementations;
 
             public bool Success { get; private set; } = true;
 
@@ -94,17 +99,17 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
-                var symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
+                this._symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
 
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
                         x => x.Type,
                         x => x,
-                        symbolEqualityComparer );
+                        this._symbolEqualityComparer );
 
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
-                        .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
+                        .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
@@ -419,6 +424,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
                 this._currentTypeName = symbol.Name;
+                this._currentTypeImplicitInterfaceImplementations = this.GetImplicitlyImplementedInterfaceMembers( symbol);
 
                 // Check the diagnostics in this type.
                 // At compile time, any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
@@ -605,6 +611,41 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 return transformedNode;
+            }
+
+            private Dictionary<ISymbol, HashSet<ISymbol>> GetImplicitlyImplementedInterfaceMembers( INamedTypeSymbol type )
+            {
+                var implicitInterfaceMembers = new Dictionary<ISymbol, HashSet<ISymbol>>();
+
+                foreach (var interfaceType in type.AllInterfaces)
+                {
+                    var interfaceScope = this.SymbolClassifier.GetTemplatingScope( interfaceType );
+
+                    if (interfaceScope == TemplatingScope.RunTimeOnly )
+                    { 
+                        // Do not generate explicit implementation for runtime interfaces.
+                        continue; 
+                    }
+
+                    foreach (var interfaceMember in interfaceType.GetMembers())
+                    {
+                        var interfaceMemberImplementation = type.FindImplementationForInterfaceMember( interfaceMember ).AssertNotNull();
+
+                        if ( this._symbolEqualityComparer.Equals(interfaceMemberImplementation.ContainingType, type)
+                            && !interfaceMemberImplementation.IsExplicitInterfaceMemberImplementation())
+                        {
+                            // The interface member is implemented in the current type.
+                            if (!implicitInterfaceMembers.TryGetValue(interfaceMemberImplementation, out var implementedInterfaceMembers))
+                            {
+                                implicitInterfaceMembers[interfaceMemberImplementation] = implementedInterfaceMembers = new HashSet<ISymbol>(this._symbolEqualityComparer);
+                            }
+
+                            implementedInterfaceMembers.Add( interfaceMember );
+                        }
+                    }
+                }
+
+                return implicitInterfaceMembers;
             }
 
             private bool CheckTemplateName( ISymbol symbol )
@@ -867,6 +908,62 @@ namespace Metalama.Framework.Engine.CompileTime
                                                             null,
                                                             null )
                                                         .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
+
+                            if ( this._currentTypeImplicitInterfaceImplementations.TryGetValue( propertySymbol, out var implicitlyImplementedInterfaceMembers ) )
+                            {
+                                foreach ( var interfaceProperty in implicitlyImplementedInterfaceMembers.OfType<IPropertySymbol>() )
+                                {
+                                    if (interfaceProperty.SetMethod == null || !interfaceProperty.SetMethod.IsInitOnly)
+                                    {
+                                        continue;
+                                    }
+
+                                    // If the property implicitly implements any interface property with init accessor, we need to add explicit implementation because
+                                    // changing it to ordinary setter would cause an error.
+                                    yield return 
+                                        PropertyDeclaration(
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            rewrittenProperty.Type,
+                                            ExplicitInterfaceSpecifier(
+                                                (NameSyntax) this._syntaxGenerationContext.SyntaxGenerator.Type( interfaceProperty.ContainingType ) ),
+                                            rewrittenProperty.Identifier,
+                                            AccessorList(
+                                                List(
+                                                    new[]
+                                                    {
+                                                        interfaceProperty.GetMethod != null
+                                                        ? AccessorDeclaration(
+                                                            SyntaxKind.GetAccessorDeclaration,
+                                                            List<AttributeListSyntax>(),
+                                                            TokenList(),
+                                                            Token (SyntaxKind.GetKeyword),
+                                                            null,
+                                                            ArrowExpressionClause(
+                                                                MemberAccessExpression(
+                                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                                    ThisExpression(),
+                                                                    IdentifierName( interfaceProperty.Name ) ) ),
+                                                            Token(SyntaxKind.SemicolonToken) )
+                                                        : null,
+                                                        AccessorDeclaration(
+                                                            SyntaxKind.InitAccessorDeclaration,
+                                                            List<AttributeListSyntax>(),
+                                                            TokenList(),
+                                                            Token (SyntaxKind.InitKeyword),
+                                                            null,
+                                                            ArrowExpressionClause(
+                                                                AssignmentExpression(
+                                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                                    MemberAccessExpression(
+                                                                        SyntaxKind.SimpleMemberAccessExpression,
+                                                                        ThisExpression(),
+                                                                        IdentifierName( interfaceProperty.Name ) ),
+                                                                    IdentifierName( "value" ) ) ),
+                                                            Token(SyntaxKind.SemicolonToken) ),
+                                                    }.WhereNotNull() ) ) );
+                                }
+                            }
                         }
 
                         yield return rewritten;

@@ -7,11 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.Value
 [RunTimeOrCompileTime]
 public struct ValueType : ICompileTimeSerializable
 {
-    public int Value { get; }
+    public int Value { get; set; }
+
+    public int ValueGetOnly { get; }
+
+    public int ValueInitOnly { get; init; }
 
     public ValueType(int value)
     {
         this.Value = value;
+        this.ValueGetOnly = value;
+        this.ValueInitOnly = value;
     }
 }
 
@@ -28,9 +34,10 @@ public class TestAspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         Console.WriteLine(meta.CompileTime(SerializedValue.Value));
+        Console.WriteLine(meta.CompileTime(SerializedValue.ValueGetOnly));
+        Console.WriteLine(meta.CompileTime(SerializedValue.ValueInitOnly));
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass

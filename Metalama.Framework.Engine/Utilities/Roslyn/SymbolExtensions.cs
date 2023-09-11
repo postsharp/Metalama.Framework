@@ -311,5 +311,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             return false;
         }
+
+        public static bool IsExplicitInterfaceMemberImplementation(this ISymbol? symbol )
+        {
+            return symbol switch
+            {
+                IMethodSymbol method => method.ExplicitInterfaceImplementations.Length > 0,
+                IPropertySymbol property => property.ExplicitInterfaceImplementations.Length > 0,
+                IEventSymbol @event => @event.ExplicitInterfaceImplementations.Length > 0,
+                _ => false,
+            };
+        }
     }
 }
