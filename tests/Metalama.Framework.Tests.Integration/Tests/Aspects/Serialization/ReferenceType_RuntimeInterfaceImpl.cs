@@ -1,4 +1,8 @@
-﻿using Metalama.Framework.Aspects;
+﻿#if TEST_OPTIONS
+// @Skipped(#33758)
+#endif
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 
