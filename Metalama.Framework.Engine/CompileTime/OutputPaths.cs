@@ -8,10 +8,10 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal sealed record OutputPaths( string BaseDirectory, string CompileTimeAssemblyName, int? AlternateOrdinal )
 {
     [Memo]
-    public string Directory =>
-        this.AlternateOrdinal == null
-        ? this.BaseDirectory
-        : $"{this.BaseDirectory}.{this.AlternateOrdinal}";
+    public string Directory
+        => this.AlternateOrdinal == null
+            ? this.BaseDirectory
+            : $"{this.BaseDirectory}.{this.AlternateOrdinal}";
 
     [Memo]
     public string Pe => Path.Combine( this.Directory, this.CompileTimeAssemblyName + ".dll" );
@@ -22,5 +22,5 @@ internal sealed record OutputPaths( string BaseDirectory, string CompileTimeAsse
     [Memo]
     public string Manifest => Path.Combine( this.Directory, "manifest.json" );
 
-    public OutputPaths WithAlternateOrdinal( int? alternateOrdinal ) => new OutputPaths(this.BaseDirectory, this.CompileTimeAssemblyName, alternateOrdinal );
+    public OutputPaths WithAlternateOrdinal( int? alternateOrdinal ) => new OutputPaths( this.BaseDirectory, this.CompileTimeAssemblyName, alternateOrdinal );
 }

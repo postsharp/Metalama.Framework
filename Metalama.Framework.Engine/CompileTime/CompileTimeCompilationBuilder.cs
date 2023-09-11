@@ -157,7 +157,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         // We include the MVID of the current module in the hash instead of for instance the version number.
         // The benefit is to avoid conflicts in our development environments where we rebuild without changing the version number.
-        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has differents
+        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has different
         // builds, one for each platform.
         h.Update( _buildId );
         this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
@@ -779,6 +779,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found in memory cache." );
             wasInconsistent = false;
+            
             return true;
         }
 
@@ -807,6 +808,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._cache.Add( projectHash, project );
 
         wasInconsistent = false;
+        
         return true;
     }
 
@@ -834,17 +836,20 @@ internal sealed partial class CompileTimeCompilationBuilder
             // Here we presume that other files (that are not checked and are cached) are never locked and never deleted without PE or manifest missing.
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Directory}' inconsistent, will attempt an alternate." );
             wasInconsistent = true;
+            
             return false;
         }
         else if ( !peExists || !manifestExists )
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): Cache miss." );
             wasInconsistent = false;
+            
             return false;
         }
 
         this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): found on disk." );
         wasInconsistent = false;
+        
         return true;
     }
 
@@ -901,6 +906,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             {
                 // The primary directory was not present, no need to enter lock.
                 project = null;
+                
                 return false;
             }
 
@@ -910,13 +916,13 @@ internal sealed partial class CompileTimeCompilationBuilder
                 while ( alternateDirectoryOrdinal < _inconsistentFallbackLimit )
                 {
                     if ( this.TryGetCompileTimeProjectFromCache(
-                        runTimeCompilation,
-                        referencedProjects,
-                        outputPaths,
-                        projectHash,
-                        out project,
-                        out wasInconsistent,
-                        null ) )
+                            runTimeCompilation,
+                            referencedProjects,
+                            outputPaths,
+                            projectHash,
+                            out project,
+                            out wasInconsistent,
+                            null ) )
                     {
                         ReportCachedDiagnostics( project );
 
@@ -933,6 +939,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     {
                         // The cache directory was not present, we can return.
                         project = null;
+                        
                         return false;
                     }
                 }
@@ -1209,7 +1216,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                         var emitResult = this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
 
-                        if (emitResult)
+                        if ( emitResult )
                         {
                             // If successful, we will add the manifest which is not written by TryEmit.
                             using ( var stream = File.OpenWrite( outputPaths.Manifest ) )
