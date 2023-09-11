@@ -3,7 +3,6 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Workspaces

@@ -475,7 +475,7 @@ namespace Metalama.Framework.Engine.Templating
             return compiledTemplateMethodInfo.Invoke( context.TemplateProvider.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
-        public BlockSyntax? InvokeTemplate( string templateName, object? templateInstanceOrType = null, object? args = null )
+        public BlockSyntax InvokeTemplate( string templateName, object? templateInstanceOrType = null, object? args = null )
         {
             return this.InvokeTemplate( templateName, GetTemplateProvider( templateInstanceOrType ), this._objectReaderFactory.GetReader( args ) );
         }

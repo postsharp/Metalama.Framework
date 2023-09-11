@@ -54,7 +54,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
-    public bool IncludeDerivedTypes { get; private set; }
+    public bool IncludeDerivedTypes { get; }
 
     public object Object { get; private set; }
 
@@ -62,7 +62,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
     public string? MethodName { get; private set; }
 
-    internal string DiagnosticSourceDescription { get; private set; }
+    internal string DiagnosticSourceDescription { get; }
 
     internal ValidatorDriver GetReferenceValidatorDriver()
     {

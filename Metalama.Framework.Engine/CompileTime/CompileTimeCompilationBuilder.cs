@@ -155,7 +155,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         // We include the MVID of the current module in the hash instead of for instance the version number.
         // The benefit is to avoid conflicts in our development environments where we rebuild without changing the version number.
-        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has differents
+        // The cost is that there will be redundant caches of compile-time projects in production because the exact same version has different
         // builds, one for each platform.
         h.Update( _buildId );
         this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
