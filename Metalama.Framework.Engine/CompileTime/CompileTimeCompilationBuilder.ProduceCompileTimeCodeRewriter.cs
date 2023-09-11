@@ -619,14 +619,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach (var interfaceType in type.AllInterfaces)
                 {
-                    var interfaceScope = this.SymbolClassifier.GetTemplatingScope( interfaceType );
-
-                    if (interfaceScope == TemplatingScope.RunTimeOnly )
-                    { 
-                        // Do not generate explicit implementation for runtime interfaces.
-                        continue; 
-                    }
-
                     foreach (var interfaceMember in interfaceType.GetMembers())
                     {
                         var interfaceMemberImplementation = type.FindImplementationForInterfaceMember( interfaceMember ).AssertNotNull();
@@ -913,6 +905,14 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 foreach ( var interfaceProperty in implicitlyImplementedInterfaceMembers.OfType<IPropertySymbol>() )
                                 {
+                                    var interfaceScope = this.SymbolClassifier.GetTemplatingScope( interfaceProperty.ContainingType );
+
+                                    if ( interfaceScope == TemplatingScope.RunTimeOnly )
+                                    {
+                                        // Do not generate explicit implementation for runtime interfaces.
+                                        continue;
+                                    }
+
                                     if (interfaceProperty.SetMethod == null || !interfaceProperty.SetMethod.IsInitOnly)
                                     {
                                         continue;
