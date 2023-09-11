@@ -510,7 +510,7 @@ namespace Metalama.Framework.Engine.Templating
             return (templateClass, templateMember);
         }
 
-        public ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
+        private ITemplateSyntaxFactory ForTemplate( string templateName, TemplateProvider templateProvider )
         {
             var templateMember = this.GetTemplateDescription( templateName, templateProvider ).TemplateMember;
 

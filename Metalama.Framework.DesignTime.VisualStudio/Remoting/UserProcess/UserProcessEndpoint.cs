@@ -93,6 +93,7 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
         return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }
 
+    // ReSharper disable once UnusedParameter.Global
     public Task<ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>> GetCompileTimeErrorsAsync( CancellationToken cancellationToken )
         => Task.FromResult( this._compileTimeErrorsPerProject );
 

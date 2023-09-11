@@ -17,7 +17,7 @@ public static class RefExtensions
 
     // ReSharper disable once IdentifierTypo
     [return: NotNullIfNotNull( nameof(reference) )]
-    public static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
+    internal static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
         where TFrom : class, ICompilationElement
         where TTo : class, ICompilationElement
         => reference switch

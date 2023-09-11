@@ -54,7 +54,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
-    public bool IncludeDerivedTypes { get; }
+    internal bool IncludeDerivedTypes { get; }
 
     public object Object { get; private set; }
 
