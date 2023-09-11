@@ -16,6 +16,7 @@ internal sealed record TestAssemblyMetadata(
     bool MustLaunchDebugger,
     ImmutableArray<TestAssemblyReference> AssemblyReferences,
     string? GlobalUsingsFile,    
+    
     // ReSharper disable once NotAccessedPositionalProperty.Global
     TestFrameworkLicenseStatus License,
     ImmutableArray<string> IgnoredWarnings )
