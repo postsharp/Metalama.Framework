@@ -4,7 +4,7 @@ using Metalama.Framework;
 using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug18911
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug18911
 {
  public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
     {

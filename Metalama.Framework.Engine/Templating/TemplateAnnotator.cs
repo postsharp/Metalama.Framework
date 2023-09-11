@@ -1070,7 +1070,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     node.ToString() );
             }
 
-            if ( symbol is IMethodSymbol { TypeParameters: var typeParameters } && typeParameters.Any( tp => this.GetSymbolScope( tp ) == TemplatingScope.RunTimeOnly ) )
+            if ( symbol is IMethodSymbol { TypeParameters: var typeParameters }
+                 && typeParameters.Any( tp => this.GetSymbolScope( tp ) == TemplatingScope.RunTimeOnly ) )
             {
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.SubtemplateCantHaveRunTimeTypeParameter,
@@ -1111,7 +1112,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 var isRunTimeParameterOfSubtemplate =
                     parameter != null &&
                     templateInfo.CanBeReferencedAsSubtemplate &&
-                    this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+                    this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope()
+                    != TemplatingScope.CompileTimeOnly;
 
                 if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || isDynamicParameter )
                 {
@@ -1142,8 +1144,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 else if ( isRunTimeParameterOfSubtemplate )
                 {
                     using ( this.WithScopeContext(
-                               this._currentScopeContext.RunTimePreferred(
-                                   $"argument of the run-time parameter '{parameter!.Name}' of a called template" ) ) )
+                               this._currentScopeContext.RunTimePreferred( $"argument of the run-time parameter '{parameter!.Name}' of a called template" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
                     }
@@ -1322,7 +1323,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( node.AwaitKeyword.IsKind( SyntaxKind.None ) )
         {
-            forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( preferCompileTime: true ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            forEachScope = this.GetNodeScope( annotatedExpression )
+                .GetExpressionValueScope( preferCompileTime: true )
+                .ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+
             reason = $"foreach ( {node.Type} {node.Identifier} in ... )";
         }
         else
@@ -1767,7 +1771,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                     this.RequireScope( node, classifierScope.GetExpressionExecutionScope(), TemplatingScope.RunTimeOnly, "a template local function" );
                 }
-                else
+                else if ( symbol.ContainingSymbol is not IMethodSymbol { MethodKind: MethodKind.LambdaMethod } )
                 {
                     this._templateProjectManifestBuilder?.AddOrUpdateSymbol( symbol, scope );
                 }
@@ -2163,16 +2167,17 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         return ForStatement(
-            node.ForKeyword,
-            node.OpenParenToken,
-            transformedVariableDeclaration,
-            SeparatedList( transformedInitializers ),
-            node.FirstSemicolonToken,
-            transformedCondition,
-            node.SecondSemicolonToken,
-            SeparatedList( transformedIncrementors ),
-            node.CloseParenToken,
-            transformedStatement );
+                node.ForKeyword,
+                node.OpenParenToken,
+                transformedVariableDeclaration,
+                SeparatedList( transformedInitializers ),
+                node.FirstSemicolonToken,
+                transformedCondition,
+                node.SecondSemicolonToken,
+                SeparatedList( transformedIncrementors ),
+                node.CloseParenToken,
+                transformedStatement )
+            .AddTargetScopeAnnotation( TemplatingScope.RunTimeOnly );
     }
 
     public override SyntaxNode VisitWhileStatement( WhileStatementSyntax node )
@@ -2473,7 +2478,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         string scopeReason;
 
         if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsNodeOfDynamicType( annotatedExpression ))
-             || expressionScope.GetExpressionValueScope( preferCompileTime: true ).ReplaceIndeterminate( TemplatingScope.CompileTimeOnly ) != TemplatingScope.CompileTimeOnly )
+             || expressionScope.GetExpressionValueScope( preferCompileTime: true ).ReplaceIndeterminate( TemplatingScope.CompileTimeOnly )
+             != TemplatingScope.CompileTimeOnly )
         {
             switchScope = TemplatingScope.RunTimeOnly;
             scopeReason = $"the run-time 'switch( {node.Expression} )'";
@@ -2515,7 +2521,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                transformedStatements = section.Statements.SelectAsArray( s => this.Visit( s ).ReplaceScopeAnnotationIfUndetermined( TemplatingScope.CompileTimeOnly ) );
+                transformedStatements =
+                    section.Statements.SelectAsArray( s => this.Visit( s ).ReplaceScopeAnnotationIfUndetermined( TemplatingScope.CompileTimeOnly ) );
             }
 
             transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( switchScope );

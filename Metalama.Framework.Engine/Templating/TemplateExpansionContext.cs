@@ -71,7 +71,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             return false;
         }
 
-        declaration = declaration.ForCompilation( metaApi.Compilation );
+        declaration = declaration.ForCompilation( metaApi.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
         if ( metaApi.Declaration.Equals( declaration ) || metaApi.Declaration.ContainingDeclaration?.Equals( declaration ) == true )
         {

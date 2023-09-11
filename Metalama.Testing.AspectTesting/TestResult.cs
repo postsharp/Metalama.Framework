@@ -277,7 +277,7 @@ internal sealed class TestResult : IDisposable
                             outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().ContainsOrdinal( "AspectOrder" ) ) ) );
                 }
 
-                // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
+                // Find nodes annotated with // <target> or with a comment containing <target>. If there is none, the test output is the whole tree
                 // passed to this method.
 
                 var outputMembers =
@@ -291,11 +291,7 @@ internal sealed class TestResult : IDisposable
                         .Cast<SyntaxNode>()
                         .ToArray();
 
-                outputMembers = outputMembers switch
-                {
-                    { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },
-                    _ => outputMembers
-                };
+                outputMembers = outputMembers is [] ? new SyntaxNode[] { outputSyntaxRoot } : outputMembers;
 
                 for ( var i = 0; i < outputMembers.Length; i++ )
                 {

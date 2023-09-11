@@ -1,7 +1,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeDelegate
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.CompileTimeDelegate
 {
     internal class Aspect : MethodAspect
     {
