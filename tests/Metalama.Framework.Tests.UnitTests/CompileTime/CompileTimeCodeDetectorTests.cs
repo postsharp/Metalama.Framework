@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var compilation = TestCompilationFactory.CreateCSharpCompilation( @"using Metalama.Framework; namespace X {class Y {} }" );
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
-        
+
         [Fact]
         public void TopLevelUsingMetalamaFrameworkAspects()
         {

@@ -160,7 +160,7 @@ namespace {0}
                     $"[{aspectNamespace}.Aspect{i}]" );
 #pragma warning restore SA1114 // Parameter list should follow declaration
             }
-            
+
             for ( var i = 1; i <= numberOfContracts; i++ )
             {
                 sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, contractPrototype, aspectNamespace, i ) );
@@ -172,14 +172,19 @@ namespace {0}
                     $"[{aspectNamespace}.Contract{i}]" );
 #pragma warning restore SA1114 // Parameter list should follow declaration
 
-                if (i == numberOfContracts)
+                if ( i == numberOfContracts )
                 {
                     contractsApplicationBuilder.Append( " " );
                 }
             }
 
             sourceCodeBuilder.AppendLine(
-                string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, aspectApplicationBuilder.ToString(), contractsApplicationBuilder.ToString() ) );
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    targetPrototype,
+                    targetNamespace,
+                    aspectApplicationBuilder.ToString(),
+                    contractsApplicationBuilder.ToString() ) );
 
             var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace );
 

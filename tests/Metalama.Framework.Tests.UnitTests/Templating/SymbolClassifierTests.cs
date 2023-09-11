@@ -31,7 +31,12 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null, TestContextOptions? contextOptions = null )
+        private void AssertScope(
+            Compilation compilation,
+            ISymbol symbol,
+            TemplatingScope expectedScope,
+            IDiagnosticAdder? diagnosticAdder = null,
+            TestContextOptions? contextOptions = null )
         {
             using var testContext = this.CreateTestContext( contextOptions );
 
@@ -449,7 +454,9 @@ class C  {
             var options = new TestContextOptions() { RoslynIsCompileTimeOnly = roslynIsCompileTime };
             using var testContext = this.CreateTestContext( options );
 
-            var additionalReferences = new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsEnumerable( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+            var additionalReferences =
+                new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsEnumerable( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+
             var compilation = testContext.CreateCompilationModel( code, additionalReferences: additionalReferences );
 
             var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
