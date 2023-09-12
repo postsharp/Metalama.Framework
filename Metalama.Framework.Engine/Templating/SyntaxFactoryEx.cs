@@ -151,8 +151,9 @@ internal static partial class SyntaxFactoryEx
             ObjectCreationExpressionSyntax => false,
             ArrayCreationExpressionSyntax => false,
             PostfixUnaryExpressionSyntax => false,
+
             // The syntax (T)-x is ambiguous and interpreted as binary minus, not cast of unary minus.
-            PrefixUnaryExpressionSyntax { RawKind: not (int)SyntaxKind.UnaryMinusExpression } => false,
+            PrefixUnaryExpressionSyntax { RawKind: not (int) SyntaxKind.UnaryMinusExpression } => false,
             TupleExpressionSyntax => false,
             ThisExpressionSyntax => false,
             _ => true

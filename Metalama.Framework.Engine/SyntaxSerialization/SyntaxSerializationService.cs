@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         private TypeSerializer TypeSerializer { get; }
 
-        internal CompileTimeMethodInfoSerializer CompileTimeMethodInfoSerializer { get; }
+        private CompileTimeMethodInfoSerializer CompileTimeMethodInfoSerializer { get; }
 
         private CompileTimePropertyInfoSerializer CompileTimePropertyInfoSerializer { get; }
 

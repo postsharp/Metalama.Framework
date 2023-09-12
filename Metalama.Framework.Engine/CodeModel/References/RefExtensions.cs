@@ -15,8 +15,9 @@ public static class RefExtensions
     public static SyntaxTree? GetPrimarySyntaxTree( this IRef<IDeclaration> reference, CompilationContext compilationContext )
         => ((IRefImpl) reference).GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
 
+    // ReSharper disable once IdentifierTypo
     [return: NotNullIfNotNull( nameof(reference) )]
-    public static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
+    internal static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
         where TFrom : class, ICompilationElement
         where TTo : class, ICompilationElement
         => reference switch
@@ -24,6 +25,6 @@ public static class RefExtensions
             null => null,
             IRef<TTo> iref => iref,
             Ref<TFrom> @ref => @ref.As<TTo>(),
-            _ => throw new InvalidOperationException( $"Cannot cast {reference.GetType()} to {typeof( IRef<TTo> )}." )
+            _ => throw new InvalidOperationException( $"Cannot cast {reference.GetType()} to {typeof(IRef<TTo>)}." )
         };
 }

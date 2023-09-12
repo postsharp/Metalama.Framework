@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             // a non-template context e.g. a unit test or LinqPad.
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
                 ?? member.GetCompilationModel().CompilationContext.DefaultSyntaxGenerationContext;
+
             this.SerializationContext = new( member.GetCompilationModel(), this.GenerationContext );
 
             this._order = orderOptions switch

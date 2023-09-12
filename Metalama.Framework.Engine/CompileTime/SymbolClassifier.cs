@@ -190,6 +190,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return associatedTemplateInfo;
             }
 
+            // ReSharper disable once PossibleUnintendedReferenceComparison
             if ( symbol.OriginalDefinition != symbol
                  && this.GetTemplateInfo( symbol.OriginalDefinition, isInherited ) is { IsNone: false } originalDefinitionTemplateInfo )
             {

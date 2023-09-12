@@ -63,29 +63,29 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         }
 
                         result = InvocationExpression(
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        typeCreation,
-                                        IdentifierName( "GetProperty" ) ) )
-                                .AddArgumentListArguments(
-                                    Argument(
-                                        LiteralExpression(
-                                            SyntaxKind.StringLiteralExpression,
-                                            Literal( indexer.GetSymbol().AssertNotNull().MetadataName ) ) ),
-                                    Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ),
-                                    Argument( SyntaxFactoryEx.Null ), // binder
-                                    Argument( returnTypeCreation ),
-                                    Argument(
-                                        ArrayCreationExpression(
-                                                ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
-                                                    .WithRankSpecifiers(
-                                                        SingletonList(
-                                                            ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
-                                            .WithInitializer(
-                                                InitializerExpression(
-                                                    SyntaxKind.ArrayInitializerExpression,
-                                                    SeparatedList( parameterTypes ) ) ) ),
-                                    Argument( SyntaxFactoryEx.Null ) ); // modifiers
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    typeCreation,
+                                    IdentifierName( "GetProperty" ) ) )
+                            .AddArgumentListArguments(
+                                Argument(
+                                    LiteralExpression(
+                                        SyntaxKind.StringLiteralExpression,
+                                        Literal( indexer.GetSymbol().AssertNotNull().MetadataName ) ) ),
+                                Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ),
+                                Argument( SyntaxFactoryEx.Null ), // binder
+                                Argument( returnTypeCreation ),
+                                Argument(
+                                    ArrayCreationExpression(
+                                            ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
+                                                .WithRankSpecifiers(
+                                                    SingletonList(
+                                                        ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
+                                        .WithInitializer(
+                                            InitializerExpression(
+                                                SyntaxKind.ArrayInitializerExpression,
+                                                SeparatedList( parameterTypes ) ) ) ),
+                                Argument( SyntaxFactoryEx.Null ) ); // modifiers
 
                         break;
                     }

@@ -19,5 +19,5 @@ internal sealed class StandaloneAttributeData : IAttributeData
 
     public ImmutableArray<TypedConstant> ConstructorArguments { get; init; } = ImmutableArray<TypedConstant>.Empty;
 
-    public INamedArgumentList NamedArguments { get; init; } = NamedArgumentList.Empty;
+    public INamedArgumentList NamedArguments { get; } = NamedArgumentList.Empty;
 }

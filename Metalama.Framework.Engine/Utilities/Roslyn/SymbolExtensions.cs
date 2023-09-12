@@ -283,33 +283,5 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 Name: "ConfigureAwait",
                 ContainingType: var containingType
             } && containingType.ConstructedFrom.GetReflectionFullName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
-
-        public static bool HasInheritedAttribute( this INamedTypeSymbol type, INamedTypeSymbol? attribute )
-        {
-            if ( attribute == null )
-            {
-                return false;
-            }
-
-            if ( type.GetAttributes().Any( a => attribute.Equals( a.AttributeClass ) ) )
-            {
-                return true;
-            }
-
-            if ( type.BaseType?.HasInheritedAttribute( attribute ) == true )
-            {
-                return true;
-            }
-
-            foreach ( var @interface in type.Interfaces )
-            {
-                if ( @interface.HasInheritedAttribute( attribute ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

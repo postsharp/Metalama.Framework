@@ -485,7 +485,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Warning );
 
-        internal static readonly DiagnosticDefinition<ISymbol> AnonumousTypeDifferentScopes
+        internal static readonly DiagnosticDefinition<ISymbol> AnonymousTypeDifferentScopes
             = new(
                 "LAMA0269",
                 "Anonymous type can't can't be used as both run-time and compile-time in the same template.",
