@@ -27,6 +27,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._stringBuilder.Append( line );
         }
 
+        // ReSharper disable once RedundantStringFormatCall
         public void WriteLine( string format, params object[] args ) => this.WriteLine( string.Format( CultureInfo.InvariantCulture, format, args ) );
 
         public override string ToString() => this._stringBuilder.ToString();

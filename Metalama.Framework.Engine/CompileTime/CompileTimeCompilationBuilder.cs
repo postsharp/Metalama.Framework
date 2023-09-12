@@ -63,7 +63,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     {
         const string prefix = "_Resources_.";
 
-        var assembly = typeof( CompileTimeCompilationBuilder ).Assembly;
+        var assembly = typeof(CompileTimeCompilationBuilder).Assembly;
 
         // Weirdly enough the assembly prefix of the resource name is not constant; it may or may not include the Roslyn version
         // number.
@@ -88,7 +88,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         return files;
     }
 
-    private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof( CompileTimeCompilationBuilder ).Assembly ).ModuleId;
+    private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
     private readonly ClassifyingCompilationContextFactory _compilationContextFactory;
     private readonly ITempFileManager _tempFileManager;
 
@@ -1085,7 +1085,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                                    .ToList();
+                            .ToList();
 
                         var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )

@@ -98,8 +98,8 @@ namespace Metalama.Testing.UnitTesting
                 : null;
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
-            _ = typeof( DynamicAttribute ).Assembly;
-            _ = typeof( Console ).Assembly;
+            _ = typeof(DynamicAttribute).Assembly;
+            _ = typeof(Console).Assembly;
 #if NETFRAMEWORK
             _ = Assembly.Load( "System.Reflection, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" );
 #endif
