@@ -223,8 +223,7 @@ namespace Metalama.SourceTransformer
                 return result;
             }
 
-
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
                 var parentFieldsToAdd = this._fieldsToAdd;
                 this._fieldsToAdd = new List<FieldDeclarationSyntax>();
