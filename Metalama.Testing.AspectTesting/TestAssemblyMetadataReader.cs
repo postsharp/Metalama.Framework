@@ -100,6 +100,7 @@ namespace Metalama.Testing.AspectTesting
                 GetParserSymbols(),
                 GetTargetFramework(),
                 GetMustLaunchDebugger(),
+                GetAssemblyReferences( projectDirectory, "ReferenceAssemblyList" ),
                 GetAssemblyReferences( projectDirectory, "AnalyzerAssemblyList" ),
                 GetGlobalUsingsFile(),
                 GetLicense(),
