@@ -61,27 +61,6 @@ namespace Metalama.Framework.Engine.Templating
                 cancellationToken );
         }
 
-        public static void Validate(
-            ProjectServiceProvider serviceProvider,
-            Compilation compilation,
-            SemanticModel semanticModel,
-            Action<Diagnostic> reportDiagnostic,
-            bool reportCompileTimeTreeOutdatedError,
-            bool isDesignTime,
-            CancellationToken cancellationToken )
-        {
-            var compilationContext = serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation );
-
-            ValidateCoreAndHandleExceptions(
-                serviceProvider,
-                semanticModel,
-                reportDiagnostic,
-                reportCompileTimeTreeOutdatedError,
-                isDesignTime,
-                compilationContext,
-                cancellationToken );
-        }
-
         private static void ValidateCoreAndHandleExceptions(
             ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,

@@ -52,7 +52,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );
 
     [Memo]
-    public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
+    internal SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
     [Memo]
     public SafeSymbolComparer SymbolComparer => new( this );

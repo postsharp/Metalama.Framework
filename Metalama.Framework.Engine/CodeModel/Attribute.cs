@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
-        public ImmutableArray<SourceReference> Sources { get; set; }
+        public ImmutableArray<SourceReference> Sources => throw new NotImplementedException( "Sources property is not yet implemented for IAttribute." );
 
         public ICompilation Compilation => this.Constructor.Compilation;
 

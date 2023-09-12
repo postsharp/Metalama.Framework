@@ -338,7 +338,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private AnonymousObjectCreationExpressionSyntax AddAnonymousObjectNames( AnonymousObjectCreationExpressionSyntax node )
     {
         var anonymousType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node )
-            ?? throw new AssertionFailedException( $"Cannot get the type of anonymous type '{node}'." );
+                            ?? throw new AssertionFailedException( $"Cannot get the type of anonymous type '{node}'." );
 
         var transformedInitializers = new AnonymousObjectMemberDeclaratorSyntax[node.Initializers.Count];
 
@@ -1243,6 +1243,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         default:
                             transformedExpression = this.CreateRunTimeExpression( transformedExpression );
+                            
                             break;
                     }
 

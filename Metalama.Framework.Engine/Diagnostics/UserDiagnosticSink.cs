@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         internal int ErrorCount => this._errorCount;
 
-        public bool IsEmpty
+        internal bool IsEmpty
         {
             get
             {
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
         }
 
-        public void Reset()
+        internal void Reset()
         {
             this._diagnostics = null;
             this._suppressions = null;

@@ -26,12 +26,16 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             {
                 case IMethodBase method:
                     memberExpression = CompileTimeMethodInfoSerializer.SerializeMethodBase( method, serializationContext );
-                    getParametersMethodName = nameof( MethodBase.GetParameters );
+                    getParametersMethodName = nameof(MethodBase.GetParameters);
+
                     break;
+
                 case IIndexer indexer:
                     memberExpression = CompileTimePropertyInfoSerializer.SerializeProperty( indexer, serializationContext );
-                    getParametersMethodName = nameof( PropertyInfo.GetIndexParameters );
+                    getParametersMethodName = nameof(PropertyInfo.GetIndexParameters);
+
                     break;
+
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration type for '{declaringMember}'." );
             }

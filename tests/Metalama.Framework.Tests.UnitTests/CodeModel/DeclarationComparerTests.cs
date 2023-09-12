@@ -132,9 +132,15 @@ class B : A, I
             Assert.True( compilation.Comparers.Default.Is( typeB, typeA, ConversionKind.Implicit ) );
             Assert.False( compilation.Comparers.Default.Is( typeI, typeB, ConversionKind.Implicit ) );
             Assert.True( compilation.Comparers.Default.Is( typeB, typeI, ConversionKind.Implicit ) );
-            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit ) );
-            Assert.True( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Implicit ) );
-            Assert.False( compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Implicit ) );
+
+            Assert.True(
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit ) );
+
+            Assert.True(
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Implicit ) );
+
+            Assert.False(
+                compilation.Comparers.Default.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Implicit ) );
         }
 
         [Fact]

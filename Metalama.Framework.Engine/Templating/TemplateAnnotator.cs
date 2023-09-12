@@ -700,7 +700,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
             else if ( existingScope != scope )
             {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.AnonumousTypeDifferentScopes, node, symbol );
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.AnonymousTypeDifferentScopes, node, symbol );
             }
         }
 
@@ -1085,7 +1085,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.CantCallAbstractSubtemplate,
                     node,
-                    symbol! );
+                    symbol );
             }
         }
 

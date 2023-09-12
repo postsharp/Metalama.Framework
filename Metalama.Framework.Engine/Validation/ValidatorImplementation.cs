@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using K4os.Hash.xxHash;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -39,15 +37,5 @@ public readonly struct ValidatorImplementation
     {
         this.Implementation = implementation;
         this.State = aspectState;
-    }
-
-    public void UpdateHash( XXH64 hasher )
-    {
-        hasher.Update( this.Implementation.GetHashCode() );
-
-        if ( this.State != null )
-        {
-            hasher.Update( this.State.GetHashCode() );
-        }
     }
 }

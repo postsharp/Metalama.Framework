@@ -287,7 +287,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       new( compilation ),
+                       new SyntaxSerializationContext( compilation ),
                        serviceProvider ) )
             {
                 var method = compilation.Types.Single().Methods.Single();
@@ -323,7 +323,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       new( compilation ),
+                       new SyntaxSerializationContext( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -357,7 +357,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       new( compilation ),
+                       new SyntaxSerializationContext( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -394,7 +394,9 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxSerializationContext.SyntaxGenerationContext );
+                TypedExpressionSyntaxImpl parameterExpression = new(
+                    SyntaxFactory.IdentifierName( "value" ),
+                    syntaxSerializationContext.SyntaxGenerationContext );
 
                 AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"this.MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"this.MyEvent -= value" );
@@ -434,7 +436,9 @@ class TargetCode
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                TypedExpressionSyntaxImpl parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxSerializationContext.SyntaxGenerationContext );
+                TypedExpressionSyntaxImpl parameterExpression = new(
+                    SyntaxFactory.IdentifierName( "value" ),
+                    syntaxSerializationContext.SyntaxGenerationContext );
 
                 AssertEx.DynamicEquals(
                     @event.AddMethod.Invoke( parameterExpression ),
@@ -482,7 +486,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       new( compilation ),
+                       new SyntaxSerializationContext( compilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();

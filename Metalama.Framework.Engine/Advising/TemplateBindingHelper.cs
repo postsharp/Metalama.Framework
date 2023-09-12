@@ -415,8 +415,8 @@ internal static class TemplateBindingHelper
             {
                 // We accept Task for any void-returning awaitable (like the non-generic Task and ValueTask) and async void.
 
-                if ( (toTypeAsyncInfo.IsAwaitable && toTypeAsyncInfo.ResultType.SpecialType == SpecialType.Void) ||
-                    (toTypeAsyncInfo.IsAsync == true && toType.SpecialType == SpecialType.Void) )
+                if ( toTypeAsyncInfo is { IsAwaitable: true, ResultType.SpecialType: SpecialType.Void } ||
+                     (toTypeAsyncInfo.IsAsync == true && toType.SpecialType == SpecialType.Void) )
                 {
                     return true;
                 }

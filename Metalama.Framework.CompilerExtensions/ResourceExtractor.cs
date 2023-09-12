@@ -277,7 +277,9 @@ namespace Metalama.Framework.CompilerExtensions
 
                                     if ( !StreamsContentsAreEqual( stream, readStream ) )
                                     {
-                                        throw new InvalidOperationException( $"Could not open file '{filePath}' for writing and its existing content is not correct", ex );
+                                        throw new InvalidOperationException(
+                                            $"Could not open file '{filePath}' for writing and its existing content is not correct",
+                                            ex );
                                     }
                                 }
                             }
@@ -348,9 +350,11 @@ namespace Metalama.Framework.CompilerExtensions
             static int ReadFullBuffer( Stream stream, byte[] buffer )
             {
                 var bytesRead = 0;
+
                 while ( bytesRead < buffer.Length )
                 {
                     var read = stream.Read( buffer, bytesRead, buffer.Length - bytesRead );
+
                     if ( read == 0 )
                     {
                         // Reached end of stream.
