@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Check the Metalama version.
-            var referencedMetalamaVersions = GetMetalamaVersions( compilation ).ToList();
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation ).ToReadOnlyList();
 
             if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] > EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
@@ -165,7 +165,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
             var plugIns = compileTimeProject.ClosureProjects
-                .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
+                .SelectMany( p => p.PlugInTypes.SelectAsReadOnlyList( t => (Project: p, TypeName: t) ) )
                 .Select(
                     t =>
                     {

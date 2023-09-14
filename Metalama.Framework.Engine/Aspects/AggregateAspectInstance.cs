@@ -25,7 +25,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public static IAspectInstanceInternal GetInstance( IEnumerable<AspectInstance> aspectInstances )
     {
-        var instancesList = aspectInstances.ToList();
+        var instancesList = aspectInstances.ToMutableList();
 
         if ( instancesList.Count == 0 )
         {

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Array.Run
         [TestTemplate]
         private dynamic? Template()
         {
-            var fields = meta.Target.Type.FieldsAndProperties.Where( f => !f.IsStatic & !f.IsImplicitlyDeclared ).ToList();
+            var fields = meta.Target.Type.FieldsAndProperties.Where( f => !f.IsStatic & !f.IsImplicitlyDeclared ).ToReadOnlyList();
             var values = meta.RunTime( new object[fields.Count] );
 
             foreach (var i in meta.CompileTime( Enumerable.Range( 0, fields.Count ) ))

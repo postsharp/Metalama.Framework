@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     gotoStatementWalker.Visit( rootBlock );
 
                     var containedLabels =
-                        gotoStatementWalker.LabeledStatements.SelectAsEnumerable( x => x.Identifier.Text ).ToHashSet();
+                        gotoStatementWalker.LabeledStatements.SelectAsReadOnlyList( x => x.Identifier.Text ).ToHashSet();
 
                     var gotoStatements =
                         gotoStatementWalker.GotoStatements

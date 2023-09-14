@@ -68,12 +68,12 @@ namespace Metalama.Testing.AspectTesting
 
             if ( !this.IsSkipped )
             {
-                var missingConstants = this.Options.RequiredConstants.Where( c => !this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToList();
+                var missingConstants = this.Options.RequiredConstants.Where( c => !this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToReadOnlyList();
 
                 if ( missingConstants.Count > 0 )
                 {
                     this.SkipReason =
-                        $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectAsEnumerable( c => "'" + c + "'" ) )}.";
+                        $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectAsReadOnlyList( c => "'" + c + "'" ) )}.";
                 }
             }
         }

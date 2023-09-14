@@ -49,7 +49,7 @@ internal sealed class Method : MethodBase, IMethodImpl
         => new TypeParameterList(
             this,
             this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
-                .ToList() );
+                .ToReadOnlyList() );
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
@@ -114,7 +114,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
         => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
-            .ToList();
+            .ToReadOnlyList();
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 

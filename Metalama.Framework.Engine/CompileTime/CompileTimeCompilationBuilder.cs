@@ -125,7 +125,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         }
 
         // Hash compilation symbols.
-        var preprocessorSymbols = compileTimeTrees.SelectAsEnumerable( x => x.Options )
+        var preprocessorSymbols = compileTimeTrees.SelectAsReadOnlyList( x => x.Options )
             .SelectMany( x => x.PreprocessorSymbolNames )
             .Distinct()
             .OrderBy( x => x );
@@ -254,7 +254,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         path,
                         Encoding.UTF8 );
                 } )
-            .ToList();
+            .ToReadOnlyList();
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
         compilationResultManifest = produceCompileTimeCodeRewriter.GetManifest();
@@ -330,7 +330,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
         var predefinedSyntaxTrees =
-            _predefinedTypesSyntaxTree.Value.SelectAsEnumerable( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
+            _predefinedTypesSyntaxTree.Value.SelectAsReadOnlyCollection( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
         return CSharpCompilation.Create(
                 assemblyName,
@@ -621,7 +621,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private static List<UsingDirectiveSyntax> GetUsingsFromOptions( Compilation compilation )
     {
         return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ).NormalizeWhitespace() )
-            .ToList();
+            .ToMutableList();
 
         static NameSyntax ParseNamespace( string ns )
         {
@@ -700,7 +700,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             visitor.Visit( tree.GetRoot() );
         }
 
-        return allSerializableTypes.Values.ToList();
+        return allSerializableTypes.Values.ToReadOnlyList();
     }
 
     internal bool TryGetCompileTimeProject(
@@ -779,7 +779,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found in memory cache." );
             wasInconsistent = false;
-            
+
             return true;
         }
 
@@ -808,7 +808,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._cache.Add( projectHash, project );
 
         wasInconsistent = false;
-        
+
         return true;
     }
 
@@ -834,22 +834,24 @@ internal sealed partial class CompileTimeCompilationBuilder
         if ( peExists ^ manifestExists )
         {
             // Here we presume that other files (that are not checked and are cached) are never locked and never deleted without PE or manifest missing.
-            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Directory}' inconsistent, will attempt an alternate." );
+            this._logger.Trace?.Log(
+                $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): '{outputPaths.Directory}' inconsistent, will attempt an alternate." );
+
             wasInconsistent = true;
-            
+
             return false;
         }
         else if ( !peExists || !manifestExists )
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): Cache miss." );
             wasInconsistent = false;
-            
+
             return false;
         }
 
         this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{assemblyName}' ): found on disk." );
         wasInconsistent = false;
-        
+
         return true;
     }
 
@@ -878,7 +880,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             {
                 var sourceTreesForDiagnostics = sourceTreesWithCompileTimeCode.OrderBy( t => t.FilePath ).ToArray();
 
-                diagnosticSink.Report( diagnostics.SelectAsEnumerable( d => d.ToDiagnostic( sourceTreesForDiagnostics ) ) );
+                diagnosticSink.Report( diagnostics.SelectAsReadOnlyList( d => d.ToDiagnostic( sourceTreesForDiagnostics ) ) );
             }
         }
 
@@ -906,7 +908,7 @@ internal sealed partial class CompileTimeCompilationBuilder
             {
                 // The primary directory was not present, no need to enter lock.
                 project = null;
-                
+
                 return false;
             }
 
@@ -939,7 +941,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     {
                         // The cache directory was not present, we can return.
                         project = null;
-                        
+
                         return false;
                     }
                 }
@@ -1065,13 +1067,13 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var aspectTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( IsAspect )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                            .ToList();
+                            .ToReadOnlyList();
 
                         var fabricTypes = compilationForManifest.Assembly.GetTypes()
                             .Where(
                                 t => IsFabric( t ) &&
                                      !compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
-                            .ToList();
+                            .ToReadOnlyList();
 
                         var fabricTypeNames = fabricTypes
                             .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
@@ -1080,17 +1082,17 @@ internal sealed partial class CompileTimeCompilationBuilder
                             .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                             .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                            .ToList();
+                            .ToReadOnlyList();
 
                         var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                            .ToList();
+                            .ToReadOnlyList();
 
                         var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
                             .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
-                            .ToList();
+                            .ToReadOnlyList();
 
                         Dictionary<string, int>? sourceFilePathIndexes = null;
 

@@ -14,7 +14,7 @@ internal class ReturnNumbers : OverrideMethodAspect
     {
         var numbers = new object[] { 42 };
 
-        return numbers.ToList();
+        return numbers.ToReadOnlyList();
     }
 }
 

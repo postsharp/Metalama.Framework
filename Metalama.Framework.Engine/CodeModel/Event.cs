@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-            => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
+            => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToReadOnlyList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 

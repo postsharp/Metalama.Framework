@@ -230,13 +230,15 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
     private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
         => SeparatedList(
-            method.Parameters.SelectAsEnumerable(
+            method.Parameters.SelectAsReadOnlyList(
                 p => Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
                     this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                     Identifier( p.Name ),
-                    removeDefaultValues || p.DefaultValue == null ? null : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
+                    removeDefaultValues || p.DefaultValue == null
+                        ? null
+                        : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {

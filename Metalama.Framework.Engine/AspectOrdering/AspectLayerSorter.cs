@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     .GroupBy( l => l )
                     .OrderByDescending( g => g.Count() )
                     .Select( g => g.Key )
-                    .ToList();
+                    .ToReadOnlyList();
 
                 var mainLocation = cycleLocations.FirstOrDefault();
                 var additionalLocations = cycleLocations.Skip( 1 );

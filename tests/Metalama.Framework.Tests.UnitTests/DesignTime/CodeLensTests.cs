@@ -33,42 +33,42 @@ public sealed class CodeLensTests : DesignTimeTestBase
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using System;
-            using System.IO;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using System;
+                            using System.IO;
 
-            public class InjectedLoggerAttribute : OverrideMethodAspect
-            {
-                [Introduce]
-                private readonly TextWriter _logger = Console.Out;
+                            public class InjectedLoggerAttribute : OverrideMethodAspect
+                            {
+                                [Introduce]
+                                private readonly TextWriter _logger = Console.Out;
+                            
+                                public override dynamic? OverrideMethod()
+                                {
+                                    _logger.WriteLine("Logged.");
+                                    return meta.Proceed();
+                                }
+                            }
 
-                public override dynamic? OverrideMethod()
-                {
-                    _logger.WriteLine("Logged.");
-                    return meta.Proceed();
-                }
-            }
-            
-            public class RepositoryAspect : TypeAspect
-            {
-                public override void BuildAspect(IAspectBuilder<INamedType> builder)
-                {
-                    builder.Advice.IntroduceMethod(builder.Target, nameof(Get));
+                            public class RepositoryAspect : TypeAspect
+                            {
+                                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                                {
+                                    builder.Advice.IntroduceMethod(builder.Target, nameof(Get));
+                            
+                                    builder.Outbound.SelectMany(type => type.Methods)
+                                        .AddAspectIfEligible<InjectedLoggerAttribute>();
+                                }
+                            
+                                [Template]
+                                public object Get(int id) => id.ToString();
+                            }
 
-                    builder.Outbound.SelectMany(type => type.Methods)
-                        .AddAspectIfEligible<InjectedLoggerAttribute>();
-                }
-
-                [Template]
-                public object Get(int id) => id.ToString();            
-            }
-
-            [RepositoryAspect]
-            public class Repository
-            {
-            }
-            """;
+                            [RepositoryAspect]
+                            public class Repository
+                            {
+                            }
+                            """;
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
         var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
@@ -96,6 +96,6 @@ public sealed class CodeLensTests : DesignTimeTestBase
                 new[] { "RepositoryAspect", "Repository", "Custom attribute", "Introduce method 'Repository.Get(int)'." },
                 new[] { "InjectedLogger", "Repository.Get(int)", "Child of 'Repository'", "Introduce field 'Repository._logger'." }
             },
-            details.Entries.SelectAsEnumerable( e => e.Fields.SelectAsEnumerable( f => f.Text ) ) );
+            details.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
     }
 }

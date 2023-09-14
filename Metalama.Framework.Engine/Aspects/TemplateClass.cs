@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Aspects
                     {
                         TemplateClass = this,
                         Accessors = baseMember.Value.Accessors
-                            .SelectAsEnumerable( kvp => (kvp.Key, Value: kvp.Value with { TemplateClass = this }) )
+                            .SelectAsReadOnlyCollection( kvp => (kvp.Key, Value: kvp.Value with { TemplateClass = this }) )
                             .ToImmutableDictionary( kvp => kvp.Key, kvp => kvp.Value )
                     };
 

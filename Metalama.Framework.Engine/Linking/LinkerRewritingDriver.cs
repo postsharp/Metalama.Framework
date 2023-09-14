@@ -498,7 +498,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
                         EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
-                        _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax.Kind()}" ),
+                        _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax.Kind()}" )
                     };
 
                 default:
@@ -581,7 +581,8 @@ namespace Metalama.Framework.Engine.Linking
 
         private bool ShouldGenerateEmptyMember( ISymbol symbol )
         {
-            return this.InjectionRegistry.IsIntroduced( symbol ) && !symbol.IsOverride && !symbol.TryGetHiddenSymbol( this.IntermediateCompilationContext.Compilation, out _ );
+            return this.InjectionRegistry.IsIntroduced( symbol ) && !symbol.IsOverride
+                                                                 && !symbol.TryGetHiddenSymbol( this.IntermediateCompilationContext.Compilation, out _ );
         }
 
         private bool ShouldGenerateSourceMember( ISymbol symbol )
@@ -762,11 +763,11 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( preserveTarget )
             {
-                return List( attributeLists.Where( Filter ).ToList() );
+                return List( attributeLists.Where( Filter ).ToReadOnlyList() );
             }
             else
             {
-                return List( attributeLists.Where( Filter ).Select( al => al.WithTarget( null ) ).ToList() );
+                return List( attributeLists.Where( Filter ).Select( al => al.WithTarget( null ) ).ToReadOnlyList() );
             }
 
             bool Filter( AttributeListSyntax list )

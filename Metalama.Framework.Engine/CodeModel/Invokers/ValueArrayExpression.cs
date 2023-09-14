@@ -28,7 +28,7 @@ internal sealed class ValueArrayExpression : UserExpression
 
         return syntaxGenerator.ArrayCreationExpression(
             syntaxGenerator.Type( SpecialType.System_Object ),
-            this._parent.SelectAsEnumerable(
+            this._parent.SelectAsReadOnlyList(
                 p =>
                     p.RefKind.IsReadable()
                         ? SyntaxFactory.IdentifierName( p.Name )

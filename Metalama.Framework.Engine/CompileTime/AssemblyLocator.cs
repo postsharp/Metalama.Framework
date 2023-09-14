@@ -56,10 +56,10 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log( $"Finding the location of '{assemblyIdentity}'." );
 
             var referencesOfRequestedName = this._referencesByName[assemblyIdentity.Name]
-                .ConcatList( this._referencesByName[_unknownAssemblyName] );
+                .Concat( this._referencesByName[_unknownAssemblyName] );
 
             var candidates = referencesOfRequestedName
-                .SelectAsEnumerable( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
+                .SelectAsReadOnlyList( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
                 .Where( x => x.AssemblyName != null && AssemblyName.ReferenceMatchesDefinition( x.AssemblyName, assemblyName ) )
                 .ToOrderedList( x => x.AssemblyName!.Version, descending: true );
 

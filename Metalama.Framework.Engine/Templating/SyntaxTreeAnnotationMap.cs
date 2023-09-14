@@ -270,16 +270,16 @@ namespace Metalama.Framework.Engine.Templating
                 return parameters.FirstOrDefault( p => p.Name == argument.NameColon.Name.Identifier.ValueText );
             }
 
-            var index = argument.Parent.ChildNodes().ToList().IndexOf( argument );
+            var index = argument.Parent.ChildNodes().Select( ( child, i ) => (Node: child, Index: i) ).FirstOrDefault( x => x.Node == argument );
 
-            if ( index == -1 )
+            if ( index.Node == null )
             {
                 return null;
             }
 
-            if ( index < parameters.Length )
+            if ( index.Index < parameters.Length )
             {
-                return parameters[index];
+                return parameters[index.Index];
             }
 
             var lastParameter = parameters.Last();

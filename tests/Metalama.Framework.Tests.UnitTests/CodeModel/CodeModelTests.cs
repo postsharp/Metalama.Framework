@@ -197,7 +197,7 @@ interface I<T>
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var methods = compilation.Types.Single().Methods.ToList();
+            var methods = compilation.Types.Single().Methods.ToReadOnlyList();
             Assert.Equal( 2, methods.Count );
 
             var m1 = methods.ElementAt( 0 );
@@ -655,7 +655,7 @@ class C
                 Assert.Null( parameter.DefaultValue );
             }
 
-            var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();
+            var parametersWithDefaults = method.Parameters.Skip( 1 ).ToReadOnlyList();
 
             foreach ( var parameter in parametersWithDefaults )
             {
@@ -1328,7 +1328,7 @@ class C {}
                 ignoreErrors: true );
 
             var type = compilation.Types.OfName( "C" ).Single();
-            var attributes = type.Attributes.OfAttributeType( typeof(ObsoleteAttribute) ).ToList();
+            var attributes = type.Attributes.OfAttributeType( typeof(ObsoleteAttribute) ).ToReadOnlyList();
             Assert.Equal( 2, attributes.Count );
 
             // Check that roundtrip attribute reference resolution work.
@@ -1372,11 +1372,11 @@ class C {}
         public void InitializerExpression_TypedConstants( string fieldCode, object? value )
         {
             var code = $$"""
-        public class C
-        {
-           {{fieldCode}};
-        }
-""";
+                                 public class C
+                                 {
+                                    {{fieldCode}};
+                                 }
+                         """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1392,16 +1392,16 @@ class C {}
         public void InitializerExpression_EnumMembers()
         {
             const string code = """
-        public enum C
-        {
-            None = 0,
-            One,
-            Two = 2,
-            Second = Two,
-            Three = 2 + 1,
-            Third = C.Three
-        }
-""";
+                                        public enum C
+                                        {
+                                            None = 0,
+                                            One,
+                                            Two = 2,
+                                            Second = Two,
+                                            Three = 2 + 1,
+                                            Third = C.Three
+                                        }
+                                """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1426,11 +1426,11 @@ class C {}
         public void InitializerExpression_Property_TypedConstants( string fieldCode, object? value )
         {
             var code = $$"""
-        public class C
-        {
-           {{fieldCode}};
-        }
-""";
+                                 public class C
+                                 {
+                                    {{fieldCode}};
+                                 }
+                         """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1446,11 +1446,11 @@ class C {}
         public void InitializerExpression_NotTypedConstant()
         {
             const string code = $$"""
-        public class C
-        {
-           object _f = new object();
-        }
-""";
+                                          public class C
+                                          {
+                                             object _f = new object();
+                                          }
+                                  """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1468,11 +1468,11 @@ class C {}
         public void InitializerExpression_TypedConstants_Enum( string fieldCode, object value )
         {
             var code = $$"""
-        public class C
-        {
-           {{fieldCode}};
-        }
-""";
+                                 public class C
+                                 {
+                                    {{fieldCode}};
+                                 }
+                         """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1488,13 +1488,13 @@ class C {}
         public void FieldConstantValue()
         {
             const string code = $$"""
-        public class C
-        {
-            const int _f = 5;
-            int _a = 5;
-
-        }
-""";
+                                          public class C
+                                          {
+                                              const int _f = 5;
+                                              int _a = 5;
+                                  
+                                          }
+                                  """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -1700,7 +1700,7 @@ public partial class C
             Assert.True( dependency.Emit( dependencyStream ).Success );
             dependencyStream.Seek( 0, SeekOrigin.Begin );
             var dependencyReference = MetadataReference.CreateFromStream( dependencyStream );
-            
+
             var compilation = testContext.CreateCompilationModel( "class D : C {}", additionalReferences:new[]{dependencyReference}  );
 
             var type = compilation.Types.OfName( "D" ).Single().BaseType.AssertNotNull(  );

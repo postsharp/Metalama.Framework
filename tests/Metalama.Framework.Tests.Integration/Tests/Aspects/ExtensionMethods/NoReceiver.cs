@@ -9,9 +9,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.No
 #pragma warning disable CS0618 // Type or member is obsolete
 
 [RunTimeOrCompileTime]
-static class Outer
+internal static class Outer
 {
-    internal static List<T> MyToList<T>(this IEnumerable<T> source) => source.ToList();
+    internal static List<T> MyToList<T>( this IEnumerable<T> source ) => Enumerable.ToList( source );
 
     internal class ReturnNumbers : OverrideMethodAspect
     {

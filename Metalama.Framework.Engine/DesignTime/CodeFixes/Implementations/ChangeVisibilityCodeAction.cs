@@ -43,7 +43,7 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
         {
             var syntaxTree = referenceGroup.Key;
 
-            var rewriter = new Rewriter( referenceGroup.Select( x => x.GetSyntax( context.CancellationToken ) ).ToList(), this );
+            var rewriter = new Rewriter( referenceGroup.Select( x => x.GetSyntax( context.CancellationToken ) ).ToReadOnlyList(), this );
             var newRoot = rewriter.Visit( await syntaxTree.GetRootAsync( context.CancellationToken ) )!;
             context.UpdateTree( newRoot, syntaxTree );
         }

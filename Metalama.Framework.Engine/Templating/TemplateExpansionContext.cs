@@ -56,7 +56,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     internal static SyntaxSerializationContext CurrentSyntaxSerializationContext
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
            ?? _currentSyntaxSerializationContext.Value
-           ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxSerializationContext has not be set." );
+           ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxSerializationContext has not been set." );
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
@@ -161,10 +161,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
         if ( template != null )
         {
-            templateTypeArguments.AddRange( template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+            templateTypeArguments.AddRange(
+                template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
-        if (metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
+        if ( metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
         {
             // Generic method - we need to add type parameters as named arguments for correct serializable id resulution.
             // Any target method type parameter that matches name of template argument can be skipped - template will not have a runtime type parameter of that name.

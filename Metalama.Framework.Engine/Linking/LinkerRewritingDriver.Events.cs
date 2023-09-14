@@ -77,8 +77,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    GetEventBackingField( eventDeclaration, symbol ),
-                    GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
+                    GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
                 };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -332,7 +331,7 @@ namespace Metalama.Framework.Engine.Linking
             var cleanAccessorList =
                 accessorList.WithAccessors(
                     List(
-                        accessorList.Accessors.SelectAsEnumerable(
+                        accessorList.Accessors.SelectAsReadOnlyList(
                             a =>
                                 a.Kind() switch
                                 {
@@ -363,7 +362,10 @@ namespace Metalama.Framework.Engine.Linking
         private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IntermediateSymbolSemantic<IEventSymbol> targetSemantic )
         {
             Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
-            Invariant.Implies( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base, targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
+
+            Invariant.Implies(
+                targetSemantic.Kind is IntermediateSymbolSemanticKind.Base,
+                targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
 
             var addAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.AddAccessorDeclaration );
             var removeAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.RemoveAccessorDeclaration );
