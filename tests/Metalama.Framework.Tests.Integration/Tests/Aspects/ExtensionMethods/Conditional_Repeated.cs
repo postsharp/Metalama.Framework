@@ -8,6 +8,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Co
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
+internal static class MyExtensionMethods
+{
+    public static List<T> MyToList<T>( this IEnumerable<T> items )
+    {
+        var list = new List<T>();
+        list.AddRange( items );
+
+        return list;
+    }
+}
+
 internal class ReturnNumbers : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
@@ -16,7 +27,7 @@ internal class ReturnNumbers : OverrideMethodAspect
 
         foreach (var _ in meta.CompileTime( Enumerable.Range( 1, 2 ) ))
         {
-            numbers = Enumerable.ToList( numbers );
+            numbers = numbers.MyToList();
         }
 
         return numbers;
