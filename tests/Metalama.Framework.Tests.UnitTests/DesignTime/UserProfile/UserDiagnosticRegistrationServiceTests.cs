@@ -73,41 +73,41 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
             this.GetUserDiagnosticsFileContent(
                 dependentCode: """
-                using System;
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
-                using Metalama.Framework.Diagnostics;
+                               using System;
+                               using Metalama.Framework.Aspects;
+                               using Metalama.Framework.Code;
+                               using Metalama.Framework.Diagnostics;
 
-                namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
+                               namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
 
-                public class ReportErrorAttribute : MethodAspect
-                {
-                    private static readonly DiagnosticDefinition<IMethod> _userError = new(
-                            "MY001",
-                            Severity.Error,
-                            "User error description.");
-
-                    public override void BuildAspect(IAspectBuilder<IMethod> builder)
-                    {
-                        builder.Diagnostics.Report( _userError.WithArguments( builder.Target ) );
-                    }
-                }
-                """,
+                               public class ReportErrorAttribute : MethodAspect
+                               {
+                                   private static readonly DiagnosticDefinition<IMethod> _userError = new(
+                                           "MY001",
+                                           Severity.Error,
+                                           "User error description.");
+                               
+                                   public override void BuildAspect(IAspectBuilder<IMethod> builder)
+                                   {
+                                       builder.Diagnostics.Report( _userError.WithArguments( builder.Target ) );
+                                   }
+                               }
+                               """,
                 targetCode: """
-                namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
+                            namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
 
-                class TargetCode
-                {
-                    [ReportError]
-                    public void Foo() { }
-                }
-                """,
+                            class TargetCode
+                            {
+                                [ReportError]
+                                public void Foo() { }
+                            }
+                            """,
                 aspectCode: "",
                 configurationFileChanged: ( configurationManager, file ) =>
                 {
                     if ( file is UserDiagnosticsConfiguration { Diagnostics.IsEmpty: false } userDiagnostics )
                     {
-                        log.AppendLine( string.Join( ", ", userDiagnostics.Diagnostics.SelectAsEnumerable( d => d.Value.Id ) ) );
+                        log.AppendLine( string.Join( ", ", userDiagnostics.Diagnostics.SelectAsReadOnlyCollection( d => d.Value.Id ) ) );
 
                         configurationManager.Set( new UserDiagnosticsConfiguration() );
                     }

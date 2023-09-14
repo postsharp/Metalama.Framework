@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log(
                 "Assembly versions: " + string.Join(
                     ", ",
-                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsEnumerable(
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsReadOnlyList(
                         x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
@@ -161,8 +161,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
-            this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
-                .Concat( new[] { _compileTimeFrameworkAssemblyName } )
+            this.StandardAssemblyNames = Enumerable.Concat( this.MetalamaImplementationAssemblyNames, new[] { _compileTimeFrameworkAssemblyName } )
                 .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
@@ -242,7 +241,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToList();
+            var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToReadOnlyList();
 
             if ( missingPackages.Count > 0 )
             {
@@ -276,7 +275,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
 
-                    var missingFiles = manifest.ReferenceAssemblies.Where( f => !File.Exists( f ) ).ToList();
+                    var missingFiles = manifest.ReferenceAssemblies.Where( f => !File.Exists( f ) ).ToReadOnlyList();
 
                     if ( missingFiles.Count == 0 )
                     {
@@ -311,29 +310,29 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var projectText =
                     $"""
-                        <Project>
-                          <PropertyGroup>
-                            <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
-                            <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
-                            <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-                          </PropertyGroup>
-                          <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-                          <PropertyGroup>
-                            <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
-                            <OutputType>Exe</OutputType>
-                            <LangVersion>latest</LangVersion>
-                          </PropertyGroup>
-                          <ItemGroup>
-                            <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
-                            <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-                            {additionalPackageReferences}
-                          </ItemGroup>
-                          <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
-                            <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
-                          </Target>
-                          <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-                        </Project>
-                        """;
+                     <Project>
+                       <PropertyGroup>
+                         <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
+                         <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+                         <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+                       </PropertyGroup>
+                       <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+                       <PropertyGroup>
+                         <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
+                         <OutputType>Exe</OutputType>
+                         <LangVersion>latest</LangVersion>
+                       </PropertyGroup>
+                       <ItemGroup>
+                         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+                         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+                         {additionalPackageReferences}
+                       </ItemGroup>
+                       <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
+                         <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
+                       </Target>
+                       <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+                     </Project>
+                     """;
 
                 var projectFilePath = Path.Combine( this._cacheDirectory, "TempProject.csproj" );
                 this._logger.Trace?.Log( $"Writing '{projectFilePath}':" + Environment.NewLine + projectText );

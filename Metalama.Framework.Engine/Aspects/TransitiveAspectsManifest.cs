@@ -43,8 +43,8 @@ namespace Metalama.Framework.Engine.Aspects
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToImmutableDictionary(
                         g => g.Key.FullName,
-                        g => (IReadOnlyList<InheritableAspectInstance>) g.Select( i => new InheritableAspectInstance( i ) )
-                            .ToList(),
+                        g => g.Select( i => new InheritableAspectInstance( i ) )
+                            .ToReadOnlyList(),
                         StringComparer.Ordinal ),
                 validators );
 

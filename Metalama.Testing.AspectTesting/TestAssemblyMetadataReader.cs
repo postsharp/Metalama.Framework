@@ -62,7 +62,7 @@ namespace Metalama.Testing.AspectTesting
             ImmutableArray<string> GetParserSymbols()
                 => (GetOptionalAssemblyMetadataValue( "DefineConstants" ) ?? "")
                     .Split( ';' )
-                    .SelectAsEnumerable( s => s.Trim() )
+                    .SelectAsReadOnlyList( s => s.Trim() )
                     .Where( s => !string.IsNullOrEmpty( s ) )
                     .ToImmutableArray();
 

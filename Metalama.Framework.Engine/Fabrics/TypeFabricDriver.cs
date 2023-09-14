@@ -60,7 +60,7 @@ internal sealed class TypeFabricDriver : FabricDriver
         // Prepare declarative advice.
         var declarativeAdvice = templateClass
             .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation )
-            .ToList();
+            .ToReadOnlyList();
 
         // Execute the AmendType.
         var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );

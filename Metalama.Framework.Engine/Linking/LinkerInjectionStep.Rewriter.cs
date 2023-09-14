@@ -37,7 +37,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
-        
+
         // ReSharper disable once NotAccessedField.Local
 #pragma warning disable IDE0052
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
@@ -84,7 +84,7 @@ internal sealed partial class LinkerInjectionStep
 
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
-                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore )
+                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsReadOnlyList( FindSuppressionsCore )
                     .SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
@@ -181,7 +181,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 return null;
             }
-            
+
             // Find trivia that's directly on the declaration (and not on its attributes).
             originalNodeForTrivia ??= originalDeclaringNode;
 
@@ -312,7 +312,8 @@ internal sealed partial class LinkerInjectionStep
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithTrailingTrivia( ElasticLineFeed )
-                        .WithAdditionalAnnotations( attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                        .WithAdditionalAnnotations(
+                            attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )
                     {
@@ -408,7 +409,7 @@ internal sealed partial class LinkerInjectionStep
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                             .WithBaseList(
-                                BaseList( SeparatedList( additionalBaseList.SelectAsEnumerable( i => i.Syntax ) ) )
+                                BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                             .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                     }
@@ -417,7 +418,7 @@ internal sealed partial class LinkerInjectionStep
                         node = (T) node.WithBaseList(
                             BaseList(
                                 node.BaseList.Types.AddRange(
-                                    additionalBaseList.SelectAsEnumerable(
+                                    additionalBaseList.SelectAsReadOnlyList(
                                         i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }
@@ -673,7 +674,11 @@ internal sealed partial class LinkerInjectionStep
             }
             else
             {
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists, originalNode );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists(
+                    originalNode.Declaration.Variables[0],
+                    originalNode.AttributeLists,
+                    originalNode );
+
                 node = ReplaceAttributes( node, rewrittenAttributes );
 
                 var anyChangeToVariables = false;
@@ -773,7 +778,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            
+
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
                 node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -813,7 +818,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            
+
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
                 node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );

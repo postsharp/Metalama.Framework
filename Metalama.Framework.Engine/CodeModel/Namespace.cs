@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this._symbol.GetNamespaceMembers()
                     .Where( n => this.IsExternal || this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
                     .Select( n => new Ref<INamespace>( n, this.Compilation.CompilationContext ) )
-                    .ToList() );
+                    .ToReadOnlyList() );
 
         public INamespace? GetDescendant( string ns )
         {

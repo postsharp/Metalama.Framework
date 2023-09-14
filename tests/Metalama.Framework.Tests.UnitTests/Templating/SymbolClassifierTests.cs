@@ -393,20 +393,20 @@ class C  {
         public void SystemTypes()
         {
             const string code = """
-                using System;
+                                using System;
 
-                class C
-                {
-                    void M()
-                    {
-                        Console.WriteLine();
-
-                        _ = DateTime.Now;
-
-                        Math.Abs(0);
-                    }
-                }
-                """;
+                                class C
+                                {
+                                    void M()
+                                    {
+                                        Console.WriteLine();
+                                
+                                        _ = DateTime.Now;
+                                
+                                        Math.Abs(0);
+                                    }
+                                }
+                                """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -438,24 +438,24 @@ class C  {
         public void RoslynTypes( bool roslynIsCompileTime )
         {
             const string code = """
-                using Microsoft.CodeAnalysis;
-                using Microsoft.CodeAnalysis.CSharp;
+                                using Microsoft.CodeAnalysis;
+                                using Microsoft.CodeAnalysis.CSharp;
 
-                class C
-                {
-                    void M()
-                    {
-                        ISymbol symbol;
-                        CSharpSyntaxNode node;
-                    }
-                }
-                """;
+                                class C
+                                {
+                                    void M()
+                                    {
+                                        ISymbol symbol;
+                                        CSharpSyntaxNode node;
+                                    }
+                                }
+                                """;
 
             var options = new TestContextOptions() { RoslynIsCompileTimeOnly = roslynIsCompileTime };
             using var testContext = this.CreateTestContext( options );
 
             var additionalReferences =
-                new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsEnumerable( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+                new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsReadOnlyList( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
 
             var compilation = testContext.CreateCompilationModel( code, additionalReferences: additionalReferences );
 

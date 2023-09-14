@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var constructorSymbol = attribute.AttributeConstructor!;
 
-            var constructors = type.GetConstructors().Where( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) ).ToList();
+            var constructors = type.GetConstructors().Where( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) ).ToReadOnlyList();
 
             if ( constructors.Count == 0 )
             {

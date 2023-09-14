@@ -75,7 +75,7 @@ public sealed class TaskBag
             this._logger.Warning?.Log(
                 "The following tasks take a long time to complete: " + string.Join(
                     ", ",
-                    this._pendingTasks.SelectAsEnumerable( x => x.Value.Func.ToString() ) ) );
+                    this._pendingTasks.SelectAsReadOnlyCollection( x => x.Value.Func.ToString() ) ) );
         }
 
         // Avoid blocking forever in case of bug.
@@ -87,7 +87,7 @@ public sealed class TaskBag
             throw new TimeoutException(
                 "The following tasks did not complete complete in time: " + string.Join(
                     ", ",
-                    this._pendingTasks.SelectAsEnumerable( x => x.Value.Func.Method.ToString() ) ) );
+                    this._pendingTasks.SelectAsReadOnlyCollection( x => x.Value.Func.Method.ToString() ) ) );
         }
 #pragma warning restore VSTHRD003
     }

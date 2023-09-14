@@ -267,7 +267,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         => new TypeParameterList(
             this._facade,
             this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
-                .ToList() );
+                .ToReadOnlyList() );
 
     [Memo]
     public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );

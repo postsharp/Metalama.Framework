@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                         return type.Name;
 
                     case string?[] strings:
-                        return string.Join( ", ", strings.SelectAsEnumerable( s => s == null ? null : "'" + s + "'" ) );
+                        return string.Join( ", ", strings.SelectAsReadOnlyList( s => s == null ? null : "'" + s + "'" ) );
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );

@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Formatting
                 var members = node.AncestorsAndSelf()
                     .Select( GetMemberTextPair )
                     .Where( x => x.Node != null )
-                    .ToList();
+                    .ToReadOnlyList();
 
                 static (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
                     => n switch
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Formatting
                     else
                     {
                         members.Reverse();
-                        finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsEnumerable( x => x.Text! ) )}'" );
+                        finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsReadOnlyList( x => x.Text! ) )}'" );
                     }
                 }
 
@@ -340,7 +340,12 @@ namespace Metalama.Framework.Engine.Formatting
             await textWriter.WriteAsync( finalBuilder.ToString() );
         }
 
-        private static void HtmlEncode( StringBuilder stringBuilder, TextSpan span, string text, bool attributeEncode = false, Action<TextSpan>? onNewLine = null )
+        private static void HtmlEncode(
+            StringBuilder stringBuilder,
+            TextSpan span,
+            string text,
+            bool attributeEncode = false,
+            Action<TextSpan>? onNewLine = null )
         {
             foreach ( var c in text )
             {
@@ -490,7 +495,7 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     return null;
                 }
-                
+
                 return GetDiffInfo( oldTree, newTree, isOld );
             }
         }

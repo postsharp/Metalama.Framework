@@ -59,7 +59,7 @@ namespace Metalama.Framework.Workspaces
                 var instances = MSBuildLocator.QueryVisualStudioInstances(
                         new VisualStudioInstanceQueryOptions { DiscoveryTypes = DiscoveryType.DotNetSdk, WorkingDirectory = projectDirectory } )
                     .OrderByDescending( i => i.Version )
-                    .ToList();
+                    .ToReadOnlyList();
 
                 _logger.Trace?.Log( $"Found {instances.Count} instances: {string.Join( ", ", instances.Select( x => x.Name ) )}" );
 
@@ -387,7 +387,7 @@ namespace Metalama.Framework.Workspaces
 
         public Project GetProject( string name, string? targetFramework = null )
         {
-            var candidates = this.Projects.Where( p => p.Name == name && (targetFramework == null || p.TargetFramework == targetFramework) ).ToList();
+            var candidates = this.Projects.Where( p => p.Name == name && (targetFramework == null || p.TargetFramework == targetFramework) ).ToReadOnlyList();
 
             return candidates.Count switch
             {

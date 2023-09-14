@@ -121,9 +121,15 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return CodeLensSummary.NotAvailable;
         }
 
-        var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).Select( i => i.AspectClassFullName ).ToList();
-        var transformations = syntaxTreeResult.Transformations.Where( t => t.TargetDeclarationId == symbolId ).Select( t => t.AspectClassFullName ).ToList();
-        var distinctAspects = aspectInstances.Concat( transformations ).Distinct().ToList();
+        var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId )
+            .Select( i => i.AspectClassFullName )
+            .ToReadOnlyList();
+
+        var transformations = syntaxTreeResult.Transformations.Where( t => t.TargetDeclarationId == symbolId )
+            .Select( t => t.AspectClassFullName )
+            .ToReadOnlyList();
+
+        var distinctAspects = Enumerable.Concat( aspectInstances, transformations ).Distinct().ToReadOnlyList();
         var distinctAspectCount = distinctAspects.Count;
 
         this._logger.Trace?.Log( $"There are {distinctAspectCount} distinct aspect(s) affecting '{codePointData.Symbol}'." );
@@ -133,7 +139,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             0 => ("no aspect", "This declaration is not affected by any aspect."),
             1 => ("1 aspect", $"This declaration is affected by the aspect '{distinctAspects.Single()}'."),
             _ => ($"{distinctAspectCount} aspects",
-                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectAsEnumerable( i => $"'{i}'" ) )}.")
+                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectAsReadOnlyList( i => $"'{i}'" ) )}.")
         };
 
         return new CodeLensSummary( text, tooltip );
@@ -307,7 +313,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         foreach ( var aspectInstance in aspectInstances.Where( i => i.Value.Count == 0 ) )
         {
             var aspectInstanceTransformations =
-                aspectInstance.Key.Advice.SelectMany( a => a.Transformations ).Select( t => t.TargetDeclaration ).Distinct().ToList();
+                aspectInstance.Key.Advice.SelectMany( a => a.Transformations ).Select( t => t.TargetDeclaration ).Distinct().ToReadOnlyList();
 
             var transformationText = aspectInstanceTransformations.Count switch
             {
@@ -339,7 +345,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
                                && transformedDeclarationId != symbolId) )
                     .Select( t => t.TargetDeclaration )
                     .Distinct()
-                    .ToList();
+                    .ToReadOnlyList();
 
                 if ( transformationsOnChildren.Count > 0 )
                 {

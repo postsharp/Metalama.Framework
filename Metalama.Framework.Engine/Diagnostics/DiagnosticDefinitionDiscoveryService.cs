@@ -33,10 +33,10 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
-            => types.SelectAsEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
+            => types.SelectAsReadOnlyList( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
         internal IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
-            => types.SelectAsEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
+            => types.SelectAsReadOnlyList( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
             where T : class

@@ -87,10 +87,9 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionRegistry = injectionRegistry;
 
             var indexedLayers =
-                new[] { AspectLayerId.Null }
-                    .Concat( orderedAspectLayers.SelectAsEnumerable( x => x.AspectLayerId ) )
+                Enumerable.Concat( new[] { AspectLayerId.Null }, orderedAspectLayers.SelectAsReadOnlyList( x => x.AspectLayerId ) )
                     .Select( ( al, i ) => (AspectLayerId: al, Index: i) )
-                    .ToList();
+                    .ToReadOnlyList();
 
             this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
@@ -203,7 +202,8 @@ namespace Metalama.Framework.Engine.Linking
 
                     var targetSemantic =
                         (!declaredInCurrentType && resolvedReferencedSymbol.IsVirtual)
-                        || (declaredInCurrentType && resolvedReferencedSymbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } && overrideIndices.Count == 0)
+                        || (declaredInCurrentType && resolvedReferencedSymbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true }
+                                                  && overrideIndices.Count == 0)
                             ? resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base )
                             : resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
 
@@ -382,7 +382,7 @@ namespace Metalama.Framework.Engine.Linking
             // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
             return
                 referencedDeclarationOverrides
-                    .SelectAsEnumerable(
+                    .SelectAsReadOnlyList(
                         x => (
                             Index: new MemberLayerIndex(
                                 this._layerIndex[x.AspectLayerId],
@@ -496,7 +496,10 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             if ( expression.Parent?.Parent?.Parent?.Parent is InvocationExpressionSyntax { Expression: { } wrappingExpression }
-                 && semanticModel.GetSymbolInfo( wrappingExpression ).Symbol is IMethodSymbol { ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName } wrappingHelperMethod )
+                 && semanticModel.GetSymbolInfo( wrappingExpression ).Symbol is IMethodSymbol
+                 {
+                     ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName
+                 } wrappingHelperMethod )
             {
                 // Wrapping helper methods are used in special cases where the generated expression needs to be additionally wrapped.
 

@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
                     DepthFirstSearch( semantic );
                 }
 
-                return visited.ToList();
+                return visited.ToReadOnlyList();
 
                 void DepthFirstSearch( IntermediateSymbolSemantic current )
                 {

@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Templating
                 return this.MetaSyntaxFactory.SingletonSeparatedList<T>( this.Transform( list[0] ) );
             }
 
-            return this.MetaSyntaxFactory.SeparatedList<T>( list.SelectAsEnumerable( this.Transform ) );
+            return this.MetaSyntaxFactory.SeparatedList<T>( list.SelectAsReadOnlyList( this.Transform ) );
         }
 
         [UsedImplicitly]
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Templating
                                     this.MetaSyntaxFactory.ArrayType<SyntaxToken>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( list.SelectAsEnumerable( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.SelectAsReadOnlyList( this.Transform ) ) ) ) ) ) ) );
         }
 
         [UsedImplicitly]
@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Templating
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( list.SelectAsEnumerable( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.SelectAsReadOnlyList( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )
@@ -267,13 +267,13 @@ namespace Metalama.Framework.Engine.Templating
             // Argument needed.
 
             /*
-                 * public static Microsoft.CodeAnalysis.SyntaxToken Token (
-                 * Microsoft.CodeAnalysis.SyntaxTriviaList leading,
-                 * Microsoft.CodeAnalysis.CSharp.SyntaxKind kind,
-                 * string text,
-                 * string valueText,
-                 * Microsoft.CodeAnalysis.SyntaxTriviaList trailing);
-                 */
+             * public static Microsoft.CodeAnalysis.SyntaxToken Token (
+             * Microsoft.CodeAnalysis.SyntaxTriviaList leading,
+             * Microsoft.CodeAnalysis.CSharp.SyntaxKind kind,
+             * string text,
+             * string valueText,
+             * Microsoft.CodeAnalysis.SyntaxTriviaList trailing);
+             */
 
             return this.MetaSyntaxFactory.Token(
                 LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),

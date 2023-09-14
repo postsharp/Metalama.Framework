@@ -59,7 +59,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 

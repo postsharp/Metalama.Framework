@@ -85,7 +85,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
         this.EnsureComplete();
 
         var itemsToRemove = this.Where( x => x.GetTarget( namedType.Compilation ).Constructor.DeclaringType.Is( namedType ) )
-            .ToList();
+            .ToReadOnlyList();
 
         foreach ( var item in itemsToRemove )
         {

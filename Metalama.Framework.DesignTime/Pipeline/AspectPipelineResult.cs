@@ -401,7 +401,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
             }
 
-            return resultBuilders.SelectAsEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public Invalidator ToInvalidator() => new( this );

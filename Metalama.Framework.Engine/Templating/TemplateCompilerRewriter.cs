@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -794,7 +795,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     InitializerExpression(
                         SyntaxKind.ObjectInitializerExpression,
                         SeparatedList<ExpressionSyntax>(
-                            this._templateCompileTimeTypeParameterNames.SelectAsEnumerable(
+                            this._templateCompileTimeTypeParameterNames.SelectAsReadOnlyCollection(
                                 name =>
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
@@ -827,7 +828,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             if ( this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol { ReducedFrom: not null } method )
             {
-                this.Report( TemplatingDiagnosticDescriptors.ExtensionMethodMethodGroupConversion.CreateRoslynDiagnostic( node.GetDiagnosticLocation(), method ) );
+                this.Report(
+                    TemplatingDiagnosticDescriptors.ExtensionMethodMethodGroupConversion.CreateRoslynDiagnostic( node.GetDiagnosticLocation(), method ) );
             }
         }
         else
@@ -875,7 +877,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return base.TransformConditionalAccessExpression( node );
     }
 
-    private (ExpressionSyntax Condition, ExpressionSyntax Invocation)? ProcessConditionalAccessExtensionMethod( ConditionalAccessExpressionSyntax conditionalAccessExpression )
+    private (ExpressionSyntax Condition, ExpressionSyntax Invocation)? ProcessConditionalAccessExtensionMethod(
+        ConditionalAccessExpressionSyntax conditionalAccessExpression )
     {
         var memberBinding = conditionalAccessExpression.DescendantNodes().OfType<MemberBindingExpressionSyntax>().FirstOrDefault();
         var symbol = memberBinding == null ? null : this._syntaxTreeAnnotationMap.GetSymbol( memberBinding );
@@ -1133,7 +1136,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         modifiedArgument = argument.WithExpression( this.MetaSyntaxFactory.IdentifierName( variableIdentifier ) );
                     }
-                    else if ( this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly )
+                    else if ( this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope()
+                              != TemplatingScope.CompileTimeOnly )
                     {
                         modifiedArgument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
                     }
@@ -1144,7 +1148,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var (receiver, name) = node.Expression switch
                 {
                     SimpleNameSyntax simpleName => (null, simpleName),
-                    MemberAccessExpressionSyntax memberAccess => (this.Visit( memberAccess.Expression ).AssertCast<ExpressionSyntax>().AssertNotNull(), memberAccess.Name),
+                    MemberAccessExpressionSyntax memberAccess => (
+                        this.Visit( memberAccess.Expression ).AssertCast<ExpressionSyntax>().AssertNotNull(), memberAccess.Name),
                     _ => throw new AssertionFailedException( $"Expression '{node.Expression}' has unexpected expression type {node.Expression.GetType()}." )
                 };
 
@@ -1153,7 +1158,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // Handle receiver side-effects by saving it into a variable.
                     var variableIdentifier = this._currentMetaContext!.GetVariable( symbol.Name );
 
-                    var variableDeclaration = LocalDeclarationStatement( VariableDeclaration( SyntaxFactoryEx.VarIdentifier() ).AddVariables( VariableDeclarator( variableIdentifier, default, EqualsValueClause( receiver ) ) ) );
+                    var variableDeclaration = LocalDeclarationStatement(
+                        VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
+                            .AddVariables( VariableDeclarator( variableIdentifier, default, EqualsValueClause( receiver ) ) ) );
 
                     this._currentMetaContext.Statements.Add( variableDeclaration );
 
@@ -1185,7 +1192,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
 
                 ExpressionSyntax compiledTemplateExpression =
-                    receiver == null ? IdentifierName( compiledTemplateName ) : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, IdentifierName( compiledTemplateName ) );
+                    receiver == null
+                        ? IdentifierName( compiledTemplateName )
+                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, IdentifierName( compiledTemplateName ) );
 
                 var templateProviderExpression = symbol.IsStatic switch
                 {
@@ -1196,7 +1205,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 };
 
                 // templateSyntaxFactory.ForTemplate("templateName", templateProvider)
-                var templateSyntaxFactoryExpression = InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ForTemplate) ) ) 
+                var templateSyntaxFactoryExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ForTemplate) ) )
                     .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralNonNullExpression( symbol.Name ) ), Argument( templateProviderExpression ) );
 
                 var templateInvocationExpression = InvocationExpression( compiledTemplateExpression )
@@ -1243,7 +1253,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         default:
                             transformedExpression = this.CreateRunTimeExpression( transformedExpression );
-                            
+
                             break;
                     }
 
@@ -1376,8 +1386,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         .WithAttributeLists( default );
 
                 if ( parameter.Default != null )
-                { 
-                    templateParameter = 
+                {
+                    templateParameter =
                         templateParameter.WithDefault( EqualsValueClause( SyntaxFactoryEx.Null ) );
 
                     // param ??= default-syntax;
@@ -1435,7 +1445,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             body = body?.WithStatements( body.Statements.InsertRange( 0, templateParameterDefaultStatements ) );
         }
 
-        var result = this.CreateTemplateMethod( node, body, templateParameters.ToArray(), node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ).ToArray() );
+        var result = this.CreateTemplateMethod(
+            node,
+            body,
+            templateParameters.ToArray(),
+            node.Modifiers.Where( modifier => modifier.IsAccessModifierKeyword() ).ToArray() );
 
         this.Unindent( 3 );
 
@@ -1541,7 +1555,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax? body, ParameterSyntax[]? parameters = null, SyntaxToken[]? accessibilityModifiers = null )
+    private MethodDeclarationSyntax CreateTemplateMethod(
+        SyntaxNode node,
+        BlockSyntax? body,
+        ParameterSyntax[]? parameters = null,
+        SyntaxToken[]? accessibilityModifiers = null )
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
@@ -1590,7 +1608,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     var compileTimeBaseType = this.MetaSyntaxFactory.ReflectionMapper.GetNamedTypeSymbolByMetadataName(
                         overriddenTemplate.ContainingType.GetReflectionFullName(),
-                        new( overriddenTemplate.ContainingAssembly.Name ) );
+                        new AssemblyName( overriddenTemplate.ContainingAssembly.Name ) );
 
                     var baseCompiledTemplate = compileTimeBaseType.GetMembers( this._templateName ).SingleOrDefault();
 
@@ -2031,7 +2049,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
                 var section = node.Sections[i];
-                var transformedStatements = this.ToMetaStatements( section.Statements ).ToList();
+                var transformedStatements = this.ToMetaStatements( section.Statements ).ToMutableList();
 
                 // If the last statement does not transfer control elsewhere, add a break statement.
                 // This happens when the transfer control statement in a template is run-time (e.g. a throw).

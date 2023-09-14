@@ -111,9 +111,9 @@ namespace Metalama.Testing.UnitTesting
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
                 .Select( GetCachedMetadataReference )
-                .ToList();
+                .ToReadOnlyList();
 
-            return standardLibraries.ConcatList( systemLibraries );
+            return standardLibraries.Concat( systemLibraries );
         }
 
         // Caching is critical for memory usage, otherwise we get random OutOfMemoryException in parallel tests.
@@ -189,12 +189,13 @@ namespace Metalama.Testing.UnitTesting
             var parseOptions = GetParseOptions( preprocessorSymbols );
 
             var mainRoslynCompilation = CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
-                .AddSyntaxTrees( code.SelectAsEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                .AddSyntaxTrees( code.SelectAsReadOnlyCollection( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {
                 var dependentCompilation = CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
-                    .AddSyntaxTrees( dependentCode.SelectAsEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                    .AddSyntaxTrees(
+                        dependentCode.SelectAsReadOnlyCollection( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }

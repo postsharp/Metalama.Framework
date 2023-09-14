@@ -18,7 +18,7 @@ internal sealed class OverflowAspectSource : IAspectSource
 {
     private readonly ConcurrentLinkedList<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 
-    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsEnumerable( a => a.AspectClass ).Distinct().ToImmutableArray();
+    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsReadOnlyCollection( a => a.AspectClass ).Distinct().ToImmutableArray();
 
     public AspectSourceResult GetAspectInstances(
         CompilationModel compilation,
@@ -32,7 +32,7 @@ internal sealed class OverflowAspectSource : IAspectSource
                 .Select( a => a.Source )
                 .Distinct()
                 .Select( a => a.GetAspectInstances( compilation, aspectClass, diagnosticAdder, cancellationToken ) )
-                .ToList();
+                .ToReadOnlyList();
 
         return new AspectSourceResult( aspectSourceResults.SelectMany( x => x.AspectInstances ), aspectSourceResults.SelectMany( x => x.Exclusions ) );
     }

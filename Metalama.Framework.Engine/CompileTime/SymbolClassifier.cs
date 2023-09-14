@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
                     (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
-                }.SelectMany( t => t.MemberNames.SelectAsEnumerable( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
+                }.SelectMany( t => t.MemberNames.SelectAsReadOnlyList( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
                 .ToImmutableDictionary(
                     t => (t.Type.Name.AssertNotNull(), t.MemberName),
                     t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
@@ -261,8 +261,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return TemplatingScope.CompileTimeOnly;
             }
 
-            var scopeFromAttributes = assembly.GetAttributes()
-                .Concat( assembly.Modules.First().GetAttributes() )
+            var scopeFromAttributes = Enumerable.Concat( assembly.GetAttributes(), assembly.Modules.First().GetAttributes() )
                 .Select( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 

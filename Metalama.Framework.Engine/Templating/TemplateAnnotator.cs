@@ -670,7 +670,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
         var childNodes = visitedNode.ChildNodes().Where( n => n is ExpressionSyntax or InterpolationSyntax );
 
-        var combinedScope = this.GetExpressionScope( childNodes.ToList(), node );
+        var combinedScope = this.GetExpressionScope( childNodes.ToReadOnlyList(), node );
 
         return visitedNode.AddScopeAnnotation( combinedScope );
     }
@@ -706,7 +706,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
         var transformedMembers =
-            node.Initializers.SelectAsEnumerable( i => this.Visit( i ).AddScopeAnnotation( scope ) );
+            node.Initializers.SelectAsReadOnlyList( i => this.Visit( i ).AddScopeAnnotation( scope ) );
 
         return node.Update(
                 node.NewKeyword,
@@ -760,7 +760,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;
-        var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
+        var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToReadOnlyList();
         var scope = this.GetCommonSymbolScope( symbols );
 
         if ( scope is null or TemplatingScope.DynamicTypeConstruction )
@@ -1017,7 +1017,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var compileTimeOutArguments = node.ArgumentList.Arguments.Where(
                 a => a.RefKindKeyword.Kind() is SyntaxKind.OutKeyword or SyntaxKind.RefKeyword
                      && this.GetNodeScope( a.Expression ) == TemplatingScope.CompileTimeOnly )
-            .ToList();
+            .ToReadOnlyList();
 
         ScopeContext? expressionContext = null;
 
@@ -1614,7 +1614,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{typeSymbol}'" ) ) )
             {
                 // ReSharper disable once RedundantSuppressNullableWarningExpression
-                var transformedVariables = node.Variables.SelectAsEnumerable( v => this.Visit( v )! );
+                var transformedVariables = node.Variables.SelectAsReadOnlyList( v => this.Visit( v )! );
 
                 return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
             }
@@ -1624,14 +1624,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedVariables = node.Variables.SelectAsImmutableArray( v => this.Visit( v )! );
 
-            var variableScopes = transformedVariables.SelectAsEnumerable( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
+            var variableScopes = transformedVariables.SelectAsReadOnlyList( v => v.GetScopeFromAnnotation() ).Distinct().ToReadOnlyList();
 
             if ( variableScopes.Count != 1 )
             {
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.SplitVariables,
                     node,
-                    string.Join( ",", node.Variables.SelectAsEnumerable( v => "'" + v.Identifier.Text + "'" ) ) );
+                    string.Join( ",", node.Variables.SelectAsReadOnlyList( v => "'" + v.Identifier.Text + "'" ) ) );
             }
 
             var variableScope = variableScopes.Single();
@@ -2150,11 +2150,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        var transformedInitializers = node.Initializers.SelectAsEnumerable( i => this.Visit( i )! );
+        var transformedInitializers = node.Initializers.SelectAsReadOnlyList( i => this.Visit( i )! );
         var transformedCondition = this.Visit( node.Condition );
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        var transformedIncrementors = node.Incrementors.SelectAsEnumerable( syntax => this.Visit( syntax )! );
+        var transformedIncrementors = node.Incrementors.SelectAsReadOnlyList( syntax => this.Visit( syntax )! );
 
         StatementSyntax transformedStatement;
 

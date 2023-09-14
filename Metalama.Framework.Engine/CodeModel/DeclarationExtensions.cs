@@ -74,8 +74,8 @@ namespace Metalama.Framework.Engine.CodeModel
                             namedType.TypeParameters )
                         .ConcatNotNull( namedType.StaticConstructor )
                         .ConcatNotNull( namedType.Finalizer ),
-                    IMethod method => method.Parameters
-                        .Concat<IDeclaration>( method.TypeParameters )
+                    IMethod method => Enumerable
+                        .Concat<IDeclaration>( method.Parameters, method.TypeParameters )
                         .ConcatNotNull( method.ReturnParameter ),
                     IIndexer indexer => indexer.Parameters.Concat<IDeclaration>( indexer.Accessors ),
                     IConstructor constructor => constructor.Parameters,

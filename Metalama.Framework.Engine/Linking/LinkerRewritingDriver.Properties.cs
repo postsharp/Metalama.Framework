@@ -457,7 +457,7 @@ namespace Metalama.Framework.Engine.Linking
             var cleanAccessorList =
                 accessorList?.WithAccessors(
                     List(
-                        accessorList.Accessors.SelectAsEnumerable(
+                        accessorList.Accessors.SelectAsReadOnlyList(
                             a =>
                                 a.Kind() switch
                                 {
@@ -495,7 +495,9 @@ namespace Metalama.Framework.Engine.Linking
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static PropertyDeclarationSyntax GetTrampolineForProperty( PropertyDeclarationSyntax property, IntermediateSymbolSemantic<IPropertySymbol> targetSymbol )
+        private static PropertyDeclarationSyntax GetTrampolineForProperty(
+            PropertyDeclarationSyntax property,
+            IntermediateSymbolSemantic<IPropertySymbol> targetSymbol )
         {
             var getAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
             var setAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );

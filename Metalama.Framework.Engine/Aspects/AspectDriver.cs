@@ -46,7 +46,7 @@ internal sealed class AspectDriver : IAspectDriver
         // Introductions must have a deterministic order because of testing.
         var declarativeAdviceAttributes = aspectClass
             .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
-            .ToList();
+            .ToReadOnlyList();
 
         if ( declarativeAdviceAttributes.Count > 0 )
         {
@@ -186,7 +186,7 @@ internal sealed class AspectDriver : IAspectDriver
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
                 .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
-                .ToList();
+                .ToReadOnlyList();
 
             // Create the AspectBuilder.
             var aspectBuilderState = new AspectBuilderState(

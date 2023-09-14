@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
@@ -110,12 +111,12 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( declaration is IMethod method )
                 {
-                    identifiers.AddRange( method.Parameters.SelectAsEnumerable( p => p.Name ) );
-                    identifiers.AddRange( method.TypeParameters.SelectAsEnumerable( p => p.Name ) );
-                }           
-                
+                    identifiers.AddRange( method.Parameters.SelectAsReadOnlyList( p => p.Name ) );
+                    identifiers.AddRange( method.TypeParameters.SelectAsReadOnlyList( p => p.Name ) );
+                }
+
                 // Accessors have implicit "value" parameter.
-                if ( declaration is IMethod { MethodKind: Code.MethodKind.PropertySet or Code.MethodKind.EventAdd or Code.MethodKind.EventRemove } )
+                if ( declaration is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove } )
                 {
                     identifiers.Add( "value" );
                 }

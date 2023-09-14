@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public void ApplyModifications( PartialCompilation compilation )
         {
-            this.Compilation = this.Compilation.Update( compilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree != null ).ToList() );
+            this.Compilation = this.Compilation.Update( compilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree != null ).ToReadOnlyList() );
 
             foreach ( var modifiedPath in compilation.ModifiedSyntaxTrees.Keys )
             {

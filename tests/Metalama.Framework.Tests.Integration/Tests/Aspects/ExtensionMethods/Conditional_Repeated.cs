@@ -14,9 +14,9 @@ internal class ReturnNumbers : OverrideMethodAspect
     {
         IEnumerable<object>? numbers = new object[] { 42 };
 
-        foreach (var _ in meta.CompileTime(Enumerable.Range(1, 2)))
+        foreach (var _ in meta.CompileTime( Enumerable.Range( 1, 2 ) ))
         {
-            numbers = numbers?.ToList();
+            numbers = Enumerable.ToList( numbers );
         }
 
         return numbers;
