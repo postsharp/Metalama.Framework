@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionRegistry = injectionRegistry;
 
             var indexedLayers =
-                Enumerable.Concat( new[] { AspectLayerId.Null }, orderedAspectLayers.SelectAsReadOnlyList( x => x.AspectLayerId ) )
+                new[] { AspectLayerId.Null }.Concat( orderedAspectLayers.SelectAsReadOnlyList( x => x.AspectLayerId ) )
                     .Select( ( al, i ) => (AspectLayerId: al, Index: i) )
                     .ToReadOnlyList();
 

@@ -98,9 +98,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =
-            Enumerable.Concat(
-                    new[] { (InterfaceType: this._interfaceType, IsTopLevel: true) },
-                    this._interfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
+            new[] { (InterfaceType: this._interfaceType, IsTopLevel: true) }
+                .Concat( this._interfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                 .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
         // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.

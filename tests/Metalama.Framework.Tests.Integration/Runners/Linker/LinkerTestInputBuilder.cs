@@ -99,9 +99,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilationModel,
-                Enumerable.Concat(
-                        this._rewriter.ReplacedTransformations
-                            .Concat( this._rewriter.ObservableTransformations ),
+                this._rewriter.ReplacedTransformations.Concat(
+                        this._rewriter.ObservableTransformations,
                         this._rewriter.NonObservableTransformations )
                     .ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 orderedLayers,

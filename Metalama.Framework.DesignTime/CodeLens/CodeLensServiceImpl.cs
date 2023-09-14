@@ -129,7 +129,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             .Select( t => t.AspectClassFullName )
             .ToReadOnlyList();
 
-        var distinctAspects = Enumerable.Concat( aspectInstances, transformations ).Distinct().ToReadOnlyList();
+        var distinctAspects = aspectInstances.Concat( transformations ).Distinct().ToReadOnlyList();
         var distinctAspectCount = distinctAspects.Count;
 
         this._logger.Trace?.Log( $"There are {distinctAspectCount} distinct aspect(s) affecting '{codePointData.Symbol}'." );

@@ -261,8 +261,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 return TemplatingScope.CompileTimeOnly;
             }
 
-            var scopeFromAttributes = Enumerable.Concat( assembly.GetAttributes(), assembly.Modules.First().GetAttributes() )
-                .Select( GetTemplatingScope )
+            var scopeFromAttributes = assembly.GetAttributes()
+                .Concat( assembly.Modules.First().GetAttributes() )
+                .SelectAsList( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )

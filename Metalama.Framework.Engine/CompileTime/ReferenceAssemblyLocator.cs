@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
-            this.StandardAssemblyNames = Enumerable.Concat( this.MetalamaImplementationAssemblyNames, new[] { _compileTimeFrameworkAssemblyName } )
+            this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames.Concat( new[] { _compileTimeFrameworkAssemblyName } )
                 .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 

@@ -156,7 +156,7 @@ internal static class TestDeclarationExtensions
         => declaration switch
         {
             ICompilation compilation => new[] { compilation.GlobalNamespace },
-            INamespace ns => Enumerable.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
+            INamespace ns => ns.Namespaces.Concat<IDeclaration>( ns.Types ),
             INamedType namedType => new IEnumerable<IDeclaration>[]
                 {
                     namedType.NestedTypes,
