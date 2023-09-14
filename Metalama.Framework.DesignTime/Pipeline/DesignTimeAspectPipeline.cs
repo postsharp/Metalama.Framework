@@ -852,7 +852,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
                                                                                    && syntaxTree == null;
 
-    private IReadOnlyCollection<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
+    private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {
         // Check the aspects already on the declaration.
         var filePath = symbol.GetPrimaryDeclaration()?.SyntaxTree.FilePath;
