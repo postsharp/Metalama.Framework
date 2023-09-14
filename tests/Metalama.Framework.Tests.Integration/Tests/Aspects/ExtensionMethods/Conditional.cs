@@ -17,13 +17,13 @@ internal class ReturnNumbers : OverrideMethodAspect
         switch (DateTime.Today.DayOfWeek)
         {
             case DayOfWeek.Monday:
-                return numbers?.ToList();
+                return numbers?.ToReadOnlyList();
             case DayOfWeek.Tuesday:
-                return numbers?.ToList().ToList();
+                return numbers?.ToReadOnlyList().ToReadOnlyList();
             case DayOfWeek.Wednesday:
-                return numbers.ToList()?.ToList();
+                return numbers.ToReadOnlyList()?.ToReadOnlyList();
             default:
-                return numbers?.ToList()?.ToList();
+                return numbers?.ToReadOnlyList()?.ToReadOnlyList();
         }
     }
 }

@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Formatting
                 var members = node.AncestorsAndSelf()
                     .Select( GetMemberTextPair )
                     .Where( x => x.Node != null )
-                    .ToReadOnlyList();
+                    .ToMutableList();
 
                 static (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
                     => n switch
