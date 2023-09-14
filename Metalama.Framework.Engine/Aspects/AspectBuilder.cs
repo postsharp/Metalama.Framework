@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -55,6 +56,11 @@ namespace Metalama.Framework.Engine.Aspects
         void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
             this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
+        }
+
+        public void AddConfiguratorSource( IConfiguratorSource configuratorSource )
+        {
+            this._aspectBuilderState.ConfiguratorSources = this._aspectBuilderState.ConfiguratorSources.Add( configuratorSource );
         }
 
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
@@ -107,31 +113,32 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var result = rule.GetEligibility( this.Target );
 
-            if ( result == EligibleScenarios.None )
+            switch ( result )
             {
-                var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
+                case EligibleScenarios.None:
+                    {
+                        var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
 
-                this._aspectBuilderState.Diagnostics.Report(
-                    GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
-                        this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
-                        this ) );
+                        this._aspectBuilderState.Diagnostics.Report(
+                            GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
+                                this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
+                                (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
+                                this ) );
 
-                this.SkipAspect();
+                        this.SkipAspect();
 
-                return false;
-            }
-            else if ( result == EligibleScenarios.Inheritance )
-            {
-                // If inheritance is allowed, we return false without reporting any error.
+                        return false;
+                    }
 
-                this.SkipAspect();
+                case EligibleScenarios.Inheritance:
+                    // If inheritance is allowed, we return false without reporting any error.
 
-                return false;
-            }
-            else
-            {
-                return true;
+                    this.SkipAspect();
+
+                    return false;
+
+                default:
+                    return true;
             }
         }
 

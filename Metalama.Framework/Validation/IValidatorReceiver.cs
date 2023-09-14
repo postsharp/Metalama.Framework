@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Options;
 using System;
 using System.Collections.Generic;
 
@@ -103,4 +104,6 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// Filters the set of declarations included in the query.
     /// </summary>
     IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
+
+    void Configure<TOptions>( Func<TDeclaration, TOptions> func ) where TOptions : AspectOptions, IAspectOptions<TDeclaration>, new();
 }

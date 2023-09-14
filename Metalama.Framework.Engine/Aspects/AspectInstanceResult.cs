@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
 
@@ -22,6 +23,8 @@ namespace Metalama.Framework.Engine.Aspects
         public ImmutableArray<IAspectSource> AspectSources { get; }
 
         public ImmutableArray<IValidatorSource> ValidatorSources { get; }
+        
+        public ImmutableArray<IConfiguratorSource> ConfiguratorSources { get; }
 
         public AspectInstanceResult(
             IAspectInstance aspectInstance,
@@ -29,7 +32,8 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableUserDiagnosticList diagnostics,
             ImmutableArray<ITransformation> transformations,
             ImmutableArray<IAspectSource> aspectSources,
-            ImmutableArray<IValidatorSource> validatorSources )
+            ImmutableArray<IValidatorSource> validatorSources,
+            ImmutableArray<IConfiguratorSource> configuratorSources )
         {
             this.AspectInstance = aspectInstance;
             this.Outcome = outcome;
@@ -37,6 +41,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.Transformations = transformations;
             this.AspectSources = aspectSources;
             this.ValidatorSources = validatorSources;
+            this.ConfiguratorSources = configuratorSources;
         }
 
         public AspectInstanceResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )
@@ -46,6 +51,7 @@ namespace Metalama.Framework.Engine.Aspects
                 this.Diagnostics.Concat( diagnostics ),
                 this.Transformations,
                 this.AspectSources,
-                this.ValidatorSources );
+                this.ValidatorSources,
+                this.ConfiguratorSources );
     }
 }

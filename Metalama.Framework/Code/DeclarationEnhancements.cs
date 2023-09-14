@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,4 +72,7 @@ public readonly struct DeclarationEnhancements<T>
     public bool HasAspect<TAspect>()
         where TAspect : IAspect<T>
         => this.HasAspect( typeof(TAspect) );
+
+    public TOptions GetOptions<TOptions>() where TOptions : AspectOptions, IAspectOptions<T>, new()
+        => ((ICompilationInternal) this.Declaration.Compilation).AspectOptionsManager.GetOptions<TOptions>( this.Declaration );
 }

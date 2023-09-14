@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             private readonly List<IAspectSource> _aspectSources = new();
             private readonly List<IValidatorSource> _validatorSources = new();
+            private readonly List<IConfiguratorSource> _configuratorSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
                 base( project, fabricManager, fabricInstance, targetDeclaration ) { }
@@ -40,6 +42,8 @@ namespace Metalama.Framework.Engine.Fabrics
             public sealed override void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
 
             public override void AddValidatorSource( IValidatorSource validatorSource ) => this._validatorSources.Add( validatorSource );
+
+            public override void AddConfiguratorSource( IConfiguratorSource configuratorSource ) => this._configuratorSources.Add( configuratorSource );
 
             public StaticFabricResult ToResult() => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray() );
         }

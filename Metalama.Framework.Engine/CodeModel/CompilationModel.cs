@@ -14,8 +14,10 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -60,6 +62,10 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
         internal AspectRepository AspectRepository { get; }
+
+        internal AspectOptionsManager AspectOptionsManager { get; }
+
+        IAspectOptionsManager ICompilationInternal.AspectOptionsManager => this.AspectOptionsManager;
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 

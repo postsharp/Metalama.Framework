@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -444,6 +445,11 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         {
             this._validatorSources.Add( source );
         }
+    }
+
+    public void AddConfigurationSources( IEnumerable<IConfiguratorSource> configuratorSources )
+    {
+        TODO
     }
 
     public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
