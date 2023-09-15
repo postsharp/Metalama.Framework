@@ -886,7 +886,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         var compilationContext = CompilationContextFactory.GetInstance( compilation );
 
-        var currentAspectInstances = (IReadOnlyList<DesignTimeAspectInstance>?) this.GetAspectInstancesOnSymbol( symbol )
+        var currentAspectInstances = this.GetAspectInstancesOnSymbol( symbol )
                                      ?? Array.Empty<DesignTimeAspectInstance>();
 
         IDeclaration? declaration = null;

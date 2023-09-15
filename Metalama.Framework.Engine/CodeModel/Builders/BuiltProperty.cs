@@ -34,15 +34,15 @@ internal sealed class BuiltProperty : BuiltMember, IPropertyImpl
     public IType Type => this.Compilation.Factory.GetIType( this.PropertyBuilder.Type );
 
     [Memo]
-    public IMethod? GetMethod
-        => this.PropertyBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.GetMethod ) : null;
+    public IMethod? GetMethod => this.PropertyBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.GetMethod ) : null;
 
     [Memo]
-    public IMethod? SetMethod
-        => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
+    public IMethod? SetMethod => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
 
     [Memo]
     public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
+
+    IProperty IProperty.PropertyDefinition => this;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]

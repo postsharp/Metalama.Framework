@@ -324,6 +324,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                     "Couldn't get initializer for member.",
                     _category );
 
+        internal static readonly DiagnosticDefinition<(string OptionName, DeclarationKind DeclarationKind, IDeclaration Target, FormattableString Reason)>
+            OptionNotEligibleOnTarget = new(
+                "LAMA0065",
+                _category,
+                "The option '{0}' cannot be applied to the {1} '{2}' because {3}.",
+                Error,
+                "The option cannot be applied to a declaration because eligibility conditions are not met." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

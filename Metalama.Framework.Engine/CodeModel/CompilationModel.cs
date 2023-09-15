@@ -40,23 +40,25 @@ namespace Metalama.Framework.Engine.CodeModel
             ProjectModel project,
             PartialCompilation compilation,
             AspectRepository? aspectRepository = null,
+            AspectOptionsManager? aspectOptionsManager = null,
             string? debugLabel = null )
-            => new( project, compilation, aspectRepository, CompilationModelOptions.Default, debugLabel );
+            => new( project, compilation, aspectRepository, aspectOptionsManager, CompilationModelOptions.Default, debugLabel );
 
         public static CompilationModel CreateInitialInstance(
             ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null,
+            AspectOptionsManager? aspectOptionsManager = null,
             string? debugLabel = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, CompilationModelOptions.Default, debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, aspectOptionsManager, CompilationModelOptions.Default, debugLabel );
 
         internal static CompilationModel CreateInitialInstance(
             ProjectModel project,
             Compilation compilation,
             CompilationModelOptions options,
             string? debugLabel )
-            => new( project, PartialCompilation.CreateComplete( compilation ), null, options: options, debugLabel: debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, options: options, debugLabel: debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -65,7 +67,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal AspectOptionsManager AspectOptionsManager { get; }
 
-        IAspectOptionsManager ICompilationInternal.AspectOptionsManager => this.AspectOptionsManager;
+        IAspectOptionsManager ICompilationInternal.AspectOptionsManager
+            => this.AspectOptionsManager.AssertNotNull( $"The {nameof(this.AspectOptionsManager)} has not been supplied." );
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
@@ -100,13 +103,14 @@ namespace Metalama.Framework.Engine.CodeModel
             ProjectModel project,
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
+            AspectOptionsManager? aspectOptionsManager,
             CompilationModelOptions? options,
             string? debugLabel )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this._debugLabel = debugLabel;
-
+            
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
             this._staticConstructors =
@@ -116,6 +120,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this._derivedTypes = partialCompilation.LazyDerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
+            this.AspectOptionsManager = aspectOptionsManager ?? new AspectOptionsManager( project.ServiceProvider );
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -239,6 +244,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._redirections = prototype._redirections;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this.AspectRepository = prototype.AspectRepository;
+            this.AspectOptionsManager = prototype.AspectOptionsManager;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }

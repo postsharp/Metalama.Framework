@@ -40,6 +40,10 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
         }
     }
 
+    [Memo]
+    public IIndexer IndexerDefinition
+        => this.PropertySymbol == this.PropertySymbol.OriginalDefinition ? this : this.Compilation.Factory.GetIndexer( this.PropertySymbol.OriginalDefinition );
+
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 
     public IIndexerInvoker With( object? target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );

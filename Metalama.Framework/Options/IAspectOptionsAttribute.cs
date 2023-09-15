@@ -10,8 +10,8 @@ public interface IAspectOptionsAttribute
     ImmutableArray<Type> SupportedOptionTypes { get; }
 }
 
-public interface IAspectOptionsAttribute<T> : IAspectOptionsAttribute
+public interface IAspectOptionsAttribute<out T> : IAspectOptionsAttribute
     where T : AspectOptions
 {
-    T GetOptions( T baseOptions );
+    T ToOptions();
 }

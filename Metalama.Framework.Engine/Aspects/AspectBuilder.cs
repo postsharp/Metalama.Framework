@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 case EligibleScenarios.None:
                     {
-                        var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
+                        var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<T>( this.Target ) );
 
                         this._aspectBuilderState.Diagnostics.Report(
                             GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(

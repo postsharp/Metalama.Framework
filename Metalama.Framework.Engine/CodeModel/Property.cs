@@ -52,6 +52,12 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        [Memo]
+        public IProperty PropertyDefinition
+            => this.PropertySymbol == this.PropertySymbol.OriginalDefinition
+                ? this
+                : this.Compilation.Factory.GetProperty( this.PropertySymbol.OriginalDefinition );
+
         public IMember? OverriddenMember => this.OverriddenProperty;
 
         [Memo]

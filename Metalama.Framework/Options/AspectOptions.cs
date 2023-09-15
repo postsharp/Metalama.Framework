@@ -8,5 +8,13 @@ public abstract class AspectOptions
 {
     protected internal virtual AspectOptions? GetDefaultOptions( IProject project ) => null;
 
-    protected internal abstract AspectOptions WithChanges( AspectOptions options );
+    protected internal abstract AspectOptions OverrideWith( AspectOptions options, AspectOptionsOverrideAxis axis );
+}
+
+public enum AspectOptionsOverrideAxis
+{
+    Containment,
+    ContainmentOverBase,
+    SameDeclaration,
+    CurrentDeclarationOverInheritance
 }

@@ -50,7 +50,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
                 ({ SetMethod: not null }, Writeability.All) => false,
                 ({ SetMethod: not null }, Writeability.InitOnly) => true,
                 _ => throw new InvalidOperationException(
-                    $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." ),
+                    $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." )
             };
     }
 
@@ -81,6 +81,8 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     public IProperty? OverriddenProperty { get; set; }
 
+    IProperty IProperty.PropertyDefinition => this;
+
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IProperty>();
@@ -109,7 +111,8 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+            .GetTypedExpressionSyntax();
 
     public TemplateMember<IProperty>? InitializerTemplate
     {

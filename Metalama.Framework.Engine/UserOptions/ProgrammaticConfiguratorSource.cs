@@ -14,18 +14,18 @@ internal sealed class ProgrammaticConfiguratorSource : IConfiguratorSource
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<UserOptionsConfigurator>> _getInstances;
 
     public ProgrammaticConfiguratorSource(
-        Type optionsType,
+        string optionsType,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<UserOptionsConfigurator>> getInstances )
     {
-        this.OptionsTypes = ImmutableArray.Create( optionsType );
+        this.OptionTypes = ImmutableArray.Create( optionsType );
         this._getInstances = getInstances;
     }
 
-    public ImmutableArray<Type> OptionsTypes { get; }
+    public ImmutableArray<string> OptionTypes { get; }
 
-    public IEnumerable<UserOptionsConfigurator> GetConfigurators( Type optionsType, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<UserOptionsConfigurator> GetConfigurators( string optionsType, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
-        if ( optionsType != this.OptionsTypes[0] )
+        if ( optionsType != this.OptionTypes[0] )
         {
             return Enumerable.Empty<UserOptionsConfigurator>();
         }

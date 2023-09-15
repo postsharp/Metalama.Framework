@@ -282,7 +282,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             var aspectInstance = new AspectInstance( aspect, requirementTarget, stronglyTypedAspectClass, predecessors.ToImmutableArray() );
             var eligibility = aspectInstance.ComputeEligibility( requirementTarget );
 
-            if ( (eligibility & (EligibleScenarios.Aspect | EligibleScenarios.Inheritance)) != 0 )
+            if ( (eligibility & (EligibleScenarios.Default | EligibleScenarios.Inheritance)) != 0 )
             {
                 aspectInstances.Add( new ResolvedAspectInstance( aspectInstance, (IDeclarationImpl) requirementTarget, eligibility ) );
             }
@@ -297,7 +297,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Get the aspects that can be processed, i.e. they are not abstract-only.
         var concreteAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Default ) )
             .ToReadOnlyList();
 
         // Gets aspects that can be inherited.
@@ -313,7 +313,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     .Select( d => (TargetDeclaration: (IDeclarationImpl) d, DerivedAspectInstance: a.AspectInstance.CreateDerivedInstance( d )) )
                     .Select(
                         x => (x.TargetDeclaration, x.DerivedAspectInstance, Eligibility: x.DerivedAspectInstance.ComputeEligibility( x.TargetDeclaration )) )
-                    .Where( x => x.Eligibility.IncludesAny( EligibleScenarios.Aspect | EligibleScenarios.Inheritance ) )
+                    .Where( x => x.Eligibility.IncludesAny( EligibleScenarios.Default | EligibleScenarios.Inheritance ) )
                     .Select(
                         x =>
                             new ResolvedAspectInstance(
@@ -323,7 +323,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             .ToReadOnlyList();
 
         var concreteInheritedAspectInstancesInProject =
-            inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+            inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Default ) )
                 .ToReadOnlyList();
 
         // Index these aspects. 
@@ -447,9 +447,12 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public void AddConfigurationSources( IEnumerable<IConfiguratorSource> configuratorSources )
+    public void AddConfiguratorSources( IEnumerable<IConfiguratorSource> configuratorSources )
     {
-        TODO
+        foreach ( var source in configuratorSources )
+        {
+            this.LastCompilation.AspectOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
+        }
     }
 
     public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );

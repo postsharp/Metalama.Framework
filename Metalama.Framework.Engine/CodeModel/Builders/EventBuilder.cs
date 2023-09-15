@@ -105,6 +105,8 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IEvent>();
 
+    IEvent IEvent.EventDefinition => this;
+
     public IExpression? InitializerExpression { get; set; }
 
     public TemplateMember<IEvent>? InitializerTemplate { get; set; }

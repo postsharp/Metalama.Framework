@@ -10,21 +10,11 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.UserOptions;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
-
-class CompilationConfiguratorSource : IConfiguratorSource
-{
-    public ImmutableArray<Type> OptionsTypes { get; set; }
-
-    public IEnumerable<UserOptionsConfigurator> GetConfigurators( Type optionsType, CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) => throw new NotImplementedException();
-}
 
 /// <summary>
 /// An implementation  of <see cref="IAspectSource"/> that creates aspect instances from custom attributes
@@ -94,7 +84,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
                         if ( eligibility == EligibleScenarios.None )
                         {
-                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Default;
 
                             var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
                                 requestedEligibility,

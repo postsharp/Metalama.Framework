@@ -38,15 +38,15 @@ internal sealed class BuiltIndexer : BuiltMember, IIndexerImpl
             this.GetCompilationModel().GetParameterCollection( this._indexerBuilder.ToTypedRef<IHasParameters>() ) );
 
     [Memo]
-    public IMethod? GetMethod
-        => this._indexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.GetMethod ) : null;
+    public IMethod? GetMethod => this._indexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.GetMethod ) : null;
 
     [Memo]
-    public IMethod? SetMethod
-        => this._indexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.SetMethod ) : null;
+    public IMethod? SetMethod => this._indexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._indexerBuilder.SetMethod ) : null;
 
     [Memo]
     public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
+
+    IIndexer IIndexer.IndexerDefinition => this;
 
     public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 

@@ -312,7 +312,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterConfiguratorSource(
                 new ProgrammaticConfiguratorSource(
-                    typeof(TOptions),
+                    typeof(TOptions).FullName.AssertNotNull(),
                     ( compilation, diagnosticAdder )
                         => this.SelectAndValidateValidatorOrConfiguratorTargets<UserOptionsConfigurator>(
                             userCodeInvoker,
@@ -510,7 +510,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
 
                 var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
-                var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+                var requiredEligibility = canBeInherited ? EligibleScenarios.Default | EligibleScenarios.Inheritance : EligibleScenarios.Default;
 
                 if ( !eligibility.IncludesAny( requiredEligibility ) )
                 {

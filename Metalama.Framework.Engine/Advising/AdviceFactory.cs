@@ -337,9 +337,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     {
         var rule = EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind );
 
-        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Default) == 0 )
         {
-            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<IDeclaration>( declaration ) );
 
             throw new InvalidOperationException(
                 MetalamaStringFormatter.Format(
@@ -353,9 +353,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     {
         var rule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection );
 
-        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Default) == 0 )
         {
-            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<IDeclaration>( declaration ) );
 
             throw new InvalidOperationException(
                 MetalamaStringFormatter.Format(

@@ -37,7 +37,7 @@ public sealed class EditorExperienceAttribute : Attribute
     /// <summary>
     /// Gets or sets a value indicating whether the code refactoring menu should offer the possibility to apply this aspect as a custom attribute. This property is <c>false</c> by default.
     /// The property is ignored if the aspect class does not have a default constructor. The eligibility
-    /// of the aspect for the <see cref="EligibleScenarios.Aspect"/> or <see cref="EligibleScenarios.Inheritance"/> scenario is taken into account. See <see cref="IEligible{T}.BuildEligibility"/> for details.
+    /// of the aspect for the <see cref="EligibleScenarios.Default"/> or <see cref="EligibleScenarios.Inheritance"/> scenario is taken into account. See <see cref="IEligible{T}.BuildEligibility"/> for details.
     /// </summary>
     public bool SuggestAsAddAttribute
     {

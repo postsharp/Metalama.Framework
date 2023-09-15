@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -116,7 +117,8 @@ internal sealed class AspectDriver : IAspectDriver
                     ImmutableUserDiagnosticList.Empty,
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<IValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty,
+                    ImmutableArray<IConfiguratorSource>.Empty );
             }
 
             AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
@@ -127,7 +129,8 @@ internal sealed class AspectDriver : IAspectDriver
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<IValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty,
+                    ImmutableArray<IConfiguratorSource>.Empty );
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -231,7 +234,8 @@ internal sealed class AspectDriver : IAspectDriver
                         diagnosticSink.ToImmutable(),
                         ImmutableArray<ITransformation>.Empty,
                         ImmutableArray<IAspectSource>.Empty,
-                        ImmutableArray<IValidatorSource>.Empty );
+                        ImmutableArray<IValidatorSource>.Empty,
+                        ImmutableArray<IConfiguratorSource>.Empty );
             }
 
             var aspectResult = aspectBuilderState.ToResult();
