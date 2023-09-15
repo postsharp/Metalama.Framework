@@ -9,12 +9,12 @@ using Metalama.Framework.Options;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.UserOptions;
+namespace Metalama.Framework.Engine.AspectConfiguration;
 
 public partial class AspectOptionsManager : IAspectOptionsManager
 {
     private readonly ConcurrentDictionary<string, OptionTypeNode> _sources = new();
-    private readonly ConcurrentDictionary<string, AspectOptions> _defaultOptions = new();
+    private readonly ConcurrentDictionary<string, Framework.Options.AspectOptions> _defaultOptions = new();
     private readonly ProjectServiceProvider _serviceProvider;
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
@@ -56,7 +56,7 @@ public partial class AspectOptionsManager : IAspectOptionsManager
     }
 
     public TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : AspectOptions, new()
+        where TOptions : Framework.Options.AspectOptions, new()
     {
         if ( this._sources.TryGetValue( typeof(TOptions).FullName.AssertNotNull(), out var node ) )
         {
@@ -69,7 +69,7 @@ public partial class AspectOptionsManager : IAspectOptionsManager
     }
 
     private T GetDefaultOptions<T>( ICompilation compilation )
-        where T : AspectOptions, new()
+        where T : Framework.Options.AspectOptions, new()
     {
         var optionTypeName = typeof(T).FullName.AssertNotNull();
 

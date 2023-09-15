@@ -6,6 +6,8 @@ using Metalama.Framework.Fabrics;
 // @Include(_Common.cs)
 #endif
 
+#pragma warning disable CS0067
+
 namespace Metalama.Framework.Tests.Integration.Tests.Options.ProjectFabric_;
 
 public class Fabric : ProjectFabric

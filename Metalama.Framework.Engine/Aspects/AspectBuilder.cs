@@ -6,13 +6,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.AspectConfiguration;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -48,12 +48,12 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
-        void IAspectOrValidatorSourceCollector.AddAspectSource( IAspectSource aspectSource )
+        void IPipelineContributorSourceCollector.AddAspectSource( IAspectSource aspectSource )
         {
             this._aspectBuilderState.AspectSources = this._aspectBuilderState.AspectSources.Add( aspectSource );
         }
 
-        void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
+        void IPipelineContributorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
             this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
         }

@@ -5,11 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.AspectConfiguration;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -313,7 +313,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterConfiguratorSource(
                 new ProgrammaticConfiguratorSource(
                     ( compilation, diagnosticAdder )
-                        => this.SelectAndValidateValidatorOrConfiguratorTargets<UserOptionsConfigurator>(
+                        => this.SelectAndValidateValidatorOrConfiguratorTargets<Configurator>(
                             userCodeInvoker,
                             executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                             compilation,
@@ -331,7 +331,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                                 return new[]
                                 {
-                                    new UserOptionsConfigurator(
+                                    new Configurator(
                                         t,
                                         options )
                                 };

@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AspectConfiguration;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -14,7 +15,6 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Options;
@@ -51,7 +51,13 @@ namespace Metalama.Framework.Engine.CodeModel
             AspectRepository? aspectRepository = null,
             AspectOptionsManager? aspectOptionsManager = null,
             string? debugLabel = null )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository, aspectOptionsManager, CompilationModelOptions.Default, debugLabel );
+            => new(
+                project,
+                PartialCompilation.CreateComplete( compilation, resources ),
+                aspectRepository,
+                aspectOptionsManager,
+                CompilationModelOptions.Default,
+                debugLabel );
 
         internal static CompilationModel CreateInitialInstance(
             ProjectModel project,
@@ -110,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this._debugLabel = debugLabel;
-            
+
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
             this._staticConstructors =

@@ -3,11 +3,10 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.UserOptions;
+namespace Metalama.Framework.Engine.AspectConfiguration;
 
 internal interface IConfiguratorSource
 {
-    IEnumerable<UserOptionsConfigurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder );
+    IEnumerable<Configurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder );
 }

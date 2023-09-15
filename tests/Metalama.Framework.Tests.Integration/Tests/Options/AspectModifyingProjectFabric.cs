@@ -6,6 +6,8 @@ using Metalama.Framework.Fabrics;
 // @Include(_Common.cs)
 #endif
 
+#pragma warning disable CS0067
+
 namespace Metalama.Framework.Tests.Integration.Tests.Options.AspectModifyingProjectFabric;
 
 public class Fabric : ProjectFabric
@@ -55,7 +57,7 @@ public class C2
     public int F;
 
     [OptionsAspect]
-    public event EventHandler E;
+    public event EventHandler? E;
 
     public class N
     {

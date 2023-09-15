@@ -11,7 +11,7 @@ using Metalama.Framework.Options;
 using System;
 using System.Collections.Concurrent;
 
-namespace Metalama.Framework.Engine.UserOptions;
+namespace Metalama.Framework.Engine.AspectConfiguration;
 
 public partial class AspectOptionsManager
 {
@@ -30,13 +30,13 @@ public partial class AspectOptionsManager
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
 
             var prototype =
-                invoker.Invoke( () => (AspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
+                invoker.Invoke( () => (Framework.Options.AspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
             this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
             this._eligibilityHelper.PopulateRules( diagnosticAdder );
         }
 
-        public void AddConfigurator( UserOptionsConfigurator configurator, IDiagnosticAdder diagnosticAdder )
+        public void AddConfigurator( Configurator configurator, IDiagnosticAdder diagnosticAdder )
         {
             // ReSharper disable once InconsistentlySynchronizedField
             var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
@@ -63,7 +63,7 @@ public partial class AspectOptionsManager
                 declarationOptions.DirectOptions ??=
                     declarationOptions.DirectOptions?.OverrideWith(
                         configurator.Options,
-                        new AspectOptionsOverrideContext( AspectOptionsOverrideAxis.SameDeclaration ) )
+                        new AspectOptionsOverrideContext( AspectOptionsOverrideAxis.Self ) )
                     ?? configurator.Options;
 
                 declarationOptions.ResetMergedOptions();
@@ -71,7 +71,7 @@ public partial class AspectOptionsManager
         }
 
         public T? GetOptions<T>( IDeclaration declaration )
-            where T : AspectOptions, new()
+            where T : Framework.Options.AspectOptions, new()
         {
             var node = this.GetNodeAndComputeDirectOptions( declaration );
 
@@ -104,7 +104,7 @@ public partial class AspectOptionsManager
 
             var containingDeclaration = declaration switch
             {
-                INamedType namedType => (IDeclaration) namedType.DeclaringType ?? namedType.Namespace,
+                INamedType namedType => (IDeclaration?) namedType.DeclaringType ?? namedType.Namespace,
                 _ => declaration.ContainingDeclaration
             };
 
@@ -122,7 +122,7 @@ public partial class AspectOptionsManager
                 MergeOptions(
                     MergeOptions( baseDeclarationOptions, containingDeclarationOptions, AspectOptionsOverrideAxis.ContainmentOverBase ),
                     node?.DirectOptions,
-                    AspectOptionsOverrideAxis.CurrentDeclarationOverInheritance );
+                    AspectOptionsOverrideAxis.DirectOverInheritance );
 
             // Cache the result.
             var shouldCache =
@@ -139,7 +139,7 @@ public partial class AspectOptionsManager
         }
 
         private static T? MergeOptions<T>( T? baseOptions, T? options, AspectOptionsOverrideAxis axis )
-            where T : AspectOptions
+            where T : Framework.Options.AspectOptions
         {
             if ( baseOptions == null )
             {
