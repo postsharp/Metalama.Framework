@@ -1020,7 +1020,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             .ToList();
 
         ScopeContext? expressionContext = null;
-
+#if ENABLE_CannotSetCompileTimeVariableInRunTimeConditionalBlock
         if ( compileTimeOutArguments.Count > 0 )
         {
             expressionContext =
@@ -1034,7 +1034,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     (compileTimeOutArguments[0].ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
             }
         }
-
+#endif
         // Transform the expression.
         ExpressionSyntax transformedExpression;
 
@@ -1856,7 +1856,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         if ( IsMutatingUnaryOperator( @operator ) )
         {
             scope = this.GetAssignmentScope( transformedOperand );
-
+#if ENABLE_CannotSetCompileTimeVariableInRunTimeConditionalBlock
             if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
             {
                 // We cannot mutate a compile-time expression in a run-time-condition block.
@@ -1865,6 +1865,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     operand,
                     (operand.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
             }
+#endif
         }
 
         return (transformedOperand, scope);
@@ -1895,6 +1896,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             if ( leftScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
+#if ENABLE_CannotSetCompileTimeVariableInRunTimeConditionalBlock                
                 if ( this._currentScopeContext.IsRuntimeConditionalBlock )
                 {
                     this.ReportDiagnostic(
@@ -1902,7 +1904,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                         node.Left,
                         (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
-
+#endif
                 if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.Left ) is INamedTypeSymbol { Name: nameof(IExpression) } )
                 {
                     // Assigning a run-time expression to an IExpression is allowed but requires special processing.
