@@ -45,7 +45,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
             public override void AddConfiguratorSource( IConfiguratorSource configuratorSource ) => this._configuratorSources.Add( configuratorSource );
 
-            public StaticFabricResult ToResult() => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray() );
+            public StaticFabricResult ToResult()
+                => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray(), this._configuratorSources.ToImmutableArray() );
         }
     }
 }

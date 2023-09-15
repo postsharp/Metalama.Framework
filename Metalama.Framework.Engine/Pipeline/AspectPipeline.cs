@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -337,7 +338,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private protected virtual CodeFixFilter CodeFixFilter => ( _, _ ) => false;
 
         // ReSharper disable UnusedParameter.Global
-        private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
+        private protected virtual PipelineContributorSources CreatePipelineContributorSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
@@ -352,13 +353,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
 
+            var configuratorSources = ImmutableArray.Create<IConfiguratorSource>( new CompilationConfiguratorSource( configuration.ServiceProvider ) );
+
+            var allSources = new PipelineContributorSources( aspectSources, validatorSources, configuratorSources );
+
             if ( configuration.FabricsConfiguration != null )
             {
-                aspectSources = aspectSources.AddRange( configuration.FabricsConfiguration.AspectSources );
-                validatorSources = validatorSources.AddRange( configuration.FabricsConfiguration.ValidatorSources );
+                allSources = allSources.Add( configuration.FabricsConfiguration );
             }
 
-            return (aspectSources, validatorSources);
+            return allSources;
         }
 
         private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ProjectServiceProvider serviceProvider )
@@ -430,7 +434,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     null );
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+            var aspectSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
             // Execute the pipeline stages.
@@ -441,8 +445,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilationModel,
                 compilationModel,
                 null,
-                aspectSources.AspectSources,
-                aspectSources.ValidatorSources,
+                aspectSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )

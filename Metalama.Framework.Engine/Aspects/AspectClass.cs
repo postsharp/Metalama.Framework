@@ -240,7 +240,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
         // This must be called after Members is built and assigned.
         this._aspectDriver = aspectDriverFactory.GetAspectDriver( this );
-        
+
         if ( this._prototypeAspectInstance != null )
         {
             this._eligibilityHelper = new EligibilityHelper( this._prototypeAspectInstance, this.ServiceProvider );
@@ -408,7 +408,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     /// </summary>
     public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {
-        return this._eligibilityHelper?.GetEligibility( obj, isInheritable ) ?? EligibleScenarios.All;
+        return this._eligibilityHelper?.GetEligibility( obj, isInheritable, this ) ?? EligibleScenarios.All;
     }
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )

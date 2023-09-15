@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Services;
@@ -39,14 +40,17 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         this._targetSymbol = targetSymbol;
     }
 
-    private protected override (ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
+    private protected override PipelineContributorSources CreatePipelineContributorSources(
         AspectPipelineConfiguration configuration,
         Compilation compilation,
         CancellationToken cancellationToken )
     {
         var aspectClass = this._aspectSelector( configuration );
 
-        return (ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ), ImmutableArray<IValidatorSource>.Empty);
+        return new PipelineContributorSources(
+            ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ),
+            ImmutableArray<IValidatorSource>.Empty,
+            ImmutableArray<IConfiguratorSource>.Empty );
     }
 
     public static async Task<FallibleResult<PartialCompilation>> ExecuteAsync(

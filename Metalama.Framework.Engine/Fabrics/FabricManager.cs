@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// The top-level class that discovers, instantiates and executes fabrics. It exposes an <see cref="ExecuteFabrics"/>
-    /// method, which returns the <see cref="FabricsConfiguration"/> object, which is then a part of the <see cref="AspectPipelineConfiguration"/>.
+    /// method, which returns the <see cref="PipelineContributorSources"/> object, which is then a part of the <see cref="AspectPipelineConfiguration"/>.
     /// </summary>
     internal sealed class FabricManager
     {
@@ -42,7 +43,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public CompileTimeProject CompileTimeProject { get; }
 
-        public FabricsConfiguration ExecuteFabrics(
+        public PipelineContributorSources ExecuteFabrics(
             CompileTimeProject compileTimeProject,
             CompilationModel compilationModel,
             ProjectModel project,
@@ -72,6 +73,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             var aspectSources = ImmutableArray.CreateBuilder<IAspectSource>();
             var validatorSources = ImmutableArray.CreateBuilder<IValidatorSource>();
+            var configuratorSources = ImmutableArray.CreateBuilder<IConfiguratorSource>();
 
             if ( !typeFabricDrivers.IsEmpty )
             {
@@ -88,6 +90,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     {
                         aspectSources.AddRange( result.AspectSources );
                         validatorSources.AddRange( result.ValidatorSources );
+                        configuratorSources.AddRange( result.ConfiguratorSources );
                         this._listener?.AddStaticFabricResult( result );
                     }
                     else
@@ -102,7 +105,7 @@ namespace Metalama.Framework.Engine.Fabrics
             project.Freeze();
             Execute( fabrics.OfType<NamespaceFabricDriver>() );
 
-            return new FabricsConfiguration( aspectSources.ToImmutable(), validatorSources.ToImmutable() );
+            return new PipelineContributorSources( aspectSources.ToImmutable(), validatorSources.ToImmutable(), configuratorSources.ToImmutableArray() );
         }
 
         private IEnumerable<FabricDriver> CreateDrivers(

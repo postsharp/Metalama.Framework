@@ -4,17 +4,26 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
+using System.Dynamic;
 
-namespace Metalama.Framework.Engine.Fabrics
+namespace Metalama.Framework.Engine.Pipeline
 {
-    internal sealed record StaticFabricResult(
+    internal sealed record PipelineContributorSources(
         ImmutableArray<IAspectSource> AspectSources,
         ImmutableArray<IValidatorSource> ValidatorSources,
         ImmutableArray<IConfiguratorSource> ConfiguratorSources )
     {
-        public static StaticFabricResult Empty { get; } = new(
+        public static PipelineContributorSources Empty { get; } = new(
             ImmutableArray<IAspectSource>.Empty,
             ImmutableArray<IValidatorSource>.Empty,
             ImmutableArray<IConfiguratorSource>.Empty );
+
+        public PipelineContributorSources Add( PipelineContributorSources other )
+        {
+            return new PipelineContributorSources(
+                this.AspectSources.AddRange( other.AspectSources ),
+                this.ValidatorSources.AddRange( other.ValidatorSources ),
+                this.ConfiguratorSources.AddRange( other.ConfiguratorSources ) );
+        }
     }
 }

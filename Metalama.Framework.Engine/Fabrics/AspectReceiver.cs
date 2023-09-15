@@ -312,7 +312,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterConfiguratorSource(
                 new ProgrammaticConfiguratorSource(
-                    typeof(TOptions).FullName.AssertNotNull(),
                     ( compilation, diagnosticAdder )
                         => this.SelectAndValidateValidatorOrConfiguratorTargets<UserOptionsConfigurator>(
                             userCodeInvoker,

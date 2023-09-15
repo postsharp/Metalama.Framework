@@ -13,25 +13,13 @@ internal sealed class ProgrammaticConfiguratorSource : IConfiguratorSource
 {
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<UserOptionsConfigurator>> _getInstances;
 
-    public ProgrammaticConfiguratorSource(
-        string optionsType,
-        Func<CompilationModel, IDiagnosticAdder, IEnumerable<UserOptionsConfigurator>> getInstances )
+    public ProgrammaticConfiguratorSource( Func<CompilationModel, IDiagnosticAdder, IEnumerable<UserOptionsConfigurator>> getInstances )
     {
-        this.OptionTypes = ImmutableArray.Create( optionsType );
         this._getInstances = getInstances;
     }
 
-    public ImmutableArray<string> OptionTypes { get; }
-
-    public IEnumerable<UserOptionsConfigurator> GetConfigurators( string optionsType, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<UserOptionsConfigurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
-        if ( optionsType != this.OptionTypes[0] )
-        {
-            return Enumerable.Empty<UserOptionsConfigurator>();
-        }
-        else
-        {
-            return this._getInstances( compilation, diagnosticAdder );
-        }
+        return this._getInstances( compilation, diagnosticAdder );
     }
 }

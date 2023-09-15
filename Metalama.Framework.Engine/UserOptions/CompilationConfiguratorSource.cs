@@ -9,7 +9,6 @@ using Metalama.Framework.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -17,20 +16,16 @@ namespace Metalama.Framework.Engine.UserOptions;
 
 internal class CompilationConfiguratorSource : IConfiguratorSource
 {
-    private readonly ISystemAttributeDeserializer _attributeDeserializer;
+    private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
 
     private readonly ConcurrentDictionary<Type, Func<IAspectOptionsAttribute, AspectOptions>> _toOptionsMethods = new();
+    private readonly ProjectSpecificCompileTimeTypeResolver _typeResolver;
 
-    public CompilationConfiguratorSource( ProjectServiceProvider serviceProvider, CompilationModel compilationModel )
+    public CompilationConfiguratorSource( ProjectServiceProvider serviceProvider )
     {
-        this.OptionTypes = compilationModel.GetDerivedTypes( (INamedType) compilationModel.Factory.GetTypeByReflectionType( typeof(IAspectOptionsAttribute) ) )
-            .Select( t => t.GetFullMetadataName() )
-            .ToImmutableArray();
-
-        this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
+        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
+        this._typeResolver = serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
     }
-
-    public ImmutableArray<string> OptionTypes { get; }
 
     private Func<IAspectOptionsAttribute, AspectOptions> GetToOptionsMethod( Type type ) => this._toOptionsMethods.GetOrAdd( type, GetToOptionsMethodCore );
 
@@ -41,27 +36,37 @@ internal class CompilationConfiguratorSource : IConfiguratorSource
         var cast = Expression.Convert( parameter, interfaceType );
         var methodCall = Expression.Call( cast, interfaceType.GetMethod( nameof(IAspectOptionsAttribute<AspectOptions>.ToOptions) ).AssertNotNull() );
 
-        return Expression.Lambda<Func<IAspectOptionsAttribute, AspectOptions>>( methodCall ).Compile();
+        return Expression.Lambda<Func<IAspectOptionsAttribute, AspectOptions>>( methodCall, parameter ).Compile();
     }
 
-    public IEnumerable<UserOptionsConfigurator> GetConfigurators( string optionsTypeName, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<UserOptionsConfigurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
-        var optionsType = compilation.Factory.GetTypeByReflectionName( optionsTypeName );
-        
-        foreach ( var attribute in compilation.GetAllAttributesOfType( optionsType ) )
+        var genericIAspectOptionsAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IAspectOptionsAttribute<>) );
+
+        foreach ( var attributeType in compilation.GetDerivedTypes(
+                     (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IAspectOptionsAttribute) ) ) )
         {
-            if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var deserializedAttribute ) )
+            var optionTypes =
+                attributeType.AllImplementedInterfaces.Where( i => i.TypeDefinition == genericIAspectOptionsAttribute )
+                    .Select( x => (INamedType) x.TypeArguments[0] )
+                    .Select( x => this._typeResolver.GetCompileTimeType( x.GetSymbol().AssertNotNull(), false ).AssertNotNull() )
+                    .ToReadOnlyList();
+
+            foreach ( var attribute in compilation.GetAllAttributesOfType( attributeType ) )
             {
-                continue;
-            }
+                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var deserializedAttribute ) )
+                {
+                    continue;
+                }
 
-            var optionsAttribute = (IAspectOptionsAttribute) deserializedAttribute;
+                var optionsAttribute = (IAspectOptionsAttribute) deserializedAttribute;
 
-            foreach ( var optionType in optionsAttribute.SupportedOptionTypes )
-            {
-                var options = this.GetToOptionsMethod( optionType ).Invoke( optionsAttribute );
+                foreach ( var optionType in optionTypes )
+                {
+                    var options = this.GetToOptionsMethod( optionType ).Invoke( optionsAttribute );
 
-                yield return new UserOptionsConfigurator( attribute.ContainingDeclaration, options );
+                    yield return new UserOptionsConfigurator( attribute.ContainingDeclaration, options );
+                }
             }
         }
     }

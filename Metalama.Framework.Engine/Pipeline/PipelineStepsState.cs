@@ -66,8 +66,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     public PipelineStepsState(
         IReadOnlyList<OrderedAspectLayer> aspectLayers,
         CompilationModel inputLastCompilation,
-        ImmutableArray<IAspectSource> inputAspectSources,
-        ImmutableArray<IValidatorSource> inputValidatorSources,
+        PipelineContributorSources sources,
         AspectPipelineConfiguration pipelineConfiguration,
         CancellationToken cancellationToken )
     {
@@ -97,8 +96,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Add the initial sources.
         // TODO: process failure of the next line.
-        this.AddAspectSources( inputAspectSources, cancellationToken );
-        this.AddValidatorSources( inputValidatorSources );
+        this.AddAspectSources( sources.AspectSources, cancellationToken );
+        this.AddValidatorSources( sources.ValidatorSources );
     }
 
     public async Task ExecuteAsync( CancellationToken cancellationToken )

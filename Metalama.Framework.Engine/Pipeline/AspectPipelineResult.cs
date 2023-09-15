@@ -33,12 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ImmutableUserDiagnosticList Diagnostics { get; }
 
-        /// <summary>
-        /// Gets the list of aspect sources.
-        /// </summary>
-        internal ImmutableArray<IAspectSource> AspectSources { get; }
-
-        internal ImmutableArray<IValidatorSource> ValidatorSources { get; }
+        internal PipelineContributorSources ContributorSources { get; }
 
         /// <summary>
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
@@ -74,8 +69,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel? firstCompilationModel,
             CompilationModel? lastCompilationModel,
             ImmutableUserDiagnosticList? diagnostics = null,
-            ImmutableArray<IAspectSource> aspectSources = default,
-            ImmutableArray<IValidatorSource> validatorSources = default,
+            PipelineContributorSources? sources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
@@ -85,8 +79,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
-            this.AspectSources = aspectSources.IsDefault ? ImmutableArray<IAspectSource>.Empty : aspectSources;
-            this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<IValidatorSource>.Empty : validatorSources;
+            this.ContributorSources = sources ?? PipelineContributorSources.Empty;
             this.AspectLayers = aspectLayers;
             this.FirstCompilationModel = firstCompilationModel ?? lastCompilationModel;
             this.LastCompilationModel = lastCompilationModel;
@@ -121,8 +114,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.FirstCompilationModel,
                 this.LastCompilationModel,
                 this.Diagnostics.Concat( diagnostics ),
-                this.AspectSources,
-                this.ValidatorSources,
+                this.ContributorSources,
                 this.ExternallyInheritableAspects,
                 this.ReferenceValidators,
                 this.AdditionalSyntaxTrees,

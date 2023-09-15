@@ -36,39 +36,37 @@ public partial class AspectOptionsManager
             this._eligibilityHelper.PopulateRules( diagnosticAdder );
         }
 
-        public void AddSource( IConfiguratorSource source, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
+        public void AddConfigurator( UserOptionsConfigurator configurator, IDiagnosticAdder diagnosticAdder )
         {
-            
-            foreach ( var configurator in source.GetConfigurators( this._type.FullName!, compilationModel, diagnosticAdder ) )
+            // ReSharper disable once InconsistentlySynchronizedField
+            var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
+
+            // Check the eligibility of the options on the target declaration.
+            var eligibility = this._eligibilityHelper.GetEligibility( configurator.Declaration, true, this._type.Name );
+
+            if ( eligibility == EligibleScenarios.None )
             {
-                // ReSharper disable once InconsistentlySynchronizedField
-                var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
+                var justification = this._eligibilityHelper.GetIneligibilityJustification(
+                    EligibleScenarios.Default | EligibleScenarios.Inheritance,
+                    new DescribedObject<IDeclaration>( configurator.Declaration ) );
 
-                // Check the eligibility of the options on the target declaration.
-                var eligibility = this._eligibilityHelper.GetEligibility( configurator.Declaration, true );
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.OptionNotEligibleOnTarget.CreateRoslynDiagnostic(
+                        configurator.Declaration.GetDiagnosticLocation(),
+                        (this._type.Name, configurator.Declaration.DeclarationKind, configurator.Declaration, justification!) ) );
 
-                if ( eligibility == EligibleScenarios.None )
-                {
-                    var justification = this._eligibilityHelper.GetIneligibilityJustification(
-                        EligibleScenarios.Default | EligibleScenarios.Inheritance,
-                        new DescribedObject<IDeclaration>( configurator.Declaration ) );
+                return;
+            }
 
-                    diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.OptionNotEligibleOnTarget.CreateRoslynDiagnostic(
-                            configurator.Declaration.GetDiagnosticLocation(),
-                            (this._type.Name, configurator.Declaration.DeclarationKind, configurator.Declaration, justification!) ) );
+            lock ( declarationOptions.Sync )
+            {
+                declarationOptions.DirectOptions ??=
+                    declarationOptions.DirectOptions?.OverrideWith(
+                        configurator.Options,
+                        new AspectOptionsOverrideContext( AspectOptionsOverrideAxis.SameDeclaration ) )
+                    ?? configurator.Options;
 
-                    continue;
-                }
-
-                lock ( declarationOptions.Sync )
-                {
-                    declarationOptions.DirectOptions ??=
-                        declarationOptions.DirectOptions?.OverrideWith( configurator.Options, AspectOptionsOverrideAxis.SameDeclaration )
-                        ?? configurator.Options;
-
-                    declarationOptions.ResetMergedOptions();
-                }
+                declarationOptions.ResetMergedOptions();
             }
         }
 
@@ -102,8 +100,22 @@ public partial class AspectOptionsManager
             }
 
             // Get options inherited from containing declaration.
-            var containingDeclaration = declaration.ContainingDeclaration.AssertNotNull();
-            var containingDeclarationOptions = this.GetOptions<T>( containingDeclaration );
+            T? containingDeclarationOptions;
+
+            var containingDeclaration = declaration switch
+            {
+                INamedType namedType => namedType.Namespace,
+                _ => declaration.ContainingDeclaration
+            };
+
+            if ( containingDeclaration != null )
+            {
+                containingDeclarationOptions = this.GetOptions<T>( containingDeclaration );
+            }
+            else
+            {
+                containingDeclarationOptions = null;
+            }
 
             // Merge all options.
             var mergedOptions =
@@ -139,7 +151,7 @@ public partial class AspectOptionsManager
             }
             else
             {
-                return (T) baseOptions.OverrideWith( options, axis );
+                return (T) baseOptions.OverrideWith( options, new AspectOptionsOverrideContext( axis ) );
             }
         }
 

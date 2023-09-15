@@ -6,8 +6,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -37,15 +39,20 @@ namespace Metalama.Framework.Engine.Pipeline
             IDiagnosticAdder diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var aspectOptionsManager = new AspectOptionsManager( pipelineConfiguration.ServiceProvider );
+            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation, aspectOptionsManager: aspectOptionsManager );
+
+            aspectOptionsManager.AddSources(
+                input.ContributorSources.ConfiguratorSources,
+                compilation,
+                diagnostics );
 
             pipelineConfiguration.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
-                input.AspectSources,
-                input.ValidatorSources,
+                input.ContributorSources,
                 pipelineConfiguration,
                 cancellationToken );
 

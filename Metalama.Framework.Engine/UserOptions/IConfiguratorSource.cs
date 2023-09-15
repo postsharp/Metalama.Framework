@@ -9,7 +9,5 @@ namespace Metalama.Framework.Engine.UserOptions;
 
 internal interface IConfiguratorSource
 {
-    ImmutableArray<string> OptionTypes { get; }
-
-    IEnumerable<UserOptionsConfigurator> GetConfigurators( string optionsTypeName, CompilationModel compilation, IDiagnosticAdder diagnosticAdder );
+    IEnumerable<UserOptionsConfigurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder );
 }

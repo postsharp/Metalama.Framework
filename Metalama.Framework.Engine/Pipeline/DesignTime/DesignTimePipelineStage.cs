@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.UserOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
@@ -74,8 +75,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     input.FirstCompilationModel ?? pipelineStepsResult.FirstCompilation,
                     pipelineStepsResult.LastCompilation,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                    input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                    validatorSources,
+                    new PipelineContributorSources(
+                        input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                        validatorSources,
+                        ImmutableArray<IConfiguratorSource>.Empty ),
                     pipelineStepsResult.InheritableAspectInstances,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),

@@ -39,7 +39,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
         var compilation = input.Compilation.Compilation;
 
-        var aspectInstances = input.AspectSources.Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
+        var aspectInstances = input.ContributorSources.AspectSources
+            .Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
             .SelectMany( x => x.AspectInstances )
             .GroupBy( i => i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
             .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
@@ -90,6 +91,6 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.FirstCompilationModel,
             CompilationModel.CreateInitialInstance( input.FirstCompilationModel.AssertNotNull().Project, newCompilation ),
             input.Diagnostics,
-            input.AspectSources );
+            input.ContributorSources );
     }
 }

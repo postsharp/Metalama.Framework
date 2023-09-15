@@ -2,10 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Options;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.UserOptions;
 
@@ -14,23 +16,42 @@ public partial class AspectOptionsManager : IAspectOptionsManager
     private readonly ConcurrentDictionary<string, OptionTypeNode> _sources = new();
     private readonly ConcurrentDictionary<string, AspectOptions> _defaultOptions = new();
     private readonly ProjectServiceProvider _serviceProvider;
+    private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
     public AspectOptionsManager( ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
     }
 
+    internal void AddSources( ImmutableArray<IConfiguratorSource> sources, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
+    {
+        foreach ( var source in sources )
+        {
+            this.AddSource( source, compilationModel, diagnosticAdder );
+        }
+    }
+
     internal void AddSource( IConfiguratorSource source, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
     {
-        foreach ( var optionTypeName in source.OptionTypes )
+        foreach ( var configurator in source.GetConfigurators( compilationModel, diagnosticAdder ) )
         {
+            var optionTypeName = configurator.Options.GetType().FullName.AssertNotNull();
+
             if ( !this._sources.TryGetValue( optionTypeName, out var optionTypeNode ) )
             {
-                var optionType = compilationModel.Factory.GetTypeByReflectionName( optionTypeName ).ToType();
+                // We get the type resolver lazily because several tests do not supply it.
+                this._typeResolver = this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
+
+                var optionType =
+                    this._typeResolver.GetCompileTimeType(
+                            compilationModel.Factory.GetTypeByReflectionName( optionTypeName ).GetSymbol().AssertNotNull(),
+                            false )
+                        .AssertNotNull();
+
                 optionTypeNode = this._sources.GetOrAdd( optionTypeName, _ => new OptionTypeNode( this, optionType, diagnosticAdder ) );
             }
 
-            optionTypeNode.AddSource( source, compilationModel, diagnosticAdder );
+            optionTypeNode.AddConfigurator( configurator, diagnosticAdder );
         }
     }
 
@@ -47,7 +68,7 @@ public partial class AspectOptionsManager : IAspectOptionsManager
         }
     }
 
-    private T GetDefaultOptions<T>( ICompilation compilation ) 
+    private T GetDefaultOptions<T>( ICompilation compilation )
         where T : AspectOptions, new()
     {
         var optionTypeName = typeof(T).FullName.AssertNotNull();

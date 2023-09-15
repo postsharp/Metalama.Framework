@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
-        internal FabricsConfiguration? FabricsConfiguration { get; }
+        internal PipelineContributorSources? FabricsConfiguration { get; }
 
         public ProjectModel ProjectModel { get; }
 
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
             CompileTimeProjectRepository compileTimeProjectRepository,
-            FabricsConfiguration? fabricsConfiguration,
+            PipelineContributorSources? fabricsConfiguration,
             ProjectModel projectModel,
             ProjectServiceProvider serviceProvider,
             CodeFixFilter codeFixFilter )
