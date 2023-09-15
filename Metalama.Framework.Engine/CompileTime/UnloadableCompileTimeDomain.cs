@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         lock ( this._loadedAssemblies )
                         {
-                            aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToList();
+                            aliveAssemblies = this._loadedAssemblies.Where( r => r.IsAlive ).ToMutableList();
                         }
                     }
 
@@ -133,12 +133,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( stopwatch.Elapsed.TotalSeconds > 30 )
                     {
-                        var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => (Assembly?) r.Target ).WhereNotNull().Select( a => a.GetName().Name ) );
+                        var assemblies = string.Join(
+                            ",",
+                            aliveAssemblies.SelectAsReadOnlyList( r => (Assembly?) r.Target ).WhereNotNull().Select( a => a.GetName().Name ) );
 
                         // ReSharper disable CommentTypo
 
                         /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
-                         * 
+                         *
                          * Here are a few pointers:
                          *  - You need to use WinDbg and sos.dll.
                          *  - To install sos.dll, do `dotnet tool install --global dotnet-sos`.

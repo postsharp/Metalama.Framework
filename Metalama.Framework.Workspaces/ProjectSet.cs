@@ -42,7 +42,7 @@ namespace Metalama.Framework.Workspaces
         {
             var projects = this.Projects
                 .Where( p => p.Name == projectName && (string.IsNullOrEmpty( targetFramework ) || p.TargetFramework == targetFramework) )
-                .ToList();
+                .ToReadOnlyList();
 
             switch ( projects.Count )
             {

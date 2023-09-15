@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.ConcatList(
+                    input.Diagnostics.DiagnosticSuppressions.Concat(
                         pipelineStepsResult.Diagnostics.DiagnosticSuppressions,
                         validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );

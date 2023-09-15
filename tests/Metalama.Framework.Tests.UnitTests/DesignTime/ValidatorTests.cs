@@ -124,7 +124,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
                 compilationResult2.Result.ReferenceValidators.GetValidatorsForSymbol( classC )
-                    .SelectAsEnumerable( v => v.Implementation.Implementation.GetType().Name )
+                    .SelectAsReadOnlyCollection( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
 
@@ -238,33 +238,33 @@ public interface I {}
 
         private static string GetAspectRepositoryValidatorCode( string suffix )
             => $$"""
-        using System;
-        using Metalama.Framework.Aspects;
-        using Metalama.Framework.Code;
-        using Metalama.Framework.Validation;
+                 using System;
+                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Code;
+                 using Metalama.Framework.Validation;
 
-        public class TheAspect : TypeAspect
-        {
-            public override void BuildAspect( IAspectBuilder<INamedType> builder )
-            {
-                builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
-            }
+                 public class TheAspect : TypeAspect
+                 {
+                     public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                     {
+                         builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+                     }
+                 
+                     private void ValidateReference( in ReferenceValidationContext context )
+                     {
+                         if ( !( (INamedType)context.ReferencedDeclaration ).Enhancements().HasAspect<TheAspect>() )
+                         {
+                             throw new InvalidOperationException();
+                         }
+                     }
+                 }
 
-            private void ValidateReference( in ReferenceValidationContext context )
-            {
-                if ( !( (INamedType)context.ReferencedDeclaration ).Enhancements().HasAspect<TheAspect>() )
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
-
-        [TheAspect]
-        internal class C{{suffix}}
-        {
-            private C{{suffix}}? _f;
-        }
-        """;
+                 [TheAspect]
+                 internal class C{{suffix}}
+                 {
+                     private C{{suffix}}? _f;
+                 }
+                 """;
 
         [Fact]
         public async Task SourceCodeModificationsWithFabric()
@@ -273,34 +273,34 @@ public interface I {}
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string aspectCode = """
-using System;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                                      using System;
+                                      using Metalama.Framework.Fabrics;
+                                      using Metalama.Framework.Code;
+                                      using Metalama.Framework.Validation;
+                                      using Metalama.Framework.Diagnostics;
 
-public class Fabric : ProjectFabric
-{
-    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
-    public override void AmendProject( IProjectAmender amender )
-    {
-        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
+                                      public class Fabric : ProjectFabric
+                                      {
+                                          static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                                          public override void AmendProject( IProjectAmender amender )
+                                          {
+                                              amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                          }
+                                      
+                                          private void ValidateReference( in ReferenceValidationContext context )
+                                          {
+                                              context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                                          }
+                                      }
 
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
-    }
-}
-
-""";
+                                      """;
 
             const string validatedCode = """
 
-class A {}
+                                         class A {}
 
-class B {}
-""";
+                                         class B {}
+                                         """;
 
             const string changingCodeFilename = "changingCode.cs";
 
@@ -310,14 +310,14 @@ class B {}
                 .Add(
                     changingCodeFilename,
                     """
-class C
-{
-   void M()
-   {
-     A a;
-   }
-}
-""" );
+                    class C
+                    {
+                       void M()
+                       {
+                         A a;
+                       }
+                    }
+                    """ );
 
             // Step 1.
             var result1 = await ValidateCompilationAsync( code1 );
@@ -327,16 +327,16 @@ class C
             var code2 = code1.SetItem(
                 changingCodeFilename,
                 """
-class C
-{
-   void M()
-   {
-     A a;
-     B b;
-   }
-}
+                class C
+                {
+                   void M()
+                   {
+                     A a;
+                     B b;
+                   }
+                }
 
-""" );
+                """ );
 
             var result2 = await ValidateCompilationAsync( code2 );
             Assert.Equal( 2, result2.Count );
@@ -348,23 +348,23 @@ class C
                 .SetItem(
                     changingCodeFilename,
                     """
-class C
-{
-   void M()
-   {
-     A a;
-     B b;
-     D d;
-   }
-}
+                    class C
+                    {
+                       void M()
+                       {
+                         A a;
+                         B b;
+                         D d;
+                       }
+                    }
 
-""" );
+                    """ );
 
             var result3 = await ValidateCompilationAsync( code3 );
             Assert.Equal( 3, result3.Count );
 
             // Local function that executes the pipeline and the validators.
-            async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
+            async Task<IReadOnlyList<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
             {
                 var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
@@ -382,7 +382,7 @@ class C
                                 compilation.GetSemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
-                    .ToList();
+                    .ToReadOnlyList();
             }
         }
 
@@ -393,40 +393,40 @@ class C
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string aspectCode = """
-using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                                      using System;
+                                      using Metalama.Framework.Aspects;
+                                      using Metalama.Framework.Code;
+                                      using Metalama.Framework.Validation;
+                                      using Metalama.Framework.Diagnostics;
 
-public class TheAspect : TypeAspect
-{
-    string _name;
+                                      public class TheAspect : TypeAspect
+                                      {
+                                          string _name;
+                                      
+                                          public TheAspect( string name )
+                                          {
+                                              this._name = name;
+                                          }
+                                      
+                                          static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
+                                      
+                                          public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                                          {
+                                              builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                          }
+                                      
+                                          private void ValidateReference( in ReferenceValidationContext context )
+                                          {
+                                              context.Diagnostics.Report( _warning.WithArguments( this._name ) );
+                                          }
+                                      }
 
-    public TheAspect( string name )
-    {
-        this._name = name;
-    }
-
-    static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
-
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
-    {
-        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
-
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( this._name ) );
-    }
-}
-
-""";
+                                      """;
 
             const string validatedCodeTemplate = """
-[TheAspect("<<name>>")]
-class A {}
-""";
+                                                 [TheAspect("<<name>>")]
+                                                 class A {}
+                                                 """;
 
             var baseCode = ImmutableDictionary.Create<string, string>()
                 .Add( "aspectCode.cs", aspectCode )
@@ -449,7 +449,7 @@ class A {}
             Assert.Contains( "VERSION2", result2[0].ToString(), StringComparison.Ordinal );
 
             // Local function that executes the pipeline and the validators.
-            async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
+            async Task<IReadOnlyList<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> code )
             {
                 var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
@@ -467,7 +467,7 @@ class A {}
                                 compilation.GetSemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
-                    .ToList();
+                    .ToReadOnlyList();
             }
         }
 
@@ -478,40 +478,40 @@ class A {}
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string aspectCode = """
-using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                                      using System;
+                                      using Metalama.Framework.Aspects;
+                                      using Metalama.Framework.Code;
+                                      using Metalama.Framework.Validation;
+                                      using Metalama.Framework.Diagnostics;
 
-public class TheAspect : TypeAspect
-{
-    string _name;
+                                      public class TheAspect : TypeAspect
+                                      {
+                                          string _name;
+                                      
+                                          public TheAspect( string name )
+                                          {
+                                              this._name = name;
+                                          }
+                                      
+                                          static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
+                                      
+                                          public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                                          {
+                                              builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                          }
+                                      
+                                          private void ValidateReference( in ReferenceValidationContext context )
+                                          {
+                                              context.Diagnostics.Report( _warning.WithArguments( this._name ) );
+                                          }
+                                      }
 
-    public TheAspect( string name )
-    {
-        this._name = name;
-    }
-
-    static DiagnosticDefinition<string> _warning = new( "MY001", Severity.Warning, "<<{0}>>" );
-
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
-    {
-        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
-
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( this._name ) );
-    }
-}
-
-""";
+                                      """;
 
             const string validatedCodeTemplate = """
-[TheAspect("<<name>>")]
-public class A {}
-""";
+                                                 [TheAspect("<<name>>")]
+                                                 public class A {}
+                                                 """;
 
             // Step 1.
             var dependentCode1 = ImmutableDictionary.Create<string, string>()
@@ -531,7 +531,7 @@ public class A {}
             Assert.Contains( "VERSION2", result2[0].ToString(), StringComparison.Ordinal );
 
             // Local function that executes the pipeline and the validators.
-            async Task<List<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> dependentCode )
+            async Task<IReadOnlyList<Diagnostic>> ValidateCompilationAsync( ImmutableDictionary<string, string> dependentCode )
             {
                 var mainCode = ImmutableDictionary.Create<string, string>().Add( "code.cs", "class B : A {}" );
 
@@ -551,7 +551,7 @@ public class A {}
                                 compilation.GetSemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
-                    .ToList();
+                    .ToReadOnlyList();
             }
         }
 
@@ -562,43 +562,43 @@ public class A {}
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string dependentCode = """
-using System;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                                         using System;
+                                         using Metalama.Framework.Fabrics;
+                                         using Metalama.Framework.Code;
+                                         using Metalama.Framework.Validation;
+                                         using Metalama.Framework.Diagnostics;
 
-public class Fabric : ProjectFabric
-{
-    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
-    public override void AmendProject( IProjectAmender amender )
-    {
-        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
+                                         public class Fabric : ProjectFabric
+                                         {
+                                             static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                                             public override void AmendProject( IProjectAmender amender )
+                                             {
+                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                             }
+                                         
+                                             private void ValidateReference( in ReferenceValidationContext context )
+                                             {
+                                                 context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                                             }
+                                         }
 
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
-    }
-}
+                                         public class A {}
 
-public class A {}
+                                         public class B {}
 
-public class B {}
-
-""";
+                                         """;
 
             const string referencingCode = """
-class C
-{
-   void M()
-   {
-     A a;
-     B b;
-   }
-}
+                                           class C
+                                           {
+                                              void M()
+                                              {
+                                                A a;
+                                                B b;
+                                              }
+                                           }
 
-""";
+                                           """;
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( referencingCode, dependentCode: dependentCode );
 
@@ -615,7 +615,7 @@ class C
                             compilation.GetSemanticModel( t ),
                             compilationResult.Value )
                         .ReportedDiagnostics )
-                .ToList();
+                .ToReadOnlyList();
 
             Assert.Equal( 2, diagnostics.Count );
         }
@@ -630,43 +630,43 @@ class C
             using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider );
 
             const string dependentCode = """
-using System;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                                         using System;
+                                         using Metalama.Framework.Fabrics;
+                                         using Metalama.Framework.Code;
+                                         using Metalama.Framework.Validation;
+                                         using Metalama.Framework.Diagnostics;
 
-public class Fabric : ProjectFabric
-{
-    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
-    public override void AmendProject( IProjectAmender amender )
-    {
-        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
+                                         public class Fabric : ProjectFabric
+                                         {
+                                             static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                                             public override void AmendProject( IProjectAmender amender )
+                                             {
+                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                             }
+                                         
+                                             private void ValidateReference( in ReferenceValidationContext context )
+                                             {
+                                                 context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                                             }
+                                         }
 
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
-    }
-}
+                                         public class A {}
 
-public class A {}
+                                         public class B {}
 
-public class B {}
-
-""";
+                                         """;
 
             const string referencingCode = """
-class C
-{
-   void M()
-   {
-     A a;
-     B b;
-   }
-}
+                                           class C
+                                           {
+                                              void M()
+                                              {
+                                                A a;
+                                                B b;
+                                              }
+                                           }
 
-""";
+                                           """;
 
             var dependentCompilation = TestCompilationFactory.CreateCSharpCompilation( dependentCode );
 
@@ -700,7 +700,7 @@ class C
                             compilation.GetSemanticModel( t ),
                             compilationResult.Value )
                         .ReportedDiagnostics )
-                .ToList();
+                .ToReadOnlyList();
 
             Assert.Equal( 2, diagnostics.Count );
         }

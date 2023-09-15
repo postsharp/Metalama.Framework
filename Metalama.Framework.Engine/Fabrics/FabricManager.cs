@@ -51,15 +51,15 @@ namespace Metalama.Framework.Engine.Fabrics
             // Discover the transitive fabrics from project dependencies, and execute them.
             var transitiveFabricTypes = new Tuple<CompileTimeProject, int>( compileTimeProject, 0 )
                 .SelectManyRecursiveDistinct(
-                    p => p.Item1.References.SelectAsEnumerable( r => new Tuple<CompileTimeProject, int>( r, p.Item2 + 1 ) ),
+                    p => p.Item1.References.SelectAsReadOnlyList( r => new Tuple<CompileTimeProject, int>( r, p.Item2 + 1 ) ),
                     includeRoot: false )
                 .GroupBy( t => t.Item1 )
                 .Select( g => (Project: g.Key, Depth: g.Max( x => x.Item2 )) )
-                .SelectMany( x => x.Project.TransitiveFabricTypes.SelectAsEnumerable( t => (x.Project, x.Depth, Type: t) ) )
+                .SelectMany( x => x.Project.TransitiveFabricTypes.SelectAsReadOnlyList( t => (x.Project, x.Depth, Type: t) ) )
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
                 .SelectMany( x => this.CreateDrivers( x.Project, x.Type, compilationModel, diagnosticAdder ) )
-                .ToList();
+                .ToReadOnlyList();
 
             // Discover the fabrics inside the current project.
             var fabrics =

@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 .GetContainedDeclarations()
                 .OfType<INamedDeclaration>()
                 .Where( d => d.Name != "BuildEligibility" && d.ContainingDeclaration is not INamedDeclaration { Name: "BuildEligibility" } )
-                .ToList();
+                .ToReadOnlyList();
 
             var declarations = declarationList
                 .ToDictionary( GetName, d => d );

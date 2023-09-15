@@ -54,7 +54,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         {
             memberName = GenericName( memberNameString )
                 .WithTypeArgumentList(
-                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
         }
         else
         {

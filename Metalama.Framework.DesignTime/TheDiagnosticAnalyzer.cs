@@ -388,6 +388,6 @@ namespace Metalama.Framework.DesignTime
         private static string FormatDiagnostic( Diagnostic d )
             => d.Properties.IsEmpty
                 ? $"diagnostic `{d}`"
-                : $"diagnostic `{d}` with properties " + string.Join( ", ", d.Properties.SelectAsEnumerable( p => $"'{p.Key}'='{p.Value}'" ) );
+                : $"diagnostic `{d}` with properties " + string.Join( ", ", d.Properties.SelectAsReadOnlyCollection( p => $"'{p.Key}'='{p.Value}'" ) );
     }
 }

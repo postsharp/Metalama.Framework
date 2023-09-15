@@ -392,7 +392,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 // Publish compilation errors. This may create some chaos at the receiving end because compilations are unordered.
                 state._pipeline._eventHub.PublishCompileTimeErrors(
                     state._pipeline.ProjectKey,
-                    diagnosticAdder.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => new DiagnosticData( d ) ).ToList() );
+                    diagnosticAdder.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => new DiagnosticData( d ) ).ToReadOnlyList() );
 
                 if ( !initializeSuccessful )
                 {
@@ -470,7 +470,7 @@ internal sealed partial class DesignTimeAspectPipeline
             {
                 if ( state._pipeline.Logger.Error != null )
                 {
-                    var errors = getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                    var errors = getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToReadOnlyList();
 
                     state._pipeline.Logger.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 

@@ -264,7 +264,7 @@ class Aspect2 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.SelectAsEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectAsReadOnlyCollection( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
 
         [Fact]
@@ -288,7 +288,7 @@ class Aspect3 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.SelectAsEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectAsReadOnlyCollection( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
     }
 }

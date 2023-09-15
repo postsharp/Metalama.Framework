@@ -225,7 +225,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     _ => throw new AssertionFailedException( $"Unknown variance: {variance}." )
                 };
 
-            return TypeParameterList( SeparatedList( type.TypeParameters.SelectAsEnumerable( tp => TypeParameter( tp.Name ).WithVarianceKeyword( Token( GetVariance( tp.Variance ) ) ) ) ) );
+            return TypeParameterList(
+                SeparatedList(
+                    type.TypeParameters.SelectAsReadOnlyList( tp => TypeParameter( tp.Name ).WithVarianceKeyword( Token( GetVariance( tp.Variance ) ) ) ) ) );
         }
 
         private static MemberDeclarationSyntax AddHeader( MemberDeclarationSyntax node )

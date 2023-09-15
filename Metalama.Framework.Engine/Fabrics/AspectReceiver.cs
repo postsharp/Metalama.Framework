@@ -417,7 +417,7 @@ namespace Metalama.Framework.Engine.Fabrics
             EligibleScenarios filteredEligibility,
             Func<T, TResult?> createResult )
         {
-            List<T> targets;
+            IReadOnlyList<T> targets;
 
             if ( invoker != null && executionContext != null )
             {
@@ -428,11 +428,11 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
 #endif
 
-                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
+                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToReadOnlyList(), executionContext );
             }
             else
             {
-                targets = this._selector( compilation, diagnosticAdder ).ToList();
+                targets = this._selector( compilation, diagnosticAdder ).ToReadOnlyList();
             }
 
             foreach ( var targetDeclaration in targets )
@@ -506,7 +506,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
 
-            List<T> targets;
+            IReadOnlyList<T> targets;
 
             if ( invoker != null && executionContext != null )
             {
@@ -516,11 +516,11 @@ namespace Metalama.Framework.Engine.Fabrics
                     throw new AssertionFailedException( "Execution context mismatch." );
                 }
 #endif
-                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToList(), executionContext );
+                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToReadOnlyList(), executionContext );
             }
             else
             {
-                targets = this._selector( compilation, diagnosticAdder ).ToList();
+                targets = this._selector( compilation, diagnosticAdder ).ToReadOnlyList();
             }
 
             foreach ( var targetDeclaration in targets )

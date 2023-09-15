@@ -60,7 +60,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         var compilation = CreateEmptyCompilation();
 
         compilation = compilation.AddSyntaxTrees(
-            code.SelectAsEnumerable(
+            code.SelectAsReadOnlyCollection(
                 c => SyntaxFactory.ParseSyntaxTree(
                     c.Value,
                     path: c.Key,
@@ -206,18 +206,18 @@ F1.cs:
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-            public class Aspect : OverrideMethodAspect 
-            { 
-                public override dynamic? OverrideMethod()
-                {
-                    dynamic[] x; // This should cause LAMA0227
-                    return null;
-                }
-            }
+                            public class Aspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod()
+                                {
+                                    dynamic[] x; // This should cause LAMA0227
+                                    return null;
+                                }
+                            }
 
-            """;
+                            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
 
@@ -933,19 +933,19 @@ class D{version}
     public void OverrideMethodWithMultipleTargetFrameworks()
     {
         const string code = """
-            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-            class Aspect : OverrideMethodAspect
-            {
-                public override dynamic? OverrideMethod() => null;
-            }
+                            class Aspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod() => null;
+                            }
 
-            class Target
-            {
-                [Aspect]
-                void M() {}
-            }
-            """;
+                            class Target
+                            {
+                                [Aspect]
+                                void M() {}
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
 
@@ -987,18 +987,18 @@ class D{version}
             {
                 ["Aspect.cs"] =
                     $$"""
-                    using Metalama.Framework.Aspects;
-                    using System;
+                      using Metalama.Framework.Aspects;
+                      using System;
 
-                    public class Aspect : OverrideMethodAspect
-                    {
-                        public override dynamic OverrideMethod()
-                        {
-                            {{statement}}
-                            return null;
-                        }
-                    }
-                    """
+                      public class Aspect : OverrideMethodAspect
+                      {
+                          public override dynamic OverrideMethod()
+                          {
+                              {{statement}}
+                              return null;
+                          }
+                      }
+                      """
             };
 
             return CreateCSharpCompilation( code, acceptErrors: true );
@@ -1054,33 +1054,33 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
 
-            public class RepositoryAspect : TypeAspect
-            {
-                [Introduce]
-                public int Id { get; set; }
-            }
+                            public class RepositoryAspect : TypeAspect
+                            {
+                                [Introduce]
+                                public int Id { get; set; }
+                            }
 
-            [RepositoryAspect]
-            public partial class Repository<T1, T2>
-            {
-            }
+                            [RepositoryAspect]
+                            public partial class Repository<T1, T2>
+                            {
+                            }
 
-            [RepositoryAspect]
-            public partial interface IVariantRepository<in T>
-            {
-            }
+                            [RepositoryAspect]
+                            public partial interface IVariantRepository<in T>
+                            {
+                            }
 
-            public partial class Outer<T1>
-            {
-                [RepositoryAspect]
-                public partial class Inner<T2>
-                {
-                }                            
-            }
-            """;
+                            public partial class Outer<T1>
+                            {
+                                [RepositoryAspect]
+                                public partial class Inner<T2>
+                                {
+                                }
+                            }
+                            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
@@ -1090,35 +1090,35 @@ class D{version}
         this.TestOutput.WriteLine( dumpedResults );
 
         const string expectedResult = """
-            F1.cs:
-            0 diagnostic(s):
-            0 suppression(s):
-            3 introductions(s):
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial interface IVariantRepository<in T>
-            {
-                public global::System.Int32 Id { get; set; }
-            }
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial class Outer<T1>
-            {
-                partial class Inner<T2>
-                {
-                    public global::System.Int32 Id { get; set; }
-                }
-            }
-            /// <generated>
-            /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
-            /// </generated>
-            partial class Repository<T1, T2>
-            {
-                public global::System.Int32 Id { get; set; }
-            }
-            """;
+                                      F1.cs:
+                                      0 diagnostic(s):
+                                      0 suppression(s):
+                                      3 introductions(s):
+                                      /// <generated>
+                                      /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+                                      /// </generated>
+                                      partial interface IVariantRepository<in T>
+                                      {
+                                          public global::System.Int32 Id { get; set; }
+                                      }
+                                      /// <generated>
+                                      /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+                                      /// </generated>
+                                      partial class Outer<T1>
+                                      {
+                                          partial class Inner<T2>
+                                          {
+                                              public global::System.Int32 Id { get; set; }
+                                          }
+                                      }
+                                      /// <generated>
+                                      /// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+                                      /// </generated>
+                                      partial class Repository<T1, T2>
+                                      {
+                                          public global::System.Int32 Id { get; set; }
+                                      }
+                                      """;
 
         Assert.Equal( expectedResult.Replace( "\r\n", "\n" ), dumpedResults.Replace( "\r\n", "\n" ) );
     }

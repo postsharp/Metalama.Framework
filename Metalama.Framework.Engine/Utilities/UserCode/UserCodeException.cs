@@ -20,5 +20,7 @@ internal sealed class UserCodeException : Exception
         this.TargetDeclaration = context.TargetDeclaration;
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     internal IDeclaration? TargetDeclaration { get; }
 }

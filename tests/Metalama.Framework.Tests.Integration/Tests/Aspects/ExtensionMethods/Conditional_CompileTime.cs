@@ -8,6 +8,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Co
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
+[CompileTime]
+internal static class MyExtensionMethods
+{
+    public static List<T> MyToList<T>( this IEnumerable<T> items )
+    {
+        var list = new List<T>();
+        list.AddRange( items );
+
+        return list;
+    }
+}
+
 internal class ReturnNumbers : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
@@ -17,13 +29,13 @@ internal class ReturnNumbers : OverrideMethodAspect
         switch (DateTime.Today.DayOfWeek)
         {
             case DayOfWeek.Monday:
-                return numbers?.ToList();
+                return numbers?.MyToList();
             case DayOfWeek.Tuesday:
-                return numbers?.ToList().ToList();
+                return numbers?.MyToList().MyToList();
             case DayOfWeek.Wednesday:
-                return numbers.ToList()?.ToList();
+                return numbers.MyToList()?.MyToList();
             default:
-                return numbers?.ToList()?.ToList();
+                return numbers?.MyToList()?.MyToList();
         }
     }
 }

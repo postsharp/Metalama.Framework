@@ -555,7 +555,7 @@ namespace Metalama.Framework.Engine.Templating
                     return selfAttributes.Concat( GetAdviceAttributes( baseAttributesSource ) );
                 }
 
-                var adviceAttributes = GetAdviceAttributes( declaredSymbol ).Distinct().Take( 2 ).ToList();
+                var adviceAttributes = GetAdviceAttributes( declaredSymbol ).Distinct().Take( 2 ).ToReadOnlyList();
 
                 if ( adviceAttributes.Count > 1 )
                 {

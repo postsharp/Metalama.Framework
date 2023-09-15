@@ -33,7 +33,7 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
         }
         else
         {
-            return inputFilterBodies.SelectAsEnumerable( x => new InsertedStatement( x, this.TargetMember ) );
+            return inputFilterBodies.SelectAsReadOnlyList( x => new InsertedStatement( x, this.TargetMember ) );
         }
     }
 

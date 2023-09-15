@@ -1,11 +1,11 @@
 [ReturnNumbers]
 private object Method()
 {
-  global::System.Collections.Generic.IEnumerable<global::System.Object>? numbers = new object[]
-  {
-    42
-  };
-  numbers = numbers is { } iEnumerable ? global::System.Linq.Enumerable.ToList(iEnumerable) : null;
-  numbers = numbers is { } iEnumerable_1 ? global::System.Linq.Enumerable.ToList(iEnumerable_1) : null;
-  return (global::System.Object)numbers;
+    global::System.Collections.Generic.IEnumerable<global::System.Object>? numbers = new object[]
+    {
+        42
+    };
+    numbers = global::Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Conditional_Repeated.MyExtensionMethods.MyToList(numbers);
+    numbers = global::Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Conditional_Repeated.MyExtensionMethods.MyToList(numbers);
+    return (global::System.Object)numbers;
 }

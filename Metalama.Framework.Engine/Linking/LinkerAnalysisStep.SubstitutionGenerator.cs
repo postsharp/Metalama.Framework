@@ -76,11 +76,11 @@ namespace Metalama.Framework.Engine.Linking
                 this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
                 this._additionalTransformedSemantics =
-                    redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
-                        .Union( eventFieldRaiseReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
+                    redirectedSymbolReferences.SelectAsReadOnlyList( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
+                        .Union( eventFieldRaiseReferences.SelectAsReadOnlyList( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
                         .Except( inlinedSemantics )
                         .Distinct()
-                        .ToList();
+                        .ToReadOnlyList();
 
                 this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences, x => x.ContainingSemantic );
                 this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences, x => x.ContainingSemantic );
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.Linking
                 CancellationToken cancellationToken )
             {
                 var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-                var inliningTargetNodes = this._inliningSpecifications.SelectAsEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
+                var inliningTargetNodes = this._inliningSpecifications.SelectAsReadOnlyList( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -361,7 +361,9 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
-                            when !this._compilationContext.SymbolComparer.Equals( nonInlinedReference.ContainingSemantic.Symbol.ContainingType, baseSymbol.ContainingType ):
+                            when !this._compilationContext.SymbolComparer.Equals(
+                                nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
+                                baseSymbol.ContainingType ):
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol.IsOverride: true }
                             when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var potentiallyHidingSymbol }

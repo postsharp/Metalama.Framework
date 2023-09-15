@@ -128,7 +128,7 @@ internal sealed partial class ProjectVersionProvider
             var oldProjectReferences = oldCompilation?.ExternalReferences.OfType<CompilationReference>()
                 .ToDictionary( x => x.Compilation.GetProjectKey(), x => x.Compilation );
 
-            var newProjectReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToList();
+            var newProjectReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToReadOnlyList();
 
             foreach ( var reference in newProjectReferences )
             {

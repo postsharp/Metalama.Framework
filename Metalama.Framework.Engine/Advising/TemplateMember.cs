@@ -56,6 +56,7 @@ internal sealed class TemplateMember<T>
                         {
                             case EnumerableKind.IAsyncEnumerable:
                                 return TemplateKind.IAsyncEnumerable;
+
                             case EnumerableKind.IAsyncEnumerator:
                                 return TemplateKind.IAsyncEnumerator;
                         }
@@ -68,10 +69,12 @@ internal sealed class TemplateMember<T>
                 else if ( this.IsIteratorMethod )
                 {
                     var iteratorMethod = this.Declaration as IMethod ?? (this.Declaration as IProperty)?.GetMethod;
+
                     switch ( iteratorMethod?.GetIteratorInfo().EnumerableKind )
                     {
                         case EnumerableKind.IEnumerable:
                             return TemplateKind.IEnumerable;
+
                         case EnumerableKind.IEnumerator:
                             return TemplateKind.IEnumerator;
                     }

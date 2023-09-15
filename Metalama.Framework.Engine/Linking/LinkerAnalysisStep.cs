@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Linking
              *      b) If inlined reference's replaced statement is NOT a return statement, all subsequent (deeper) bodies need to have return statement transformations.
              *      c) This results in having InliningSpecification for every inlineable reference.
              *  9) Create substitution objects:
-             *      a) For all inlined aspect references (InliningSubstitution).  
+             *      a) For all inlined aspect references (InliningSubstitution).
              *      b) For all return statements that were determined to require transformation in step 8) (ReturnStatementSubstitution).
              *      c) For all implicitly returning root blocks in void methods (RootBlockSubstitution).
              *      d) For all non-inlined aspect references (AspectReferenceSubstitution).
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Linking
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
             var inlinedSemantics = inlineabilityAnalyzer.GetInlinedSemantics( inlineableSemantics, inlineableReferences );
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
-            var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToList();
+            var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToReadOnlyList();
             var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences( reachableReferencesByContainingSemantic, inlinedReferences );
 
             VerifyUnsupportedInlineability(
@@ -330,7 +330,8 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             case IntermediateSymbolSemanticKind.Final:
                             case IntermediateSymbolSemanticKind.Base when nonInlinedSemantic.Symbol.IsOverride:
-                            case IntermediateSymbolSemanticKind.Base when nonInlinedSemantic.Symbol.TryGetHiddenSymbol( intermediateCompilation.Compilation, out _ ):
+                            case IntermediateSymbolSemanticKind.Base
+                                when nonInlinedSemantic.Symbol.TryGetHiddenSymbol( intermediateCompilation.Compilation, out _ ):
                                 // Final semantics are never inlined.
                                 // Base semantics for overrides are never inlined.
                                 // Base semantics for hiding indexers are never inlined.
@@ -442,7 +443,7 @@ namespace Metalama.Framework.Engine.Linking
             var list = new List<IntermediateSymbolSemanticReference>();
 
             var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync(
-                redirectedGetOnlyAutoProperties.SelectAsEnumerable( x => (x.Property, x.Property.ContainingType) ),
+                redirectedGetOnlyAutoProperties.SelectAsReadOnlyList( x => (x.Property, x.Property.ContainingType) ),
                 cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
@@ -468,7 +469,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var allEventFieldReferences =
                 await symbolReferenceFinder.FindSymbolReferencesAsync(
-                    overriddenEventFields.SelectAsEnumerable( x => (x, x.ContainingType) ),
+                    overriddenEventFields.SelectAsReadOnlyList( x => (x, x.ContainingType) ),
                     cancellationToken );
 
             foreach ( var reference in allEventFieldReferences )

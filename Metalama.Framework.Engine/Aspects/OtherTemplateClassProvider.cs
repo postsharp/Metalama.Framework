@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal class OtherTemplateClassProvider : IProjectService
+internal sealed class OtherTemplateClassProvider : IProjectService
 {
     private readonly ImmutableDictionary<string, OtherTemplateClass> _otherTemplateClasses;
 

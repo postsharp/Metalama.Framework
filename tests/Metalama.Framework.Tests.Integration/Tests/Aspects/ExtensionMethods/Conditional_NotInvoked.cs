@@ -15,7 +15,7 @@ internal class ReturnNumbers : OverrideMethodAspect
 #if TESTRUNNER
         var numbers = new object[] { 42 };
 
-        return numbers?.ToList;
+        return numbers?.ToHashSet;
 #else
         return null;
 #endif

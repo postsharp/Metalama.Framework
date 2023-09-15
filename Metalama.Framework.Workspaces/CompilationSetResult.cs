@@ -78,7 +78,7 @@ internal sealed class CompilationSetResult : ICompilationSetResult
         if ( diagnostics.Count > 0 )
         {
             throw new CompilationFailedException(
-                $"The compilation of project(s) {string.Join( ", ", failedProjects.SelectAsEnumerable( x => $"'{x}'" ) )} failed. Check the Diagnostics collection for details. Use WithIgnoreErrors(true) to ignore errors.",
+                $"The compilation of project(s) {string.Join( ", ", failedProjects.SelectAsReadOnlyList( x => $"'{x}'" ) )} failed. Check the Diagnostics collection for details. Use WithIgnoreErrors(true) to ignore errors.",
                 diagnostics.ToImmutableArray() );
         }
 

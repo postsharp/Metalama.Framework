@@ -852,7 +852,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
                                                                                    && syntaxTree == null;
 
-    private List<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
+    private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {
         // Check the aspects already on the declaration.
         var filePath = symbol.GetPrimaryDeclaration()?.SyntaxTree.FilePath;
@@ -869,7 +869,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             return null;
         }
 
-        return result.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).ToList();
+        return result.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).ToReadOnlyList();
     }
 
     internal IReadOnlyList<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
@@ -886,7 +886,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         var compilationContext = CompilationContextFactory.GetInstance( compilation );
 
-        var currentAspectInstances = (IReadOnlyList<DesignTimeAspectInstance>?) this.GetAspectInstancesOnSymbol( symbol )
+        var currentAspectInstances = this.GetAspectInstancesOnSymbol( symbol )
                                      ?? Array.Empty<DesignTimeAspectInstance>();
 
         IDeclaration? declaration = null;

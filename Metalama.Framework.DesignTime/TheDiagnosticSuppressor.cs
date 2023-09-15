@@ -125,7 +125,7 @@ namespace Metalama.Framework.DesignTime
                     var suppressions = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
 
                     var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) )
-                        .ToList();
+                        .ToReadOnlyList();
 
                     if ( designTimeSuppressions.Count == 0 )
                     {

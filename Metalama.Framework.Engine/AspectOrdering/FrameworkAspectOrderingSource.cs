@@ -24,7 +24,7 @@ internal sealed class FrameworkAspectOrderingSource : IAspectOrderingSource
     {
         static bool IsFrameworkAspect( AspectClass t ) => t.Project?.RunTimeIdentity.Name == "Metalama.Framework";
 
-        var frameworkAspects = this._aspectTypes.Where( IsFrameworkAspect ).ToList();
+        var frameworkAspects = this._aspectTypes.Where( IsFrameworkAspect ).ToReadOnlyList();
 
         foreach ( var aspectClass in this._aspectTypes )
         {

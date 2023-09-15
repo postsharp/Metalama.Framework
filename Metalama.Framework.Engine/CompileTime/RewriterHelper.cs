@@ -87,7 +87,7 @@ internal sealed class RewriterHelper
                 disable
                     ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
                     : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
-                SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsEnumerable( IdentifierName ) ),
+                SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsReadOnlyList( IdentifierName ) ),
                 Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                 true );
         }
@@ -168,7 +168,7 @@ internal sealed class RewriterHelper
                         .WithAccessorList(
                             property.AccessorList!.WithAccessors(
                                 List(
-                                    property.AccessorList.Accessors.SelectAsEnumerable(
+                                    property.AccessorList.Accessors.SelectAsReadOnlyList(
                                         x => x
                                             .WithBody( null )
                                             .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
@@ -207,7 +207,7 @@ internal sealed class RewriterHelper
                                 .WithAccessors(
                                     List(
                                         @event.AccessorList.AssertNotNull()
-                                            .Accessors.SelectAsEnumerable(
+                                            .Accessors.SelectAsReadOnlyList(
                                                 x => x
                                                     .WithBody( null )
                                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )

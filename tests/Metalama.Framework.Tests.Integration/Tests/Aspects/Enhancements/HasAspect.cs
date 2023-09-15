@@ -3,7 +3,7 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.HasAspect
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Enhancements.HasAspect
 {
     internal class Aspect : OverrideMethodAspect
     {

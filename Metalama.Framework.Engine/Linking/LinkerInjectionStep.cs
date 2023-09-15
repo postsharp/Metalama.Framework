@@ -158,16 +158,18 @@ namespace Metalama.Framework.Engine.Linking
 
                 // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
                 // We avoid to use user APIs that require a user code execution context.
-                var assemblyVersionAttributeConstructor = assemblyVersionAttributeType.Constructors.Single( x => x.Parameters is [{ Type.SpecialType: SpecialType.String }] );
+                var assemblyVersionAttributeConstructor =
+                    assemblyVersionAttributeType.Constructors.Single( x => x.Parameters is [{ Type.SpecialType: SpecialType.String }] );
 
                 var newAssemblyVersionAttribute =
-                    new StandaloneAttributeData(
-                        assemblyVersionAttributeConstructor )
+                    new StandaloneAttributeData( assemblyVersionAttributeConstructor )
                     {
                         ConstructorArguments = ImmutableArray.Create(
-                            TypedConstant.Create( input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString(), assemblyVersionAttributeConstructor.Parameters[0].Type ) )
+                            TypedConstant.Create(
+                                input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString(),
+                                assemblyVersionAttributeConstructor.Parameters[0].Type ) )
                     };
-                
+
                 attributes.Add(
                     new AttributeBuilder(
                         null!,
@@ -605,7 +607,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );
 #if DEBUG
-                statements = statements.ToList();
+                statements = statements.ToReadOnlyList();
 
                 foreach ( var statement in statements )
                 {

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public static ExpressionSyntax CreateBindingFlags( IMember member, SyntaxSerializationContext serializationContext )
         {
             return new[] { member.Accessibility == Accessibility.Public ? "Public" : "NonPublic", member.IsStatic ? "Static" : "Instance" }
-                .SelectAsEnumerable(
+                .SelectAsReadOnlyList(
                     f => (ExpressionSyntax) SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         serializationContext.GetTypeSyntax( typeof(BindingFlags) ),

@@ -119,8 +119,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = IdentifierName( this.GetCleanTargetMemberName() );
             }
 
-            var compilation = this.Member.Compilation;
-
             var arguments = this.Member.GetArguments(
                 this.Member.Parameters,
                 TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ),

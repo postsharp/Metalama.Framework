@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking
                         CreateIndexerAccessExpression( targetIndexer, syntaxGenerator ),
                         BracketedArgumentList(
                             SeparatedList(
-                                targetIndexer.Parameters.SelectAsEnumerable(
+                                targetIndexer.Parameters.SelectAsReadOnlyList(
                                     p =>
                                     {
                                         var refKind = p.RefKind switch
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                             syntaxGenerator,
                             targetOperator.OperatorKind,
                             targetOperator.ReturnType,
-                            targetOperator.Parameters.SelectAsEnumerable( p => p.Type ) )
+                            targetOperator.Parameters.SelectAsReadOnlyList( p => p.Type ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Previous,
@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 memberName = GenericName( memberNameString )
                     .WithTypeArgumentList(
-                        TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                        TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
             }
             else
             {

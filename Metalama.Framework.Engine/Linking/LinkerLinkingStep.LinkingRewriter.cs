@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( newMembers is { Count: > 0 } )
                     {
                         transformedMembers =
-                            transformedMembers.ConcatList( newMembers );
+                            transformedMembers.Concat( newMembers );
                     }
                 }
 

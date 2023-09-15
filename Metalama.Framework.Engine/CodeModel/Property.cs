@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-            => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
+            => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToReadOnlyList();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
@@ -70,7 +70,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
+            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+                .GetTypedExpressionSyntax();
 
         private IExpression? GetInitializerExpressionCore()
         {

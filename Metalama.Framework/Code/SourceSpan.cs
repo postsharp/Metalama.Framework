@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Code;
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Code;
 /// Represents a span of source code.
 /// </summary>
 [CompileTime]
+[PublicAPI]
 public readonly struct SourceSpan
 {
     private readonly ISourceReferenceImpl _sourceReferenceImpl;

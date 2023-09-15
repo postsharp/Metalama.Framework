@@ -21,7 +21,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.PropertySymbol.Parameters.Select( p => new Ref<IParameter>( p, this.Compilation.CompilationContext ) ).ToList() );
+            this.PropertySymbol.Parameters.Select( p => new Ref<IParameter>( p, this.Compilation.CompilationContext ) ).ToReadOnlyList() );
 
     public IIndexer? OverriddenIndexer
     {
@@ -52,7 +52,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
 
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
-        => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetIndexer( p ) ).ToList();
+        => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetIndexer( p ) ).ToReadOnlyList();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 }
