@@ -14,7 +14,7 @@ using System.Linq.Expressions;
 
 namespace Metalama.Framework.Engine.UserOptions;
 
-internal class CompilationConfiguratorSource : IConfiguratorSource
+internal sealed class CompilationConfiguratorSource : IConfiguratorSource
 {
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
 

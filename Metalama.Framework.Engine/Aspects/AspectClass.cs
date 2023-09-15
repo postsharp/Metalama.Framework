@@ -243,7 +243,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
         if ( this._prototypeAspectInstance != null )
         {
-            this._eligibilityHelper = new EligibilityHelper( this._prototypeAspectInstance, this.ServiceProvider );
+            this._eligibilityHelper = new EligibilityHelper( this._prototypeAspectInstance, this.ServiceProvider, this );
 
             // Call BuildEligibility for all relevant interface implementations.
 
@@ -408,7 +408,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     /// </summary>
     public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {
-        return this._eligibilityHelper?.GetEligibility( obj, isInheritable, this ) ?? EligibleScenarios.All;
+        return this._eligibilityHelper?.GetEligibility( obj, isInheritable ) ?? EligibleScenarios.All;
     }
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )

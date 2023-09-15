@@ -52,7 +52,7 @@ public class C2
     public int F;
 
     [OptionsAspect]
-    public event EventHandler E;
+    public event EventHandler? E;
 
     public class N
     {

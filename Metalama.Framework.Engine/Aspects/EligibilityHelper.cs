@@ -21,11 +21,20 @@ internal partial class EligibilityHelper
 {
     private readonly object _prototype;
     private readonly ProjectServiceProvider _serviceProvider;
+    private readonly object _requester;
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules = new();
 
     private readonly ConcurrentDictionary<Type, Func<EligibilityHelper, IDiagnosticAdder, bool>>
         _tryInitializeEligibilityMethods = new();
+
+    public EligibilityHelper( object prototype, ProjectServiceProvider serviceProvider, object requester )
+    {
+        this._prototype = prototype;
+        this._serviceProvider = serviceProvider;
+        this._requester = requester;
+        this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+    }
 
     private Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethod( Type type )
     {
@@ -58,7 +67,7 @@ internal partial class EligibilityHelper
             var executionContext = new UserCodeExecutionContext(
                 this._serviceProvider,
                 diagnosticAdder,
-                UserCodeDescription.Create( "executing BuildEligibility for {0}", this ) );
+                UserCodeDescription.Create( "executing BuildEligibility for {0}", this._requester ) );
 
             if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
             {
@@ -69,13 +78,6 @@ internal partial class EligibilityHelper
         }
 
         return true;
-    }
-
-    public EligibilityHelper( object prototype, ProjectServiceProvider serviceProvider )
-    {
-        this._prototype = prototype;
-        this._serviceProvider = serviceProvider;
-        this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
     public bool PopulateRules( IDiagnosticAdder diagnosticAdder )
@@ -105,7 +107,7 @@ internal partial class EligibilityHelper
         this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( type, eligibilityRule ) );
     }
 
-    public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable, object requester )
+    public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {
         if ( this._eligibilityRules.Count == 0 )
         {
@@ -118,7 +120,7 @@ internal partial class EligibilityHelper
         // so we have to let the exception fly.
         var executionContext = new UserCodeExecutionContext(
             this._serviceProvider,
-            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", requester, obj ),
+            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this._requester, obj ),
             compilationModel: obj.GetCompilationModel() );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );

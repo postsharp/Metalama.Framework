@@ -32,7 +32,7 @@ public partial class AspectOptionsManager
             var prototype =
                 invoker.Invoke( () => (AspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
-            this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider );
+            this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
             this._eligibilityHelper.PopulateRules( diagnosticAdder );
         }
 
@@ -42,7 +42,7 @@ public partial class AspectOptionsManager
             var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
 
             // Check the eligibility of the options on the target declaration.
-            var eligibility = this._eligibilityHelper.GetEligibility( configurator.Declaration, true, this._type.Name );
+            var eligibility = this._eligibilityHelper.GetEligibility( configurator.Declaration, true );
 
             if ( eligibility == EligibleScenarios.None )
             {
@@ -104,7 +104,7 @@ public partial class AspectOptionsManager
 
             var containingDeclaration = declaration switch
             {
-                INamedType namedType => namedType.Namespace,
+                INamedType namedType => (IDeclaration) namedType.DeclaringType ?? namedType.Namespace,
                 _ => declaration.ContainingDeclaration
             };
 
