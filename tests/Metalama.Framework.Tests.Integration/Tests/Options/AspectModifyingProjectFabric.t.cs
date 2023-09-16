@@ -11,38 +11,38 @@ public class C1
 }
 [OptionsAspect]
 [ModifyOptionsAspect("FromAspect.C2")]
-[global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+[global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
 public class C2
 {
   [OptionsAspect]
-  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
-  public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")] int p)
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
+  public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")] int p)
   {
   }
   [OptionsAspect]
   [ModifyOptionsAspect("FromAspect.P")]
-  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.M2")]
-  public void M2([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.M2")] int p)
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.M2->FromAspect.P")]
+  public void M2([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.M2->FromAspect.P")] int p)
   {
   }
   [OptionsAspect]
-  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
   public int P {[OptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
     get; [OptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
     set; }
   [OptionsAspect]
-  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
   public int F;
   [OptionsAspect]
-  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
   public event EventHandler? E;
   public class N
   {
     [OptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")]
-    public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2")] int p)
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")]
+    public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("FromFabric.C2->FromAspect.C2")] int p)
     {
     }
   }

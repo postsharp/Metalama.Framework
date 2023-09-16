@@ -94,9 +94,9 @@ public partial class AspectOptionsManager
             // Get options inherited from containing declaration.
             T? containingDeclarationOptions;
 
-            if ( declaration is INamespace { IsGlobalNamespace: true } )
+            if ( declaration.DeclarationKind == DeclarationKind.Compilation )
             {
-                // For the global namespace, we go down to the project-level options.
+                // For the compilation, we go down to the project-level options.
                 containingDeclarationOptions = this._parent.GetDefaultOptions<T>( declaration.Compilation.Project );
             }
             else
