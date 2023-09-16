@@ -12,13 +12,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 internal sealed class CompilationConfiguratorSource : IConfiguratorSource
 {
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
 
-    private readonly ConcurrentDictionary<Type, Func<IAspectOptionsAttribute, Framework.Options.AspectOptions>> _toOptionsMethods = new();
+    private readonly ConcurrentDictionary<Type, Func<IAspectOptionsAttribute, IAspectOptions>> _toOptionsMethods = new();
     private readonly ProjectSpecificCompileTimeTypeResolver _typeResolver;
 
     public CompilationConfiguratorSource( ProjectServiceProvider serviceProvider )
@@ -27,10 +27,9 @@ internal sealed class CompilationConfiguratorSource : IConfiguratorSource
         this._typeResolver = serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
     }
 
-    private Func<IAspectOptionsAttribute, Framework.Options.AspectOptions> GetToOptionsMethod( Type type )
-        => this._toOptionsMethods.GetOrAdd( type, GetToOptionsMethodCore );
+    private Func<IAspectOptionsAttribute, IAspectOptions> GetToOptionsMethod( Type type ) => this._toOptionsMethods.GetOrAdd( type, GetToOptionsMethodCore );
 
-    private static Func<IAspectOptionsAttribute, Framework.Options.AspectOptions> GetToOptionsMethodCore( Type type )
+    private static Func<IAspectOptionsAttribute, IAspectOptions> GetToOptionsMethodCore( Type type )
     {
         var parameter = Expression.Parameter( typeof(IAspectOptionsAttribute) );
         var interfaceType = typeof(IAspectOptionsAttribute<>).MakeGenericType( type );
@@ -38,9 +37,9 @@ internal sealed class CompilationConfiguratorSource : IConfiguratorSource
 
         var methodCall = Expression.Call(
             cast,
-            interfaceType.GetMethod( nameof(IAspectOptionsAttribute<Framework.Options.AspectOptions>.ToOptions) ).AssertNotNull() );
+            interfaceType.GetMethod( nameof(IAspectOptionsAttribute<IAspectOptions>.ToOptions) ).AssertNotNull() );
 
-        return Expression.Lambda<Func<IAspectOptionsAttribute, Framework.Options.AspectOptions>>( methodCall, parameter ).Compile();
+        return Expression.Lambda<Func<IAspectOptionsAttribute, IAspectOptions>>( methodCall, parameter ).Compile();
     }
 
     public IEnumerable<Configurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )

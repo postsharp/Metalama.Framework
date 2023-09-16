@@ -9,5 +9,5 @@ namespace Metalama.Framework.Options;
 internal interface IAspectOptionsManager
 {
     TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : AspectOptions, new();
+        where TOptions : class, IAspectOptions, new();
 }

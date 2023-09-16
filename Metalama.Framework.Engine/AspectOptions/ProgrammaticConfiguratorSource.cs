@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 internal sealed class ProgrammaticConfiguratorSource : IConfiguratorSource
 {

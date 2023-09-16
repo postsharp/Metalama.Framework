@@ -8,7 +8,7 @@ namespace Metalama.Framework.Options;
 public interface IAspectOptionsAttribute { }
 
 public interface IAspectOptionsAttribute<out T> : IAspectOptionsAttribute
-    where T : AspectOptions
+    where T : class, IAspectOptions
 {
     T ToOptions();
 }

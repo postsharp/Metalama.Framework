@@ -6,15 +6,17 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Options;
+using Metalama.Framework.Project;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 public partial class AspectOptionsManager : IAspectOptionsManager
 {
     private readonly ConcurrentDictionary<string, OptionTypeNode> _sources = new();
-    private readonly ConcurrentDictionary<string, Framework.Options.AspectOptions> _defaultOptions = new();
+    private readonly ConcurrentDictionary<string, IAspectOptions> _defaultOptions = new();
     private readonly ProjectServiceProvider _serviceProvider;
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
@@ -56,7 +58,7 @@ public partial class AspectOptionsManager : IAspectOptionsManager
     }
 
     public TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : Framework.Options.AspectOptions, new()
+        where TOptions : class, IAspectOptions, new()
     {
         if ( this._sources.TryGetValue( typeof(TOptions).FullName.AssertNotNull(), out var node ) )
         {
@@ -64,19 +66,22 @@ public partial class AspectOptionsManager : IAspectOptionsManager
         }
         else
         {
-            return this.GetDefaultOptions<TOptions>( declaration.Compilation );
+            return this.GetDefaultOptions<TOptions>( declaration.Compilation.Project );
         }
     }
 
-    private T GetDefaultOptions<T>( ICompilation compilation )
-        where T : Framework.Options.AspectOptions, new()
+    private T GetDefaultOptions<T>( IProject project )
+        where T : IAspectOptions, new()
     {
         var optionTypeName = typeof(T).FullName.AssertNotNull();
 
         if ( !this._defaultOptions.TryGetValue( optionTypeName, out var options ) )
         {
             var empty = new T();
-            options = empty.GetDefaultOptions( compilation.Project ) ?? empty;
+
+            options = empty.GetDefaultOptions( project )
+                      ?? throw new ArgumentNullException( $"{typeof(T).Name}.{nameof(empty.GetDefaultOptions)} returned null." );
+
             this._defaultOptions.TryAdd( optionTypeName, options );
         }
 

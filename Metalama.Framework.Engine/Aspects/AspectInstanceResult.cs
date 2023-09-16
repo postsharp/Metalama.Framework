@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.AspectConfiguration;
+using Metalama.Framework.Engine.AspectOptions;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;

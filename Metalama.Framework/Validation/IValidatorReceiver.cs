@@ -105,6 +105,6 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </summary>
     IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
 
-    void Configure<TOptions>( Func<TDeclaration, TOptions> func ) 
-        where TOptions : AspectOptions, IAspectOptions<TDeclaration>, new();
+    void Configure<TOptions>( Func<TDeclaration, TOptions> func )
+        where TOptions : IAspectOptions, IAspectOptions<TDeclaration>, new();
 }

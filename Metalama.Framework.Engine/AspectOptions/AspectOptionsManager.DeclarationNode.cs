@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Options;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 public partial class AspectOptionsManager
 {
@@ -12,9 +13,9 @@ public partial class AspectOptionsManager
 
         public object Sync { get; } = new();
 
-        public Framework.Options.AspectOptions? DirectOptions { get; set; }
+        public IAspectOptions? DirectOptions { get; set; }
 
-        public Framework.Options.AspectOptions? MergedOptions { get; set; }
+        public IAspectOptions? MergedOptions { get; set; }
 
         public void ResetMergedOptions()
         {

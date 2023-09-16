@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 internal interface IConfiguratorSource
 {

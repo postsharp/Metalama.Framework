@@ -2,8 +2,17 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Project;
+using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public interface IAspectOptions<in T> : IEligible<T>
+public interface IAspectOptions : ICompileTimeSerializable
+{
+    IAspectOptions GetDefaultOptions( IProject project );
+
+    IAspectOptions OverrideWith( IAspectOptions options, in AspectOptionsOverrideContext context );
+}
+
+public interface IAspectOptions<in T> : IAspectOptions, IEligible<T>
     where T : class, IDeclaration { }

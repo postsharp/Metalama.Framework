@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.AspectConfiguration;
+using Metalama.Framework.Engine.AspectOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;

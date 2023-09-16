@@ -73,7 +73,7 @@ public readonly struct DeclarationEnhancements<T>
         where TAspect : IAspect<T>
         => this.HasAspect( typeof(TAspect) );
 
-    public TOptions GetOptions<TOptions>() 
-        where TOptions : AspectOptions, IAspectOptions<T>, new()
+    public TOptions GetOptions<TOptions>()
+        where TOptions : class, IAspectOptions<T>, new()
         => ((ICompilationInternal) this.Declaration.Compilation).AspectOptionsManager.GetOptions<TOptions>( this.Declaration );
 }

@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.AspectConfiguration;
+using Metalama.Framework.Engine.AspectOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -305,7 +305,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 ( c, d ) => this._selector( c, d ).Where( predicate ) );
 
         public void Configure<TOptions>( Func<T, TOptions> func )
-            where TOptions : AspectOptions, IAspectOptions<T>, new()
+            where TOptions : IAspectOptions, IAspectOptions<T>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;

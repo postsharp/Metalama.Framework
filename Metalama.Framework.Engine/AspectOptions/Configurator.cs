@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Options;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 internal class Configurator
 {
-    public Configurator( IDeclaration declaration, Framework.Options.AspectOptions options )
+    public Configurator( IDeclaration declaration, IAspectOptions options )
     {
         this.Declaration = declaration;
         this.Options = options;
@@ -14,5 +15,5 @@ internal class Configurator
 
     public IDeclaration Declaration { get; }
 
-    public Framework.Options.AspectOptions Options { get; }
+    public IAspectOptions Options { get; }
 }

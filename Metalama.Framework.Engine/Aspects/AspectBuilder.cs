@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.AspectConfiguration;
+using Metalama.Framework.Engine.AspectOptions;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;

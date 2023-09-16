@@ -11,7 +11,7 @@ using Metalama.Framework.Options;
 using System;
 using System.Collections.Concurrent;
 
-namespace Metalama.Framework.Engine.AspectConfiguration;
+namespace Metalama.Framework.Engine.AspectOptions;
 
 public partial class AspectOptionsManager
 {
@@ -30,7 +30,7 @@ public partial class AspectOptionsManager
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
 
             var prototype =
-                invoker.Invoke( () => (Framework.Options.AspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
+                invoker.Invoke( () => (IAspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
             this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
             this._eligibilityHelper.PopulateRules( diagnosticAdder );
@@ -60,18 +60,15 @@ public partial class AspectOptionsManager
 
             lock ( declarationOptions.Sync )
             {
-                declarationOptions.DirectOptions ??=
-                    declarationOptions.DirectOptions?.OverrideWith(
-                        configurator.Options,
-                        new AspectOptionsOverrideContext( AspectOptionsOverrideAxis.Self ) )
-                    ?? configurator.Options;
+                declarationOptions.DirectOptions =
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, AspectOptionsOverrideAxis.Self, configurator.Declaration );
 
                 declarationOptions.ResetMergedOptions();
             }
         }
 
         public T? GetOptions<T>( IDeclaration declaration )
-            where T : Framework.Options.AspectOptions, new()
+            where T : class, IAspectOptions, new()
         {
             var node = this.GetNodeAndComputeDirectOptions( declaration );
 
@@ -89,11 +86,6 @@ public partial class AspectOptionsManager
                 var baseDeclaration = memberOrNamedType.GetBaseDefinition();
                 baseDeclarationOptions = baseDeclaration != null ? this.GetOptions<T>( baseDeclaration ) : null;
             }
-            else if ( declaration.DeclarationKind == DeclarationKind.Compilation )
-            {
-                // For the compilation object, we take the default options initialized with project properties.
-                baseDeclarationOptions = this._parent.GetDefaultOptions<T>( declaration.Compilation );
-            }
             else
             {
                 baseDeclarationOptions = null;
@@ -102,31 +94,34 @@ public partial class AspectOptionsManager
             // Get options inherited from containing declaration.
             T? containingDeclarationOptions;
 
-            var containingDeclaration = declaration switch
+            if ( declaration is INamespace { IsGlobalNamespace: true } )
             {
-                INamedType namedType => (IDeclaration?) namedType.DeclaringType ?? namedType.Namespace,
-                _ => declaration.ContainingDeclaration
-            };
-
-            if ( containingDeclaration != null )
-            {
-                containingDeclarationOptions = this.GetOptions<T>( containingDeclaration );
+                // For the global namespace, we go down to the project-level options.
+                containingDeclarationOptions = this._parent.GetDefaultOptions<T>( declaration.Compilation.Project );
             }
             else
             {
-                containingDeclarationOptions = null;
+                var containingDeclaration = declaration switch
+                {
+                    INamedType namedType => (IDeclaration?) namedType.DeclaringType ?? namedType.Namespace,
+                    _ => declaration.ContainingDeclaration
+                };
+                
+                containingDeclarationOptions = containingDeclaration != null ? this.GetOptions<T>( containingDeclaration ) : null;
             }
 
             // Merge all options.
-            var mergedOptions =
-                MergeOptions(
-                    MergeOptions( baseDeclarationOptions, containingDeclarationOptions, AspectOptionsOverrideAxis.ContainmentOverBase ),
-                    node?.DirectOptions,
-                    AspectOptionsOverrideAxis.DirectOverInheritance );
+            var inheritedOptions = MergeOptions(
+                baseDeclarationOptions,
+                containingDeclarationOptions,
+                AspectOptionsOverrideAxis.ContainmentOverBase,
+                declaration );
+
+            var mergedOptions = MergeOptions( inheritedOptions, node?.DirectOptions, AspectOptionsOverrideAxis.DirectOverInheritance, declaration );
 
             // Cache the result.
             var shouldCache =
-                (declaration.DeclarationKind is DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.Compilation) ||
+                declaration.DeclarationKind is DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.Compilation ||
                 (mergedOptions != null && (mergedOptions != baseDeclarationOptions || mergedOptions != containingDeclarationOptions));
 
             if ( shouldCache )
@@ -138,8 +133,8 @@ public partial class AspectOptionsManager
             return (T?) mergedOptions;
         }
 
-        private static T? MergeOptions<T>( T? baseOptions, T? options, AspectOptionsOverrideAxis axis )
-            where T : Framework.Options.AspectOptions
+        private static T? MergeOptions<T>( T? baseOptions, T? options, AspectOptionsOverrideAxis axis, IDeclaration declaration )
+            where T : class, IAspectOptions
         {
             if ( baseOptions == null )
             {
@@ -149,9 +144,13 @@ public partial class AspectOptionsManager
             {
                 return baseOptions;
             }
+            else if ( ReferenceEquals( baseOptions, options ) )
+            {
+                return options;
+            }
             else
             {
-                return (T) baseOptions.OverrideWith( options, new AspectOptionsOverrideContext( axis ) );
+                return (T) baseOptions.OverrideWith( options, new AspectOptionsOverrideContext( axis, declaration ) );
             }
         }
 

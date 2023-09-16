@@ -4,18 +4,33 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
+using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Options;
 
 [assembly: AspectOrder( typeof(OptionsAspect), typeof(ModifyOptionsAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
-public class MyOptions : AspectOptions, IAspectOptions<IDeclaration>
+public record MyOptions : IAspectOptions<IDeclaration>
 {
     public string? Value { get; init; }
 
-    public override AspectOptions OverrideWith( AspectOptions options, in AspectOptionsOverrideContext context )
-        => new MyOptions { Value = ( (MyOptions)options ).Value ?? Value };
+    public bool? BaseWins { get; init; }
+
+    public IAspectOptions GetDefaultOptions( IProject project ) => this;
+
+    public IAspectOptions OverrideWith( IAspectOptions options, in AspectOptionsOverrideContext context )
+    {
+        if (BaseWins.GetValueOrDefault() && context.Axis == AspectOptionsOverrideAxis.ContainmentOverBase)
+        {
+            return this;
+        }
+        else
+        {
+            var other = (MyOptions)options;
+            return new MyOptions { Value = other.Value ?? this.Value, BaseWins = other.BaseWins ?? this.BaseWins };
+        }
+    }
 
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
 }
@@ -23,13 +38,15 @@ public class MyOptions : AspectOptions, IAspectOptions<IDeclaration>
 public class MyOptionsAttribute : Attribute, IAspectOptionsAttribute<MyOptions>
 {
     private string _value;
+    private bool _baseWins;
 
-    public MyOptionsAttribute( string value )
+    public MyOptionsAttribute( string value, bool baseWins = false )
     {
         _value = value;
+        _baseWins = baseWins;
     }
 
-    public MyOptions ToOptions() => new() { Value = _value };
+    public MyOptions ToOptions() => new() { Value = _value, BaseWins = _baseWins };
 }
 
 public class ActualOptionsAttribute : Attribute
