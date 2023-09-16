@@ -19,7 +19,7 @@ public record MyOptions : IAspectOptions<IDeclaration>
 
     public IAspectOptions GetDefaultOptions( IProject project ) => this;
 
-    public IAspectOptions OverrideWith( IAspectOptions options, in AspectOptionsOverrideContext context )
+    public object OverrideWith( object options, in AspectOptionsOverrideContext context )
     {
         if (BaseWins.GetValueOrDefault() && context.Axis == AspectOptionsOverrideAxis.ContainmentOverBase)
         {
@@ -28,7 +28,8 @@ public record MyOptions : IAspectOptions<IDeclaration>
         else
         {
             var other = (MyOptions)options;
-            return new MyOptions { Value = other.Value ?? this.Value, BaseWins = other.BaseWins ?? this.BaseWins };
+
+            return new MyOptions { Value = other.Value ?? Value, BaseWins = other.BaseWins ?? BaseWins };
         }
     }
 

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -66,6 +67,7 @@ namespace Metalama.Framework.Project
         /// </summary>
         /// <typeparam name="T">The extension type, which must derive from <see cref="ProjectExtension"/> and have a default constructor.</typeparam>
         /// <seealso href="@exposing-configuration"/>
+        [Obsolete( "Use IDeclaration.Enhancements().GetOptions<T> to get or amender.Outbound.Configure<T>(...) to set an option." )]
         T Extension<T>()
             where T : ProjectExtension, new();
 

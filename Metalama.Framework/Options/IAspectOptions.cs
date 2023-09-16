@@ -7,11 +7,9 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public interface IAspectOptions : ICompileTimeSerializable
+public interface IAspectOptions : IOverridable, ICompileTimeSerializable
 {
     IAspectOptions GetDefaultOptions( IProject project );
-
-    IAspectOptions OverrideWith( IAspectOptions options, in AspectOptionsOverrideContext context );
 }
 
 public interface IAspectOptions<in T> : IAspectOptions, IEligible<T>

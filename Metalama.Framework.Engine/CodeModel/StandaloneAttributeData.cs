@@ -2,7 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
+using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -20,4 +23,7 @@ internal sealed class StandaloneAttributeData : IAttributeData
     public ImmutableArray<TypedConstant> ConstructorArguments { get; init; } = ImmutableArray<TypedConstant>.Empty;
 
     public INamedArgumentList NamedArguments { get; } = NamedArgumentList.Empty;
+
+    bool IAttributeData.TryConstruct( ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out System.Attribute? attribute )
+        => throw new NotImplementedException();
 }

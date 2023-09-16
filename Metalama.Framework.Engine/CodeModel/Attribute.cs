@@ -3,9 +3,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Metrics;
@@ -13,6 +15,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -70,6 +73,13 @@ namespace Metalama.Framework.Engine.CodeModel
             => new NamedArgumentList(
                 this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
                     .ToReadOnlyList() );
+
+        public bool TryConstruct( ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out System.Attribute? attribute )
+        {
+            var deserializer = this._compilation.Project.ServiceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+
+            return deserializer.TryCreateAttribute( this, (IDiagnosticAdder) diagnosticSink.Sink, out attribute );
+        }
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {

@@ -2,7 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
+using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
@@ -40,5 +43,7 @@ namespace Metalama.Framework.Code
         /// Gets the named arguments (either fields or properties) of the attribute.
         /// </summary>
         INamedArgumentList NamedArguments { get; }
+
+        bool TryConstruct( ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out Attribute? attribute );
     }
 }
