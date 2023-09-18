@@ -5,11 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -77,9 +77,9 @@ namespace Metalama.Framework.Engine.Fabrics
             this._parent.AddValidatorSource( validatorSource );
         }
 
-        private void RegisterConfiguratorSource( IConfiguratorSource configuratorSource )
+        private void RegisterOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
         {
-            this._parent.AddConfiguratorSource( configuratorSource );
+            this._parent.AddOptionsSource( hierarchicalOptionsSource );
         }
 
         private IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
@@ -310,10 +310,10 @@ namespace Metalama.Framework.Engine.Fabrics
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
-            this.RegisterConfiguratorSource(
-                new ProgrammaticConfiguratorSource(
+            this.RegisterOptionsSource(
+                new ProgrammaticHierarchicalOptionsSource(
                     ( compilation, diagnosticAdder )
-                        => this.SelectAndValidateValidatorOrConfiguratorTargets<Configurator>(
+                        => this.SelectAndValidateValidatorOrConfiguratorTargets<HierarchicalOptionsInstance>(
                             userCodeInvoker,
                             executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                             compilation,
@@ -331,7 +331,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                                 return new[]
                                 {
-                                    new Configurator(
+                                    new HierarchicalOptionsInstance(
                                         t,
                                         options )
                                 };

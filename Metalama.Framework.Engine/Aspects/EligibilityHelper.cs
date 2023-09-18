@@ -53,7 +53,8 @@ internal partial class EligibilityHelper
 
         return Expression.Lambda<Func<EligibilityHelper, IDiagnosticAdder, bool>>(
                 callMethod,
-                new[] { thisParameter, diagnosticAdderParameter } )
+                thisParameter,
+                diagnosticAdderParameter )
             .Compile();
     }
 

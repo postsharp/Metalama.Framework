@@ -7,12 +7,16 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -22,10 +26,11 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
 /// </summary>
-internal sealed class TransitivePipelineContributorSource : IAspectSource, IValidatorSource
+internal sealed class TransitivePipelineContributorSource : IAspectSource, IValidatorSource, IExternalHierarchicalOptionsProvider
 {
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
     private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
+    private readonly ImmutableDictionary<AssemblyIdentity, ITransitiveAspectsManifest> _manifests;
 
     public TransitivePipelineContributorSource(
         Compilation compilation,
@@ -36,6 +41,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
         var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
         var validatorsBuilder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
+        var manifestDictionaryBuilder = ImmutableDictionary.CreateBuilder<AssemblyIdentity, ITransitiveAspectsManifest>();
 
         var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
@@ -43,6 +49,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         {
             // Get the manifest of the reference.
             ITransitiveAspectsManifest? manifest = null;
+            AssemblyIdentity? assemblyIdentity = null;
 
             switch ( reference )
             {
@@ -52,6 +59,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
                         if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                         {
                             manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider, compilation );
+                            assemblyIdentity = metadataInfo.AssemblyIdentity;
                         }
                     }
 
@@ -59,6 +67,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
                 case CompilationReference compilationReference:
                     manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation );
+                    assemblyIdentity = compilationReference.Compilation.Assembly.Identity;
 
                     break;
 
@@ -69,6 +78,8 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
             // Process the manifest.
             if ( manifest != null )
             {
+                manifestDictionaryBuilder.Add( assemblyIdentity.AssertNotNull(), manifest );
+
                 // Process inherited aspects.
                 foreach ( var aspectClassName in manifest.InheritableAspectTypes )
                 {
@@ -97,6 +108,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
         this._inheritedAspects = inheritedAspectsBuilder.ToImmutable();
         this._referenceValidators = validatorsBuilder.ToImmutable();
+        this._manifests = manifestDictionaryBuilder.ToImmutable();
     }
 
     public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
@@ -165,6 +177,20 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         else
         {
             return Enumerable.Empty<ValidatorInstance>();
+        }
+    }
+
+    public bool TryGetOptions( IDeclaration declaration, Type optionsType, [NotNullWhen( true )] out IHierarchicalOptions? options )
+    {
+        if ( !this._manifests.TryGetValue( ((AssemblyIdentityModel) declaration.DeclaringAssembly.Identity).Identity, out var manifest ) )
+        {
+            options = null;
+
+            return false;
+        }
+        else
+        {
+            return manifest.TryGetHierarchicalOptions( declaration.ToSerializableId(), optionsType, out options );
         }
     }
 }

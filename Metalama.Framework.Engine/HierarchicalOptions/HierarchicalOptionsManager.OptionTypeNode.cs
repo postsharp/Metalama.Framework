@@ -42,7 +42,7 @@ public sealed partial class HierarchicalOptionsManager
             this.Metadata = type.GetCustomAttributes<HierarchicalOptionsAttribute>().SingleOrDefault() ?? HierarchicalOptionsAttribute.Default;
         }
 
-        public void AddConfigurator( Configurator configurator, IDiagnosticAdder diagnosticAdder )
+        public void AddConfigurator( HierarchicalOptionsInstance configurator, IDiagnosticAdder diagnosticAdder )
         {
             // ReSharper disable once InconsistentlySynchronizedField
             var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
@@ -75,7 +75,6 @@ public sealed partial class HierarchicalOptionsManager
 
         public IHierarchicalOptions? GetOptions( IDeclaration declaration )
         {
-            
             var node = this.GetNodeAndComputeDirectOptions( declaration );
 
             if ( node?.MergedOptions != null )
@@ -227,7 +226,8 @@ public sealed partial class HierarchicalOptionsManager
             // ReSharper disable once InconsistentlySynchronizedField
             if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var node ) )
             {
-                if ( declaration.BelongsToCurrentProject && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._type, out var options ) == true )
+                if ( declaration.BelongsToCurrentProject
+                     && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._type, out var options ) == true )
                 {
                     node = this.GetOrAddDeclarationNode( declaration );
                     node.DirectOptions = node.MergedOptions = options;

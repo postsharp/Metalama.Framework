@@ -165,7 +165,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
-        if ( metaApi.Target.Declaration is IMethod targetMethod && targetMethod.TypeParameters is { Count: > 0 } )
+        if ( metaApi.Target.Declaration is IMethod { TypeParameters.Count: > 0 } targetMethod )
         {
             // Generic method - we need to add type parameters as named arguments for correct serializable id resolution.
             // Any target method type parameter that matches name of template argument can be skipped - template will not have a runtime type parameter of that name.

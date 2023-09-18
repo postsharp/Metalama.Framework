@@ -4,12 +4,12 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
@@ -446,9 +446,9 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public void AddConfiguratorSources( IEnumerable<IConfiguratorSource> configuratorSources )
+    public void AddOptionsSources( IEnumerable<IHierarchicalOptionsSource> optionsSources )
     {
-        foreach ( var source in configuratorSources )
+        foreach ( var source in optionsSources )
         {
             this.LastCompilation.HierarchicalOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
         }

@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     new PipelineContributorSources(
                         input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                         validatorSources,
-                        ImmutableArray<IConfiguratorSource>.Empty ),
+                        ImmutableArray<IHierarchicalOptionsSource>.Empty ),
                     pipelineStepsResult.InheritableAspectInstances,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),

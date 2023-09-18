@@ -3,9 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -58,7 +58,7 @@ internal abstract partial class FabricDriver
 
         public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
-        public abstract void AddConfiguratorSource( IConfiguratorSource configuratorSource );
+        public abstract void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource );
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
 

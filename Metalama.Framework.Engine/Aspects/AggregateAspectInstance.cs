@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;

@@ -15,14 +15,14 @@ using System.Linq.Expressions;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-internal sealed class CompilationConfiguratorSource : IConfiguratorSource
+internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOptionsSource
 {
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
 
     private readonly ConcurrentDictionary<Type, Func<IHierarchicalOptionsProvider, IHierarchicalOptions>> _toOptionsMethods = new();
     private readonly ProjectSpecificCompileTimeTypeResolver _typeResolver;
 
-    public CompilationConfiguratorSource( ProjectServiceProvider serviceProvider )
+    public CompilationHierarchicalOptionsSource( ProjectServiceProvider serviceProvider )
     {
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
         this._typeResolver = serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
@@ -44,7 +44,7 @@ internal sealed class CompilationConfiguratorSource : IConfiguratorSource
         return Expression.Lambda<Func<IHierarchicalOptionsProvider, IHierarchicalOptions>>( methodCall, parameter ).Compile();
     }
 
-    public IEnumerable<Configurator> GetConfigurators( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
         var genericIHierarchicalOptionsAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider<>) );
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
@@ -79,7 +79,7 @@ internal sealed class CompilationConfiguratorSource : IConfiguratorSource
                 {
                     var options = this.GetToOptionsMethod( optionType ).Invoke( optionsAttribute );
 
-                    yield return new Configurator( attribute.ContainingDeclaration, options );
+                    yield return new HierarchicalOptionsInstance( attribute.ContainingDeclaration, options );
                 }
             }
         }

@@ -11,5 +11,5 @@ internal interface IPipelineContributorSourceCollector
 
     void AddValidatorSource( IValidatorSource validatorSource );
 
-    void AddConfiguratorSource( IConfiguratorSource configuratorSource );
+    void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource );
 }

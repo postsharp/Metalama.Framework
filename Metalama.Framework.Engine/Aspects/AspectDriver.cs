@@ -7,12 +7,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -118,7 +118,7 @@ internal sealed class AspectDriver : IAspectDriver
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableArray<IValidatorSource>.Empty,
-                    ImmutableArray<IConfiguratorSource>.Empty );
+                    ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
@@ -130,7 +130,7 @@ internal sealed class AspectDriver : IAspectDriver
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableArray<IValidatorSource>.Empty,
-                    ImmutableArray<IConfiguratorSource>.Empty );
+                    ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -235,7 +235,7 @@ internal sealed class AspectDriver : IAspectDriver
                         ImmutableArray<ITransformation>.Empty,
                         ImmutableArray<IAspectSource>.Empty,
                         ImmutableArray<IValidatorSource>.Empty,
-                        ImmutableArray<IConfiguratorSource>.Empty );
+                        ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             var aspectResult = aspectBuilderState.ToResult();

@@ -5,9 +5,9 @@ using Metalama.Framework.Options;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-internal class Configurator
+internal sealed class HierarchicalOptionsInstance
 {
-    public Configurator( IDeclaration declaration, IHierarchicalOptions options )
+    public HierarchicalOptionsInstance( IDeclaration declaration, IHierarchicalOptions options )
     {
         this.Declaration = declaration;
         this.Options = options;

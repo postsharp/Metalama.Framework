@@ -1,3 +1,8 @@
+#if TEST_OPTIONS
+// @IgnoredDiagnostic(CS0618)
+#endif
+#pragma warning disable CS0618
+
 using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric

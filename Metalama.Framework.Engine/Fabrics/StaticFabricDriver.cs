@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             private readonly List<IAspectSource> _aspectSources = new();
             private readonly List<IValidatorSource> _validatorSources = new();
-            private readonly List<IConfiguratorSource> _configuratorSources = new();
+            private readonly List<IHierarchicalOptionsSource> _optionsSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
                 base( project, fabricManager, fabricInstance, targetDeclaration ) { }
@@ -43,10 +43,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
             public override void AddValidatorSource( IValidatorSource validatorSource ) => this._validatorSources.Add( validatorSource );
 
-            public override void AddConfiguratorSource( IConfiguratorSource configuratorSource ) => this._configuratorSources.Add( configuratorSource );
+            public override void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
+                => this._optionsSources.Add( hierarchicalOptionsSource );
 
             public StaticFabricResult ToResult()
-                => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray(), this._configuratorSources.ToImmutableArray() );
+                => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray(), this._optionsSources.ToImmutableArray() );
         }
     }
 }

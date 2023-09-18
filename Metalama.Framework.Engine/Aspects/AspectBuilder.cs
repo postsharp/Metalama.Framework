@@ -6,10 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -59,9 +59,9 @@ namespace Metalama.Framework.Engine.Aspects
             this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
         }
 
-        public void AddConfiguratorSource( IConfiguratorSource configuratorSource )
+        public void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
         {
-            this._aspectBuilderState.ConfiguratorSources = this._aspectBuilderState.ConfiguratorSources.Add( configuratorSource );
+            this._aspectBuilderState.OptionsSources = this._aspectBuilderState.OptionsSources.Add( hierarchicalOptionsSource );
         }
 
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;

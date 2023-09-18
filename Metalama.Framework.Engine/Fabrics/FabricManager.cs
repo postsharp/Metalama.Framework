@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             var aspectSources = ImmutableArray.CreateBuilder<IAspectSource>();
             var validatorSources = ImmutableArray.CreateBuilder<IValidatorSource>();
-            var configuratorSources = ImmutableArray.CreateBuilder<IConfiguratorSource>();
+            var optionsSources = ImmutableArray.CreateBuilder<IHierarchicalOptionsSource>();
 
             if ( !typeFabricDrivers.IsEmpty )
             {
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     {
                         aspectSources.AddRange( result.AspectSources );
                         validatorSources.AddRange( result.ValidatorSources );
-                        configuratorSources.AddRange( result.ConfiguratorSources );
+                        optionsSources.AddRange( result.OptionsSources );
                         this._listener?.AddStaticFabricResult( result );
                     }
                     else
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Fabrics
             project.Freeze();
             Execute( fabrics.OfType<NamespaceFabricDriver>() );
 
-            return new PipelineContributorSources( aspectSources.ToImmutable(), validatorSources.ToImmutable(), configuratorSources.ToImmutableArray() );
+            return new PipelineContributorSources( aspectSources.ToImmutable(), validatorSources.ToImmutable(), optionsSources.ToImmutableArray() );
         }
 
         private IEnumerable<FabricDriver> CreateDrivers(

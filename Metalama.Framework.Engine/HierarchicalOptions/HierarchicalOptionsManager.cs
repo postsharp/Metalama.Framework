@@ -22,27 +22,32 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
     private readonly ConcurrentDictionary<string, OptionTypeNode> _optionTypes = new();
     private readonly ConcurrentDictionary<string, IHierarchicalOptions> _defaultOptions = new();
     private readonly ProjectServiceProvider _serviceProvider;
-    private readonly IExternalOptionsProvider? _externalOptionsProvider;
+    private IExternalHierarchicalOptionsProvider? _externalOptionsProvider;
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
-    
+
     internal HierarchicalOptionsManager( ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
-        this._externalOptionsProvider = serviceProvider.GetService<IExternalOptionsProvider>();
     }
 
-    internal void AddSources( ImmutableArray<IConfiguratorSource> sources, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
+    internal void Initialize(
+        ImmutableArray<IHierarchicalOptionsSource> sources,
+        IExternalHierarchicalOptionsProvider? externalOptionsProvider,
+        CompilationModel compilationModel,
+        IDiagnosticAdder diagnosticAdder )
     {
+        this._externalOptionsProvider = externalOptionsProvider;
+
         foreach ( var source in sources )
         {
             this.AddSource( source, compilationModel, diagnosticAdder );
         }
     }
 
-    internal void AddSource( IConfiguratorSource source, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
+    internal void AddSource( IHierarchicalOptionsSource source, CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder )
     {
-        foreach ( var configurator in source.GetConfigurators( compilationModel, diagnosticAdder ) )
+        foreach ( var configurator in source.GetOptions( compilationModel, diagnosticAdder ) )
         {
             var optionTypeName = configurator.Options.GetType().FullName.AssertNotNull();
 

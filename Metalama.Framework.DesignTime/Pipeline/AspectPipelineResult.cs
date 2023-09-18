@@ -19,8 +19,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
-    internal record InheritableOptionsInstance( HierarchicalOptionsKey Key, IHierarchicalOptions Options );
-
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>

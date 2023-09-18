@@ -2,11 +2,11 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
@@ -50,7 +50,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         return new PipelineContributorSources(
             ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ),
             ImmutableArray<IValidatorSource>.Empty,
-            ImmutableArray<IConfiguratorSource>.Empty );
+            ImmutableArray<IHierarchicalOptionsSource>.Empty );
     }
 
     public static async Task<FallibleResult<PartialCompilation>> ExecuteAsync(

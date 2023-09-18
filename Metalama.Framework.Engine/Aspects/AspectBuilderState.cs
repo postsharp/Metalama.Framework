@@ -3,8 +3,8 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -26,7 +26,7 @@ internal sealed class AspectBuilderState
 
     public ImmutableArray<IValidatorSource> ValidatorSources { get; set; } = ImmutableArray<IValidatorSource>.Empty;
 
-    public ImmutableArray<IConfiguratorSource> ConfiguratorSources { get; set; } = ImmutableArray<IConfiguratorSource>.Empty;
+    public ImmutableArray<IHierarchicalOptionsSource> OptionsSources { get; set; } = ImmutableArray<IHierarchicalOptionsSource>.Empty;
 
     public CancellationToken CancellationToken { get; }
 
@@ -69,7 +69,7 @@ internal sealed class AspectBuilderState
                 this.AdviceFactoryState.Transformations.ToImmutableArray(),
                 this.AspectSources,
                 this.ValidatorSources,
-                this.ConfiguratorSources )
+                this.OptionsSources )
             : new AspectInstanceResult(
                 this.AspectInstance,
                 outcome,
@@ -77,6 +77,6 @@ internal sealed class AspectBuilderState
                 ImmutableArray<ITransformation>.Empty,
                 ImmutableArray<IAspectSource>.Empty,
                 ImmutableArray<IValidatorSource>.Empty,
-                ImmutableArray<IConfiguratorSource>.Empty );
+                ImmutableArray<IHierarchicalOptionsSource>.Empty );
     }
 }

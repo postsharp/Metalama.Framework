@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     new PipelineContributorSources(
                         input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                         input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
-                        input.ContributorSources.ConfiguratorSources ),
+                        input.ContributorSources.OptionsSources ),
                     pipelineStepsResult.InheritableAspectInstances,
                     ImmutableArray<ReferenceValidatorInstance>.Empty,
                     input.AdditionalSyntaxTrees,

@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdditionalOutputs;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -13,6 +12,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
@@ -353,9 +353,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
 
-            var configuratorSources = ImmutableArray.Create<IConfiguratorSource>( new CompilationConfiguratorSource( configuration.ServiceProvider ) );
+            var optionsSources = ImmutableArray.Create<IHierarchicalOptionsSource>( new CompilationHierarchicalOptionsSource( configuration.ServiceProvider ) );
 
-            var allSources = new PipelineContributorSources( aspectSources, validatorSources, configuratorSources );
+            var allSources = new PipelineContributorSources( aspectSources, validatorSources, optionsSources, transitiveAspectSource );
 
             if ( configuration.FabricsConfiguration != null )
             {
