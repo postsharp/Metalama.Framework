@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,7 +52,10 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         var projectServiceProvider = pipelineConfiguration.ServiceProvider;
 
-        LicenseVerifier.VerifyCanUseSdk( projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
+        // We don't use input.Project.Name, because it can return the assembly name or an empty string when the project path is unknown. 
+        var projectName = Path.GetFileNameWithoutExtension( input.Project.Path );
+
+        LicenseVerifier.VerifyCanUseSdk( projectName, projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,

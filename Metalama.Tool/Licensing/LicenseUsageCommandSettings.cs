@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Tool.Licensing;
 
-internal sealed class CreditsCommandSettings : BaseCommandSettings
+internal sealed class LicenseUsageCommandSettings : BaseCommandSettings
 {
     [CommandOption( "-d|--days" )]
     [Description( "Includes only projects built in the specified number of days." )]
@@ -25,7 +25,7 @@ internal sealed class CreditsCommandSettings : BaseCommandSettings
 
     [CommandOption( "-p|--project" )]
     [Description(
-        "Includes only the specified projects, specified by file name without extension. You can use `*` to match any substring.  May be a comma-separated list." )]
+        "Includes only the specified projects, specified by file name without extension. You can use `*` to match any substring. May be a comma-separated list." )]
     public string? Projects { get; init; }
 
     [CommandOption( "-c|--configuration" )]

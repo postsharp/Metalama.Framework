@@ -33,7 +33,7 @@ public static class MSBuildPropertyNames
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
     public const string MetalamaReferenceAssemblyRestoreTimeout = nameof(MetalamaReferenceAssemblyRestoreTimeout);
     public const string MetalamaLicense = nameof(MetalamaLicense);
-    public const string MetalamaWriteLicenseCreditData = nameof(MetalamaWriteLicenseCreditData);
+    public const string MetalamaWriteLicenseUsageData = nameof(MetalamaWriteLicenseUsageData);
     public const string MetalamaRoslynIsCompileTimeOnly = nameof(MetalamaRoslynIsCompileTimeOnly);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
@@ -60,6 +60,6 @@ public static class MSBuildPropertyNames
         ProjectAssetsFile,
         MetalamaReferenceAssemblyRestoreTimeout,
         MetalamaLicense,
-        MetalamaWriteLicenseCreditData,
+        MetalamaWriteLicenseUsageData,
         MetalamaRoslynIsCompileTimeOnly );
 }

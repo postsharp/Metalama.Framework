@@ -19,6 +19,7 @@
       "Metalama.SystemTypes\\Metalama.SystemTypes.csproj",
       "Metalama.Testing.AspectTesting\\Metalama.Testing.AspectTesting.csproj",
       "Metalama.Testing.UnitTesting\\Metalama.Testing.UnitTesting.csproj",
+      "Metalama.Tool\\Metalama.Tool.csproj",
       "Tests\\Metalama.AspectWorkbench\\Metalama.AspectWorkbench.csproj",
       "Tests\\Metalama.Framework.Tests.Integration\\Metalama.Framework.Tests.Integration.csproj",
       "Tests\\Metalama.Framework.Tests.UnitTests\\Metalama.Framework.Tests.UnitTests.csproj",

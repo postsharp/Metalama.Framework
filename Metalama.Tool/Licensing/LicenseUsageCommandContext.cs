@@ -9,9 +9,9 @@ using System.Collections.Generic;
 namespace Metalama.Tool.Licensing;
 
 [UsedImplicitly]
-internal class CreditsCommandContext : ExtendedCommandContext
+internal class LicenseUsageCommandContext : ExtendedCommandContext
 {
-    public CreditsCommandContext( ExtendedCommandContext context, IReadOnlyList<LicenseConsumptionFile> files, DateTime horizon ) : base( context )
+    public LicenseUsageCommandContext( ExtendedCommandContext context, IReadOnlyList<LicenseConsumptionFile> files, DateTime horizon ) : base( context )
     {
         this.Files = files;
         this.Horizon = horizon;
