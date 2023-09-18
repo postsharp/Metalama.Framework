@@ -14,7 +14,12 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         private const string _tooManyAspectClassesErrorId = "LAMA0800";
         private const string _redistributionInvalidErrorId = "LAMA0803";
 
-        public AspectCountTests( ITestOutputHelper logger ) : base( logger ) { }
+        private readonly ITestOutputHelper _logger;
+
+        public AspectCountTests( ITestOutputHelper logger ) : base( logger )
+        {
+            this._logger = logger;
+        }
 
         [Theory]
         [InlineData( TestLicenseKeys.PostSharpEssentials, 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
@@ -49,7 +54,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             null )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId, 4 )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
             string licenseKey,
             int numberOfAspects,
@@ -109,6 +114,7 @@ namespace {0}
     }}
 }}
 ";
+            this._logger.WriteLine( licenseKey );
 
             var sourceCodeBuilder = new StringBuilder();
             var aspectApplicationBuilder = new StringBuilder();
@@ -241,6 +247,154 @@ class TargetClass
             var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
+        }
+
+        [Fact]
+        public async Task SkippedAspectsDontCountAsync()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+public class Aspect1 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect1));
+        return meta.Proceed();
+    }
+}
+
+public class Aspect2 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+public class Aspect3 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect3));
+        return meta.Proceed();
+    }
+}
+
+public class SkippedAspect : OverrideMethodAspect
+{
+    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    {
+        builder.SkipAspect();
+    }
+
+    public override dynamic? OverrideMethod()
+    {
+        throw new InvalidOperationException();
+    }
+}
+
+class TargetClass
+{
+    [Aspect1]
+    [Aspect2]
+    [Aspect3]
+    [SkippedAspect]
+    void TargetMethod()
+    {
+    }
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+
+            Assert.Empty( diagnostics );
+        }
+
+        [Fact]
+        public async Task PartiallySkippedAspectsDoCountAsync()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+public class Aspect1 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect1));
+        return meta.Proceed();
+    }
+}
+
+public class Aspect2 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+public class Aspect3 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+public class OptionallySkippedAspect : OverrideMethodAspect
+{
+    private readonly bool _isSkipped;
+
+    public OptionallySkippedAspect(bool isSkipped)
+    {
+        this._isSkipped = isSkipped;
+    }
+
+    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    {
+        base.BuildAspect(builder);
+
+        if (this._isSkipped)
+        {
+            builder.SkipAspect();
+        }
+    }
+
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(OptionallySkippedAspect));
+        return meta.Proceed();
+    }
+}
+
+class TargetClass
+{
+    [Aspect1]
+    [Aspect2]
+    [Aspect3]
+    [OptionallySkippedAspect(false)]
+    void TargetMethod1()
+    {
+    }
+
+    [OptionallySkippedAspect(true)]
+    void TargetMethod2()
+    {
+    }
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+
+            Assert.Single( diagnostics, d => d.Id == _tooManyAspectClassesErrorId );
         }
     }
 }

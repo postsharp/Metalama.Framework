@@ -236,7 +236,7 @@ internal sealed class AspectDriver : IAspectDriver
 
             var aspectResult = aspectBuilderState.ToResult();
 
-            if ( aspectResult.Outcome == AdviceOutcome.Error )
+            if ( aspectResult.Outcome == AdviceOutcome.Error || aspectResult.Outcome == AdviceOutcome.Ignore )
             {
                 aspectInstance.Skip();
             }

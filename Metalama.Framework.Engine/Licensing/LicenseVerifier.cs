@@ -168,7 +168,8 @@ public sealed class LicenseVerifier : IProjectService
 
     internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        var aspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        // List all aspect classed, that are used. Don't count skipped instances.
+        var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
         
         // Let all contracts to be used for free.
         aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) );
