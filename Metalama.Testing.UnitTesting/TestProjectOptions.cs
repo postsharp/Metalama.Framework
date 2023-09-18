@@ -22,9 +22,9 @@ namespace Metalama.Testing.UnitTesting
         private readonly Lazy<string> _projectDirectory;
         private int _fileLockers;
 
-        public TestProjectOptions( TestContextOptions contextOptions, string? testName )
+        public TestProjectOptions( TestContextOptions contextOptions, string? projectName )
         {
-            this.ProjectName = testName;
+            this.ProjectName = projectName;
 
             this._properties = contextOptions.Properties;
 

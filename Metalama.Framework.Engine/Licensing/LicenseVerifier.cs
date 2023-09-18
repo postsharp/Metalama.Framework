@@ -37,7 +37,6 @@ public sealed class LicenseVerifier : IProjectService
     private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
     
     private readonly ITempFileManager _tempFileManager;
-    private readonly string? _targetAssemblyName;
 
     private readonly struct RedistributionLicenseFeatures { }
 
@@ -52,12 +51,11 @@ public sealed class LicenseVerifier : IProjectService
         return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
     }
 
-    internal LicenseVerifier( ProjectServiceProvider serviceProvider, string? targetAssemblyName )
+    internal LicenseVerifier( ProjectServiceProvider serviceProvider )
     {
         this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
         this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
-        this._targetAssemblyName = targetAssemblyName;
     }
 
     // This is to make the test output deterministic.
@@ -113,9 +111,6 @@ public sealed class LicenseVerifier : IProjectService
 
     private bool IsProjectWithValidRedistributionLicense( CompileTimeProject project ) => this._redistributionLicenseFeaturesByProject.ContainsKey( project );
 
-    private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
-        => this._licenseConsumptionService.CanConsume( requirement, this._targetAssemblyName );
-
     private bool CanConsumeForCurrentProject( LicenseRequirement requirement )
         => this._licenseConsumptionService.CanConsume( requirement, this._projectOptions.ProjectName );
 
@@ -125,7 +120,7 @@ public sealed class LicenseVerifier : IProjectService
 
     private void VerifyFabric( in AspectPredecessor predecessor, string feature )
     {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) )
         {
             if ( predecessor.Instance is FabricInstance fabricInstance
                  && !(fabricInstance.Driver is ProjectFabricDriver { Kind: FabricKind.Transitive } fabricDriver
@@ -145,7 +140,7 @@ public sealed class LicenseVerifier : IProjectService
             IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
-            _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
+            _ => this.CanConsumeForCurrentProject( LicenseRequirement.Professional )
         };
 
     internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
@@ -241,7 +236,7 @@ public sealed class LicenseVerifier : IProjectService
 
     internal bool VerifyCanBeInherited( AspectClass aspectClass )
     {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) )
         {
             this._inheritableAspectsWithoutLicense.Add( aspectClass );
 

@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using System;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -19,8 +20,13 @@ public class DistributedDesignTimeTestBase : UnitTestClass
         services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
     }
 
-    protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
+    protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services, string? projectName = null )
     {
+        if ( projectName != null )
+        {
+            throw new NotImplementedException();
+        }
+
         return new DistributedDesignTimeTestContext( contextOptions, services );
     }
 

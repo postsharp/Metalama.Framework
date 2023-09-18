@@ -323,6 +323,11 @@ namespace Metalama.Testing.AspectTesting
         public bool? FormatCompileTimeCode { get; set; }
 
         /// <summary>
+        /// Gets or sets the project of the test. By default, the test file name without extension is used.
+        /// </summary>
+        public string? ProjectName { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -693,6 +698,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "FormatCompileTimeCode":
                         this.FormatCompileTimeCode = bool.Parse( optionArg );
+
+                        break;
+
+                    case "ProjectName":
+                        this.ProjectName = optionArg;
 
                         break;
 

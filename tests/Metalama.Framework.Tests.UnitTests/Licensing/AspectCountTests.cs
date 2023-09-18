@@ -52,6 +52,20 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
             TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
             null )]
+        [InlineData(
+            TestLicenseKeys.MetalamaUltimatePersonalProjectBound,
+            1,
+            _arbitraryNamespace,
+            _arbitraryNamespace,
+            _tooManyAspectClassesErrorId )]
+        [InlineData(
+            TestLicenseKeys.MetalamaUltimatePersonalProjectBound,
+            11,
+            _arbitraryNamespace,
+            _arbitraryNamespace,
+            null,
+            0,
+            TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
@@ -61,7 +75,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string aspectNamespace,
             string targetNamespace,
             string? expectedErrorId,
-            int numberOfContracts = 0 )
+            int numberOfContracts = 0,
+            string projectName = "TestProject" )
         {
             const string usingsAndOrdering = @"
 using Metalama.Framework.Aspects;
@@ -192,7 +207,7 @@ namespace {0}
                     aspectApplicationBuilder.ToString(),
                     contractsApplicationBuilder.ToString() ) );
 
-            var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace );
+            var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace, projectName );
 
             if ( expectedErrorId == null )
             {

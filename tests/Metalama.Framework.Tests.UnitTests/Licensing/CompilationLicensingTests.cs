@@ -18,7 +18,9 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
-        public async Task CompilationPassesWithValidLicenseAsync( string licenseKey )
+        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution )]
+        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        public async Task CompilationPassesWithValidLicenseAsync( string licenseKey, string projectName = "TestProject" )
         {
             const string code = @"
 using System;
@@ -33,7 +35,7 @@ class Test
     }
 }";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey );
+            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey, projectName: projectName );
 
             Assert.Empty( diagnostics );
         }
