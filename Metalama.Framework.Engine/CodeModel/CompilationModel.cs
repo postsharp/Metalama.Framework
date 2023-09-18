@@ -41,8 +41,16 @@ namespace Metalama.Framework.Engine.CodeModel
             PartialCompilation compilation,
             AspectRepository? aspectRepository = null,
             HierarchicalOptionsManager? hierarchicalOptionsManager = null,
+            IExternalAnnotationProvider? externalAnnotationProvider = null,
             string? debugLabel = null )
-            => new( project, compilation, aspectRepository, hierarchicalOptionsManager, CompilationModelOptions.Default, debugLabel );
+            => new(
+                project,
+                compilation,
+                aspectRepository,
+                hierarchicalOptionsManager,
+                externalAnnotationProvider,
+                CompilationModelOptions.Default,
+                debugLabel );
 
         public static CompilationModel CreateInitialInstance(
             ProjectModel project,
@@ -50,12 +58,14 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null,
             HierarchicalOptionsManager? hierarchicalOptionsManager = null,
+            IExternalAnnotationProvider? externalAnnotationProvider = null,
             string? debugLabel = null )
             => new(
                 project,
                 PartialCompilation.CreateComplete( compilation, resources ),
                 aspectRepository,
                 hierarchicalOptionsManager,
+                externalAnnotationProvider,
                 CompilationModelOptions.Default,
                 debugLabel );
 
@@ -64,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel
             Compilation compilation,
             CompilationModelOptions options,
             string? debugLabel )
-            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, options: options, debugLabel: debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, options: options, debugLabel: debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
@@ -76,7 +86,34 @@ namespace Metalama.Framework.Engine.CodeModel
         public IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
             where T : class, IAnnotation
         {
-            return this._annotations[declaration.ToTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
+            if ( declaration.BelongsToCurrentProject )
+            {
+                return this._annotations[declaration.ToTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
+            }
+            else if ( this._externalAnnotationProvider != null )
+            {
+                return this._externalAnnotationProvider.GetAnnotations( declaration ).OfType<T>();
+            }
+            else
+            {
+                return Enumerable.Empty<T>();
+            }
+        }
+
+        public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> GetExportedAnnotations()
+        {
+            var builder = new ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder();
+
+            foreach ( var annotation in this._annotations
+                         .SelectMany(
+                             group => group
+                                 .Where( i => i.Export )
+                                 .Select( i => (DeclarationId: group.Key.ToSerializableId(), i.Annotation) ) ) )
+            {
+                builder.Add( annotation.DeclarationId, annotation.Annotation );
+            }
+
+            return builder.ToImmutable();
         }
 
         IHierarchicalOptionsManager ICompilationInternal.HierarchicalOptionsManager
@@ -110,18 +147,21 @@ namespace Metalama.Framework.Engine.CodeModel
         internal CompilationModelOptions Options { get; }
 
         private readonly string? _debugLabel;
+        private readonly IExternalAnnotationProvider? _externalAnnotationProvider;
 
         private CompilationModel(
             ProjectModel project,
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
             HierarchicalOptionsManager? hierarchicalOptionsManager,
+            IExternalAnnotationProvider? externalAnnotationProvider,
             CompilationModelOptions? options,
             string? debugLabel )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this._debugLabel = debugLabel;
+            this._externalAnnotationProvider = externalAnnotationProvider;
 
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
@@ -235,6 +275,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Helpers = prototype.Helpers;
             this.Options = options ?? prototype.Options;
             this._debugLabel = debugLabel;
+            this._externalAnnotationProvider = prototype._externalAnnotationProvider;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -268,6 +309,14 @@ namespace Metalama.Framework.Engine.CodeModel
             this.AspectRepository = aspectRepository;
         }
 
+        private CompilationModel( CompilationModel prototype, IExternalAnnotationProvider annotationProvider, string? debugLabel ) : this(
+            prototype,
+            false,
+            debugLabel )
+        {
+            this._externalAnnotationProvider = annotationProvider;
+        }
+
         internal CompilationModel WithTransformationsAndAspectInstances(
             IReadOnlyCollection<ITransformation>? introducedDeclarations,
             IEnumerable<AspectInstance>? aspectInstances,
@@ -283,6 +332,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
             => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository, debugLabel );
+
+        internal CompilationModel WithExternalAnnotationProvider( IExternalAnnotationProvider? annotationProvider, string? debugLabel )
+            => this._externalAnnotationProvider == annotationProvider ? this : new CompilationModel( this, annotationProvider, debugLabel );
 
         [Memo]
         public INamedTypeCollection Types

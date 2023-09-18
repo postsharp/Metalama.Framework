@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
 /// </summary>
-internal sealed class TransitivePipelineContributorSource : IAspectSource, IValidatorSource, IExternalHierarchicalOptionsProvider
+internal sealed class TransitivePipelineContributorSource : IAspectSource, IValidatorSource, IExternalHierarchicalOptionsProvider, IExternalAnnotationProvider
 {
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
     private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
@@ -195,6 +195,18 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         else
         {
             return manifest.InheritableOptions.TryGetValue( new HierarchicalOptionsKey( optionsType, declaration.ToSerializableId() ), out options );
+        }
+    }
+
+    public ImmutableArray<IAnnotation> GetAnnotations( IDeclaration declaration )
+    {
+        if ( !this._manifests.TryGetValue( ((AssemblyIdentityModel) declaration.DeclaringAssembly.Identity).Identity, out var manifest ) )
+        {
+            return ImmutableArray<IAnnotation>.Empty;
+        }
+        else
+        {
+            return manifest.Annotations[declaration.ToSerializableId()];
         }
     }
 }

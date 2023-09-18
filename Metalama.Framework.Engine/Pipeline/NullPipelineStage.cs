@@ -33,10 +33,11 @@ namespace Metalama.Framework.Engine.Pipeline
                     input.FirstCompilationModel ?? pipelineStepsResult.FirstCompilation,
                     pipelineStepsResult.LastCompilation,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ),
-                    new PipelineContributorSources(
-                        input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                        input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
-                        input.ContributorSources.OptionsSources ),
+                    input.ContributorSources with
+                    {
+                        AspectSources = input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                        ValidatorSources = input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources )
+                    },
                     pipelineStepsResult.InheritableAspectInstances,
                     ImmutableArray<ReferenceValidatorInstance>.Empty,
                     input.AdditionalSyntaxTrees,

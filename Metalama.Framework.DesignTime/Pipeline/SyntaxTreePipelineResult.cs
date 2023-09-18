@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -43,6 +45,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableArray<DesignTimeTransformation> Transformations { get; }
 
+        public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; }
+
         private SyntaxTreePipelineResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
@@ -53,9 +57,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableArray<DesignTimeReferenceValidatorInstance>? validators,
             ImmutableArray<DesignTimeAspectInstance>? aspectInstances,
             ImmutableArray<DesignTimeTransformation>? transformations,
-            ImmutableArray<InheritableOptionsInstance>? inheritableOptions )
+            ImmutableArray<InheritableOptionsInstance>? inheritableOptions,
+            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>? annotations )
         {
             this.SyntaxTree = syntaxTree;
+            this.Annotations = annotations ?? ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Empty;
             this.InheritableOptions = inheritableOptions ?? ImmutableArray<InheritableOptionsInstance>.Empty;
             this.ReferenceValidators = validators ?? ImmutableArray<DesignTimeReferenceValidatorInstance>.Empty;
             this.InheritableAspects = inheritableAspects ?? ImmutableArray<InheritableAspectInstance>.Empty;

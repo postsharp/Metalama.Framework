@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -28,6 +30,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public ImmutableArray<DesignTimeAspectInstance>.Builder? AspectInstances;
             public ImmutableArray<DesignTimeTransformation>.Builder? Transformations;
             public ImmutableArray<InheritableOptionsInstance>.Builder? InheritableOptions;
+            public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder? Annotations;
+
 #pragma warning restore SA1401 // Fields should be private
 
             public Builder( SyntaxTree syntaxTree )
@@ -61,7 +65,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.Validators?.ToImmutable(),
                     this.AspectInstances?.ToImmutable(),
                     this.Transformations?.ToImmutable(),
-                    this.InheritableOptions?.ToImmutable() );
+                    this.InheritableOptions?.ToImmutable(),
+                    this.Annotations?.ToImmutable() );
             }
         }
     }

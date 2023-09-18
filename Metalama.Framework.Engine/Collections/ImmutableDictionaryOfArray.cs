@@ -20,6 +20,11 @@ namespace Metalama.Framework.Engine.Collections
             this._dictionary = dictionary;
         }
 
+        public ImmutableDictionaryOfArray( IEnumerable<KeyValuePair<TKey, ImmutableArray<TValue>>> dictionary )
+        {
+            this._dictionary = dictionary.ToImmutableDictionary( x => x.Key, x => new Group( x.Key, x.Value ) );
+        }
+
         public static ImmutableDictionaryOfArray<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
         public static ImmutableDictionaryOfArray<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
@@ -140,5 +145,8 @@ namespace Metalama.Framework.Engine.Collections
                 return new ImmutableDictionaryOfArray<TKey, TValue>( builder.ToImmutable() );
             }
         }
+
+        public ImmutableDictionary<TKey, ImmutableArray<TValue>> ToImmutableDictionary()
+            => this._dictionary.ToImmutableDictionary( x => x.Key, x => x.Value.Items );
     }
 }

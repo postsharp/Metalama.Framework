@@ -79,7 +79,5 @@ public readonly struct DeclarationEnhancements<T>
 
     public IEnumerable<TAnnotation> GetAnnotations<TAnnotation>()
         where TAnnotation : class, IAnnotation<T>
-    {
-        return ((ICompilationInternal) this.Declaration.Compilation).GetAnnotations<TAnnotation>( this.Declaration );
-    }
+        => ((ICompilationInternal) this.Declaration.Compilation).GetAnnotations<TAnnotation>( this.Declaration );
 }

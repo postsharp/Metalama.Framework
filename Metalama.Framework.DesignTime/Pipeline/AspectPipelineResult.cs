@@ -38,6 +38,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private static readonly ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> _emptyInheritableOptions
             = ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty;
 
+        private static readonly ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> _emptyAnnotations =
+            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Empty;
+
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
@@ -72,6 +75,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; } = _emptyInheritableOptions;
 
+        public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; } = _emptyAnnotations;
+
         private byte[]? _serializedTransitiveAspectManifest;
 
         private AspectPipelineResult(
@@ -81,7 +86,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
             DesignTimeReferenceValidatorCollection referenceValidators,
-            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> inheritableOptions )
+            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> inheritableOptions,
+            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> annotations )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
@@ -90,6 +96,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.InheritableOptions = inheritableOptions;
             this.ReferenceValidators = referenceValidators;
             this.Configuration = configuration;
+            this.Annotations = annotations;
 
             Logger.DesignTime.Trace?.Log(
                 $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
@@ -126,6 +133,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
             DesignTimeReferenceValidatorCollection.Builder? validatorsBuilder = null;
             ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Builder? inheritableOptionsBuilder = null;
+            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder? annotationsBuilder = null;
 
             foreach ( var result in resultsByTree )
             {
@@ -186,6 +194,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             inheritableOptionsBuilder.Remove( optionItem.Key );
                         }
                     }
+
+                    if ( !oldSyntaxTreeResult.Annotations.IsEmpty )
+                    {
+                        annotationsBuilder ??= this.Annotations.ToBuilder();
+
+                        foreach ( var annotation in oldSyntaxTreeResult.Annotations )
+                        {
+                            annotationsBuilder.Remove( annotation.Key, annotation );
+                        }
+                    }
                 }
 
                 // Index the new tree.
@@ -239,6 +257,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                 }
 
+                if ( !result.Annotations.IsEmpty )
+                {
+                    annotationsBuilder ??= this.Annotations.ToBuilder();
+
+                    foreach ( var annotationGroup in result.Annotations )
+                    {
+                        annotationsBuilder.Add( annotationGroup.Key, annotationGroup );
+                    }
+                }
+
                 syntaxTreeResultBuilder[filePath] = result;
             }
 
@@ -250,6 +278,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                              ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
 
             var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this.InheritableOptions;
+            var annotations = annotationsBuilder?.ToImmutable() ?? this.Annotations;
 
             return new AspectPipelineResult(
                 configuration,
@@ -258,7 +287,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 introducedTrees,
                 inheritableAspects,
                 validators,
-                inheritableOptions );
+                inheritableOptions,
+                annotations );
         }
 
         /// <summary>
@@ -487,7 +517,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var manifest = TransitiveAspectsManifest.Create(
                     this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
                     this.ReferenceValidators.ToTransitiveValidatorInstances(),
-                    this.InheritableOptions );
+                    this.InheritableOptions,
+                    this.Annotations );
 
                 this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilation );
             }

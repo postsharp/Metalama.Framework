@@ -355,7 +355,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var optionsSources = ImmutableArray.Create<IHierarchicalOptionsSource>( new CompilationHierarchicalOptionsSource( configuration.ServiceProvider ) );
 
-            var allSources = new PipelineContributorSources( aspectSources, validatorSources, optionsSources, transitiveAspectSource );
+            var allSources = new PipelineContributorSources( aspectSources, validatorSources, optionsSources, transitiveAspectSource, transitiveAspectSource );
 
             if ( configuration.FabricsConfiguration != null )
             {
@@ -435,6 +435,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             var aspectSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
             // Execute the pipeline stages.

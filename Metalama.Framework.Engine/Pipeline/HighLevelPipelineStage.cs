@@ -43,7 +43,8 @@ namespace Metalama.Framework.Engine.Pipeline
             var compilation = CompilationModel.CreateInitialInstance(
                 input.Project,
                 input.Compilation,
-                hierarchicalOptionsManager: hierarchicalOptionsManager );
+                hierarchicalOptionsManager: hierarchicalOptionsManager,
+                externalAnnotationProvider: input.ContributorSources.ExternalAnnotationProvider );
 
             hierarchicalOptionsManager.Initialize(
                 input.ContributorSources.OptionsSources,
