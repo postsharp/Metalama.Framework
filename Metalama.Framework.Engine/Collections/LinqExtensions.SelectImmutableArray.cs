@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// ReSharper disable once CheckNamespace
 namespace System.Linq;
 
 public static partial class LinqExtensions

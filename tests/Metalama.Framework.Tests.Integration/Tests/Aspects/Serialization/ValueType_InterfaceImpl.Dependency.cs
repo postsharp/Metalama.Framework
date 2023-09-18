@@ -2,10 +2,10 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ReferenceType;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ValueType_InterfaceImpl;
 
 [RunTimeOrCompileTime]
-public class ReferenceType : ICompileTimeSerializable
+public struct ValueType : ICompileTimeSerializable
 {
     public int Value { get; set; }
 
@@ -13,7 +13,7 @@ public class ReferenceType : ICompileTimeSerializable
 
     public int ValueInitOnly { get; init; }
 
-    public ReferenceType(int value)
+    public ValueType(int value)
     {
         this.Value = value;
         this.ValueGetOnly = value;
@@ -24,11 +24,11 @@ public class ReferenceType : ICompileTimeSerializable
 [Inheritable]
 public class TestAspect : OverrideMethodAspect
 {
-    public ReferenceType SerializedValue;
+    public ValueType SerializedValue;
 
     public TestAspect(int x)
     {
-        SerializedValue = new ReferenceType(x);
+        SerializedValue = new ValueType(x);
     }
 
     public override dynamic? OverrideMethod()
@@ -38,7 +38,6 @@ public class TestAspect : OverrideMethodAspect
         Console.WriteLine(meta.CompileTime(SerializedValue.ValueInitOnly));
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
@@ -46,5 +45,6 @@ public class BaseClass
     [TestAspect(42)]
     public virtual void Foo()
     {
+        Console.WriteLine("Original");
     }
 }
