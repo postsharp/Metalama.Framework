@@ -37,7 +37,16 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         CompilationModel compilationModel,
         IDiagnosticAdder diagnosticAdder )
     {
-        this._externalOptionsProvider = externalOptionsProvider;
+        if ( externalOptionsProvider != null )
+        {
+            this._externalOptionsProvider = externalOptionsProvider;
+
+            // We have to create OptionType nodes now while we have an IDiagnosticAdder. 
+            foreach ( var optionType in externalOptionsProvider.GetOptionTypes() )
+            {
+                _ = this.GetOptionTypeNode( compilationModel, diagnosticAdder, optionType );
+            }
+        }
 
         foreach ( var source in sources )
         {
@@ -51,22 +60,29 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         {
             var optionTypeName = configurator.Options.GetType().FullName.AssertNotNull();
 
-            if ( !this._optionTypes.TryGetValue( optionTypeName, out var optionTypeNode ) )
-            {
-                // We get the type resolver lazily because several tests do not supply it.
-                this._typeResolver = this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
-
-                var optionType =
-                    this._typeResolver.GetCompileTimeType(
-                            compilationModel.Factory.GetTypeByReflectionName( optionTypeName ).GetSymbol().AssertNotNull(),
-                            false )
-                        .AssertNotNull();
-
-                optionTypeNode = this._optionTypes.GetOrAdd( optionTypeName, _ => new OptionTypeNode( this, optionType, diagnosticAdder ) );
-            }
+            var optionTypeNode = this.GetOptionTypeNode( compilationModel, diagnosticAdder, optionTypeName );
 
             optionTypeNode.AddConfigurator( configurator, diagnosticAdder );
         }
+    }
+
+    private OptionTypeNode GetOptionTypeNode( CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder, string optionTypeName )
+    {
+        if ( !this._optionTypes.TryGetValue( optionTypeName, out var optionTypeNode ) )
+        {
+            // We get the type resolver lazily because several tests do not supply it.
+            this._typeResolver = this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
+
+            var optionType =
+                this._typeResolver.GetCompileTimeType(
+                        compilationModel.Factory.GetTypeByReflectionName( optionTypeName ).GetSymbol().AssertNotNull(),
+                        false )
+                    .AssertNotNull();
+
+            optionTypeNode = this._optionTypes.GetOrAdd( optionTypeName, _ => new OptionTypeNode( this, optionType, diagnosticAdder ) );
+        }
+
+        return optionTypeNode;
     }
 
     public TOptions GetOptions<TOptions>( IDeclaration declaration )

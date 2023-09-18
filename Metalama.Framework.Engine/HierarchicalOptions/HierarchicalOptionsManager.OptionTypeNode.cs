@@ -24,6 +24,7 @@ public sealed partial class HierarchicalOptionsManager
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
+        private string _typeName;
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
@@ -31,6 +32,7 @@ public sealed partial class HierarchicalOptionsManager
         {
             this._parent = parent;
             this._type = type;
+            this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
 
@@ -226,8 +228,8 @@ public sealed partial class HierarchicalOptionsManager
             // ReSharper disable once InconsistentlySynchronizedField
             if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var node ) )
             {
-                if ( declaration.BelongsToCurrentProject
-                     && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._type, out var options ) == true )
+                if ( !declaration.BelongsToCurrentProject
+                     && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out var options ) == true )
                 {
                     node = this.GetOrAddDeclarationNode( declaration );
                     node.DirectOptions = node.MergedOptions = options;
@@ -244,15 +246,14 @@ public sealed partial class HierarchicalOptionsManager
         public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation )
         {
             // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
-            var optionsTypeName = this._type.FullName.AssertNotNull();
-
+            
             return this._optionsByDeclaration
                     .Where( x => x.Value.DirectOptions != null )
                     .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
-                    .Where( x => x.CanBeInherited )
+                    .Where( x => x is { CanBeInherited: true, BelongsToCurrentProject: true } )
                     .Select(
                         x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
-                            new HierarchicalOptionsKey( optionsTypeName, x.ToSerializableId() ),
+                            new HierarchicalOptionsKey( this._typeName, x.ToSerializableId() ),
                             this.GetOptions( x ).AssertNotNull() ) )
                 ;
         }

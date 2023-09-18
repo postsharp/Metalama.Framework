@@ -46,11 +46,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
 
-        public bool TryGetHierarchicalOptions( SerializableDeclarationId declaration, Type type, [NotNullWhen( true )] out IHierarchicalOptions? options )
+        public bool TryGetHierarchicalOptions(
+            SerializableDeclarationId declaration,
+            string optionType,
+            [NotNullWhen( true )] out IHierarchicalOptions? options )
         {
-            var key = new HierarchicalOptionsKey( type.FullName.AssertNotNull(), declaration );
+            var key = new HierarchicalOptionsKey( optionType, declaration );
 
-            return this._inheritableOptions.TryGetValue( key, out options );
+            return this.InheritableOptions.TryGetValue( key, out options );
         }
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
@@ -67,8 +70,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _inheritableAspects = _emptyInheritableAspects;
 
-        private readonly ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> _inheritableOptions =
-            _emptyInheritableOptions;
+        public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; } = _emptyInheritableOptions;
 
         private byte[]? _serializedTransitiveAspectManifest;
 
@@ -85,7 +87,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
-            this._inheritableOptions = inheritableOptions;
+            this.InheritableOptions = inheritableOptions;
             this.ReferenceValidators = referenceValidators;
             this.Configuration = configuration;
 
@@ -174,7 +176,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     if ( !oldSyntaxTreeResult.InheritableOptions.IsDefault )
                     {
-                        inheritableOptionsBuilder ??= this._inheritableOptions.ToBuilder();
+                        inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
 
                         foreach ( var optionItem in oldSyntaxTreeResult.InheritableOptions )
                         {
@@ -226,7 +228,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( !result.InheritableOptions.IsDefaultOrEmpty )
                 {
-                    inheritableOptionsBuilder ??= this._inheritableOptions.ToBuilder();
+                    inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
 
                     foreach ( var optionItem in result.InheritableOptions )
                     {
@@ -247,7 +249,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             var validators = validatorsBuilder?.ToImmutable( projectVersion.ReferencedValidatorCollections )
                              ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
 
-            var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this._inheritableOptions;
+            var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this.InheritableOptions;
 
             return new AspectPipelineResult(
                 configuration,
@@ -485,7 +487,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var manifest = TransitiveAspectsManifest.Create(
                     this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
                     this.ReferenceValidators.ToTransitiveValidatorInstances(),
-                    this._inheritableOptions );
+                    this.InheritableOptions );
 
                 this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilation );
             }

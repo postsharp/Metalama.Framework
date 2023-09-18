@@ -41,7 +41,7 @@ internal sealed partial class AspectPipelineResult
                 this._parent.IntroducedSyntaxTrees,
                 this._parent._inheritableAspects,
                 this._parent.ReferenceValidators,
-                this._parent._inheritableOptions );
+                this._parent.InheritableOptions );
         }
     }
 }

@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Framework.Services;
-using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
@@ -13,5 +13,7 @@ namespace Metalama.Framework.Engine.HierarchicalOptions;
 /// </summary>
 internal interface IExternalHierarchicalOptionsProvider : IProjectService
 {
-    bool TryGetOptions( IDeclaration declaration, Type optionsType, [NotNullWhen( true )] out IHierarchicalOptions? options );
+    IEnumerable<string> GetOptionTypes();
+
+    bool TryGetOptions( IDeclaration declaration, string optionsType, [NotNullWhen( true )] out IHierarchicalOptions? options );
 }

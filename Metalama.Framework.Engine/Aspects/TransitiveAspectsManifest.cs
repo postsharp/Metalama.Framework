@@ -26,6 +26,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; private set; }
 
+        public IEnumerable<string> InheritableOptionTypes { get; set; }
+
         // To levels of mapping of options: first option types, then target declaration.
         public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; private set; }
 
@@ -44,11 +46,6 @@ namespace Metalama.Framework.Engine.Aspects
             this.InheritableAspects = inheritableAspects;
             this.ReferenceValidators = validators;
             this.InheritableOptions = options;
-        }
-
-        public bool TryGetHierarchicalOptions( SerializableDeclarationId declaration, Type type, [NotNullWhen( true )] out IHierarchicalOptions? options )
-        {
-            return this.InheritableOptions.TryGetValue( new HierarchicalOptionsKey( type.FullName.AssertNotNull(), declaration ), out options );
         }
 
         public static TransitiveAspectsManifest Create(

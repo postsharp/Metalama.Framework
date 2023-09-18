@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -180,7 +179,12 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         }
     }
 
-    public bool TryGetOptions( IDeclaration declaration, Type optionsType, [NotNullWhen( true )] out IHierarchicalOptions? options )
+    public IEnumerable<string> GetOptionTypes()
+        => this._manifests.SelectMany( m => m.Value.InheritableOptions.Keys )
+            .Select( x => x.OptionType )
+            .Distinct();
+
+    public bool TryGetOptions( IDeclaration declaration, string optionsType, [NotNullWhen( true )] out IHierarchicalOptions? options )
     {
         if ( !this._manifests.TryGetValue( ((AssemblyIdentityModel) declaration.DeclaringAssembly.Identity).Identity, out var manifest ) )
         {
@@ -190,7 +194,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         }
         else
         {
-            return manifest.TryGetHierarchicalOptions( declaration.ToSerializableId(), optionsType, out options );
+            return manifest.InheritableOptions.TryGetValue( new HierarchicalOptionsKey( optionsType, declaration.ToSerializableId() ), out options );
         }
     }
 }

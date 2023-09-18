@@ -187,14 +187,15 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 }
 
                 // Create a manifest for transitive aspects and validators.
-                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
+                var inheritableOptions = result.Value.LastCompilationModel?.HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel ) ??
+                                         ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty;
+                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 || inheritableOptions.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) )
                             .ToImmutableArray(),
                         referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ),
-                        result.Value.LastCompilationModel?.HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel ) ??
-                        ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty );
+                        inheritableOptions );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
                     additionalResources = additionalResources.Add( resource );

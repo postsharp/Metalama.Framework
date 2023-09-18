@@ -12,7 +12,7 @@ public sealed partial class HierarchicalOptionsManager
         private readonly ConcurrentLinkedList<DeclarationNode> _children = new();
 
         public object Sync { get; } = new();
-
+        
         public IHierarchicalOptions? DirectOptions { get; set; }
 
         public IHierarchicalOptions? MergedOptions { get; set; }
