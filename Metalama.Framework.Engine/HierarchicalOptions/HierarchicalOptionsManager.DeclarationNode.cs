@@ -16,7 +16,7 @@ public sealed partial class HierarchicalOptionsManager
         public IHierarchicalOptions? DirectOptions { get; set; }
 
         public IHierarchicalOptions? MergedOptions { get; set; }
-
+        
         public void ResetMergedOptions()
         {
             this.MergedOptions = null;

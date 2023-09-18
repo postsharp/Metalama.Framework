@@ -39,3 +39,10 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOpti
 
 [MyOptions( "FromBaseClass" )]
 public class BaseClass { }
+
+[MyOptions( "BaseDeclaringClass" )]
+public class BaseNestingClass
+{
+    public class BaseNestedClass { }
+}
+ 

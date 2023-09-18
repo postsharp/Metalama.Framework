@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -27,3 +27,7 @@ public class ActualOptionsAttribute : Attribute
 // <target>
 [PrintOptionsAspect]
 internal class DerivedClass : BaseClass { }
+
+// <target>
+[PrintOptionsAspect]
+internal class DerivedOfNested : BaseNestingClass.BaseNestedClass { }
