@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// ReSharper disable once CheckNamespace
 namespace System.Linq;
 
 public static partial class LinqExtensions

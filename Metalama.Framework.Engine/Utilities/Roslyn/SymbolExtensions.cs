@@ -283,8 +283,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 Name: "ConfigureAwait",
                 ContainingType: var containingType
             } && containingType.ConstructedFrom.GetReflectionFullName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
-            }
-        public static bool IsExplicitInterfaceMemberImplementation(this ISymbol? symbol )
+
+        internal static bool IsExplicitInterfaceMemberImplementation( this ISymbol? symbol )
         {
             return symbol switch
             {
