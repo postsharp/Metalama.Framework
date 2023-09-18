@@ -33,7 +33,7 @@ internal sealed class ExternalAssemblyTypeCollection : INamedTypeCollection
 
             if ( !this._includeNestedTypes )
             {
-                this._types = topLevelTypes.ToList();
+                this._types = topLevelTypes.ToMutableList();
             }
             else
             {

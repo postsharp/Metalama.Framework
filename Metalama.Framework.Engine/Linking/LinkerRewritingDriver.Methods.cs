@@ -292,7 +292,7 @@ namespace Metalama.Framework.Engine.Linking
                     InvocationExpression(
                         GetInvocationTarget(),
                         ArgumentList(
-                            SeparatedList( method.ParameterList.Parameters.SelectAsEnumerable( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+                            SeparatedList( method.ParameterList.Parameters.SelectAsReadOnlyList( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
 
                 if ( !targetSemantic.Symbol.ReturnsVoid )
                 {

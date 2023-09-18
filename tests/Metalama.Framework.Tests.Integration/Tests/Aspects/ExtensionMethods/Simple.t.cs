@@ -5,5 +5,5 @@ private object Method()
   {
     42
   };
-  return (global::System.Object)global::System.Linq.Enumerable.ToList(numbers);
+  return (global::System.Object)global::System.Linq.LinqExtensions.ToReadOnlyList(numbers);
 }

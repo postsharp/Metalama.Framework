@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 await this._concurrentTaskRunner.RunInParallelAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
 
-                return inliningSpecifications.ToList();
+                return inliningSpecifications.ToReadOnlyList();
 
                 void VisitSemantic( IntermediateSymbolSemantic semantic, InliningAnalysisContext context )
                 {

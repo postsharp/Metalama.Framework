@@ -280,14 +280,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "Metalama is not enabled in this project.",
                 _category );
 
-        internal static readonly DiagnosticDefinition<(string TypeName, string Message)> CannotInstantiateType =
-            new(
-                "LAMA0058",
-                Error,
-                "Cannot instantiate the plug-in type '{0}': {1}",
-                "Cannot instantiate the plug-in type.",
-                _category );
-
         internal static readonly DiagnosticDefinition<ISymbol> GenericAspectTypeNotSupported =
             new(
                 "LAMA0059",

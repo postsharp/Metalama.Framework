@@ -116,6 +116,13 @@ public static partial class EligibilityRuleFactory
                     } );
         } );
 
+    /// <summary>
+    /// Gets the default eligibility rules that apply to a specific advice.
+    /// The rules returned by this method are those used by classes <see cref="OverrideMethodAspect"/>, <see cref="OverrideFieldOrPropertyAspect"/>
+    /// and so on. If you implement the <see cref="IEligible{T}.BuildEligibility"/> method manually, you can use this method to get the base rules, and
+    /// add only rules that are specific to your aspect.
+    /// </summary>
+    /// <param name="adviceKind">The kind of advice.</param>
     public static IEligibilityRule<IDeclaration> GetAdviceEligibilityRule( AdviceKind adviceKind )
         => adviceKind switch
         {
@@ -136,6 +143,12 @@ public static partial class EligibilityRuleFactory
             _ => throw new ArgumentOutOfRangeException( nameof(adviceKind), $"Value not supported: {adviceKind}." )
         };
 
+    /// <summary>
+    /// Gets the default eligibility rules that apply to a contract advice for a specific direction.
+    /// The rules returned by this method are those used by the <see cref="ContractAspect"/> class.
+    /// If you implement the <see cref="IEligible{T}.BuildEligibility"/> method manually, you can use this method to get the base rules, and
+    /// add only rules that are specific to your aspect.
+    /// </summary>
     public static IEligibilityRule<IDeclaration> GetContractAdviceEligibilityRule( ContractDirection contractDirection )
         => Contracts.GetEligibilityRule( contractDirection );
 

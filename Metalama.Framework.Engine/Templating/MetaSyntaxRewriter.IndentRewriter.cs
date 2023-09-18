@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating
                     try
                     {
                         var indentedArguments =
-                            node.Arguments.SelectAsEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
+                            node.Arguments.SelectAsReadOnlyList( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
 
                         return SyntaxFactory.ArgumentList(
                             node.OpenParenToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Templating
                     try
                     {
                         var indentedExpressions =
-                            node.Expressions.SelectAsEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
+                            node.Expressions.SelectAsReadOnlyList( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
 
                         return SyntaxFactory.InitializerExpression(
                             node.Kind(),

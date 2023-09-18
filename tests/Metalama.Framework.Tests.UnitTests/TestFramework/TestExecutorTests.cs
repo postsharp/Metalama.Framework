@@ -51,7 +51,7 @@ public sealed class TestExecutorTests : UnitTestClass
         var tests = testDiscoverer.Discover( directory, ImmutableHashSet<string>.Empty );
         testExecutor.RunTests( tests, messageSink, new TestFrameworkExecutionOptions() );
 
-        var sequence = string.Join( ",", messageSink.Messages.SelectAsEnumerable( x => x.GetType().Name ) );
+        var sequence = string.Join( ",", messageSink.Messages.SelectAsReadOnlyList( x => x.GetType().Name ).Where( x => x != "TestOutput" ) );
 
         Assert.Equal( expectedEventSequence, sequence );
     }

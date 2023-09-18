@@ -352,7 +352,7 @@ internal sealed class TestResult : IDisposable
                     .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )
                     .Select( SyntaxFactory.Comment )
-                    .ToList() );
+                    .ToReadOnlyList() );
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 

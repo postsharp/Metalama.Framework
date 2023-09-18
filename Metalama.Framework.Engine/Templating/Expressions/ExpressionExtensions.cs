@@ -23,7 +23,7 @@ internal static class ExpressionExtensions
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static IUserExpression ToUserExpression( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
+    private static IUserExpression ToUserExpression( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
         => expression switch
         {
             null => null!,

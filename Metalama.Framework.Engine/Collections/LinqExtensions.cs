@@ -14,32 +14,47 @@ namespace System.Linq;
 
 [PublicAPI]
 [RunTimeOrCompileTime]
-public static class LinqExtensions
+public static partial class LinqExtensions
 {
-    [Obsolete( "Use SelectAsEnumerable, SelectAsArray, or SelectAsArray." )]
-    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectAsEnumerable( list, func );
+    [Obsolete( "Use SelectAsReadOnlyCollection or SelectAsArray." )]
+    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectAsReadOnlyCollection( list, func );
 
-    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    [Obsolete( "Use SelectAsList or SelectAsArray." )]
+    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func ) => SelectAsReadOnlyList( list, func );
+
+    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
-        foreach ( var item in list )
+        if ( list.Count == 0 )
         {
-            yield return func( item );
+            return Array.Empty<TOut>();
+        }
+        else
+        {
+            return new SelectCollection<TIn, TOut>( list, func );
         }
     }
 
-    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static IReadOnlyList<TOut> SelectAsReadOnlyList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
-        foreach ( var item in list )
+        if ( list.Count == 0 )
         {
-            yield return func( item );
+            return Array.Empty<TOut>();
+        }
+        else
+        {
+            return new SelectList<TIn, TOut>( list, func );
         }
     }
 
-    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static IReadOnlyList<TOut> SelectAsReadOnlyList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
-        foreach ( var item in list )
+        if ( list.Length == 0 )
         {
-            yield return func( item );
+            return Array.Empty<TOut>();
+        }
+        else
+        {
+            return new SelectList<TIn, TOut>( list, func );
         }
     }
 
@@ -226,11 +241,40 @@ public static class LinqExtensions
         return result;
     }
 
+    // This intentionally creates an ambiguity in resolving the call so we have to choose the right variant.
+    // Generally ToReadOnlyList is the right choice.
+    [Obsolete( "Use ToReadOnlyList or ToMutableList." )]
+    public static List<T> ToList<T>( this IEnumerable<T> items ) => Enumerable.ToList( items );
+
+    public static List<T> ToMutableList<T>( this IEnumerable<T> items ) => Enumerable.ToList( items );
+
     /// <summary>
     /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
     /// only if needed.
     /// </summary>
-    public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection as IReadOnlyList<T> ?? collection.ToList();
+    public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> items )
+    {
+        if ( items is IReadOnlyList<T> readOnlyList )
+        {
+            return readOnlyList;
+        }
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return Array.Empty<T>();
+        }
+
+        var list = new List<T> { enumerator.Current };
+
+        while ( enumerator.MoveNext() )
+        {
+            list.Add( enumerator.Current );
+        }
+
+        return list;
+    }
 
     [Obsolete( "This method is redundant." )]
     internal static IReadOnlyList<T> ToReadOnlyList<T>( this IReadOnlyList<T> list ) => list;
@@ -284,57 +328,42 @@ public static class LinqExtensions
         yield return item;
     }
 
-    public static IReadOnlyList<T> ConcatList<T>( this IReadOnlyList<T>? a, IReadOnlyList<T>? b )
+    public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T>? a, IReadOnlyList<T>? b )
     {
+        if ( a == null || a.Count == 0 )
+        {
+            return b ?? Array.Empty<T>();
+        }
+
         if ( b == null || b.Count == 0 )
         {
-            return a ?? Array.Empty<T>();
+            return a;
         }
-        else if ( a == null || a.Count == 0 )
-        {
-            return b;
-        }
-        else
-        {
-            var result = new T[a.Count + b.Count];
 
-            for ( var i = 0; i < a.Count; i++ )
-            {
-                result[i] = a[i];
-            }
-
-            for ( var i = 0; i < b.Count; i++ )
-            {
-                result[i + a.Count] = b[i];
-            }
-
-            return result;
-        }
+        return new ConcatenatedList<T>( a, b );
     }
 
-    public static IReadOnlyList<T> ConcatList<T>( this IReadOnlyList<T> a, IReadOnlyList<T> b, IReadOnlyList<T> c )
+    public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T>? a, IReadOnlyList<T>? b, IReadOnlyList<T>? c )
     {
-        var result = new T[a.Count + b.Count + c.Count];
-
-        for ( var i = 0; i < a.Count; i++ )
+        if ( a == null || a.Count == 0 )
         {
-            result[i] = a[i];
+            return b.Concat( c );
         }
 
-        for ( var i = 0; i < b.Count; i++ )
+        if ( b == null || b.Count == 0 )
         {
-            result[i + a.Count] = b[i];
+            return a.Concat( c );
         }
 
-        for ( var i = 0; i < c.Count; i++ )
+        if ( c == null || c.Count == 0 )
         {
-            result[i + a.Count + b.Count] = c[i];
+            return a.Concat( b );
         }
 
-        return result;
+        return new ConcatenatedList<T>( a, b, c );
     }
 
-    public static ImmutableArray<T> ConcatImmutableArray<T>( this IReadOnlyList<T> a, IReadOnlyList<T> b )
+    public static ImmutableArray<T> ConcatAsImmutableArray<T>( this IReadOnlyList<T> a, IReadOnlyList<T> b )
     {
         var result = ImmutableArray.CreateBuilder<T>( a.Count + b.Count );
 
@@ -351,7 +380,7 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static ImmutableArray<T> ConcatImmutableArray<T>( this IReadOnlyList<T> a, IReadOnlyList<T> b, IReadOnlyList<T> c )
+    public static ImmutableArray<T> ConcatAsImmutableArray<T>( this IReadOnlyList<T> a, IReadOnlyList<T> b, IReadOnlyList<T> c )
     {
         var result = ImmutableArray.CreateBuilder<T>( a.Count + b.Count + c.Count );
 
@@ -374,7 +403,7 @@ public static class LinqExtensions
     }
 
     [Obsolete( "Use ToOrderedList" )]
-    internal static List<T> ToList<T>( this IOrderedEnumerable<T> enumerable ) => ((IEnumerable<T>) enumerable).ToList();
+    internal static List<T> ToList<T>( this IOrderedEnumerable<T> enumerable ) => enumerable.ToMutableList();
 
     public static List<TItem> ToOrderedList<TItem, TKey>(
         this IEnumerable<TItem> enumerable,
@@ -382,7 +411,7 @@ public static class LinqExtensions
         IComparer<TKey>? comparer = null,
         bool descending = false )
     {
-        var list = enumerable.ToList();
+        var list = enumerable.ToMutableList();
 
         if ( list.Count < 2 )
         {

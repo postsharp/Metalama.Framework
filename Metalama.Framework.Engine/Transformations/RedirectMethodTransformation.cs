@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
         private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
         public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
-            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+            : base( advice, overriddenDeclaration, ObjectReader.Empty )
         {
             this._targetMethod = targetMethod;
         }
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Transformations
                     InvocationExpression(
                         GetInvocationTargetExpression(),
                         ArgumentList(
-                            SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsEnumerable( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
+                            SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()

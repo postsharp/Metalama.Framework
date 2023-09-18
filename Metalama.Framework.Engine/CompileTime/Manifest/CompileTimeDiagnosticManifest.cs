@@ -63,7 +63,10 @@ internal sealed class CompileTimeDiagnosticManifest
 #pragma warning restore CA1305
         this.HelpLinkUri = diagnostic.Descriptor.HelpLinkUri;
         this.Location = new CompileTimeDiagnosticLocationManifest( diagnostic.Location, sourceFilePathIndexes );
-        this.AdditionalLocations = diagnostic.AdditionalLocations.SelectAsArray( location => new CompileTimeDiagnosticLocationManifest( location, sourceFilePathIndexes ) );
+
+        this.AdditionalLocations =
+            diagnostic.AdditionalLocations.SelectAsArray( location => new CompileTimeDiagnosticLocationManifest( location, sourceFilePathIndexes ) );
+
         this.CustomTags = diagnostic.Descriptor.CustomTags;
         this.Properties = diagnostic.Properties;
     }
@@ -82,7 +85,7 @@ internal sealed class CompileTimeDiagnosticManifest
             this.Description,
             this.HelpLinkUri,
             this.Location.ToLocation( sourceTrees ),
-            this.AdditionalLocations.SelectAsEnumerable( l => l.ToLocation( sourceTrees ) ),
+            this.AdditionalLocations.SelectAsReadOnlyList( l => l.ToLocation( sourceTrees ) ),
             this.CustomTags,
             this.Properties );
 }

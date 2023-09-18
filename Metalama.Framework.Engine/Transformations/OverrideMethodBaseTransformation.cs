@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -98,12 +99,12 @@ namespace Metalama.Framework.Engine.Transformations
         private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext, AspectReferenceSyntaxProvider referenceSyntaxProvider )
             => this.OverriddenDeclaration switch
             {
-                { MethodKind: Code.MethodKind.Default or Code.MethodKind.ExplicitInterfaceImplementation } =>
+                { MethodKind: MethodKind.Default or MethodKind.ExplicitInterfaceImplementation } =>
                     InvocationExpression(
                         this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                         ArgumentList(
                             SeparatedList(
-                                this.OverriddenDeclaration.Parameters.SelectAsEnumerable(
+                                this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList(
                                     p =>
                                     {
                                         var refKind = p.RefKind switch
@@ -117,11 +118,14 @@ namespace Metalama.Framework.Engine.Transformations
 
                                         return Argument( null, refKind, IdentifierName( p.Name ) );
                                     } ) ) ) ),
-                { MethodKind: Code.MethodKind.Finalizer } =>
+                { MethodKind: MethodKind.Finalizer } =>
                     referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
-                { MethodKind: Code.MethodKind.Operator } =>
-                    referenceSyntaxProvider.GetOperatorReference( this.ParentAdvice.AspectLayerId, (IMethod) this.TargetDeclaration, generationContext.SyntaxGenerator ),
-                _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." ),
+                { MethodKind: MethodKind.Operator } =>
+                    referenceSyntaxProvider.GetOperatorReference(
+                        this.ParentAdvice.AspectLayerId,
+                        (IMethod) this.TargetDeclaration,
+                        generationContext.SyntaxGenerator ),
+                _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." )
             };
     }
 }

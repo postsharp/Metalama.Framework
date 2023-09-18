@@ -215,7 +215,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     {
         var aspectSourceResults = aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) )
             .Select( s => s.GetAspectInstances( compilation, aspectClass, this, cancellationToken ) )
-            .ToList();
+            .ToReadOnlyList();
 
         HashSet<IDeclaration>? exclusions = null;
 
@@ -261,7 +261,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     return new ResolvedAspectInstance( x, target, x.ComputeEligibility( target ) );
                 } )
             .Where( x => x.TargetDeclaration != null! )
-            .ToList();
+            .ToMutableList();
 
         // Process aspect requirements.
         // We always add an aspect instance if there is a requirement, even if there is already an instance, because this has the side effect of exposing
@@ -297,12 +297,12 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         // Get the aspects that can be processed, i.e. they are not abstract-only.
         var concreteAspectInstances = aspectInstances
             .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
-            .ToList();
+            .ToReadOnlyList();
 
         // Gets aspects that can be inherited.
         var inheritableAspectInstances = aspectInstances
             .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.IsInheritable )
-            .ToList();
+            .ToReadOnlyList();
 
         // Gets aspects that have been inherited by the source, including abstract instances that can in turn be only inherited. 
         var inheritedAspectInstancesInProject = inheritableAspectInstances
@@ -319,18 +319,22 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                                 x.DerivedAspectInstance,
                                 x.TargetDeclaration,
                                 x.Eligibility ) ) )
-            .ToList();
+            .ToReadOnlyList();
+
+        var concreteInheritedAspectInstancesInProject =
+            inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+                .ToReadOnlyList();
 
         // Index these aspects. 
         this.AddAspectInstances( concreteAspectInstances );
-        this.AddAspectInstances( inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ) );
+        this.AddAspectInstances( concreteInheritedAspectInstancesInProject );
 
         // Index the inheritable aspects for the aspect manifest. It must also include indirectly inheritable aspect instances.
         this.AddInheritableAspectInstances(
             inheritableAspectInstances.Concat( inheritedAspectInstancesInProject.Where( a => a.AspectInstance.IsInheritable ) )
                 .Select( x => x.AspectInstance ) );
 
-        return concreteAspectInstances.SelectAsImmutableArray( x => x.AspectInstance );
+        return concreteAspectInstances.Concat( concreteInheritedAspectInstancesInProject ).SelectAsImmutableArray( x => x.AspectInstance );
     }
 
     private bool TryGetOrAddStep(

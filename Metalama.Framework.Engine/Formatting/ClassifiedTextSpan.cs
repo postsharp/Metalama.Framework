@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             if ( this.Tags.Any() )
             {
-                s += " " + string.Join( ", ", this.Tags.SelectAsEnumerable( tag => $"{tag.Key}={tag.Value}" ) );
+                s += " " + string.Join( ", ", this.Tags.SelectAsReadOnlyCollection( tag => $"{tag.Key}={tag.Value}" ) );
             }
 
             return s;

@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+
 namespace Metalama.Framework.Fabrics
 {
     /// <summary>
@@ -7,6 +9,7 @@ namespace Metalama.Framework.Fabrics
     /// add aspects to the parent type.
     /// </summary>
     /// <seealso href="@type-fabrics"/> 
+    [PublicAPI]
     public abstract class TypeFabric : Fabric
     {
         /// <summary>

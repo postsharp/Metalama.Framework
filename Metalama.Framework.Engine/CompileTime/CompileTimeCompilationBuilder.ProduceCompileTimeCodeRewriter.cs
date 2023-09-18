@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._symbolEqualityComparer );
 
                 this._serializableFieldsAndProperties =
-                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
+                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsReadOnlyList( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             private SyntaxList<AttributeListSyntax> VisitAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
-                => List( attributeLists.SelectAsEnumerable( l => (AttributeListSyntax?) this.VisitAttributeList( l ) ).WhereNotNull() );
+                => List( attributeLists.SelectAsReadOnlyList( l => (AttributeListSyntax?) this.VisitAttributeList( l ) ).WhereNotNull() );
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( this._parent._logger.Warning != null )
                     {
-                        var diagnostics = compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        var diagnostics = compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToReadOnlyList();
 
                         this._parent._logger.Warning.Log(
                             $"Compiling the compile-time project failed because the source code contains {diagnostics.Count} C# error(s):" );
@@ -975,8 +975,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     else if ( propertySymbol.IsAbstract )
                     {
                         if ( !this.SymbolClassifier.GetTemplatingScope( propertySymbol.Type ).CanExecuteAtCompileTime()
-                             || propertySymbol.Parameters.Any(
-                                 p => !this.SymbolClassifier.GetTemplatingScope( p.Type ).CanExecuteAtCompileTime() ) )
+                             || propertySymbol.Parameters.Any( p => !this.SymbolClassifier.GetTemplatingScope( p.Type ).CanExecuteAtCompileTime() ) )
                         {
                             this._diagnosticAdder.Report(
                                 TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
@@ -1293,18 +1292,18 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
                         m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
-                    .ToList();
+                    .ToReadOnlyList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     // Filter usings. It is important to visit all nodes so we also process preprocessor directives.
-                    var currentUsings = node.Usings.SelectAsEnumerable( n => n.ToString() ).ToHashSet();
+                    var currentUsings = node.Usings.SelectAsReadOnlyList( n => n.ToString() ).ToHashSet();
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.SelectAsEnumerable( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
                     var attributes = this.VisitAttributeLists( node.AttributeLists );

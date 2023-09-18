@@ -31,7 +31,12 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null, TestContextOptions? contextOptions = null )
+        private void AssertScope(
+            Compilation compilation,
+            ISymbol symbol,
+            TemplatingScope expectedScope,
+            IDiagnosticAdder? diagnosticAdder = null,
+            TestContextOptions? contextOptions = null )
         {
             using var testContext = this.CreateTestContext( contextOptions );
 
@@ -388,20 +393,20 @@ class C  {
         public void SystemTypes()
         {
             const string code = """
-                using System;
+                                using System;
 
-                class C
-                {
-                    void M()
-                    {
-                        Console.WriteLine();
-
-                        _ = DateTime.Now;
-
-                        Math.Abs(0);
-                    }
-                }
-                """;
+                                class C
+                                {
+                                    void M()
+                                    {
+                                        Console.WriteLine();
+                                
+                                        _ = DateTime.Now;
+                                
+                                        Math.Abs(0);
+                                    }
+                                }
+                                """;
 
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
@@ -433,23 +438,25 @@ class C  {
         public void RoslynTypes( bool roslynIsCompileTime )
         {
             const string code = """
-                using Microsoft.CodeAnalysis;
-                using Microsoft.CodeAnalysis.CSharp;
+                                using Microsoft.CodeAnalysis;
+                                using Microsoft.CodeAnalysis.CSharp;
 
-                class C
-                {
-                    void M()
-                    {
-                        ISymbol symbol;
-                        CSharpSyntaxNode node;
-                    }
-                }
-                """;
+                                class C
+                                {
+                                    void M()
+                                    {
+                                        ISymbol symbol;
+                                        CSharpSyntaxNode node;
+                                    }
+                                }
+                                """;
 
             var options = new TestContextOptions() { RoslynIsCompileTimeOnly = roslynIsCompileTime };
             using var testContext = this.CreateTestContext( options );
 
-            var additionalReferences = new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsEnumerable( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+            var additionalReferences =
+                new[] { typeof(ISymbol), typeof(CSharpSyntaxNode) }.SelectAsReadOnlyList( type => MetadataReference.CreateFromFile( type.Assembly.Location ) );
+
             var compilation = testContext.CreateCompilationModel( code, additionalReferences: additionalReferences );
 
             var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();

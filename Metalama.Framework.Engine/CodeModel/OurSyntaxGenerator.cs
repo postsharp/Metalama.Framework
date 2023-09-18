@@ -330,7 +330,7 @@ internal partial class OurSyntaxGenerator
 
             return this.ArrayCreationExpression(
                 this.Type( elementType.GetSymbol() ),
-                immutableArray.SelectAsEnumerable( item => this.TypedConstant( item ) ) );
+                immutableArray.SelectAsReadOnlyList( item => this.TypedConstant( item ) ) );
         }
         else
         {

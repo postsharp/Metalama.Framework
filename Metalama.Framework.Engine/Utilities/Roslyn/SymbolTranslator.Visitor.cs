@@ -62,7 +62,7 @@ internal sealed partial class SymbolTranslator
 
             var candidates = namedType.GetMembers( symbol.Name )
                 .Where( m => m.Kind == symbol.Kind && StructuralSymbolComparer.ContainingDeclarationOblivious.Equals( m, symbol ) )
-                .ToList();
+                .ToReadOnlyList();
 
             if ( candidates.Count == 1 )
             {
@@ -77,7 +77,7 @@ internal sealed partial class SymbolTranslator
                 else
                 {
                     throw new AssertionFailedException(
-                        $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsEnumerable( x => $"'{x}'" ) )}." );
+                        $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsReadOnlyList( x => $"'{x}'" ) )}." );
                 }
             }
         }

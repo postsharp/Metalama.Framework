@@ -97,7 +97,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         [Memo]
         private ImmutableDictionaryOfArray<string, (CompileTimeFileManifest File, CompileTimeProject Project)> ClosureCodeFiles
-            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
+            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsReadOnlyList( f => (f, p) ) )
+                .ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.

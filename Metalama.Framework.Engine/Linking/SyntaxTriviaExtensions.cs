@@ -9,19 +9,6 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class SyntaxTriviaExtensions
     {
-        public static T WithAdditionalLeadingTrivia<T>( this T node, in SyntaxTriviaList list )
-            where T : SyntaxNode
-        {
-            if ( list.Count == 0 )
-            {
-                return node;
-            }
-            else
-            {
-                return node.WithLeadingTrivia( list.AddRange( node.GetLeadingTrivia() ) );
-            }
-        }
-
         public static SyntaxTriviaList StripFirstTrailingNewLine( this SyntaxTriviaList list )
         {
             var newTrivias = new List<SyntaxTrivia>();
