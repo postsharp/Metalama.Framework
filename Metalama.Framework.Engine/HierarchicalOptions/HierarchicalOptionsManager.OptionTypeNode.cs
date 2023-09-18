@@ -24,7 +24,7 @@ public sealed partial class HierarchicalOptionsManager
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
-        private string _typeName;
+        private readonly string _typeName;
 
         public HierarchicalOptionsAttribute Metadata { get; }
 

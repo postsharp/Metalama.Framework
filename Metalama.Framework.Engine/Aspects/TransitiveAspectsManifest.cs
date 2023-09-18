@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.HierarchicalOptions;
@@ -13,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -25,9 +23,7 @@ namespace Metalama.Framework.Engine.Aspects
         public ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> InheritableAspects { get; private set; }
 
         public ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; private set; }
-
-        public IEnumerable<string> InheritableOptionTypes { get; set; }
-
+        
         // To levels of mapping of options: first option types, then target declaration.
         public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; private set; }
 
