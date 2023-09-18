@@ -57,6 +57,18 @@ namespace Metalama.Framework.Engine.Collections
             return builder.ToImmutable();
         }
 
+        public ImmutableDictionaryOfArray<TKey, TValue> Add( TKey key, TValue value )
+        {
+            if ( this._dictionary.TryGetValue( key, out var group ) )
+            {
+                return new ImmutableDictionaryOfArray<TKey, TValue>( this._dictionary.SetItem( key, group.Add( value ) ) );
+            }
+            else
+            {
+                return new ImmutableDictionaryOfArray<TKey, TValue>( this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ) ) ) );
+            }
+        }
+
         IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
 
         public ImmutableArray<TValue> this[ TKey key ]

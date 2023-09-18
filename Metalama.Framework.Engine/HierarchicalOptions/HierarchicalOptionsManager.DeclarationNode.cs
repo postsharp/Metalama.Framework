@@ -3,9 +3,9 @@
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Options;
 
-namespace Metalama.Framework.Engine.AspectOptions;
+namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-public partial class AspectOptionsManager
+public sealed partial class HierarchicalOptionsManager
 {
     private sealed class DeclarationNode
     {
@@ -13,9 +13,9 @@ public partial class AspectOptionsManager
 
         public object Sync { get; } = new();
 
-        public IAspectOptions? DirectOptions { get; set; }
+        public IHierarchicalOptions? DirectOptions { get; set; }
 
-        public IAspectOptions? MergedOptions { get; set; }
+        public IHierarchicalOptions? MergedOptions { get; set; }
 
         public void ResetMergedOptions()
         {

@@ -3,11 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 
-namespace Metalama.Framework.Engine.AspectOptions;
+namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal class Configurator
 {
-    public Configurator( IDeclaration declaration, IAspectOptions options )
+    public Configurator( IDeclaration declaration, IHierarchicalOptions options )
     {
         this.Declaration = declaration;
         this.Options = options;
@@ -15,5 +15,5 @@ internal class Configurator
 
     public IDeclaration Declaration { get; }
 
-    public IAspectOptions Options { get; }
+    public IHierarchicalOptions Options { get; }
 }

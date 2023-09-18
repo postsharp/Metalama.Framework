@@ -7,10 +7,10 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public interface IAspectOptions : IOverridable, ICompileTimeSerializable
+public interface IHierarchicalOptions : IOverridable, ICompileTimeSerializable
 {
-    IAspectOptions GetDefaultOptions( IProject project );
+    IHierarchicalOptions GetDefaultOptions( IProject project );
 }
 
-public interface IAspectOptions<in T> : IAspectOptions, IEligible<T>
+public interface IHierarchicalOptions<in T> : IHierarchicalOptions, IEligible<T>
     where T : class, IDeclaration { }

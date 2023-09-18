@@ -3,10 +3,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -48,6 +51,10 @@ namespace Metalama.Framework.Engine.Aspects
         public ImmutableArray<AspectPredecessor> Predecessors { get; }
 
         public IAspectState? AspectState { get; set; }
+
+        public T GetOptions<T>()
+            where T : class, IHierarchicalOptions, new()
+            => HierarchicalOptionsManager.GetOptions<T>( this );
 
         void IAspectInstanceInternal.SetState( IAspectState? value ) => this.AspectState = value;
 

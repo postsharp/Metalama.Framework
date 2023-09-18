@@ -8,33 +8,33 @@ using System.Linq;
 
 namespace Metalama.Framework.Options;
 
-public sealed partial class AspectOptionItemCollection<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
-    where T : IAspectOptionItem
+public sealed partial class HierarchicalOptionItemCollection<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
+    where T : IHierarchicalOptionItem
 {
     private readonly ImmutableDictionary<object, Item> _items;
     private readonly bool _clear;
 
-    public AspectOptionItemCollection( params T[] items )
+    public HierarchicalOptionItemCollection( params T[] items )
     {
         this._items = items.ToImmutableDictionary( i => i.GetKey(), i => new Item( i ) );
     }
 
-    private AspectOptionItemCollection( ImmutableDictionary<object, Item> items, bool clear = false )
+    private HierarchicalOptionItemCollection( ImmutableDictionary<object, Item> items, bool clear = false )
     {
         this._items = items;
         this._clear = clear;
     }
 
-    public AspectOptionItemCollection<T> Clear() => new( this._items, true );
+    public HierarchicalOptionItemCollection<T> Clear() => new( this._items, true );
 
-    public AspectOptionItemCollection<T> AddOrUpdate( T item )
+    public HierarchicalOptionItemCollection<T> AddOrUpdate( T item )
     {
         var key = item.GetKey();
 
-        return new AspectOptionItemCollection<T>( this._items.SetItem( key, new Item( item ) ) );
+        return new HierarchicalOptionItemCollection<T>( this._items.SetItem( key, new Item( item ) ) );
     }
 
-    public AspectOptionItemCollection<T> Remove( T item ) => new( this._items.SetItem( item, new Item( item, false ) ) );
+    public HierarchicalOptionItemCollection<T> Remove( T item ) => new( this._items.SetItem( item, new Item( item, false ) ) );
 
     public IEnumerator<T> GetEnumerator() => this._items.Values.Where( i => i.IsEnabled ).Select( i => i.Value! ).GetEnumerator();
 
@@ -42,7 +42,7 @@ public sealed partial class AspectOptionItemCollection<T> : IOverridable, IReadO
 
     public int Count => this._items.Count( i => i.Value.IsEnabled );
 
-    public AspectOptionItemCollection<T> OverrideWith( AspectOptionItemCollection<T> options, in AspectOptionsOverrideContext context )
+    public HierarchicalOptionItemCollection<T> OverrideWith( HierarchicalOptionItemCollection<T> options, in HierarchicalOptionsOverrideContext context )
     {
         var dictionary = options._clear ? ImmutableDictionary<object, Item>.Empty : this._items;
 
@@ -61,9 +61,9 @@ public sealed partial class AspectOptionItemCollection<T> : IOverridable, IReadO
             }
         }
 
-        return new AspectOptionItemCollection<T>( dictionary );
+        return new HierarchicalOptionItemCollection<T>( dictionary );
     }
 
-    object IOverridable.OverrideWith( object options, in AspectOptionsOverrideContext context )
-        => this.OverrideWith( (AspectOptionItemCollection<T>) options, context );
+    object IOverridable.OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
+        => this.OverrideWith( (HierarchicalOptionItemCollection<T>) options, context );
 }

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Code;
@@ -74,6 +75,12 @@ public readonly struct DeclarationEnhancements<T>
         => this.HasAspect( typeof(TAspect) );
 
     public TOptions GetOptions<TOptions>()
-        where TOptions : class, IAspectOptions<T>, new()
-        => ((ICompilationInternal) this.Declaration.Compilation).AspectOptionsManager.GetOptions<TOptions>( this.Declaration );
+        where TOptions : class, IHierarchicalOptions<T>, new()
+        => ((ICompilationInternal) this.Declaration.Compilation).HierarchicalOptionsManager.GetOptions<TOptions>( this.Declaration );
+
+    public IEnumerable<TAnnotation> GetAnnotations<TAnnotation>()
+        where TAnnotation : class, IAnnotation<T>
+    {
+        return ((ICompilationInternal) this.Declaration.Compilation).GetAnnotations<TAnnotation>( this.Declaration );
+    }
 }

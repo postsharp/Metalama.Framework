@@ -4,7 +4,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public interface IAspectOptionItem : IOverridable, ICompileTimeSerializable
+public interface IHierarchicalOptionItem : IOverridable, ICompileTimeSerializable
 {
     public object GetKey();
 }

@@ -1,20 +1,26 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
+    internal record InheritableOptionsInstance( HierarchicalOptionsKey Key, IHierarchicalOptions Options );
+
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
@@ -31,6 +37,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 StringComparer.Ordinal,
                 InheritableAspectInstance.ByTargetComparer.Instance );
 
+        private static readonly ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> _emptyInheritableOptions
+            = ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty;
+
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
@@ -38,6 +47,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.ReferenceValidators.IsEmpty && this._inheritableAspects.IsEmpty;
 
         internal DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
+
+        public bool TryGetHierarchicalOptions( SerializableDeclarationId declaration, Type type, [NotNullWhen( true )] out IHierarchicalOptions? options )
+        {
+            var key = new HierarchicalOptionsKey( type.FullName.AssertNotNull(), declaration );
+
+            return this._inheritableOptions.TryGetValue( key, out options );
+        }
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -52,20 +68,26 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _invalidSyntaxTreeResults = _emptySyntaxTreeResults;
 
         private readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _inheritableAspects = _emptyInheritableAspects;
+
+        private readonly ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> _inheritableOptions =
+            _emptyInheritableOptions;
+
         private byte[]? _serializedTransitiveAspectManifest;
 
         private AspectPipelineResult(
+            AspectPipelineConfiguration? configuration,
             ImmutableDictionary<string, SyntaxTreePipelineResult> syntaxTreeResults,
             ImmutableDictionary<string, SyntaxTreePipelineResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
             DesignTimeReferenceValidatorCollection referenceValidators,
-            AspectPipelineConfiguration? configuration )
+            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> inheritableOptions )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
+            this._inheritableOptions = inheritableOptions;
             this.ReferenceValidators = referenceValidators;
             this.Configuration = configuration;
 
@@ -103,6 +125,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionary<string, IntroducedSyntaxTree>.Builder? introducedSyntaxTreeBuilder = null;
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
             DesignTimeReferenceValidatorCollection.Builder? validatorsBuilder = null;
+            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Builder? inheritableOptionsBuilder = null;
 
             foreach ( var result in resultsByTree )
             {
@@ -132,9 +155,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
                         {
                             Logger.DesignTime.Trace?.Log(
-                                $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectType}'." );
+                                $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectClass.ShortName}'." );
 
-                            inheritableAspectsBuilder.Remove( x.AspectType, x.AspectInstance );
+                            inheritableAspectsBuilder.Remove( x.AspectClass.FullName, x );
                         }
                     }
 
@@ -148,6 +171,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                 $"CompilationPipelineResult.Update( id = {this._id} ): removing validator `{validator}` from syntax tree '{filePath}'." );
 
                             validatorsBuilder.Remove( validator );
+                        }
+                    }
+
+                    if ( !oldSyntaxTreeResult.InheritableOptions.IsDefault )
+                    {
+                        inheritableOptionsBuilder ??= this._inheritableOptions.ToBuilder();
+
+                        foreach ( var optionItem in oldSyntaxTreeResult.InheritableOptions )
+                        {
+                            Logger.DesignTime.Trace?.Log(
+                                $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable option of type `{optionItem.Key.OptionType}` on `{optionItem.Key.DeclarationId}` from syntax tree '{filePath}'." );
+
+                            inheritableOptionsBuilder.Remove( optionItem.Key );
                         }
                     }
                 }
@@ -173,9 +209,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     foreach ( var x in result.InheritableAspects )
                     {
                         Logger.DesignTime.Trace?.Log(
-                            $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable aspect of type '{x.AspectType}'." );
+                            $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable aspect of type '{x.AspectClass.ShortName}'." );
 
-                        inheritableAspectsBuilder.Add( x.AspectType, x.AspectInstance );
+                        inheritableAspectsBuilder.Add( x.AspectClass.FullName, x );
                     }
                 }
 
@@ -190,6 +226,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                 }
 
+                if ( !result.InheritableOptions.IsDefaultOrEmpty )
+                {
+                    inheritableOptionsBuilder ??= this._inheritableOptions.ToBuilder();
+
+                    foreach ( var optionItem in result.InheritableOptions )
+                    {
+                        Logger.DesignTime.Trace?.Log(
+                            $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable options of type `{optionItem.Key.OptionType}`." );
+
+                        inheritableOptionsBuilder.Add( optionItem.Key, optionItem.Options );
+                    }
+                }
+
                 syntaxTreeResultBuilder[filePath] = result;
             }
 
@@ -200,13 +249,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
             var validators = validatorsBuilder?.ToImmutable( projectVersion.ReferencedValidatorCollections )
                              ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
 
+            var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this._inheritableOptions;
+
             return new AspectPipelineResult(
+                configuration,
                 syntaxTreeResultBuilder.ToImmutable(),
                 ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
                 validators,
-                configuration );
+                inheritableOptions );
         }
 
         /// <summary>
@@ -299,8 +351,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
-                builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
-                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName.AssertNotNull(), inheritableAspectInstance) );
+                builder.InheritableAspects ??= ImmutableArray.CreateBuilder<InheritableAspectInstance>();
+                builder.InheritableAspects.Add( inheritableAspectInstance );
             }
 
             // Split validators by syntax tree.
@@ -434,7 +486,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var manifest = TransitiveAspectsManifest.Create(
                     this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
-                    this.ReferenceValidators.ToTransitiveValidatorInstances() );
+                    this.ReferenceValidators.ToTransitiveValidatorInstances(),
+                    this._inheritableOptions );
 
                 this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilation );
             }

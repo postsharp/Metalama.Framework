@@ -4,7 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdditionalOutputs;
-using Metalama.Framework.Engine.AspectOptions;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -345,7 +345,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
+            var transitiveAspectSource = new TransitivePipelineContributorSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( configuration.ServiceProvider, aspectClasses ),

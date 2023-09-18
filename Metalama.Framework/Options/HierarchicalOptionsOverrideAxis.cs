@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Options;
 
 [CompileTime]
-public enum AspectOptionsOverrideAxis
+public enum HierarchicalOptionsOverrideAxis
 {
     /// <summary>
     /// Means that options defined on a contained declaration override options defined on the containing declaration.
@@ -27,5 +27,6 @@ public enum AspectOptionsOverrideAxis
     /// <summary>
     /// Means that options directly applied to the declaration override options inherited along the containment or base axis.
     /// </summary>
-    DirectOverInheritance
+    DirectOverInheritance,
+    Aspect
 }

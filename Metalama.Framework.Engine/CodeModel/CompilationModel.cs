@@ -5,13 +5,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.AspectOptions;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -40,22 +40,22 @@ namespace Metalama.Framework.Engine.CodeModel
             ProjectModel project,
             PartialCompilation compilation,
             AspectRepository? aspectRepository = null,
-            AspectOptionsManager? aspectOptionsManager = null,
+            HierarchicalOptionsManager? hierarchicalOptionsManager = null,
             string? debugLabel = null )
-            => new( project, compilation, aspectRepository, aspectOptionsManager, CompilationModelOptions.Default, debugLabel );
+            => new( project, compilation, aspectRepository, hierarchicalOptionsManager, CompilationModelOptions.Default, debugLabel );
 
         public static CompilationModel CreateInitialInstance(
             ProjectModel project,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null,
-            AspectOptionsManager? aspectOptionsManager = null,
+            HierarchicalOptionsManager? hierarchicalOptionsManager = null,
             string? debugLabel = null )
             => new(
                 project,
                 PartialCompilation.CreateComplete( compilation, resources ),
                 aspectRepository,
-                aspectOptionsManager,
+                hierarchicalOptionsManager,
                 CompilationModelOptions.Default,
                 debugLabel );
 
@@ -71,10 +71,16 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal AspectRepository AspectRepository { get; }
 
-        internal AspectOptionsManager AspectOptionsManager { get; }
+        internal HierarchicalOptionsManager HierarchicalOptionsManager { get; }
 
-        IAspectOptionsManager ICompilationInternal.AspectOptionsManager
-            => this.AspectOptionsManager.AssertNotNull( $"The {nameof(this.AspectOptionsManager)} has not been supplied." );
+        public IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
+            where T : class, IAnnotation
+        {
+            return this._annotations[declaration.ToTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
+        }
+
+        IHierarchicalOptionsManager ICompilationInternal.HierarchicalOptionsManager
+            => this.HierarchicalOptionsManager.AssertNotNull( $"The {nameof(this.HierarchicalOptionsManager)} has not been supplied." );
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
@@ -109,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel
             ProjectModel project,
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
-            AspectOptionsManager? aspectOptionsManager,
+            HierarchicalOptionsManager? hierarchicalOptionsManager,
             CompilationModelOptions? options,
             string? debugLabel )
         {
@@ -123,10 +129,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
 
             this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+            this._annotations = ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
 
             this._derivedTypes = partialCompilation.LazyDerivedTypes;
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
-            this.AspectOptionsManager = aspectOptionsManager ?? new AspectOptionsManager( project.ServiceProvider );
+            this.HierarchicalOptionsManager = hierarchicalOptionsManager ?? new HierarchicalOptionsManager( project.ServiceProvider );
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -242,6 +249,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._allInterfaceImplementations = prototype._allInterfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
             this._finalizers = prototype._finalizers;
+            this._annotations = prototype._annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
 
@@ -250,7 +258,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._redirections = prototype._redirections;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this.AspectRepository = prototype.AspectRepository;
-            this.AspectOptionsManager = prototype.AspectOptionsManager;
+            this.HierarchicalOptionsManager = prototype.HierarchicalOptionsManager;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }

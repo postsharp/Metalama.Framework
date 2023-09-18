@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System.Collections.Immutable;
 
@@ -43,5 +44,8 @@ namespace Metalama.Framework.Aspects
         /// property of the <see cref="IAspectBuilder"/> interface.
         /// </summary>
         IAspectState? AspectState { get; }
+
+        T GetOptions<T>()
+            where T : class, IHierarchicalOptions, new();
     }
 }

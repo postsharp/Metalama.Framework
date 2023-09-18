@@ -35,12 +35,13 @@ internal sealed partial class AspectPipelineResult
         public AspectPipelineResult ToImmutable()
         {
             return new AspectPipelineResult(
+                this._parent.Configuration,
                 this._syntaxTreeBuilders.ToImmutable(),
                 this._invalidSyntaxTreeBuilders.ToImmutable(),
                 this._parent.IntroducedSyntaxTrees,
                 this._parent._inheritableAspects,
                 this._parent.ReferenceValidators,
-                this._parent.Configuration );
+                this._parent._inheritableOptions );
         }
     }
 }

@@ -1,18 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -190,7 +193,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) )
                             .ToImmutableArray(),
-                        referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
+                        referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ),
+                        result.Value.LastCompilationModel?.HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel ) ??
+                        ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
                     additionalResources = additionalResources.Add( resource );

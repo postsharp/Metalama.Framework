@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Options;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Code
 {
@@ -15,6 +16,9 @@ namespace Metalama.Framework.Code
 
         IAspectRepository AspectRepository { get; }
 
-        IAspectOptionsManager AspectOptionsManager { get; }
+        IHierarchicalOptionsManager HierarchicalOptionsManager { get; }
+
+        IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
+            where T : class, IAnnotation;
     }
 }

@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -33,7 +35,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public ImmutableArray<string> Dependencies { get; }
 
-        public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
+        public ImmutableArray<InheritableAspectInstance> InheritableAspects { get; }
+
+        public ImmutableArray<InheritableOptionsInstance> InheritableOptions { get; }
 
         public ImmutableArray<DesignTimeReferenceValidatorInstance> ReferenceValidators { get; }
 
@@ -47,14 +51,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
-            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects,
+            ImmutableArray<InheritableAspectInstance>? inheritableAspects,
             ImmutableArray<DesignTimeReferenceValidatorInstance>? validators,
             ImmutableArray<DesignTimeAspectInstance>? aspectInstances,
-            ImmutableArray<DesignTimeTransformation>? transformations )
+            ImmutableArray<DesignTimeTransformation>? transformations,
+            ImmutableArray<InheritableOptionsInstance>? inheritableOptions )
         {
             this.SyntaxTree = syntaxTree;
+            this.InheritableOptions = inheritableOptions ?? ImmutableArray<InheritableOptionsInstance>.Empty;
             this.ReferenceValidators = validators ?? ImmutableArray<DesignTimeReferenceValidatorInstance>.Empty;
-            this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Empty;
+            this.InheritableAspects = inheritableAspects ?? ImmutableArray<InheritableAspectInstance>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;
             this.Introductions = introductions ?? ImmutableArray<IntroducedSyntaxTree>.Empty;

@@ -6,8 +6,8 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Options;
 
 [CompileTime]
-internal interface IAspectOptionsManager
+internal interface IHierarchicalOptionsManager
 {
     TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : class, IAspectOptions, new();
+        where TOptions : class, IHierarchicalOptions, new();
 }

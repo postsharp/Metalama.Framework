@@ -1,15 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -22,23 +26,35 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; private set; }
 
+        // To levels of mapping of options: first option types, then target declaration.
+        public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; private set; }
+
         // Deserializer constructor.
         private TransitiveAspectsManifest()
         {
             this.InheritableAspects = null!;
+            this.InheritableOptions = null!;
         }
 
         private TransitiveAspectsManifest(
             ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> inheritableAspects,
-            ImmutableArray<TransitiveValidatorInstance> validators )
+            ImmutableArray<TransitiveValidatorInstance> validators,
+            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> options )
         {
             this.InheritableAspects = inheritableAspects;
             this.ReferenceValidators = validators;
+            this.InheritableOptions = options;
+        }
+
+        public bool TryGetHierarchicalOptions( SerializableDeclarationId declaration, Type type, [NotNullWhen( true )] out IHierarchicalOptions? options )
+        {
+            return this.InheritableOptions.TryGetValue( new HierarchicalOptionsKey( type.FullName.AssertNotNull(), declaration ), out options );
         }
 
         public static TransitiveAspectsManifest Create(
             ImmutableArray<InheritableAspectInstance> inheritedAspect,
-            ImmutableArray<TransitiveValidatorInstance> validators )
+            ImmutableArray<TransitiveValidatorInstance> validators,
+            ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> options )
             => new(
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToImmutableDictionary(
@@ -46,7 +62,8 @@ namespace Metalama.Framework.Engine.Aspects
                         g => g.Select( i => new InheritableAspectInstance( i ) )
                             .ToReadOnlyList(),
                         StringComparer.Ordinal ),
-                validators );
+                validators,
+                options );
 
         private void Serialize( Stream stream, ProjectServiceProvider serviceProvider, Compilation compilation )
         {
@@ -98,6 +115,7 @@ namespace Metalama.Framework.Engine.Aspects
                 var instance = (TransitiveAspectsManifest) obj;
                 initializationArguments.SetValue( nameof(instance.InheritableAspects), instance.InheritableAspects );
                 initializationArguments.SetValue( nameof(instance.ReferenceValidators), instance.ReferenceValidators );
+                initializationArguments.SetValue( nameof(instance.InheritableOptions), instance.InheritableOptions );
             }
 
             public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
@@ -110,6 +128,9 @@ namespace Metalama.Framework.Engine.Aspects
 
                 instance.ReferenceValidators =
                     initializationArguments.GetValue<ImmutableArray<TransitiveValidatorInstance>>( nameof(instance.ReferenceValidators) );
+
+                instance.InheritableOptions =
+                    initializationArguments.GetValue<ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>>( nameof(instance.InheritableOptions) )!;
             }
         }
     }

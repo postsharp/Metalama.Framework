@@ -4,7 +4,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public partial class AspectOptionItemCollection<T>
+public partial class HierarchicalOptionItemCollection<T>
 {
     private readonly struct Item : ICompileTimeSerializable
     {

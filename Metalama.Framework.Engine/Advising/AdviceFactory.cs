@@ -1723,4 +1723,25 @@ internal sealed class AdviceFactory : IAdviceFactory
             defaultValue,
             pullAction,
             attributes );
+
+    public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
+        where TDeclaration : class, IDeclaration
+    {
+        using ( this.WithNonUserCode() )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var advice = new AddAnnotationAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                declaration,
+                this._compilation,
+                new AnnotationInstance( annotation, export ) );
+
+            this.ExecuteAdvice<IDeclaration>( advice );
+        }
+    }
 }

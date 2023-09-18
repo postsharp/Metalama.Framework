@@ -5,10 +5,10 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Options;
 
 [RunTimeOrCompileTime]
-public interface IAspectOptionsAttribute { }
+public interface IHierarchicalOptionsProvider { }
 
-public interface IAspectOptionsAttribute<out T> : IAspectOptionsAttribute
-    where T : class, IAspectOptions
+public interface IHierarchicalOptionsProvider<out T> : IHierarchicalOptionsProvider
+    where T : class, IHierarchicalOptions
 {
-    T ToOptions();
+    T GetOptions();
 }

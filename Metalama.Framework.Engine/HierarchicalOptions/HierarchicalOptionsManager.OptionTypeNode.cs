@@ -10,19 +10,24 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
-namespace Metalama.Framework.Engine.AspectOptions;
+namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-public partial class AspectOptionsManager
+public sealed partial class HierarchicalOptionsManager
 {
     private sealed class OptionTypeNode
     {
-        private readonly AspectOptionsManager _parent;
+        private readonly HierarchicalOptionsManager _parent;
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
 
-        public OptionTypeNode( AspectOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder )
+        public HierarchicalOptionsAttribute Metadata { get; }
+
+        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder )
         {
             this._parent = parent;
             this._type = type;
@@ -30,10 +35,11 @@ public partial class AspectOptionsManager
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
 
             var prototype =
-                invoker.Invoke( () => (IAspectOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
+                invoker.Invoke( () => (IHierarchicalOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
             this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
             this._eligibilityHelper.PopulateRules( diagnosticAdder );
+            this.Metadata = type.GetCustomAttributes<HierarchicalOptionsAttribute>().SingleOrDefault() ?? HierarchicalOptionsAttribute.Default;
         }
 
         public void AddConfigurator( Configurator configurator, IDiagnosticAdder diagnosticAdder )
@@ -61,63 +67,85 @@ public partial class AspectOptionsManager
             lock ( declarationOptions.Sync )
             {
                 declarationOptions.DirectOptions =
-                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, AspectOptionsOverrideAxis.Self, configurator.Declaration );
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, HierarchicalOptionsOverrideAxis.Self, configurator.Declaration );
 
                 declarationOptions.ResetMergedOptions();
             }
         }
 
-        public T? GetOptions<T>( IDeclaration declaration )
-            where T : class, IAspectOptions, new()
+        public IHierarchicalOptions? GetOptions( IDeclaration declaration )
         {
+            
             var node = this.GetNodeAndComputeDirectOptions( declaration );
 
             if ( node?.MergedOptions != null )
             {
                 // If we have a cached value, use it.
-                return (T) node.MergedOptions;
+                return node.MergedOptions;
             }
 
             // Get options inherited from the base declaration.
-            T? baseDeclarationOptions;
+            IHierarchicalOptions? baseDeclarationOptions;
+            IHierarchicalOptions? containingDeclarationOptions;
 
-            if ( declaration is IMemberOrNamedType memberOrNamedType )
+            switch ( declaration )
             {
-                var baseDeclaration = memberOrNamedType.GetBaseDefinition();
-                baseDeclarationOptions = baseDeclaration != null ? this.GetOptions<T>( baseDeclaration ) : null;
-            }
-            else
-            {
-                baseDeclarationOptions = null;
-            }
+                case INamedType namedType:
+                    if ( this.Metadata.InheritedByDerivedTypes && namedType.GetBaseDefinition() is { } baseType )
+                    {
+                        baseDeclarationOptions = this.GetOptions( baseType );
+                    }
+                    else
+                    {
+                        baseDeclarationOptions = null;
+                    }
 
-            // Get options inherited from containing declaration.
-            T? containingDeclarationOptions;
+                    if ( this.Metadata.InheritedByNestedTypes && namedType.DeclaringType != null )
+                    {
+                        containingDeclarationOptions = this.GetOptions( namedType.DeclaringType );
+                    }
+                    else
+                    {
+                        containingDeclarationOptions = this.GetOptions( namedType.Namespace );
+                    }
 
-            if ( declaration.DeclarationKind == DeclarationKind.Compilation )
-            {
-                // For the compilation, we go down to the project-level options.
-                containingDeclarationOptions = this._parent.GetDefaultOptions<T>( declaration.Compilation.Project );
-            }
-            else
-            {
-                var containingDeclaration = declaration switch
-                {
-                    INamedType namedType => (IDeclaration?) namedType.DeclaringType ?? namedType.Namespace,
-                    _ => declaration.ContainingDeclaration
-                };
-                
-                containingDeclarationOptions = containingDeclaration != null ? this.GetOptions<T>( containingDeclaration ) : null;
+                    break;
+
+                case IMember member:
+                    if ( this.Metadata.InheritedByOverridingMembers && member.GetBaseDefinition() is { } baseDeclaration )
+                    {
+                        baseDeclarationOptions = this.GetOptions( baseDeclaration );
+                    }
+                    else
+                    {
+                        baseDeclarationOptions = null;
+                    }
+
+                    containingDeclarationOptions = this.GetOptions( member.DeclaringType );
+
+                    break;
+
+                case ICompilation:
+                    baseDeclarationOptions = null;
+                    containingDeclarationOptions = this._parent.GetDefaultOptions( this._type, declaration.Compilation.Project );
+
+                    break;
+
+                default:
+                    baseDeclarationOptions = null;
+                    containingDeclarationOptions = this.GetOptions( declaration.ContainingDeclaration.AssertNotNull() );
+
+                    break;
             }
 
             // Merge all options.
             var inheritedOptions = MergeOptions(
                 baseDeclarationOptions,
                 containingDeclarationOptions,
-                AspectOptionsOverrideAxis.ContainmentOverBase,
+                HierarchicalOptionsOverrideAxis.ContainmentOverBase,
                 declaration );
 
-            var mergedOptions = MergeOptions( inheritedOptions, node?.DirectOptions, AspectOptionsOverrideAxis.DirectOverInheritance, declaration );
+            var mergedOptions = MergeOptions( inheritedOptions, node?.DirectOptions, HierarchicalOptionsOverrideAxis.DirectOverInheritance, declaration );
 
             // Cache the result.
             var shouldCache =
@@ -130,11 +158,14 @@ public partial class AspectOptionsManager
                 node.MergedOptions = mergedOptions;
             }
 
-            return (T?) mergedOptions;
+            return mergedOptions;
         }
 
-        private static T? MergeOptions<T>( T? baseOptions, T? options, AspectOptionsOverrideAxis axis, IDeclaration declaration )
-            where T : class, IAspectOptions
+        private static IHierarchicalOptions? MergeOptions(
+            IHierarchicalOptions? baseOptions,
+            IHierarchicalOptions? options,
+            HierarchicalOptionsOverrideAxis axis,
+            IDeclaration declaration )
         {
             if ( baseOptions == null )
             {
@@ -150,7 +181,7 @@ public partial class AspectOptionsManager
             }
             else
             {
-                return (T) baseOptions.OverrideWith( options, new AspectOptionsOverrideContext( axis, declaration ) );
+                return (IHierarchicalOptions) baseOptions.OverrideWith( options, new HierarchicalOptionsOverrideContext( axis, declaration ) );
             }
         }
 
@@ -194,12 +225,36 @@ public partial class AspectOptionsManager
             bool createNodeIfEmpty = false )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var optionsOnDeclaration ) && createNodeIfEmpty )
+            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var node ) )
             {
-                optionsOnDeclaration = this.GetOrAddDeclarationNode( declaration );
+                if ( declaration.BelongsToCurrentProject && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._type, out var options ) == true )
+                {
+                    node = this.GetOrAddDeclarationNode( declaration );
+                    node.DirectOptions = node.MergedOptions = options;
+                }
+                else if ( createNodeIfEmpty )
+                {
+                    node = this.GetOrAddDeclarationNode( declaration );
+                }
             }
 
-            return optionsOnDeclaration;
+            return node;
+        }
+
+        public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation )
+        {
+            // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
+            var optionsTypeName = this._type.FullName.AssertNotNull();
+
+            return this._optionsByDeclaration
+                    .Where( x => x.Value.DirectOptions != null )
+                    .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
+                    .Where( x => x.CanBeInherited )
+                    .Select(
+                        x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
+                            new HierarchicalOptionsKey( optionsTypeName, x.ToSerializableId() ),
+                            this.GetOptions( x ).AssertNotNull() ) )
+                ;
         }
     }
 }

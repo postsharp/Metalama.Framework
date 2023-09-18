@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.AspectOptions;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -450,7 +450,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     {
         foreach ( var source in configuratorSources )
         {
-            this.LastCompilation.AspectOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
+            this.LastCompilation.HierarchicalOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
         }
     }
 

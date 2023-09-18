@@ -23,10 +23,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public ImmutableArray<Diagnostic>.Builder? Diagnostics;
             public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
             public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
-            public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
+            public ImmutableArray<InheritableAspectInstance>.Builder? InheritableAspects;
             public ImmutableArray<DesignTimeReferenceValidatorInstance>.Builder? Validators;
             public ImmutableArray<DesignTimeAspectInstance>.Builder? AspectInstances;
             public ImmutableArray<DesignTimeTransformation>.Builder? Transformations;
+            public ImmutableArray<InheritableOptionsInstance>.Builder? InheritableOptions;
 #pragma warning restore SA1401 // Fields should be private
 
             public Builder( SyntaxTree syntaxTree )
@@ -59,7 +60,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.InheritableAspects?.ToImmutable(),
                     this.Validators?.ToImmutable(),
                     this.AspectInstances?.ToImmutable(),
-                    this.Transformations?.ToImmutable() );
+                    this.Transformations?.ToImmutable(),
+                    this.InheritableOptions?.ToImmutable() );
             }
         }
     }

@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.AspectOptions;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
@@ -83,6 +84,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         [Memo]
         public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
+
+        public TOptions GetOptions<TOptions>()
+            where TOptions : class, IHierarchicalOptions<T>, new()
+            => this.AspectInstance.GetOptions<TOptions>();
 
         IDeclaration IAspectBuilder.Target => this.Target;
 

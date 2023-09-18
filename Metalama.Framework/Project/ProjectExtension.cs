@@ -14,7 +14,7 @@ namespace Metalama.Framework.Project
     /// </remarks>
     /// <seealso href="@exposing-configuration"/>
     [CompileTime]
-    [Obsolete( "Use IAspectOptions." )]
+    [Obsolete( "Use IHierarchicalOptions." )]
     public abstract class ProjectExtension
     {
         // ReSharper disable UnusedParameter.Global

@@ -22,12 +22,12 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
 /// </summary>
-internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
+internal sealed class TransitivePipelineContributorSource : IAspectSource, IValidatorSource
 {
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
     private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
 
-    public TransitiveAspectSource(
+    public TransitivePipelineContributorSource(
         Compilation compilation,
         ImmutableArray<IAspectClass> aspectClasses,
         ProjectServiceProvider serviceProvider )
@@ -78,7 +78,7 @@ internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
                         // In that case, an error should have been reported above. Anyway, this should not be the problem of the present
                         // method but of the code upstream and we should cope with that situation/
                         serviceProvider.GetLoggerFactory()
-                            .GetLogger( nameof(TransitiveAspectSource) )
+                            .GetLogger( nameof(TransitivePipelineContributorSource) )
                             .Warning?.Log( $"Cannot find the aspect class '{aspectClassesByName}'." );
 
                         continue;

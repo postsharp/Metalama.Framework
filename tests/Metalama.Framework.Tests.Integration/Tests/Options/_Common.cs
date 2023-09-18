@@ -11,17 +11,19 @@ using Metalama.Framework.Tests.Integration.Tests.Options;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
-public record MyOptions : IAspectOptions<IDeclaration>
+public record MyOptions : IHierarchicalOptions<IDeclaration>
 {
     public string? Value { get; init; }
 
+    public string? OverrideHistory { get; init; }
+
     public bool? BaseWins { get; init; }
 
-    public IAspectOptions GetDefaultOptions( IProject project ) => this;
+    public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object options, in AspectOptionsOverrideContext context )
+    public object OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
     {
-        if (BaseWins.GetValueOrDefault() && context.Axis == AspectOptionsOverrideAxis.ContainmentOverBase)
+        if (BaseWins.GetValueOrDefault() && context.Axis == HierarchicalOptionsOverrideAxis.ContainmentOverBase)
         {
             return this;
         }
@@ -29,14 +31,17 @@ public record MyOptions : IAspectOptions<IDeclaration>
         {
             var other = (MyOptions)options;
 
-            return new MyOptions { Value = other.Value ?? Value, BaseWins = other.BaseWins ?? BaseWins };
+            return new MyOptions
+            {
+                Value = other.Value ?? Value, BaseWins = other.BaseWins ?? BaseWins, OverrideHistory = $"{OverrideHistory ?? Value}->{other.Value}"
+            };
         }
     }
 
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
 }
 
-public class MyOptionsAttribute : Attribute, IAspectOptionsAttribute<MyOptions>
+public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
 {
     private string _value;
     private bool _baseWins;
@@ -47,7 +52,7 @@ public class MyOptionsAttribute : Attribute, IAspectOptionsAttribute<MyOptions>
         _baseWins = baseWins;
     }
 
-    public MyOptions ToOptions() => new() { Value = _value, BaseWins = _baseWins };
+    public MyOptions GetOptions() => new() { Value = _value, BaseWins = _baseWins };
 }
 
 public class ActualOptionsAttribute : Attribute

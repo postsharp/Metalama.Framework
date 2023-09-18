@@ -7,5 +7,5 @@ namespace Metalama.Framework.Options;
 [CompileTime]
 public interface IOverridable
 {
-    object OverrideWith( object options, in AspectOptionsOverrideContext context );
+    object OverrideWith( object options, in HierarchicalOptionsOverrideContext context );
 }

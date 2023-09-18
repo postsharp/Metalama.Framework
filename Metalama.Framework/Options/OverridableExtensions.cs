@@ -7,7 +7,7 @@ namespace Metalama.Framework.Options;
 [CompileTime]
 public static class OverridableExtensions
 {
-    public static T? OverrideWithSafe<T>( this T? baseOptions, T? overrideOptions, in AspectOptionsOverrideContext context )
+    public static T? OverrideWithSafe<T>( this T? baseOptions, T? overrideOptions, in HierarchicalOptionsOverrideContext context )
         where T : class, IOverridable
     {
         if ( baseOptions == null )

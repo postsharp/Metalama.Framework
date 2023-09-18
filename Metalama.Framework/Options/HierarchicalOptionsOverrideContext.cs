@@ -6,13 +6,13 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Options;
 
 [CompileTime]
-public readonly struct AspectOptionsOverrideContext
+public readonly struct HierarchicalOptionsOverrideContext
 {
-    public AspectOptionsOverrideAxis Axis { get; }
+    public HierarchicalOptionsOverrideAxis Axis { get; }
 
     public IDeclaration Declaration { get; }
 
-    internal AspectOptionsOverrideContext( AspectOptionsOverrideAxis axis, IDeclaration declaration )
+    internal HierarchicalOptionsOverrideContext( HierarchicalOptionsOverrideAxis axis, IDeclaration declaration )
     {
         this.Axis = axis;
         this.Declaration = declaration;

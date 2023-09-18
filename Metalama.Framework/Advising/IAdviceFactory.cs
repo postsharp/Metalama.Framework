@@ -736,6 +736,9 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
+        void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
+            where TDeclaration : class, IDeclaration;
+
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will use the specified object to find template methods.
         /// </summary>
