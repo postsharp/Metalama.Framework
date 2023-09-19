@@ -236,7 +236,23 @@ public static partial class LinqExtensions
     public static List<T> ToMutableList<T>( this IReadOnlyList<T> list )
     {
         var result = new List<T>( list.Count );
-        result.AddRange( list );
+
+        foreach ( var item in list )
+        {
+            result.Add( item );
+        }
+
+        return result;
+    }
+
+    public static List<T> ToMutableList<T>( this IReadOnlyCollection<T> list )
+    {
+        var result = new List<T>( list.Count );
+
+        foreach ( var item in list )
+        {
+            result.Add( item );
+        }
 
         return result;
     }
@@ -275,6 +291,11 @@ public static partial class LinqExtensions
 
         return list;
     }
+
+    public static IReadOnlyList<T> Materialize<T>( this IReadOnlyList<T> list ) => list is INonMaterialized ? list.ToMutableList() : list;
+
+    public static IReadOnlyCollection<T> Materialize<T>( this IReadOnlyCollection<T> collection )
+        => collection is INonMaterialized ? collection.ToMutableList() : collection;
 
     [Obsolete( "This method is redundant." )]
     internal static IReadOnlyList<T> ToReadOnlyList<T>( this IReadOnlyList<T> list ) => list;

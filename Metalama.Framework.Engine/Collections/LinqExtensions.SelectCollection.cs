@@ -8,7 +8,7 @@ namespace System.Linq;
 
 public static partial class LinqExtensions
 {
-    private class SelectCollection<TIn, TOut> : IReadOnlyCollection<TOut>
+    private class SelectCollection<TIn, TOut> : INonMaterialized, IReadOnlyCollection<TOut>
     {
         private readonly IReadOnlyCollection<TIn> _input;
         private readonly Func<TIn, TOut> _func;

@@ -607,7 +607,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );
 #if DEBUG
-                statements = statements.ToReadOnlyList();
+                statements = statements.ToMutableList();
 
                 foreach ( var statement in statements )
                 {
