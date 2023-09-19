@@ -2,10 +2,21 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ReferenceType;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ReferenceType_CompileTimeInterfaceImpl;
+
+[CompileTime]
+public interface IFace
+{
+    int Value { get; set; }
+
+    int ValueGetOnly { get; }
+
+    int ValueInitOnly { get; init; }
+}
+
 
 [RunTimeOrCompileTime]
-public class ReferenceType : ICompileTimeSerializable
+public class ReferenceType : IFace, ICompileTimeSerializable
 {
     public int Value { get; set; }
 

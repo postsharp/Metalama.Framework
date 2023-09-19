@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -60,10 +61,12 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly TypeOfRewriter _typeOfRewriter;
             private readonly RewriterHelper _helper;
             private readonly TemplateProjectManifestBuilder _compileTimeManifestBuilder;
+            private readonly SafeSymbolComparer _symbolEqualityComparer;
 
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
+            private Dictionary<ISymbol, HashSet<ISymbol>>? _currentTypeImplicitInterfaceImplementations;
 
             public bool Success { get; private set; } = true;
 
@@ -94,17 +97,17 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
-                var symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
+                this._symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
 
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
                         x => x.Type,
                         x => x,
-                        symbolEqualityComparer );
+                        this._symbolEqualityComparer );
 
                 this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsReadOnlyList( y => (Member: y, Type: x) ) )
-                        .ToDictionary( x => x.Member, x => x.Type, symbolEqualityComparer );
+                        .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
@@ -419,6 +422,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
                 this._currentTypeName = symbol.Name;
+                this._currentTypeImplicitInterfaceImplementations = this.GetImplicitlyImplementedInterfaceMembers( symbol );
 
                 // Check the diagnostics in this type.
                 // At compile time, any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
@@ -605,6 +609,34 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 return transformedNode;
+            }
+
+            private Dictionary<ISymbol, HashSet<ISymbol>> GetImplicitlyImplementedInterfaceMembers( INamedTypeSymbol type )
+            {
+                var implicitInterfaceMembers = new Dictionary<ISymbol, HashSet<ISymbol>>();
+
+                foreach ( var interfaceType in type.AllInterfaces )
+                {
+                    foreach ( var interfaceMember in interfaceType.GetMembers() )
+                    {
+                        var interfaceMemberImplementation = type.FindImplementationForInterfaceMember( interfaceMember ).AssertNotNull();
+
+                        if ( this._symbolEqualityComparer.Equals( interfaceMemberImplementation.ContainingType, type )
+                             && !interfaceMemberImplementation.IsExplicitInterfaceMemberImplementation() )
+                        {
+                            // The interface member is implemented in the current type.
+                            if ( !implicitInterfaceMembers.TryGetValue( interfaceMemberImplementation, out var implementedInterfaceMembers ) )
+                            {
+                                implicitInterfaceMembers[interfaceMemberImplementation] =
+                                    implementedInterfaceMembers = new HashSet<ISymbol>( this._symbolEqualityComparer );
+                            }
+
+                            implementedInterfaceMembers.Add( interfaceMember );
+                        }
+                    }
+                }
+
+                return implicitInterfaceMembers;
             }
 
             private bool CheckTemplateName( ISymbol symbol )
@@ -867,6 +899,71 @@ namespace Metalama.Framework.Engine.CompileTime
                                                             null,
                                                             null )
                                                         .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
+
+                            // If the property implicitly implements interface members, we need to emit explicit implementations with init-only setter.
+                            if ( this._currentTypeImplicitInterfaceImplementations.AssertNotNull().TryGetValue( propertySymbol, out var implicitlyImplementedInterfaceMembers ) )
+                            {
+                                foreach ( var interfaceProperty in implicitlyImplementedInterfaceMembers.OfType<IPropertySymbol>() )
+                                {
+                                    var interfaceScope = this.SymbolClassifier.GetTemplatingScope( interfaceProperty.ContainingType );
+
+                                    if ( interfaceScope == TemplatingScope.RunTimeOnly )
+                                    {
+                                        // Do not generate explicit implementation for runtime interfaces.
+                                        continue;
+                                    }
+
+                                    if ( interfaceProperty.SetMethod is not { IsInitOnly: true } )
+                                    {
+                                        continue;
+                                    }
+
+                                    // If the property implicitly implements any interface property with init accessor, we need to add explicit implementation because
+                                    // changing it to ordinary setter would cause an error.
+                                    yield return
+                                        PropertyDeclaration(
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            rewrittenProperty.Type,
+                                            ExplicitInterfaceSpecifier(
+                                                (NameSyntax) this._syntaxGenerationContext.SyntaxGenerator.Type( interfaceProperty.ContainingType ) ),
+                                            rewrittenProperty.Identifier,
+                                            AccessorList(
+                                                List(
+                                                    new[]
+                                                    {
+                                                        interfaceProperty.GetMethod != null
+                                                            ? AccessorDeclaration(
+                                                                SyntaxKind.GetAccessorDeclaration,
+                                                                List<AttributeListSyntax>(),
+                                                                TokenList(),
+                                                                Token( SyntaxKind.GetKeyword ),
+                                                                null,
+                                                                ArrowExpressionClause(
+                                                                    MemberAccessExpression(
+                                                                        SyntaxKind.SimpleMemberAccessExpression,
+                                                                        ThisExpression(),
+                                                                        IdentifierName( interfaceProperty.Name ) ) ),
+                                                                Token( SyntaxKind.SemicolonToken ) )
+                                                            : null,
+                                                        AccessorDeclaration(
+                                                            SyntaxKind.InitAccessorDeclaration,
+                                                            List<AttributeListSyntax>(),
+                                                            TokenList(),
+                                                            Token( SyntaxKind.InitKeyword ),
+                                                            null,
+                                                            ArrowExpressionClause(
+                                                                AssignmentExpression(
+                                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                                    MemberAccessExpression(
+                                                                        SyntaxKind.SimpleMemberAccessExpression,
+                                                                        ThisExpression(),
+                                                                        IdentifierName( interfaceProperty.Name ) ),
+                                                                    IdentifierName( "value" ) ) ),
+                                                            Token( SyntaxKind.SemicolonToken ) ),
+                                                    }.WhereNotNull() ) ) );
+                                }
+                            }
                         }
 
                         yield return rewritten;
@@ -1359,28 +1456,30 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
-                    if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                    switch ( symbol )
                     {
-                        return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
-                    }
-                    else if ( symbol is { IsStatic: true }
-                              && node.Parent is not MemberAccessExpressionSyntax
-                              && node.Parent is not AliasQualifiedNameSyntax
-                              && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
-                    {
-                        switch ( symbol.Kind )
-                        {
-                            case SymbolKind.Field:
-                            case SymbolKind.Property:
-                            case SymbolKind.Event:
-                            case SymbolKind.Method:
-                                // We have an access to a field or method with a "using static", or a non-qualified static member access.
-                                return MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
-                                        IdentifierName( node.Identifier.Text ) )
-                                    .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
-                        }
+                        case INamespaceOrTypeSymbol namespaceOrType:
+                            return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+
+                        case { IsStatic: true }
+                            when node.Parent is not MemberAccessExpressionSyntax
+                                 && node.Parent is not AliasQualifiedNameSyntax
+                                 && symbol is not IMethodSymbol { MethodKind: MethodKind.LocalFunction }:
+                            switch ( symbol.Kind )
+                            {
+                                case SymbolKind.Field:
+                                case SymbolKind.Property:
+                                case SymbolKind.Event:
+                                case SymbolKind.Method:
+                                    // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                                    return MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
+                                            IdentifierName( node.Identifier.Text ) )
+                                        .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                            }
+
+                            break;
                     }
                 }
 
