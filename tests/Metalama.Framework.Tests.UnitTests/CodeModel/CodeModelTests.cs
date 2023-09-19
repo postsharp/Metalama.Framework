@@ -1161,7 +1161,7 @@ class Derived : Base<int>
 
             var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
             Assert.False( baseMethod.IsGeneric );
-            Assert.Same( baseMethod, baseMethod.MethodDefinition );
+            Assert.Same( baseMethod, baseMethod.Definition );
 
             var derivedClass = compilation.Types.OfName( "Derived" ).Single();
             Assert.False( derivedClass.IsGeneric );
@@ -1171,11 +1171,11 @@ class Derived : Base<int>
             var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
             Assert.False( derivedMethod.IsGeneric );
             Assert.False( derivedMethod.OverriddenMethod!.IsGeneric );
-            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.MethodDefinition );
+            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.Definition );
 
             var genericMethod = derivedClass.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethod.IsGeneric );
-            Assert.Same( genericMethod, genericMethod.MethodDefinition );
+            Assert.Same( genericMethod, genericMethod.Definition );
         }
 
         [Fact]

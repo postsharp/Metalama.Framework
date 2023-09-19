@@ -172,7 +172,10 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        public ExecutionScope ExecutionScope
-            => this.Compilation.Project.ClassificationService?.GetExecutionScope( this.Symbol ) ?? ExecutionScope.RunTime;
+        public ExecutionScope ExecutionScope => this.Compilation.Project.ClassificationService?.GetExecutionScope( this.Symbol ) ?? ExecutionScope.RunTime;
+
+        protected abstract IMemberOrNamedType GetDefinition();
+
+        public IMemberOrNamedType Definition => this.GetDefinition();
     }
 }

@@ -79,7 +79,9 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
                         false )
                     .AssertNotNull();
 
-            optionTypeNode = this._optionTypes.GetOrAdd( optionTypeName, _ => new OptionTypeNode( this, optionType, diagnosticAdder ) );
+            optionTypeNode = this._optionTypes.GetOrAdd(
+                optionTypeName,
+                _ => new OptionTypeNode( this, optionType, diagnosticAdder, this.GetDefaultOptions( optionType, compilationModel.Project ) ) );
         }
 
         return optionTypeNode;
@@ -98,7 +100,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         }
     }
 
-    public static TOptions GetOptions<TOptions>( IAspectInstance aspectInstance )
+    internal static TOptions GetOptions<TOptions>( IAspectInstance aspectInstance )
         where TOptions : class, IHierarchicalOptions, new()
     {
         // We require a UserCodeExecutionContext to execute this method because requiring an explicit ICompilation would
@@ -144,7 +146,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         return options;
     }
 
-    public ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>
+    internal ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>
         GetInheritableOptions( ICompilation compilation )
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
             .SelectMany( s => s.Value.GetInheritableOptions( compilation ) )

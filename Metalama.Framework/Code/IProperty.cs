@@ -20,6 +20,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         IProperty? OverriddenProperty { get; }
 
-        IProperty PropertyDefinition { get; }
+        new IProperty Definition { get; }
     }
 }

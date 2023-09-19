@@ -19,5 +19,7 @@ namespace Metalama.Framework.Code
         /// in a referenced assembly).
         /// </summary>
         TypedConstant? ConstantValue { get; }
+
+        new IField Definition { get; }
     }
 }

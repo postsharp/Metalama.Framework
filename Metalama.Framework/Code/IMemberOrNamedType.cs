@@ -53,5 +53,7 @@ namespace Metalama.Framework.Code
         /// <seealso cref="CompileTimeAttribute"/>
         /// <seealso cref="RunTimeOrCompileTimeAttribute"/>
         ExecutionScope ExecutionScope { get; }
+
+        IMemberOrNamedType Definition { get; }
     }
 }

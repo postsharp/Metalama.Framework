@@ -44,7 +44,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
         => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
-    IEvent IEvent.EventDefinition => this;
+    IEvent IEvent.Definition => this;
 
     public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 

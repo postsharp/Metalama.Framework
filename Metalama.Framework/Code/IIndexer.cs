@@ -21,5 +21,5 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
 
-    IIndexer IndexerDefinition { get; }
+    new IIndexer Definition { get; }
 }

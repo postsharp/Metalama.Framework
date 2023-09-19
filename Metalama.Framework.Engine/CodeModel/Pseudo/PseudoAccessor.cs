@@ -106,7 +106,9 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public OperatorKind OperatorKind => OperatorKind.None;
 
-    IMethod IMethod.MethodDefinition => this;
+    IMethod IMethod.Definition => this;
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
     bool IMethod.IsExtern => false;
 

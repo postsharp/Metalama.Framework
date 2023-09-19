@@ -68,7 +68,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
             }
 
             var optionTypes =
-                attributeType.AllImplementedInterfaces.Where( i => i.TypeDefinition == genericIHierarchicalOptionsAttribute )
+                attributeType.AllImplementedInterfaces.Where( i => i.Definition == genericIHierarchicalOptionsAttribute )
                     .Select( x => (INamedType) x.TypeArguments[0] )
                     .Select( x => this._typeResolver.GetCompileTimeType( x.GetSymbol().AssertNotNull(), false ).AssertNotNull() )
                     .ToReadOnlyList();

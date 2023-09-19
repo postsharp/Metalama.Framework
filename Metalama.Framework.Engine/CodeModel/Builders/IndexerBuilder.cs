@@ -82,7 +82,7 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
 
     public IIndexer? OverriddenIndexer { get; set; }
 
-    IIndexer IIndexer.IndexerDefinition => this;
+    IIndexer IIndexer.Definition => this;
 
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 

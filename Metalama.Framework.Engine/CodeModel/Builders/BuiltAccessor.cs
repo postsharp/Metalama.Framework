@@ -64,7 +64,9 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public OperatorKind OperatorKind => this._accessorBuilder.OperatorKind;
 
-    IMethod IMethod.MethodDefinition => this;
+    IMethod IMethod.Definition => this;
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
     bool IMethod.IsExtern => false;
 

@@ -57,6 +57,8 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public TypedConstant? ConstantValue => this.FieldBuilder.ConstantValue;
 
+    IField IField.Definition => this;
+
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors

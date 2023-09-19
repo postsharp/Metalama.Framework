@@ -2,10 +2,8 @@
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Generic;

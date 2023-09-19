@@ -46,7 +46,7 @@ internal sealed class BuiltIndexer : BuiltMember, IIndexerImpl
     [Memo]
     public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
 
-    IIndexer IIndexer.IndexerDefinition => this;
+    IIndexer IIndexer.Definition => this;
 
     public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 

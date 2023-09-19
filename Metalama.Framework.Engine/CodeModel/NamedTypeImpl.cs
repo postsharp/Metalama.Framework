@@ -494,9 +494,13 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         }
     }
 
+    
+
     public INamedTypeSymbol TypeSymbol { get; }
 
+    INamedType INamedType.Definition => throw new NotSupportedException();
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
+    protected override IMemberOrNamedType GetDefinition() => throw new NotSupportedException();
 
     [Memo]
     public INamedType UnderlyingType => this.GetUnderlyingTypeCore();

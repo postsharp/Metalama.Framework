@@ -46,7 +46,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; }
 
-        IEvent EventDefinition { get; }
+        new IEvent Definition { get; }
 
         /// <summary>
         /// Gets an <see cref="EventInfo"/> that represents the current event at run time.

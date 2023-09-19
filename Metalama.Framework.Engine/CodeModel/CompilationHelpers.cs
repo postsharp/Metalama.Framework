@@ -26,13 +26,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
         {
-            if ( right.TypeDefinition != right )
+            if ( right.Definition != right )
             {
                 throw new ArgumentOutOfRangeException( nameof(right), "The type must not be a generic type instance." );
             }
-            
+
             // We do not include the right type itself.
-            if ( left.TypeDefinition.Equals( right ) )
+            if ( left.Definition.Equals( right ) )
             {
                 return false;
             }
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( type.BaseType != null )
                 {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.TypeDefinition ) )
+                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
                     {
                         return true;
                     }
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var i in type.ImplementedInterfaces )
                 {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( i.TypeDefinition ) )
+                    if ( IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
                     {
                         return true;
                     }
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 if ( type.BaseType != null )
                 {
-                    var baseType = type.BaseType.TypeDefinition;
+                    var baseType = type.BaseType.Definition;
 
                     if ( baseType.Equals( right ) )
                     {
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var i in type.ImplementedInterfaces )
                 {
-                    if ( i.TypeDefinition.Equals( right ) )
+                    if ( i.Definition.Equals( right ) )
                     {
                         return true;
                     }
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 if ( type.BaseType != null && !type.BaseType.DeclaringAssembly.Equals( type.DeclaringAssembly ) )
                 {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.TypeDefinition ) )
+                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
                     {
                         return true;
                     }
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var i in type.ImplementedInterfaces )
                 {
-                    if ( !i.DeclaringAssembly.Equals( type.DeclaringAssembly ) && IsEqualOrDerivesFromWithAnyDegree( i.TypeDefinition ) )
+                    if ( !i.DeclaringAssembly.Equals( type.DeclaringAssembly ) && IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
                     {
                         return true;
                     }

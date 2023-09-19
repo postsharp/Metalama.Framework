@@ -81,7 +81,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     public IProperty? OverriddenProperty { get; set; }
 
-    IProperty IProperty.PropertyDefinition => this;
+    IProperty IProperty.Definition => this;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 

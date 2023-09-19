@@ -58,9 +58,13 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
 
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
+
     [Memo]
-    public IMethod MethodDefinition
+    public new IMethod Definition
         => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;
 
     public bool IsPartial => this.MethodSymbol.IsPartialDefinition || this.MethodSymbol.PartialDefinitionPart != null;
 

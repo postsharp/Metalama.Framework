@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;

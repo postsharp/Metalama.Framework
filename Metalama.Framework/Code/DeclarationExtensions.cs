@@ -119,16 +119,5 @@ namespace Metalama.Framework.Code
                 return (IFieldOrProperty) ((ICompilationInternal) compilation).Factory.Translate( fieldOrProperty, options );
             }
         }
-
-        public static IDeclaration? GetBaseDefinition( this IMemberOrNamedType declaration )
-            => declaration.DeclarationKind switch
-            {
-                DeclarationKind.NamedType => ((INamedType) declaration).BaseType?.TypeDefinition,
-                DeclarationKind.Method => ((IMethod) declaration).OverriddenMethod?.MethodDefinition,
-                DeclarationKind.Property => ((IProperty) declaration).OverriddenProperty?.PropertyDefinition,
-                DeclarationKind.Event => ((IEvent) declaration).OverriddenEvent?.EventDefinition,
-                DeclarationKind.Indexer => ((IIndexer) declaration).OverriddenIndexer?.IndexerDefinition,
-                _ => null
-            };
     }
 }

@@ -111,6 +111,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     // TODO: If we support introducing const fields, implement ConstantValue.
     public TypedConstant? ConstantValue => null;
 
+    IField IField.Definition => this;
+
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
     public bool IsRequired { get; set; }

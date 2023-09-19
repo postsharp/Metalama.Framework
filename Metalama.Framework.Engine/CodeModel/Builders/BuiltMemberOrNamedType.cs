@@ -31,4 +31,6 @@ internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrName
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this;
 }

@@ -19,5 +19,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <returns>A <see cref="ConstructorInfo"/> that can be used only in run-time code.</returns>
         ConstructorInfo ToConstructorInfo();
+        
+        new IConstructor Definition { get; }
     }
 }

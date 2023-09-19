@@ -71,7 +71,7 @@ namespace Metalama.Framework.Code
         /// Gets the method definition with unassigned type parameters. When the current <see cref="IMethod"/> is neither a generic method instance
         /// nor a method of a generic type, returns the current <see cref="IMethod"/>.
         /// </summary>
-        IMethod MethodDefinition { get; }
+        new IMethod Definition { get; }
 
         /// <summary>
         /// Gets a value indicating whether the method has a non-managed implementation, i.e. has the <c>extern</c> modifier.

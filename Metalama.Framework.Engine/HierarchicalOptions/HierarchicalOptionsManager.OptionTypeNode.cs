@@ -20,6 +20,7 @@ public sealed partial class HierarchicalOptionsManager
 {
     private sealed class OptionTypeNode
     {
+        private readonly IHierarchicalOptions _defaultOptions;
         private readonly HierarchicalOptionsManager _parent;
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
@@ -28,10 +29,11 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder )
+        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder, IHierarchicalOptions defaultOptions )
         {
             this._parent = parent;
             this._type = type;
+            this._defaultOptions = defaultOptions;
             this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
@@ -92,7 +94,7 @@ public sealed partial class HierarchicalOptionsManager
             switch ( declaration )
             {
                 case INamedType namedType:
-                    if ( this.Metadata.InheritedByDerivedTypes && namedType.GetBaseDefinition() is { } baseType )
+                    if ( this.Metadata.InheritedByDerivedTypes && namedType.Definition is { } baseType )
                     {
                         baseDeclarationOptions = this.GetOptions( baseType );
                     }
@@ -113,7 +115,7 @@ public sealed partial class HierarchicalOptionsManager
                     break;
 
                 case IMember member:
-                    if ( this.Metadata.InheritedByOverridingMembers && member.GetBaseDefinition() is { } baseDeclaration )
+                    if ( this.Metadata.InheritedByOverridingMembers && member.Definition is { } baseDeclaration )
                     {
                         baseDeclarationOptions = this.GetOptions( baseDeclaration );
                     }
@@ -128,7 +130,7 @@ public sealed partial class HierarchicalOptionsManager
 
                 case ICompilation:
                     baseDeclarationOptions = null;
-                    containingDeclarationOptions = this._parent.GetDefaultOptions( this._type, declaration.Compilation.Project );
+                    containingDeclarationOptions = this._defaultOptions;
 
                     break;
 
@@ -204,7 +206,7 @@ public sealed partial class HierarchicalOptionsManager
 
         private void WireNodeToParents( IDeclaration declaration, DeclarationNode node )
         {
-            var baseDeclaration = (declaration as IMemberOrNamedType)?.GetBaseDefinition();
+            var baseDeclaration = (declaration as IMemberOrNamedType)?.Definition;
 
             if ( baseDeclaration != null )
             {
@@ -246,7 +248,7 @@ public sealed partial class HierarchicalOptionsManager
         public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation )
         {
             // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
-            
+
             return this._optionsByDeclaration
                     .Where( x => x.Value.DirectOptions != null )
                     .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
