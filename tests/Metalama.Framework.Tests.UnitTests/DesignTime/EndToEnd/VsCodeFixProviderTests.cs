@@ -31,26 +31,26 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         await testContext.WhenFullyInitialized;
 
         const string code = """
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
-using Metalama.Framework.Code;
-using Metalama.Framework.CodeFixes;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.CodeFixes;
 
-class TheAspect : TypeAspect 
-{
-   [Introduce]
-   void IntroducedMethod(){}
+                            class TheAspect : TypeAspect
+                            {
+                               [Introduce]
+                               void IntroducedMethod(){}
+                            
+                               public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                               {
+                                   base.BuildAspect( builder );
+                                   builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof(TheAspect) ), builder.Target );
+                               }
+                            }
 
-   public override void BuildAspect( IAspectBuilder<INamedType> builder )
-   {
-       base.BuildAspect( builder );
-       builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof(TheAspect) ), builder.Target );
-   }
-}
-
-[TheAspect
-class TheClass {}
-""";
+                            [TheAspect
+                            class TheClass {}
+                            """;
 
         // Initialize the workspace.
         var projectKey = testContext.WorkspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );

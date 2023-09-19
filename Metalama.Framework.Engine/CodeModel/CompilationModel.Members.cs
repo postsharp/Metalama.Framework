@@ -29,7 +29,8 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
-    private ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> _annotations;
+
+    public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
     internal bool IsMutable { get; }
 
@@ -304,8 +305,8 @@ public sealed partial class CompilationModel
 
     private void AddAnnotation( AddAnnotationTransformation addAnnotationTransformation )
     {
-        this._annotations =
-            this._annotations.Add( addAnnotationTransformation.TargetDeclaration.ToTypedRef(), addAnnotationTransformation.AnnotationInstance );
+        this.Annotations =
+            this.Annotations.Add( addAnnotationTransformation.TargetDeclaration.ToTypedRef(), addAnnotationTransformation.AnnotationInstance );
     }
 
     private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )

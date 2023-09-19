@@ -31,3 +31,11 @@ internal class DerivedClass : BaseClass { }
 // <target>
 [PrintOptionsAspect]
 internal class DerivedOfNested : BaseNestingClass.BaseNestedClass { }
+
+// <target>
+[MyOptions( "OtherClass" )]
+internal class OtherClass
+{
+    [PrintOptionsAspect]
+    internal class C { }
+}

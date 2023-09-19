@@ -9,11 +9,11 @@ using Metalama.Framework.Fabrics;
 namespace Metalama.Framework.Tests.Integration.Tests.Options.TypeFabric_NotUnderCurrentDeclaration
 {
     // <target>
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public class C1
     {
-        [OptionsAspect]
-        public void M( [OptionsAspect] int p ) { }
+        [ShowOptionsAspect]
+        public void M( [ShowOptionsAspect] int p ) { }
 
         private class Fabric : TypeFabric
         {

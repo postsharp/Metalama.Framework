@@ -24,14 +24,11 @@ public partial class DerivedTypeIndex
             this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( compilationContext.SymbolComparer );
         }
 
-        internal Builder(
-            CompilationContext compilationContext,
-            ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
-            ImmutableHashSet<INamedTypeSymbol>.Builder processedTypes )
+        internal Builder( DerivedTypeIndex immutable )
         {
-            this._compilationContext = compilationContext;
-            this._relationships = relationships;
-            this._processedTypes = processedTypes;
+            this._compilationContext = immutable._compilationContext;
+            this._relationships = immutable._relationships.ToBuilder();
+            this._processedTypes = immutable._processedTypes.ToBuilder();
         }
 
         public void AnalyzeType( INamedTypeSymbol type )
@@ -54,7 +51,7 @@ public partial class DerivedTypeIndex
                 {
                     continue;
                 }
-                
+
                 var interfaceType = interfaceImpl.OriginalDefinition;
                 this._relationships.Add( interfaceType, type );
                 this.AnalyzeType( interfaceType );
@@ -76,7 +73,7 @@ public partial class DerivedTypeIndex
             return new DerivedTypeIndex(
                 this._compilationContext,
                 this._relationships.ToImmutable(),
-                externalBaseTypes );
+                this._processedTypes.ToImmutable() );
         }
     }
 }

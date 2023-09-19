@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal readonly struct AnnotationInstance
+public readonly struct AnnotationInstance
 {
+    public Ref<IDeclaration> TargetDeclaration { get; }
+
     public IAnnotation Annotation { get; }
 
     public bool Export { get; }
@@ -17,9 +18,4 @@ internal readonly struct AnnotationInstance
         this.Annotation = annotation;
         this.Export = export;
     }
-}
-
-public interface IExternalAnnotationProvider
-{
-    ImmutableArray<IAnnotation> GetAnnotations( IDeclaration declaration );
 }

@@ -24,44 +24,44 @@ public class Fabric : ProjectFabric
 }
 
 // <target>
-[OptionsAspect]
+[ShowOptionsAspect]
 [ModifyOptionsAspect( "FromAspect.C1" )]
 public class C1
 {
-    [OptionsAspect]
-    public void M( [OptionsAspect] int p ) { }
+    [ShowOptionsAspect]
+    public void M( [ShowOptionsAspect] int p ) { }
 }
 
 // <target>
-[OptionsAspect]
+[ShowOptionsAspect]
 [ModifyOptionsAspect( "FromAspect.C2" )]
 public class C2
 {
-    [OptionsAspect]
-    public void M( [OptionsAspect] int p ) { }
+    [ShowOptionsAspect]
+    public void M( [ShowOptionsAspect] int p ) { }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [ModifyOptionsAspect( "FromAspect.P" )]
-    public void M2( [OptionsAspect] int p ) { }
+    public void M2( [ShowOptionsAspect] int p ) { }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public int P
     {
-        [OptionsAspect]
+        [ShowOptionsAspect]
         get;
-        [OptionsAspect]
+        [ShowOptionsAspect]
         set;
     }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public int F;
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public event EventHandler? E;
 
     public class N
     {
-        [OptionsAspect]
-        public void M( [OptionsAspect] int p ) { }
+        [ShowOptionsAspect]
+        public void M( [ShowOptionsAspect] int p ) { }
     }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -26,7 +27,12 @@ namespace Metalama.Framework.Engine.Advising
 
         public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
-        private AdviceImplementationResult( AdviceOutcome outcome, IRef<IDeclaration>? newDeclaration, ImmutableArray<Diagnostic> diagnostics, IReadOnlyCollection<IInterfaceImplementationResult> interfaces, IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
+        private AdviceImplementationResult(
+            AdviceOutcome outcome,
+            IRef<IDeclaration>? newDeclaration,
+            ImmutableArray<Diagnostic> diagnostics,
+            IReadOnlyCollection<IInterfaceImplementationResult> interfaces,
+            IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
         {
             this.Diagnostics = diagnostics;
             this.Outcome = outcome;
@@ -35,7 +41,7 @@ namespace Metalama.Framework.Engine.Advising
             this.InterfaceMembers = interfaceMembers;
         }
 
-        public static AdviceImplementationResult Success( IDeclaration newDeclaration ) => Success( AdviceOutcome.Default, newDeclaration.ToRef() );
+        public static AdviceImplementationResult Success( IDeclaration newDeclaration ) => Success( AdviceOutcome.Default, newDeclaration.ToTypedRef() );
 
         public static AdviceImplementationResult Success(
             AdviceOutcome outcome = AdviceOutcome.Default,
@@ -51,16 +57,31 @@ namespace Metalama.Framework.Engine.Advising
                 interfaceMembers ?? Array.Empty<IInterfaceMemberImplementationResult>() );
 
         public static AdviceImplementationResult Success( AdviceOutcome outcome, IDeclaration newDeclaration )
-            => new( outcome, newDeclaration.ToRef(), ImmutableArray<Diagnostic>.Empty, Array.Empty<IInterfaceImplementationResult>(), Array.Empty<IInterfaceMemberImplementationResult>() );
+            => new(
+                outcome,
+                newDeclaration.ToTypedRef(),
+                ImmutableArray<Diagnostic>.Empty,
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
 
-        public static AdviceImplementationResult Ignored( IDeclaration existingDeclaration )
-            => Ignored( existingDeclaration.ToRef() );
+        public static AdviceImplementationResult Ignored( IDeclaration existingDeclaration ) => Ignored( existingDeclaration.ToTypedRef() );
 
         public static AdviceImplementationResult Ignored( IRef<IDeclaration> existingDeclaration )
-            => new( AdviceOutcome.Ignore, existingDeclaration, ImmutableArray<Diagnostic>.Empty, Array.Empty<IInterfaceImplementationResult>(), Array.Empty<IInterfaceMemberImplementationResult>() );
+            => new(
+                AdviceOutcome.Ignore,
+                existingDeclaration,
+                ImmutableArray<Diagnostic>.Empty,
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
 
         public static AdviceImplementationResult Failed( Diagnostic diagnostic ) => Failed( ImmutableArray.Create( diagnostic ) );
 
-        public static AdviceImplementationResult Failed( ImmutableArray<Diagnostic> diagnostics ) => new( AdviceOutcome.Error, null, diagnostics, Array.Empty<IInterfaceImplementationResult>(), Array.Empty<IInterfaceMemberImplementationResult>() );
+        public static AdviceImplementationResult Failed( ImmutableArray<Diagnostic> diagnostics )
+            => new(
+                AdviceOutcome.Error,
+                null,
+                diagnostics,
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
     }
 }

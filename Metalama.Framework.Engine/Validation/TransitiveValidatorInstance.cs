@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
 using System;
@@ -13,7 +15,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
-        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
+        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToTypedRef();
         this.ReferenceKinds = instance.ReferenceKinds;
         this.IncludeDerivedTypes = instance.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;
@@ -23,7 +25,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     }
 
     public TransitiveValidatorInstance(
-        IRef<IDeclaration> validatedDeclaration,
+        Ref<IDeclaration> validatedDeclaration,
         ReferenceKinds referenceKinds,
         bool includeDerivedTypes,
         object obj,
@@ -43,14 +45,14 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     private TransitiveValidatorInstance()
     {
         // This to make code analysis happy. All properties are actually set by the deserializer.
-        this.ValidatedDeclaration = null!;
+        this.ValidatedDeclaration = default;
         this.ReferenceKinds = default;
         this.MethodName = null!;
         this.Object = null!;
         this.DiagnosticSourceDescription = null!;
     }
 
-    public IRef<IDeclaration> ValidatedDeclaration { get; private set; }
+    public Ref<IDeclaration> ValidatedDeclaration { get; private set; }
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
@@ -104,7 +106,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
         {
             var instance = (TransitiveValidatorInstance) obj;
-            instance.ValidatedDeclaration = initializationArguments.GetValue<IRef<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
+            instance.ValidatedDeclaration = initializationArguments.GetValue<Ref<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
             instance.ReferenceKinds = initializationArguments.GetValue<ReferenceKinds>( nameof(instance.ReferenceKinds) );
             instance.Object = initializationArguments.GetValue<object>( nameof(instance.Object) )!;
             instance.State = initializationArguments.GetValue<IAspectState>( nameof(instance.State) );

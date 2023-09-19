@@ -7,7 +7,7 @@ using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Options;
 
-[assembly: AspectOrder( typeof(OptionsAspect), typeof(ModifyOptionsAspect) )]
+[assembly: AspectOrder( typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
@@ -37,8 +37,6 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
             };
         }
     }
-
-    public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
 }
 
 public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
@@ -60,7 +58,7 @@ public class ActualOptionsAttribute : Attribute
     public ActualOptionsAttribute( string value ) { }
 }
 
-public class OptionsAspect : Attribute, IAspect<IDeclaration>
+public class ShowOptionsAspect : Attribute, IAspect<IDeclaration>
 {
     public void BuildAspect( IAspectBuilder<IDeclaration> builder )
     {

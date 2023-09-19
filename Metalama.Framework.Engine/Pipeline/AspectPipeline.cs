@@ -428,15 +428,33 @@ namespace Metalama.Framework.Engine.Pipeline
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 return new AspectPipelineResult(
                     compilation,
-                    pipelineConfiguration.ProjectModel,
-                    ImmutableArray<OrderedAspectLayer>.Empty,
-                    null,
-                    null );
+                    pipelineConfiguration.ProjectModel );
             }
 
-            var aspectSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+            var contributorSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
 
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
+
+            if ( compilationModel == null )
+            {
+                var hierarchicalOptionsManager = new HierarchicalOptionsManager( pipelineConfiguration.ServiceProvider );
+
+                compilationModel = CompilationModel.CreateInitialInstance(
+                    pipelineConfiguration.ProjectModel,
+                    compilation,
+                    hierarchicalOptionsManager: hierarchicalOptionsManager,
+                    externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
+
+                hierarchicalOptionsManager.Initialize(
+                    contributorSources.OptionsSources,
+                    contributorSources.ExternalOptionsProvider,
+                    compilationModel,
+                    diagnosticAdder );
+            }
+            else
+            {
+                compilationModel.HierarchicalOptionsManager.AssertNotNull();
+            }
 
             // Execute the pipeline stages.
             var pipelineStageResult = new AspectPipelineResult(
@@ -446,7 +464,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilationModel,
                 compilationModel,
                 null,
-                aspectSources,
+                contributorSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )

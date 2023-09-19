@@ -4,6 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 
+#pragma warning disable CS0618
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
     public class TransitiveFabric : Framework.Fabrics.TransitiveProjectFabric

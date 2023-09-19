@@ -42,6 +42,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             IPipelineStepsResult pipelineStepsResult,
             TestableCancellationToken cancellationToken )
         {
+            // TODO: validators should not run here but after all pipeline stages. If there are several high-level stages, they may run several times.
             // Run the validators.
             var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources );
             var initialCompilation = pipelineStepsResult.FirstCompilation;
@@ -82,15 +83,16 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     linkerResult.Compilation,
                     input.Project,
                     input.AspectLayers,
-                    input.FirstCompilationModel,
-                    pipelineStepsResult.LastCompilation,
+                    input.FirstCompilationModel.AssertNotNull(),
+                    null,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                     new PipelineContributorSources(
-                        pipelineStepsResult.ExternalAspectSources,
+                        input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),
                         input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                         input.ContributorSources.OptionsSources ),
                     input.ExternallyInheritableAspects.AddRange(
                         pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
+                    finalCompilation.Annotations,
                     validationResult.ExternallyVisibleValidations,
                     additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                         ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
@@ -111,7 +113,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 serviceProvider,
-                input.Compilation,
+                input.LastCompilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,
                 diagnostics,

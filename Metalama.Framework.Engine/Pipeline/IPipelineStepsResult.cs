@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the list of aspect sources that are not a part of the current pipeline stage.
         /// </summary>
-        ImmutableArray<IAspectSource> ExternalAspectSources { get; }
+        ImmutableArray<IAspectSource> OverflowAspectSources { get; }
 
         ImmutableArray<IValidatorSource> ValidatorSources { get; }
 

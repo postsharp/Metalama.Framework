@@ -40,31 +40,31 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         entryPointManager.RegisterServiceProvider( otherVersionServiceProvider );
 
         const string masterCode = """
-using System;
-using Metalama.Framework.Aspects;
+                                  using System;
+                                  using Metalama.Framework.Aspects;
 
-[Inheritable]
-public class TheAspect : TypeAspect
-{
- [Introduce( WhenExists = OverrideStrategy.New )]
-  public void IntroducedMethod() {}
-}
+                                  [Inheritable]
+                                  public class TheAspect : TypeAspect
+                                  {
+                                   [Introduce( WhenExists = OverrideStrategy.New )]
+                                    public void IntroducedMethod() {}
+                                  }
 
-[TheAspect]
-public interface TheInterface 
-{
+                                  [TheAspect]
+                                  public interface TheInterface
+                                  {
 
-}
+                                  }
 
-""";
+                                  """;
 
         const string dependentCode = """
-public class TheClass : TheInterface
-{
-   
-}
+                                     public class TheClass : TheInterface
+                                     {
+                                        
+                                     }
 
-""";
+                                     """;
 
         workspaceProvider.AddOrUpdateProject(
             "master",

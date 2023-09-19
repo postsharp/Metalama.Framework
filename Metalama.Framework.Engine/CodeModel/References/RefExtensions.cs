@@ -12,7 +12,8 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 public static class RefExtensions
 {
     // ReSharper disable once SuspiciousTypeConversion.Global
-    public static SyntaxTree? GetPrimarySyntaxTree( this IRef<IDeclaration> reference, CompilationContext compilationContext )
+    public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )
+        where T : IRef<IDeclaration>
         => ((IRefImpl) reference).GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
 
     // ReSharper disable once IdentifierTypo

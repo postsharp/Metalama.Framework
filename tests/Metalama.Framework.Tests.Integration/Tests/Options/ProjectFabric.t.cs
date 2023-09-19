@@ -1,49 +1,49 @@
-[OptionsAspect]
+[ShowOptionsAspect]
 [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")]
 public class C1
 {
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")]
-    public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")] int p)
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")] int p)
     {
     }
 }
 
-[OptionsAspect]
+[ShowOptionsAspect]
 [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
 public class C2
 {
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
-    public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
     {
     }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("M2")]
-    public void M2([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("M2")] int p)
+    public void M2([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("M2")] int p)
     {
     }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
-    public int P {[OptionsAspect]
+    public int P {[ShowOptionsAspect]
         [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
-        get; [OptionsAspect]
+        get; [ShowOptionsAspect]
         [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
         set; }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
     public int F;
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
     public event EventHandler? E;
     public class N
     {
-        [OptionsAspect]
+        [ShowOptionsAspect]
         [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
-        public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
+        public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
         {
         }
     }

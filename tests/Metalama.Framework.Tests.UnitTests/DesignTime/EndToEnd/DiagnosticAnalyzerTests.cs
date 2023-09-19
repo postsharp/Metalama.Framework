@@ -52,14 +52,14 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
     public async Task CSharpErrorIsNotReported()
     {
         const string code = """
-using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-class TheAspect : TypeAspect
-{
-   SomeError;
-}
+                            class TheAspect : TypeAspect
+                            {
+                               SomeError;
+                            }
 
-""";
+                            """;
 
         var diagnostics = await this.RunAnalyzer( code );
 
@@ -71,19 +71,19 @@ class TheAspect : TypeAspect
     public async Task CompileTimeMetalamaDiagnosticsAreReported()
     {
         const string code = """
-using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-class TheAspect : OverrideMethodAspect 
-{ 
-   public override dynamic? OverrideMethod()
-   {
-      // The following line is an error.
-      meta.InsertComment( meta.Proceed() );
-   }
-}
+                            class TheAspect : OverrideMethodAspect
+                            {
+                               public override dynamic? OverrideMethod()
+                               {
+                                  // The following line is an error.
+                                  meta.InsertComment( meta.Proceed() );
+                               }
+                            }
 
 
-""";
+                            """;
 
         var diagnostics = await this.RunAnalyzer( code );
 
@@ -95,26 +95,26 @@ class TheAspect : OverrideMethodAspect
     public async Task TemplateAnnotatorDiagnosticsAreReported()
     {
         const string code = """
-using System;
-using Metalama.Framework;
-using Metalama.Framework.Aspects;
+                            using System;
+                            using Metalama.Framework;
+                            using Metalama.Framework.Aspects;
 
-class TheAspect : OverrideMethodAspect 
-{ 
-    public override dynamic? OverrideMethod()
-    {
-        int i = meta.CompileTime(0);
-
-        if (meta.Target.Parameters[0].Value)
-        {
-            // The following line is an error.
-            i = 1;
-        }
-
-        return null;
-    }
-}
-""";
+                            class TheAspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod()
+                                {
+                                    int i = meta.CompileTime(0);
+                            
+                                    if (meta.Target.Parameters[0].Value)
+                                    {
+                                        // The following line is an error.
+                                        i = 1;
+                                    }
+                            
+                                    return null;
+                                }
+                            }
+                            """;
 
         var diagnostics = await this.RunAnalyzer( code );
 
@@ -126,24 +126,24 @@ class TheAspect : OverrideMethodAspect
     {
         static string GetCode( string extraCode )
             => $$"""
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Diagnostics;
+                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Code;
+                 using Metalama.Framework.Diagnostics;
 
-            class ErrorAspect : TypeAspect
-            {
-                static readonly DiagnosticDefinition _error = new( "MLTEST", Severity.Error, "Error!" );
+                 class ErrorAspect : TypeAspect
+                 {
+                     static readonly DiagnosticDefinition _error = new( "MLTEST", Severity.Error, "Error!" );
+                 
+                     public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                     {
+                         builder.Diagnostics.Report( _error );
+                         {{extraCode}}
+                     }
+                 }
 
-                public override void BuildAspect( IAspectBuilder<INamedType> builder )
-                {
-                    builder.Diagnostics.Report( _error );
-                    {{extraCode}}
-                }
-            }
-            
-            [ErrorAspect]
-            class C {}
-            """;
+                 [ErrorAspect]
+                 class C {}
+                 """;
 
         var additionalServices = new AdditionalServiceCollection();
         additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( true ) );
@@ -203,35 +203,35 @@ class TheAspect : OverrideMethodAspect
     public async Task ReferenceValidator()
     {
         const string code = """
-using System;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
-using Metalama.Framework.Diagnostics;
+                            using System;
+                            using Metalama.Framework.Fabrics;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Validation;
+                            using Metalama.Framework.Diagnostics;
 
-public class Fabric : ProjectFabric
-{
-    static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
-    public override void AmendProject( IProjectAmender amender )
-    {
-        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
-    }
+                            public class Fabric : ProjectFabric
+                            {
+                                static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                                public override void AmendProject( IProjectAmender amender )
+                                {
+                                    amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                }
+                            
+                                private void ValidateReference( in ReferenceValidationContext context )
+                                {
+                                    context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                                }
+                            }
 
-    private void ValidateReference( in ReferenceValidationContext context )
-    {
-        context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
-    }
-}
-
-class A {}
-class B
-{
-  void M() 
-  {
-   A a;
-  } 
-}
-""";
+                            class A {}
+                            class B
+                            {
+                              void M()
+                              {
+                               A a;
+                              }
+                            }
+                            """;
 
         var diagnostics = await this.RunAnalyzer( code );
         Assert.Single( diagnostics, d => d.Id == "MY001" );

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 
@@ -12,5 +11,5 @@ public interface IHierarchicalOptions : IOverridable, ICompileTimeSerializable
     IHierarchicalOptions GetDefaultOptions( IProject project );
 }
 
-public interface IHierarchicalOptions<in T> : IHierarchicalOptions, IEligible<T>
+public interface IHierarchicalOptions<in T> : IHierarchicalOptions
     where T : class, IDeclaration { }

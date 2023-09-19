@@ -38,19 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
             IDiagnosticAdder diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var hierarchicalOptionsManager = new HierarchicalOptionsManager( pipelineConfiguration.ServiceProvider );
-
-            var compilation = CompilationModel.CreateInitialInstance(
-                input.Project,
-                input.Compilation,
-                hierarchicalOptionsManager: hierarchicalOptionsManager,
-                externalAnnotationProvider: input.ContributorSources.ExternalAnnotationProvider );
-
-            hierarchicalOptionsManager.Initialize(
-                input.ContributorSources.OptionsSources,
-                input.ContributorSources.ExternalOptionsProvider,
-                compilation,
-                diagnostics );
+            var compilation = input.LastCompilationModel;
 
             pipelineConfiguration.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 

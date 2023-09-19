@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
@@ -48,15 +49,21 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
     {
         var genericIHierarchicalOptionsAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider<>) );
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
+        var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
 
         foreach ( var attributeType in compilation.GetDerivedTypes(
-                     (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider) ) ) )
+                     (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider) ),
+                     DerivedTypesOptions.IncludingExternalTypesDangerous ) )
         {
             if ( attributeType.Is( aspectType ) )
             {
                 // Aspects can implement IHierarchicalOptionsProvider but their options are exposed on IAspectInstance.GetOptions
                 // or IAspectBuilder.Options and are not handled by the current facility. Because we want options defined
                 // on aspects to have absolute priority.
+                continue;
+            }
+            else if ( !attributeType.Is( systemAttributeType ) )
+            {
                 continue;
             }
 

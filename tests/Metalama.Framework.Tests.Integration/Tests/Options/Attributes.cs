@@ -8,13 +8,13 @@ using Metalama.Framework.Tests.Integration.Tests.Options;
 namespace Metalama.Framework.Tests.Integration.Tests.Options.Attributes;
 
 [MyOptions( "Attribute.C" )]
-[OptionsAspect]
+[ShowOptionsAspect]
 public class C
 {
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [MyOptions( "Attribute.M" )]
     public void M( int p ) { }
 }
 
-[OptionsAspect]
+[ShowOptionsAspect]
 public class D { }

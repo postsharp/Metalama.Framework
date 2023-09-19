@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             }
 
             var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;
-            var finalCompilation = pipelineResult.Value.LastCompilationModel.AssertNotNull();
+            var finalCompilation = pipelineResult.Value.LastCompilationModel;
 
             // Run the validators.
             var validatorSources = pipelineResult.Value.ContributorSources.ValidatorSources;

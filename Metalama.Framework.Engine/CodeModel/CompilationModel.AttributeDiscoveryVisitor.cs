@@ -1,14 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -19,8 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
-            private readonly ImmutableDictionaryOfArray<string, AttributeRef>.Builder _builder =
-                ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
+            private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.Builder _builder =
+                ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.CreateBuilder();
 
             private readonly CompilationContext _compilationContext;
 
@@ -31,38 +30,25 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override void VisitAttribute( AttributeSyntax node )
             {
-                // Get the short name of the attribute.
-                var name = node.Name switch
+                // We always need to resolve the constructor from the semantic model because the attribute name from
+                // the syntax may not correspond to the class name because of `using xx = yy` directives.
+
+                var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                var attributeConstructor = semanticModel.GetSymbolInfo( node ).Symbol;
+
+                if ( attributeConstructor == null )
                 {
-                    SimpleNameSyntax simpleName => simpleName.Identifier.Text,
-                    QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
-                    _ => throw new AssertionFailedException( $"Unexpected node kind {node.Kind()} at '{node.GetLocation()}'." )
-                };
-
-                // When the name is e.g. [RequiresAttribute], the actual attribute type could be named RequiresAttribute, or RequiresAttributeAttribute.
-                // We need to use semantics to distinguish these two cases.
-                if ( name.EndsWith( "Attribute", StringComparison.Ordinal ) )
-                {
-                    var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
-
-                    var attributeConstructor = semanticModel.GetSymbolInfo( node ).Symbol;
-
-                    if ( attributeConstructor == null )
-                    {
-                        return;
-                    }
-
-                    var attributeType = attributeConstructor.ContainingType;
-
-                    name = attributeType.Name.TrimSuffix( "Attribute" );
+                    return;
                 }
+
+                var attributeType = Ref.FromSymbol<INamedType>( attributeConstructor.ContainingType, this._compilationContext );
 
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
                 {
                     void Add( SyntaxNode? realDeclaration )
                     {
-                        this._builder.Add( name, new AttributeRef( node, realDeclaration, kind, this._compilationContext ) );
+                        this._builder.Add( attributeType, new AttributeRef( attributeType, node, realDeclaration, kind, this._compilationContext ) );
                     }
 
                     switch ( parentDeclaration )
@@ -103,15 +89,15 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         case SyntaxKind.ModuleKeyword:
                             this._builder.Add(
-                                name,
-                                new AttributeRef( node, Ref.FromSymbol( this._compilationContext.Compilation.SourceModule, this._compilationContext ) ) );
+                                attributeType,
+                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.SourceModule, this._compilationContext ) );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
                             this._builder.Add(
-                                name,
-                                new AttributeRef( node, Ref.FromSymbol( this._compilationContext.Compilation.Assembly, this._compilationContext ) ) );
+                                attributeType,
+                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.Assembly, this._compilationContext ) );
 
                             break;
 
@@ -175,7 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public ImmutableDictionaryOfArray<string, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
+            public ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
 
             public void Visit( SyntaxTree tree )
             {

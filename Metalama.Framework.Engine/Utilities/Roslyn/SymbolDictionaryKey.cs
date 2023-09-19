@@ -50,7 +50,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
             _ => throw new AssertionFailedException( $"Unexpected key type: {this._identity.GetType()}" )
         };
 
-    public IRef<IDeclaration> ToRef()
+    public Ref<IDeclaration> ToRef()
     {
         var symbolId = this._identity as string ?? throw new InvalidOperationException();
 

@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Testing.UnitTesting;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -75,6 +77,23 @@ class C< [MyAttribute(4)]T>
                     "C<T>.ff:13"
                 },
                 targets );
+        }
+
+        [Fact]
+        public void GetAllAttributesOfType_Derived()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string dependentCode = """
+                                         public class MyAttribute : System.Attribute, System.IDisposable {  }
+                                         """;
+
+            const string mainCode = """
+                                    [assembly: MyAttribute]
+                                    """;
+
+            var compilation = testContext.CreateCompilationModel( mainCode, dependentCode );
+            Assert.Single( compilation.GetAllAttributesOfType( typeof(IDisposable), true ) );
         }
     }
 }

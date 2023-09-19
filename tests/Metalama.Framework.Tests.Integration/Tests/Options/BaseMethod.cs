@@ -9,13 +9,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options.BaseMethod;
 public class C
 {
     [MyOptions( "C.Method" )]
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public virtual void Method() { }
 }
 
 public class D : C
 {
     // <target>
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public override void Method() { }
 }

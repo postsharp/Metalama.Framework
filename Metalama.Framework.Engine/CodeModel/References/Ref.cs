@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The base implementation of <see cref="ISdkRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal readonly struct Ref<T> : IRefImpl<T>, IEquatable<Ref<T>>
+    public readonly struct Ref<T> : IRefImpl<T>, IEquatable<Ref<T>>
         where T : class, ICompilationElement
     {
         // The compilation for which the symbol (stored in Target) is valid.
@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilationContext = null;
         }
 
-        public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
+        internal Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
         {
             this.Target = declaration;
             this.TargetKind = targetKind;
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public object? Target { get; }
 
-        public DeclarationRefTargetKind TargetKind { get; }
+        internal DeclarationRefTargetKind TargetKind { get; }
 
         public SerializableDeclarationId ToSerializableId()
         {
@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( this.Target is string id && IsDeclarationId( id ) && this.TargetKind == DeclarationRefTargetKind.Default )
             {
-                return new( id );
+                return new SerializableDeclarationId( id );
             }
 
             if ( this._compilationContext == null )
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
         /// the code model.
         /// </summary>
-        public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext )
+        internal (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext )
         {
             if ( this.TargetKind == DeclarationRefTargetKind.Return )
             {
@@ -304,7 +304,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         }
                         else if ( IsTypeId( id ) )
                         {
-                            symbol = compilationContext.SerializableTypeIdResolver.ResolveId( new( id ) );
+                            symbol = compilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( id ) );
                         }
                         else
                         {
@@ -353,12 +353,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private static ISymbol GetSymbolOfNode( CompilationContext compilationContext, SyntaxNode node )
         {
-            var semanticModel = 
-                compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ) 
+            var semanticModel =
+                compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree )
                 ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
 
-            var symbol = 
-                semanticModel.GetDeclaredSymbol( node ) 
+            var symbol =
+                semanticModel.GetDeclaredSymbol( node )
                 ?? throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
 
             return symbol;

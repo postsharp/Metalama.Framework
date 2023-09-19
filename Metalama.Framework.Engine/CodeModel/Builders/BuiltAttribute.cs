@@ -50,7 +50,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
-    public IRef<IDeclaration> TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 

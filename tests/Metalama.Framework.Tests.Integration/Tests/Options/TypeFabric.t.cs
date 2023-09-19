@@ -1,10 +1,10 @@
-[OptionsAspect]
+[ShowOptionsAspect]
 [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Type")]
 public class C1
 {
-    [OptionsAspect]
+    [ShowOptionsAspect]
     [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Type")]
-    public void M([OptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Type")] int p)
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Type")] int p)
     {
     }
 

@@ -153,7 +153,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     return default;
                 }
 
-                var resultPartialCompilation = result.Value.Compilation;
+                var resultPartialCompilation = result.Value.LastCompilation;
 
                 // Execute validators.
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
@@ -190,8 +190,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
                 // Create a manifest for transitive aspects and validators.
                 var inheritableOptions =
-                    result.Value.LastCompilationModel?.HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel ) ??
-                    ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Empty;
+                    result.Value.FirstCompilationModel.AssertNotNull().HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel );
 
                 var annotations = result.Value.LastCompilationModel?.GetExportedAnnotations()
                                   ?? ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Empty;

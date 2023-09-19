@@ -57,7 +57,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
     ImmutableUserDiagnosticList IPipelineStepsResult.Diagnostics => this._diagnostics.ToImmutable();
 
-    public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
+    public ImmutableArray<IAspectSource> OverflowAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
     public ImmutableArray<AspectInstanceResult> AspectInstanceResults => this._aspectInstanceResults.ToImmutableArray();
 

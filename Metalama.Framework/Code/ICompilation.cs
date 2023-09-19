@@ -44,6 +44,10 @@ namespace Metalama.Framework.Code
         /// <param name="options">Options that determine whether the search should be deep or shallow.</param>
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default );
 
+        IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type, bool includeDerivedTypes = false );
+
+        IEnumerable<IAttribute> GetAllAttributesOfType( Type type, bool includeDerivedTypes = false );
+
         /// <summary>
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.

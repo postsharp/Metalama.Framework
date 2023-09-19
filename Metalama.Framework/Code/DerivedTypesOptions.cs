@@ -16,12 +16,12 @@ public enum DerivedTypesOptions
     Default,
 
     /// <summary>
-    /// Returns all types that derive from the given type, directly or indirectly.
+    /// Returns all types declared in the current compilation that derive from the given type, directly or indirectly.
     /// </summary>
     All = Default,
 
     /// <summary>
-    /// Only returns types that directly derive from the given type.
+    /// Only returns types declared in the current compilation that directly derive from the given type.
     /// </summary>
     DirectOnly,
 
@@ -30,5 +30,12 @@ public enum DerivedTypesOptions
     /// if the derived type is an external type. That is, does not return types of the current compilation that derive from another type in
     /// the current compilation that derives from the given type.
     /// </summary>
-    FirstLevelWithinCompilationOnly
+    FirstLevelWithinCompilationOnly,
+
+    /// <summary>
+    /// Returns types of the current compilation and of any referenced project or assembly. This setting is dangerous because not all types referenced
+    /// by the current compilation are returned: only types <i>declared</i> or <i>used as attributes</i> in the current compilation and all their base
+    /// types are indexed. 
+    /// </summary>
+    IncludingExternalTypesDangerous
 }

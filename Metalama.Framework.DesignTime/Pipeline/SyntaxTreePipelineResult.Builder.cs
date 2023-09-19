@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
@@ -44,9 +43,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Compute the default dependency graph.
                 var semanticModel = compilation.GetCachedSemanticModel( this._syntaxTree );
 
-                var declaredTypes = this._syntaxTree.FindDeclaredTypes()
-                    .Select( t => semanticModel.GetDeclaredSymbol( t ) as INamedTypeSymbol )
-                    .WhereNotNull();
+                var declaredTypes = new List<INamedTypeSymbol>();
+                DependencyAnalysisHelper.FindDeclaredTypes( semanticModel, declaredTypes.Add );
 
                 var dependencies = declaredTypes
                     .SelectMany( t => t.DeclaringSyntaxReferences )

@@ -24,41 +24,41 @@ public class Fabric : ProjectFabric
 }
 
 // <target>
-[OptionsAspect]
+[ShowOptionsAspect]
 public class C1
 {
-    [OptionsAspect]
-    public void M( [OptionsAspect] int p ) { }
+    [ShowOptionsAspect]
+    public void M( [ShowOptionsAspect] int p ) { }
 }
 
 // <target>
-[OptionsAspect]
+[ShowOptionsAspect]
 public class C2
 {
-    [OptionsAspect]
-    public void M( [OptionsAspect] int p ) { }
+    [ShowOptionsAspect]
+    public void M( [ShowOptionsAspect] int p ) { }
 
-    [OptionsAspect]
-    public void M2( [OptionsAspect] int p ) { }
+    [ShowOptionsAspect]
+    public void M2( [ShowOptionsAspect] int p ) { }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public int P
     {
-        [OptionsAspect]
+        [ShowOptionsAspect]
         get;
-        [OptionsAspect]
+        [ShowOptionsAspect]
         set;
     }
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public int F;
 
-    [OptionsAspect]
+    [ShowOptionsAspect]
     public event EventHandler? E;
 
     public class N
     {
-        [OptionsAspect]
-        public void M( [OptionsAspect] int p ) { }
+        [ShowOptionsAspect]
+        public void M( [ShowOptionsAspect] int p ) { }
     }
 }
