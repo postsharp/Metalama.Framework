@@ -110,6 +110,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
+    IMember IMember.Definition => this;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
@@ -151,17 +153,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => throw new NotSupportedException();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
-
-    public IDeclaration OriginalDefinition
-        => this.MethodKind switch
-        {
-            MethodKind.PropertyGet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).GetMethod.AssertNotNull(),
-            MethodKind.PropertySet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).SetMethod.AssertNotNull(),
-            MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
-            MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
-            MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
-            _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
-        };
 
     public IMember? OverriddenMember => ((IHasAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 

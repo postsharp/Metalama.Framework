@@ -580,8 +580,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
 
-        public override IDeclaration OriginalDefinition => this;
-
         internal GenericMap EmptyGenericMap { get; }
 
         bool IAssembly.IsExternal => false;

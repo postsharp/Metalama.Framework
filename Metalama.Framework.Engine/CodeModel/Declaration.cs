@@ -46,9 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel
             return Ref.FromSymbol( this.Symbol, this.Compilation.CompilationContext );
         }
 
-        [Memo]
-        public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );
-
         public override string ToString()
         {
             this.OnUsingDeclaration();

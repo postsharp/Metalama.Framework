@@ -10,20 +10,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.
 
 internal class MyAspect : ContractAspect
 {
-    public override void Validate(dynamic? value)
+    public override void Validate( dynamic? value )
     {
-        if (meta.Target.Parameter.Type is INamedType namedType && namedType.ImplementedInterfaces.Any(i => i.TypeDefinition.Is(typeof(IEnumerable<>))))
+        if (meta.Target.Parameter.Type is INamedType namedType && namedType.ImplementedInterfaces.Any( i => i.Definition.Is( typeof(IEnumerable<>) ) ))
         {
             foreach (var c in value)
             {
-                Console.WriteLine(c);
+                Console.WriteLine( c );
             }
         }
-        else if (meta.Target.Parameter.Type.Is(typeof(bool)))
+        else if (meta.Target.Parameter.Type.Is( typeof(bool) ))
         {
             if (value)
             {
-                Console.WriteLine("T");
+                Console.WriteLine( "T" );
             }
         }
     }
@@ -33,8 +33,8 @@ internal class MyAspect : ContractAspect
 internal class Target
 {
     [return: MyAspect]
-    string M1() => "foo";
+    private string M1() => "foo";
 
     [return: MyAspect]
-    bool M2() => false;
+    private bool M2() => false;
 }

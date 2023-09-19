@@ -41,5 +41,7 @@ namespace Metalama.Framework.Code
         /// Gets the type containing the current member.
         /// </summary>
         new INamedType DeclaringType { get; }
+
+        new IMember Definition { get; }
     }
 }

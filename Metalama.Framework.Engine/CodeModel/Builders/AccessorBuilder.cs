@@ -106,6 +106,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMethod IMethod.Definition => this;
 
+    IMember IMember.Definition => this;
+
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
     public bool IsPartial => false;

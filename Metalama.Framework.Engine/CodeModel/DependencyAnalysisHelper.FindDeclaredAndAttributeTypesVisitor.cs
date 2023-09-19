@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public static partial class DependencyAnalysisHelper
 {
-    private sealed partial class FindDeclaredAndAttributeTypesVisitor : SafeSyntaxWalker
+    private sealed class FindDeclaredAndAttributeTypesVisitor : SafeSyntaxWalker
     {
         private readonly SemanticModel _semanticModel;
         private readonly Action<INamedTypeSymbol> _addDeclaredType;

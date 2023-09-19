@@ -66,6 +66,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
         }
     }
 
+    IMember IMember.Definition => this;
+
     public bool HasImplementation => true;
 
     public bool IsDesignTime => !this.IsOverride && !this.IsNew;

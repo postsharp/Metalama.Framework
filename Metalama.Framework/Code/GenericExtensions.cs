@@ -21,53 +21,44 @@ namespace Metalama.Framework.Code
         public static bool IsSelfOrDeclaringTypeGeneric( this IMemberOrNamedType declaration )
             => declaration is IGeneric { IsGeneric: true } || (declaration.DeclaringType != null && declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric());
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IDeclaration GetOriginalDefinition( this IDeclaration declaration ) => GetOriginalDefinitionImpl( declaration );
+        internal static IDeclaration GetOriginalDefinition( this IDeclaration declaration )
+            => declaration switch
+            {
+                IMemberOrNamedType memberOrNamedType => memberOrNamedType.Definition,
+                _ => declaration
+            };
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static INamedType GetOriginalDefinition( this INamedType declaration ) => GetOriginalDefinitionImpl( declaration );
+        internal static IMemberOrNamedType? GetBase( this IMemberOrNamedType declaration )
+            => declaration switch
+            {
+                INamedType namedType => namedType.BaseType,
+                IMethod method => method.OverriddenMethod,
+                IProperty property => property.OverriddenProperty,
+                IEvent @event => @event.OverriddenEvent,
+                IIndexer indexer => indexer.OverriddenIndexer,
+                _ => null
+            };
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IMemberOrNamedType GetOriginalDefinition( this IMemberOrNamedType declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static INamedType GetOriginalDefinition( this INamedType declaration ) => declaration.Definition;
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IMember GetOriginalDefinition( this IMember declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static IMemberOrNamedType GetOriginalDefinition( this IMemberOrNamedType declaration ) => declaration.Definition;
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IMethod GetOriginalDefinition( this IMethod declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static IMember GetOriginalDefinition( this IMember declaration ) => declaration.Definition;
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IProperty GetOriginalDefinition( this IProperty declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static IMethod GetOriginalDefinition( this IMethod declaration ) => declaration.Definition;
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IEvent GetOriginalDefinition( this IEvent declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static IProperty GetOriginalDefinition( this IProperty declaration ) => declaration.Definition;
 
-        /// <summary>
-        /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
-        /// are unbound, including the ones of the containing types.
-        /// </summary>
-        public static IConstructor GetOriginalDefinition( this IConstructor declaration ) => GetOriginalDefinitionImpl( declaration );
+        [Obsolete( "Use the Definition property." )]
+        public static IEvent GetOriginalDefinition( this IEvent declaration ) => declaration.Definition;
+
+        [Obsolete( "Use the Definition property." )]
+        public static IConstructor GetOriginalDefinition( this IConstructor declaration ) => declaration.Definition;
 
         /// <summary>
         /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given as <see cref="IType"/>.
@@ -148,10 +139,6 @@ namespace Metalama.Framework.Code
         public static IConstructor ForTypeInstance( this IConstructor declaration, INamedType typeInstance )
             => (IConstructor) ForTypeInstanceImpl( declaration, typeInstance );
 
-        private static T GetOriginalDefinitionImpl<T>( this T declaration )
-            where T : class, IDeclaration
-            => (T) ((IDeclarationInternal) declaration).OriginalDefinition;
-
         private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, IReadOnlyList<IType> typeArguments )
             => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments );
 
@@ -165,9 +152,9 @@ namespace Metalama.Framework.Code
                 throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a nested type." );
             }
 
-            var thisOriginalDeclaration = declaration.GetOriginalDefinition();
+            var thisOriginalDeclaration = declaration.Definition;
 
-            if ( !declaration.Compilation.Comparers.Default.Equals( typeInstance.GetOriginalDefinition(), thisOriginalDeclaration.DeclaringType! ) )
+            if ( !declaration.Compilation.Comparers.Default.Equals( typeInstance.Definition, thisOriginalDeclaration.DeclaringType! ) )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(typeInstance),
@@ -222,7 +209,7 @@ namespace Metalama.Framework.Code
                     throw new ArgumentOutOfRangeException( nameof(declaration) );
             }
 
-            return candidates.Single( c => declaration.Compilation.Comparers.Default.Equals( c.GetOriginalDefinition(), thisOriginalDeclaration ) );
+            return candidates.Single( c => declaration.Compilation.Comparers.Default.Equals( c.Definition, thisOriginalDeclaration ) );
         }
     }
 }

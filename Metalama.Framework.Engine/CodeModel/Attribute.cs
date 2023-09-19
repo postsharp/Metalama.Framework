@@ -118,8 +118,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        IDeclaration IDeclarationInternal.OriginalDefinition => this;
-
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences
             => this.AttributeData.ApplicationSyntaxReference != null
                 ? ImmutableArray.Create( this.AttributeData.ApplicationSyntaxReference )

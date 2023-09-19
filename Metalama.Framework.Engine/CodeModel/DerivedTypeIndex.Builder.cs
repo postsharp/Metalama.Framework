@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -67,9 +66,6 @@ public partial class DerivedTypeIndex
 
         public DerivedTypeIndex ToImmutable()
         {
-            var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
-                .ToImmutableHashSet<INamedTypeSymbol>( this._compilationContext.SymbolComparer );
-
             return new DerivedTypeIndex(
                 this._compilationContext,
                 this._relationships.ToImmutable(),

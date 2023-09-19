@@ -61,7 +61,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     [Memo]
-    public new IMethod Definition
+    public IMethod Definition
         => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;

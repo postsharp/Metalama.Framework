@@ -1153,11 +1153,11 @@ class Derived : Base<int>
 
             var nonGenericClass = compilation.Types.OfName( "NonGeneric" ).Single();
             Assert.False( nonGenericClass.IsGeneric );
-            Assert.Same( nonGenericClass, nonGenericClass.TypeDefinition );
+            Assert.Same( nonGenericClass, nonGenericClass.Definition );
 
             var baseClass = compilation.Types.OfName( "Base" ).Single();
             Assert.True( baseClass.IsGeneric );
-            Assert.Same( baseClass, baseClass.TypeDefinition );
+            Assert.Same( baseClass, baseClass.Definition );
 
             var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
             Assert.False( baseMethod.IsGeneric );
@@ -1166,7 +1166,7 @@ class Derived : Base<int>
             var derivedClass = compilation.Types.OfName( "Derived" ).Single();
             Assert.False( derivedClass.IsGeneric );
             Assert.True( derivedClass.BaseType!.IsGeneric );
-            Assert.Same( baseClass, derivedClass.BaseType.TypeDefinition );
+            Assert.Same( baseClass, derivedClass.BaseType.Definition );
 
             var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
             Assert.False( derivedMethod.IsGeneric );

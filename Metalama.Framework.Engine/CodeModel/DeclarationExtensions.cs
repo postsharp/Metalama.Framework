@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
             }
 
-            var definition = declaration.GetOriginalDefinition();
+            var definition = declaration.Definition;
 
             if ( definition.IsExplicitInterfaceImplementation )
             {

@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.CodeModel
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
         [Memo]
-        public new IField Definition
+        public IField Definition
             => this._symbol == this._symbol.OriginalDefinition ? this : this.Compilation.Factory.GetField( this._symbol.OriginalDefinition );
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;

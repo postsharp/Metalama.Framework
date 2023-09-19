@@ -62,7 +62,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
             var optionTypeNode = this.GetOptionTypeNode( compilationModel, diagnosticAdder, optionTypeName );
 
-            optionTypeNode.AddConfigurator( configurator, diagnosticAdder );
+            optionTypeNode.AddOptionsInstance( configurator, diagnosticAdder );
         }
     }
 

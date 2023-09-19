@@ -65,8 +65,6 @@ namespace Metalama.Framework.Engine.CodeModel
             where T : IMetric
             => this.Compilation.MetricManager.GetMetric<T>( this );
 
-        public abstract IDeclaration OriginalDefinition { get; }
-
         public abstract Location? DiagnosticLocation { get; }
 
         public abstract SyntaxTree? PrimarySyntaxTree { get; }

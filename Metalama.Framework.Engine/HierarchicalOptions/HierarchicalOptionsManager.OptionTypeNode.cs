@@ -46,7 +46,7 @@ public sealed partial class HierarchicalOptionsManager
             this.Metadata = type.GetCustomAttributes<HierarchicalOptionsAttribute>().SingleOrDefault() ?? HierarchicalOptionsAttribute.Default;
         }
 
-        public void AddConfigurator( HierarchicalOptionsInstance configurator, IDiagnosticAdder diagnosticAdder )
+        public void AddOptionsInstance( HierarchicalOptionsInstance configurator, IDiagnosticAdder diagnosticAdder )
         {
             // ReSharper disable once InconsistentlySynchronizedField
             var declarationOptions = this.GetOrAddDeclarationNode( configurator.Declaration );
@@ -94,7 +94,7 @@ public sealed partial class HierarchicalOptionsManager
             switch ( declaration )
             {
                 case INamedType namedType:
-                    if ( this.Metadata.InheritedByDerivedTypes && namedType.Definition is { } baseType )
+                    if ( this.Metadata.InheritedByDerivedTypes && namedType.BaseType?.Definition is { } baseType )
                     {
                         baseDeclarationOptions = this.GetOptions( baseType );
                     }
@@ -115,7 +115,7 @@ public sealed partial class HierarchicalOptionsManager
                     break;
 
                 case IMember member:
-                    if ( this.Metadata.InheritedByOverridingMembers && member.Definition is { } baseDeclaration )
+                    if ( this.Metadata.InheritedByOverridingMembers && member.GetBase()?.Definition is { } baseDeclaration )
                     {
                         baseDeclarationOptions = this.GetOptions( baseDeclaration );
                     }
@@ -206,7 +206,7 @@ public sealed partial class HierarchicalOptionsManager
 
         private void WireNodeToParents( IDeclaration declaration, DeclarationNode node )
         {
-            var baseDeclaration = (declaration as IMemberOrNamedType)?.Definition;
+            var baseDeclaration = (declaration as IMemberOrNamedType)?.GetBase()?.Definition;
 
             if ( baseDeclaration != null )
             {

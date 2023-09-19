@@ -68,6 +68,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
+    IMember IMember.Definition => this;
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => this._accessorBuilder.With( options );

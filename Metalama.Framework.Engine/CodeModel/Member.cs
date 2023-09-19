@@ -16,6 +16,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
+        IMember IMember.Definition => (IMember) this.GetDefinition();
+
         public abstract bool IsAsync { get; }
 
         public bool IsVirtual => this.Symbol.IsVirtual;
@@ -29,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 IFieldSymbol { IsConst: true } => false,
                 { IsAbstract: true } => false,
                 { IsExtern: true } => false,
-                _ => true,
+                _ => true
             };
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )

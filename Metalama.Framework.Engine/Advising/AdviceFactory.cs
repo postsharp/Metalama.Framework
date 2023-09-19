@@ -1739,7 +1739,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 declaration,
                 this._compilation,
-                new AnnotationInstance( annotation, export ) );
+                new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
 
             this.ExecuteAdvice<IDeclaration>( advice );
         }

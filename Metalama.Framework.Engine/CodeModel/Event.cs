@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToReadOnlyList();
 
         [Memo]
-        public new IEvent Definition
+        public IEvent Definition
             => this._symbol == this._symbol.OriginalDefinition ? this : this.Compilation.Factory.GetEvent( this._symbol.OriginalDefinition );
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;

@@ -176,6 +176,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected abstract IMemberOrNamedType GetDefinition();
 
-        public IMemberOrNamedType Definition => this.GetDefinition();
+        IMemberOrNamedType IMemberOrNamedType.Definition => this.GetDefinition();
     }
 }

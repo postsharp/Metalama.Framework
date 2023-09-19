@@ -441,14 +441,12 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
         }
 
-        
-
         [Memo]
-        public new INamedType Definition
+        public INamedType Definition
             => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
-        
+
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         INamedType INamedType.TypeDefinition => this.Definition;
