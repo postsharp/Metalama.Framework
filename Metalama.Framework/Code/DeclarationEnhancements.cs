@@ -9,7 +9,7 @@ using System.Linq;
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Gives access to the aspects and annotations on a declaration.
+/// Gives access to the aspects, options and annotations on a declaration.
 /// </summary>
 [CompileTime]
 public readonly struct DeclarationEnhancements<T>
@@ -73,10 +73,21 @@ public readonly struct DeclarationEnhancements<T>
         where TAspect : IAspect<T>
         => this.HasAspect( typeof(TAspect) );
 
+    /// <summary>
+    /// Gets the options effective for the current declarations, taking into account the options set on parent declarations,
+    /// but ignoring any options defined by any aspect implementing <see cref="IHierarchicalOptionsProvider{T}"/>. To get
+    /// such options, use the <see cref="IAspectInstance.GetOptions{T}"/> method of <see cref="IAspectInstance"/>.
+    /// </summary>
+    /// <typeparam name="TOptions">The type of options.</typeparam>
     public TOptions GetOptions<TOptions>()
         where TOptions : class, IHierarchicalOptions<T>, new()
         => ((ICompilationInternal) this.Declaration.Compilation).HierarchicalOptionsManager.GetOptions<TOptions>( this.Declaration );
 
+    /// <summary>
+    /// Gets the list of annotations of a given type on the current declaration.
+    /// </summary>
+    /// <typeparam name="TAnnotation">The type of annotations.</typeparam>
+    /// <returns>The list of annotations of this type on the current declaration.</returns>
     public IEnumerable<TAnnotation> GetAnnotations<TAnnotation>()
         where TAnnotation : class, IAnnotation<T>
         => ((ICompilationInternal) this.Declaration.Compilation).GetAnnotations<TAnnotation>( this.Declaration );

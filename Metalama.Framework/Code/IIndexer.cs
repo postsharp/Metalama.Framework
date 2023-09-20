@@ -21,5 +21,9 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// </summary>
     IIndexer? OverriddenIndexer { get; }
 
+    /// <summary>
+    /// Gets the definition of the indexer. If the current declaration is an indexer of
+    /// a generic type instance, this returns the indexer in the generic type definition. Otherwise, it returns the current instance.
+    /// </summary>
     new IIndexer Definition { get; }
 }

@@ -45,6 +45,10 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         IAspectState? AspectState { get; }
 
+        /// <summary>
+        /// Gets the options effective for the current aspect instance, including any options set on a parent declaration.
+        /// </summary>
+        /// <typeparam name="T">The type of options.</typeparam>
         T GetOptions<T>()
             where T : class, IHierarchicalOptions, new();
     }

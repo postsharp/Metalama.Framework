@@ -21,15 +21,15 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
+    public object OverrideWith( object overridingObject, in OverrideContext context )
     {
-        if (BaseWins.GetValueOrDefault() && context.Axis == HierarchicalOptionsOverrideAxis.DeclaringType)
+        if (BaseWins.GetValueOrDefault() && context.Axis == OverrideAxis.ContainingDeclaration)
         {
             return this;
         }
         else
         {
-            var other = (MyOptions)options;
+            var other = (MyOptions)overridingObject;
 
             return new MyOptions
             {

@@ -20,6 +20,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         IProperty? OverriddenProperty { get; }
 
+        /// <summary>
+        /// Gets the definition of the property. If the current declaration is a property of
+        /// a generic type instance, this returns the property in the generic type definition. Otherwise, it returns the current instance.
+        /// </summary>
         new IProperty Definition { get; }
     }
 }

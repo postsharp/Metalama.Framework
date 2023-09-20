@@ -19,9 +19,9 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
+    public object OverrideWith( object overridingObject, in OverrideContext context )
     {
-        var other = (MyOptions)options;
+        var other = (MyOptions)overridingObject;
 
         return new MyOptions { Value = other.Value ?? Value };
     }

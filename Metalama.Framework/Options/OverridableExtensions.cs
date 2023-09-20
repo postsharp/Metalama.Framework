@@ -4,10 +4,16 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Options;
 
+/// <summary>
+/// Extensions of the <see cref="IOverridable"/> interface.
+/// </summary>
 [CompileTime]
 public static class OverridableExtensions
 {
-    public static T? OverrideWithSafe<T>( this T? baseOptions, T? overrideOptions, in HierarchicalOptionsOverrideContext context )
+    /// <summary>
+    /// Invokes <see cref="IOverridable.OverrideWith"/> in a type- and nullable-safe way.
+    /// </summary>
+    public static T? OverrideWithSafe<T>( this T? baseOptions, T? overrideOptions, in OverrideContext context )
         where T : class, IOverridable
     {
         if ( baseOptions == null )

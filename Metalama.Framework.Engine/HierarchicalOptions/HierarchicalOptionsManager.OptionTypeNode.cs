@@ -71,7 +71,7 @@ public sealed partial class HierarchicalOptionsManager
             lock ( declarationOptions.Sync )
             {
                 declarationOptions.DirectOptions =
-                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, HierarchicalOptionsOverrideAxis.Self, configurator.Declaration );
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, OverrideAxis.Direct, configurator.Declaration );
 
                 declarationOptions.ResetMergedOptions();
             }
@@ -138,7 +138,15 @@ public sealed partial class HierarchicalOptionsManager
                         baseDeclarationOptions = null;
                     }
 
-                    containingDeclarationOptions = this.GetOptions( member.DeclaringType );
+                    if ( this.Metadata.InheritedByMembers )
+                    {
+                        containingDeclarationOptions = this.GetOptions( member.DeclaringType );
+                    }
+                    else
+                    {
+                        containingDeclarationOptions = null;
+                    }
+
                     namespaceOptions = null;
 
                     break;
@@ -170,19 +178,19 @@ public sealed partial class HierarchicalOptionsManager
             var inheritedOptions = MergeOptions(
                 baseDeclarationOptions,
                 containingDeclarationOptions,
-                HierarchicalOptionsOverrideAxis.DeclaringType,
+                OverrideAxis.ContainingDeclaration,
                 declaration );
 
             var inheritedOptionsWithNamespaceOptions = MergeOptions(
                 namespaceOptions,
                 inheritedOptions,
-                HierarchicalOptionsOverrideAxis.Namespace,
+                OverrideAxis.Namespace,
                 declaration );
 
             var mergedOptions = MergeOptions(
                 inheritedOptionsWithNamespaceOptions,
                 node?.DirectOptions,
-                HierarchicalOptionsOverrideAxis.Declaration,
+                OverrideAxis.Declaration,
                 declaration );
 
             // Cache the result.
@@ -209,25 +217,25 @@ public sealed partial class HierarchicalOptionsManager
 
         private static IHierarchicalOptions? MergeOptions(
             IHierarchicalOptions? baseOptions,
-            IHierarchicalOptions? options,
-            HierarchicalOptionsOverrideAxis axis,
+            IHierarchicalOptions? overridingOptions,
+            OverrideAxis axis,
             IDeclaration declaration )
         {
             if ( baseOptions == null )
             {
-                return options;
+                return overridingOptions;
             }
-            else if ( options == null )
+            else if ( overridingOptions == null )
             {
                 return baseOptions;
             }
-            else if ( ReferenceEquals( baseOptions, options ) )
+            else if ( ReferenceEquals( baseOptions, overridingOptions ) )
             {
-                return options;
+                return overridingOptions;
             }
             else
             {
-                return (IHierarchicalOptions) baseOptions.OverrideWith( options, new HierarchicalOptionsOverrideContext( axis, declaration ) );
+                return (IHierarchicalOptions) baseOptions.OverrideWith( overridingOptions, new OverrideContext( axis, declaration ) );
             }
         }
 

@@ -68,8 +68,8 @@ namespace Metalama.Framework.Code
         OperatorKind OperatorKind { get; }
 
         /// <summary>
-        /// Gets the method definition with unassigned type parameters. When the current <see cref="IMethod"/> is neither a generic method instance
-        /// nor a method of a generic type, returns the current <see cref="IMethod"/>.
+        /// Gets the definition of the method. If the current method a generic method instance or a method of
+        /// a generic type instance, this returns the generic definition. Otherwise, it returns the current instance.
         /// </summary>
         new IMethod Definition { get; }
 

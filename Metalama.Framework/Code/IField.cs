@@ -20,6 +20,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         TypedConstant? ConstantValue { get; }
 
+        /// <summary>
+        /// Gets the definition of the field. If the current declaration is a field of
+        /// a generic type instance, this returns the field in the generic type definition. Otherwise, it returns the current instance.
+        /// </summary>
         new IField Definition { get; }
     }
 }
