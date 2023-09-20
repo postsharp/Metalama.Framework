@@ -20,8 +20,8 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     IDiagnosticLocation ISourceReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
         => sourceReference.NodeOrToken switch
         {
-            SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
-            SyntaxToken token => new LocationWrapper( token.GetLocation() ),
+            SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
+            SyntaxToken token => token.GetLocation().ToDiagnosticLocation(),
             _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrToken.GetType()}." )
         };
 
