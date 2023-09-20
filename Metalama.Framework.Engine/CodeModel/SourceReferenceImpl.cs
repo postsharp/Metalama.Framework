@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,8 +20,8 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     IDiagnosticLocation ISourceReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
         => sourceReference.NodeOrToken switch
         {
-            SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
-            SyntaxToken token => new LocationWrapper( token.GetLocation() ),
+            SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
+            SyntaxToken token => token.GetLocation().ToDiagnosticLocation(),
             _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrToken.GetType()}." )
         };
 
