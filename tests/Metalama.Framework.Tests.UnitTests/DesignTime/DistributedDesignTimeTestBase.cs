@@ -20,11 +20,11 @@ public class DistributedDesignTimeTestBase : UnitTestClass
         services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
     }
 
-    protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services, string? projectName = null )
+    protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
     {
-        if ( projectName != null )
+        if ( contextOptions.ProjectName != null )
         {
-            throw new NotImplementedException();
+            throw new ArgumentOutOfRangeException();
         }
 
         return new DistributedDesignTimeTestContext( contextOptions, services );

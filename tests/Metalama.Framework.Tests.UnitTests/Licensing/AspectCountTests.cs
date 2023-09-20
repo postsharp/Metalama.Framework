@@ -129,6 +129,7 @@ namespace {0}
     }}
 }}
 ";
+
             this._logger.WriteLine( licenseKey );
 
             var sourceCodeBuilder = new StringBuilder();
