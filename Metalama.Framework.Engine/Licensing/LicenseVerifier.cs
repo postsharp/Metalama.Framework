@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -161,7 +160,7 @@ public sealed class LicenseVerifier : IProjectService
         };
     }
 
-    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    internal void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         // List all aspect classed, that are used. Don't count skipped instances.
         var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
