@@ -148,6 +148,7 @@ public sealed partial class HierarchicalOptionsManager
                     baseDeclarationOptions = null;
                     containingDeclarationOptions = null;
                     namespaceOptions = null;
+
                     break;
 
                 case ICompilation:
@@ -304,7 +305,9 @@ public sealed partial class HierarchicalOptionsManager
             return this._optionsByDeclaration
                     .Where( x => x.Value.DirectOptions != null )
                     .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
-                    .Where( x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation }  or { CanBeInherited: true, BelongsToCurrentProject: true }  )
+                    .Where(
+                        x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation } or
+                            { CanBeInherited: true, BelongsToCurrentProject: true } )
                     .Select(
                         x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
                             new HierarchicalOptionsKey( this._typeName, x.ToSerializableId() ),

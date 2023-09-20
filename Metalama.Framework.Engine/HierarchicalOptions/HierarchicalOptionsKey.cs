@@ -18,8 +18,10 @@ public record struct HierarchicalOptionsKey( string OptionType, SerializableDecl
         public override HierarchicalOptionsKey DeserializeObject( IArgumentsReader constructorArguments )
         {
             return new HierarchicalOptionsKey(
+#pragma warning disable SA1101
                 constructorArguments.GetValue<string>( nameof(OptionType) )!,
                 constructorArguments.GetValue<SerializableDeclarationId>( nameof(DeclarationId) ) );
+#pragma warning restore SA1101
         }
     }
 }

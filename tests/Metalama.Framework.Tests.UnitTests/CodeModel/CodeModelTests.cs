@@ -1036,7 +1036,7 @@ class D
 
             Assert.Single( system.Types.OfName( nameof(Math) ) );
             Assert.NotNull( system.Namespaces.OfName( "Collections" ) );
-            
+
             Assert.False( system.BelongsToCurrentProject );
             Assert.Same( system.DeclaringAssembly, system.ParentNamespace?.ContainingDeclaration );
         }
@@ -1116,8 +1116,6 @@ namespace System { class MySystemClass {} }
             Assert.Single( systemNs.Types );
             Assert.Empty( systemNs.Namespaces );
         }
-
-    
 
         [Theory]
         [InlineData( SpecialType.Int32, SpecialType.Double, true )]

@@ -27,15 +27,13 @@ public sealed class SerializableDeclarationIdTests : UnitTestClass
         var mainCompilation = testContext.CreateCompilation(
             "class B : A {}",
             additionalReferences: new[] { referencedCompilation.GetRoslynCompilation().ToMetadataReference() } );
-        
+
         var assemblyReference = mainCompilation.Types.Single().BaseType!.DeclaringAssembly;
 
         var referencedCompilationId = referencedCompilation.ToSerializableId();
         var assemblyReferenceId = assemblyReference.ToSerializableId();
-        
-        Assert.Equal( referencedCompilationId, assemblyReferenceId );
-        
 
+        Assert.Equal( referencedCompilationId, assemblyReferenceId );
     }
 
     [Fact]
