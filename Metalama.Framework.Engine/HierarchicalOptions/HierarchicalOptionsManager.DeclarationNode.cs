@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Options;
+using System;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
@@ -11,15 +12,56 @@ public sealed partial class HierarchicalOptionsManager
     {
         private readonly ConcurrentLinkedList<DeclarationNode> _children = new();
 
+        public bool HasCachedMergedOptions { get; private set; }
+        public bool HasCachedMergedOptionsExcludingNamespace { get; private set; }
+
+        private IHierarchicalOptions? _cachedMergedOptions;
+        private IHierarchicalOptions? _cachedMergedOptionsExcludingNamespace;
+
         public object Sync { get; } = new();
-        
+
         public IHierarchicalOptions? DirectOptions { get; set; }
 
-        public IHierarchicalOptions? MergedOptions { get; set; }
+        public IHierarchicalOptions? CachedMergedOptions
+        {
+            get
+            {
+                if ( !this.HasCachedMergedOptions )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return this._cachedMergedOptions;
+            }
+            set
+            {
+                this._cachedMergedOptions = value;
+                this.HasCachedMergedOptions = true;
+            }
+        }
         
+        public IHierarchicalOptions? CachedMergedOptionsExcludingNamespace
+        {
+            get
+            {
+                if ( !this.HasCachedMergedOptionsExcludingNamespace )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return this._cachedMergedOptionsExcludingNamespace;
+            }
+            set
+            {
+                this._cachedMergedOptionsExcludingNamespace = value;
+                this.HasCachedMergedOptionsExcludingNamespace = true;
+            }
+        }
+
         public void ResetMergedOptions()
         {
-            this.MergedOptions = null;
+            this.CachedMergedOptions = null;
+            this.HasCachedMergedOptions = false;
 
             foreach ( var child in this._children )
             {

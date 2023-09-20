@@ -4,8 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
+using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
+[assembly: MyOptions("FromDependencyAssembly")]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
+
+
 
 public record MyOptions : IHierarchicalOptions<IDeclaration>
 {
@@ -25,6 +29,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
 }
 
+[AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
 public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
 {
     private string _value;
@@ -45,4 +50,6 @@ public class BaseNestingClass
 {
     public class BaseNestedClass { }
 }
+
+public class BaseClassWithoutDirectOptions { }
  

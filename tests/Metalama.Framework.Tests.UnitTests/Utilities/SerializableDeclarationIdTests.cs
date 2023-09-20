@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -16,6 +17,26 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 public sealed class SerializableDeclarationIdTests : UnitTestClass
 {
     public SerializableDeclarationIdTests( ITestOutputHelper? testOutputHelper = null ) : base( testOutputHelper, false ) { }
+
+    [Fact]
+    public void AssemblyAndCompilation()
+    {
+        using var testContext = this.CreateTestContext();
+        var referencedCompilation = testContext.CreateCompilation( "public class A {}" );
+
+        var mainCompilation = testContext.CreateCompilation(
+            "class B : A {}",
+            additionalReferences: new[] { referencedCompilation.GetRoslynCompilation().ToMetadataReference() } );
+        
+        var assemblyReference = mainCompilation.Types.Single().BaseType!.DeclaringAssembly;
+
+        var referencedCompilationId = referencedCompilation.ToSerializableId();
+        var assemblyReferenceId = assemblyReference.ToSerializableId();
+        
+        Assert.Equal( referencedCompilationId, assemblyReferenceId );
+        
+
+    }
 
     [Fact]
     public void TestAllDeclarations()

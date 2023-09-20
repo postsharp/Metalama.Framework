@@ -25,6 +25,28 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
 
+        public override IDeclaration? ContainingDeclaration
+        {
+            get
+            {
+                if ( this.IsGlobalNamespace )
+                {
+                    if ( this.IsExternal )
+                    {
+                        return this.DeclaringAssembly;
+                    }
+                    else
+                    {
+                        return this.Compilation;
+                    }
+                }
+                else
+                {
+                    return this.ParentNamespace.AssertNotNull();
+                }
+            }
+        }
+
         [Memo]
         public override IAssembly DeclaringAssembly
             => this.Compilation.Factory.GetAssembly(
@@ -104,7 +126,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => !this.IsExternal && this.Compilation.IsPartial;
 
-        public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
+        public override string ToString() => $"{(this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName)} ({this.DeclaringAssembly.Identity.Name})";
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 

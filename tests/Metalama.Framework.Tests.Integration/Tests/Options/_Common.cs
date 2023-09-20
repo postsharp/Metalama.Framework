@@ -23,7 +23,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public object OverrideWith( object options, in HierarchicalOptionsOverrideContext context )
     {
-        if (BaseWins.GetValueOrDefault() && context.Axis == HierarchicalOptionsOverrideAxis.ContainmentOverBase)
+        if (BaseWins.GetValueOrDefault() && context.Axis == HierarchicalOptionsOverrideAxis.DeclaringType)
         {
             return this;
         }

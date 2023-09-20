@@ -244,7 +244,7 @@ internal sealed class AspectDriver : IAspectDriver
             {
                 aspectInstance.Skip();
             }
-            else
+            else if ( aspectResult.Outcome != AdviceOutcome.Ignore )
             {
                 // Validators on the current version of the compilation must be executed now.
 

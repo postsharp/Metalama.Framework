@@ -4,8 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 
+[assembly: MyOptions("FromAssembly")]
 namespace Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
+
+
 
 public class PrintOptionsAspect : Attribute, IAspect<IDeclaration>
 {
@@ -39,3 +43,12 @@ internal class OtherClass
     [PrintOptionsAspect]
     internal class C { }
 }
+
+// <target>
+[PrintOptionsAspect]
+internal class ClassWithoutOptions { } 
+
+
+// <target>
+[PrintOptionsAspect]
+internal class DerivedFromBaseClassWithoutDirectOptions : BaseClassWithoutDirectOptions { } 

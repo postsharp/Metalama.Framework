@@ -77,19 +77,31 @@ public sealed partial class HierarchicalOptionsManager
             }
         }
 
-        public IHierarchicalOptions? GetOptions( IDeclaration declaration )
+        public IHierarchicalOptions? GetOptions( IDeclaration declaration, bool ignoreNamespace = false )
         {
             var node = this.GetNodeAndComputeDirectOptions( declaration );
 
-            if ( node?.MergedOptions != null )
+            if ( ignoreNamespace )
             {
-                // If we have a cached value, use it.
-                return node.MergedOptions;
+                if ( node?.HasCachedMergedOptionsExcludingNamespace == true )
+                {
+                    // If we have a cached value, use it.
+                    return node.CachedMergedOptionsExcludingNamespace;
+                }
+            }
+            else
+            {
+                if ( node?.HasCachedMergedOptions == true )
+                {
+                    // If we have a cached value, use it.
+                    return node.CachedMergedOptions;
+                }
             }
 
             // Get options inherited from the base declaration.
             IHierarchicalOptions? baseDeclarationOptions;
             IHierarchicalOptions? containingDeclarationOptions;
+            IHierarchicalOptions? namespaceOptions;
 
             switch ( declaration )
             {
@@ -105,12 +117,14 @@ public sealed partial class HierarchicalOptionsManager
 
                     if ( this.Metadata.InheritedByNestedTypes && namedType.DeclaringType != null )
                     {
-                        containingDeclarationOptions = this.GetOptions( namedType.DeclaringType );
+                        containingDeclarationOptions = this.GetOptions( namedType.DeclaringType, true );
                     }
                     else
                     {
-                        containingDeclarationOptions = this.GetOptions( namedType.Namespace );
+                        containingDeclarationOptions = null;
                     }
+
+                    namespaceOptions = !ignoreNamespace ? this.GetOptions( namedType.Namespace ) : null;
 
                     break;
 
@@ -125,17 +139,27 @@ public sealed partial class HierarchicalOptionsManager
                     }
 
                     containingDeclarationOptions = this.GetOptions( member.DeclaringType );
+                    namespaceOptions = null;
 
+                    break;
+
+                case IAssembly { IsExternal: true }:
+                    // Make sure not to go down to the compilation.
+                    baseDeclarationOptions = null;
+                    containingDeclarationOptions = null;
+                    namespaceOptions = null;
                     break;
 
                 case ICompilation:
                     baseDeclarationOptions = null;
                     containingDeclarationOptions = this._defaultOptions;
+                    namespaceOptions = null;
 
                     break;
 
                 default:
                     baseDeclarationOptions = null;
+                    namespaceOptions = null;
                     containingDeclarationOptions = this.GetOptions( declaration.ContainingDeclaration.AssertNotNull() );
 
                     break;
@@ -145,10 +169,20 @@ public sealed partial class HierarchicalOptionsManager
             var inheritedOptions = MergeOptions(
                 baseDeclarationOptions,
                 containingDeclarationOptions,
-                HierarchicalOptionsOverrideAxis.ContainmentOverBase,
+                HierarchicalOptionsOverrideAxis.DeclaringType,
                 declaration );
 
-            var mergedOptions = MergeOptions( inheritedOptions, node?.DirectOptions, HierarchicalOptionsOverrideAxis.DirectOverInheritance, declaration );
+            var inheritedOptionsWithNamespaceOptions = MergeOptions(
+                namespaceOptions,
+                inheritedOptions,
+                HierarchicalOptionsOverrideAxis.Namespace,
+                declaration );
+
+            var mergedOptions = MergeOptions(
+                inheritedOptionsWithNamespaceOptions,
+                node?.DirectOptions,
+                HierarchicalOptionsOverrideAxis.Declaration,
+                declaration );
 
             // Cache the result.
             var shouldCache =
@@ -158,7 +192,15 @@ public sealed partial class HierarchicalOptionsManager
             if ( shouldCache )
             {
                 node ??= this.GetNodeAndComputeDirectOptions( declaration, true )!;
-                node.MergedOptions = mergedOptions;
+
+                if ( ignoreNamespace )
+                {
+                    node.CachedMergedOptionsExcludingNamespace = mergedOptions;
+                }
+                else
+                {
+                    node.CachedMergedOptions = mergedOptions;
+                }
             }
 
             return mergedOptions;
@@ -196,9 +238,19 @@ public sealed partial class HierarchicalOptionsManager
                 {
                     var node = new DeclarationNode();
 
-                    // Note that in case of race we may wire a node that will be unused,
-                    // but this should not affect the consistency of the data structure.
-                    this.WireNodeToParents( declaration, node );
+                    if ( !declaration.BelongsToCurrentProject )
+                    {
+                        if ( this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out var options ) == true )
+                        {
+                            node.DirectOptions = node.CachedMergedOptions = options;
+                        }
+                    }
+                    else
+                    {
+                        // Note that in case of race we may wire a node that will be unused,
+                        // but this should not affect the consistency of the data structure.
+                        this.WireNodeToParents( declaration, node );
+                    }
 
                     return node;
                 } );
@@ -231,10 +283,10 @@ public sealed partial class HierarchicalOptionsManager
             if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var node ) )
             {
                 if ( !declaration.BelongsToCurrentProject
-                     && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out var options ) == true )
+                     && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out _ ) == true )
                 {
+                    // If this is an external declaration and we have options, call GetOrAddDeclarationNode, which will set the options.
                     node = this.GetOrAddDeclarationNode( declaration );
-                    node.DirectOptions = node.MergedOptions = options;
                 }
                 else if ( createNodeIfEmpty )
                 {
@@ -252,7 +304,7 @@ public sealed partial class HierarchicalOptionsManager
             return this._optionsByDeclaration
                     .Where( x => x.Value.DirectOptions != null )
                     .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
-                    .Where( x => x is { CanBeInherited: true, BelongsToCurrentProject: true } )
+                    .Where( x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation }  or { CanBeInherited: true, BelongsToCurrentProject: true }  )
                     .Select(
                         x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
                             new HierarchicalOptionsKey( this._typeName, x.ToSerializableId() ),
