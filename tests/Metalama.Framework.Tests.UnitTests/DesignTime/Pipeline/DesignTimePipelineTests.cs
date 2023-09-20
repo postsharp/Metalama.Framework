@@ -1122,4 +1122,67 @@ class D{version}
 
         Assert.Equal( expectedResult.Replace( "\r\n", "\n" ), dumpedResults.Replace( "\r\n", "\n" ) );
     }
+
+    [Fact]
+    public void OptionsTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string fabricCode = """
+                                  using Metalama.Framework.Fabrics;
+                                  class Fabric : ProjectFabric
+                                  {
+                                      public override void AmendProject( IProjectAmender amender )
+                                      {
+                                          amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                      }
+                                  }
+                                  """;
+
+        var code = new Dictionary<string, string>
+        {
+            ["options.cs"] = OptionsTestHelper.Code,
+            ["aspect.cs"] =
+                """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Diagnostics;
+                using Metalama.Framework.Eligibility;
+                using System.Linq;
+                using System;
+
+                class MyAspect : MethodAspect
+                {
+                   private static readonly DiagnosticDefinition<string> _description = new("MY001", Severity.Warning, "Option='{0}'" );
+                   
+                   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+                   {
+                        aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.GetOptions<MyOptions>().Value ) );
+                   }
+                }
+                """,
+            ["fabric.cs"] =
+                fabricCode.Replace( "THE_VALUE", "Version1" ),
+            ["target.cs"] =
+                """
+                class C
+                {
+                    [MyAspect]
+                    void M(){}
+                }
+                """
+        };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var compilation = CreateCSharpCompilation( code );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+        Assert.Contains( results.GetAllDiagnostics(), d => d.GetMessage().Contains( "Option='Version1'" ) );
+
+        code["fabric.cs"] = fabricCode.Replace( "THE_VALUE", "Version2" );
+
+        var compilation2 = CreateCSharpCompilation( code );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var results2 ) );
+        Assert.Contains( results2.GetAllDiagnostics(), d => d.GetMessage().Contains( "Option='Version2'" ) );
+    }
 }

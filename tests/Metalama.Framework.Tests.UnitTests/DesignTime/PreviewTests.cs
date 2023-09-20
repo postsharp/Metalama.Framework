@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 public sealed class PreviewTests : UnitTestClass
 {
     private const string _mainProjectName = "master";
-
+    
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
 
     protected override void ConfigureServices( IAdditionalServiceCollection services )
@@ -152,6 +152,43 @@ class Fabric : ProjectFabric
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task WithProjectFabricAndOptions()
+    {
+        var code = new Dictionary<string, string>()
+        {
+            ["options.cs"] = OptionsTestHelper.Code,
+            ["aspect.cs"] =
+                """
+
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Fabrics;
+
+                class MyAspect : TypeAspect
+                {
+                    [Introduce]
+                    public string Field = meta.AspectInstance.GetOptions<MyOptions>().Value;
+                }
+
+
+                class Fabric : ProjectFabric
+                {
+                    public override void AmendProject( IProjectAmender amender ) 
+                    {
+                        amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "TheValue" } );
+                        amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
+                    }
+                }
+
+                """,
+            ["target.cs"] = "class C {}"
+        };
+
+        var result = await this.RunPreviewAsync( code, "target.cs" );
+
+        Assert.Contains( "Field=\"TheValue\"", result, StringComparison.Ordinal );
     }
 
     [Fact]
