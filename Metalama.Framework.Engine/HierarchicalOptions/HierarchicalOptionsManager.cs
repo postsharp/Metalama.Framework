@@ -11,6 +11,7 @@ using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -146,9 +147,8 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         return options;
     }
 
-    internal ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>
-        GetInheritableOptions( ICompilation compilation )
+    public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>
+        GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
-            .SelectMany( s => s.Value.GetInheritableOptions( compilation ) )
-            .ToImmutableDictionary();
+            .SelectMany( s => s.Value.GetInheritableOptions( compilation, withSyntaxTree ) );
 }

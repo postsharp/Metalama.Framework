@@ -1,8 +1,10 @@
-﻿namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 internal static class OptionsTestHelper
 {
-    public const string Code =
+    public const string OptionsCode =
         """
         using System;
         using Metalama.Framework.Aspects;
@@ -27,5 +29,25 @@ internal static class OptionsTestHelper
             public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
         }
                                
+        """;
+
+    public const string ReportWarningFromOptionAspectCode =
+        """
+        using Metalama.Framework.Aspects;
+        using Metalama.Framework.Code;
+        using Metalama.Framework.Diagnostics;
+        using Metalama.Framework.Eligibility;
+        using System.Linq;
+        using System;
+
+        class ReportWarningFromOptionsAspect : MethodAspect
+        {
+           private static readonly DiagnosticDefinition<string> _description = new("MY001", Severity.Warning, "Option='{0}'" );
+           
+           public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+           {
+                aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.GetOptions<MyOptions>().Value ?? "<undefined>" ) );
+           }
+        }
         """;
 }

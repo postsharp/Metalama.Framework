@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 public sealed class PreviewTests : UnitTestClass
 {
     private const string _mainProjectName = "master";
-    
+
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
 
     protected override void ConfigureServices( IAdditionalServiceCollection services )
@@ -159,7 +159,7 @@ class Fabric : ProjectFabric
     {
         var code = new Dictionary<string, string>()
         {
-            ["options.cs"] = OptionsTestHelper.Code,
+            ["options.cs"] = OptionsTestHelper.OptionsCode,
             ["aspect.cs"] =
                 """
 
@@ -175,7 +175,7 @@ class Fabric : ProjectFabric
 
                 class Fabric : ProjectFabric
                 {
-                    public override void AmendProject( IProjectAmender amender ) 
+                    public override void AmendProject( IProjectAmender amender )
                     {
                         amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "TheValue" } );
                         amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();

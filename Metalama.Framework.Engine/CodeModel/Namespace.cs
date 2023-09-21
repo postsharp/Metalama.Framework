@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
 
-        public override IDeclaration? ContainingDeclaration
+        public override IDeclaration ContainingDeclaration
         {
             get
             {

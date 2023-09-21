@@ -306,7 +306,7 @@ public sealed partial class HierarchicalOptionsManager
             return node;
         }
 
-        public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation )
+        public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         {
             // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
 
@@ -318,7 +318,7 @@ public sealed partial class HierarchicalOptionsManager
                             { CanBeInherited: true, BelongsToCurrentProject: true } )
                     .Select(
                         x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
-                            new HierarchicalOptionsKey( this._typeName, x.ToSerializableId() ),
+                            new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
                             this.GetOptions( x ).AssertNotNull() ) )
                 ;
         }

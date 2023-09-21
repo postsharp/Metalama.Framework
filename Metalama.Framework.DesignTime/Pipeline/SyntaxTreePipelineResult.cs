@@ -16,9 +16,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
     internal sealed partial class SyntaxTreePipelineResult
     {
         /// <summary>
-        /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
+        /// Gets the file path of the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared,
+        /// or <c>null</c> if this object represents the part of the results that do not pertain to any syntax tree.
         /// </summary>
-        public SyntaxTree SyntaxTree { get; }
+        public string? SyntaxTreePath { get; }
 
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
@@ -48,7 +49,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; }
 
         private SyntaxTreePipelineResult(
-            SyntaxTree syntaxTree,
+            string? syntaxTreePath,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
@@ -60,7 +61,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableArray<InheritableOptionsInstance>? inheritableOptions,
             ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>? annotations )
         {
-            this.SyntaxTree = syntaxTree;
+            this.SyntaxTreePath = syntaxTreePath;
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Empty;
             this.InheritableOptions = inheritableOptions ?? ImmutableArray<InheritableOptionsInstance>.Empty;
             this.ReferenceValidators = validators ?? ImmutableArray<DesignTimeReferenceValidatorInstance>.Empty;
@@ -74,6 +75,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         public override string ToString()
-            => $"FilePath='{this.SyntaxTree.FilePath}, Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}, InheritableAspects={this.InheritableAspects.Length}";
+            => $"FilePath='{this.SyntaxTreePath}', Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}, InheritableAspects={this.InheritableAspects.Length}";
     }
 }

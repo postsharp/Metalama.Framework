@@ -15,7 +15,6 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -48,16 +47,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.ReferenceValidators.IsEmpty && this._inheritableAspects.IsEmpty;
 
         internal DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
-
-        public bool TryGetHierarchicalOptions(
-            SerializableDeclarationId declaration,
-            string optionType,
-            [NotNullWhen( true )] out IHierarchicalOptions? options )
-        {
-            var key = new HierarchicalOptionsKey( optionType, declaration );
-
-            return this.InheritableOptions.TryGetValue( key, out options );
-        }
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -137,7 +126,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             foreach ( var result in resultsByTree )
             {
-                var filePath = result.SyntaxTree.FilePath;
+                var filePath = result.SyntaxTreePath ?? "";
 
                 // Un-index the old tree.
                 if ( syntaxTreeResultBuilder.TryGetValue( filePath, out var oldSyntaxTreeResult ) ||
@@ -300,6 +289,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PartialCompilation compilation,
                 DesignTimePipelineExecutionResult pipelineResults )
         {
+            SyntaxTreePipelineResult.Builder? emptySyntaxTreeResult = null;
+
             var resultBuilders = pipelineResults
                 .InputSyntaxTrees
                 .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
@@ -470,6 +461,25 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     new DesignTimeTransformation( transformation.TargetDeclaration.ToSerializableId(), transformation.AspectClass.FullName ) );
             }
 
+            // Split options by syntax tree.
+            foreach ( var optionItem in pipelineResults.InheritableOptions )
+            {
+                SyntaxTreePipelineResult.Builder builder;
+                var syntaxTreePath = optionItem.Key.SyntaxTreePath;
+
+                if ( syntaxTreePath != null )
+                {
+                    builder = resultBuilders[syntaxTreePath];
+                }
+                else
+                {
+                    builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
+                }
+
+                builder.InheritableOptions ??= ImmutableArray.CreateBuilder<InheritableOptionsInstance>();
+                builder.InheritableOptions.Add( new InheritableOptionsInstance( optionItem.Key, optionItem.Value ) );
+            }
+
             // Add syntax trees with empty output to it gets cached too.
             var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
@@ -481,6 +491,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
             foreach ( var empty in inputTreesWithoutOutput )
             {
                 resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
+            }
+
+            if ( emptySyntaxTreeResult != null )
+            {
+                resultBuilders[""] = emptySyntaxTreeResult;
             }
 
             return resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) );

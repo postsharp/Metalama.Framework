@@ -6,5 +6,6 @@ namespace Metalama.Framework.Code;
 
 public interface IAnnotation : ICompileTimeSerializable { }
 
+// ReSharper disable once UnusedTypeParameter
 public interface IAnnotation<in T> : IAnnotation
     where T : class, IDeclaration { }

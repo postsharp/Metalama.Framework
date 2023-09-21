@@ -18,7 +18,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public sealed class Builder
         {
-            private readonly SyntaxTree _syntaxTree;
+            private readonly SyntaxTree? _syntaxTree;
 
 #pragma warning disable SA1401 // Fields should be private
             public ImmutableArray<Diagnostic>.Builder? Diagnostics;
@@ -33,28 +33,37 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
 #pragma warning restore SA1401 // Fields should be private
 
-            public Builder( SyntaxTree syntaxTree )
+            public Builder( SyntaxTree? syntaxTree )
             {
                 this._syntaxTree = syntaxTree;
             }
 
             public SyntaxTreePipelineResult ToImmutable( Compilation compilation )
             {
-                // Compute the default dependency graph.
-                var semanticModel = compilation.GetCachedSemanticModel( this._syntaxTree );
+                ImmutableArray<string> dependencies;
 
-                var declaredTypes = new List<INamedTypeSymbol>();
-                DependencyAnalysisHelper.FindDeclaredTypes( semanticModel, declaredTypes.Add );
+                if ( this._syntaxTree != null )
+                {
+                    // Compute the default dependency graph.
+                    var semanticModel = compilation.GetCachedSemanticModel( this._syntaxTree );
 
-                var dependencies = declaredTypes
-                    .SelectMany( t => t.DeclaringSyntaxReferences )
-                    .Select( r => r.SyntaxTree.FilePath )
-                    .Where( p => p != this._syntaxTree.FilePath )
-                    .Distinct()
-                    .ToImmutableArray();
+                    var declaredTypes = new List<INamedTypeSymbol>();
+                    DependencyAnalysisHelper.FindDeclaredTypes( semanticModel, declaredTypes.Add );
+
+                    dependencies = declaredTypes
+                        .SelectMany( t => t.DeclaringSyntaxReferences )
+                        .Select( r => r.SyntaxTree.FilePath )
+                        .Where( p => p != this._syntaxTree.FilePath )
+                        .Distinct()
+                        .ToImmutableArray();
+                }
+                else
+                {
+                    dependencies = ImmutableArray<string>.Empty;
+                }
 
                 return new SyntaxTreePipelineResult(
-                    this._syntaxTree,
+                    this._syntaxTree?.FilePath,
                     this.Diagnostics?.ToImmutable(),
                     this.Suppressions?.ToImmutable(),
                     this.Introductions?.ToImmutable(),

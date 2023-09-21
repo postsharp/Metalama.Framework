@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -188,10 +186,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
                 // Create a manifest for transitive aspects and validators.
                 var inheritableOptions =
-                    result.Value.FirstCompilationModel.AssertNotNull().HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel );
+                    result.Value.FirstCompilationModel.AssertNotNull()
+                        .HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel, false )
+                        .ToImmutableDictionary();
 
-                var annotations = result.Value.LastCompilationModel?.GetExportedAnnotations()
-                                  ?? ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Empty;
+                var annotations = result.Value.LastCompilationModel.GetExportedAnnotations();
 
                 if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 || inheritableOptions.Count > 0
                      || !annotations.IsEmpty )

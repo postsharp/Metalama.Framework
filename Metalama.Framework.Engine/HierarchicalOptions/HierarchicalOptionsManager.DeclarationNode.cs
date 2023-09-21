@@ -13,6 +13,7 @@ public sealed partial class HierarchicalOptionsManager
         private readonly ConcurrentLinkedList<DeclarationNode> _children = new();
 
         public bool HasCachedMergedOptions { get; private set; }
+
         public bool HasCachedMergedOptionsExcludingNamespace { get; private set; }
 
         private IHierarchicalOptions? _cachedMergedOptions;
@@ -39,7 +40,7 @@ public sealed partial class HierarchicalOptionsManager
                 this.HasCachedMergedOptions = true;
             }
         }
-        
+
         public IHierarchicalOptions? CachedMergedOptionsExcludingNamespace
         {
             get

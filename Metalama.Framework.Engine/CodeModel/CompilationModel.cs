@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal AspectRepository AspectRepository { get; }
 
-        internal HierarchicalOptionsManager HierarchicalOptionsManager { get; }
+        public HierarchicalOptionsManager HierarchicalOptionsManager { get; }
 
         public IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
             where T : class, IAnnotation

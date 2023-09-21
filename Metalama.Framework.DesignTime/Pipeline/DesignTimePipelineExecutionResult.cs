@@ -3,9 +3,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -22,6 +24,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
         ImmutableUserDiagnosticList Diagnostics,
         IReadOnlyList<InheritableAspectInstance> InheritableAspects,
+        IReadOnlyList<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> InheritableOptions,
         ImmutableArray<ReferenceValidatorInstance> ReferenceValidators,
         ImmutableArray<IAspectInstance> AspectInstances,
         IReadOnlyCollection<ITransformationBase> Transformations );

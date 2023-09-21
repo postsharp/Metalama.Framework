@@ -11,12 +11,14 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -518,6 +520,10 @@ internal sealed partial class DesignTimeAspectPipeline
                 pipelineResultValue?.ExternallyInheritableAspects.SelectAsImmutableArray( i => new InheritableAspectInstance( i ) )
                 ?? ImmutableArray<InheritableAspectInstance>.Empty;
 
+            var inheritableOptions =
+                pipelineResultValue?.LastCompilationModel.HierarchicalOptionsManager.GetInheritableOptions( pipelineResultValue.LastCompilationModel, true )
+                    .ToReadOnlyList() ?? ImmutableArray<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>.Empty;
+
             var referenceValidators = pipelineResultValue?.ReferenceValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
 
             var immutableUserDiagnostics = new ImmutableUserDiagnosticList(
@@ -534,6 +540,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 additionalSyntaxTrees,
                 immutableUserDiagnostics,
                 inheritableAspectInstances,
+                inheritableOptions,
                 referenceValidators,
                 aspectInstances,
                 transformations );
