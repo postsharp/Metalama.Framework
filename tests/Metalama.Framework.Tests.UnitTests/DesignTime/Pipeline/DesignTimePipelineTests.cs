@@ -55,6 +55,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof(Enumerable).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
                 .AddReferences( additionalReferences ?? Enumerable.Empty<MetadataReference>() );
         }
@@ -1142,7 +1143,7 @@ class D{version}
                             {
                                 public override void AmendProject( IProjectAmender amender )
                                 {
-                                    amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                    amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                 }
                             }
                             """,
@@ -1174,7 +1175,7 @@ class D{version}
                                   {
                                       public override void AmendProject( IProjectAmender amender )
                                       {
-                                          amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                          amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                       }
                                   }
                                   """;

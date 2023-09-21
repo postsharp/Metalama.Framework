@@ -75,6 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
+        [Memo]
         public IConstructor Definition
             => this.MethodSymbol == this.MethodSymbol.OriginalDefinition
                 ? this

@@ -177,7 +177,7 @@ class Fabric : ProjectFabric
                 {
                     public override void AmendProject( IProjectAmender amender )
                     {
-                        amender.Outbound.Configure<MyOptions>( o => new MyOptions { Value = "TheValue" } );
+                        amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "TheValue" } );
                         amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
                     }
                 }

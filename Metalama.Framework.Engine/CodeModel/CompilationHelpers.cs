@@ -15,11 +15,12 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class CompilationHelpers : ICompilationHelpers
     {
-        private readonly UserCodeAttributeDeserializer _attributeDeserializer;
+        private readonly ProjectServiceProvider _serviceProvider;
+        private UserCodeAttributeDeserializer? _attributeDeserializer;
 
         public CompilationHelpers( ProjectServiceProvider serviceProvider )
         {
-            this._attributeDeserializer = serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+            this._serviceProvider = serviceProvider;
         }
 
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
@@ -140,6 +141,9 @@ namespace Metalama.Framework.Engine.CodeModel
             ScopedDiagnosticSink diagnosticSink,
             [NotNullWhen( true )] out System.Attribute? constructedAttribute )
         {
+            // The service is not always available in tests, so we get it lazily.
+            this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+            
             return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
         }
     }
