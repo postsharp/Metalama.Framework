@@ -372,12 +372,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<SimpleExplicitlySerializedClass<T>>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
-                {
-                    return new SimpleExplicitlySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
-                }
+                public override SimpleExplicitlySerializedClass<T> CreateInstance( IArgumentsReader constructorArguments )
+                    => new( constructorArguments.GetValue<T>( "_" )! );
 
-                internal override void SerializeObject(
+                public override void SerializeObject(
                     SimpleExplicitlySerializedClass<T> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -385,7 +383,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     constructorArguments.SetValue( "_", obj.Value );
                 }
 
-                internal override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
+                public override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
@@ -447,12 +445,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 private const string _valueKey = "_ov";
                 private const string _fieldKey = "_fv";
 
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override ExplicitlySerializedClass<TForCtor, TForField> CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey )! );
                 }
 
-                internal override void SerializeObject(
+                public override void SerializeObject(
                     ExplicitlySerializedClass<TForCtor, TForField> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -462,7 +460,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "n", obj.Nullable );
                 }
 
-                internal override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Field = initializationArguments.GetValue<TForField>( _fieldKey );
                     obj.Nullable = initializationArguments.GetValue<int?>( "n" );

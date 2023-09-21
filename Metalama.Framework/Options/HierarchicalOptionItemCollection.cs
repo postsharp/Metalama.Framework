@@ -20,8 +20,8 @@ namespace Metalama.Framework.Options;
 public sealed partial class HierarchicalOptionItemCollection<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
     where T : class, IHierarchicalOptionItem
 {
-    private readonly ImmutableDictionary<object, Item> _items;
     private readonly bool _clear;
+    private ImmutableDictionary<object, Item> _items;
 
     /// <summary>
     /// Creates a new, empty instance of the <see cref="HierarchicalOptionItemCollection{T}"/>. This instance does not represent any operation.
