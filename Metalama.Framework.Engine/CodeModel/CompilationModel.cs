@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel
                                  ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
-            this.Helpers = new CompilationHelpers();
+            this.Helpers = new CompilationHelpers( project.ServiceProvider );
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.

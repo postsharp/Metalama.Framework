@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -13,7 +12,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -50,9 +48,6 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
 
     public INamedArgumentList NamedArguments => this._attributeConstruction.NamedArguments;
-
-    public bool TryConstruct( ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out System.Attribute? attribute )
-        => throw new NotImplementedException();
 
     public FormattableString FormatPredecessor( ICompilation compilation ) => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

@@ -1,15 +1,27 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class CompilationHelpers : ICompilationHelpers
     {
+        private readonly UserCodeAttributeDeserializer _attributeDeserializer;
+
+        public CompilationHelpers( ProjectServiceProvider serviceProvider )
+        {
+            this._attributeDeserializer = serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+        }
+
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
 
         public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();
@@ -121,6 +133,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 return false;
             }
+        }
+
+        public bool TryConstructAttribute(
+            IAttribute attribute,
+            ScopedDiagnosticSink diagnosticSink,
+            [NotNullWhen( true )] out System.Attribute? constructedAttribute )
+        {
+            return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
         }
     }
 }

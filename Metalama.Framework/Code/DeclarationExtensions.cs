@@ -20,7 +20,7 @@ namespace Metalama.Framework.Code
         {
             var comparer = declaration.Compilation.Comparers.Default;
 
-            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
+            if ( comparer.Equals( declaration.GetDefinition(), containingDeclaration.GetDefinition() ) )
             {
                 return true;
             }

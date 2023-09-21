@@ -2,12 +2,10 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Diagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Code.DeclarationBuilders
@@ -37,9 +35,6 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Note that the order may be important in case of non-trivial property setters.
         /// </summary>
         public INamedArgumentList NamedArguments { get; }
-
-        bool IAttributeData.TryConstruct( ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out Attribute? attribute )
-            => throw new NotImplementedException();
 
         private AttributeConstruction(
             IConstructor constructor,

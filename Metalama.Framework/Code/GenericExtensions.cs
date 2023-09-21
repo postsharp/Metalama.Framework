@@ -21,14 +21,10 @@ namespace Metalama.Framework.Code
         public static bool IsSelfOrDeclaringTypeGeneric( this IMemberOrNamedType declaration )
             => declaration is IGeneric { IsGeneric: true } || (declaration.DeclaringType != null && declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric());
 
-        internal static IDeclaration GetOriginalDefinition( this IDeclaration declaration )
-            => declaration switch
-            {
-                IMemberOrNamedType memberOrNamedType => memberOrNamedType.Definition,
-                _ => declaration
-            };
-
-        internal static IMemberOrNamedType? GetBase( this IMemberOrNamedType declaration )
+        /// <summary>
+        /// Gets the base type of a type or the base member of an overridden member, if any.
+        /// </summary>
+        public static IMemberOrNamedType? GetBase( this IMemberOrNamedType declaration )
             => declaration switch
             {
                 INamedType namedType => namedType.BaseType,
@@ -37,6 +33,16 @@ namespace Metalama.Framework.Code
                 IEvent @event => @event.OverriddenEvent,
                 IIndexer indexer => indexer.OverriddenIndexer,
                 _ => null
+            };
+
+        [Obsolete( "Use the Definition property." )]
+        public static IDeclaration GetOriginalDefinition( this IDeclaration declaration ) => declaration.GetDefinition();
+
+        internal static IDeclaration GetDefinition( this IDeclaration declaration )
+            => declaration switch
+            {
+                IMemberOrNamedType memberOrNamedType => memberOrNamedType.Definition,
+                _ => declaration
             };
 
         [Obsolete( "Use the Definition property." )]

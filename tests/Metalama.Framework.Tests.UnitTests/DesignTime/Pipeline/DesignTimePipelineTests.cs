@@ -1230,7 +1230,7 @@ class D{version}
     }
 
     [Fact]
-    public async Task AnnotationsCrossProjectTest()
+    public void AnnotationsCrossProjectTest()
     {
         using var testContext = this.CreateTestContext();
 
