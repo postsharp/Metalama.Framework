@@ -304,7 +304,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 this._compilationModelVersion,
                 ( c, d ) => this._selector( c, d ).Where( predicate ) );
 
-        public void Configure<TOptions>( Func<T, TOptions> func )
+        public void SetOptions<TOptions>( Func<T, TOptions> func )
             where TOptions : IHierarchicalOptions, IHierarchicalOptions<T>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();

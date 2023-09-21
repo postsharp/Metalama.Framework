@@ -16,7 +16,7 @@ namespace Metalama.Framework.Options;
 /// </summary>
 /// <remarks>
 /// <para>
-///  Users typically set options from a fabric using the <see cref="IValidatorReceiver{TDeclaration}.Configure{TOptions}"/>
+///  Users typically set options from a fabric using the <see cref="IAspectReceiver{TDeclaration}.SetOptions{TOptions}"/>
 /// method of the <see cref="IAmender{T}.Outbound"/> object.
 /// </para>
 /// <para>

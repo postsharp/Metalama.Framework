@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Represents a set of declarations and offers the ability to add aspects, annotations to them. It inherits from <see cref="IValidatorReceiver{TDeclaration}"/>,
+    /// Represents a set of declarations and offers the ability to add aspects and set options to them. It inherits from <see cref="IValidatorReceiver{TDeclaration}"/>,
     /// which allows to add validators.
     /// </summary>
     [InternalImplement]
@@ -103,6 +104,20 @@ namespace Metalama.Framework.Aspects
         new IAspectReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
             where TMember : class, IDeclaration;
 
+        /// <summary>
+        /// Filters the set of declarations included in the current set.
+        /// </summary>
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
+        
+        /// <summary>
+        /// Sets options for the declarations in the current set of declarations.
+        /// </summary>
+        /// <param name="func">A function giving the options for the given declaration.</param>
+        /// <typeparam name="TOptions">The type of options.</typeparam>
+        /// <remarks>
+        /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
+        /// </remarks>
+        void SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
+            where TOptions : IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
     }
 }

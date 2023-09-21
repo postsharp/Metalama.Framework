@@ -4,12 +4,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Options;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Validation;
 
+/// <summary>
+/// The non-generic base interface for <see cref="IValidatorReceiver{TDeclaration}"/>. Represents a set of declarations to which
+/// validators, diagnostics and code fix suggestions can be added.
+/// </summary>
 [InternalImplement]
 [CompileTime]
 public interface IValidatorReceiver
@@ -42,6 +45,11 @@ public interface IValidatorReceiver
     void ValidateReferences( ReferenceValidator validator );
 }
 
+/// <summary>
+/// Represents a set of declarations to which
+/// validators, diagnostics, code fix suggestions, and options can be added.
+/// </summary>
+/// <typeparam name="TDeclaration">The type of declarations in the current set.</typeparam>
 [InternalImplement]
 [CompileTime]
 public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
@@ -104,7 +112,4 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// Filters the set of declarations included in the query.
     /// </summary>
     IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
-
-    void Configure<TOptions>( Func<TDeclaration, TOptions> func )
-        where TOptions : IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
 }

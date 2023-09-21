@@ -14,12 +14,12 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.Configure( c => new MyOptions { Value = "FromFabric.Project" } );
-        amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() ).Configure( c => new MyOptions { Value = "FromFabric.C2" } );
+        amender.Outbound.SetOptions( c => new MyOptions { Value = "FromFabric.Project" } );
+        amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() ).SetOptions( c => new MyOptions { Value = "FromFabric.C2" } );
 
         amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() )
             .Select( t => t.Methods.OfName( nameof(C2.M2) ).Single() )
-            .Configure( c => new MyOptions { Value = "FromFabric.M2" } );
+            .SetOptions( c => new MyOptions { Value = "FromFabric.M2" } );
     }
 }
 

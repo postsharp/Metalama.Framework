@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options.TypeFabric_NotUnder
         {
             public override void AmendType( ITypeAmender amender )
             {
-                amender.Outbound.Select( t => t.Namespace ).Configure( c => new MyOptions { Value = "Namespace" } );
+                amender.Outbound.Select( t => t.Namespace ).SetOptions( c => new MyOptions { Value = "Namespace" } );
             }
         }
     }

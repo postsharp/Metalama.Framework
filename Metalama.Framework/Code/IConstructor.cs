@@ -20,6 +20,10 @@ namespace Metalama.Framework.Code
         /// <returns>A <see cref="ConstructorInfo"/> that can be used only in run-time code.</returns>
         ConstructorInfo ToConstructorInfo();
         
+        /// <summary>
+        /// Gets the definition of the constructor. If the current declaration is a constructor of
+        /// a generic type instance, this returns the constructor in the generic type definition. Otherwise, it returns the current instance.
+        /// </summary>
         new IConstructor Definition { get; }
     }
 }

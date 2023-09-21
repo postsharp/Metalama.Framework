@@ -83,7 +83,7 @@ public class ModifyOptionsAspect : Attribute, IAspect<IDeclaration>
     {
         // Get the old value so populate the cache and we can test that the cache is invalidated.
         var oldValue = builder.Target.Enhancements().GetOptions<MyOptions>().Value;
-        builder.Outbound.Configure( x => new MyOptions { Value = $"{oldValue}->{_value}" } );
+        builder.Outbound.SetOptions( x => new MyOptions { Value = $"{oldValue}->{_value}" } );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
