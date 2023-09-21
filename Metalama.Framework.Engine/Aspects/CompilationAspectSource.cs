@@ -63,7 +63,9 @@ internal sealed class CompilationAspectSource : IAspectSource
             return AspectSourceResult.Empty;
         }
 
-        var aspectInstances = compilation.GetAllAttributesOfType( aspectType )
+        var attributes = compilation.GetAllAttributesOfType( aspectType );
+
+        var aspectInstances = attributes
             .Select(
                 attribute =>
                 {

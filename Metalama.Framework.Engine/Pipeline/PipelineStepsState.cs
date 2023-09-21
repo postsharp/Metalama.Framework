@@ -96,7 +96,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Add the initial sources.
         // TODO: process failure of the next line.
-        this.AddAspectSources( sources.AspectSources, cancellationToken );
+        this.AddAspectSources( sources.AspectSources, false, cancellationToken );
         this.AddValidatorSources( sources.ValidatorSources );
     }
 
@@ -144,7 +144,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         previousStep = currentStep;
     }
 
-    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
+    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, bool addOtherStagesToOverflow, CancellationToken cancellationToken )
     {
         foreach ( var aspectSource in aspectSources )
         {
@@ -182,7 +182,10 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                             }
                         }
 
-                        this._overflowAspectSource.Add( aspectSource, aspectType );
+                        if ( addOtherStagesToOverflow )
+                        {
+                            this._overflowAspectSource.Add( aspectSource, aspectType );
+                        }
                     }
                     else
                     {
