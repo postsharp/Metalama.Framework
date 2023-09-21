@@ -736,6 +736,16 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
+        /// <summary>
+        /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
+        /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.
+        /// Annotations are a way of communication between aspects or classes of aspects.
+        /// </summary>
+        /// <param name="declaration">The declaration to which the annotation should be added.</param>
+        /// <param name="annotation">The annotation.</param>
+        /// <param name="export">A value indicating whether the annotation should be exported and made visible to other projects.
+        /// Unless this parameter is set to <c>true</c>, the annotation will only be visible to the current project.</param>
+        /// <typeparam name="TDeclaration">The type of declaration.</typeparam>
         void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
             where TDeclaration : class, IDeclaration;
 

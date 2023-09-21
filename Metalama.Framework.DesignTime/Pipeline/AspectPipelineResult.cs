@@ -483,6 +483,17 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split annotations by syntax tree.
             foreach ( var annotationsOnDeclaration in pipelineResults.Annotations )
             {
+                // Annotations in AspectPipelineResults are only used for the cross-project scenario, so we only index exported annotations.
+                var exportedAnnotations = annotationsOnDeclaration
+                    .Where( x => x.Export )
+                    .Select( x => x.Annotation )
+                    .ToImmutableArray();
+
+                if ( exportedAnnotations.IsEmpty )
+                {
+                    continue;
+                }
+
                 var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree( compilation.CompilationContext );
 
                 SyntaxTreePipelineResult.Builder builder;
@@ -498,7 +509,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 builder.Annotations ??= ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.CreateBuilder();
-                builder.Annotations.Add( annotationsOnDeclaration.Key.ToSerializableId(), annotationsOnDeclaration.Select( x => x.Annotation ) );
+                builder.Annotations.Add( annotationsOnDeclaration.Key.ToSerializableId(), exportedAnnotations );
             }
 
             // Add syntax trees with empty output to it gets cached too.

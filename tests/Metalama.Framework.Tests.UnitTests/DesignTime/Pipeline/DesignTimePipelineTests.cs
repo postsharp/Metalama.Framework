@@ -1264,7 +1264,7 @@ class D{version}
                     
                     public override void BuildAspect( IAspectBuilder<INamedType> builder )
                     {
-                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value) );
+                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value), true );
                     }
                 }
                 """,
