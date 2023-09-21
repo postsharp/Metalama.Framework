@@ -330,7 +330,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
         var predefinedSyntaxTrees =
-            _predefinedTypesSyntaxTree.Value.SelectAsReadOnlyCollection( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
+            _predefinedTypesSyntaxTree.Value.SelectAsArray( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
         return CSharpCompilation.Create(
                 assemblyName,

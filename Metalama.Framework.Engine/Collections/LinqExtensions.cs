@@ -22,7 +22,7 @@ public static partial class LinqExtensions
     [Obsolete( "Use SelectAsList or SelectAsArray." )]
     internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func ) => SelectAsReadOnlyList( list, func );
 
-    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func, bool materialize = false )
     {
         if ( list.Count == 0 )
         {
