@@ -304,21 +304,24 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         // is removed.
         if ( this.MustReportPausedPipelineAsErrors )
         {
-            foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
+            if ( this._currentState.CompileTimeSyntaxTrees != null )
             {
-                if ( file.Value == null )
+                foreach ( var file in this._currentState.CompileTimeSyntaxTrees )
                 {
-                    this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+                    if ( file.Value == null )
+                    {
+                        this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
 
-                    RetryHelper.Retry(
-                        () =>
-                        {
-                            if ( File.Exists( file.Key ) )
+                        RetryHelper.Retry(
+                            () =>
                             {
-                                File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                            }
-                        },
-                        logger: this.Logger );
+                                if ( File.Exists( file.Key ) )
+                                {
+                                    File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
+                                }
+                            },
+                            logger: this.Logger );
+                    }
                 }
             }
         }
