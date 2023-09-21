@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Tests.UnitTests.LamaSerialization;
-using System;
 using Xunit;
 
 // ReSharper disable MemberCanBeInternal
