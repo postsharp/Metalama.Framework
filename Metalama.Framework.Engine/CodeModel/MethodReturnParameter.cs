@@ -44,9 +44,6 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.DeclaringMethod.GetDerivedDeclarations( options ).Select( d => ((IMethod) d).ReturnParameter );
 
         [Memo]
-        public override IDeclaration OriginalDefinition => ((Method) this.DeclaringMember.GetOriginalDefinition()).ReturnParameter;
-
-        [Memo]
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,

@@ -32,7 +32,7 @@ public sealed partial class InheritableAspectInstance
                 return false;
             }
 
-            return x.TargetDeclaration == y.TargetDeclaration;
+            return x.TargetDeclaration.Equals( y.TargetDeclaration );
         }
 
         public int GetHashCode( InheritableAspectInstance obj )

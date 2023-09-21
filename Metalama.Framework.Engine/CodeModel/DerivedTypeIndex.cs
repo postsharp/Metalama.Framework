@@ -20,15 +20,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         // Maps a base type to direct derived types.
         private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
-        private readonly ImmutableHashSet<INamedTypeSymbol> _externalBaseTypes;
+        private readonly ImmutableHashSet<INamedTypeSymbol> _processedTypes;
 
         private DerivedTypeIndex(
             CompilationContext compilationContext,
             ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
-            ImmutableHashSet<INamedTypeSymbol> externalBaseTypes )
+            ImmutableHashSet<INamedTypeSymbol> processedTypes )
         {
             this._relationships = relationships;
-            this._externalBaseTypes = externalBaseTypes;
+            this._processedTypes = processedTypes;
             this._compilationContext = compilationContext;
         }
 
@@ -42,13 +42,17 @@ namespace Metalama.Framework.Engine.CodeModel
                 DerivedTypesOptions.All => this.GetAllDerivedTypesCore( baseType ),
                 DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypesCore( baseType ),
                 DerivedTypesOptions.FirstLevelWithinCompilationOnly => this.GetFirstLevelDerivedTypesCore( baseType ),
+                DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
                 _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
             };
         }
 
-        private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
+        public IEnumerable<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
             => this._relationships[baseType]
-                .SelectManyRecursiveDistinct( t => this._relationships[t] )
+                .SelectManyRecursiveDistinct( t => this._relationships[t] );
+
+        private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
+            => this.GetDerivedTypes( baseType )
                 .Where( this.IsContainedInCurrentCompilation );
 
         private IEnumerable<INamedTypeSymbol> GetDirectlyDerivedTypesCore( INamedTypeSymbol baseType )
@@ -91,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var introducedInterface in introducedInterfaces )
             {
-                builder ??= new Builder( this._compilationContext, this._relationships.ToBuilder(), this._externalBaseTypes.ToBuilder() );
+                builder ??= new Builder( this );
 
                 var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
 
@@ -131,6 +135,29 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 collector.AddDependency( rootType, derivedType );
                 this.PopulateDependenciesCore( collector, rootType, derivedType );
+            }
+        }
+
+        internal DerivedTypeIndex WithAdditionalAnalyzedTypes( IEnumerable<INamedTypeSymbol> types )
+        {
+            Builder? builder = null;
+
+            foreach ( var type in types )
+            {
+                if ( !this._processedTypes.Contains( type ) )
+                {
+                    builder ??= new Builder( this );
+                    builder.AnalyzeType( type );
+                }
+            }
+
+            if ( builder == null )
+            {
+                return this;
+            }
+            else
+            {
+                return builder.ToImmutable();
             }
         }
     }

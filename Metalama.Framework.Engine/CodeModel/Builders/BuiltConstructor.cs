@@ -29,6 +29,8 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();
 
+    IConstructor IConstructor.Definition => this;
+
     public IConstructor? GetBaseConstructor()
     {
         // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always

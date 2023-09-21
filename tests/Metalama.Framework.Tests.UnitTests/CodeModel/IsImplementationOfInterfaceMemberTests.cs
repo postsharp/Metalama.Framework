@@ -15,18 +15,18 @@ public sealed class IsImplementationOfInterfaceMemberTests : UnitTestClass
     public void ImplicitImplementation()
     {
         const string code = """
-interface IInterface
-{
-    int Foo();
-    int Foo(int value);
-}
+                            interface IInterface
+                            {
+                                int Foo();
+                                int Foo(int value);
+                            }
 
-class Implementation : IInterface
-{
-    public int Foo() { return 42; }
-    public int Foo(int value) { return 42; }
-}
-""";
+                            class Implementation : IInterface
+                            {
+                                public int Foo() { return 42; }
+                                public int Foo(int value) { return 42; }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
@@ -50,18 +50,18 @@ class Implementation : IInterface
     public void ExplicitImplementation()
     {
         const string code = """
-interface IInterface
-{
-    int Foo();
-    int Foo(int value);
-}
+                            interface IInterface
+                            {
+                                int Foo();
+                                int Foo(int value);
+                            }
 
-class Implementation : IInterface
-{
-    int IInterface.Foo() { return 42; }
-    int IInterface.Foo(int value) { return 42; }
-}
-""";
+                            class Implementation : IInterface
+                            {
+                                int IInterface.Foo() { return 42; }
+                                int IInterface.Foo(int value) { return 42; }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
@@ -85,24 +85,24 @@ class Implementation : IInterface
     public void Reimplementation()
     {
         const string code = """
-interface IInterface
-{
-    int Foo();
-    int Foo(int value);
-}
+                            interface IInterface
+                            {
+                                int Foo();
+                                int Foo(int value);
+                            }
 
-class Base : IInterface
-{
-    public int Foo() { return 42; }
-    public int Foo(int value) { return 42; }
-}
+                            class Base : IInterface
+                            {
+                                public int Foo() { return 42; }
+                                public int Foo(int value) { return 42; }
+                            }
 
-class Implementation : Base, IInterface
-{
-    public new int Foo() { return 42; }
-    public new int Foo(int value) { return 42; }
-}
-""";
+                            class Implementation : Base, IInterface
+                            {
+                                public new int Foo() { return 42; }
+                                public new int Foo(int value) { return 42; }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
@@ -134,27 +134,27 @@ class Implementation : Base, IInterface
     public void SubInterfaceReimplementation()
     {
         const string code = """
-interface ISubInterface
-{
-    int Foo();
-}
+                            interface ISubInterface
+                            {
+                                int Foo();
+                            }
 
-interface IInterface : ISubInterface
-{
-    int Foo(int value);
-}
+                            interface IInterface : ISubInterface
+                            {
+                                int Foo(int value);
+                            }
 
-class Base : IInterface
-{
-    public int Foo() { return 42; }
-    public int Foo(int value) { return 42; }
-}
+                            class Base : IInterface
+                            {
+                                public int Foo() { return 42; }
+                                public int Foo(int value) { return 42; }
+                            }
 
-class Implementation : Base, ISubInterface
-{
-    public new int Foo() { return 42; }
-}
-""";
+                            class Implementation : Base, ISubInterface
+                            {
+                                public new int Foo() { return 42; }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
@@ -184,17 +184,17 @@ class Implementation : Base, ISubInterface
     public void GenericImplementation()
     {
         const string code = """
-interface IInterface<T>
-{
-    int Foo(T param);
-}
+                            interface IInterface<T>
+                            {
+                                int Foo(T param);
+                            }
 
-class Implementation : IInterface<int>, IInterface<string>
-{
-    public int Foo(int value) { return 42; }
-    public int Foo(string value) { return 42; }
-}
-""";
+                            class Implementation : IInterface<int>, IInterface<string>
+                            {
+                                public int Foo(int value) { return 42; }
+                                public int Foo(string value) { return 42; }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );

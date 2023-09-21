@@ -57,5 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAssembly DeclaringAssembly => this;
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
+
+        public override bool BelongsToCurrentProject => false;
     }
 }

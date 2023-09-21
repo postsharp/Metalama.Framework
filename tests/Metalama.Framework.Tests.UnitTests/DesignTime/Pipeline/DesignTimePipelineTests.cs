@@ -36,7 +36,8 @@ public sealed class DesignTimePipelineTests : UnitTestClass
     private static CSharpCompilation CreateCSharpCompilation(
         IReadOnlyDictionary<string, string> code,
         string? assemblyName = null,
-        bool acceptErrors = false )
+        bool acceptErrors = false,
+        IEnumerable<MetadataReference>? additionalReferences = null )
     {
         CSharpCompilation CreateEmptyCompilation()
         {
@@ -54,13 +55,15 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
+                    MetadataReference.CreateFromFile( typeof(Enumerable).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
+                .AddReferences( additionalReferences ?? Enumerable.Empty<MetadataReference>() );
         }
 
         var compilation = CreateEmptyCompilation();
 
         compilation = compilation.AddSyntaxTrees(
-            code.SelectAsReadOnlyCollection(
+            code.SelectAsArray(
                 c => SyntaxFactory.ParseSyntaxTree(
                     c.Value,
                     path: c.Key,
@@ -74,16 +77,16 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         return compilation;
     }
 
-    private static void DumpSyntaxTreeResult( SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
+    private static void DumpSyntaxTreeResult( SyntaxTree? syntaxTree, SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
     {
         string GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
-            var syntaxTree = diagnostic.Location.SourceTree ?? syntaxTreeResult.SyntaxTree;
+            var syntaxTreeOfDiagnostic = diagnostic.Location.SourceTree ?? syntaxTree;
 
-            return syntaxTree.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            return syntaxTreeOfDiagnostic?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString() ?? "";
         }
 
-        stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
+        stringBuilder.AppendLine( syntaxTreeResult.SyntaxTreePath + ":" );
 
         // Diagnostics
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
@@ -117,7 +120,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         var i = 0;
 
-        foreach ( var result in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
+        foreach ( var syntaxTreeResult in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTreePath ) )
         {
             if ( i > 0 )
             {
@@ -126,7 +129,9 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
             i++;
 
-            DumpSyntaxTreeResult( result, stringBuilder );
+            var syntaxTree = syntaxTreeResult.SyntaxTreePath != null ? results.ProjectVersion.SyntaxTrees[syntaxTreeResult.SyntaxTreePath].SyntaxTree : null;
+
+            DumpSyntaxTreeResult( syntaxTree, syntaxTreeResult, stringBuilder );
         }
 
         return stringBuilder.ToString().Trim();
@@ -1121,5 +1126,206 @@ class D{version}
                                       """;
 
         Assert.Equal( expectedResult.Replace( "\r\n", "\n" ), dumpedResults.Replace( "\r\n", "\n" ) );
+    }
+
+    [Fact]
+    public void OptionsTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["options.cs"] = OptionsTestHelper.OptionsCode,
+            ["aspect.cs"] = OptionsTestHelper.ReportWarningFromOptionAspectCode,
+            ["fabric.cs"] = """
+                            using Metalama.Framework.Fabrics;
+                            class Fabric : ProjectFabric
+                            {
+                                public override void AmendProject( IProjectAmender amender )
+                                {
+                                    amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                }
+                            }
+                            """,
+            ["target.cs"] =
+                """
+                class C
+                {
+                    [ReportWarningFromOptionsAspect]
+                    void M(){}
+                }
+                """
+        };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var compilation = CreateCSharpCompilation( code );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+        Assert.Contains( results.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_VALUE'" ) );
+    }
+
+    [Fact]
+    public async Task OptionsCrossProjectTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string fabricCode = """
+                                  using Metalama.Framework.Fabrics;
+                                  class Fabric : ProjectFabric
+                                  {
+                                      public override void AmendProject( IProjectAmender amender )
+                                      {
+                                          amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                      }
+                                  }
+                                  """;
+
+        var dependencyCode = new Dictionary<string, string>()
+        {
+            ["options.cs"] = OptionsTestHelper.OptionsCode,
+            ["fabric.cs"] = fabricCode,
+            ["code.cs"] =
+                """
+                public class C {}
+                """
+        };
+
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = OptionsTestHelper.ReportWarningFromOptionAspectCode,
+            ["target.cs"] =
+                """
+                class D : C
+                {
+                    [ReportWarningFromOptionsAspect]
+                    void M(){}
+                }
+                """
+        };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var dependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+        var compilation = CreateCSharpCompilation( code, assemblyName: "main", additionalReferences: new[] { dependencyCompilation.ToMetadataReference() } );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+        Assert.Contains( results.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_VALUE'" ) );
+
+        // Try an update.
+        dependencyCode["fabric.cs"] = fabricCode.Replace( "THE_VALUE", "THE_UPDATED_VALUE" );
+        var updatedDependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+
+        var updatedCompilation = CreateCSharpCompilation(
+            code,
+            assemblyName: "main",
+            additionalReferences: new[] { updatedDependencyCompilation.ToMetadataReference() } );
+
+        // The next pipeline run will pause the pipeline.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out _ ) );
+
+        // Resume the pipeline.
+        await factory.ResumePipelinesAsync( AsyncExecutionContext.Get(), false, default );
+
+        // Run the pipeline again.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResults ) );
+        Assert.Contains( updatedResults.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_UPDATED_VALUE'" ) );
+    }
+
+    [Fact]
+    public void AnnotationsCrossProjectTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var dependencyCode = new Dictionary<string, string>()
+        {
+            ["annotation.cs"] =
+                """
+                using Metalama.Framework.Code;
+                public class TheAnnotation : IAnnotation<INamedType>
+                {
+                    public string Value;
+                    
+                    public TheAnnotation( string value )
+                    {
+                        this.Value = value;
+                    }
+                }
+                """,
+            ["aspect.cs"] =
+                """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                public class AddAnnotation : TypeAspect
+                {
+                    public string Value;
+                   
+                   public AddAnnotation( string value )
+                   {
+                       this.Value = value;
+                   }
+                    
+                    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                    {
+                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value), true );
+                    }
+                }
+                """,
+            ["code.cs"] =
+                """
+                [AddAnnotation("THE_VALUE")]
+                public class C {}
+                """
+        };
+
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] =
+                """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Diagnostics;
+                using Metalama.Framework.Eligibility;
+                using System.Linq;
+                using System;
+
+                class ReportWarningFromAnnotationAspect : TypeAspect
+                {
+                   private static readonly DiagnosticDefinition<string> _description = new("MY001", Severity.Warning, "Option='{0}'" );
+                   
+                   public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
+                   {
+                        var annotation = aspectBuilder.Target.BaseType.Enhancements().GetAnnotations<TheAnnotation>().SingleOrDefault();
+                        aspectBuilder.Diagnostics.Report( _description.WithArguments( annotation?.Value ?? "<undefined>" ) );
+                   }
+                }
+                """,
+            ["target.cs"] =
+                """
+                [ReportWarningFromAnnotationAspect]
+                class D : C
+                {
+                    
+                }
+                """
+        };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var dependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+        var compilation = CreateCSharpCompilation( code, assemblyName: "main", additionalReferences: new[] { dependencyCompilation.ToMetadataReference() } );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+        Assert.Contains( results.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_VALUE'" ) );
+
+        // Try an update.
+        dependencyCode["code.cs"] = dependencyCode["code.cs"].Replace( "THE_VALUE", "THE_UPDATED_VALUE" );
+        var updatedDependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+
+        var updatedCompilation = CreateCSharpCompilation(
+            code,
+            assemblyName: "main",
+            additionalReferences: new[] { updatedDependencyCompilation.ToMetadataReference() } );
+
+        // Run the pipeline again.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResults ) );
+        Assert.Contains( updatedResults.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_UPDATED_VALUE'" ) );
     }
 }

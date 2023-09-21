@@ -65,12 +65,14 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             }
 
             var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;
-            var finalCompilation = pipelineResult.Value.LastCompilationModel.AssertNotNull();
+            var finalCompilation = pipelineResult.Value.LastCompilationModel;
 
             // Run the validators.
-            if ( !pipelineResult.Value.ValidatorSources.IsDefaultOrEmpty )
+            var validatorSources = pipelineResult.Value.ContributorSources.ValidatorSources;
+
+            if ( !validatorSources.IsDefaultOrEmpty )
             {
-                var validationRunner = new ValidationRunner( configuration, pipelineResult.Value.ValidatorSources );
+                var validationRunner = new ValidationRunner( configuration, validatorSources );
                 var initialCompilation = pipelineResult.Value.FirstCompilationModel.AssertNotNull();
                 var validationResult = await validationRunner.RunAllAsync( initialCompilation, finalCompilation, cancellationToken );
 

@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
@@ -56,7 +57,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
     ImmutableUserDiagnosticList IPipelineStepsResult.Diagnostics => this._diagnostics.ToImmutable();
 
-    public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
+    public ImmutableArray<IAspectSource> OverflowAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
     public ImmutableArray<AspectInstanceResult> AspectInstanceResults => this._aspectInstanceResults.ToImmutableArray();
 
@@ -65,8 +66,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     public PipelineStepsState(
         IReadOnlyList<OrderedAspectLayer> aspectLayers,
         CompilationModel inputLastCompilation,
-        ImmutableArray<IAspectSource> inputAspectSources,
-        ImmutableArray<IValidatorSource> inputValidatorSources,
+        PipelineContributorSources sources,
         AspectPipelineConfiguration pipelineConfiguration,
         CancellationToken cancellationToken )
     {
@@ -96,8 +96,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Add the initial sources.
         // TODO: process failure of the next line.
-        this.AddAspectSources( inputAspectSources, cancellationToken );
-        this.AddValidatorSources( inputValidatorSources );
+        this.AddAspectSources( sources.AspectSources, false, cancellationToken );
+        this.AddValidatorSources( sources.ValidatorSources );
     }
 
     public async Task ExecuteAsync( CancellationToken cancellationToken )
@@ -144,7 +144,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         previousStep = currentStep;
     }
 
-    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, CancellationToken cancellationToken )
+    public void AddAspectSources( IEnumerable<IAspectSource> aspectSources, bool addOtherStagesToOverflow, CancellationToken cancellationToken )
     {
         foreach ( var aspectSource in aspectSources )
         {
@@ -182,7 +182,10 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                             }
                         }
 
-                        this._overflowAspectSource.Add( aspectSource, aspectType );
+                        if ( addOtherStagesToOverflow )
+                        {
+                            this._overflowAspectSource.Add( aspectSource, aspectType );
+                        }
                     }
                     else
                     {
@@ -281,7 +284,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             var aspectInstance = new AspectInstance( aspect, requirementTarget, stronglyTypedAspectClass, predecessors.ToImmutableArray() );
             var eligibility = aspectInstance.ComputeEligibility( requirementTarget );
 
-            if ( (eligibility & (EligibleScenarios.Aspect | EligibleScenarios.Inheritance)) != 0 )
+            if ( (eligibility & (EligibleScenarios.Default | EligibleScenarios.Inheritance)) != 0 )
             {
                 aspectInstances.Add( new ResolvedAspectInstance( aspectInstance, (IDeclarationImpl) requirementTarget, eligibility ) );
             }
@@ -296,7 +299,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         // Get the aspects that can be processed, i.e. they are not abstract-only.
         var concreteAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Default ) )
             .ToReadOnlyList();
 
         // Gets aspects that can be inherited.
@@ -312,7 +315,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
                     .Select( d => (TargetDeclaration: (IDeclarationImpl) d, DerivedAspectInstance: a.AspectInstance.CreateDerivedInstance( d )) )
                     .Select(
                         x => (x.TargetDeclaration, x.DerivedAspectInstance, Eligibility: x.DerivedAspectInstance.ComputeEligibility( x.TargetDeclaration )) )
-                    .Where( x => x.Eligibility.IncludesAny( EligibleScenarios.Aspect | EligibleScenarios.Inheritance ) )
+                    .Where( x => x.Eligibility.IncludesAny( EligibleScenarios.Default | EligibleScenarios.Inheritance ) )
                     .Select(
                         x =>
                             new ResolvedAspectInstance(
@@ -322,7 +325,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             .ToReadOnlyList();
 
         var concreteInheritedAspectInstancesInProject =
-            inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+            inheritedAspectInstancesInProject.Where( x => x.Eligibility.IncludesAll( EligibleScenarios.Default ) )
                 .ToReadOnlyList();
 
         // Index these aspects. 
@@ -443,6 +446,14 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         foreach ( var source in validatorSources )
         {
             this._validatorSources.Add( source );
+        }
+    }
+
+    public void AddOptionsSources( IEnumerable<IHierarchicalOptionsSource> optionsSources )
+    {
+        foreach ( var source in optionsSources )
+        {
+            this.LastCompilation.HierarchicalOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
         }
     }
 

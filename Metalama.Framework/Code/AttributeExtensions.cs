@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Diagnostics;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
@@ -39,6 +42,22 @@ namespace Metalama.Framework.Code
             value = default;
 
             return false;
+        }
+
+        /// <summary>
+        /// Tries to construct an instance of the attribute represented by the current <see cref="IAttribute"/>. The attribute type
+        /// must not be a run-time-only type.
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="diagnosticSink"></param>
+        /// <param name="constructedAttribute"></param>
+        /// <returns></returns>
+        public static bool TryConstruct(
+            this IAttribute attribute,
+            ScopedDiagnosticSink diagnosticSink,
+            [NotNullWhen( true )] out Attribute? constructedAttribute )
+        {
+            return ((ICompilationInternal) attribute.Compilation).Helpers.TryConstructAttribute( attribute, diagnosticSink, out constructedAttribute );
         }
 
         internal static object? GetNamedArgumentValue( this IAttribute attribute, string name )

@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -28,6 +29,8 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
+
+    public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
     internal bool IsMutable { get; }
 
@@ -293,6 +296,17 @@ public sealed partial class CompilationModel
         {
             this.AddIntroduceInterfaceTransformation( introduceInterface );
         }
+
+        if ( transformation is AddAnnotationTransformation addAnnotationTransformation )
+        {
+            this.AddAnnotation( addAnnotationTransformation );
+        }
+    }
+
+    private void AddAnnotation( AddAnnotationTransformation addAnnotationTransformation )
+    {
+        this.Annotations =
+            this.Annotations.Add( addAnnotationTransformation.TargetDeclaration.ToTypedRef(), addAnnotationTransformation.AnnotationInstance );
     }
 
     private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 this._serviceProvider,
-                input.Compilation,
+                input.LastCompilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
                 diagnosticSink,
@@ -68,15 +69,18 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             return
                 new AspectPipelineResult(
-                    input.Compilation,
+                    input.LastCompilation,
                     input.Project,
                     input.AspectLayers,
-                    input.FirstCompilationModel ?? pipelineStepsResult.FirstCompilation,
+                    input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.LastCompilation,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                    input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                    validatorSources,
+                    new PipelineContributorSources(
+                        input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),
+                        validatorSources,
+                        ImmutableArray<IHierarchicalOptionsSource>.Empty ),
                     pipelineStepsResult.InheritableAspectInstances,
+                    pipelineStepsResult.LastCompilation.Annotations,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
                     input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ),

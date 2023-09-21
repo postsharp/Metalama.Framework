@@ -35,7 +35,7 @@ internal sealed class IncrementalAspectRepository : AspectRepository
         if ( type == null )
         {
             throw new InvalidOperationException(
-                MetalamaStringFormatter.Format( $"The Enhancement() method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
+                MetalamaStringFormatter.Format( $"This method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
         }
 
         if ( type.IsGenericType )
@@ -49,9 +49,9 @@ internal sealed class IncrementalAspectRepository : AspectRepository
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot call the Enhancements() method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current compilation." )
+                        $"Cannot call this method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current partial compilation." )
                     +
-                    "At design time, you can only use the Enhancements() method within the current type and its ancestors. " +
+                    $"At design time, you can only use this method within the current type and its ancestors. " +
                     "Use the `MetalamaExecutionContext.Current.ExecutionScenario.IsDesignTime` expression to check if your code is running at design time. " +
                     "Also check the IDeclaration.BelongsToCurrentProject property." );
             }
@@ -59,7 +59,7 @@ internal sealed class IncrementalAspectRepository : AspectRepository
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot call the Enhancements() method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current project. Check the IDeclaration.BelongsToCurrentProject property." ) );
+                        $"Cannot call this method with the {declaration.DeclarationKind} '{declaration}' because it not a part of the current project. Check the IDeclaration.BelongsToCurrentProject property." ) );
             }
         }
     }

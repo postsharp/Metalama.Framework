@@ -37,14 +37,14 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
-            this._attributeBuilder.NamedArguments.SelectAsList(
+            this._attributeBuilder.NamedArguments.SelectAsArray(
                 a => new KeyValuePair<string, TypedConstant>(
                     a.Key,
                     a.Value.ForCompilation( this.GetCompilationModel() ) ) ) );
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
-    public IRef<IDeclaration> TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 

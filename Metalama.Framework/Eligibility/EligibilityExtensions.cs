@@ -517,10 +517,10 @@ public static partial class EligibilityExtensions
     /// Determines whether the given declaration is an eligible target for a specified aspect type given as a type parameter.
     /// </summary>
     /// <param name="declaration">The declaration for which eligibility is determined.</param>
-    /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Aspect"/>.</param>
+    /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Default"/>.</param>
     /// <typeparam name="T">The aspect type.</typeparam>
     /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the aspect type <typeparamref name="T"/> for any of the specified <paramref name="scenarios"/>.</returns>
-    public static bool IsAspectEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+    public static bool IsAspectEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Default )
         where T : IAspect
         => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( typeof(T), declaration, scenarios );
 
@@ -529,9 +529,9 @@ public static partial class EligibilityExtensions
     /// </summary>
     /// <param name="declaration">The declaration for which eligibility is determined.</param>
     /// <param name="aspectType">The aspect type.</param>
-    /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Aspect"/>.</param>
+    /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Default"/>.</param>
     /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the given <paramref name="aspectType"/> for any of the specified <paramref name="scenarios"/>.</returns>
-    public static bool IsAspectEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+    public static bool IsAspectEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Default )
         => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( aspectType, declaration, scenarios );
 
     /// <summary>
@@ -542,7 +542,7 @@ public static partial class EligibilityExtensions
     /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the given <paramref name="adviceKind"/>.</returns>
     /// <seealso cref="IsContractAdviceEligible"/>
     public static bool IsAdviceEligible( this IDeclaration declaration, AdviceKind adviceKind )
-        => (EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
+        => (EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind ).GetEligibility( declaration ) & EligibleScenarios.Default) != 0;
 
     /// <summary>
     ///  Determines whether the given declaration is an eligible target for an <see cref="AdviceKind.AddContract"/> advice for a given <see cref="ContractDirection"/>.
@@ -551,5 +551,5 @@ public static partial class EligibilityExtensions
     /// <param name="contractDirection">The contract direction.</param>
     /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for an <see cref="AdviceKind.AddContract"/> advice for the given <paramref name="contractDirection"/>.</returns>
     public static bool IsContractAdviceEligible( this IDeclaration declaration, ContractDirection contractDirection = ContractDirection.Default )
-        => (EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
+        => (EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection ).GetEligibility( declaration ) & EligibleScenarios.Default) != 0;
 }

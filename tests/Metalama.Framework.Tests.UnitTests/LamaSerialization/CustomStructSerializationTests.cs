@@ -242,14 +242,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class SimpleClassSerializer : ReferenceTypeSerializer<SimpleClass>
             {
-                internal override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "x", obj.X );
                 }
 
-                internal override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
+                public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
 
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override SimpleClass CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new SimpleClass( constructorArguments.GetValue<int>( "x" ) );
                 }

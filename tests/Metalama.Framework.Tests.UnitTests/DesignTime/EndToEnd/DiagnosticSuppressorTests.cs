@@ -49,39 +49,39 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
     public async Task SuppressVariableLevelWarning()
     {
         const string code = """
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
-{
-    public class SuppressWarningAttribute : MethodAspect
-    {
-        private static readonly SuppressionDefinition _suppression1 = new( "CS0219" );
-
-        public override void BuildAspect( IAspectBuilder<IMethod> builder )
-        {
-            builder.Diagnostics.Suppress( _suppression1, builder.Target );
-        }
-    }
-
-    // <target>
-    internal class TargetClass
-    {
-        [SuppressWarning]
-        private void M2( string m )
-        {
-            var x = 0;
-        }
-
-        // CS0219 expected 
-        private void M1( string m )
-        {
-            var x = 0;
-        }
-    }
-}
-""";
+                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            {
+                                public class SuppressWarningAttribute : MethodAspect
+                                {
+                                    private static readonly SuppressionDefinition _suppression1 = new( "CS0219" );
+                            
+                                    public override void BuildAspect( IAspectBuilder<IMethod> builder )
+                                    {
+                                        builder.Diagnostics.Suppress( _suppression1, builder.Target );
+                                    }
+                                }
+                            
+                                // <target>
+                                internal class TargetClass
+                                {
+                                    [SuppressWarning]
+                                    private void M2( string m )
+                                    {
+                                        var x = 0;
+                                    }
+                            
+                                    // CS0219 expected
+                                    private void M1( string m )
+                                    {
+                                        var x = 0;
+                                    }
+                                }
+                            }
+                            """;
 
         var suppressions = await this.ExecuteSuppressorAsync( code, "CS0219" );
 
@@ -94,30 +94,30 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
     public async Task SuppressFieldLevelWarning()
     {
         const string code = """
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
-{
-    public class SuppressWarningAttribute : FieldAspect
-    {
-        private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
-
-        public override void BuildAspect( IAspectBuilder<IField> builder )
-        {
-            builder.Diagnostics.Suppress( _suppression1, builder.Target );
-        }
-    }
-
-    // <target>
-    internal class TargetClass
-    {
-        [SuppressWarning]
-        int _field;       
-    }
-}
-""";
+                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            {
+                                public class SuppressWarningAttribute : FieldAspect
+                                {
+                                    private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+                            
+                                    public override void BuildAspect( IAspectBuilder<IField> builder )
+                                    {
+                                        builder.Diagnostics.Suppress( _suppression1, builder.Target );
+                                    }
+                                }
+                            
+                                // <target>
+                                internal class TargetClass
+                                {
+                                    [SuppressWarning]
+                                    int _field;
+                                }
+                            }
+                            """;
 
         var suppressions = await this.ExecuteSuppressorAsync( code, "CS0169" );
 

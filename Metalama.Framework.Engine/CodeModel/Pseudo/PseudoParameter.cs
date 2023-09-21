@@ -80,8 +80,6 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-        public override IDeclaration OriginalDefinition => this;
-
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
@@ -99,12 +97,12 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new TypedExpressionSyntaxImpl( 
+            => new TypedExpressionSyntaxImpl(
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,
                 ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
                 isReferenceable: true );
-        
+
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;

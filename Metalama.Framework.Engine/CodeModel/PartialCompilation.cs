@@ -213,8 +213,8 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
-                closure.Types,
-                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypes ),
+                closure.DeclaredTypes,
+                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
         }
 
@@ -232,8 +232,8 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
-                closure.Types.ToImmutableHashSet(),
-                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypes ),
+                closure.DeclaredTypes.ToImmutableHashSet(),
+                new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
         }
 
@@ -255,7 +255,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypes)
+        private static (ImmutableHashSet<INamedTypeSymbol> DeclaredTypes, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypeIndex)
             GetClosure( CompilationContext compilationContext, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilationContext.Compilation.Assembly;
@@ -325,18 +325,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
-                // Add all types in this syntax tree, as well as all base types.
-                foreach ( var typeNode in syntaxTree.FindDeclaredTypes() )
-                {
-                    var type = (INamedTypeSymbol?) semanticModel.GetDeclaredSymbol( typeNode );
-
-                    if ( type == null )
-                    {
-                        continue;
-                    }
-
-                    AddTypeRecursive( type );
-                }
+                DependencyAnalysisHelper.FindDeclaredTypes(
+                    semanticModel,
+                    AddTypeRecursive );
             }
 
             return (topLevelTypes.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());

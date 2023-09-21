@@ -230,7 +230,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var transformedFileGenerator = new TransformedPathGenerator();
 
         var syntaxTrees = treesWithCompileTimeCode
-            .SelectAsList(
+            .SelectAsArray(
                 t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ),
                       Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
             .OrderBy( t => t.FileName )
@@ -330,7 +330,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
         var predefinedSyntaxTrees =
-            _predefinedTypesSyntaxTree.Value.SelectAsReadOnlyCollection( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
+            _predefinedTypesSyntaxTree.Value.SelectAsArray( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
         return CSharpCompilation.Create(
                 assemblyName,
@@ -1076,7 +1076,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                             .ToReadOnlyList();
 
                         var fabricTypeNames = fabricTypes
-                            .SelectAsList( t => t.GetReflectionFullName().AssertNotNull() );
+                            .SelectAsArray( t => t.GetReflectionFullName().AssertNotNull() );
 
                         var transitiveFabricTypeNames = compilationForManifest.Assembly.GetTypes()
                             .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )

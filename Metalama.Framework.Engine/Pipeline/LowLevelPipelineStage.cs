@@ -35,13 +35,14 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         IDiagnosticAdder diagnostics,
         TestableCancellationToken cancellationToken )
     {
-        // TODO: it is suboptimal to get a CompilationModel here.
-        var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
-        var compilation = input.Compilation.Compilation;
+        var compilationModel = input.LastCompilationModel;
 
-        var aspectInstances = input.AspectSources.Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
+        var aspectInstances = input.ContributorSources.AspectSources
+            .Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
             .SelectMany( x => x.AspectInstances )
-            .GroupBy( i => i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
+            .GroupBy(
+                i => i.TargetDeclaration.GetSymbol( compilationModel.RoslynCompilation )
+                    .AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
             .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
 
         if ( !aspectInstances.Any() )
@@ -56,7 +57,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         var context = new AspectWeaverContext(
             this._aspectClass,
             aspectInstances,
-            input.Compilation,
+            input.LastCompilation,
             diagnostics.Report,
             pipelineConfiguration.ServiceProvider.Underlying,
             input.Project,
@@ -83,13 +84,15 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         // (the problem here is that we don't necessarily need CompilationModels after a low-level pipeline, because
         // they are supposed to be "unmanaged" at the end of the pipeline. Currently this condition is not properly enforced,
         // and we don't test what happens when a low-level stage is before a high-level stage).
+        var newCompilationModel = newCompilation == compilationModel.PartialCompilation ? compilationModel : null;
+
         return new AspectPipelineResult(
             newCompilation,
             input.Project,
             input.AspectLayers,
-            input.FirstCompilationModel,
-            CompilationModel.CreateInitialInstance( input.FirstCompilationModel.AssertNotNull().Project, newCompilation ),
+            input.FirstCompilationModel.AssertNotNull(),
+            newCompilationModel,
             input.Diagnostics,
-            input.AspectSources );
+            input.ContributorSources );
     }
 }

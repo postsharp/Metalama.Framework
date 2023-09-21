@@ -19,7 +19,9 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed class ProjectModel : IProject
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
+#pragma warning restore CS0618 // Type or member is obsolete
         private readonly IProjectOptions _projectOptions;
 
         internal ProjectServiceProvider ServiceProvider { get; }
@@ -54,8 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        public string Name
-            => this._projectOptions.ProjectName ?? this._projectOptions.AssemblyName ?? "";
+        public string Name => this._projectOptions.ProjectName ?? this._projectOptions.AssemblyName ?? "";
 
         public string AssemblyName => this._projectOptions.AssemblyName ?? "";
 
@@ -71,6 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._projectOptions.TryGetProperty( name, out value );
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public T Extension<T>()
             where T : ProjectExtension, new()
             => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectExtension );
@@ -82,6 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return data;
         }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
 

@@ -155,12 +155,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public sealed class Serializer : ReferenceTypeSerializer<Base>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override Base CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new Base();
                 }
 
-                internal override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( Base obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     if ( obj.Fail == Fail.Write )
                     {
@@ -170,7 +170,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "Fail", obj.Fail );
                 }
 
-                internal override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
                 {
                     obj.Fail = initializationArguments.GetValue<Fail>( "Fail" );
 
@@ -188,17 +188,17 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public new class Serializer : ReferenceTypeSerializer<Child>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override Child CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new Child();
                 }
 
-                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     new Base.Serializer().SerializeObject( obj, constructorArguments, initializationArguments );
                 }
 
-                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     new Base.Serializer().DeserializeFields( obj, initializationArguments );
                 }
@@ -220,12 +220,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<ReferenceToChildren>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override ReferenceToChildren CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new ReferenceToChildren();
                 }
 
-                internal override void SerializeObject(
+                public override void SerializeObject(
                     ReferenceToChildren obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "Children", obj.Children );
                 }
 
-                internal override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<List<Child>>( "Children" ).AssertNotNull();
                 }

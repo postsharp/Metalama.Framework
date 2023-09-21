@@ -29,20 +29,20 @@ public sealed class CompileTimeErrorNotificationTests : DistributedDesignTimeTes
         await testContext.WhenFullyInitialized;
 
         const string codeWithError = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using System;
+                                                 using Metalama.Framework.Aspects;
+                                                 using Metalama.Framework.Code;
+                                                 using System;
+                                     
+                                                 public class InjectedLoggerAttribute : OverrideMethodAspect
+                                                 {
+                                     
+                                                     public override dynamic? OverrideMethod()
+                                                     {
+                                                         some error here
+                                                     }
+                                                 }
 
-            public class InjectedLoggerAttribute : OverrideMethodAspect
-            {
-
-                public override dynamic? OverrideMethod()
-                {
-                    some error here
-                }
-            }
-
-""";
+                                     """;
 
         // Initialize the workspace. We are initializing it with an error to check that we get the initial state correctly.
         var projectKey = testContext.WorkspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = codeWithError } );

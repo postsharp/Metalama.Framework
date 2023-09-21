@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
@@ -39,14 +40,17 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         this._targetSymbol = targetSymbol;
     }
 
-    private protected override (ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
+    private protected override PipelineContributorSources CreatePipelineContributorSources(
         AspectPipelineConfiguration configuration,
         Compilation compilation,
         CancellationToken cancellationToken )
     {
         var aspectClass = this._aspectSelector( configuration );
 
-        return (ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ), ImmutableArray<IValidatorSource>.Empty);
+        return new PipelineContributorSources(
+            ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ),
+            ImmutableArray<IValidatorSource>.Empty,
+            ImmutableArray<IHierarchicalOptionsSource>.Empty );
     }
 
     public static async Task<FallibleResult<PartialCompilation>> ExecuteAsync(
@@ -72,7 +76,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         {
             diagnosticAdder.Report(
                 LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                    aspectInstance.TargetDeclaration.GetSymbol( result.Value.Compilation.Compilation )
+                    aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
                         .AssertNotNull( "Live templates should be always applied on a target." )
                         .GetDiagnosticLocation(),
                     ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
@@ -86,7 +90,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         }
         else
         {
-            return result.Value.Compilation;
+            return result.Value.LastCompilation;
         }
     }
 

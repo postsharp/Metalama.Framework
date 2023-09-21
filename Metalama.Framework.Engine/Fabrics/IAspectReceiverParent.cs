@@ -12,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal interface IAspectReceiverParent : IValidatorDriverFactory, IAspectOrValidatorSourceCollector, IDiagnosticSource
+internal interface IAspectReceiverParent : IValidatorDriverFactory, IPipelineContributorSourceCollector, IDiagnosticSource
 {
     ProjectServiceProvider ServiceProvider { get; }
 

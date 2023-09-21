@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     return default;
                 }
 
-                var resultPartialCompilation = result.Value.Compilation;
+                var resultPartialCompilation = result.Value.LastCompilation;
 
                 // Execute validators.
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
@@ -185,12 +185,22 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 }
 
                 // Create a manifest for transitive aspects and validators.
-                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
+                var inheritableOptions =
+                    result.Value.FirstCompilationModel.AssertNotNull()
+                        .HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel, false )
+                        .ToImmutableDictionary();
+
+                var annotations = result.Value.LastCompilationModel.GetExportedAnnotations();
+
+                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 || inheritableOptions.Count > 0
+                     || !annotations.IsEmpty )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) )
                             .ToImmutableArray(),
-                        referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
+                        referenceValidators.SelectAsImmutableArray( i => new TransitiveValidatorInstance( i ) ),
+                        inheritableOptions,
+                        annotations );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
                     additionalResources = additionalResources.Add( resource );

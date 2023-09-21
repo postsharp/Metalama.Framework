@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Collections
             private readonly ImmutableDictionary<TKey, ImmutableArray<TValue>.Builder>.Builder _modifiedValuesBuilder;
 
             // Creates a Builder initialized to an empty dictionary.
-            internal Builder( IEqualityComparer<TKey>? comparer )
+            internal Builder( IEqualityComparer<TKey>? comparer = null )
             {
                 this._modifiedValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( comparer );
             }
@@ -45,6 +45,25 @@ namespace Metalama.Framework.Engine.Collections
                 }
 
                 arrayBuilder.Add( value );
+            }
+
+            public void Add( TKey key, IEnumerable<TValue> values )
+            {
+                if ( !this._modifiedValuesBuilder.TryGetValue( key, out var arrayBuilder ) )
+                {
+                    if ( this._initialValues?._dictionary.TryGetValue( key, out var existingGroup ) == true )
+                    {
+                        arrayBuilder = existingGroup.Items.ToBuilder();
+                    }
+                    else
+                    {
+                        arrayBuilder = ImmutableArray.CreateBuilder<TValue>();
+                    }
+
+                    this._modifiedValuesBuilder[key] = arrayBuilder;
+                }
+
+                arrayBuilder.AddRange( values );
             }
 
             public void AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue )
@@ -116,6 +135,27 @@ namespace Metalama.Framework.Engine.Collections
                 }
 
                 return arrayBuilder.Remove( value );
+            }
+
+            public void Remove( TKey key, IEnumerable<TValue> values )
+            {
+                if ( !this._modifiedValuesBuilder.TryGetValue( key, out var arrayBuilder ) )
+                {
+                    if ( this._initialValues?._dictionary.TryGetValue( key, out var existingGroup ) == true )
+                    {
+                        arrayBuilder = existingGroup.Items.ToBuilder();
+                        this._modifiedValuesBuilder[key] = arrayBuilder;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                foreach ( var value in values )
+                {
+                    arrayBuilder.Remove( value );
+                }
             }
         }
     }

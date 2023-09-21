@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -116,7 +117,8 @@ internal sealed class AspectDriver : IAspectDriver
                     ImmutableUserDiagnosticList.Empty,
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<IValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty,
+                    ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
@@ -127,7 +129,8 @@ internal sealed class AspectDriver : IAspectDriver
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<IValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty,
+                    ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -231,7 +234,8 @@ internal sealed class AspectDriver : IAspectDriver
                         diagnosticSink.ToImmutable(),
                         ImmutableArray<ITransformation>.Empty,
                         ImmutableArray<IAspectSource>.Empty,
-                        ImmutableArray<IValidatorSource>.Empty );
+                        ImmutableArray<IValidatorSource>.Empty,
+                        ImmutableArray<IHierarchicalOptionsSource>.Empty );
             }
 
             var aspectResult = aspectBuilderState.ToResult();
@@ -240,7 +244,7 @@ internal sealed class AspectDriver : IAspectDriver
             {
                 aspectInstance.Skip();
             }
-            else
+            else if ( aspectResult.Outcome != AdviceOutcome.Ignore )
             {
                 // Validators on the current version of the compilation must be executed now.
 

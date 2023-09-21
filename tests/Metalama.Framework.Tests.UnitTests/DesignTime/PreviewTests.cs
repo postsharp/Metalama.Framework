@@ -155,6 +155,43 @@ class Fabric : ProjectFabric
     }
 
     [Fact]
+    public async Task WithProjectFabricAndOptions()
+    {
+        var code = new Dictionary<string, string>()
+        {
+            ["options.cs"] = OptionsTestHelper.OptionsCode,
+            ["aspect.cs"] =
+                """
+
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Fabrics;
+
+                class MyAspect : TypeAspect
+                {
+                    [Introduce]
+                    public string Field = meta.AspectInstance.GetOptions<MyOptions>().Value;
+                }
+
+
+                class Fabric : ProjectFabric
+                {
+                    public override void AmendProject( IProjectAmender amender )
+                    {
+                        amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "TheValue" } );
+                        amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
+                    }
+                }
+
+                """,
+            ["target.cs"] = "class C {}"
+        };
+
+        var result = await this.RunPreviewAsync( code, "target.cs" );
+
+        Assert.Contains( "Field=\"TheValue\"", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
     public async Task WithTypeFabric()
     {
         var code = new Dictionary<string, string>()

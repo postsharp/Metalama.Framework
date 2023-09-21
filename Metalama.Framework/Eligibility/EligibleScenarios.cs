@@ -14,30 +14,33 @@ namespace Metalama.Framework.Eligibility
     public enum EligibleScenarios
     {
         /// <summary>
-        /// Means that the aspect can neither be applied to the target declaration, nor to declarations derived from the the
-        /// target declaration, nor as a live template.
+        /// Means that the aspect or option can neither be applied to the target declaration, nor to declarations derived from the the
+        /// target declaration, nor, for aspects, as a live template.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// Means that the aspect can be applied to declarations that are derived from the target declaration, but not on
+        /// Means that the aspect or option can be applied to declarations that are derived from the target declaration, but not on
         /// the target declaration itself.
         /// </summary>
         Inheritance = 1,
 
         /// <summary>
-        /// Means that the aspect can be applied to the target declaration.
+        /// Means that the aspect or option can be applied to the target declaration.
         /// </summary>
-        Aspect = 2,
+        Default = 2,
+
+        [Obsolete( "Use EligibleScenarios.Default" )]
+        Aspect = Default,
 
         /// <summary>
-        /// Means that the aspect can be used as a live template on the target declaration.
+        /// Means that the aspect or option can be used as a live template on the target declaration.
         /// </summary>
         LiveTemplate = 4,
 
         /// <summary>
-        /// Means that the aspect can be used in any scenario.
+        /// Means that the aspect or option can be used in any scenario.
         /// </summary>
-        All = Inheritance | Aspect | LiveTemplate
+        All = Inheritance | Default | LiveTemplate
     }
 }

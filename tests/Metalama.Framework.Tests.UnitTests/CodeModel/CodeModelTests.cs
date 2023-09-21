@@ -1036,6 +1036,9 @@ class D
 
             Assert.Single( system.Types.OfName( nameof(Math) ) );
             Assert.NotNull( system.Namespaces.OfName( "Collections" ) );
+
+            Assert.False( system.BelongsToCurrentProject );
+            Assert.Same( system.DeclaringAssembly, system.ParentNamespace?.ContainingDeclaration );
         }
 
         [Fact]
@@ -1153,29 +1156,29 @@ class Derived : Base<int>
 
             var nonGenericClass = compilation.Types.OfName( "NonGeneric" ).Single();
             Assert.False( nonGenericClass.IsGeneric );
-            Assert.Same( nonGenericClass, nonGenericClass.TypeDefinition );
+            Assert.Same( nonGenericClass, nonGenericClass.Definition );
 
             var baseClass = compilation.Types.OfName( "Base" ).Single();
             Assert.True( baseClass.IsGeneric );
-            Assert.Same( baseClass, baseClass.TypeDefinition );
+            Assert.Same( baseClass, baseClass.Definition );
 
             var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
             Assert.False( baseMethod.IsGeneric );
-            Assert.Same( baseMethod, baseMethod.MethodDefinition );
+            Assert.Same( baseMethod, baseMethod.Definition );
 
             var derivedClass = compilation.Types.OfName( "Derived" ).Single();
             Assert.False( derivedClass.IsGeneric );
             Assert.True( derivedClass.BaseType!.IsGeneric );
-            Assert.Same( baseClass, derivedClass.BaseType.TypeDefinition );
+            Assert.Same( baseClass, derivedClass.BaseType.Definition );
 
             var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
             Assert.False( derivedMethod.IsGeneric );
             Assert.False( derivedMethod.OverriddenMethod!.IsGeneric );
-            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.MethodDefinition );
+            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.Definition );
 
             var genericMethod = derivedClass.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethod.IsGeneric );
-            Assert.Same( genericMethod, genericMethod.MethodDefinition );
+            Assert.Same( genericMethod, genericMethod.Definition );
         }
 
         [Fact]

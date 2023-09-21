@@ -261,17 +261,17 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<SimpleType>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override SimpleType CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new SimpleType();
                 }
 
-                internal override void SerializeObject( SimpleType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( SimpleType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "_", obj.Name );
                 }
 
-                internal override void DeserializeFields( SimpleType obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( SimpleType obj, IArgumentsReader initializationArguments )
                 {
                     obj.Name = initializationArguments.GetValue<string>( "_" );
                 }
@@ -330,12 +330,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override TypeWithDictionary<TKey, TValue> CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new TypeWithDictionary<TKey, TValue>();
                 }
 
-                internal override void SerializeObject(
+                public override void SerializeObject(
                     TypeWithDictionary<TKey, TValue> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
@@ -343,7 +343,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( "_", obj.Dictionary );
                 }
 
-                internal override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Dictionary = initializationArguments.GetValue<Dictionary<TKey, TValue>>( "_" );
                 }
@@ -357,17 +357,17 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             // deliberately serializing object graph not array to test deep object graphs
             public class Serializer : ReferenceTypeSerializer<LinkedListImpl>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override LinkedListImpl CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new LinkedListImpl();
                 }
 
-                internal override void SerializeObject( LinkedListImpl obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( LinkedListImpl obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( "_", obj.Head );
                 }
 
-                internal override void DeserializeFields( LinkedListImpl obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( LinkedListImpl obj, IArgumentsReader initializationArguments )
                 {
                     obj.Head = initializationArguments.GetValue<Node<int>>( "_" );
                 }
@@ -388,18 +388,18 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<Node<T>>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override Node<T> CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new Node<T>( constructorArguments.GetValue<T>( "v" )! );
                 }
 
-                internal override void SerializeObject( Node<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( Node<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "v", obj.Value );
                     initializationArguments.SetValue( "next", obj.Next );
                 }
 
-                internal override void DeserializeFields( Node<T> obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( Node<T> obj, IArgumentsReader initializationArguments )
                 {
                     obj.Next = initializationArguments.GetValue<Node<T>>( "next" );
                 }

@@ -41,7 +41,7 @@ public sealed class PreviewAspectPipeline : AspectPipeline
 
         if ( result.IsSuccessful )
         {
-            return result.Value.Compilation;
+            return result.Value.LastCompilation;
         }
         else
         {

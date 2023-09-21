@@ -31,20 +31,20 @@ public sealed class CodeLensTests : DistributedDesignTimeTestBase
         await testContext.WhenFullyInitialized;
 
         const string code = """
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
-using Metalama.Framework.Code;
-using Metalama.Framework.CodeFixes;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.CodeFixes;
 
-class TheAspect : TypeAspect 
-{
-   [Introduce]
-   void IntroducedMethod(){}
-}
+                            class TheAspect : TypeAspect
+                            {
+                               [Introduce]
+                               void IntroducedMethod(){}
+                            }
 
-[TheAspect
-class TheClass {}
-""";
+                            [TheAspect
+                            class TheClass {}
+                            """;
 
         // Initialize the workspace.
         var projectKey = testContext.WorkspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );

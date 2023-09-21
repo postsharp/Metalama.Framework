@@ -20,7 +20,7 @@ namespace Metalama.Framework.Code
         {
             var comparer = declaration.Compilation.Comparers.Default;
 
-            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
+            if ( comparer.Equals( declaration.GetDefinition(), containingDeclaration.GetDefinition() ) )
             {
                 return true;
             }
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Code
         }
 
         /// <summary>
-        /// Gets an object that gives access to the aspects on the current declaration.
+        /// Gets an object that gives access to the aspects, options and annotations on the current declaration.
         /// </summary>
         public static DeclarationEnhancements<T> Enhancements<T>( this T declaration )
             where T : class, IDeclaration

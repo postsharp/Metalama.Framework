@@ -75,6 +75,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
+        [Memo]
+        public IConstructor Definition
+            => this.MethodSymbol == this.MethodSymbol.OriginalDefinition
+                ? this
+                : this.Compilation.Factory.GetConstructor( this.MethodSymbol.OriginalDefinition );
+
+        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+
         public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
     }
 }

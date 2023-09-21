@@ -9,28 +9,28 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class AssemblyIdentityModel : IAssemblyIdentity
     {
-        private readonly AssemblyIdentity _assemblyIdentity;
+        public AssemblyIdentity Identity { get; }
 
         public AssemblyIdentityModel( AssemblyIdentity assemblyIdentity )
         {
-            this._assemblyIdentity = assemblyIdentity;
+            this.Identity = assemblyIdentity;
         }
 
-        public string Name => this._assemblyIdentity.Name;
+        public string Name => this.Identity.Name;
 
-        public Version Version => this._assemblyIdentity.Version;
+        public Version Version => this.Identity.Version;
 
-        public string CultureName => this._assemblyIdentity.CultureName;
+        public string CultureName => this.Identity.CultureName;
 
-        public ImmutableArray<byte> PublicKey => this._assemblyIdentity.PublicKey;
+        public ImmutableArray<byte> PublicKey => this.Identity.PublicKey;
 
-        public ImmutableArray<byte> PublicKeyToken => this._assemblyIdentity.PublicKeyToken;
+        public ImmutableArray<byte> PublicKeyToken => this.Identity.PublicKeyToken;
 
-        public bool IsStrongNamed => this._assemblyIdentity.IsStrongName;
+        public bool IsStrongNamed => this.Identity.IsStrongName;
 
-        public bool HasPublicKey => this._assemblyIdentity.HasPublicKey;
+        public bool HasPublicKey => this.Identity.HasPublicKey;
 
-        public override string ToString() => this._assemblyIdentity.ToString();
+        public override string ToString() => this.Identity.ToString();
 
         public bool Equals( IAssemblyIdentity? other )
         {
@@ -44,11 +44,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 return true;
             }
 
-            return this._assemblyIdentity.Equals( ((AssemblyIdentityModel) other)._assemblyIdentity );
+            return this.Identity.Equals( ((AssemblyIdentityModel) other).Identity );
         }
 
         public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || (obj is IAssemblyIdentity other && this.Equals( other ));
 
-        public override int GetHashCode() => this._assemblyIdentity.GetHashCode();
+        public override int GetHashCode() => this.Identity.GetHashCode();
     }
 }

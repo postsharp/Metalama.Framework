@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -24,14 +23,11 @@ public partial class DerivedTypeIndex
             this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( compilationContext.SymbolComparer );
         }
 
-        internal Builder(
-            CompilationContext compilationContext,
-            ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
-            ImmutableHashSet<INamedTypeSymbol>.Builder processedTypes )
+        internal Builder( DerivedTypeIndex immutable )
         {
-            this._compilationContext = compilationContext;
-            this._relationships = relationships;
-            this._processedTypes = processedTypes;
+            this._compilationContext = immutable._compilationContext;
+            this._relationships = immutable._relationships.ToBuilder();
+            this._processedTypes = immutable._processedTypes.ToBuilder();
         }
 
         public void AnalyzeType( INamedTypeSymbol type )
@@ -54,7 +50,7 @@ public partial class DerivedTypeIndex
                 {
                     continue;
                 }
-                
+
                 var interfaceType = interfaceImpl.OriginalDefinition;
                 this._relationships.Add( interfaceType, type );
                 this.AnalyzeType( interfaceType );
@@ -70,13 +66,10 @@ public partial class DerivedTypeIndex
 
         public DerivedTypeIndex ToImmutable()
         {
-            var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
-                .ToImmutableHashSet<INamedTypeSymbol>( this._compilationContext.SymbolComparer );
-
             return new DerivedTypeIndex(
                 this._compilationContext,
                 this._relationships.ToImmutable(),
-                externalBaseTypes );
+                this._processedTypes.ToImmutable() );
         }
     }
 }

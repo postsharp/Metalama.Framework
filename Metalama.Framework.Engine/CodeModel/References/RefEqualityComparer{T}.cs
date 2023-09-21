@@ -17,8 +17,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal sealed class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
         where T : class, ICompilationElement
     {
-        public static readonly RefEqualityComparer<T> Default = new( StructuralSymbolComparer.Default );
-        public static readonly RefEqualityComparer<T> IncludeNullability = new( StructuralSymbolComparer.IncludeNullability );
+        public static readonly RefEqualityComparer<T> Default = new( StructuralSymbolComparer.IncludeAssembly );
+        public static readonly RefEqualityComparer<T> IncludeNullability = new( StructuralSymbolComparer.IncludeAssemblyAndNullability );
 
         private RefEqualityComparer( StructuralSymbolComparer symbolEqualityComparer )
         {

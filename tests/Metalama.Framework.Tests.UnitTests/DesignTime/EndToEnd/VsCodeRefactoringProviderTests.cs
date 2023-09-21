@@ -29,13 +29,13 @@ public sealed class VsCodeRefactoringProviderTests : DistributedDesignTimeTestBa
         await testContext.WhenFullyInitialized;
 
         const string code = """
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
 
-class TheAspect : TypeAspect { }
+                            class TheAspect : TypeAspect { }
 
-class TheClass {}
-""";
+                            class TheClass {}
+                            """;
 
         // Initialize the workspace.
         var projectKey = testContext.WorkspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );

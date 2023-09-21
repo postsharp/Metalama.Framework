@@ -15,5 +15,6 @@ public enum TransformationKind
     IntroduceMember,
     ImplementInterface,
     IntroduceParameter,
-    RemoveAttributes
+    RemoveAttributes,
+    AddAnnotation
 }

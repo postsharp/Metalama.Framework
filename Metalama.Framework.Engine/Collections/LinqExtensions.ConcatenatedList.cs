@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,11 +9,17 @@ namespace System.Linq;
 
 public static partial class LinqExtensions
 {
-    private class ConcatenatedList<T> : IReadOnlyList<T>
+    private interface INonMaterialized { }
+
+    private class ConcatenatedList<T> : INonMaterialized, IReadOnlyList<T>
     {
         private readonly IReadOnlyList<T> _list1;
         private readonly IReadOnlyList<T> _list2;
         private readonly IReadOnlyList<T> _list3;
+
+#if DEBUG
+        private bool _isAlreadyEvaluated;
+#endif
 
         public ConcatenatedList( IReadOnlyList<T> list1, IReadOnlyList<T> list2, IReadOnlyList<T>? list3 = null )
         {
@@ -23,6 +30,23 @@ public static partial class LinqExtensions
 
         public IEnumerator<T> GetEnumerator()
         {
+#if DEBUG
+
+            // This is a heuristic to check that we don't evaluate the func several times
+            // for the same item. In this case, the current class should not be used
+            // and the query should be materialized.
+
+            if ( this._isAlreadyEvaluated )
+            {
+                throw new AssertionFailedException( "The ConcatenatedList was evaluated twice." );
+            }
+            else
+            {
+                this._isAlreadyEvaluated = true;
+            }
+
+#endif
+
             if ( this._list1.Count > 0 )
             {
                 foreach ( var item in this._list1 )

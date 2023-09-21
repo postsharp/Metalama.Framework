@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
@@ -41,13 +40,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
     private IAspectDriver? _aspectDriver;
     private ValidatorDriverFactory? _validatorDriverFactory;
-
-    private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
-            nameof(TryInitializeEligibility),
-            BindingFlags.Instance | BindingFlags.NonPublic )
-        .AssertNotNull();
-
-    private ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules;
+    private EligibilityHelper? _eligibilityHelper;
 
     internal override Type Type { get; }
 
@@ -200,7 +193,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                     {
                         string weaverTypeName => weaverTypeName,
                         ITypeSymbol weaverTypeSymbol => weaverTypeSymbol.GetReflectionFullName(),
-                        var value => throw new InvalidOperationException( $"Invalid value '{value?.ToString() ?? "null"}' for RequireAspectWeaverAttribute argument." )
+                        var value => throw new InvalidOperationException(
+                            $"Invalid value '{value?.ToString() ?? "null"}' for RequireAspectWeaverAttribute argument." )
                     };
 
                     break;
@@ -249,71 +243,27 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 
         if ( this._prototypeAspectInstance != null )
         {
+            this._eligibilityHelper = new EligibilityHelper( this._prototypeAspectInstance, this.ServiceProvider, this );
+
             // Call BuildEligibility for all relevant interface implementations.
-            List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> eligibilityRules = new();
 
             // Add additional rules defined by the driver.
             if ( this._aspectDriver is AspectDriver { EligibilityRule: { } eligibilityRule } )
             {
-                eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IDeclaration), eligibilityRule ) );
+                this._eligibilityHelper.Add( typeof(IDeclaration), eligibilityRule );
             }
 
-            var eligibilitySuccess = true;
-
-            foreach ( var implementedInterface in this._prototypeAspectInstance.GetType()
-                         .GetInterfaces()
-                         .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
-            {
-                var declarationInterface = implementedInterface.GenericTypeArguments[0];
-
-                // If methods are eligible, we need to check that the target method is not a local function.
-                if ( declarationInterface == typeof(IMethod) )
-                {
-                    eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );
-                }
-
-                eligibilitySuccess &= (bool)
-                    _tryInitializeEligibilityMethod.MakeGenericMethod( declarationInterface )
-                        .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } )!;
-            }
-
-            if ( !eligibilitySuccess )
+            if ( !this._eligibilityHelper.PopulateRules( diagnosticAdder ) )
             {
                 return false;
             }
-
-            this._eligibilityRules = eligibilityRules.ToImmutableArray();
         }
         else
         {
             // Abstract aspect classes don't have eligibility because they cannot be applied.
-            this._eligibilityRules = ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>>.Empty;
         }
 
         // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
-
-        return true;
-    }
-
-    private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> rules )
-        where T : class, IDeclaration
-    {
-        if ( this._prototypeAspectInstance is IEligible<T> eligible )
-        {
-            var builder = new EligibilityBuilder<T>();
-
-            var executionContext = new UserCodeExecutionContext(
-                this.ServiceProvider,
-                diagnosticAdder,
-                UserCodeDescription.Create( "executing BuildEligibility for {0}", this ) );
-
-            if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
-            {
-                return false;
-            }
-
-            rules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(T), ((IEligibilityBuilder<T>) builder).Build() ) );
-        }
 
         return true;
     }
@@ -458,79 +408,14 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     /// </summary>
     public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {
-        if ( this._eligibilityRules.IsDefaultOrEmpty )
-        {
-            // Linker tests do not set this member but don't need to test eligibility.
-            return EligibleScenarios.Aspect;
-        }
-
-        // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
-        // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
-        // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext(
-            this.ServiceProvider,
-            UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this, obj ),
-            compilationModel: obj.GetCompilationModel() );
-
-        return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
-
-        // Implementation, which all runs in a user context.
-        EligibleScenarios GetEligibilityCore()
-        {
-            var declarationType = obj.GetType();
-            var eligibility = EligibleScenarios.All;
-
-            // If the aspect cannot be inherited, remove the inheritance eligibility.
-            if ( isInheritable != true )
-            {
-                eligibility &= ~EligibleScenarios.Inheritance;
-            }
-
-            // Evaluate all eligibility rules that apply to the target declaration type.
-            foreach ( var rule in this._eligibilityRules )
-            {
-                if ( rule.Key.IsAssignableFrom( declarationType ) )
-                {
-                    eligibility &= rule.Value.GetEligibility( obj );
-
-                    if ( eligibility == EligibleScenarios.None )
-                    {
-                        return EligibleScenarios.None;
-                    }
-                }
-            }
-
-            return eligibility;
-        }
+        return this._eligibilityHelper?.GetEligibility( obj, isInheritable ) ?? EligibleScenarios.All;
     }
+
+    public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+        => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );
 
     ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext )
         => this.GetTemplateReflectionContext( compilationContext );
-
-    public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
-    {
-        var targetDeclaration = describedObject.Object;
-        var declarationType = targetDeclaration.GetType();
-
-        var group = new AndEligibilityRule<IDeclaration>(
-            this._eligibilityRules.Where( r => r.Key.IsAssignableFrom( declarationType ) )
-                .Select( r => r.Value )
-                .ToImmutableArray() );
-
-        // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
-        // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
-        // so we have to let the exception fly.
-        var executionContext = new UserCodeExecutionContext(
-            this.ServiceProvider,
-            UserCodeDescription.Create( "evaluating eligibility description for {0} applied to '{1}'", this, describedObject ) );
-
-        return this._userCodeInvoker.Invoke(
-            () =>
-                group.GetIneligibilityJustification(
-                    requestedEligibility,
-                    new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) ),
-            executionContext );
-    }
 
     internal IAspect CreateDefaultInstance()
         => this._userCodeInvoker.Invoke(
@@ -558,20 +443,5 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.Type );
 
         return this._validatorDriverFactory.GetDeclarationValidatorDriver( validate );
-    }
-
-    private sealed class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
-    {
-        public static LocalFunctionEligibilityRule Instance { get; } = new();
-
-        private LocalFunctionEligibilityRule() { }
-
-        public EligibleScenarios GetEligibility( IDeclaration obj )
-            => ((IMethod) obj).MethodKind == Code.MethodKind.LocalFunction ? EligibleScenarios.None : EligibleScenarios.All;
-
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
-            => ((IMethod) describedObject.Object).MethodKind == Code.MethodKind.LocalFunction
-                ? $"{describedObject} is a local function"
-                : (FormattableString?) null;
     }
 }

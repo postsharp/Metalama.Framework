@@ -9,12 +9,14 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
@@ -47,14 +49,19 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
-        void IAspectOrValidatorSourceCollector.AddAspectSource( IAspectSource aspectSource )
+        void IPipelineContributorSourceCollector.AddAspectSource( IAspectSource aspectSource )
         {
             this._aspectBuilderState.AspectSources = this._aspectBuilderState.AspectSources.Add( aspectSource );
         }
 
-        void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
+        void IPipelineContributorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
             this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
+        }
+
+        public void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
+        {
+            this._aspectBuilderState.OptionsSources = this._aspectBuilderState.OptionsSources.Add( hierarchicalOptionsSource );
         }
 
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
@@ -77,6 +84,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         [Memo]
         public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
+
+        public TOptions GetOptions<TOptions>()
+            where TOptions : class, IHierarchicalOptions<T>, new()
+            => this.AspectInstance.GetOptions<TOptions>();
 
         IDeclaration IAspectBuilder.Target => this.Target;
 
@@ -107,31 +118,32 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var result = rule.GetEligibility( this.Target );
 
-            if ( result == EligibleScenarios.None )
+            switch ( result )
             {
-                var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
+                case EligibleScenarios.None:
+                    {
+                        var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<T>( this.Target ) );
 
-                this._aspectBuilderState.Diagnostics.Report(
-                    GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
-                        this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
-                        this ) );
+                        this._aspectBuilderState.Diagnostics.Report(
+                            GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
+                                this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
+                                (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
+                                this ) );
 
-                this.SkipAspect();
+                        this.SkipAspect();
 
-                return false;
-            }
-            else if ( result == EligibleScenarios.Inheritance )
-            {
-                // If inheritance is allowed, we return false without reporting any error.
+                        return false;
+                    }
 
-                this.SkipAspect();
+                case EligibleScenarios.Inheritance:
+                    // If inheritance is allowed, we return false without reporting any error.
 
-                return false;
-            }
-            else
-            {
-                return true;
+                    this.SkipAspect();
+
+                    return false;
+
+                default:
+                    return true;
             }
         }
 

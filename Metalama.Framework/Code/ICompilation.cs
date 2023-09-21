@@ -45,6 +45,22 @@ namespace Metalama.Framework.Code
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default );
 
         /// <summary>
+        /// Gets all attributes of a given type in the current compilation, where the attribute type is given as an <see cref="INamedType"/>.
+        /// </summary>
+        /// <param name="type">The attribute type.</param>
+        /// <param name="includeDerivedTypes">A value indicating whether attributes of types derived from <paramref name="type"/> should be returned as well.</param>
+        /// <returns>A list of attributes.</returns>
+        IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type, bool includeDerivedTypes = false );
+
+        /// <summary>
+        /// Gets all attributes of a given type in the current compilation, where the attribute type is given as a <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type">The attribute type.</param>
+        /// <param name="includeDerivedTypes">A value indicating whether attributes of types derived from <paramref name="type"/> should be returned as well.</param>
+        /// <returns>A list of attributes.</returns>
+        IEnumerable<IAttribute> GetAllAttributesOfType( Type type, bool includeDerivedTypes = false );
+
+        /// <summary>
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.
         /// </summary>

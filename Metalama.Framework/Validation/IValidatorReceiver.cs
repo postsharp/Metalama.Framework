@@ -9,6 +9,10 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Validation;
 
+/// <summary>
+/// The non-generic base interface for <see cref="IValidatorReceiver{TDeclaration}"/>. Represents a set of declarations to which
+/// validators, diagnostics and code fix suggestions can be added.
+/// </summary>
 [InternalImplement]
 [CompileTime]
 public interface IValidatorReceiver
@@ -41,6 +45,11 @@ public interface IValidatorReceiver
     void ValidateReferences( ReferenceValidator validator );
 }
 
+/// <summary>
+/// Represents a set of declarations to which
+/// validators, diagnostics, code fix suggestions, and options can be added.
+/// </summary>
+/// <typeparam name="TDeclaration">The type of declarations in the current set.</typeparam>
 [InternalImplement]
 [CompileTime]
 public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -14,6 +15,8 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
     private readonly IAspectClass? _aspectClass;
 
     public IRef<IDeclaration> TargetDeclaration { get; private set; }
+
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.TargetDeclaration;
 
     // This member is not available after deserialization. We would need, if necessary, to have a post-deserialization initialization.
     // The AspectClass is the full type of the aspect, anyway.
@@ -29,14 +32,19 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
 
     public IAspectState? AspectState { get; private set; }
 
+    public T GetOptions<T>()
+        where T : class, IHierarchicalOptions, new()
+        => throw new NotImplementedException();
+
     public IAspect Aspect { get; private set; }
 
     public int PredecessorDegree { get; }
 
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {
-        this.TargetDeclaration = aspectInstance.TargetDeclaration;
-        this.TargetDeclarationDepth = ((IAspectPredecessorImpl) aspectInstance).TargetDeclarationDepth;
+        var asPredecessor = (IAspectPredecessorImpl) aspectInstance;
+        this.TargetDeclaration = asPredecessor.TargetDeclaration;
+        this.TargetDeclarationDepth = asPredecessor.TargetDeclarationDepth;
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;
         this.AspectState = aspectInstance.AspectState;
