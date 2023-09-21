@@ -3,12 +3,15 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
@@ -535,6 +538,8 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
 
+            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+
             var result = new DesignTimePipelineExecutionResult(
                 compilation.SyntaxTrees,
                 additionalSyntaxTrees,
@@ -543,7 +548,8 @@ internal sealed partial class DesignTimeAspectPipeline
                 inheritableOptions,
                 referenceValidators,
                 aspectInstances,
-                transformations );
+                transformations,
+                annotations );
 
             // Update the dependency graph with results of the pipeline.
             DependencyGraph newDependencies;

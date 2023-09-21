@@ -1218,8 +1218,112 @@ class D{version}
             assemblyName: "main",
             additionalReferences: new[] { updatedDependencyCompilation.ToMetadataReference() } );
 
+        // The next pipeline run will pause the pipeline.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out _ ) );
+
+        // Resume the pipeline.
         await factory.ResumePipelinesAsync( AsyncExecutionContext.Get(), false, default );
+
+        // Run the pipeline again.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResults ) );
+        Assert.Contains( updatedResults.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_UPDATED_VALUE'" ) );
+    }
+
+    [Fact]
+    public async Task AnnotationsCrossProjectTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var dependencyCode = new Dictionary<string, string>()
+        {
+            ["annotation.cs"] =
+                """
+                using Metalama.Framework.Code;
+                public class TheAnnotation : IAnnotation<INamedType>
+                {
+                    public string Value;
+                    
+                    public TheAnnotation( string value )
+                    {
+                        this.Value = value;
+                    }
+                }
+                """,
+            ["aspect.cs"] =
+                """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                public class AddAnnotation : TypeAspect
+                {
+                    public string Value;
+                   
+                   public AddAnnotation( string value )
+                   {
+                       this.Value = value;
+                   }
+                    
+                    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                    {
+                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value) );
+                    }
+                }
+                """,
+            ["code.cs"] =
+                """
+                [AddAnnotation("THE_VALUE")]
+                public class C {}
+                """
+        };
+
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] =
+                """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Diagnostics;
+                using Metalama.Framework.Eligibility;
+                using System.Linq;
+                using System;
+
+                class ReportWarningFromAnnotationAspect : TypeAspect
+                {
+                   private static readonly DiagnosticDefinition<string> _description = new("MY001", Severity.Warning, "Option='{0}'" );
+                   
+                   public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
+                   {
+                        var annotation = aspectBuilder.Target.BaseType.Enhancements().GetAnnotations<TheAnnotation>().SingleOrDefault();
+                        aspectBuilder.Diagnostics.Report( _description.WithArguments( annotation?.Value ?? "<undefined>" ) );
+                   }
+                }
+                """,
+            ["target.cs"] =
+                """
+                [ReportWarningFromAnnotationAspect]
+                class D : C
+                {
+                    
+                }
+                """
+        };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var dependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+        var compilation = CreateCSharpCompilation( code, assemblyName: "main", additionalReferences: new[] { dependencyCompilation.ToMetadataReference() } );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+        Assert.Contains( results.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_VALUE'" ) );
+
+        // Try an update.
+        dependencyCode["code.cs"] = dependencyCode["code.cs"].Replace( "THE_VALUE", "THE_UPDATED_VALUE" );
+        var updatedDependencyCompilation = CreateCSharpCompilation( dependencyCode, assemblyName: "dependency" );
+
+        var updatedCompilation = CreateCSharpCompilation(
+            code,
+            assemblyName: "main",
+            additionalReferences: new[] { updatedDependencyCompilation.ToMetadataReference() } );
+
+        // Run the pipeline again.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResults ) );
         Assert.Contains( updatedResults.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_UPDATED_VALUE'" ) );
     }

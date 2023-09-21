@@ -1,7 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
@@ -27,5 +31,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         IReadOnlyList<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> InheritableOptions,
         ImmutableArray<ReferenceValidatorInstance> ReferenceValidators,
         ImmutableArray<IAspectInstance> AspectInstances,
-        IReadOnlyCollection<ITransformationBase> Transformations );
+        IReadOnlyCollection<ITransformationBase> Transformations,
+        ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations );
 }

@@ -480,6 +480,27 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.InheritableOptions.Add( new InheritableOptionsInstance( optionItem.Key, optionItem.Value ) );
             }
 
+            // Split annotations by syntax tree.
+            foreach ( var annotationsOnDeclaration in pipelineResults.Annotations )
+            {
+                var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree( compilation.CompilationContext );
+
+                SyntaxTreePipelineResult.Builder builder;
+
+                if ( syntaxTree == null )
+                {
+                    builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
+                }
+                else
+                {
+                    var filePath = syntaxTree.FilePath;
+                    builder = resultBuilders[filePath];
+                }
+
+                builder.Annotations ??= ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.CreateBuilder();
+                builder.Annotations.Add( annotationsOnDeclaration.Key.ToSerializableId(), annotationsOnDeclaration.Select( x => x.Annotation ) );
+            }
+
             // Add syntax trees with empty output to it gets cached too.
             var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
