@@ -97,7 +97,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -109,7 +109,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -121,7 +121,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Length );
 

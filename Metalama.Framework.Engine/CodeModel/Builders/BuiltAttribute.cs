@@ -37,7 +37,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
-            this._attributeBuilder.NamedArguments.SelectAsList(
+            this._attributeBuilder.NamedArguments.SelectAsArray(
                 a => new KeyValuePair<string, TypedConstant>(
                     a.Key,
                     a.Value.ForCompilation( this.GetCompilationModel() ) ) ) );

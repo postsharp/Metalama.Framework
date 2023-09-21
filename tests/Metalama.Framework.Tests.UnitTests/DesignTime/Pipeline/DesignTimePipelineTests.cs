@@ -63,7 +63,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         var compilation = CreateEmptyCompilation();
 
         compilation = compilation.AddSyntaxTrees(
-            code.SelectAsReadOnlyCollection(
+            code.SelectAsArray(
                 c => SyntaxFactory.ParseSyntaxTree(
                     c.Value,
                     path: c.Key,
