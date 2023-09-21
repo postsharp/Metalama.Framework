@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
-using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Options;
 
