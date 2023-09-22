@@ -146,7 +146,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IIncrementalObje
     /// <summary>
     /// Overrides the current collection with another collection and returns the result.
     /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> OverrideWith( IncrementalKeyedCollection<TKey, TValue> overridingOptions, in ApplyChangesContext context )
+    public IncrementalKeyedCollection<TKey, TValue> ApplyChanges( IncrementalKeyedCollection<TKey, TValue> overridingOptions, in ApplyChangesContext context )
     {
         var dictionary = overridingOptions._clear ? ImmutableDictionary<TKey, Item>.Empty : this._dictionary;
 
@@ -169,5 +169,5 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IIncrementalObje
     }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
-        => this.OverrideWith( (IncrementalKeyedCollection<TKey, TValue>) changes, context );
+        => this.ApplyChanges( (IncrementalKeyedCollection<TKey, TValue>) changes, context );
 }

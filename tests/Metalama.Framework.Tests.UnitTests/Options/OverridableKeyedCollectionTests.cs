@@ -32,8 +32,11 @@ public sealed class OverridableKeyedCollectionTests
     [Fact]
     public void ClearThenAdd()
     {
-        var item = Assert.Single(
-            IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Item" ) ).Clear().AddOrApplyChanges( new Item( "Item", "New" ) ) );
+        var collection1 = IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Item" ) );
+        var collection2 = IncrementalKeyedCollection.Clear<string,Item>().AddOrApplyChanges( new Item( "Item", "New" ) );
+
+        var merged = collection1.ApplyChanges( collection2, default );
+        var item = Assert.Single( merged );
 
         Assert.Equal( "New", item.Value );
     }
@@ -43,7 +46,7 @@ public sealed class OverridableKeyedCollectionTests
     {
         var collection1 = IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Key" ) );
         var collection2 = IncrementalKeyedCollection.Clear<string, Item>();
-        var merged = collection1.OverrideWith( collection2, default );
+        var merged = collection1.ApplyChanges( collection2, default );
         Assert.Empty( merged );
     }
 
@@ -52,11 +55,11 @@ public sealed class OverridableKeyedCollectionTests
     {
         var collection1 = IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Key" ) );
         var collection2 = IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Key", "Updated" ) );
-        var merged = collection1.OverrideWith( collection2, default );
+        var merged = collection1.ApplyChanges( collection2, default );
         Assert.Equal( "Updated", Assert.Single( merged ).Value );
     }
 
-    private class Item : IIncrementalKeyedCollectionItem<string>
+    private sealed class Item : IIncrementalKeyedCollectionItem<string>
     {
         public object ApplyChanges( object changes, in ApplyChangesContext context ) => new Item( this.Key, ((Item) changes).Value ?? this.Value );
 

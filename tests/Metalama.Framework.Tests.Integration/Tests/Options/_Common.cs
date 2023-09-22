@@ -29,7 +29,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
         }
         else
         {
-            var other = (MyOptions)overridingObject;
+            var other = (MyOptions)changes;
 
             return new MyOptions
             {

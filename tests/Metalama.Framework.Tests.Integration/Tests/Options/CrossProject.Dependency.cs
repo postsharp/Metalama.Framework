@@ -20,7 +20,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
-        var other = (MyOptions)overridingObject;
+        var other = (MyOptions)changes;
 
         return new MyOptions { Value = other.Value ?? Value };
     }
