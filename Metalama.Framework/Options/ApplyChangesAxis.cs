@@ -5,10 +5,10 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Options;
 
 /// <summary>
-/// Enumerates the axes along which two option layers can be merged by the <see cref="IOverridable.OverrideWith"/> method. 
+/// Enumerates the axes along which two option layers can be merged by the <see cref="IIncrementalObject.ApplyChanges"/> method. 
 /// </summary>
 [CompileTime]
-public enum OverrideAxis
+public enum ApplyChangesAxis
 {
     /// <summary>
     /// Means that options directly applied to the declaration override other options also directly applied to the declaration.
