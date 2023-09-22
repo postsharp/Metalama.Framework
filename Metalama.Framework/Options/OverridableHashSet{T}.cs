@@ -19,8 +19,13 @@ namespace Metalama.Framework.Options;
 public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
     where T : notnull
 {
+    public static OverridableHashSet<T> Empty { get; } = new( ImmutableDictionary<T, bool>.Empty );
+
     private readonly bool _clear;
     private ImmutableDictionary<T, bool> _dictionary;
+
+    [NonCompileTimeSerialized]
+    private int? _count;
 
     protected internal OverridableHashSet( ImmutableDictionary<T, bool> dictionary, bool clear = false )
     {
@@ -105,7 +110,9 @@ public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T
     /// <summary>
     /// Gets the number of items in the current collection.
     /// </summary>
-    public int Count => this._dictionary.Count( x => x.Value );
+    public int Count => this._count ??= this._dictionary.Count( x => x.Value );
+
+    public bool IsEmpty => this.Count == 0;
 
     /// <summary>
     /// Overrides the current collection with another collection and returns the result.

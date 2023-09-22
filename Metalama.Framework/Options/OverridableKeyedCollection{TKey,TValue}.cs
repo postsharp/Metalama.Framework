@@ -20,8 +20,13 @@ public partial class OverridableKeyedCollection<TKey, TValue> : IOverridable, IR
     where TKey : notnull
     where TValue : class, IOverridableKeyedCollectionItem<TKey>
 {
+    public static OverridableKeyedCollection<TKey, TValue> Empty { get; } = new OverridableKeyedCollection<TKey,TValue>( ImmutableDictionary<TKey, Item>.Empty );
+    
     private readonly bool _clear;
     private ImmutableDictionary<TKey, Item> _dictionary;
+    
+    [NonCompileTimeSerialized]
+    private int? _count;
 
     protected internal OverridableKeyedCollection( ImmutableDictionary<TKey, Item> dictionary, bool clear = false )
     {
@@ -135,7 +140,9 @@ public partial class OverridableKeyedCollection<TKey, TValue> : IOverridable, IR
     /// <summary>
     /// Gets the number of items in the current collection.
     /// </summary>
-    public int Count => this._dictionary.Count( i => i.Value.IsEnabled );
+    public int Count => this._count ??= this._dictionary.Count( i => i.Value.IsEnabled );
+
+    public bool IsEmpty => this.Count == 0;
 
     /// <summary>
     /// Overrides the current collection with another collection and returns the result.

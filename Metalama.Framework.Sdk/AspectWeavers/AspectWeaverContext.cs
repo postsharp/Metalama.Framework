@@ -6,8 +6,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,6 +30,8 @@ namespace Metalama.Framework.Engine.AspectWeavers
     public sealed partial class AspectWeaverContext
     {
         private readonly Action<Diagnostic> _addDiagnostic;
+        private readonly ISdkHierarchicalOptionsManager _optionsManager;
+            
         private IPartialCompilation _compilation;
 
         public ProjectServiceProvider ServiceProvider { get; }
@@ -68,6 +72,10 @@ namespace Metalama.Framework.Engine.AspectWeavers
         }
 
         public ICompilationServices CompilationServices { get; }
+
+        public T GetOptions<T>( ISymbol symbol )
+            where T : IHierarchicalOptions
+            => (T) this._optionsManager.GetOptions( symbol, typeof(T) );
 
         private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
@@ -147,7 +155,8 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
             ICompilationServices compilationServices,
-            CancellationToken cancellationToken )
+            CancellationToken cancellationToken,
+            ISdkHierarchicalOptionsManager optionsManager )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
@@ -156,6 +165,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this.Project = project;
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
             this.CancellationToken = cancellationToken;
+            this._optionsManager = optionsManager;
             this.ServiceProvider = serviceProvider;
             this.CompilationServices = compilationServices;
         }

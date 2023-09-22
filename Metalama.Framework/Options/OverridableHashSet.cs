@@ -19,7 +19,7 @@ public static class OverridableHashSet
     /// </summary>
     public static OverridableHashSet<T> Empty<T>()
         where T : notnull
-        => new( ImmutableDictionary<T, bool>.Empty );
+        => OverridableHashSet<T>.Empty;
 
     /// <summary>
     /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the operation clearing

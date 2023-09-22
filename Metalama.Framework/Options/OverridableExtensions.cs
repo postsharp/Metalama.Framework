@@ -29,4 +29,11 @@ public static class OverridableExtensions
             return (T) baseOptions.OverrideWith( overrideOptions, context );
         }
     }
+    
+    /// <summary>
+    /// Invokes <see cref="IOverridable.OverrideWith"/> in a type--safe way.
+    /// </summary>
+    public static T OverrideWith<T>( this T baseOptions, T overrideOptions, in OverrideContext context )
+        where T : class, IOverridable
+        => (T) baseOptions.OverrideWith( overrideOptions, context );
 }

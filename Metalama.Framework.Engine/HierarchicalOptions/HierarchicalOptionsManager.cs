@@ -88,18 +88,21 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         return optionTypeNode;
     }
 
-    public TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : class, IHierarchicalOptions, new()
+    internal IHierarchicalOptions GetOptions( IDeclaration declaration, Type optionsType )
     {
-        if ( this._optionTypes.TryGetValue( typeof(TOptions).FullName.AssertNotNull(), out var node ) )
+        if ( this._optionTypes.TryGetValue( optionsType.FullName.AssertNotNull(), out var node ) )
         {
-            return (TOptions) node.GetOptions( declaration ).AssertNotNull();
+            return node.GetOptions( declaration ).AssertNotNull();
         }
         else
         {
-            return (TOptions) this.GetDefaultOptions( typeof(TOptions), declaration.Compilation.Project );
+            return this.GetDefaultOptions( optionsType, declaration.Compilation.Project );
         }
     }
+
+    public TOptions GetOptions<TOptions>( IDeclaration declaration )
+        where TOptions : class, IHierarchicalOptions, new()
+        => (TOptions) this.GetOptions( declaration, typeof(TOptions) );
 
     internal static TOptions GetOptions<TOptions>( IAspectInstance aspectInstance )
         where TOptions : class, IHierarchicalOptions, new()

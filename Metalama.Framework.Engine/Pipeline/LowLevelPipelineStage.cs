@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -54,6 +55,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         LicenseVerifier.VerifyCanUseSdk( projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
+        var sdkOptionsManager = new SdkHierarchicalOptionsManager( compilationModel );
+
         var context = new AspectWeaverContext(
             this._aspectClass,
             aspectInstances,
@@ -63,7 +66,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,
             compilationModel.CompilationContext,
-            cancellationToken );
+            cancellationToken,
+            sdkOptionsManager );
 
         var executionContext = new UserCodeExecutionContext(
             projectServiceProvider,
