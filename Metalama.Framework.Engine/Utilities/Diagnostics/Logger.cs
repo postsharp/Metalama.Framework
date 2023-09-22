@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
 using System;
+using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
@@ -34,6 +35,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
 
                 processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
                 processInfo.Info?.Log( $"Process kind: {ProcessUtilities.ProcessKind}" );
+                processInfo.Info?.Log( $"Process name: {Process.GetCurrentProcess().ProcessName.ToLowerInvariant()}" );
                 processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.GetInstance( typeof(Logger).Assembly ).BuildId}" );
 
                 DesignTime = _loggerFactory.DesignTime();
