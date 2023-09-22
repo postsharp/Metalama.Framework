@@ -11,15 +11,24 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization;
 public sealed class HierarchicalOptionsSerializersTest : SerializationTestsBase
 {
     [Fact]
-    public void Collection()
+    public void KeyedCollection()
     {
-        var collection = new HierarchicalOptionItemCollection<MyItem>( new MyItem( "TheKey" ) );
+        var collection = OverridableKeyedCollection.AddOrOverride<string, MyItem>( new MyItem( "TheKey" ) );
         var roundtrip = this.SerializeDeserialize( collection );
         Assert.Single( roundtrip );
         Assert.Equal( "TheKey", roundtrip.Single().Key );
     }
 
-    private sealed class MyItem : IHierarchicalOptionItem
+    [Fact]
+    public void HashSet()
+    {
+        var collection = OverridableHashSet.Add( "TheKey" );
+        var roundtrip = this.SerializeDeserialize( collection );
+        Assert.Single( roundtrip );
+        Assert.Equal( "TheKey", roundtrip.Single() );
+    }
+
+    private sealed class MyItem : IOverridableKeyedCollectionItem<string>
     {
         public MyItem( string key )
         {
@@ -29,8 +38,6 @@ public sealed class HierarchicalOptionsSerializersTest : SerializationTestsBase
         public string Key { get; }
 
         public object OverrideWith( object overridingObject, in OverrideContext context ) => this;
-
-        public object GetKey() => this.Key;
 
         [UsedImplicitly]
         private sealed class Serializer : ReferenceTypeSerializer<MyItem>

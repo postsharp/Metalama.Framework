@@ -1,19 +1,19 @@
-﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
 using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public partial class HierarchicalOptionItemCollection<T>
+public partial class OverridableKeyedCollection<TKey, TValue>
 {
-    private readonly struct Item : ICompileTimeSerializable
+    protected internal readonly struct Item : ICompileTimeSerializable
     {
-        public T? Value { get; }
+        public TValue? Value { get; }
 
         public bool IsEnabled { get; }
 
-        public Item( T? value, bool isEnabled = true )
+        public Item( TValue? value, bool isEnabled = true )
         {
             this.Value = value;
             this.IsEnabled = isEnabled;
@@ -34,7 +34,7 @@ public partial class HierarchicalOptionItemCollection<T>
             public override Item DeserializeObject( IArgumentsReader constructorArguments )
             {
                 return new Item(
-                    constructorArguments.GetValue<T>( nameof(Value) ),
+                    constructorArguments.GetValue<TValue>( nameof(Value) ),
                     constructorArguments.GetValue<bool>( nameof(IsEnabled) ) );
             }
         }

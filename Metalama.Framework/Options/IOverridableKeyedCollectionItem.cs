@@ -5,12 +5,13 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Framework.Options;
 
 /// <summary>
-/// An item in a <see cref="HierarchicalOptionItemCollection{T}"/>.
+/// An item in a <see cref="OverridableKeyedCollection{TKey,TValue}"/>.
 /// </summary>
-public interface IHierarchicalOptionItem : IOverridable, ICompileTimeSerializable
+public interface IOverridableKeyedCollectionItem<out TKey> : IOverridable, ICompileTimeSerializable
+    where TKey : notnull
 {
     /// <summary>
     /// Gets the key that uniquely identifies the item in the collection.
     /// </summary>
-    public object GetKey();
+    public TKey Key { get; }
 }
