@@ -20,7 +20,7 @@ namespace Metalama.Framework.Options;
 /// </para>
 /// <para>
 ///  Implementations of this class must be immutable. An instance of this object represents a <i>layer</i> of options,
-///  and these layers are merged by the <see cref="IOverridable.OverrideWith"/> method. Therefore, all properties should typically be nullable or
+///  and these layers are merged by the <see cref="IIncrementalObject.ApplyChanges"/> method. Therefore, all properties should typically be nullable or
 ///  support another representation of being unset.
 /// </para>
 /// <para>
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Options;
 /// which allows authors to customize the inheritance mechanisms of the option.
 /// </para>
 /// </remarks>
-public interface IHierarchicalOptions : IOverridable, ICompileTimeSerializable
+public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializable
 {
     /// <summary>
     /// Gets the default options from the current project. 

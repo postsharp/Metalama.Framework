@@ -23,7 +23,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation clearing
-    /// the overridden collection of all items.
+    /// the collection of all items.
     /// </summary>
     public static IncrementalHashSet<T> Clear<T>()
         where T : notnull
@@ -31,7 +31,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding an item to
-    /// the overridden collection, or to override with a new value if these items already exist.
+    /// the collection, or to override with a new value if these items already exist.
     /// </summary>
     public static IncrementalHashSet<T> Add<T>( T item )
         where T : notnull
@@ -41,7 +41,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
-    /// the overridden collection, or to override with a new value if these items already exist.
+    /// the collection, or to override with a new value if these items already exist.
     /// </summary>
     public static IncrementalHashSet<T> Add<T>( params T[] items )
         where T : notnull
@@ -49,7 +49,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
-    /// the overridden collection, or to override with a new value if these items already exist.
+    /// the collection, or to override with a new value if these items already exist.
     /// </summary>
     public static IncrementalHashSet<T> Add<T>( IEnumerable<T> items )
         where T : notnull
@@ -57,7 +57,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing an item
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalHashSet<T> Remove<T>( T item )
         where T : notnull
@@ -67,7 +67,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing items
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalHashSet<T> Remove<T>( params T[] items )
         where T : notnull
@@ -75,7 +75,7 @@ public static class IncrementalHashSet
 
     /// <summary>
     /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing items
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalHashSet<T> Remove<T>( IEnumerable<T> items )
         where T : notnull

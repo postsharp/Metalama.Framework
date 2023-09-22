@@ -23,7 +23,7 @@ public static class IncrementalKeyedCollection
         => new( ImmutableDictionary<TKey, IncrementalKeyedCollection<TKey, TValue>.Item>.Empty );
 
     /// <summary>
-    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of removing any item both in the overridden collection.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of removing any item both in the collection.
     /// </summary>
     public static IncrementalKeyedCollection<TKey, TValue> Clear<TKey, TValue>()
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
@@ -32,9 +32,9 @@ public static class IncrementalKeyedCollection
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding an item to
-    /// the overridden collection, or to override with new value if this item already exists.
+    /// the collection, or, if an item with the same key already exists, update this item with the given new values.
     /// </summary>
-    public static IncrementalKeyedCollection<TKey, TValue> AddOrOverride<TKey, TValue>( TValue item )
+    public static IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges<TKey, TValue>( TValue item )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
         where TKey : notnull
         => new(
@@ -43,25 +43,25 @@ public static class IncrementalKeyedCollection
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding items to
-    /// the overridden collection, or to override with new value if this item already exists.
+    /// the collection, or, if any item with the same key already exists, update these item with the given new values.
     /// </summary>
-    public static IncrementalKeyedCollection<TKey, TValue> AddOrOverride<TKey, TValue>( params TValue[] items )
+    public static IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges<TKey, TValue>( params TValue[] items )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
         where TKey : notnull
         => new( items.ToImmutableDictionary( i => i.Key, i => new IncrementalKeyedCollection<TKey, TValue>.Item( i ) ) );
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding items to
-    /// the overridden collection, or to override with new value if this item already exists.
+    /// the collection, or, if any item with the same key already exists, update these item with the given new values.
     /// </summary>
-    public static IncrementalKeyedCollection<TKey, TValue> AddOrOverride<TKey, TValue>( IEnumerable<TValue> items )
+    public static IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges<TKey, TValue>( IEnumerable<TValue> items )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
         where TKey : notnull
         => new( items.ToImmutableDictionary( i => i.Key, i => new IncrementalKeyedCollection<TKey, TValue>.Item( i ) ) );
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing an item
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalKeyedCollection<TKey, TValue> Remove<TKey, TValue>( TValue item )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
@@ -72,7 +72,7 @@ public static class IncrementalKeyedCollection
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing items
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalKeyedCollection<TKey, TValue> Remove<TKey, TValue>( params TValue[] items )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>
@@ -81,7 +81,7 @@ public static class IncrementalKeyedCollection
 
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing items
-    /// from the overridden collection.
+    /// from the collection.
     /// </summary>
     public static IncrementalKeyedCollection<TKey, TValue> Remove<TKey, TValue>( IEnumerable<TValue> items )
         where TValue : class, IIncrementalKeyedCollectionItem<TKey>

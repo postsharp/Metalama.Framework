@@ -71,7 +71,7 @@ public sealed partial class HierarchicalOptionsManager
             lock ( declarationOptions.Sync )
             {
                 declarationOptions.DirectOptions =
-                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, OverrideAxis.Direct, configurator.Declaration );
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.Direct, configurator.Declaration );
 
                 declarationOptions.ResetMergedOptions();
             }
@@ -178,19 +178,19 @@ public sealed partial class HierarchicalOptionsManager
             var inheritedOptions = MergeOptions(
                 baseDeclarationOptions,
                 containingDeclarationOptions,
-                OverrideAxis.ContainingDeclaration,
+                ApplyChangesAxis.ContainingDeclaration,
                 declaration );
 
             var inheritedOptionsWithNamespaceOptions = MergeOptions(
                 namespaceOptions,
                 inheritedOptions,
-                OverrideAxis.Namespace,
+                ApplyChangesAxis.Namespace,
                 declaration );
 
             var mergedOptions = MergeOptions(
                 inheritedOptionsWithNamespaceOptions,
                 node?.DirectOptions,
-                OverrideAxis.Declaration,
+                ApplyChangesAxis.Declaration,
                 declaration );
 
             // Cache the result.
@@ -218,7 +218,7 @@ public sealed partial class HierarchicalOptionsManager
         private static IHierarchicalOptions? MergeOptions(
             IHierarchicalOptions? baseOptions,
             IHierarchicalOptions? overridingOptions,
-            OverrideAxis axis,
+            ApplyChangesAxis axis,
             IDeclaration declaration )
         {
             if ( baseOptions == null )
@@ -235,7 +235,7 @@ public sealed partial class HierarchicalOptionsManager
             }
             else
             {
-                return (IHierarchicalOptions) baseOptions.OverrideWith( overridingOptions, new OverrideContext( axis, declaration ) );
+                return (IHierarchicalOptions) baseOptions.ApplyChanges( overridingOptions, new ApplyChangesContext( axis, declaration ) );
             }
         }
 

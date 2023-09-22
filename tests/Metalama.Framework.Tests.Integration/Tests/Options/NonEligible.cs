@@ -10,7 +10,7 @@ public record NonElifibleOptions : IHierarchicalOptions<INamedType>, IEligible<I
 {
     public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object other, in OverrideContext context )
+    public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
         return this;
     }

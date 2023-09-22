@@ -21,9 +21,9 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object other, in OverrideContext context )
+    public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
-        if (BaseWins.GetValueOrDefault() && context.Axis == OverrideAxis.ContainingDeclaration)
+        if (BaseWins.GetValueOrDefault() && context.Axis == ApplyChangesAxis.ContainingDeclaration)
         {
             return this;
         }

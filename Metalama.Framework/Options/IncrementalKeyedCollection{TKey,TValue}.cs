@@ -11,16 +11,23 @@ namespace Metalama.Framework.Options;
 
 /// <summary>
 /// An immutable keyed collection where each class instance does not represent the full collection but a modification of another collection (possibly empty).
-/// This class implements the <see cref="IOverridable"/> semantic and can be easily used in the context of an <see cref="IHierarchicalOptions{T}"/>.
-/// The class can represent the <see cref="AddOrOverride(TValue)"/>, <see cref="Remove(TKey)"/> and <see cref="Clear"/> operations.
+/// This class implements the <see cref="IIncrementalObject"/> interface and can be easily used in the context of an <see cref="IHierarchicalOptions{T}"/>.
+/// The class can represent the <see cref="AddOrApplyChanges(TValue)"/>, <see cref="Remove(TKey)"/> and <see cref="IncrementalKeyedCollection.Clear{TKey,TValue}"/> operations.
 /// </summary>
 /// <typeparam name="TKey">Type of keys.</typeparam>
 /// <typeparam name="TValue">Type of items, implementing the <see cref="IIncrementalKeyedCollectionItem{TKey}"/> interface.</typeparam>
 [PublicAPI]
-public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IReadOnlyCollection<TValue>, ICompileTimeSerializable
+public partial class IncrementalKeyedCollection<TKey, TValue> : IIncrementalObject, IReadOnlyCollection<TValue>, ICompileTimeSerializable
     where TKey : notnull
     where TValue : class, IIncrementalKeyedCollectionItem<TKey>
 {
+    /// <summary>
+    /// Gets an <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the absence of any change in the collection.
+    /// </summary>
+    /// <remarks>
+    /// If you are looking for an object resulting in an empty collection even if the previous collection is not empty,
+    /// use <see cref="IncrementalKeyedCollection.Clear{TKey,TValue}"/>.
+    /// </remarks>
     public static IncrementalKeyedCollection<TKey, TValue> Empty { get; } = new( ImmutableDictionary<TKey, Item>.Empty );
 
     private readonly bool _clear;
@@ -36,19 +43,12 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
     }
 
     protected virtual IncrementalKeyedCollection<TKey, TValue> Create( ImmutableDictionary<TKey, Item> items, bool clear = false ) => new( items, clear );
-
+    
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of removing any item both in the
-    /// current collection and in any overridden collection.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of adding an item, or, if an item with the same key already exists, update it with the given new values.
     /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> Clear() => this.Create( ImmutableDictionary<TKey, Item>.Empty, true );
-
-    /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding an item to
-    /// the collection, or to override with new value if this item already exists, additionally to any operation
-    /// represented by the current object.
-    /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> AddOrOverride( TValue item )
+    public IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges( TValue item )
     {
         var key = item.Key;
 
@@ -56,7 +56,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
 
         if ( this._dictionary.TryGetValue( key, out var oldItem ) && oldItem.IsEnabled )
         {
-            mergedItem = oldItem.Value.OverrideWithSafe( item, default )!;
+            mergedItem = oldItem.Value.ApplyChangesSafe( item, default )!;
         }
         else
         {
@@ -67,18 +67,16 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
     }
 
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding items to
-    /// the collection, or to override with new value if this item already exists, additionally to any operation
-    /// represented by the current object.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of adding items, or, if any item with the same key already exists, update it with the given new values.
     /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> AddOrOverride( params TValue[] items ) => this.AddOrOverride( (IEnumerable<TValue>) items );
+    public IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges( params TValue[] items ) => this.AddOrApplyChanges( (IEnumerable<TValue>) items );
 
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the operation of adding items to
-    /// the collection, or to override with new value if this item already exists, additionally to any operation
-    /// represented by the current object.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of adding items, or, if any item with the same key already exists, update it with the given new values.
     /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> AddOrOverride( IEnumerable<TValue> items )
+    public IncrementalKeyedCollection<TKey, TValue> AddOrApplyChanges( IEnumerable<TValue> items )
     {
         var builder = this._dictionary.ToBuilder();
 
@@ -90,7 +88,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
 
             if ( this._dictionary.TryGetValue( key, out var oldItem ) && oldItem.IsEnabled )
             {
-                mergedItem = oldItem.Value.OverrideWithSafe( item, default )!;
+                mergedItem = oldItem.Value.ApplyChangesSafe( item, default )!;
             }
             else
             {
@@ -104,20 +102,20 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
     }
 
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing an item
-    /// from the current collection or from the overridden collection, additionally to other operations represented by the current object.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of removing an item from the collection.
     /// </summary>
     public IncrementalKeyedCollection<TKey, TValue> Remove( TKey key ) => this.Create( this._dictionary.SetItem( key, new Item( default, false ) ) );
 
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing items
-    /// from the current collection or from the overridden collection, additionally to other operations represented by the current object.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of removing items from the collection.
     /// </summary>
     public IncrementalKeyedCollection<TKey, TValue> Remove( TKey[] keys ) => this.Remove( (IEnumerable<TKey>) keys );
 
     /// <summary>
-    /// Creates a new <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that represents the option of removing items
-    /// from the current collection or from the overridden collection, additionally to other operations represented by the current object.
+    /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
+    /// plus the operation of removing items from the collection.
     /// </summary>
     public IncrementalKeyedCollection<TKey, TValue> Remove( IEnumerable<TKey> keys )
     {
@@ -148,7 +146,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
     /// <summary>
     /// Overrides the current collection with another collection and returns the result.
     /// </summary>
-    public IncrementalKeyedCollection<TKey, TValue> OverrideWith( IncrementalKeyedCollection<TKey, TValue> overridingOptions, in OverrideContext context )
+    public IncrementalKeyedCollection<TKey, TValue> OverrideWith( IncrementalKeyedCollection<TKey, TValue> overridingOptions, in ApplyChangesContext context )
     {
         var dictionary = overridingOptions._clear ? ImmutableDictionary<TKey, Item>.Empty : this._dictionary;
 
@@ -157,7 +155,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
             if ( item.Value.IsEnabled && dictionary.TryGetValue( item.Key, out var existingItem ) && existingItem.IsEnabled )
             {
                 // If we replace an enabled value by another enabled value, we have to merge the items.
-                var newValue = (TValue) existingItem.Value!.OverrideWith( item.Value.Value!, context );
+                var newValue = (TValue) existingItem.Value!.ApplyChanges( item.Value.Value!, context );
                 dictionary = dictionary.SetItem( item.Key, new Item( newValue ) );
             }
             else
@@ -170,6 +168,6 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IOverridable, IR
         return this.Create( dictionary );
     }
 
-    object IOverridable.OverrideWith( object other, in OverrideContext context )
-        => this.OverrideWith( (IncrementalKeyedCollection<TKey, TValue>) other, context );
+    object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
+        => this.OverrideWith( (IncrementalKeyedCollection<TKey, TValue>) changes, context );
 }

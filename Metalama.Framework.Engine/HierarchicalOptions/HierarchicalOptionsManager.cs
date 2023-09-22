@@ -120,9 +120,9 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         {
             var aspectOptions = hierarchicalOptionsProvider.GetOptions();
 
-            var combinedOptions = inheritedOptions.OverrideWithSafe(
+            var combinedOptions = inheritedOptions.ApplyChangesSafe(
                     aspectOptions,
-                    new OverrideContext( OverrideAxis.Aspect, declaration ) )
+                    new ApplyChangesContext( ApplyChangesAxis.Aspect, declaration ) )
                 .AssertNotNull();
 
             return combinedOptions;
