@@ -19,7 +19,7 @@ internal static class OptionsTestHelper
         
             public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
         
-            public object OverrideWith( object overridingObject, in OverrideContext context )
+            public object ApplyChanges( object overridingObject, in ApplyChangesContext context )
             {
                 var other = (MyOptions)overridingObject;
         
