@@ -13,7 +13,7 @@ public sealed class HierarchicalOptionsSerializersTest : SerializationTestsBase
     [Fact]
     public void KeyedCollection()
     {
-        var collection = OverridableKeyedCollection.AddOrOverride<string, MyItem>( new MyItem( "TheKey" ) );
+        var collection = IncrementalKeyedCollection.AddOrOverride<string, MyItem>( new MyItem( "TheKey" ) );
         var roundtrip = this.SerializeDeserialize( collection );
         Assert.Single( roundtrip );
         Assert.Equal( "TheKey", roundtrip.Single().Key );
@@ -22,13 +22,13 @@ public sealed class HierarchicalOptionsSerializersTest : SerializationTestsBase
     [Fact]
     public void HashSet()
     {
-        var collection = OverridableHashSet.Add( "TheKey" );
+        var collection = IncrementalHashSet.Add( "TheKey" );
         var roundtrip = this.SerializeDeserialize( collection );
         Assert.Single( roundtrip );
         Assert.Equal( "TheKey", roundtrip.Single() );
     }
 
-    private sealed class MyItem : IOverridableKeyedCollectionItem<string>
+    private sealed class MyItem : IIncrementalKeyedCollectionItem<string>
     {
         public MyItem( string key )
         {
@@ -37,7 +37,7 @@ public sealed class HierarchicalOptionsSerializersTest : SerializationTestsBase
 
         public string Key { get; }
 
-        public object OverrideWith( object overridingObject, in OverrideContext context ) => this;
+        public object OverrideWith( object other, in OverrideContext context ) => this;
 
         [UsedImplicitly]
         private sealed class Serializer : ReferenceTypeSerializer<MyItem>

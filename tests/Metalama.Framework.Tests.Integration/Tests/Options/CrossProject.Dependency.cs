@@ -5,11 +5,10 @@ using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
-[assembly: MyOptions("FromDependencyAssembly")]
+
+[assembly: MyOptions( "FromDependencyAssembly" )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
-
-
 
 public record MyOptions : IHierarchicalOptions<IDeclaration>
 {
@@ -19,7 +18,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
 
-    public object OverrideWith( object overridingObject, in OverrideContext context )
+    public object OverrideWith( object other, in OverrideContext context )
     {
         var other = (MyOptions)overridingObject;
 
@@ -29,7 +28,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> declaration ) { }
 }
 
-[AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+[AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
 public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
 {
     private string _value;
@@ -52,4 +51,3 @@ public class BaseNestingClass
 }
 
 public class BaseClassWithoutDirectOptions { }
- 

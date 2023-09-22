@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
 
-public partial class OverridableKeyedCollection<TKey, TValue>
+public partial class IncrementalKeyedCollection<TKey, TValue>
 {
     protected internal readonly struct Item : ICompileTimeSerializable
     {

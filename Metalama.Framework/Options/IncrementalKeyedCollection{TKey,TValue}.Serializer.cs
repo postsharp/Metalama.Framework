@@ -6,20 +6,20 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Options;
 
-public partial class OverridableKeyedCollection<TKey, TValue>
+public partial class IncrementalKeyedCollection<TKey, TValue>
 {
     [UsedImplicitly]
-    private sealed class Serializer : ReferenceTypeSerializer<OverridableKeyedCollection<TKey, TValue>>
+    private sealed class Serializer : ReferenceTypeSerializer<IncrementalKeyedCollection<TKey, TValue>>
     {
-        public override OverridableKeyedCollection<TKey, TValue> CreateInstance( IArgumentsReader constructorArguments )
+        public override IncrementalKeyedCollection<TKey, TValue> CreateInstance( IArgumentsReader constructorArguments )
         {
             var clear = constructorArguments.GetValue<bool>( "clear" );
 
-            return new OverridableKeyedCollection<TKey, TValue>( null!, clear );
+            return new IncrementalKeyedCollection<TKey, TValue>( null!, clear );
         }
 
         public override void SerializeObject(
-            OverridableKeyedCollection<TKey, TValue> obj,
+            IncrementalKeyedCollection<TKey, TValue> obj,
             IArgumentsWriter constructorArguments,
             IArgumentsWriter initializationArguments )
         {
@@ -27,7 +27,7 @@ public partial class OverridableKeyedCollection<TKey, TValue>
             initializationArguments.SetValue( "items", obj._dictionary );
         }
 
-        public override void DeserializeFields( OverridableKeyedCollection<TKey, TValue> obj, IArgumentsReader initializationArguments )
+        public override void DeserializeFields( IncrementalKeyedCollection<TKey, TValue> obj, IArgumentsReader initializationArguments )
         {
             obj._dictionary = initializationArguments.GetValue<ImmutableDictionary<TKey, Item>>( "items" )!;
         }

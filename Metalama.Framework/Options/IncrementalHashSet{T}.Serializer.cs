@@ -5,24 +5,24 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Options;
 
-public partial class OverridableHashSet<T>
+public partial class IncrementalHashSet<T>
 {
-    private class Serializer : ReferenceTypeSerializer<OverridableHashSet<T>>
+    private class Serializer : ReferenceTypeSerializer<IncrementalHashSet<T>>
     {
-        public override OverridableHashSet<T> CreateInstance( IArgumentsReader constructorArguments )
+        public override IncrementalHashSet<T> CreateInstance( IArgumentsReader constructorArguments )
         {
             var clear = constructorArguments.GetValue<bool>( "clear" );
 
-            return new OverridableHashSet<T>( null!, clear );
+            return new IncrementalHashSet<T>( null!, clear );
         }
 
-        public override void SerializeObject( OverridableHashSet<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        public override void SerializeObject( IncrementalHashSet<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
             constructorArguments.SetValue( "clear", obj._clear );
             initializationArguments.SetValue( "items", obj._dictionary );
         }
 
-        public override void DeserializeFields( OverridableHashSet<T> obj, IArgumentsReader initializationArguments )
+        public override void DeserializeFields( IncrementalHashSet<T> obj, IArgumentsReader initializationArguments )
         {
             obj._dictionary = initializationArguments.GetValue<ImmutableDictionary<T, bool>>( "items" )!;
         }

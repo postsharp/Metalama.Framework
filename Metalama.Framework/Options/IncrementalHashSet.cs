@@ -9,75 +9,75 @@ namespace Metalama.Framework.Options;
 #pragma warning disable SA1642
 
 /// <summary>
-/// Factory methods for the <see cref="OverridableHashSet{T}"/> generic class.
+/// Factory methods for the <see cref="IncrementalHashSet{T}"/> generic class.
 /// </summary>
 [CompileTime]
-public static class OverridableHashSet
+public static class IncrementalHashSet
 {
     /// <summary>
-    /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the absence of any operation.
+    /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the absence of any operation.
     /// </summary>
-    public static OverridableHashSet<T> Empty<T>()
+    public static IncrementalHashSet<T> Empty<T>()
         where T : notnull
-        => OverridableHashSet<T>.Empty;
+        => IncrementalHashSet<T>.Empty;
 
     /// <summary>
-    /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the operation clearing
+    /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation clearing
     /// the overridden collection of all items.
     /// </summary>
-    public static OverridableHashSet<T> Clear<T>()
+    public static IncrementalHashSet<T> Clear<T>()
         where T : notnull
         => new( ImmutableDictionary<T, bool>.Empty, true );
 
     /// <summary>
-    /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the operation of adding an item to
+    /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding an item to
     /// the overridden collection, or to override with a new value if these items already exist.
     /// </summary>
-    public static OverridableHashSet<T> Add<T>( T item )
+    public static IncrementalHashSet<T> Add<T>( T item )
         where T : notnull
         => new(
             ImmutableDictionary.Create<T, bool>()
                 .Add( item, true ) );
 
     /// <summary>
-    /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the operation of adding items to
+    /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
     /// the overridden collection, or to override with a new value if these items already exist.
     /// </summary>
-    public static OverridableHashSet<T> Add<T>( params T[] items )
+    public static IncrementalHashSet<T> Add<T>( params T[] items )
         where T : notnull
         => new( items.ToImmutableDictionary( i => i, i => true ) );
 
     /// <summary>
-    /// Creates  new <see cref="OverridableHashSet{T}"/> that represents the operation of adding items to
+    /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
     /// the overridden collection, or to override with a new value if these items already exist.
     /// </summary>
-    public static OverridableHashSet<T> Add<T>( IEnumerable<T> items )
+    public static IncrementalHashSet<T> Add<T>( IEnumerable<T> items )
         where T : notnull
         => new( items.ToImmutableDictionary( i => i, i => true ) );
 
     /// <summary>
-    /// Creates a <see cref="OverridableHashSet{T}"/> that represents the option of removing an item
+    /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing an item
     /// from the overridden collection.
     /// </summary>
-    public static OverridableHashSet<T> Remove<T>( T item )
+    public static IncrementalHashSet<T> Remove<T>( T item )
         where T : notnull
         => new(
             ImmutableDictionary.Create<T, bool>()
                 .Add( item, false ) );
 
     /// <summary>
-    /// Creates a <see cref="OverridableHashSet{T}"/> that represents the option of removing items
+    /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing items
     /// from the overridden collection.
     /// </summary>
-    public static OverridableHashSet<T> Remove<T>( params T[] items )
+    public static IncrementalHashSet<T> Remove<T>( params T[] items )
         where T : notnull
         => new( items.ToImmutableDictionary( i => i, i => false ) );
 
     /// <summary>
-    /// Creates a <see cref="OverridableHashSet{T}"/> that represents the option of removing items
+    /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing items
     /// from the overridden collection.
     /// </summary>
-    public static OverridableHashSet<T> Remove<T>( IEnumerable<T> items )
+    public static IncrementalHashSet<T> Remove<T>( IEnumerable<T> items )
         where T : notnull
         => new( items.ToImmutableDictionary( i => i, i => true ) );
 }

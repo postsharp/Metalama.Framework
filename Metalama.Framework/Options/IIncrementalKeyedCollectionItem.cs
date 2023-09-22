@@ -5,9 +5,9 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Framework.Options;
 
 /// <summary>
-/// An item in a <see cref="OverridableKeyedCollection{TKey,TValue}"/>.
+/// An item in a <see cref="IncrementalKeyedCollection{TKey,TValue}"/>.
 /// </summary>
-public interface IOverridableKeyedCollectionItem<out TKey> : IOverridable, ICompileTimeSerializable
+public interface IIncrementalKeyedCollectionItem<out TKey> : IOverridable, ICompileTimeSerializable
     where TKey : notnull
 {
     /// <summary>

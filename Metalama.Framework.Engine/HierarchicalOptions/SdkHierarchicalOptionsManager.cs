@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-internal class SdkHierarchicalOptionsManager : ISdkHierarchicalOptionsManager
+internal sealed class SdkHierarchicalOptionsManager : ISdkHierarchicalOptionsManager
 {
     private readonly CompilationModel _compilationModel;
 

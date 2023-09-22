@@ -10,14 +10,14 @@ public sealed class OverridableKeyedCollectionTests
     [Fact]
     public void Add()
     {
-        Assert.Single( OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ) );
+        Assert.Single( IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ) );
     }
 
     [Fact]
     public void Replace()
     {
         var item = Assert.Single(
-            OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Item", "New" ) ).AddOrOverride( new Item( "Item", "Replaced" ) ) );
+            IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Item", "New" ) ).AddOrOverride( new Item( "Item", "Replaced" ) ) );
 
         Assert.Equal( "Replaced", item.Value );
     }
@@ -25,7 +25,7 @@ public sealed class OverridableKeyedCollectionTests
     [Fact]
     public void Remove()
     {
-        var item = OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ).Remove( "Item" );
+        var item = IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ).Remove( "Item" );
         Assert.Empty( item );
     }
 
@@ -33,7 +33,7 @@ public sealed class OverridableKeyedCollectionTests
     public void ClearThenAdd()
     {
         var item = Assert.Single(
-            OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ).Clear().AddOrOverride( new Item( "Item", "New" ) ) );
+            IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Item" ) ).Clear().AddOrOverride( new Item( "Item", "New" ) ) );
 
         Assert.Equal( "New", item.Value );
     }
@@ -41,8 +41,8 @@ public sealed class OverridableKeyedCollectionTests
     [Fact]
     public void OverrideWithClear()
     {
-        var collection1 = OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Key" ) );
-        var collection2 = OverridableKeyedCollection.Clear<string, Item>();
+        var collection1 = IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Key" ) );
+        var collection2 = IncrementalKeyedCollection.Clear<string, Item>();
         var merged = collection1.OverrideWith( collection2, default );
         Assert.Empty( merged );
     }
@@ -50,16 +50,15 @@ public sealed class OverridableKeyedCollectionTests
     [Fact]
     public void OverrideWithUpdate()
     {
-        var collection1 = OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Key" ) );
-        var collection2 = OverridableKeyedCollection.AddOrOverride<string, Item>( new Item( "Key", "Updated" ) );
+        var collection1 = IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Key" ) );
+        var collection2 = IncrementalKeyedCollection.AddOrOverride<string, Item>( new Item( "Key", "Updated" ) );
         var merged = collection1.OverrideWith( collection2, default );
         Assert.Equal( "Updated", Assert.Single( merged ).Value );
     }
 
-    private class Item : IOverridableKeyedCollectionItem<string>
+    private class Item : IIncrementalKeyedCollectionItem<string>
     {
-        public object OverrideWith( object overridingObject, in OverrideContext context )
-            => new Item( this.Key, ((Item) overridingObject).Value ?? this.Value );
+        public object OverrideWith( object other, in OverrideContext context ) => new Item( this.Key, ((Item) other).Value ?? this.Value );
 
         public string Key { get; }
 

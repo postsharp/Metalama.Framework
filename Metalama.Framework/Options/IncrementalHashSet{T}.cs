@@ -10,16 +10,16 @@ using System.Linq;
 namespace Metalama.Framework.Options;
 
 /// <summary>
-/// An immutable hash set that implements the <see cref="IOverridable"/> semantic and can be easily used in the context of an <see cref="IHierarchicalOptions{T}"/>.
-/// The class can represent the <see cref="Add(T)"/>, <see cref="Remove(T)"/> and <see cref="Clear"/> operations. To create an instance of this class,
-/// use the <see cref="OverridableHashSet"/> factory class.
+/// An immutable hash set where each class instance does not represent the full set but a modification of another set (possibly empty).
+/// This class implements the <see cref="IOverridable"/> semantic and can be easily used in the context of an <see cref="IHierarchicalOptions{T}"/>.
+/// The class can represent the <see cref="Add(T)"/>, <see cref="Remove(T)"/> and <see cref="Clear"/> operations.
 /// </summary>
 /// <typeparam name="T">Type of items.</typeparam>
 [PublicAPI]
-public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
+public partial class IncrementalHashSet<T> : IOverridable, IReadOnlyCollection<T>, ICompileTimeSerializable
     where T : notnull
 {
-    public static OverridableHashSet<T> Empty { get; } = new( ImmutableDictionary<T, bool>.Empty );
+    public static IncrementalHashSet<T> Empty { get; } = new( ImmutableDictionary<T, bool>.Empty );
 
     private readonly bool _clear;
     private ImmutableDictionary<T, bool> _dictionary;
@@ -27,43 +27,43 @@ public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T
     [NonCompileTimeSerialized]
     private int? _count;
 
-    protected internal OverridableHashSet( ImmutableDictionary<T, bool> dictionary, bool clear = false )
+    protected internal IncrementalHashSet( ImmutableDictionary<T, bool> dictionary, bool clear = false )
     {
         this._dictionary = dictionary;
         this._clear = clear;
     }
 
-    protected virtual OverridableHashSet<T> Create( ImmutableDictionary<T, bool> dictionary, bool clear = false ) => new( dictionary, clear );
+    protected virtual IncrementalHashSet<T> Create( ImmutableDictionary<T, bool> dictionary, bool clear = false ) => new( dictionary, clear );
 
     /// <summary>
-    /// Creates a <see cref="OverridableHashSet{T}"/> that represents the operation of removing any item both in the
+    /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the operation of removing any item both in the
     /// current collection and in any overridden collection.
     /// </summary>
-    public OverridableHashSet<T> Clear() => this.Create( ImmutableDictionary<T, bool>.Empty, true );
+    public IncrementalHashSet<T> Clear() => this.Create( ImmutableDictionary<T, bool>.Empty, true );
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the operation of adding an item to
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding an item to
     /// the overridden collection, or to override with a new value if this item already exists, additionally to
     /// any operation represented by the current collection.
     /// </summary>
-    public OverridableHashSet<T> Add( T item )
+    public IncrementalHashSet<T> Add( T item )
     {
         return this.Create( this._dictionary.SetItem( item, true ), this._clear );
     }
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the operation of adding items to
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
     /// the overridden collection, or to override with a new value if these items already exist, additionally to
     /// any operation represented by the current collection.
     /// </summary>
-    public OverridableHashSet<T> Add( T[] items ) => this.Add( (IEnumerable<T>) items );
+    public IncrementalHashSet<T> Add( T[] items ) => this.Add( (IEnumerable<T>) items );
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the operation of adding items to
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
     /// the overridden collection, or to override with a new value if these items already exist, additionally to
     /// any operation represented by the current collection.
     /// </summary>
-    public OverridableHashSet<T> Add( IEnumerable<T> items )
+    public IncrementalHashSet<T> Add( IEnumerable<T> items )
     {
         var builder = this._dictionary.ToBuilder();
 
@@ -76,22 +76,22 @@ public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T
     }
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the option of removing an item
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the option of removing an item
     /// from the overridden collection, additionally to any operation represented by the current object.
     /// </summary>
-    public OverridableHashSet<T> Remove( T item ) => this.Create( this._dictionary.SetItem( item, false ), this._clear );
+    public IncrementalHashSet<T> Remove( T item ) => this.Create( this._dictionary.SetItem( item, false ), this._clear );
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the option of removing a items
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the option of removing a items
     /// from the overridden collection, additionally to any operation represented by the current object.
     /// </summary>
-    public OverridableHashSet<T> Remove( T[] items ) => this.Remove( (IEnumerable<T>) items );
+    public IncrementalHashSet<T> Remove( T[] items ) => this.Remove( (IEnumerable<T>) items );
 
     /// <summary>
-    /// Creates a new <see cref="OverridableHashSet{T}"/> that represents the option of removing a items
+    /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the option of removing a items
     /// from the overridden collection, additionally to any operation represented by the current object.
     /// </summary>
-    public OverridableHashSet<T> Remove( IEnumerable<T> items )
+    public IncrementalHashSet<T> Remove( IEnumerable<T> items )
     {
         var builder = this._dictionary.ToBuilder();
 
@@ -117,7 +117,7 @@ public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T
     /// <summary>
     /// Overrides the current collection with another collection and returns the result.
     /// </summary>
-    public OverridableHashSet<T> OverrideWith( OverridableHashSet<T> other, in OverrideContext context )
+    public IncrementalHashSet<T> OverrideWith( IncrementalHashSet<T> other, in OverrideContext context )
     {
         if ( other._clear )
         {
@@ -136,6 +136,5 @@ public partial class OverridableHashSet<T> : IOverridable, IReadOnlyCollection<T
         }
     }
 
-    object IOverridable.OverrideWith( object overridingObject, in OverrideContext context )
-        => this.OverrideWith( (OverridableHashSet<T>) overridingObject, context );
+    object IOverridable.OverrideWith( object other, in OverrideContext context ) => this.OverrideWith( (IncrementalHashSet<T>) other, context );
 }
