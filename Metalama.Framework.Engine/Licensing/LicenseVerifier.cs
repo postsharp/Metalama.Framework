@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -35,7 +34,7 @@ public sealed class LicenseVerifier : IProjectService
     private readonly IProjectOptions _projectOptions;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
     private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
-    
+
     private readonly ITempFileManager _tempFileManager;
 
     private readonly struct RedistributionLicenseFeatures { }
@@ -161,13 +160,16 @@ public sealed class LicenseVerifier : IProjectService
         };
     }
 
-    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    internal void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         // List all aspect classed, that are used. Don't count skipped instances.
         var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
-        
+
         // Let all contracts to be used for free.
         aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) );
+
+        // All aspects from redistributable libraries are for free.
+        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } project } && this.IsProjectWithValidRedistributionLicense( project ) );
 
         // List remaining aspect classes.
         var consumedAspectClassNames =

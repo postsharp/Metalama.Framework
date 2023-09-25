@@ -16,12 +16,16 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     {
         protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
-        protected async Task<DiagnosticBag> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = "AspectCountTests.ArbitraryNamespace", string projectName = "TestProject" )
+        protected async Task<DiagnosticBag> GetDiagnosticsAsync(
+            string code,
+            string licenseKey,
+            string? assemblyName = "AspectCountTests.ArbitraryNamespace",
+            string projectName = "TestProject" )
         {
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
 
-            using var testContext = this.CreateTestContext( mocks, projectName );
+            using var testContext = this.CreateTestContext( this.GetDefaultTestContextOptions() with { ProjectName = projectName }, mocks );
             var domain = testContext.Domain;
 
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: assemblyName );

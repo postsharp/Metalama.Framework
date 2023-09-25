@@ -22,10 +22,9 @@ namespace Metalama.Testing.UnitTesting
         private readonly Lazy<string> _projectDirectory;
         private int _fileLockers;
 
-        public TestProjectOptions( TestContextOptions contextOptions, string? projectName )
+        public TestProjectOptions( TestContextOptions contextOptions )
         {
-            this.ProjectName = projectName;
-
+            this.ProjectName = contextOptions.ProjectName;
             this._properties = contextOptions.Properties;
 
             // We don't use the backstage TempFileManager because it would generate paths that are too long.

@@ -475,7 +475,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
                 var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
-                licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                licenseVerifier.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
                 pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
             }
 
