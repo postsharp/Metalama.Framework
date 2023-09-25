@@ -1,6 +1,22 @@
 // --- AspectClassesCountWithRedistributionLicense.cs ---
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0800 on ``: `This project uses 4 aspect classes, but only 3 are allowed by your license. For details, use the following command: `metalama license usage details --project AspectClassesCountWithRedistributionLicense`.`
-// --- _Redistribution.cs ---
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0800 on ``: `This project uses 4 aspect classes, but only 3 are allowed by your license. For details, use the following command: `metalama license usage details --project AspectClassesCountWithRedistributionLicense`.`
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithRedistributionLicense;
+class Dummy
+{
+} // --- _Redistribution.cs ---
+using  Metalama . Framework . Tests . Integration . Tests . Licensing . Redistribution . Dependency ;
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution;
+class RedistributionTargetClass
+{
+  [RedistributionAspect1]
+  [RedistributionAspect2]
+  [RedistributionAspect3]
+  [RedistributionAspect4]
+  void RedistributionTargetMethod()
+  {
+    global::System.Console.WriteLine("RedistributionTargetClass.RedistributionTargetMethod() enhanced by RedistributionAspect1");
+    global::System.Console.WriteLine("RedistributionTargetClass.RedistributionTargetMethod() enhanced by RedistributionAspect2");
+    global::System.Console.WriteLine("RedistributionTargetClass.RedistributionTargetMethod() enhanced by RedistributionAspect3");
+    global::System.Console.WriteLine("RedistributionTargetClass.RedistributionTargetMethod() enhanced by RedistributionAspect4");
+    return;
+  }
+}

@@ -25,15 +25,6 @@ namespace Metalama.Testing.AspectTesting
 
         private static TestAssemblyMetadata GetMetadataCore( IAssemblyInfo assembly )
         {
-            string GetShortAssemblyName()
-            {
-#pragma warning disable CA1307 // Use string comparison parameter. 
-                var commaPosition = assembly.Name.IndexOf( ',' );
-#pragma warning restore CA1307
-
-                return commaPosition > 0 ? assembly.Name.Substring( 0, commaPosition ) : assembly.Name;
-            }
-
             IAttributeInfo? GetOptionalAssemblyMetadataAttribute( string key )
                 => assembly
                     .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
@@ -58,6 +49,10 @@ namespace Metalama.Testing.AspectTesting
             }
 
             string GetProjectDirectory() => GetRequiredAssemblyMetadataValue( "ProjectDirectory" );
+
+            string GetProjectPath() => GetRequiredAssemblyMetadataValue( "ProjectPath" );
+
+            string GetProjectName() => Path.GetFileNameWithoutExtension( GetProjectPath() );
 
             ImmutableArray<string> GetParserSymbols()
                 => (GetOptionalAssemblyMetadataValue( "DefineConstants" ) ?? "")
@@ -84,7 +79,7 @@ namespace Metalama.Testing.AspectTesting
 
             bool GetIgnoreUserProfileLicenses() => GetBoolAssemblyMetadataValue( "MetalamaTestFrameworkIgnoreUserProfileLicenses" );
 
-            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetProjectLicense(), GetIgnoreUserProfileLicenses() );
+            TestFrameworkLicenseStatus GetLicense() => new( GetProjectName(), GetProjectLicense(), GetIgnoreUserProfileLicenses() );
 
             ImmutableArray<string> GetIgnoredWarnings()
                 => GetOptionalAssemblyMetadataValue( "IgnoredWarnings" )
