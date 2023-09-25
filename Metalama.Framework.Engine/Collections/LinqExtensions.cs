@@ -22,7 +22,10 @@ public static partial class LinqExtensions
     [Obsolete( "Use SelectAsList or SelectAsArray." )]
     internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func ) => SelectAsReadOnlyList( list, func );
 
-    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func, bool materialize = false )
+    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>(
+        this IReadOnlyCollection<TIn> list,
+        Func<TIn, TOut> func,
+        bool materialize = false )
     {
         if ( list.Count == 0 )
         {
@@ -257,12 +260,9 @@ public static partial class LinqExtensions
         return result;
     }
 
-    // This intentionally creates an ambiguity in resolving the call so we have to choose the right variant.
-    // Generally ToReadOnlyList is the right choice.
-    [Obsolete( "Use ToReadOnlyList or ToMutableList." )]
-    public static List<T> ToList<T>( this IEnumerable<T> items ) => Enumerable.ToList( items );
-
-    public static List<T> ToMutableList<T>( this IEnumerable<T> items ) => Enumerable.ToList( items );
+#pragma warning disable CMT005
+    public static List<T> ToMutableList<T>( this IEnumerable<T> items ) => items.ToList();
+#pragma warning restore CMT005
 
     /// <summary>
     /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
