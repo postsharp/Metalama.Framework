@@ -64,4 +64,6 @@ public sealed record TestContextOptions
     /// Gets the test timeout period, after which the <see cref="TestContext.CancellationToken"/> of the <see cref="TestContext"/> is signalled.
     /// </summary>
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds( 30 );
+
+    public string? ProjectName { get; init; }
 }

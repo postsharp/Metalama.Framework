@@ -36,6 +36,20 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Licensing\CodeFixApplicationAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixApplicationDisallowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixApplyAspectApplicationAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixApplyAspectApplicationDisallowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixApplyAspectPreviewingAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixPreviewingAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\LiveTemplateApplicationAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\LiveTemplateApplicationDisallowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\LiveTemplatePreviewAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\SdkAllowedByUltimate - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\SdkDisallowedByFree - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -44,6 +58,53 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
 		    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Licensing\CodeFixApplicationAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplicationAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplicationDisallowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplicationDisallowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplyAspectApplicationAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectApplicationAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplyAspectApplicationDisallowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectApplicationDisallowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplyAspectPreviewingAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectPreviewingAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixPreviewingAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixPreviewingAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\LiveTemplateApplicationAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>LiveTemplateApplicationAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\LiveTemplateApplicationDisallowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>LiveTemplateApplicationDisallowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\LiveTemplatePreviewAllowedProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>LiveTemplatePreviewAllowedProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\SdkAllowedByProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>SdkAllowedByProjectBound.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\SdkDisallowedByProjectBound.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>SdkDisallowedByProjectBound.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

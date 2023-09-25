@@ -44,24 +44,24 @@ namespace Metalama.Tool
                 {
                     case "license":
                         builder.AddBranch(
-                            "credits",
-                            credits =>
+                            "usage",
+                            usage =>
                             {
-                                credits.SetDescription( "Analyzes license credits required to build your projects." );
+                                usage.SetDescription( "Analyzes usage of license used to build your projects." );
 
-                                credits.AddCommand<PrintTotalCreditsCommand>( "summary" )
+                                usage.AddCommand<PrintTotalLicenseUsageCommand>( "summary" )
                                     .WithData( options )
-                                    .WithDescription( "Prints an overall summary of required credits for recent builds." );
+                                    .WithDescription( "Prints an overall summary of aspect classes used in recently built projects." );
 
-                                credits.AddCommand<PrintProjectCreditsCommand>( "projects" )
+                                usage.AddCommand<PrintProjectLicenseUsageCommand>( "projects" )
                                     .WithData( options )
-                                    .WithDescription( "Prints a by-project summary of required credits for recent builds." );
+                                    .WithDescription( "Prints a by-project summary of aspect classes used in recently built projects." );
 
-                                credits.AddCommand<PrintCreditDetailsCommand>( "details" )
+                                usage.AddCommand<PrintLicenseUsageDetailsCommand>( "details" )
                                     .WithData( options )
-                                    .WithDescription( "Prints the detail of how aspect classes or libraries consumed credits during recent builds." );
+                                    .WithDescription( "Prints the list of aspect classes used in recently built projects." );
 
-                                credits.AddCommand<ResetCreditsCommands>( "reset" )
+                                usage.AddCommand<ResetLicenseUsageCommands>( "reset" )
                                     .WithData( options )
                                     .WithDescription( "Resets the license consumption data gathered for the past builds." );
                             } );

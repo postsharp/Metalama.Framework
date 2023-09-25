@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using System;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -21,6 +22,11 @@ public class DistributedDesignTimeTestBase : UnitTestClass
 
     protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
     {
+        if ( contextOptions.ProjectName != null )
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
         return new DistributedDesignTimeTestContext( contextOptions, services );
     }
 
