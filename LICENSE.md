@@ -9,15 +9,13 @@ IF YOU DO NOT AGREE TO THE TERMS AND CONDITIONS OF THE AGREEMENT, YOU MAYNOT INS
 BY ATTEMPTING TO SET UP, INSTALL, COPY OR SAVE THE SOFTWARE ON YOUR COMPUTER, OR OTHERWISE USE THIS SOFTWARE, OR BY CLICKING ON THE RESPECTIVE ICON ACCEPTING THE AGREEMENT, AS THE CASE MAY BE, YOU, OR THE ENTITY YOU ARE REPRESENTING, AS THE CASE MAY BE, ARE BECOMING A PARTY TO THIS AGREEMENT AND YOU ARE CONSENTING TO BE BOUND BY ALL THE TERMS AND CONDITIONS OF THIS AGREEMENT.
 
 
-## TERMS AND CONDITIONS
-
-### 1. PARTIES
+## 1. PARTIES
 
 1.1 ' **Licensor**' means SharpCrafters s.r.o. with its registered office at Prague 5, nám. 11. října 1307/2, Postal Code 150 00, the Czech Republic, ID 28953690, registered in the Commercial Register maintained by the Municipal Court in Prague, Section C, File 155506. Licensor is doing business under the trade names of 'PostSharp' or 'PostSharp Technologies'.
 
 1.2 ' **Licensee**' means the legal entity or individual specified in the respective **Order** , as defined below. For editions of the Software that are available at no cost and used without explicit Order, Licensee means the legal entity or the individual using the free Software edition.
 
-### 2. DEFINITIONS
+## 2. DEFINITIONS
 
 2.1 As used in this Agreement, the capitalized terms shall have the following meanings:
 
