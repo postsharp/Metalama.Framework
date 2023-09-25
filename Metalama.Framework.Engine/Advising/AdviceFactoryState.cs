@@ -34,9 +34,7 @@ internal sealed class AdviceFactoryState
     public IntrospectionPipelineListener? IntrospectionListener { get; }
 
     public List<ITransformation> Transformations { get; } = new();
-
-    public bool IsAspectSkipped { get; private set; }
-
+    
     public IAspectBuilder? AspectBuilder { get; set; }
 
     public UserCodeExecutionContext ExecutionContext { get; }
@@ -62,9 +60,7 @@ internal sealed class AdviceFactoryState
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;
     }
-
-    public void SkipAspect() => this.IsAspectSkipped = true;
-
+    
     public void AddTransformations( List<ITransformation> transformations )
     {
         this.Transformations.AddRange( transformations );
