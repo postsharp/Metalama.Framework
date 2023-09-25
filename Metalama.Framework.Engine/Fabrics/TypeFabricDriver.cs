@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -134,5 +135,8 @@ internal sealed class TypeFabricDriver : FabricDriver
         public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
         public override void AddValidatorSource( IValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
+
+        public override void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
+            => this._aspectBuilder.AddOptionsSource( hierarchicalOptionsSource );
     }
 }

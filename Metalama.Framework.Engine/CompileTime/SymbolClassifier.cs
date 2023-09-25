@@ -263,7 +263,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .SelectAsList( GetTemplatingScope )
+                .SelectAsArray( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )

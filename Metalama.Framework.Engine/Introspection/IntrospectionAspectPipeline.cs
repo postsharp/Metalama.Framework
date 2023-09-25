@@ -100,7 +100,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
         {
             var outputCompilationModel = CompilationModel.CreateInitialInstance(
                 configuration.ProjectModel,
-                pipelineResult.Value.Compilation );
+                pipelineResult.Value.LastCompilation );
 
             return new IntrospectionCompilationResultModel(
                 compilationName,

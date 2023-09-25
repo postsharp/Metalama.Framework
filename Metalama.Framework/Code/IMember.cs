@@ -41,5 +41,11 @@ namespace Metalama.Framework.Code
         /// Gets the type containing the current member.
         /// </summary>
         new INamedType DeclaringType { get; }
+
+        /// <summary>
+        /// Gets the definition of the member. If the current declaration is a generic method instance or a member of
+        /// a generic type instance, this returns the generic definition. Otherwise, it returns the current instance.
+        /// </summary>
+        new IMember Definition { get; }
     }
 }

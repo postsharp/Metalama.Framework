@@ -32,42 +32,42 @@ public sealed class CodeFixTests : UnitTestClass
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.CodeFixes;
-            using Metalama.Framework.Diagnostics;
-            using System;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.CodeFixes;
+                            using Metalama.Framework.Diagnostics;
+                            using System;
 
-            internal class Aspect : MethodAspect
-            {
-                private static DiagnosticDefinition _diagHidden = new( "MY001", Severity.Hidden, "Add Hidden attribute" );
-                private static DiagnosticDefinition _diagInfo = new( "MY002", Severity.Info, "Add Info attribute" );
+                            internal class Aspect : MethodAspect
+                            {
+                                private static DiagnosticDefinition _diagHidden = new( "MY001", Severity.Hidden, "Add Hidden attribute" );
+                                private static DiagnosticDefinition _diagInfo = new( "MY002", Severity.Info, "Add Info attribute" );
+                            
+                                public override void BuildAspect( IAspectBuilder<IMethod> builder )
+                                {
+                                    base.BuildAspect( builder );
+                            
+                                    builder.Diagnostics.Report( _diagHidden.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof( HiddenAttribute ) ) ) );
+                            
+                                    builder.Diagnostics.Report( _diagInfo.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof( InfoAttribute ) ) ) );
+                            
+                                    builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof( RefactoringAttribute ) ) );
+                                }
+                            }
 
-                public override void BuildAspect( IAspectBuilder<IMethod> builder )
-                {
-                    base.BuildAspect( builder );
+                            internal class HiddenAttribute : Attribute { }
+                            internal class InfoAttribute : Attribute { }
+                            internal class RefactoringAttribute : Attribute { }
 
-                    builder.Diagnostics.Report( _diagHidden.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof( HiddenAttribute ) ) ) );
-
-                    builder.Diagnostics.Report( _diagInfo.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof( InfoAttribute ) ) ) );
-
-                    builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof( RefactoringAttribute ) ) );
-                }
-            }
-
-            internal class HiddenAttribute : Attribute { }
-            internal class InfoAttribute : Attribute { }
-            internal class RefactoringAttribute : Attribute { }
-
-            internal class TargetCode
-            {
-                [Aspect]
-                public static int Method( int a )
-                {
-                    return a;
-                }
-            }
-            """;
+                            internal class TargetCode
+                            {
+                                [Aspect]
+                                public static int Method( int a )
+                                {
+                                    return a;
+                                }
+                            }
+                            """;
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
@@ -121,63 +121,63 @@ public sealed class CodeFixTests : UnitTestClass
         using var testContext = this.CreateTestContext();
 
         const string libraryCode = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.CodeFixes;
-            using Metalama.Framework.Diagnostics;
-            using System;
-            using System.Linq;
+                                   using Metalama.Framework.Aspects;
+                                   using Metalama.Framework.Code;
+                                   using Metalama.Framework.CodeFixes;
+                                   using Metalama.Framework.Diagnostics;
+                                   using System;
+                                   using System.Linq;
 
-            [AttributeUsage(AttributeTargets.Class)]
-            public sealed class RequiredAttribute : Attribute { }            
+                                   [AttributeUsage(AttributeTargets.Class)]
+                                   public sealed class RequiredAttribute : Attribute { }
 
-            [RequiresAttribute]
-            public interface IRequiresAttribute { }
+                                   [RequiresAttribute]
+                                   public interface IRequiresAttribute { }
 
-            [Inheritable]
-            public sealed class RequiresAttribute : TypeAspect
-            {
-                private static readonly DiagnosticDefinition<INamedType> typeNeedsAttribute = new(
-                    "RA01",
-                    Severity.Error,
-                    "The class '{0}' must be annotated with [RequiredAttribute].");
-                
-                public override void BuildAspect(IAspectBuilder<INamedType> builder)
-                {
-                    bool hasRequiredAttribute = builder.Target.Attributes.Any(a => a.Type.Is(typeof(RequiredAttribute)));
-                    if (!hasRequiredAttribute)
-                    {
-                        builder.Diagnostics.Report(typeNeedsAttribute.WithArguments(builder.Target), builder.Target);
-                        builder.Diagnostics.Suggest(CodeFixFactory.AddAttribute(builder.Target, typeof(RequiredAttribute)), builder.Target);
-                    }
-                }
-            }
-            """;
+                                   [Inheritable]
+                                   public sealed class RequiresAttribute : TypeAspect
+                                   {
+                                       private static readonly DiagnosticDefinition<INamedType> typeNeedsAttribute = new(
+                                           "RA01",
+                                           Severity.Error,
+                                           "The class '{0}' must be annotated with [RequiredAttribute].");
+                                       
+                                       public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                                       {
+                                           bool hasRequiredAttribute = builder.Target.Attributes.Any(a => a.Type.Is(typeof(RequiredAttribute)));
+                                           if (!hasRequiredAttribute)
+                                           {
+                                               builder.Diagnostics.Report(typeNeedsAttribute.WithArguments(builder.Target), builder.Target);
+                                               builder.Diagnostics.Suggest(CodeFixFactory.AddAttribute(builder.Target, typeof(RequiredAttribute)), builder.Target);
+                                           }
+                                       }
+                                   }
+                                   """;
 
         const string appCode = """
-            namespace NS
-            {
-                /// <summary>
-                /// Some doc.
-                /// </summary>
-                public sealed class TestClass : IRequiresAttribute
-                {
-                }
-            }
-            """;
+                               namespace NS
+                               {
+                                   /// <summary>
+                                   /// Some doc.
+                                   /// </summary>
+                                   public sealed class TestClass : IRequiresAttribute
+                                   {
+                                   }
+                               }
+                               """;
 
         const string modifiedAppCode = """
-            namespace NS
-            {
-                /// <summary>
-                /// Some doc.
-                /// </summary>
-                [Required]
-                public sealed class TestClass : IRequiresAttribute
-                {
-                }
-            }
-            """;
+                                       namespace NS
+                                       {
+                                           /// <summary>
+                                           /// Some doc.
+                                           /// </summary>
+                                           [Required]
+                                           public sealed class TestClass : IRequiresAttribute
+                                           {
+                                           }
+                                       }
+                                       """;
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();

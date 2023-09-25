@@ -1,0 +1,50 @@
+[ShowOptionsAspect]
+[global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")]
+public class C1
+{
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")]
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("Project")] int p)
+    {
+    }
+}
+
+[ShowOptionsAspect]
+[global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+public class C2
+{
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
+    {
+    }
+
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("M2")]
+    public void M2([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("M2")] int p)
+    {
+    }
+
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+    public int P {[ShowOptionsAspect]
+        [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+        get; [ShowOptionsAspect]
+        [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+        set; }
+
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+    public int F;
+    [ShowOptionsAspect]
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+    public event EventHandler? E;
+    public class N
+    {
+        [ShowOptionsAspect]
+        [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")]
+        public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("C2")] int p)
+        {
+        }
+    }
+}

@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
                 resolvedReferencesBySource,
-                eventFieldRaiseReferences.SelectAsList( x => x.TargetSemantic ) );
+                eventFieldRaiseReferences.SelectAsArray( x => x.TargetSemantic ) );
 
             var reachableSemantics = reachabilityAnalyzer.Run();
 

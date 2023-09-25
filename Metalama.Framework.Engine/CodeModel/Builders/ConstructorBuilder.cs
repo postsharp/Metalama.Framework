@@ -55,5 +55,7 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
+    IConstructor IConstructor.Definition => this;
+
     public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 }

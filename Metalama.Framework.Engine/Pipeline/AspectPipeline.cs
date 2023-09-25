@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
@@ -337,14 +338,14 @@ namespace Metalama.Framework.Engine.Pipeline
         private protected virtual CodeFixFilter CodeFixFilter => ( _, _ ) => false;
 
         // ReSharper disable UnusedParameter.Global
-        private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
+        private protected virtual PipelineContributorSources CreatePipelineContributorSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
         {
             var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
+            var transitiveAspectSource = new TransitivePipelineContributorSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( configuration.ServiceProvider, aspectClasses ),
@@ -352,13 +353,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
 
+            var optionsSources = ImmutableArray.Create<IHierarchicalOptionsSource>( new CompilationHierarchicalOptionsSource( configuration.ServiceProvider ) );
+
+            var allSources = new PipelineContributorSources( aspectSources, validatorSources, optionsSources, transitiveAspectSource, transitiveAspectSource );
+
             if ( configuration.FabricsConfiguration != null )
             {
-                aspectSources = aspectSources.AddRange( configuration.FabricsConfiguration.AspectSources );
-                validatorSources = validatorSources.AddRange( configuration.FabricsConfiguration.ValidatorSources );
+                allSources = allSources.Add( configuration.FabricsConfiguration );
             }
 
-            return (aspectSources, validatorSources);
+            return allSources;
         }
 
         private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ProjectServiceProvider serviceProvider )
@@ -424,14 +428,33 @@ namespace Metalama.Framework.Engine.Pipeline
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 return new AspectPipelineResult(
                     compilation,
-                    pipelineConfiguration.ProjectModel,
-                    ImmutableArray<OrderedAspectLayer>.Empty,
-                    null,
-                    null );
+                    pipelineConfiguration.ProjectModel );
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+            var contributorSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
+
+            if ( compilationModel == null )
+            {
+                var hierarchicalOptionsManager = new HierarchicalOptionsManager( pipelineConfiguration.ServiceProvider );
+
+                compilationModel = CompilationModel.CreateInitialInstance(
+                    pipelineConfiguration.ProjectModel,
+                    compilation,
+                    hierarchicalOptionsManager: hierarchicalOptionsManager,
+                    externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
+
+                hierarchicalOptionsManager.Initialize(
+                    contributorSources.OptionsSources,
+                    contributorSources.ExternalOptionsProvider,
+                    compilationModel,
+                    diagnosticAdder );
+            }
+            else
+            {
+                compilationModel.HierarchicalOptionsManager.AssertNotNull();
+            }
 
             // Execute the pipeline stages.
             var pipelineStageResult = new AspectPipelineResult(
@@ -441,8 +464,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilationModel,
                 compilationModel,
                 null,
-                aspectSources.AspectSources,
-                aspectSources.ValidatorSources,
+                contributorSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )

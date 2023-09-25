@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -66,7 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
-            private Dictionary<ISymbol, HashSet<ISymbol>>? _currentTypeImplicitInterfaceImplementations;
+            private IReadOnlyDictionary<ISymbol, HashSet<ISymbol>>? _currentTypeImplicitInterfaceImplementations;
 
             public bool Success { get; private set; } = true;
 
@@ -123,14 +122,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalIdAttribute ) ) );
 
                 this._originalPathTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalPathAttribute ) ) );
 
-                this._fabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                this._fabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( Fabric ) );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
@@ -275,7 +274,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
                                                         .CreateRoslynDiagnostic(
                                                             childSymbol.GetDiagnosticLocation(),
-                                                            (childSymbol, typeof(TypeFabric)) ) );
+                                                            (childSymbol, typeof( TypeFabric )) ) );
 
                                                 this.Success = false;
                                             }
@@ -337,7 +336,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof(TypeFabric)) ) );
+                                        (childSymbol, typeof( TypeFabric )) ) );
 
                                 this.Success = false;
                             }
@@ -517,7 +516,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
+                    if ( implementedInterface.Name is nameof( IAspect ) or nameof( IEligible<IDeclaration> ) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -611,15 +610,25 @@ namespace Metalama.Framework.Engine.CompileTime
                 return transformedNode;
             }
 
-            private Dictionary<ISymbol, HashSet<ISymbol>> GetImplicitlyImplementedInterfaceMembers( INamedTypeSymbol type )
+            private IReadOnlyDictionary<ISymbol, HashSet<ISymbol>> GetImplicitlyImplementedInterfaceMembers( INamedTypeSymbol type )
             {
+                if ( type is not { TypeKind: TypeKind.Class or TypeKind.Struct } )
+                {
+                    return ImmutableDictionary<ISymbol, HashSet<ISymbol>>.Empty;
+                }
+
                 var implicitInterfaceMembers = new Dictionary<ISymbol, HashSet<ISymbol>>();
 
                 foreach ( var interfaceType in type.AllInterfaces )
                 {
                     foreach ( var interfaceMember in interfaceType.GetMembers() )
                     {
-                        var interfaceMemberImplementation = type.FindImplementationForInterfaceMember( interfaceMember ).AssertNotNull();
+                        var interfaceMemberImplementation = type.FindImplementationForInterfaceMember( interfaceMember );
+
+                        if ( interfaceMemberImplementation == null )
+                        {
+                            continue;
+                        }
 
                         if ( this._symbolEqualityComparer.Equals( interfaceMemberImplementation.ContainingType, type )
                              && !interfaceMemberImplementation.IsExplicitInterfaceMemberImplementation() )

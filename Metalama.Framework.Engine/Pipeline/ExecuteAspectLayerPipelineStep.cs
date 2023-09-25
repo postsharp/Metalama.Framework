@@ -119,8 +119,9 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 
                 default:
                     // Apply the changes done by the aspects.
-                    this.Parent.AddAspectSources( aspectResult.AspectSources, cancellationToken );
+                    this.Parent.AddAspectSources( aspectResult.AspectSources, true, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
+                    this.Parent.AddOptionsSources( aspectResult.OptionsSources );
                     this.Parent.AddTransformations( aspectResult.Transformations );
 
                     foreach ( var transformation in aspectResult.Transformations )

@@ -362,7 +362,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 // Override. Look for overrides.
                 for ( var c = (IMemberImpl) candidate; c != null; c = (IMemberImpl?) c.OverriddenMember )
                 {
-                    if ( c.OverriddenMember?.GetOriginalDefinition() == member )
+                    if ( c.OverriddenMember?.Definition == member )
                     {
                         overridingMembers.Add( candidate );
                     }
@@ -393,7 +393,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
                 if ( (candidateMember.SignatureEquals( interfaceMember )
-                      || candidateMember.GetOriginalDefinition().SignatureEquals( interfaceMember ))
+                      || candidateMember.Definition.SignatureEquals( interfaceMember ))
                      && candidateMember.SignatureEquals( typeMember ) )
                 {
                     return true;
@@ -477,7 +477,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 }
             }
 
-            currentType = currentType.BaseType?.GetOriginalDefinition();
+            currentType = currentType.BaseType?.Definition;
         }
 
         if ( symbolInterfaceMemberImplementation != null )
@@ -496,7 +496,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     public INamedTypeSymbol TypeSymbol { get; }
 
+    INamedType INamedType.Definition => throw new NotSupportedException();
+
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
+
+    protected override IMemberOrNamedType GetDefinition() => throw new NotSupportedException();
 
     [Memo]
     public INamedType UnderlyingType => this.GetUnderlyingTypeCore();

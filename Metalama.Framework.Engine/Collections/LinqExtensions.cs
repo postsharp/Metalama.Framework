@@ -22,7 +22,7 @@ public static partial class LinqExtensions
     [Obsolete( "Use SelectAsList or SelectAsArray." )]
     internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func ) => SelectAsReadOnlyList( list, func );
 
-    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static IReadOnlyCollection<TOut> SelectAsReadOnlyCollection<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func, bool materialize = false )
     {
         if ( list.Count == 0 )
         {
@@ -97,7 +97,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -109,7 +109,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -121,7 +121,7 @@ public static partial class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectAsList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsMutableList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Length );
 
@@ -236,7 +236,23 @@ public static partial class LinqExtensions
     public static List<T> ToMutableList<T>( this IReadOnlyList<T> list )
     {
         var result = new List<T>( list.Count );
-        result.AddRange( list );
+
+        foreach ( var item in list )
+        {
+            result.Add( item );
+        }
+
+        return result;
+    }
+
+    public static List<T> ToMutableList<T>( this IReadOnlyCollection<T> list )
+    {
+        var result = new List<T>( list.Count );
+
+        foreach ( var item in list )
+        {
+            result.Add( item );
+        }
 
         return result;
     }
@@ -275,6 +291,11 @@ public static partial class LinqExtensions
 
         return list;
     }
+
+    public static IReadOnlyList<T> Materialize<T>( this IReadOnlyList<T> list ) => list is INonMaterialized ? list.ToMutableList() : list;
+
+    public static IReadOnlyCollection<T> Materialize<T>( this IReadOnlyCollection<T> collection )
+        => collection is INonMaterialized ? collection.ToMutableList() : collection;
 
     [Obsolete( "This method is redundant." )]
     internal static IReadOnlyList<T> ToReadOnlyList<T>( this IReadOnlyList<T> list ) => list;

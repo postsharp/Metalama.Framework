@@ -121,8 +121,6 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 
-    public IDeclaration OriginalDefinition => this;
-
     public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
 
     // TODO: should we locate diagnostic on the aspect attribute?

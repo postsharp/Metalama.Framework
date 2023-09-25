@@ -63,7 +63,9 @@ internal sealed class CompilationAspectSource : IAspectSource
             return AspectSourceResult.Empty;
         }
 
-        var aspectInstances = compilation.GetAllAttributesOfType( aspectType )
+        var attributes = compilation.GetAllAttributesOfType( aspectType );
+
+        var aspectInstances = attributes
             .Select(
                 attribute =>
                 {
@@ -84,7 +86,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
                         if ( eligibility == EligibleScenarios.None )
                         {
-                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Default;
 
                             var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
                                 requestedEligibility,

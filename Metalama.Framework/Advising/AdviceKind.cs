@@ -27,5 +27,6 @@ public enum AdviceKind
     RemoveAttributes,
     AddInitializer,
     AddContract,
-    ImplementInterface
+    ImplementInterface,
+    AddAnnotation
 }

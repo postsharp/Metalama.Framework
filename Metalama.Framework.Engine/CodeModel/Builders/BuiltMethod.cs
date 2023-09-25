@@ -72,7 +72,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     [Memo]
     public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this._methodBuilder.OverriddenMethod );
 
-    IMethod IMethod.MethodDefinition => this;
+    IMethod IMethod.Definition => this;
 
     bool IMethod.IsPartial => false;
 

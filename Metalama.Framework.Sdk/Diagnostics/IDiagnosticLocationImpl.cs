@@ -3,7 +3,7 @@
 using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
     /// Exposes the Roslyn <see cref="Location"/>.

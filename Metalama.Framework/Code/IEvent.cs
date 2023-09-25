@@ -47,6 +47,12 @@ namespace Metalama.Framework.Code
         IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; }
 
         /// <summary>
+        /// Gets the definition of the event. If the current declaration is an event of
+        /// a generic type instance, this returns the event in the generic type definition. Otherwise, it returns the current instance.
+        /// </summary>
+        new IEvent Definition { get; }
+
+        /// <summary>
         /// Gets an <see cref="EventInfo"/> that represents the current event at run time.
         /// </summary>
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>

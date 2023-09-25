@@ -337,9 +337,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     {
         var rule = EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind );
 
-        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Default) == 0 )
         {
-            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<IDeclaration>( declaration ) );
 
             throw new InvalidOperationException(
                 MetalamaStringFormatter.Format(
@@ -353,9 +353,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     {
         var rule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection );
 
-        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+        if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Default) == 0 )
         {
-            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+            var justification = rule.GetIneligibilityJustification( EligibleScenarios.Default, new DescribedObject<IDeclaration>( declaration ) );
 
             throw new InvalidOperationException(
                 MetalamaStringFormatter.Format(
@@ -1723,4 +1723,25 @@ internal sealed class AdviceFactory : IAdviceFactory
             defaultValue,
             pullAction,
             attributes );
+
+    public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
+        where TDeclaration : class, IDeclaration
+    {
+        using ( this.WithNonUserCode() )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var advice = new AddAnnotationAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                declaration,
+                this._compilation,
+                new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
+
+            this.ExecuteAdvice<IDeclaration>( advice );
+        }
+    }
 }

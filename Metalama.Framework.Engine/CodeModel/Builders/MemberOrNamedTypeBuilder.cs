@@ -111,4 +111,6 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         this._name = name;
         this._usesNewKeyword = false;
     }
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this;
 }

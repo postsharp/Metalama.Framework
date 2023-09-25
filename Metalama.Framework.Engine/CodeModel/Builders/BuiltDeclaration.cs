@@ -58,9 +58,6 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public override string ToString() => this.Builder.ToString();
 
-    [Memo]
-    public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
-
     public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
     public sealed override bool IsImplicitlyDeclared => false;

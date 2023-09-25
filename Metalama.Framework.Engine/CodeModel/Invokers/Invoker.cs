@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
                 ?? member.GetCompilationModel().CompilationContext.DefaultSyntaxGenerationContext;
 
-            this.SerializationContext = new( member.GetCompilationModel(), this.GenerationContext );
+            this.SerializationContext = new SyntaxSerializationContext( member.GetCompilationModel(), this.GenerationContext );
 
             this._order = orderOptions switch
             {
@@ -100,11 +100,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
 
             // CurrentAspectLayerId may be null when we are not executing in a template execution context.
-            => new( TemplateExpansionContext.CurrentAspectLayerId ?? default, this._order, flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );
+            => new(
+                TemplateExpansionContext.CurrentAspectLayerId ?? default,
+                this._order,
+                flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );
 
         protected string GetCleanTargetMemberName()
         {
-            var definition = this.Member.GetOriginalDefinition();
+            var definition = this.Member.Definition;
 
             return
                 definition.IsExplicitInterfaceImplementation
@@ -139,7 +142,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 else if ( this.Member.IsStatic )
                 {
                     return new ReceiverTypedExpressionSyntax(
-                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax( this.SerializationContext ),
+                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification )
+                            .ToTypedExpressionSyntax( this.SerializationContext ),
                         false,
                         aspectReferenceSpecification );
                 }

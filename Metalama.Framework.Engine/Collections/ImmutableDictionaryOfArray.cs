@@ -20,6 +20,11 @@ namespace Metalama.Framework.Engine.Collections
             this._dictionary = dictionary;
         }
 
+        public ImmutableDictionaryOfArray( IEnumerable<KeyValuePair<TKey, ImmutableArray<TValue>>> dictionary )
+        {
+            this._dictionary = dictionary.ToImmutableDictionary( x => x.Key, x => new Group( x.Key, x.Value ) );
+        }
+
         public static ImmutableDictionaryOfArray<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
         public static ImmutableDictionaryOfArray<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
@@ -55,6 +60,18 @@ namespace Metalama.Framework.Engine.Collections
             builder.AddRange( source, getKey, getValue );
 
             return builder.ToImmutable();
+        }
+
+        public ImmutableDictionaryOfArray<TKey, TValue> Add( TKey key, TValue value )
+        {
+            if ( this._dictionary.TryGetValue( key, out var group ) )
+            {
+                return new ImmutableDictionaryOfArray<TKey, TValue>( this._dictionary.SetItem( key, group.Add( value ) ) );
+            }
+            else
+            {
+                return new ImmutableDictionaryOfArray<TKey, TValue>( this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ) ) ) );
+            }
         }
 
         IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
@@ -128,5 +145,8 @@ namespace Metalama.Framework.Engine.Collections
                 return new ImmutableDictionaryOfArray<TKey, TValue>( builder.ToImmutable() );
             }
         }
+
+        public ImmutableDictionary<TKey, ImmutableArray<TValue>> ToImmutableDictionary()
+            => this._dictionary.ToImmutableDictionary( x => x.Key, x => x.Value.Items );
     }
 }

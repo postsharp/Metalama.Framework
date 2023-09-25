@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Testing.UnitTesting;
@@ -80,6 +81,30 @@ namespace D {}
             var compilation2 = testContext.CreateCompilationModel( code );
 
             AssertSymbolsEqual( compilation1, compilation2, StructuralSymbolComparer.Default );
+        }
+
+        [Fact]
+        public void Namespaces()
+        {
+            const string code = @"
+namespace System;
+
+class A
+{
+
+}
+
+";
+
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var externalNamespace = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) )).Namespace;
+            var internalNamespace = compilation.Types.Single().Namespace;
+
+            Assert.NotSame( externalNamespace, internalNamespace );
+
+            Assert.False( StructuralSymbolComparer.IncludeAssembly.Equals( externalNamespace.GetSymbol(), internalNamespace.GetSymbol() ) );
         }
 
         // TODO: More tests.

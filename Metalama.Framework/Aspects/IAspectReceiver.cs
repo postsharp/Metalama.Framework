@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Represents a set of declarations and offers the ability to add aspects, annotations to them. It inherits from <see cref="IValidatorReceiver{TDeclaration}"/>,
+    /// Represents a set of declarations and offers the ability to add aspects and set options to them. It inherits from <see cref="IValidatorReceiver{TDeclaration}"/>,
     /// which allows to add validators.
     /// </summary>
     [InternalImplement]
@@ -29,13 +30,13 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="aspectType">The exact type of the aspect returned by <paramref name="createAspect"/>. It is not allowed to specify a base type in this parameter, only the exact type.</param>
         /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
-        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Aspect"/> | <see cref="EligibleScenarios.Inheritance"/>.
+        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Default"/> | <see cref="EligibleScenarios.Inheritance"/>.
         /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
         /// </param>
         void AddAspectIfEligible(
             Type aspectType,
             Func<TDeclaration, IAspect> createAspect,
-            EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance );
+            EligibleScenarios eligibility = EligibleScenarios.Default | EligibleScenarios.Inheritance );
 
         /// <summary>
         /// Adds an aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect.
@@ -48,12 +49,12 @@ namespace Metalama.Framework.Aspects
         /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
         /// </summary>
         /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
-        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Aspect"/> | <see cref="EligibleScenarios.Inheritance"/>.
+        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Default"/> | <see cref="EligibleScenarios.Inheritance"/>.
         /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
         /// </param>
         void AddAspectIfEligible<TAspect>(
             Func<TDeclaration, TAspect> createAspect,
-            EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
+            EligibleScenarios eligibility = EligibleScenarios.Default | EligibleScenarios.Inheritance )
             where TAspect : class, IAspect<TDeclaration>;
 
         /// <summary>
@@ -68,10 +69,10 @@ namespace Metalama.Framework.Aspects
         /// does not verify the eligibility of the declaration for the aspect unless you specify the <paramref name="eligibility"/> parameter.
         /// This overload creates a new instance of the aspect class for each eligible target declaration.
         /// </summary>
-        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Aspect"/> | <see cref="EligibleScenarios.Inheritance"/>.
+        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Default"/> | <see cref="EligibleScenarios.Inheritance"/>.
         /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
         /// </param>
-        void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
+        void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility = EligibleScenarios.Default | EligibleScenarios.Inheritance )
             where TAspect : class, IAspect<TDeclaration>, new();
 
         /// <summary>
@@ -103,6 +104,20 @@ namespace Metalama.Framework.Aspects
         new IAspectReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
             where TMember : class, IDeclaration;
 
+        /// <summary>
+        /// Filters the set of declarations included in the current set.
+        /// </summary>
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
+        
+        /// <summary>
+        /// Sets options for the declarations in the current set of declarations.
+        /// </summary>
+        /// <param name="func">A function giving the options for the given declaration.</param>
+        /// <typeparam name="TOptions">The type of options.</typeparam>
+        /// <remarks>
+        /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
+        /// </remarks>
+        void SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
+            where TOptions : IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
     }
 }

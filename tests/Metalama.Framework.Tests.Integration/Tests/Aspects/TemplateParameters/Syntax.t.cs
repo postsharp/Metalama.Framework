@@ -1,25 +1,25 @@
 internal class Target
 {
-  [return: MyAspect]
-  string M1()
-  {
-    global::System.String returnValue;
-    returnValue = "foo";
-    foreach (var c in returnValue)
+    [return: MyAspect]
+    private string M1()
     {
-      global::System.Console.WriteLine(c);
+        global::System.String returnValue;
+        returnValue = "foo";
+        foreach (var c in returnValue)
+        {
+            global::System.Console.WriteLine(c);
+        }
+        return returnValue;
     }
-    return returnValue;
-  }
-  [return: MyAspect]
-  bool M2()
-  {
-    global::System.Boolean returnValue;
-    returnValue = false;
-    if (returnValue)
+    [return: MyAspect]
+    private bool M2()
     {
-      global::System.Console.WriteLine("T");
+        global::System.Boolean returnValue;
+        returnValue = false;
+        if (returnValue)
+        {
+            global::System.Console.WriteLine("T");
+        }
+        return returnValue;
     }
-    return returnValue;
-  }
 }

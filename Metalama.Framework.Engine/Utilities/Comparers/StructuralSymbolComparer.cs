@@ -21,6 +21,16 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers );
 
+        public static readonly StructuralSymbolComparer IncludeAssembly =
+            new(
+                StructuralSymbolComparerOptions.ContainingDeclaration |
+                StructuralSymbolComparerOptions.Name |
+                StructuralSymbolComparerOptions.GenericParameterCount |
+                StructuralSymbolComparerOptions.GenericArguments |
+                StructuralSymbolComparerOptions.ParameterTypes |
+                StructuralSymbolComparerOptions.ParameterModifiers |
+                StructuralSymbolComparerOptions.ContainingAssembly );
+
         public static readonly StructuralSymbolComparer IncludeNullability =
             new(
                 StructuralSymbolComparerOptions.ContainingDeclaration |
@@ -30,6 +40,17 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers |
                 StructuralSymbolComparerOptions.Nullability );
+
+        public static readonly StructuralSymbolComparer IncludeAssemblyAndNullability =
+            new(
+                StructuralSymbolComparerOptions.ContainingDeclaration |
+                StructuralSymbolComparerOptions.Name |
+                StructuralSymbolComparerOptions.GenericParameterCount |
+                StructuralSymbolComparerOptions.GenericArguments |
+                StructuralSymbolComparerOptions.ParameterTypes |
+                StructuralSymbolComparerOptions.ParameterModifiers |
+                StructuralSymbolComparerOptions.Nullability |
+                StructuralSymbolComparerOptions.ContainingAssembly );
 
         public static readonly StructuralSymbolComparer ContainingDeclarationOblivious =
             new(
@@ -103,7 +124,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (IParameterSymbol parameterX, IParameterSymbol parameterY):
                     result = this.Compare( parameterX.ContainingSymbol, parameterY.ContainingSymbol );
-                    
+
                     if ( result != 0 )
                     {
                         return result;
@@ -113,7 +134,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (IPropertySymbol propertyX, IPropertySymbol propertyY):
                     result = this.CompareProperties( propertyX, propertyY, this._options );
-                    
+
                     if ( result != 0 )
                     {
                         return result;
@@ -123,7 +144,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (IEventSymbol eventX, IEventSymbol eventY):
                     result = CompareEvents( eventX, eventY, this._options );
-                    
+
                     if ( result != 0 )
                     {
                         return result;
@@ -133,7 +154,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (IFieldSymbol fieldX, IFieldSymbol fieldY):
                     result = CompareFields( fieldX, fieldY, this._options );
-            
+
                     if ( result != 0 )
                     {
                         return result;
@@ -143,7 +164,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (ITypeSymbol typeX, ITypeSymbol typeY):
                     result = this.CompareTypes( typeX, typeY );
-        
+
                     if ( result != 0 )
                     {
                         return result;
@@ -152,8 +173,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
-                    result = CompareNamespaces( namespaceX, namespaceY );
-           
+                    result = this.CompareNamespaces( namespaceX, namespaceY );
+
                     if ( result != 0 )
                     {
                         return result;
@@ -167,7 +188,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY):
                     // TODO: Is this correct in all options?
                     result = StringComparer.Ordinal.Compare( localSymbolX.Name, localSymbolY.Name );
-         
+
                     if ( result != 0 )
                     {
                         return result;
@@ -182,7 +203,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration ) )
             {
                 result = this.CompareContainingDeclarations( x.ContainingSymbol, y.ContainingSymbol );
-       
+
                 if ( result != 0 )
                 {
                     return result;
@@ -192,7 +213,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly ) )
             {
                 result = CompareContainingModules( x.ContainingModule, y.ContainingModule );
-       
+
                 if ( result != 0 )
                 {
                     return result;
@@ -208,7 +229,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             var identityY = assemblyY.Identity;
 
             var result = AssemblyIdentityComparer.SimpleNameComparer.Compare( identityX.Name, identityY.Name );
-    
+
             if ( result != 0 )
             {
                 return result;
@@ -219,10 +240,22 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             // Ignore culture and public key, since they shouldn't be relevant.
         }
 
-        private static int CompareNamespaces( INamespaceSymbol nsX, INamespaceSymbol nsY )
+        private int CompareNamespaces( INamespaceSymbol nsX, INamespaceSymbol nsY )
         {
-            var result = nsX.NamespaceKind.CompareTo( nsY.NamespaceKind );
-      
+            int result;
+
+            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly ) )
+            {
+                result = CompareContainingModules( nsX.ContainingModule, nsY.ContainingModule );
+
+                if ( result != 0 )
+                {
+                    return result;
+                }
+            }
+
+            result = nsX.NamespaceKind.CompareTo( nsY.NamespaceKind );
+
             if ( result != 0 )
             {
                 return result;
@@ -236,7 +269,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             }
 
             result = nsX.IsGlobalNamespace.CompareTo( nsY.IsGlobalNamespace );
-     
+
             if ( result != 0 )
             {
                 return result;
@@ -247,7 +280,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 0;
             }
 
-            return CompareNamespaces( nsX.ContainingNamespace, nsY.ContainingNamespace );
+            return this.CompareNamespaces( nsX.ContainingNamespace, nsY.ContainingNamespace );
         }
 
         private int CompareNamedTypes( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralSymbolComparerOptions options )
@@ -257,7 +290,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
                 result = StringComparer.Ordinal.Compare( namedTypeX.Name, namedTypeY.Name );
-         
+
                 if ( result != 0 )
                 {
                     return result;
@@ -265,8 +298,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 if ( namedTypeX.ContainingType == null && namedTypeY.ContainingType == null )
                 {
-                    result = CompareNamespaces( namedTypeX.ContainingNamespace, namedTypeY.ContainingNamespace );
-          
+                    result = this.CompareNamespaces( namedTypeX.ContainingNamespace, namedTypeY.ContainingNamespace );
+
                     if ( result != 0 )
                     {
                         return result;
@@ -277,7 +310,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability ) )
             {
                 result = Comparer<NullableAnnotation>.Default.Compare( namedTypeX.NullableAnnotation, namedTypeY.NullableAnnotation );
-         
+
                 if ( result != 0 )
                 {
                     return result;
@@ -287,7 +320,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
                 result = namedTypeX.TypeParameters.Length.CompareTo( namedTypeY.TypeParameters.Length );
-      
+
                 if ( result != 0 )
                 {
                     return result;
@@ -304,7 +337,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     var typeArgumentY = namedTypeY.TypeArguments[i];
 
                     result = this.CompareTypes( typeArgumentX, typeArgumentY );
-        
+
                     if ( result != 0 )
                     {
                         return result;
@@ -327,7 +360,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
             {
                 result = StringComparer.Ordinal.Compare( methodX.Name, methodY.Name );
-       
+
                 if ( result != 0 )
                 {
                     return result;
@@ -337,7 +370,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
                 result = methodX.TypeParameters.Length.CompareTo( methodY.TypeParameters.Length );
-     
+
                 if ( result != 0 )
                 {
                     return result;
@@ -354,7 +387,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     var typeArgumentY = methodY.TypeArguments[i];
 
                     result = this.CompareTypes( typeArgumentX, typeArgumentY );
-      
+
                     if ( result != 0 )
                     {
                         return result;
@@ -364,7 +397,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             return this.CompareParameters( methodX.Parameters, methodY.Parameters, methodX.ReturnType, methodY.ReturnType, options );
         }
-        
+
         private int CompareProperties( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralSymbolComparerOptions options )
         {
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
@@ -399,7 +432,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                  || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
             {
                 var result = methodXParameters.Length.CompareTo( methodYParameters.Length );
-    
+
                 if ( result != 0 )
                 {
                     return result;
@@ -413,7 +446,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
                     {
                         result = CompareParameterTypes( parameterX.Type, parameterY.Type );
-      
+
                         if ( result != 0 )
                         {
                             return result;
@@ -423,7 +456,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
                         result = Comparer<RefKind>.Default.Compare( parameterX.RefKind, parameterY.RefKind );
-          
+
                         if ( result != 0 )
                         {
                             return result;
@@ -433,7 +466,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 // Conversion operators have the same parameters but a different return type.
                 result = CompareParameterTypes( methodXReturnType, methodYReturnType );
-   
+
                 if ( result != 0 )
                 {
                     return result;
@@ -469,19 +502,19 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 return 0;
             }
-     
+
             if ( typeX == null )
             {
                 return -1;
             }
-    
+
             if ( typeY == null )
             {
                 return 1;
             }
 
             var result = Comparer<TypeKind>.Default.Compare( typeX.TypeKind, typeY.TypeKind );
-    
+
             if ( result != 0 )
             {
                 // Unequal kinds.
@@ -492,7 +525,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
                     result = StringComparer.Ordinal.Compare( typeParamX.Name, typeParamY.Name );
-       
+
                     if ( result != 0 )
                     {
                         return result;
@@ -510,7 +543,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                 case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
                     result = arrayTypeX.Rank.CompareTo( arrayTypeY.Rank );
-      
+
                     if ( result != 0 )
                     {
                         return result;
@@ -525,7 +558,10 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     return this.CompareTypes( xPointerType.PointedAtType, yPointerType.PointedAtType );
 
                 case (IFunctionPointerTypeSymbol xFunctionPointerType, IFunctionPointerTypeSymbol yFunctionPointerType):
-                    return this.CompareMethods( xFunctionPointerType.Signature, yFunctionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
+                    return this.CompareMethods(
+                        xFunctionPointerType.Signature,
+                        yFunctionPointerType.Signature,
+                        StructuralSymbolComparerOptions.FunctionPointer );
 
                 default:
                     throw new NotImplementedException( $"{typeX.Kind}" );
@@ -543,19 +579,19 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 {
                     return 0;
                 }
-     
+
                 if ( currentX == null )
                 {
                     return -1;
                 }
-      
+
                 if ( currentY == null )
                 {
                     return 1;
                 }
 
                 var result = Comparer<SymbolKind>.Default.Compare( currentX.Kind, currentY.Kind );
-      
+
                 if ( result != 0 )
                 {
                     return result;
@@ -565,7 +601,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 {
                     case (IMethodSymbol methodX, IMethodSymbol methodY):
                         result = this.CompareMethods( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature );
-          
+
                         if ( result != 0 )
                         {
                             return result;
@@ -575,7 +611,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                         result = this.CompareNamedTypes( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type );
-          
+
                         if ( result != 0 )
                         {
                             return result;
@@ -585,7 +621,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
                         result = StringComparer.Ordinal.Compare( namespaceX.Name, namespaceY.Name );
-      
+
                         if ( result != 0 )
                         {
                             return result;
@@ -611,19 +647,19 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 return 0;
             }
-     
+
             if ( moduleX == null )
             {
                 return -1;
             }
-     
+
             if ( moduleY == null )
             {
                 return 1;
             }
 
             var result = StringComparer.Ordinal.Compare( moduleX.Name, moduleY.Name );
-     
+
             if ( result != 0 )
             {
                 return result;

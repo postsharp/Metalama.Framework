@@ -9,9 +9,11 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -73,6 +75,11 @@ namespace Metalama.Framework.Engine.Fabrics
             this._parent.LicenseVerifier?.VerifyCanAddValidator( this._parent.AspectPredecessor );
 
             this._parent.AddValidatorSource( validatorSource );
+        }
+
+        private void RegisterOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
+        {
+            this._parent.AddOptionsSource( hierarchicalOptionsSource );
         }
 
         private IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
@@ -155,11 +162,12 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
                         userCodeInvoker,
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
-                        diagnostics,
+                        (IDiagnosticAdder) diagnostics,
+                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         item => this.SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
@@ -179,11 +187,12 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
                         userCodeInvoker,
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
-                        diagnostics,
+                        (IDiagnosticAdder) diagnostics,
+                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         item => this.SelectReferenceValidatorInstances(
                             item,
                             source.Driver,
@@ -204,11 +213,12 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
                         userCodeInvoker,
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
-                        diagnostics,
+                        (IDiagnosticAdder) diagnostics,
+                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         item =>
                         {
                             var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
@@ -234,11 +244,12 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._compilationModelVersion,
                     this._parent.AspectPredecessor,
                     validateMethod,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
                         userCodeInvoker,
                         executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
                         compilation,
-                        diagnostics,
+                        (IDiagnosticAdder) diagnostics,
+                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         item => new[]
                         {
                             new DeclarationValidatorInstance(
@@ -292,6 +303,40 @@ namespace Metalama.Framework.Engine.Fabrics
                 this._parent,
                 this._compilationModelVersion,
                 ( c, d ) => this._selector( c, d ).Where( predicate ) );
+
+        public void SetOptions<TOptions>( Func<T, TOptions> func )
+            where TOptions : IHierarchicalOptions, IHierarchicalOptions<T>, new()
+        {
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
+            this.RegisterOptionsSource(
+                new ProgrammaticHierarchicalOptionsSource(
+                    ( compilation, diagnosticAdder )
+                        => this.SelectAndValidateValidatorOrConfiguratorTargets<HierarchicalOptionsInstance>(
+                            userCodeInvoker,
+                            executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
+                            compilation,
+                            diagnosticAdder,
+                            GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
+                            t =>
+                            {
+                                if ( !userCodeInvoker.TryInvoke(
+                                        () => func( t ),
+                                        executionContext,
+                                        out var options ) || options == null )
+                                {
+                                    return null;
+                                }
+
+                                return new[]
+                                {
+                                    new HierarchicalOptionsInstance(
+                                        t,
+                                        options )
+                                };
+                            } ) ) );
+        }
 
         IValidatorReceiver<T> IValidatorReceiver<T>.Where( Func<T, bool> predicate ) => this.Where( predicate );
 
@@ -464,7 +509,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
 
                 var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
-                var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+                var requiredEligibility = canBeInherited ? EligibleScenarios.Default | EligibleScenarios.Inheritance : EligibleScenarios.Default;
 
                 if ( !eligibility.IncludesAny( requiredEligibility ) )
                 {
@@ -497,15 +542,15 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
+        private IEnumerable<TResult> SelectAndValidateValidatorOrConfiguratorTargets<TResult>(
             UserCodeInvoker? invoker,
             UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
-            IDiagnosticSink diagnosticSink,
-            Func<T, IEnumerable<ValidatorInstance>> createResult )
+            IDiagnosticAdder diagnosticAdder,
+            DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)> diagnosticDefinition,
+            Func<T, IEnumerable<TResult?>?> createResult )
+            where TResult : class
         {
-            var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
-
             IReadOnlyList<T> targets;
 
             if ( invoker != null && executionContext != null )
@@ -534,18 +579,24 @@ namespace Metalama.Framework.Engine.Fabrics
                      && containingTypeOrCompilation.DeclarationKind != DeclarationKind.Compilation )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateRoslynDiagnostic(
+                        diagnosticDefinition.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
 
                     continue;
                 }
 
-                var validatorInstances = createResult( targetDeclaration );
+                var results = createResult( targetDeclaration );
 
-                foreach ( var validatorInstance in validatorInstances )
+                if ( results != null )
                 {
-                    yield return validatorInstance;
+                    foreach ( var result in results )
+                    {
+                        if ( result != null )
+                        {
+                            yield return result;
+                        }
+                    }
                 }
             }
         }

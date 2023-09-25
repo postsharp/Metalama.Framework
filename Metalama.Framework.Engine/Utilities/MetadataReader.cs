@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -31,16 +32,17 @@ namespace Metalama.Framework.Engine.Utilities
                     return false;
                 }
 
-                metadataInfo = GetCompileTimeResourceCore( path );
+                metadataInfo = GetMetadataCore( path );
                 _cache.TryAdd( path, metadataInfo );
             }
 
             return true;
         }
 
-        private static MetadataInfo GetCompileTimeResourceCore( string path )
+        private static MetadataInfo GetMetadataCore( string path )
         {
             var timestamp = File.GetLastWriteTime( path );
+            var assemblyIdentity = AssemblyName.GetAssemblyName( path ).ToAssemblyIdentity();
 
             using var stream = new FileStream( path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
             using var peReader = new PEReader( stream );
@@ -117,6 +119,7 @@ namespace Metalama.Framework.Engine.Utilities
                     group => group.Select( type => metadataReader.GetString( type.Name ) ).ToImmutableArray() );
 
             return new MetadataInfo(
+                assemblyIdentity,
                 timestamp,
                 resourcesDictionaryBuilder?.ToImmutable() ?? ImmutableDictionary<string, byte[]>.Empty,
                 hasCompileTimeAttribute,

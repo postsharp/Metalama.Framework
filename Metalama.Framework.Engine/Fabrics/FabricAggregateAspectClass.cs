@@ -60,12 +60,12 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public ImmutableArray<AspectLayer> Layers { get; } = ImmutableArray.Create( new AspectLayer( "<Fabric>", null ) );
 
-        EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Aspect;
+        EligibleScenarios IAspectClassImpl.GetEligibility( IDeclaration obj, bool isInheritable ) => EligibleScenarios.Default;
 
         public ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
             => this.Project.TemplateReflectionContext ?? compilationContext;
 
-        EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+        EligibleScenarios IEligibilityRule<IDeclaration>.GetEligibility( IDeclaration obj ) => EligibleScenarios.Default;
 
         FormattableString IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
             EligibleScenarios requestedEligibility,

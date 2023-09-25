@@ -140,7 +140,7 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public OperatorKind OperatorKind { get; }
 
-    IMethod IMethod.MethodDefinition => this;
+    IMethod IMethod.Definition => this;
 
     bool IMethod.IsPartial => false;
 

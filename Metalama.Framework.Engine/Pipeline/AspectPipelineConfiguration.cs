@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
-using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Generic;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
-        internal FabricsConfiguration? FabricsConfiguration { get; }
+        internal PipelineContributorSources? FabricsConfiguration { get; }
 
         public ProjectModel ProjectModel { get; }
 
@@ -52,7 +51,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
             CompileTimeProjectRepository compileTimeProjectRepository,
-            FabricsConfiguration? fabricsConfiguration,
+            PipelineContributorSources? fabricsConfiguration,
             ProjectModel projectModel,
             ProjectServiceProvider serviceProvider,
             CodeFixFilter codeFixFilter )

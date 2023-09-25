@@ -155,7 +155,10 @@ internal static class TemplateBindingHelper
     /// <summary>
     /// Binds a template to a contract for a given location name with given arguments.
     /// </summary>
-    public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, ExpressionSyntax parameterExpression, IObjectReader? arguments = null )
+    public static BoundTemplateMethod ForContract(
+        this TemplateMember<IMethod> template,
+        ExpressionSyntax parameterExpression,
+        IObjectReader? arguments = null )
     {
         // The template must be void.
         if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
@@ -228,7 +231,7 @@ internal static class TemplateBindingHelper
                     var declarationKind = targetMethod switch
                     {
                         { OperatorKind: not OperatorKind.None } => "operator",
-                        _ => "accessor",
+                        _ => "accessor"
                     };
 
                     if ( template.TemplateClassMember.RunTimeParameters.Length != expectedParameterCount )
@@ -355,7 +358,12 @@ internal static class TemplateBindingHelper
         return true;
     }
 
-    private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments, AsyncInfo? toMethodAsyncInfo = null )
+    private static bool VerifyTemplateType(
+        IType fromType,
+        IType toType,
+        TemplateMember<IMethod> template,
+        IObjectReader arguments,
+        AsyncInfo? toMethodAsyncInfo = null )
     {
         fromType = fromType.ForCompilation( toType.Compilation );
 
@@ -397,7 +405,7 @@ internal static class TemplateBindingHelper
         {
             // Special rules for matching async-related return types.
 
-            var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
+            var fromOriginalDefinition = fromNamedType.Definition;
             var toTypeAsyncInfo = toMethodAsyncInfo.Value;
 
             if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
@@ -406,7 +414,7 @@ internal static class TemplateBindingHelper
                 // We accept Task<dynamic> for any awaitable, async void, and async enumerable.
 
                 if ( toTypeAsyncInfo.IsAwaitable || toTypeAsyncInfo.IsAsync == true ||
-                     toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
+                     toNamedType.Definition.SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
                 {
                     return true;
                 }
@@ -422,7 +430,7 @@ internal static class TemplateBindingHelper
                 }
             }
             else if ( fromNamedType.TypeArguments.Count > 0 &&
-                      fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
+                      fromOriginalDefinition.Equals( toNamedType.Definition ) &&
                       VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
             {
                 return true;
@@ -558,7 +566,7 @@ internal static class TemplateBindingHelper
                             $"The value of type parameter '{parameter.Name}' for template '{template.Declaration}' must not be null." ) ),
                     _ => throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
-                            $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) ),
+                            $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) )
                 };
 
                 templateArguments.Add( CreateTemplateTypeArgument( parameter.Name, typeModel ) );

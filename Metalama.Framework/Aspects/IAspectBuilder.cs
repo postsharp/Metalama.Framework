@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System.Threading;
@@ -110,5 +111,12 @@ namespace Metalama.Framework.Aspects
         /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
+
+        /// <summary>
+        /// Gets the options effective for the current aspect instance, including any options set on a parent declaration.
+        /// </summary>
+        /// <typeparam name="T">The type of options.</typeparam>
+        T GetOptions<T>()
+            where T : class, IHierarchicalOptions<TAspectTarget>, new();
     }
 }

@@ -164,11 +164,14 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
 
+        [Obsolete( "Renamed Definition." )]
+        INamedType TypeDefinition { get; }
+
         /// <summary>
         /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance,
         /// returns the current <see cref="INamedType"/>.
         /// </summary>
-        INamedType TypeDefinition { get; }
+        new INamedType Definition { get; }
 
         /// <summary>
         /// Gets the underlying type of an enum, the non-nullable type of a nullable type, or the current type.

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
@@ -37,15 +36,14 @@ namespace Metalama.Framework.Engine.Pipeline
             IDiagnosticAdder diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var compilation = input.LastCompilationModel;
 
             pipelineConfiguration.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
-                input.AspectSources,
-                input.ValidatorSources,
+                input.ContributorSources,
                 pipelineConfiguration,
                 cancellationToken );
 

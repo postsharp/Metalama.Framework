@@ -737,6 +737,19 @@ namespace Metalama.Framework.Advising
             ImmutableArray<AttributeConstruction> attributes = default );
 
         /// <summary>
+        /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
+        /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.
+        /// Annotations are a way of communication between aspects or classes of aspects.
+        /// </summary>
+        /// <param name="declaration">The declaration to which the annotation should be added.</param>
+        /// <param name="annotation">The annotation.</param>
+        /// <param name="export">A value indicating whether the annotation should be exported and made visible to other projects.
+        /// Unless this parameter is set to <c>true</c>, the annotation will only be visible to the current project.</param>
+        /// <typeparam name="TDeclaration">The type of declaration.</typeparam>
+        void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
+            where TDeclaration : class, IDeclaration;
+
+        /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will use the specified object to find template methods.
         /// </summary>
         /// <param name="templateProvider">A <see cref="TemplateProvider"/>.</param>

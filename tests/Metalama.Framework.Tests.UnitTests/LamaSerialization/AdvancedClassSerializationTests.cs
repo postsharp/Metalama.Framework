@@ -135,19 +135,19 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 private const string _nameKey = "_";
                 private const string _spouseKey = "_s";
 
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override Parent CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new Parent( constructorArguments.GetValue<string>( _nameKey ).AssertNotNull() );
                 }
 
-                internal override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _childrenKey, obj.Children );
                     initializationArguments.SetValue( _spouseKey, obj.Spouse );
                     constructorArguments.SetValue( _nameKey, obj.Name );
                 }
 
-                internal override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
                 {
                     obj.Children = initializationArguments.GetValue<Child[]>( _childrenKey );
                     obj.Spouse = initializationArguments.GetValue<Parent>( _spouseKey );
@@ -172,12 +172,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 private const string _fatherKey = "_f";
                 private const string _siblingKey = "_s";
 
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override Child CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new Child();
                 }
 
-                internal override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( Child obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     initializationArguments.SetValue( _nameKey, obj.Name );
                     initializationArguments.SetValue( _motherKey, obj.Mother );
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                     initializationArguments.SetValue( _siblingKey, obj.Sibling );
                 }
 
-                internal override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( Child obj, IArgumentsReader initializationArguments )
                 {
                     obj.Name = initializationArguments.GetValue<string>( _nameKey );
                     obj.Mother = initializationArguments.GetValue<Parent>( _motherKey );
@@ -211,17 +211,17 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public class Serializer : ReferenceTypeSerializer<IgnoringType>
             {
-                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                public override IgnoringType CreateInstance( IArgumentsReader constructorArguments )
                 {
                     return new IgnoringType();
                 }
 
-                internal override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject( IgnoringType obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
                     throw new NotImplementedException();
                 }
 
-                internal override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
+                public override void DeserializeFields( IgnoringType obj, IArgumentsReader initializationArguments )
                 {
                     throw new NotImplementedException();
                 }

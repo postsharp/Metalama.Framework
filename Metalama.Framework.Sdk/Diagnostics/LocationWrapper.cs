@@ -3,12 +3,12 @@
 using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.Diagnostics;
 
 /// <summary>
 /// Wraps a Roslyn <see cref="Location"/> as an <see cref="IDiagnosticLocation"/>.
 /// </summary>
-public sealed class LocationWrapper : IDiagnosticLocationImpl
+internal sealed class LocationWrapper : IDiagnosticLocationImpl
 {
     /// <summary>
     /// Gets the location.

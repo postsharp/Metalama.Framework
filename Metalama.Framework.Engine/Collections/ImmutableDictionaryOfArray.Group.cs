@@ -39,6 +39,8 @@ namespace Metalama.Framework.Engine.Collections
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
+            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ) );
+
             public override string ToString() => $"Key={this.Key}, Items={this.Items.Length}";
         }
     }

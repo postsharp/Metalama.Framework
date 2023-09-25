@@ -114,7 +114,7 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 this._symbol.GetSerializableId().Id,
                 this._scope?.ToExecutionScope(),
                 this._templateInfo == null ? null : new TemplateInfoManifest( this._templateInfo.AttributeType, this._templateInfo.IsAbstract ),
-                this._children?.ToDictionary( x => x.Key, x => (IReadOnlyList<TemplateSymbolManifest>) x.Value.SelectAsList( b => b.Build() ) ) );
+                this._children?.ToDictionary( x => x.Key, x => (IReadOnlyList<TemplateSymbolManifest>) x.Value.SelectAsArray( b => b.Build() ) ) );
     }
 
     SerializableDeclarationId ITemplateInfo.Id => new( this.Id );

@@ -82,6 +82,8 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
 
     public IIndexer? OverriddenIndexer { get; set; }
 
+    IIndexer IIndexer.Definition => this;
+
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 
     public IIndexerInvoker With( object? target, InvokerOptions options = default ) => new IndexerInvoker( this, options, target );

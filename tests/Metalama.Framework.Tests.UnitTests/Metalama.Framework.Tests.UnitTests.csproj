@@ -33,6 +33,8 @@
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
     </ItemGroup>
 
+
+
      <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 
 </Project>

@@ -41,4 +41,6 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
             return Member.GetDerivedDeclarationsCore( this, options );
         }
     }
+
+    IMember IMember.Definition => this;
 }

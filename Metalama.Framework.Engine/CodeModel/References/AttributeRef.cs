@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -19,6 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         private readonly object _originalTarget;
 
         public object? Target { get; private set; }
+
+        public Ref<INamedType> AttributeType { get; }
 
         bool IRefImpl.IsDefault => false;
 
@@ -54,42 +55,30 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         public AttributeRef(
+            Ref<INamedType> attributeType,
             AttributeSyntax attributeSyntax,
             SyntaxNode? declaration,
             DeclarationRefTargetKind targetKind,
             CompilationContext compilationContext )
         {
+            this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
             this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
-        public AttributeRef( AttributeSyntax attributeSyntax, in Ref<IDeclaration> declaration )
+        public AttributeRef( Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
         {
+            this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = declaration;
+            this._declaringDeclaration = Ref.FromSymbol( declaration, compilationContext );
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
+            this.AttributeType = builder.Constructor.DeclaringType.ToTypedRef();
             this.Target = this._originalTarget = builder;
             this._declaringDeclaration = builder.ContainingDeclaration.ToTypedRef();
         }
-
-        public string? AttributeTypeName
-            => AttributeHelper.GetShortName(
-                this.Target switch
-                {
-                    AttributeData attributeData => attributeData.AttributeClass?.Name,
-                    AttributeBuilder reference => reference.Constructor.DeclaringType.Name,
-                    AttributeSyntax attributeSyntax => attributeSyntax.Name switch
-                    {
-                        SimpleNameSyntax simpleName => simpleName.Identifier.Text,
-                        QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
-                        _ => throw new AssertionFailedException(
-                            $"Unexpected attribute name syntax: {attributeSyntax.Name.Kind()} at '{attributeSyntax.GetLocation()}'." )
-                    },
-                    _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
-                } );
 
         public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
