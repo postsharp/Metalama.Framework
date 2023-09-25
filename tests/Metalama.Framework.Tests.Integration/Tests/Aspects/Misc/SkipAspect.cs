@@ -13,6 +13,9 @@ public class SkippedAspect : TypeAspect
     {
        builder.SkipAspect();
     }
+
+    [Introduce]
+    public static bool IsApplied = true;
 }
 
 public class IsSkippedAspect : TypeAspect
