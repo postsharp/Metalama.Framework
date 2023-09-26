@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -76,6 +77,11 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         set
         {
             this.CheckNotFrozen();
+
+            if ( !value.IsValidIdentifier() )
+            {
+                throw new ArgumentOutOfRangeException( nameof(value), $"'{value}' is not a valid identifier." );
+            }
 
             this._name = value;
         }

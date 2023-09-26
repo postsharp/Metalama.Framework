@@ -943,6 +943,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         Action<IFieldBuilder>? buildField = null,
         object? tags = null )
     {
+        if ( !fieldName.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(fieldName), $"'{fieldName}' is not a valid identifier." );
+        }
+
         using ( this.WithNonUserCode() )
         {
             if ( this._templateInstance == null )
@@ -999,6 +1004,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         Action<IPropertyBuilder>? buildProperty = null,
         object? tags = null )
     {
+        if ( !propertyName.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(propertyName), $"'{propertyName}' is not a valid identifier." );
+        }
+
         using ( this.WithNonUserCode() )
         {
             if ( this._templateInstance == null )
@@ -1098,6 +1108,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         object? args = null,
         object? tags = null )
     {
+        if ( !name.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(name), $"'{name}' is not a valid identifier." );
+        }
+
         using ( this.WithNonUserCode() )
         {
             if ( this._templateInstance == null )
@@ -1358,6 +1373,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         object? args = null,
         object? tags = null )
     {
+        if ( !name.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(name), $"'{name}' is not a valid identifier." );
+        }
+
         using ( this.WithNonUserCode() )
         {
             if ( this._templateInstance == null )
@@ -1684,6 +1704,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         Func<IParameter, IConstructor, PullAction>? pullAction = null,
         ImmutableArray<AttributeConstruction> attributes = default )
     {
+        if ( !parameterName.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(parameterName), $"'{parameterName}' is not a valid identifier." );
+        }
+
         using ( this.WithNonUserCode() )
         {
             if ( this._templateInstance == null )

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
@@ -54,6 +55,11 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
         {
             this.CheckNotFrozen();
 
+            if ( !value.IsValidIdentifier() )
+            {
+                throw new ArgumentOutOfRangeException( nameof(value), $"'{value}' is not a valid identifier." );
+            }
+
             this._name = this._name != null
                 ? value ?? throw new NotSupportedException( "Cannot set the parameter name to null." )
                 : throw new NotSupportedException( "Cannot set the name of a return parameter." );
@@ -90,6 +96,11 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public ParameterBuilder( IHasParameters declaringMember, int index, string? name, IType type, RefKind refKind, Advice advice ) : base( advice )
     {
+        if ( !name.IsValidIdentifier() )
+        {
+            throw new ArgumentOutOfRangeException( nameof(name), $"'{name}' is not a valid identifier." );
+        }
+
         this.DeclaringMember = declaringMember;
         this.Index = index;
         this._name = name;
@@ -101,7 +112,8 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
 
     public override SerializableDeclarationId ToSerializableId()
-        => throw new NotSupportedException( "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
+        => throw new NotSupportedException(
+            "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 

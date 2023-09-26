@@ -64,6 +64,12 @@ namespace Metalama.Framework.Engine.Utilities
 
         private static readonly Regex _invalidIdentifierCharacters = new( "[^_0-9a-zA-Z]", RegexOptions.Compiled );
 
+        private static readonly Regex _identifierRegex = new(
+            "[_\\p{Lu}\\p{Ll}\\p{Lt}\\p{Lm}\\p{Lo}\\p{Nl}][\\p{Lu}\\p{Ll}\\p{Lt}\\p{Lm}\\p{Lo}\\p{Nl}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}\\p{Cf}]*",
+            RegexOptions.Compiled );
+
+        public static bool IsValidIdentifier( this string? identifier ) => identifier == null || _identifierRegex.IsMatch( identifier );
+
         public static string ToIdentifier( this string s )
         {
             s = _invalidIdentifierCharacters.Replace( s, string.Empty );
