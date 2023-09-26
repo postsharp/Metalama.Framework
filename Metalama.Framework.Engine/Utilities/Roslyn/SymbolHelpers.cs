@@ -63,6 +63,20 @@ internal static class SymbolHelpers
     }
 
     [Conditional( "DEBUG" )]
+    internal static void ThrowIfBelongsToDifferentCompilationThan( this ISymbol? symbol, CompilationContext compilationContext )
+    {
+        if ( symbol == null )
+        {
+            return;
+        }
+
+        if ( symbol.BelongsToCompilation( compilationContext ) == false )
+        {
+            throw new AssertionFailedException( $"The symbol '{symbol}' does not belong to the expected compilation." );
+        }
+    }
+
+    [Conditional( "DEBUG" )]
     internal static void ThrowIfBelongsToDifferentCompilationThan( this ISymbol? symbol, ISymbol? otherSymbol )
     {
         if ( symbol?.ContainingAssembly == null || otherSymbol?.ContainingAssembly == null )
