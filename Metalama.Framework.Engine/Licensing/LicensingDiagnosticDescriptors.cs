@@ -10,11 +10,11 @@ public static class LicensingDiagnosticDescriptors
 
     private const string _category = "Metalama.General";
 
-    internal static readonly DiagnosticDefinition<(int ActualCount, int MaxAspectsCount, string ProjectName)> InsufficientCredits =
+    internal static readonly DiagnosticDefinition<(int ActualCount, int MaxAspectsCount, string ProjectName)> TooManyAspectClasses =
         new(
             "LAMA0800",
             _category,
-            "This project uses {0} license credits, but only {1} are allowed by your license. For details, use the following command: `metalama license credits details --project {2}`.",
+            "This project uses {0} aspect classes, but only {1} are allowed by your license. For details, use the following command: `metalama license usage details --project {2}`.",
             Severity.Error,
             "Too many aspect classes in the project." );
 

@@ -38,6 +38,10 @@
                 <_Parameter1>ProjectDirectory</_Parameter1>
                 <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
             </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>ProjectPath</_Parameter1>
+                <_Parameter2>$(MSBuildProjectFullPath)</_Parameter2>
+            </AssemblyAttribute>
             <!-- Sets up the default Xunit test framework, which is the custom test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='' OR '$(MetalamaTestFramework)'=='Auto'">

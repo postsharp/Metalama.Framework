@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Options
         /// Gets a value indicating whether the json file with license consumption data should be written. If the property
         /// is null, it is considered <c>true</c> in trial mode and <c>false</c> otherwise.
         /// </summary>
-        bool? WriteLicenseCreditData { get; }
+        bool? WriteLicenseUsageData { get; }
 
         /// <summary>
         /// Gets a value indicating whether Roslyn (Microsoft.CodeAnalysis) types are considered compile-time-only.

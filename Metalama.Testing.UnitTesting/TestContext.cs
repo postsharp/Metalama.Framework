@@ -81,10 +81,22 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     /// do not call this constructor directly, but instead the <see cref="UnitTestClass.CreateTestContext(IAdditionalServiceCollection)"/>
     /// method.
     /// </summary>
+    public TestContext( TestContextOptions contextOptions ) : this( contextOptions, null ) { }
+
+    [Obsolete( "Instead of supplying the testName parameter, set the ProjectName property of TestContextOptions." )]
     public TestContext(
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null,
-        string? testName = null )
+        string? testName = null ) : this( contextOptions with { ProjectName = testName }, additionalServices ) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestContext"/> class and specify an optional <see cref="IAdditionalServiceCollection"/>. Tests typically
+    /// do not call this constructor directly, but instead the <see cref="UnitTestClass.CreateTestContext(IAdditionalServiceCollection)"/>
+    /// method.
+    /// </summary>
+    public TestContext(
+        TestContextOptions contextOptions,
+        IAdditionalServiceCollection? additionalServices = null )
     {
         this._throttlingHandle = TestThrottlingHelper.StartTest( contextOptions.RequiresExclusivity );
 
@@ -94,7 +106,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this._domain = new StrongBox<CompileTimeDomain?>();
         this._isRoot = true;
 
-        this.ProjectOptions = new TestProjectOptions( contextOptions, testName );
+        this.ProjectOptions = new TestProjectOptions( contextOptions );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
         var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();

@@ -102,9 +102,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
-        public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
+        public void SkipAspect() => this._aspectBuilderState.AspectInstance.Skip();
 
-        public bool IsAspectSkipped => this._aspectBuilderState.IsAspectSkipped;
+        public bool IsAspectSkipped => this._aspectBuilderState.AspectInstance.IsSkipped;
 
         public IAspectState? AspectState
         {

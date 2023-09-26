@@ -2,24 +2,23 @@
 
 using JetBrains.Annotations;
 using Spectre.Console;
-using System;
 using System.Globalization;
 using System.Linq;
 
 namespace Metalama.Tool.Licensing;
 
 [UsedImplicitly]
-internal class PrintTotalCreditsCommand : CreditsBaseCommand
+internal class PrintTotalLicenseUsageCommand : LicenseUsageBaseCommand
 {
-    protected override void Execute( CreditsCommandContext context, CreditsCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
     {
-        var requiredCredits = (int) Math.Ceiling( context.Files.Max( f => f.TotalCredits ) );
+        var requiredAspectClassesCount = context.Files.Max( f => f.TotalAspectClasses );
 
         var table = new Table();
-        table.AddColumns( "Maximum Credit Requirements", "Maximum Metalama Version", "Maximum Metalama Build Date" );
+        table.AddColumns( "Maximum Used Aspect Classes Count", "Maximum Metalama Version", "Maximum Metalama Build Date" );
 
         table.AddRow(
-            requiredCredits.ToString( CultureInfo.InvariantCulture ),
+            requiredAspectClassesCount.ToString( CultureInfo.InvariantCulture ),
             context.Files.Select( f => f.MetalamaVersion ).OrderByDescending( f => f, new PackageVersionComparer() ).First(),
             context.Files.Where( f => f.MetalamaBuildDate.HasValue ).Max( f => f.MetalamaBuildDate!.Value ).ToString( "d", CultureInfo.InvariantCulture ) );
 

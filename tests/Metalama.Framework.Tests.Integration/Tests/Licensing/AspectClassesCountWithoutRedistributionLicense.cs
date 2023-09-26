@@ -4,7 +4,7 @@
 // @Include(_Redistribution.Dependency.cs);
 // @OutputAllSyntaxTrees
 
-namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RedistributionDisallowed;
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithoutRedistributionLicense;
 
 class Dummy
 {

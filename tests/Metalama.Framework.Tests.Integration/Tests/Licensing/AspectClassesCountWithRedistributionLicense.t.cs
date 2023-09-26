@@ -1,5 +1,5 @@
-// --- RedistributionAllowed.cs ---
-namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RedistributionAllowed;
+// --- AspectClassesCountWithRedistributionLicense.cs ---
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithRedistributionLicense;
 class Dummy
 {
 } // --- _Redistribution.cs ---

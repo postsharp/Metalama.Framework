@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace Metalama.Tool.Licensing;
 
-internal class ResetCreditsCommands : CreditsBaseCommand
+internal class ResetLicenseUsageCommands : LicenseUsageBaseCommand
 {
-    protected override void Execute( CreditsCommandContext context, CreditsCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
     {
         var deleted = 0;
 
@@ -39,9 +39,9 @@ internal class ResetCreditsCommands : CreditsBaseCommand
     }
 }
 
-internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
+internal abstract class LicenseUsageBaseCommand : BaseCommand<LicenseUsageCommandSettings>
 {
-    protected sealed override void Execute( ExtendedCommandContext context, CreditsCommandSettings settings )
+    protected sealed override void Execute( ExtendedCommandContext context, LicenseUsageCommandSettings settings )
     {
         var horizon = settings.GetHorizon();
 
@@ -59,9 +59,9 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
         if ( !licenseService.IsTrialLicense )
         {
             context.Console.WriteWarning(
-                "The trial mode is currently not activated. Credit consumption data is therefore only being collected " +
-                "when projects are built with the parameter `/p:MetalamaWriteLicenseCreditData=True` or when the build " +
-                "fails because of insufficient license credits." );
+                "The trial mode is currently not activated. License usage data is therefore only being collected " +
+                "when projects are built with the parameter `/p:MetalamaWriteLicenseUsageData=True` or when the build " +
+                "fails because too many aspect classes have been used." );
         }
 
         var projectFilters = settings.GetProjectRegexes();
@@ -100,7 +100,7 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
                 }
 
                 if ( !string.IsNullOrWhiteSpace( settings.Configurations )
-                     && !CreditsCommandSettings.SplitCommaSeparatedList( settings.Configurations )
+                     && !LicenseUsageCommandSettings.SplitCommaSeparatedList( settings.Configurations )
                          .Any( c => string.Equals( c, file.Configuration, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     continue;
@@ -109,7 +109,7 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
                 static string GetTargetFrameworkOrEmpty( string s ) => string.IsNullOrWhiteSpace( s ) ? "empty" : s;
 
                 if ( !string.IsNullOrWhiteSpace( settings.TargetFrameworks )
-                     && !CreditsCommandSettings.SplitCommaSeparatedList( settings.TargetFrameworks )
+                     && !LicenseUsageCommandSettings.SplitCommaSeparatedList( settings.TargetFrameworks )
                          .Any( c => string.Equals( c, GetTargetFrameworkOrEmpty( file.TargetFramework ), StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     continue;
@@ -131,13 +131,13 @@ internal abstract class CreditsBaseCommand : BaseCommand<CreditsCommandSettings>
             }
             else
             {
-                throw new CommandException( "No license credit data has been collected yet." );
+                throw new CommandException( "No license usage data has been collected yet." );
             }
         }
 
         // Execute the command.
-        this.Execute( new CreditsCommandContext( context, files, horizon ), settings );
+        this.Execute( new LicenseUsageCommandContext( context, files, horizon ), settings );
     }
 
-    protected abstract void Execute( CreditsCommandContext context, CreditsCommandSettings settings );
+    protected abstract void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings );
 }

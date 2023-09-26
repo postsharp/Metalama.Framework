@@ -8,16 +8,16 @@ using System.Linq;
 namespace Metalama.Tool.Licensing;
 
 [UsedImplicitly]
-internal class PrintProjectCreditsCommand : CreditsBaseCommand
+internal class PrintProjectLicenseUsageCommand : LicenseUsageBaseCommand
 {
-    protected override void Execute( CreditsCommandContext context, CreditsCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
     {
         var table = new Table();
 
         table.AddColumn( "Project File" );
         table.AddColumn( "Configuration" );
         table.AddColumn( "Target Framework" );
-        table.AddColumn( "Required Credits" );
+        table.AddColumn( "Aspect Classes" );
         table.AddColumn( "Metalama Version" );
         table.AddColumn( "Metalama Build Date" );
 
@@ -27,7 +27,7 @@ internal class PrintProjectCreditsCommand : CreditsBaseCommand
                 file.ProjectPath,
                 file.Configuration,
                 file.TargetFramework,
-                file.TotalCredits.ToString( CultureInfo.InvariantCulture ),
+                file.TotalAspectClasses.ToString( CultureInfo.InvariantCulture ),
                 file.MetalamaVersion,
                 file.MetalamaBuildDate?.ToString( "d", CultureInfo.InvariantCulture ) ?? " " );
         }
@@ -36,7 +36,7 @@ internal class PrintProjectCreditsCommand : CreditsBaseCommand
             "MAXIMUM",
             "",
             "",
-            context.Files.Max( f => f.TotalCredits ).ToString( CultureInfo.InvariantCulture ),
+            context.Files.Max( f => f.TotalAspectClasses ).ToString( CultureInfo.InvariantCulture ),
             context.Files.Select( f => f.MetalamaVersion ).OrderByDescending( f => f, new PackageVersionComparer() ).First(),
             context.Files.Where( f => f.MetalamaBuildDate.HasValue ).Max( f => f.MetalamaBuildDate!.Value ).ToString( "d", CultureInfo.InvariantCulture ) );
 
