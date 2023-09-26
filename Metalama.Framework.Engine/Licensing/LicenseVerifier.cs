@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -174,7 +173,7 @@ public sealed class LicenseVerifier : IProjectService
         // List remaining aspect classes.
         var consumedAspectClassNames =
             aspectClasses
-                .SelectAsEnumerable( x => x.FullName )
+                .SelectAsArray( x => x.FullName )
                 .OrderBy( x => x )
                 .ToReadOnlyList();
 
