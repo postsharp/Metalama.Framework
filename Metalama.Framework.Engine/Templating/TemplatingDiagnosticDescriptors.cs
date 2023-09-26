@@ -48,9 +48,9 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly DiagnosticDefinition<(string VariableName, string RunTimeCondition)> CannotSetCompileTimeVariableInRunTimeConditionalBlock
             = new(
                 "LAMA0108",
-                "Cannot set a compile-time variable in a block whose execution depends on a run-time condition",
-                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}'. " +
-                "Move the assignment out of the run-time-conditional block.",
+                "Cannot set an outside compile-time variable in a block whose execution depends on a run-time condition",
+                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}' and it was not declared inside the block. " +
+                "Move the assignment out of the run-time-conditional block or move the variable into the block.",
                 _category,
                 Error );
 
@@ -570,6 +570,14 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0279",
                 "Abstract or empty template can't be called.",
                 "The abstract or empty template '{0}' can't be called.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string Expression, string RunTimeCondition)> CannotSetCompileTimeExpressionInRunTimeConditionalBlock
+            = new(
+                "LAMA0280",
+                "Cannot set a compile-time expression in a block whose execution depends on a run-time condition.",
+                "Cannot set the compile-time expression '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}'.",
                 _category,
                 Error );
     }

@@ -1,6 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -11,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly TemplatingScope _preferredScope;
 
             public static ScopeContext Default
-                => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null, false, null );
+                => new( TemplatingScope.RunTimeOrCompileTime, false, null, null, TemplatingScope.RunTimeOrCompileTime, null, false, null );
 
             public TemplatingScope CurrentBreakOrContinueScope { get; }
 
@@ -23,12 +26,18 @@ namespace Metalama.Framework.Engine.Templating
             public bool PreferRunTimeExpression => this._preferredScope == TemplatingScope.RunTimeOnly;
 
             /// <summary>
-            /// Gets a value indicating whether the current node is guarded by a conditional statement where the condition is a runtime-only
+            /// Gets a value indicating whether the current node is guarded by a conditional statement where the condition is a run-time-only
             /// expression.
             /// </summary>
-            public bool IsRuntimeConditionalBlock { get; }
+            [MemberNotNullWhen( true, nameof(IsRunTimeConditionalBlockReason), nameof(RunTimeConditionalBlockVariables) )]
+            public bool IsRunTimeConditionalBlock { get; }
 
-            public string? IsRuntimeConditionalBlockReason { get; }
+            public string? IsRunTimeConditionalBlockReason { get; }
+
+            /// <summary>
+            /// Gets compile-time local variables declared directly within the current run-time conditional block.
+            /// </summary>
+            public List<ILocalSymbol>? RunTimeConditionalBlockVariables { get; }
 
             public string? PreferredScopeReason { get; }
 
@@ -38,16 +47,18 @@ namespace Metalama.Framework.Engine.Templating
 
             private ScopeContext(
                 TemplatingScope currentBreakOrContinueScope,
-                bool isRuntimeConditionalBlock,
-                string? isRuntimeConditionalBlockReason,
+                bool isRunTimeConditionalBlock,
+                string? isRunTimeConditionalBlockReason,
+                List<ILocalSymbol>? runTimeConditionalBlockVariables,
                 TemplatingScope preferredScope,
                 string? preferredScopeReason,
                 bool isDynamicTypingForbidden,
                 string? forbidDynamicTypingReason )
             {
                 this.CurrentBreakOrContinueScope = currentBreakOrContinueScope;
-                this.IsRuntimeConditionalBlock = isRuntimeConditionalBlock;
-                this.IsRuntimeConditionalBlockReason = isRuntimeConditionalBlockReason;
+                this.IsRunTimeConditionalBlock = isRunTimeConditionalBlock;
+                this.IsRunTimeConditionalBlockReason = isRunTimeConditionalBlockReason;
+                this.RunTimeConditionalBlockVariables = runTimeConditionalBlockVariables;
                 this._preferredScope = preferredScope;
                 this.PreferredScopeReason = preferredScopeReason;
                 this.IsDynamicTypingForbidden = isDynamicTypingForbidden;
@@ -62,8 +73,9 @@ namespace Metalama.Framework.Engine.Templating
             public ScopeContext CompileTimeOnly( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
-                    this.IsRuntimeConditionalBlock,
-                    this.IsRuntimeConditionalBlockReason,
+                    this.IsRunTimeConditionalBlock,
+                    this.IsRunTimeConditionalBlockReason,
+                    this.RunTimeConditionalBlockVariables,
                     TemplatingScope.CompileTimeOnly,
                     reason,
                     this.IsDynamicTypingForbidden,
@@ -72,8 +84,9 @@ namespace Metalama.Framework.Engine.Templating
             public ScopeContext RunTimeOrCompileTime( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
-                    this.IsRuntimeConditionalBlock,
-                    this.IsRuntimeConditionalBlockReason,
+                    this.IsRunTimeConditionalBlock,
+                    this.IsRunTimeConditionalBlockReason,
+                    this.RunTimeConditionalBlockVariables,
                     TemplatingScope.RunTimeOrCompileTime,
                     reason,
                     this.IsDynamicTypingForbidden,
@@ -82,22 +95,24 @@ namespace Metalama.Framework.Engine.Templating
             public ScopeContext RunTimePreferred( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
-                    this.IsRuntimeConditionalBlock,
-                    this.IsRuntimeConditionalBlockReason,
+                    this.IsRunTimeConditionalBlock,
+                    this.IsRunTimeConditionalBlockReason,
+                    this.RunTimeConditionalBlockVariables,
                     TemplatingScope.RunTimeOnly,
                     reason,
                     this.IsDynamicTypingForbidden,
                     this.ForbidDynamicTypingReason );
 
             /// <summary>
-            /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
-            /// Local variables modified within such branch cannot be compile-time.
+            /// Enters a branch of the syntax tree whose execution depends on a run-time-only condition.
+            /// Compile-time local variables can be modified within such a branch only if they are declared directly within that branch.
             /// </summary>
             public ScopeContext RunTimeConditional( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
-                    true,
-                    reason,
+                    isRunTimeConditionalBlock: true,
+                    isRunTimeConditionalBlockReason: reason,
+                    runTimeConditionalBlockVariables: new(),
                     this._preferredScope,
                     this.PreferredScopeReason,
                     this.IsDynamicTypingForbidden,
@@ -106,8 +121,9 @@ namespace Metalama.Framework.Engine.Templating
             public ScopeContext BreakOrContinue( TemplatingScope scope, string reason )
                 => new(
                     scope,
-                    scope == TemplatingScope.RunTimeOnly || this.IsRuntimeConditionalBlock,
-                    scope == TemplatingScope.RunTimeOnly ? reason : this.IsRuntimeConditionalBlockReason,
+                    scope == TemplatingScope.RunTimeOnly || this.IsRunTimeConditionalBlock,
+                    scope == TemplatingScope.RunTimeOnly ? reason : this.IsRunTimeConditionalBlockReason,
+                    scope == TemplatingScope.RunTimeOnly ? new() : this.RunTimeConditionalBlockVariables,
                     this._preferredScope,
                     this.PreferredScopeReason,
                     this.IsDynamicTypingForbidden,
@@ -116,8 +132,9 @@ namespace Metalama.Framework.Engine.Templating
             public ScopeContext ForbidDynamic( string reason )
                 => new(
                     this.CurrentBreakOrContinueScope,
-                    this.IsRuntimeConditionalBlock,
-                    this.IsRuntimeConditionalBlockReason,
+                    this.IsRunTimeConditionalBlock,
+                    this.IsRunTimeConditionalBlockReason,
+                    this.RunTimeConditionalBlockVariables,
                     this._preferredScope,
                     this.PreferredScopeReason,
                     true,
