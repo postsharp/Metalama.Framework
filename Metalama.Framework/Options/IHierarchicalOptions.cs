@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using System;
 
 namespace Metalama.Framework.Options;
 
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Options;
 /// </summary>
 /// <remarks>
 /// <para>
-///  Users typically set options from a fabric using the <see cref="IAspectReceiver{TDeclaration}.SetOptions{TOptions}"/>
+///  Users typically set options from a fabric using the <see cref="IAspectReceiver{TDeclaration}.SetOptions{TOptions}(Func{TDeclaration,TOptions})"/>
 /// method of the <see cref="IAmender{T}.Outbound"/> object.
 /// </para>
 /// <para>

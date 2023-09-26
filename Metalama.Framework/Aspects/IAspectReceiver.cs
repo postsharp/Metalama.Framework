@@ -108,9 +108,9 @@ namespace Metalama.Framework.Aspects
         /// Filters the set of declarations included in the current set.
         /// </summary>
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
-        
+
         /// <summary>
-        /// Sets options for the declarations in the current set of declarations.
+        /// Sets options for the declarations in the current set of declarations. This overload expects a delegate returning an <see cref="IHierarchicalOptions"/> object.
         /// </summary>
         /// <param name="func">A function giving the options for the given declaration.</param>
         /// <typeparam name="TOptions">The type of options.</typeparam>
@@ -118,6 +118,12 @@ namespace Metalama.Framework.Aspects
         /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
         /// </remarks>
         void SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
-            where TOptions : IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
+            where TOptions : class, IHierarchicalOptions<TDeclaration>, new();
+
+        /// <summary>
+        /// Sets options for the declarations in the current set of declarations. This overload expects a delegate operating on an <see cref="IHierarchicalOptionsBuilder"/>.
+        /// </summary>
+        void SetOptions<TOptions>( Action<TDeclaration, TOptions> configure )
+            where TOptions : class, IHierarchicalOptionsBuilder<TDeclaration>, new();
     }
 }

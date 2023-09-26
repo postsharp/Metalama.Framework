@@ -305,7 +305,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 ( c, d ) => this._selector( c, d ).Where( predicate ) );
 
         public void SetOptions<TOptions>( Func<T, TOptions> func )
-            where TOptions : IHierarchicalOptions, IHierarchicalOptions<T>, new()
+            where TOptions : class, IHierarchicalOptions<T>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
@@ -323,6 +323,46 @@ namespace Metalama.Framework.Engine.Fabrics
                             {
                                 if ( !userCodeInvoker.TryInvoke(
                                         () => func( t ),
+                                        executionContext,
+                                        out var options ) || options == null )
+                                {
+                                    return null;
+                                }
+
+                                return new[]
+                                {
+                                    new HierarchicalOptionsInstance(
+                                        t,
+                                        options )
+                                };
+                            } ) ) );
+        }
+
+        public void SetOptions<TOptions>( Action<T, TOptions> configure ) 
+            where TOptions : class, IHierarchicalOptionsBuilder<T>, new()
+        {
+            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
+
+            this.RegisterOptionsSource(
+                new ProgrammaticHierarchicalOptionsSource(
+                    ( compilation, diagnosticAdder )
+                        => this.SelectAndValidateValidatorOrConfiguratorTargets<HierarchicalOptionsInstance>(
+                            userCodeInvoker,
+                            executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
+                            compilation,
+                            diagnosticAdder,
+                            GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
+                            t =>
+                            {
+                                if ( !userCodeInvoker.TryInvoke(
+                                        () =>
+                                        {
+                                            var builder = new TOptions();
+                                            configure( t, builder );
+
+                                            return builder.Build();
+                                        },
                                         executionContext,
                                         out var options ) || options == null )
                                 {
