@@ -301,12 +301,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Translate a symbol to a different <see cref="CompilationContext"/> if necessary, but only in
         /// the debug build. This is to make a symbol compatible with the <see cref="SafeSymbolComparer"/>.
         /// </summary>
-        internal static T TranslateIfNecessary<T>( this T symbol, CompilationContext compilation ) where T : ISymbol
+        internal static T TranslateIfNecessary<T>( this T symbol, CompilationContext compilation ) 
+            where T : ISymbol
         {
 #if DEBUG
             if ( symbol.BelongsToCompilation( compilation ) == false )
             {
-                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation );
+                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertNotNull();
             }
 #endif
             return symbol;
