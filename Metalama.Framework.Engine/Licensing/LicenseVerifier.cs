@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,8 +27,8 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 public sealed class LicenseVerifier : IProjectService
 {
-    private const string _licenseCreditsSubdirectoryName = "LicenseCredits";
-    internal const string LicenseCreditsFilePrefix = "credits-";
+    private const string _licenseUsageSubdirectoryName = "LicenseUsage";
+    internal const string LicenseUsageFilePrefix = "usage-";
 
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
     private readonly IProjectOptions _projectOptions;
@@ -37,27 +36,25 @@ public sealed class LicenseVerifier : IProjectService
     private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
 
     private readonly ITempFileManager _tempFileManager;
-    private readonly string? _targetAssemblyName;
 
     private readonly struct RedistributionLicenseFeatures { }
 
     private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
     {
-        return tempFileManager.GetTempDirectory( _licenseCreditsSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
+        return tempFileManager.GetTempDirectory( _licenseUsageSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
     }
 
     [PublicAPI]
     public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
     {
-        return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseCreditsFilePrefix}*.json" );
+        return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
     }
 
-    internal LicenseVerifier( ProjectServiceProvider serviceProvider, string? targetAssemblyName )
+    internal LicenseVerifier( ProjectServiceProvider serviceProvider )
     {
         this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
         this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
-        this._targetAssemblyName = targetAssemblyName;
     }
 
     // This is to make the test output deterministic.
@@ -113,8 +110,8 @@ public sealed class LicenseVerifier : IProjectService
 
     private bool IsProjectWithValidRedistributionLicense( CompileTimeProject project ) => this._redistributionLicenseFeaturesByProject.ContainsKey( project );
 
-    private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
-        => this._licenseConsumptionService.CanConsume( requirement, this._targetAssemblyName );
+    private bool CanConsumeForCurrentProject( LicenseRequirement requirement )
+        => this._licenseConsumptionService.CanConsume( requirement, this._projectOptions.ProjectName );
 
     internal void VerifyCanAddChildAspect( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor, "add an aspect" );
 
@@ -122,7 +119,7 @@ public sealed class LicenseVerifier : IProjectService
 
     private void VerifyFabric( in AspectPredecessor predecessor, string feature )
     {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) )
         {
             if ( predecessor.Instance is FabricInstance fabricInstance
                  && !(fabricInstance.Driver is ProjectFabricDriver { Kind: FabricKind.Transitive } fabricDriver
@@ -142,7 +139,7 @@ public sealed class LicenseVerifier : IProjectService
             IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
-            _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
+            _ => this.CanConsumeForCurrentProject( LicenseRequirement.Professional )
         };
 
     internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
@@ -163,68 +160,46 @@ public sealed class LicenseVerifier : IProjectService
         };
     }
 
-    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    internal void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        var aspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        // List all aspect classed, that are used. Don't count skipped instances.
+        var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
 
-        // Compute required credits.
-        var consumptions = new List<LicenseCreditConsumption>();
+        // Let all contracts to be used for free.
+        aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) );
 
-        // Before excluding aspect classes from redistributable libraries, check aspects considered as features.
-        if ( aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) ) > 0 )
-        {
-            // Consume 1 credit for all contracts.
-            consumptions.Add( new LicenseCreditConsumption( "Contract Aspects", 1, LicenseCreditConsumptionKind.Feature ) );
-        }
+        // All aspects from redistributable libraries are for free.
+        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } project } && this.IsProjectWithValidRedistributionLicense( project ) );
 
-        // Identify redistributable libraries.
-        var projectsWithRedistributionLicense = aspectClasses
-            .OfType<AspectClass>()
-            .Where( c => c.Project != null )
-            .Select( c => c.Project! )
-            .Distinct()
-            .Where( this.IsProjectWithValidRedistributionLicense )
-            .ToHashSet();
-
-        // Consume 1 credit per redistributable library.
-        consumptions.AddRange(
-            projectsWithRedistributionLicense.SelectAsReadOnlyCollection( x => x.RunTimeIdentity.Name )
+        // List remaining aspect classes.
+        var consumedAspectClassNames =
+            aspectClasses
+                .SelectAsEnumerable( x => x.FullName )
                 .OrderBy( x => x )
-                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.Library ) ) );
-
-        // Exclude aspect classes coming from the redistributable libraries. 
-        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
-
-        // Consume 1 credit per remaining aspect class.
-        consumptions.AddRange(
-            aspectClasses.SelectAsReadOnlyCollection( x => x.FullName )
-                .OrderBy( x => x )
-                .Select( x => new LicenseCreditConsumption( x, 1, LicenseCreditConsumptionKind.UserClass ) ) );
-
-        var totalRequiredCredits = (int) Math.Ceiling( consumptions.Sum( c => c.ConsumedCredits ) );
+                .ToReadOnlyList();
 
         // Enforce the license.
-        var maxCredits = this switch
+        var maxAspectClasses = this switch
         {
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
-            _ when this._licenseConsumptionService.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Ultimate ) => int.MaxValue,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) => 10,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) => 5,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Free ) => 3,
             _ => 0
         };
 
-        var hasLicenseError = totalRequiredCredits > maxCredits;
+        var hasLicenseError = consumedAspectClassNames.Count > maxAspectClasses;
 
         if ( hasLicenseError )
         {
             diagnostics.Report(
-                LicensingDiagnosticDescriptors.InsufficientCredits.CreateRoslynDiagnostic(
+                LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                     null,
-                    (totalRequiredCredits, maxCredits, Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath ) ?? "Anonymous") ) );
+                    (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
         }
 
         // Write consumption data to disk if required.
-        if ( hasLicenseError || (this._projectOptions.WriteLicenseCreditData ?? this._licenseConsumptionService.IsTrialLicense) )
+        if ( hasLicenseError || (this._projectOptions.WriteLicenseUsageData ?? this._licenseConsumptionService.IsTrialLicense) )
         {
             var directory = GetConsumptionDataDirectory( this._tempFileManager );
 
@@ -232,8 +207,8 @@ public sealed class LicenseVerifier : IProjectService
                 this._projectOptions.ProjectPath ?? "Anonymous",
                 this._projectOptions.Configuration ?? "",
                 this._projectOptions.TargetFramework ?? "",
-                totalRequiredCredits,
-                consumptions,
+                consumedAspectClassNames.Count,
+                consumedAspectClassNames,
                 EngineAssemblyMetadataReader.Instance.PackageVersion ?? "",
                 EngineAssemblyMetadataReader.Instance.BuildDate );
 
@@ -263,7 +238,7 @@ public sealed class LicenseVerifier : IProjectService
 
     internal bool VerifyCanBeInherited( AspectClass aspectClass )
     {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) )
         {
             this._inheritableAspectsWithoutLicense.Add( aspectClass );
 
@@ -276,6 +251,7 @@ public sealed class LicenseVerifier : IProjectService
     }
 
     internal static void VerifyCanUseSdk(
+        string? projectName,
         ProjectServiceProvider serviceProvider,
         IAspectWeaver aspectWeaver,
         IEnumerable<IAspectInstance> aspectInstances,
@@ -290,7 +266,7 @@ public sealed class LicenseVerifier : IProjectService
             return;
         }
 
-        if ( !manager.CanConsume( LicenseRequirement.Professional ) )
+        if ( !manager.CanConsume( LicenseRequirement.Professional, projectName ) )
         {
             var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
 

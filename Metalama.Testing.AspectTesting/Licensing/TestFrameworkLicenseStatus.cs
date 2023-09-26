@@ -14,7 +14,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
 
         private IReadOnlyList<LicensingMessage> Messages { get; }
 
-        public TestFrameworkLicenseStatus( string testAssemblyName, string? projectLicense, bool ignoreUserProfileLicenses )
+        public TestFrameworkLicenseStatus( string testProjectName, string? projectLicense, bool ignoreUserProfileLicenses )
         {
             // We don't use the service BackstageServiceFactory.ServiceProvider here,
             // because the additional license is test-assembly-specific.
@@ -41,7 +41,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
 
             var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
-            this.IsLicensed = licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, testAssemblyName );
+            this.IsLicensed = licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, testProjectName );
 
             this.Messages = licenseConsumptionManager.Messages;
         }

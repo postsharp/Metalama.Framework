@@ -132,8 +132,13 @@ internal abstract partial class BaseTestRunner
 
                 testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
-                var transformedOptions = this.GetContextOptions( testContextOptions );
-                using var testContext = new TestContext( transformedOptions, testName: testInput.TestName );
+                var transformedOptions = this.GetContextOptions( testContextOptions )
+                    with
+                    {
+                        ProjectName = testInput.Options.ProjectName ?? testInput.TestName
+                    };
+
+                using var testContext = new TestContext( transformedOptions );
 
                 Dictionary<string, object?> state = new( StringComparer.Ordinal );
                 using var testResult = new TestResult();

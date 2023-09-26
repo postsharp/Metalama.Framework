@@ -84,11 +84,14 @@ class TargetClass
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
-        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted )
+        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, false )]
+        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, true, TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted, string projectName = "TestProject" )
         {
-            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey );
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey, projectName: projectName );
 
-            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO01" : "LAMA0801") );
+            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO01" : "LAMA0800") );
         }
 
         [Theory]
@@ -99,9 +102,11 @@ class TargetClass
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
-        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted )
+        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, false )]
+        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, true, TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted, string projectName = "TestProject" )
         {
-            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey );
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO02" : "LAMA0801") );
         }
