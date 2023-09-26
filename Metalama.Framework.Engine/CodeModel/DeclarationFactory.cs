@@ -109,13 +109,22 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             typeSymbol,
             s => new PointerType( (IPointerTypeSymbol) s, this._compilationModel ) );
 
-    public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
+    public INamedType GetNamedType( INamedTypeSymbol typeSymbol, bool translateToCurrentCompilation = false )
     {
         // Roslyn considers the type in e.g. typeof(List<>) to be different from e.g. List<T>.
         // That distinction makes things more complicated for us (e.g. it's not representable using Type), so get rid of it.
         if ( typeSymbol.IsUnboundGenericType )
         {
             typeSymbol = typeSymbol.ConstructedFrom;
+        }
+
+        if ( translateToCurrentCompilation )
+        {
+            typeSymbol = typeSymbol.TranslateIfNecessary( this.CompilationContext );
+        }
+        else
+        {
+            typeSymbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
         }
 
         return (INamedType) this._typeCache.GetOrAdd(
@@ -148,10 +157,17 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             fieldSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
 
-    public IConstructor GetConstructor( IMethodSymbol methodSymbol )
-        => (IConstructor) this._defaultCache.GetOrAdd(
+    public IConstructor GetConstructor( IMethodSymbol methodSymbol, bool translateToCurrentCompilation = false )
+    {
+        if ( translateToCurrentCompilation )
+        {
+            methodSymbol = methodSymbol.TranslateIfNecessary( this.CompilationContext );
+        }
+
+        return (IConstructor) this._defaultCache.GetOrAdd(
             methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ).AssertNotNull(), this._compilationModel ) );
+    }
 
     public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
         => (IMethod) this._defaultCache.GetOrAdd(

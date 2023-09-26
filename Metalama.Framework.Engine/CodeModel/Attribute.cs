@@ -25,6 +25,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
         {
+            // Note that Roslyn can return an AttributeData that does not belong to the same compilation
+            // as the parent symbol, probably because of some bug or optimisation.
+
             this.AttributeData = data;
             this._compilation = compilation;
             this.ContainingDeclaration = containingDeclaration;
@@ -57,10 +60,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
-        public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
+        public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull(), true );
 
         [Memo]
-        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
+        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull(), true );
 
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();

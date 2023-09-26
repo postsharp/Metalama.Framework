@@ -119,7 +119,8 @@ internal partial class OurSyntaxGenerator
     {
         var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( elementType, elements );
 
-        return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
+        return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) )
+            .NormalizeWhitespace( indentation: "", eol: "", elasticTrivia: true );
     }
 
     public TypeSyntax Type( SpecialType specialType )

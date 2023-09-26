@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -21,6 +22,10 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
     {
         this._parent = parent;
         this._moduleSymbol = moduleSymbol;
+
+#if DEBUG
+        (parent.Target as ISymbol).ThrowIfBelongsToDifferentCompilationThan( compilation.CompilationContext );
+#endif
     }
 
     protected override void PopulateAllItems( Action<AttributeRef> action )
@@ -42,6 +47,9 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     {
                         continue;
                     }
+
+                    // Note that Roslyn can return an AttributeData that does not belong to the same compilation
+                    // as the parent symbol, probably because of some bug or optimisation.
 
                     action( new AttributeRef( attribute, this._parent ) );
                 }

@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -291,8 +293,24 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 IMethodSymbol method => method.ExplicitInterfaceImplementations.Length > 0,
                 IPropertySymbol property => property.ExplicitInterfaceImplementations.Length > 0,
                 IEventSymbol @event => @event.ExplicitInterfaceImplementations.Length > 0,
-                _ => false,
+                _ => false
             };
+        }
+
+        /// <summary>
+        /// Translate a symbol to a different <see cref="CompilationContext"/> if necessary, but only in
+        /// the debug build. This is to make a symbol compatible with the <see cref="SafeSymbolComparer"/>.
+        /// </summary>
+        internal static T TranslateIfNecessary<T>( this T symbol, CompilationContext compilation ) 
+            where T : ISymbol
+        {
+#if DEBUG
+            if ( symbol.BelongsToCompilation( compilation ) == false )
+            {
+                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertNotNull();
+            }
+#endif
+            return symbol;
         }
     }
 }

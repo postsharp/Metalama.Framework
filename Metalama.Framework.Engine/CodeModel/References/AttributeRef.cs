@@ -50,6 +50,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration )
         {
+            // Note that Roslyn can return an AttributeData that does not belong to the same compilation
+            // as the parent symbol, probably because of some bug or optimisation.
+
             this.Target = this._originalTarget = attributeData;
             this._declaringDeclaration = declaringDeclaration;
         }
