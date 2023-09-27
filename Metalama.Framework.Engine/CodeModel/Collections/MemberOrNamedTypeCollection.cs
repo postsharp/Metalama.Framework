@@ -11,8 +11,8 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 internal abstract class MemberOrNamedTypeCollection<TMember> : DeclarationCollection<TMember, Ref<TMember>>, IMemberOrNamedTypeCollection<TMember>
     where TMember : class, IMemberOrNamedType
 {
-    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, UpdatableMemberCollection<TMember> sourceItems ) :
-        base( containingDeclaration, sourceItems ) { }
+    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, UpdatableMemberCollection<TMember> sourceItems )
+        : base( containingDeclaration, sourceItems ) { }
 
     public IEnumerable<TMember> OfName( string name )
     {
