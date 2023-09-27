@@ -1916,8 +1916,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         if ( this._currentScopeContext.IsRunTimeConditionalBlock )
         {
-            if ( this._syntaxTreeAnnotationMap.GetSymbol( expression ) is not ILocalSymbol local
-)
+            if ( this._syntaxTreeAnnotationMap.GetSymbol( expression ) is not ILocalSymbol local )
             {
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.CannotSetCompileTimeExpressionInRunTimeConditionalBlock,

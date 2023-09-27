@@ -17,6 +17,7 @@ class Aspect
         {
             int i = meta.CompileTime(0);
             M(out i, out var j);
+            j++;
             Console.WriteLine($"i={i} j={j}");
         }
 

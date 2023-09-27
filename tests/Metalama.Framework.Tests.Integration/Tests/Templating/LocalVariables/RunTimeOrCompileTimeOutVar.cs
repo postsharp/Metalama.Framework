@@ -15,6 +15,7 @@ class Aspect
         {
             var s = meta.CompileTime("0");
             int.TryParse(s, out var i);
+            i++;
             Console.WriteLine($"i={i}");
         }
 
