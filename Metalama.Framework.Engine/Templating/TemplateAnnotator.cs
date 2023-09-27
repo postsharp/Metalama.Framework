@@ -131,6 +131,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( scope == TemplatingScope.CompileTimeOnly )
         {
+            if ( symbol is ILocalSymbol local )
+            {
+                this._currentScopeContext.RunTimeConditionalBlockVariables?.Add( local );
+            }
+
             scope = this.FixCompileTimeReturningBothScopeWithSerializers( symbol );
         }
 
@@ -1016,23 +1021,17 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         // be in a run-time-conditional block.
         var compileTimeOutArguments = node.ArgumentList.Arguments.Where(
                 a => a.RefKindKeyword.Kind() is SyntaxKind.OutKeyword or SyntaxKind.RefKeyword
-                     && this.GetNodeScope( a.Expression ) == TemplatingScope.CompileTimeOnly )
+                     && this.GetNodeScope( a.Expression ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             .ToReadOnlyList();
 
         ScopeContext? expressionContext = null;
 
-        if ( compileTimeOutArguments.Count > 0 )
+        foreach ( var compileTimeOutArgument in compileTimeOutArguments )
         {
             expressionContext =
-                this._currentScopeContext.CompileTimeOnly( $"a call to a method that sets the compile-time variable '{compileTimeOutArguments[0]}'" );
+                this._currentScopeContext.CompileTimeOnly( $"a call to a method that sets the compile-time expression '{compileTimeOutArgument}'" );
 
-            if ( this._currentScopeContext.IsRuntimeConditionalBlock )
-            {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
-                    compileTimeOutArguments[0],
-                    (compileTimeOutArguments[0].ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
-            }
+            this.CheckForMutatingCompileTimeExpressionInRunTimeConditionalBlock( compileTimeOutArgument.Expression );
         }
 
         // Transform the expression.
@@ -1451,21 +1450,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var transformedType = this.Visit( node.Type );
 
-        TemplatingScope scope;
         ScopeContext? context = null;
 
-        if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
+        if ( !this._currentScopeContext.ForceCompileTimeOnlyExpression && this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
         {
-            scope = TemplatingScope.CompileTimeOnly;
-        }
-        else
-        {
-            scope = this.GetNodeScope( transformedType );
-
-            if ( scope == TemplatingScope.CompileTimeOnly )
-            {
-                context = this._currentScopeContext.CompileTimeOnly( $"an inline variable declaration of compile-time type '{transformedType}" );
-            }
+            context = this._currentScopeContext.CompileTimeOnly( $"an inline variable declaration of compile-time type '{transformedType}" );
         }
 
         VariableDesignationSyntax transformedDesignation;
@@ -1474,6 +1463,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             transformedDesignation = this.Visit( node.Designation );
         }
+
+        var scope = this.GetExpressionScope( new SyntaxNode[] { transformedType, transformedDesignation }, node );
 
         return node.Update( transformedType, transformedDesignation ).AddScopeAnnotation( scope );
     }
@@ -1857,13 +1848,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             scope = this.GetAssignmentScope( transformedOperand );
 
-            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
+            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
-                // We cannot mutate a compile-time expression in a run-time-condition block.
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
-                    operand,
-                    (operand.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
+                this.CheckForMutatingCompileTimeExpressionInRunTimeConditionalBlock( operand );
             }
         }
 
@@ -1895,13 +1882,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             if ( leftScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
-                if ( this._currentScopeContext.IsRuntimeConditionalBlock )
-                {
-                    this.ReportDiagnostic(
-                        TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
-                        node.Left,
-                        (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
-                }
+                this.CheckForMutatingCompileTimeExpressionInRunTimeConditionalBlock( node.Left );
 
                 if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.Left ) is INamedTypeSymbol { Name: nameof(IExpression) } )
                 {
@@ -1928,6 +1909,27 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
 
             return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( leftScope );
+        }
+    }
+
+    private void CheckForMutatingCompileTimeExpressionInRunTimeConditionalBlock( ExpressionSyntax expression )
+    {
+        if ( this._currentScopeContext.IsRunTimeConditionalBlock )
+        {
+            if ( this._syntaxTreeAnnotationMap.GetSymbol( expression ) is not ILocalSymbol local )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.CannotSetCompileTimeExpressionInRunTimeConditionalBlock,
+                    expression,
+                    (expression.ToString(), this._currentScopeContext.IsRunTimeConditionalBlockReason) );
+            }
+            else if ( !this._currentScopeContext.RunTimeConditionalBlockVariables.Contains( local ) )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
+                    expression,
+                    (expression.ToString(), this._currentScopeContext.IsRunTimeConditionalBlockReason) );
+            }
         }
     }
 
@@ -2606,7 +2608,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     private void RequireLoopScope( SyntaxNode nodeForDiagnostic, TemplatingScope requiredScope, string statementName )
     {
-        if ( requiredScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRuntimeConditionalBlock )
+        if ( requiredScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && this._currentScopeContext.IsRunTimeConditionalBlock )
         {
             // It is not allowed to have a do or while loop in a run-time-conditional block because compile-time loops require a compile-time
             // variable, and mutating a compile-time variable is not allowed in a run-time-conditional block. This condition may be
@@ -2616,7 +2618,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             this.ReportDiagnostic(
                 TemplatingDiagnosticDescriptors.CannotHaveCompileTimeLoopInRunTimeConditionalBlock,
                 nodeForDiagnostic,
-                (statementName, this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
+                (statementName, this._currentScopeContext.IsRunTimeConditionalBlockReason) );
         }
     }
 
