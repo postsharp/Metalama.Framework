@@ -28,7 +28,13 @@ namespace Metalama.Framework.Engine.CompileTime
             "Fabrics",
             "Project",
             "Services",
-            "Validation" );
+            "Validation",
+            "Options",
+            "Metrics",
+            "Eligibility",
+            "Advising",
+            "Serialization",
+            "CodeFixes" );
 
         // The 'Validation' namespace should NOT be included because referencing a constraint of this namespace is a normal use case in run-time code.
 
