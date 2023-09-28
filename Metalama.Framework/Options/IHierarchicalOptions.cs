@@ -25,12 +25,6 @@ namespace Metalama.Framework.Options;
 ///  support another representation of being unset.
 /// </para>
 /// <para>
-/// Aspects typically use the <see cref="IAspectBuilder{TAspectTarget}.GetOptions{T}"/> method of the <see cref="IAspectBuilder{TAspectTarget}"/>
-/// to get the options applying to the current aspect instance. This method is also exposed on the <see cref="IAspectInstance"/> interface.
-/// This service is also exposed by the <see cref="DeclarationExtensions.Enhancements{T}"/> method, but the result does not include the options
-/// set by the aspect itself.
-/// </para>
-/// <para>
 /// Classes that implement this interface must implement the <see cref="IHierarchicalOptions{T}"/> generic interface where <c>T</c> is
 /// the type of declarations for which the user is allowed to set the options. Typically, a single class would implement several instances
 /// of this instance. For instance, for an option affecting a method-level aspect, a good practice is to implement this interface
@@ -40,6 +34,16 @@ namespace Metalama.Framework.Options;
 /// Classes that implement this interface can be annotated with the <see cref="HierarchicalOptionsAttribute"/> custom attribute,
 /// which allows authors to customize the inheritance mechanisms of the option.
 /// </para>
+/// <para>
+/// Attribute classes and aspect classes can implement the <see cref="IHierarchicalOptionsProvider"/> interface if they want to contribute
+/// options.
+/// </para>
+/// <para>
+/// Aspects typically use the <see cref="IAspectInstance.GetOptions{T}"/> method of the <see cref="IAspectInstance"/> interface
+/// to get the options applying to the current aspect instance. This method is also exposed on the <see cref="IAspectInstance"/> interface.
+/// This service is also exposed by the <see cref="DeclarationExtensions.Enhancements{T}"/> method, but the result does not include the options
+/// set by the aspect itself, or any other aspect, through the <see cref="IHierarchicalOptionsProvider"/> interface.
+/// </para> 
 /// </remarks>
 public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializable
 {

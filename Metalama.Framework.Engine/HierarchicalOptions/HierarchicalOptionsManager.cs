@@ -22,8 +22,8 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 {
     private readonly ConcurrentDictionary<string, OptionTypeNode> _optionTypes = new();
     private readonly ProjectServiceProvider _serviceProvider;
+    private readonly UserCodeInvoker _userCodeInvoker;
     private IExternalHierarchicalOptionsProvider? _externalOptionsProvider;
-    private UserCodeInvoker _userCodeInvoker;
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
@@ -72,17 +72,16 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
                 new ScopedDiagnosticSink( diagnosticSink, new GetDefaultOptionsDiagnosticSourceDescription( optionType ), null, null ) );
 
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => empty.GetDefaultOptions( context ) ?? (IHierarchicalOptions) Activator.CreateInstance( optionType ),
+                    () => empty.GetDefaultOptions( context ) ?? (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
                     userCodeExecutionContext,
                     out var defaultOptions ) )
             {
                 // If we fail to get the default options, we will continue with the non-initialized options.
-                defaultOptions = empty;
             }
 
             this._optionTypes.TryAdd(
                 optionTypeName,
-                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ) );
+                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ?? empty ) );
         }
 
         if ( externalOptionsProvider != null )
