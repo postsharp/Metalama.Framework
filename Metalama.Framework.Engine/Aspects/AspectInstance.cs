@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal sealed class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
     {
+        private ImmutableArray<IHierarchicalOptions> _cachedOptions = ImmutableArray<IHierarchicalOptions>.Empty;
+
         /// <summary>
         /// Gets the aspect instance.
         /// </summary>
@@ -53,7 +55,21 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T GetOptions<T>()
             where T : class, IHierarchicalOptions, new()
-            => HierarchicalOptionsManager.GetOptions<T>( this );
+        {
+            foreach ( var cached in this._cachedOptions )
+            {
+                if ( cached is T cachedOptions )
+                {
+                    return cachedOptions;
+                }
+            }
+
+            var options = HierarchicalOptionsManager.GetOptions<T>( this );
+
+            this._cachedOptions = this._cachedOptions.Add( options );
+
+            return options;
+        }
 
         void IAspectInstanceInternal.SetState( IAspectState? value ) => this.AspectState = value;
 

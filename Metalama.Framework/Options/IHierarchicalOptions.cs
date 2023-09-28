@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
@@ -45,15 +46,32 @@ public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializ
     /// <summary>
     /// Gets the default options from the current project. 
     /// </summary>
-    /// <param name="project">The current project.</param>
-    /// <returns>The default options for the given project.</returns>
+    /// <returns>The default options for the given project, or <c>null</c> if the default value is the instance initialized by the default constructor.</returns>
     /// <remarks>
     /// <para>
     ///  If the aspect supports parameters supplied as MSBuild project properties, the implementation of this
-    ///  method should read these properties and assign their values to the returned object.
+    ///  method should read these properties and assign their values to the returned object. Otherwise, it can return <c>null</c>.
     /// </para>
     /// </remarks>
-    IHierarchicalOptions GetDefaultOptions( IProject project );
+    IHierarchicalOptions? GetDefaultOptions( OptionsInitializationContext context )
+#if NET5_0_OR_GREATER
+        => null;
+#else
+        ;
+#endif
+}
+
+public sealed class OptionsInitializationContext
+{
+    public IProject Project { get; }
+
+    public ScopedDiagnosticSink Diagnostics { get; }
+
+    internal OptionsInitializationContext( IProject project, ScopedDiagnosticSink diagnostics )
+    {
+        this.Project = project;
+        this.Diagnostics = diagnostics;
+    }
 }
 
 /// <summary>

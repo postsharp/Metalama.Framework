@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
@@ -71,7 +70,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public T GetOptions<T>()
         where T : class, IHierarchicalOptions, new()
-        => HierarchicalOptionsManager.GetOptions<T>( this );
+        => this._primaryInstance.GetOptions<T>();
 
     public void SetState( IAspectState? value ) => this._primaryInstance.AspectState = value;
 

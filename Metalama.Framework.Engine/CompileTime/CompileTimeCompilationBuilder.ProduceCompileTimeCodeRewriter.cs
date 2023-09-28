@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,6 +26,7 @@ using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -122,14 +124,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalIdAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
 
                 this._originalPathTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalPathAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                this._fabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( Fabric ) );
-                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
+                this._fabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
@@ -274,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics
                                                         .CreateRoslynDiagnostic(
                                                             childSymbol.GetDiagnosticLocation(),
-                                                            (childSymbol, typeof( TypeFabric )) ) );
+                                                            (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }
@@ -336,7 +338,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptTypeFabrics.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof( TypeFabric )) ) );
+                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                 this.Success = false;
                             }
@@ -510,13 +512,13 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                // Add non-implemented members of IAspect, IEligible and IProjectData.
+                // Add non-implemented members of IAspect, IEligible, IHierarchicalOptions.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
                 var allImplementedInterfaces = symbol.SelectManyRecursiveDistinct( i => i.Interfaces );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-                    if ( implementedInterface.Name is nameof( IAspect ) or nameof( IEligible<IDeclaration> ) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(IHierarchicalOptions) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -547,9 +549,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         Identifier( p.Name ),
                                                         default ) ) ) ),
                                         default,
-                                        SyntaxFactoryEx.FormattedBlock(),
-                                        default,
-                                        default )
+                                        method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
+                                        method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
+                                        method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
                                     .NormalizeWhitespace();
 
                                 members.Add( newMethod );
@@ -910,7 +912,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
 
                             // If the property implicitly implements interface members, we need to emit explicit implementations with init-only setter.
-                            if ( this._currentTypeImplicitInterfaceImplementations.AssertNotNull().TryGetValue( propertySymbol, out var implicitlyImplementedInterfaceMembers ) )
+                            if ( this._currentTypeImplicitInterfaceImplementations.AssertNotNull()
+                                .TryGetValue( propertySymbol, out var implicitlyImplementedInterfaceMembers ) )
                             {
                                 foreach ( var interfaceProperty in implicitlyImplementedInterfaceMembers.OfType<IPropertySymbol>() )
                                 {
@@ -969,7 +972,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                                         ThisExpression(),
                                                                         IdentifierName( interfaceProperty.Name ) ),
                                                                     IdentifierName( "value" ) ) ),
-                                                            Token( SyntaxKind.SemicolonToken ) ),
+                                                            Token( SyntaxKind.SemicolonToken ) )
                                                     }.WhereNotNull() ) ) );
                                 }
                             }

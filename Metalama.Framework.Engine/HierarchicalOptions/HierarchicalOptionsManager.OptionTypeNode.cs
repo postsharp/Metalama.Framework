@@ -29,7 +29,7 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder, IHierarchicalOptions defaultOptions )
+        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions )
         {
             this._parent = parent;
             this._type = type;

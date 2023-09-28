@@ -17,7 +17,7 @@ internal static class OptionsTestHelper
         {
             public string? Value { get; set; }
         
-            public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
+            public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
         
             public object ApplyChanges( object overridingObject, in ApplyChangesContext context )
             {
@@ -46,7 +46,7 @@ internal static class OptionsTestHelper
            
            public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
            {
-                aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.GetOptions<MyOptions>().Value ?? "<undefined>" ) );
+                aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.AspectInstance.GetOptions<MyOptions>().Value ?? "<undefined>" ) );
            }
         }
         """;

@@ -45,7 +45,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
         return Expression.Lambda<Func<IHierarchicalOptionsProvider, IHierarchicalOptions>>( methodCall, parameter ).Compile();
     }
 
-    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
     {
         var genericIHierarchicalOptionsAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider<>) );
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
@@ -75,7 +75,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
 
             foreach ( var attribute in compilation.GetAllAttributesOfType( attributeType ) )
             {
-                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var deserializedAttribute ) )
+                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticSink, out var deserializedAttribute ) )
                 {
                     continue;
                 }
