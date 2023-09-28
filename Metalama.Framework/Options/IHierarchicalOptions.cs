@@ -2,9 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
@@ -63,19 +61,6 @@ public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializ
 #else
         ;
 #endif
-}
-
-public sealed class OptionsInitializationContext
-{
-    public IProject Project { get; }
-
-    public ScopedDiagnosticSink Diagnostics { get; }
-
-    internal OptionsInitializationContext( IProject project, ScopedDiagnosticSink diagnostics )
-    {
-        this.Project = project;
-        this.Diagnostics = diagnostics;
-    }
 }
 
 /// <summary>
