@@ -121,6 +121,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
+                ImmutableArray<string>.Empty,
                 CreateFrameworkTemplateProjectManifest( assembly ),
                 null,
                 0,

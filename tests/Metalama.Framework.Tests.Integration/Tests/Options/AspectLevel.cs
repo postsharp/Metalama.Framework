@@ -13,7 +13,7 @@ public class TheAspect : TypeAspect, IHierarchicalOptionsProvider<MyOptions>
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var options = builder.GetOptions<MyOptions>();
+        var options = builder.AspectInstance.GetOptions<MyOptions>();
 
         builder.Advice.IntroduceAttribute(
             builder.Target,

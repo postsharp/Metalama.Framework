@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Options;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -99,6 +100,11 @@ namespace Metalama.Framework.Engine.CompileTime
         private ImmutableDictionaryOfArray<string, (CompileTimeFileManifest File, CompileTimeProject Project)> ClosureCodeFiles
             => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsReadOnlyList( f => (f, p) ) )
                 .ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
+
+        [Memo]
+        public IReadOnlyList<string> ClosureOptionTypes
+            => this.ClosureProjects.SelectMany( p => p.Manifest?.OptionTypes ?? Enumerable.Empty<string>() )
+                .ToReadOnlyList();
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -313,20 +319,28 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Find interesting types.
-            var aspectTypes = assembly.GetTypes().Where( t => typeof(IAspect).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+            var types = assembly.GetTypes();
+            var aspectTypes = types.Where( t => typeof(IAspect).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
 
-            var fabricTypes = assembly.GetTypes()
+            var fabricTypes = types
                 .Where( t => typeof(ProjectFabric).IsAssignableFrom( t ) && !typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
-                .Select( t => t.FullName )
-                .ToImmutableArray();
+                .Select( t => t.FullName.AssertNotNull() )
+                .ToReadOnlyList();
 
-            var transitiveFabricTypes = assembly.GetTypes()
+            var transitiveFabricTypes = types
                 .Where( t => typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
-                .Select( t => t.FullName )
-                .ToImmutableArray();
+                .Select( t => t.FullName.AssertNotNull() )
+                .ToReadOnlyList();
 
-            var templateProviders =
-                assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+            var templateProviders = types
+                .Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) )
+                .Select( t => t.FullName.AssertNotNull() )
+                .ToReadOnlyList();
+
+            var optionTypes = types
+                .Where( t => typeof(IHierarchicalOptions).IsAssignableFrom( t ) )
+                .Select( t => t.FullName.AssertNotNull() )
+                .ToReadOnlyList();
 
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(
@@ -337,6 +351,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 fabricTypes,
                 transitiveFabricTypes,
                 templateProviders,
+                optionTypes,
                 null,
                 TemplateProjectManifest.Empty,
                 null,

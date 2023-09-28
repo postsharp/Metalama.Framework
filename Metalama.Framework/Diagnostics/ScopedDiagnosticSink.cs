@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
+using System;
 
 namespace Metalama.Framework.Diagnostics;
 
@@ -22,18 +23,18 @@ public readonly struct ScopedDiagnosticSink
     /// <summary>
     /// Gets the declaration on which diagnostics or code fixes will be reported or suppressed.
     /// </summary>
-    public IDeclaration DefaultTargetDeclaration { get; }
+    public IDeclaration? DefaultTargetDeclaration { get; }
 
     /// <summary>
     /// Gets the location on which diagnostics or code fixes will be reported or suppressed.
     /// </summary>
-    public IDiagnosticLocation DefaultTargetLocation { get; }
+    public IDiagnosticLocation? DefaultTargetLocation { get; }
 
     internal ScopedDiagnosticSink(
         IDiagnosticSink sink,
         IDiagnosticSource source,
-        IDiagnosticLocation defaultTargetLocation,
-        IDeclaration defaultTargetDeclaration )
+        IDiagnosticLocation? defaultTargetLocation,
+        IDeclaration? defaultTargetDeclaration )
     {
         this.Sink = sink;
         this._source = source;
@@ -51,13 +52,23 @@ public readonly struct ScopedDiagnosticSink
     /// Suppresses a diagnostic from the default declaration of the current <see cref="ScopedDiagnosticSink"/>.
     /// </summary>
     /// <param name="suppression"></param>
-    public void Suppress( SuppressionDefinition suppression ) => this.Sink.Suppress( suppression, this.DefaultTargetDeclaration, this._source );
+    public void Suppress( SuppressionDefinition suppression )
+    {
+        this.Sink.Suppress(
+            suppression,
+            this.DefaultTargetDeclaration ?? throw new InvalidOperationException( "Use the overload that receives a scope declaration." ),
+            this._source );
+    }
 
     /// <summary>
     /// Suggest a code fix without reporting a diagnostic.
     /// </summary>
     /// <param name="codeFix">The <see cref="CodeFix"/>.</param>
-    public void Suggest( CodeFix codeFix ) => this.Sink.Suggest( codeFix, this.DefaultTargetDeclaration, this._source );
+    public void Suggest( CodeFix codeFix )
+        => this.Sink.Suggest(
+            codeFix,
+            this.DefaultTargetDeclaration ?? throw new InvalidOperationException( "Use the overload that receives a scope declaration." ),
+            this._source );
 
     /// <summary>
     /// Reports a parametric diagnostic by specifying its location.

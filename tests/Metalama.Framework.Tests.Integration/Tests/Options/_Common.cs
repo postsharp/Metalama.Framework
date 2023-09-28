@@ -2,6 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
 using Metalama.Framework.Project;
@@ -11,7 +12,7 @@ using Metalama.Framework.Tests.Integration.Tests.Options;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
-public record MyOptions : IHierarchicalOptions<IDeclaration>
+public class MyOptions : IHierarchicalOptions<IDeclaration>
 {
     public string? Value { get; init; }
 
@@ -19,7 +20,9 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public bool? BaseWins { get; init; }
 
-    public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
+#if !NET5_0_OR_GREATER
+    public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
+#endif
 
     public object ApplyChanges( object changes, in ApplyChangesContext context )
     {

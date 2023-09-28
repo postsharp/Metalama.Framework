@@ -445,11 +445,16 @@ namespace Metalama.Framework.Engine.Pipeline
                     hierarchicalOptionsManager: hierarchicalOptionsManager,
                     externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
 
+                var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
+
                 hierarchicalOptionsManager.Initialize(
+                    pipelineConfiguration.CompileTimeProject,
                     contributorSources.OptionsSources,
                     contributorSources.ExternalOptionsProvider,
                     compilationModel,
-                    diagnosticAdder );
+                    diagnosticSink );
+
+                diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
             }
             else
             {

@@ -16,7 +16,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Options;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
@@ -85,10 +84,6 @@ namespace Metalama.Framework.Engine.Aspects
         [Memo]
         public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
 
-        public TOptions GetOptions<TOptions>()
-            where TOptions : class, IHierarchicalOptions<T>, new()
-            => this.AspectInstance.GetOptions<TOptions>();
-
         IDeclaration IAspectBuilder.Target => this.Target;
 
         private AspectReceiverSelector<T> GetAspectReceiverSelector()
@@ -126,7 +121,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         this._aspectBuilderState.Diagnostics.Report(
                             GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
-                                this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
+                                this.Diagnostics.DefaultTargetLocation?.GetDiagnosticLocation(),
                                 (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
                                 this ) );
 

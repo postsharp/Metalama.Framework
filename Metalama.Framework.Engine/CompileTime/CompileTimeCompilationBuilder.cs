@@ -20,6 +20,7 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -1059,17 +1060,20 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var fabricType = compilationForManifest.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
                         var transitiveFabricType = compilationForManifest.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
                         var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
+                        var optionType = compilationForManifest.GetTypeByMetadataName( typeof(IHierarchicalOptions).FullName.AssertNotNull() );
 
                         bool IsAspect( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, aspectType );
 
                         bool IsFabric( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, fabricType );
 
-                        var aspectTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                        var allTypes = compilationForManifest.Assembly.GetAllTypes().ToReadOnlyList();
+
+                        var aspectTypeNames = allTypes
                             .Where( IsAspect )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
                             .ToReadOnlyList();
 
-                        var fabricTypes = compilationForManifest.Assembly.GetTypes()
+                        var fabricTypes = allTypes
                             .Where(
                                 t => IsFabric( t ) &&
                                      !compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
@@ -1078,19 +1082,23 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var fabricTypeNames = fabricTypes
                             .SelectAsArray( t => t.GetReflectionFullName().AssertNotNull() );
 
-                        var transitiveFabricTypeNames = compilationForManifest.Assembly.GetTypes()
+                        var transitiveFabricTypeNames = allTypes
                             .Where( t => compilationForManifest.HasImplicitConversion( t, transitiveFabricType ) )
                             .Concat( fabricTypes.Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(InheritableAttribute) ) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
                             .ToReadOnlyList();
 
-                        var compilerPlugInTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                        var compilerPlugInTypeNames = allTypes
                             .Where( t => t.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(MetalamaPlugInAttribute) ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
                             .ToReadOnlyList();
 
-                        var otherTemplateTypeNames = compilationForManifest.Assembly.GetAllTypes()
+                        var otherTemplateTypeNames = allTypes
                             .Where( t => compilationForManifest.HasImplicitConversion( t, templateProviderType ) && !IsAspect( t ) && !IsFabric( t ) )
+                            .Select( t => t.GetReflectionFullName().AssertNotNull() )
+                            .ToReadOnlyList();
+
+                        var optionTypeNames = allTypes.Where( t => compilationForManifest.HasImplicitConversion( t, optionType ) )
                             .Select( t => t.GetReflectionFullName().AssertNotNull() )
                             .ToReadOnlyList();
 
@@ -1112,6 +1120,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                             fabricTypeNames,
                             transitiveFabricTypeNames,
                             otherTemplateTypeNames,
+                            optionTypeNames,
                             referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
                             compilationResultManifest,
                             projectLicenseInfo?.RedistributionLicenseKey,
