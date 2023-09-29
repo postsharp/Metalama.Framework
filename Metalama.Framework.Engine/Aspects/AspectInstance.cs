@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -21,8 +20,6 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal sealed class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
     {
-        private ImmutableArray<IHierarchicalOptions> _cachedOptions = ImmutableArray<IHierarchicalOptions>.Empty;
-
         /// <summary>
         /// Gets the aspect instance.
         /// </summary>

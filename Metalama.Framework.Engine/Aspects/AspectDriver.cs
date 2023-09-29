@@ -78,7 +78,7 @@ internal sealed class AspectDriver : IAspectDriver
         }
     }
 
-    private void ApplyOptions( IAspectInstanceInternal aspectInstance, IDeclaration declaration, UserCodeInvoker invoker, UserCodeExecutionContext baseContext )
+    private static void ApplyOptions( IAspectInstanceInternal aspectInstance, IDeclaration declaration, UserCodeInvoker invoker, UserCodeExecutionContext baseContext )
     {
         if ( aspectInstance.Aspect is IHierarchicalOptionsProvider optionsProvider )
         {
@@ -189,7 +189,7 @@ internal sealed class AspectDriver : IAspectDriver
                 throwOnUnsupportedDependencies: true );
 
             // Apply options.
-            this.ApplyOptions( aspectInstance, targetDeclaration, userCodeInvoker, buildAspectExecutionContext );
+            ApplyOptions( aspectInstance, targetDeclaration, userCodeInvoker, buildAspectExecutionContext );
 
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(

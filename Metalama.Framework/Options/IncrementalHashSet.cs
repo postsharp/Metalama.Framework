@@ -45,7 +45,7 @@ public static class IncrementalHashSet
     /// </summary>
     public static IncrementalHashSet<T> Add<T>( params T[] items )
         where T : notnull
-        => new( items.ToImmutableDictionary( i => i, i => true ) );
+        => new( items.ToImmutableDictionary( i => i, _ => true ) );
 
     /// <summary>
     /// Creates  new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding items to
@@ -53,7 +53,7 @@ public static class IncrementalHashSet
     /// </summary>
     public static IncrementalHashSet<T> Add<T>( IEnumerable<T> items )
         where T : notnull
-        => new( items.ToImmutableDictionary( i => i, i => true ) );
+        => new( items.ToImmutableDictionary( i => i, _ => true ) );
 
     /// <summary>
     /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing an item
@@ -71,7 +71,7 @@ public static class IncrementalHashSet
     /// </summary>
     public static IncrementalHashSet<T> Remove<T>( params T[] items )
         where T : notnull
-        => new( items.ToImmutableDictionary( i => i, i => false ) );
+        => new( items.ToImmutableDictionary( i => i, _ => false ) );
 
     /// <summary>
     /// Creates a <see cref="IncrementalHashSet{T}"/> that represents the option of removing items
@@ -79,5 +79,5 @@ public static class IncrementalHashSet
     /// </summary>
     public static IncrementalHashSet<T> Remove<T>( IEnumerable<T> items )
         where T : notnull
-        => new( items.ToImmutableDictionary( i => i, i => true ) );
+        => new( items.ToImmutableDictionary( i => i, _ => true ) );
 }

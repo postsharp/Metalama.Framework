@@ -508,7 +508,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var targetDeclaration in targets )
             {
-                if ( targetDeclaration == null )
+                if ( targetDeclaration == null! )
                 {
                     continue;
                 }
@@ -601,7 +601,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var targetDeclaration in targets )
             {
-                if ( targetDeclaration == null )
+                if ( targetDeclaration == null! )
                 {
                     continue;
                 }
