@@ -91,10 +91,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.            
 
-        var templateReflectionContext = this.Aspect.AspectClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
+        var templateReflectionContext = this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
 
-        var aspectType = templateReflectionContext.GetCompilationModel( this.SourceCompilation )
-            .Factory.GetTypeByReflectionName( this.Aspect.AspectClass.FullName );
+        var templateClassType = templateReflectionContext.GetCompilationModel( this.SourceCompilation )
+            .Factory.GetTypeByReflectionName( this.TemplateInstance.TemplateClass.FullName );
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =
@@ -209,7 +209,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IMethod>? GetAspectInterfaceMethod( IMethod interfaceMethod )
         {
-            var method = aspectType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+            var method = templateClassType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
 
             if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
             {
@@ -221,7 +221,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IProperty>? GetAspectInterfaceProperty( IProperty interfaceProperty )
         {
-            var property = aspectType.AllProperties.OfName( interfaceProperty.Name ).SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+            var property = templateClassType.AllProperties.OfName( interfaceProperty.Name ).SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
 
             if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
             {
@@ -233,7 +233,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
         TemplateMember<IEvent>? GetAspectInterfaceEvent( IEvent interfaceEvent )
         {
-            var @event = aspectType.AllEvents.OfName( interfaceEvent.Name ).SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
+            var @event = templateClassType.AllEvents.OfName( interfaceEvent.Name ).SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
 
             if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
             {
