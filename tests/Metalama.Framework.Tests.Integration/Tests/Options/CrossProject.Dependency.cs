@@ -42,9 +42,9 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
         _value = value;
     }
 
-    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context )
     {
-        yield return new MyOptions { Value = _value };
+        return new[] { new MyOptions { Value = _value } };
     }
 }
 

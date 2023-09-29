@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
@@ -78,13 +79,22 @@ internal sealed class AspectDriver : IAspectDriver
         }
     }
 
-    private static void ApplyOptions( IAspectInstanceInternal aspectInstance, IDeclaration declaration, UserCodeInvoker invoker, UserCodeExecutionContext baseContext )
+    private static void ApplyOptions(
+        IAspectInstanceInternal aspectInstance,
+        IDeclaration declaration,
+        IUserDiagnosticSink diagnosticSink,
+        UserCodeInvoker invoker,
+        UserCodeExecutionContext baseContext )
     {
         if ( aspectInstance.Aspect is IHierarchicalOptionsProvider optionsProvider )
         {
             var invokerContext = baseContext.WithDescription( UserCodeDescription.Create( "executing GetOptions() for {0}", aspectInstance ) );
 
-            var optionList = invoker.Invoke( () => optionsProvider.GetOptions( declaration ).ToReadOnlyList(), invokerContext );
+            var providerContext = new OptionsProviderContext(
+                declaration,
+                new ScopedDiagnosticSink( diagnosticSink, aspectInstance, declaration, declaration ) );
+
+            var optionList = invoker.Invoke( () => optionsProvider.GetOptions( providerContext ).ToReadOnlyList(), invokerContext );
 
             foreach ( var options in optionList )
             {
@@ -189,7 +199,7 @@ internal sealed class AspectDriver : IAspectDriver
                 throwOnUnsupportedDependencies: true );
 
             // Apply options.
-            ApplyOptions( aspectInstance, targetDeclaration, userCodeInvoker, buildAspectExecutionContext );
+            ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );
 
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(

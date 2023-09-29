@@ -21,9 +21,9 @@ public class TheAspect : TypeAspect, IHierarchicalOptionsProvider
             AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { options.OverrideHistory } ) );
     }
 
-    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context )
     {
-        yield return new MyOptions { Value = "FromTheAspect" };
+        return new[] { new MyOptions { Value = "FromTheAspect" } };
     }
 }
 
