@@ -33,7 +33,7 @@ public sealed class OverridableKeyedCollectionTests
     public void ClearThenAdd()
     {
         var collection1 = IncrementalKeyedCollection.AddOrApplyChanges<string, Item>( new Item( "Item" ) );
-        var collection2 = IncrementalKeyedCollection.Clear<string,Item>().AddOrApplyChanges( new Item( "Item", "New" ) );
+        var collection2 = IncrementalKeyedCollection.Clear<string, Item>().AddOrApplyChanges( new Item( "Item", "New" ) );
 
         var merged = collection1.ApplyChanges( collection2, default );
         var item = Assert.Single( merged );

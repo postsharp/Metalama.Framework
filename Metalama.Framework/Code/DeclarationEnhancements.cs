@@ -74,9 +74,8 @@ public readonly struct DeclarationEnhancements<T>
         => this.HasAspect( typeof(TAspect) );
 
     /// <summary>
-    /// Gets the options effective for the current declarations, taking into account the options set on parent declarations,
-    /// but ignoring any options defined by any aspect implementing <see cref="IHierarchicalOptionsProvider{T}"/>. To get
-    /// such options, use the <see cref="IAspectInstance.GetOptions{T}"/> method of <see cref="IAspectInstance"/>.
+    /// Gets the options effective for the current declarations. Options provided by aspects through the <see cref="IHierarchicalOptionsProvider"/> are available only when and after the given
+    /// aspect instance has been initialized; options provided by other means are available immediately.
     /// </summary>
     /// <typeparam name="TOptions">The type of options.</typeparam>
     public TOptions GetOptions<TOptions>()

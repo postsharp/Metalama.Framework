@@ -46,7 +46,7 @@ internal static class OptionsTestHelper
            
            public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
            {
-                aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.AspectInstance.GetOptions<MyOptions>().Value ?? "<undefined>" ) );
+                aspectBuilder.Diagnostics.Report( _description.WithArguments( aspectBuilder.Target.Enhancements().GetOptions<MyOptions>().Value ?? "<undefined>" ) );
            }
         }
         """;
