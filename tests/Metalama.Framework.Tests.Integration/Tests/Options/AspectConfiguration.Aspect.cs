@@ -21,9 +21,9 @@ namespace Doc.AspectConfiguration
             return meta.Proceed();
         }
 
-        public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+        public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context )
         {
-            yield return new LoggingOptions() { Category = Category };
+            return new[] { new LoggingOptions() { Category = Category } };
         }
     }
 }

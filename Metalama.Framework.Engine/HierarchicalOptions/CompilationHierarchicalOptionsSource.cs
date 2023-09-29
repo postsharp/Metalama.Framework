@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -62,7 +63,11 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
                     UserCodeDescription.Create( "executing GetOptions() for '{0}' applied to '{1}'", attributeType.Name, attribute.ContainingDeclaration ),
                     targetDeclaration: attribute.ContainingDeclaration );
 
-                var optionList = this._invoker.Invoke( () => optionsAttribute.GetOptions( attribute.ContainingDeclaration ).ToReadOnlyList(), invokerContext );
+                var providerContext = new OptionsProviderContext(
+                    attribute.ContainingDeclaration,
+                    new ScopedDiagnosticSink( diagnosticSink, new ProvideOptionsDiagnosticSource( attribute ), attribute, attribute.ContainingDeclaration ) );
+
+                var optionList = this._invoker.Invoke( () => optionsAttribute.GetOptions( providerContext ).ToReadOnlyList(), invokerContext );
 
                 foreach ( var options in optionList )
                 {
@@ -70,5 +75,18 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
                 }
             }
         }
+    }
+
+    private sealed class ProvideOptionsDiagnosticSource : IDiagnosticSource
+    {
+        private readonly IAttribute _attribute;
+
+        public ProvideOptionsDiagnosticSource( IAttribute attribute )
+        {
+            this._attribute = attribute;
+        }
+
+        public string DiagnosticSourceDescription
+            => $"executing '{this._attribute.Type.Name}.{nameof(IHierarchicalOptionsProvider.GetOptions)}' for '{this._attribute.ContainingDeclaration}'";
     }
 }

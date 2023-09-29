@@ -61,9 +61,9 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
         _baseWins = baseWins;
     }
 
-    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context )
     {
-        yield return new MyOptions { Value = _value, BaseWins = _baseWins };
+        return new[] { new MyOptions { Value = _value, BaseWins = _baseWins } };
     }
 }
 

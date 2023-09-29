@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Options;
@@ -15,7 +14,7 @@ public interface IHierarchicalOptionsProvider
     /// <summary>
     /// Gets the list of options provided by the current aspect or attribute.
     /// </summary>
-    /// <param name="targetDeclaration">The declaration to which the aspect or attribute has been applied.</param>
+    /// <param name="context"></param>
     /// <returns>The list of options.</returns>
     /// <remarks>
     /// <para>
@@ -32,5 +31,5 @@ public interface IHierarchicalOptionsProvider
     ///     this aspect instance.
     /// </para>
     /// </remarks>
-    IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration targetDeclaration );
+    IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context );
 }
